@@ -9,20 +9,6 @@ progresso sessão a sessão.
 
 ---
 
-## Status atual (2026-05-19, pós-Sessão 01)
-
-**Sessão 01** entregou Tarefa 1 (scaffolding) + Tarefa 2 (`cad_fetch()`
-ponta-a-ponta). Pacote verde: `devtools::check()` 0/0/0;
-`lintr::lint_package()` retorna `character(0)`;
-`covr::package_coverage()` 87.50%.
-
-Detalhes em `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md`.
-
-Commits: `d36bc94` (scaffolding) + `066c1f0` (cad_fetch) +
-`f89c5ae` (retrospective) + `cd0ad54` (task summary).
-
----
-
 ## Pré-v0.1 (companhias abertas — Resolução CVM 80/22)
 
 ### Fase A — Esqueleto (8-12h)
