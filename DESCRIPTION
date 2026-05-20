@@ -28,14 +28,25 @@ URL: https://github.com/SidneyBissoli/cvmdata,
 BugReports: https://github.com/SidneyBissoli/cvmdata/issues
 Depends:
     R (>= 4.1)
+Imports:
+    cli,
+    httr2,
+    readr,
+    rlang,
+    tibble,
+    yaml
 Suggests:
     covr,
+    dplyr,
+    httptest2,
     knitr,
     lintr,
     pkgdown,
     rmarkdown,
     styler,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
