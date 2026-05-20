@@ -1,0 +1,44 @@
+# Schema: cad / companhias
+# Cadastro de Companhias Abertas — current-state snapshot of all companies
+# ever registered with the CVM. Single-file dataset, no temporal partitioning.
+#
+# Source verified empirically on 2026-05-18.
+
+dataset: cad
+table: companhias
+
+# Download topology -------------------------------------------------------
+# CAD is published as a single CSV that is the full current snapshot.
+# It is not bundled in a yearly archive, so `cvm_archive_url_pattern` is null.
+# {year} is not interpolated in any CAD URL.
+cvm_archive_url_pattern: null
+cvm_file_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/CAD/DADOS/cad_cia_aberta.csv"
+cvm_file_pattern: "cad_cia_aberta.csv"
+
+# Dictionary --------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/CAD/META/meta_cad_cia_aberta.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+# CAD has no `dt_refer` column; it is overwritten by the CVM as the current
+# state. Each download supersedes the previous one.
+temporal_partitioning: none
+
+# Field count (validation aid) --------------------------------------------
+# Reader should assert that the CSV header has exactly this many columns.
+expected_field_count: 46
+
+# Transformations ---------------------------------------------------------
+# CAD requires no shape-altering transformations. Date columns are detected
+# from the dictionary type (`Tipo Dados: date`) and converted automatically;
+# they are not declared here. See cvmdata_rodada2-5_naming_unificado.md §9
+# for the definition of "shape-altering" transformations that must be
+# declared in this section.
+#
+# Note: empirical inspection (2026-05-18) confirmed that CD_CVM in CAD is
+# stored without leading-zero padding (range 35..28010), whereas in ITR/DFP
+# it is zero-padded to 6 chars. The package preserves CD_CVM as character
+# in all datasets (see naming doc §11.2 — pending entry resolved here).

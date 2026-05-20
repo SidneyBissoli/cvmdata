@@ -1,0 +1,43 @@
+Package: cvmdata
+Type: Package
+Title: Tidy Access to Brazilian CVM Open Data
+Version: 0.0.0.9000
+Authors@R:
+    person(
+      given = "Sidney da Silva Pereira",
+      family = "Bissoli",
+      email = "sbissoli76@gmail.com",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0009-0001-0442-3700")
+    )
+Description: Provides a tidy API to the open data published by the
+    Brazilian Securities and Exchange Commission ('CVM' - Comissao de
+    Valores Mobiliarios). The package's first release covers core
+    publicly-traded-company datasets: 'cad' (company registry), 'itr'
+    (quarterly financial statements), 'dfp' (annual financial
+    statements) and 'fre' (reference form, including ESG/governance
+    tables). Column names, table names, categorical values and free
+    text are preserved in Portuguese as published by 'CVM'; function
+    names, arguments and metadata attributes are in English following
+    the rOpenSci and tidyverse conventions. Future releases will
+    expand coverage to investment funds and other regulated entity
+    classes.
+License: MIT + file LICENSE
+URL: https://github.com/SidneyBissoli/cvmdata,
+    https://sidneybissoli.github.io/cvmdata/
+BugReports: https://github.com/SidneyBissoli/cvmdata/issues
+Depends:
+    R (>= 4.1)
+Suggests:
+    covr,
+    knitr,
+    lintr,
+    pkgdown,
+    rmarkdown,
+    styler,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

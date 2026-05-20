@@ -1,0 +1,87 @@
+# Schema: fre / administrador_membro_conselho_fiscal
+# Formulário de Referência — administrators and fiscal council members.
+# One row per (filing, person, governing body) tuple.
+#
+# Source verified empirically on 2026-05-18 against fre_cia_aberta_2024.zip.
+#
+# NAMING DEVIATION FROM THE ROUND 2.6 PROMPT ------------------------------
+# The prompt requested a file named `orgao_administracao.yaml`. Empirical
+# inspection shows that the CVM does not publish a file with that name in
+# the FRE distribution. `Orgao_Administracao` is a COLUMN that appears in
+# multiple FRE tables (administrador_membro_conselho_fiscal,
+# administrador_declaracao_genero, administrador_declaracao_raca,
+# administrador_PCD, remuneracao_total_orgao, etc.). The most natural
+# referent for the prompt's intent is this table — the master directors
+# record from which the others are derived. Per the canonical naming
+# principle ("if it comes from CVM, keep it as CVM"), the table name
+# preserves the CVM file name. See accompanying document
+# cvmdata_rodada2-6_schemas.md §2.3 for the full discussion and the
+# question for the maintainer.
+
+dataset: fre
+table: administrador_membro_conselho_fiscal
+
+# Download topology -------------------------------------------------------
+# FRE is published as a yearly ZIP archive containing 36 CSVs (in the 2024
+# release). This table is one entry in that archive.
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_administrador_membro_conselho_fiscal_{year}.csv"
+
+# Dictionary --------------------------------------------------------------
+# FRE dictionaries are all in a single ZIP (50 TXT entries in the 2026-05-18
+# snapshot; the 14-entry surplus over the 36 CSVs in the 2024 release
+# corresponds to tables not yet present in that release).
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/META/meta_fre_cia_aberta.zip#meta_fre_cia_aberta_administrador_membro_conselho_fiscal.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+# FRE structured (post-Resolução CVM 80/22, the 36-table format) starts in
+# 2021. Pre-2021 ZIPs exist in the portal but in a legacy format that is
+# out of scope for v0.1.
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 21
+
+# Column-naming heterogeneity flag ----------------------------------------
+# FRE detail tables use a different column-naming convention from
+# CAD/ITR/DFP and from the FRE header file. Example contrasts:
+#
+#   FRE detail tables     | CAD / ITR / DFP / FRE header
+#   ----------------------+------------------------------
+#   CNPJ_Companhia        | CNPJ_CIA
+#   Data_Referencia       | DT_REFER
+#   Nome_Companhia        | DENOM_CIA
+#   Versao                | VERSAO
+#   ID_Documento          | ID_DOC
+#
+# Per the naming doc's "preserve as CVM" principle, these are kept as
+# `cnpj_companhia`, `data_referencia`, `nome_companhia`, etc. in the
+# returned tibble — which CONFLICTS with the "universal keys" claim in
+# naming doc §3. This conflict requires a decision before Round 3; see
+# cvmdata_rodada2-6_schemas.md §3.1.
+
+# Transformations ---------------------------------------------------------
+# No shape-altering transformations.
+#
+# - Date columns (Data_Referencia, Data_Eleicao, Data_Posse, Data_Nascimento,
+#   Data_Inicio_Primeiro_Mandato) convert to Date automatically via the
+#   dictionary-derived type rule and are not declared here.
+# - The categorical column `Orgao_Administracao` is preserved as character
+#   with PT values exactly as the CVM emits them. In this table the empirical
+#   codelist (2024) is:
+#     - "Conselho Fiscal"
+#     - "Pertence apenas ao Conselho de Administração"
+#     - "Pertence apenas à Diretoria"
+#     - "Pertence à Diretoria e ao Conselho de Administração"
+#   The codelist differs across FRE tables that share the column name (see
+#   accompanying document §2.2). Codelists are intentionally not part of
+#   this minimal YAML — they live in a separate snapshot (naming doc §7.4)
+#   to be designed in Round 3.
+
+transformations: []

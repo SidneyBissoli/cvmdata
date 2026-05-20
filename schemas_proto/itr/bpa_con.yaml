@@ -1,0 +1,59 @@
+# Schema: itr / bpa_con
+# Informações Trimestrais — Balanço Patrimonial Ativo, consolidated.
+# Companies report quarterly (3 ITRs per year + 1 DFP at year-end).
+#
+# Source verified empirically on 2026-05-18 against the 2024 and 2018 zips.
+
+dataset: itr
+table: bpa_con
+
+# Download topology -------------------------------------------------------
+# ITR is published as a yearly ZIP archive containing 19 CSVs (one per
+# demonstrative × consolidated/individual + composicao_capital + parecer +
+# header). The BPA consolidated file is one entry in that archive.
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "itr_cia_aberta_BPA_con_{year}.csv"
+
+# Dictionary --------------------------------------------------------------
+# ITR dictionary is itself a ZIP, with one TXT per demonstrative (not per
+# variant). The single BPA dictionary covers both `bpa_con` and `bpa_ind`.
+# `{archive}#{entry}` notation: the URL to the left of `#` is the ZIP, the
+# part to the right is the entry inside the ZIP.
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/META/meta_itr_cia_aberta_txt.zip#meta_itr_cia_aberta_BPA.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+# Empirical: ITR is published per year from 2011 to current year. The reader
+# resolves {year} against the user's `years` argument and the current calendar.
+temporal_partitioning: yearly
+first_year: 2011
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 14
+
+# Transformations ---------------------------------------------------------
+# Only shape-altering transformations are declared here. Type conversions
+# (Date, integer) are derived from the dictionary type and are not listed.
+transformations:
+
+  - column: vl_conta
+    action: multiply_by_scale
+    scale_column: escala_moeda
+    note: >-
+      VL_CONTA is stored in units of ESCALA_MOEDA. The package multiplies
+      by the scale factor (UNIDADE=1, MIL=1e3, MILHÃO=1e6, BILHÃO=1e9) so
+      that the returned `vl_conta` is expressed in absolute Reais. See
+      naming doc §9.1. Empirical (2024 and 2018): only "MIL" and "UNIDADE"
+      have been observed in the data; MILHÃO and BILHÃO remain in the
+      domain to keep the reader robust against future filings.
+
+  - column: escala_moeda
+    action: drop
+    note: >-
+      Removed from the returned tibble after being internalized into
+      `vl_conta` (see above). The `moeda` column is kept even though it is
+      constant "REAL" in v0.1, anticipating fund datasets in v0.4+.
