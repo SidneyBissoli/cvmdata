@@ -402,7 +402,15 @@ de edição editorial (análoga à 3.0.1):
 
 ## 6. Pendências e próximos passos para a Sessão 02
 
-Sugestão alinhada à §11.2/Fase D do ROADMAP:
+**Resumo (caminho crítico)**:
+
+- `itr_fetch()` com pipeline ZIP-based + `temporal_partitioning: yearly`.
+- `multiply_by_scale` e `keep_latest_version` declarativos no YAML.
+- `cvm_fetch()` genérico exportado, com aliases virando thin wrappers.
+- `cvm_datasets()` + `cvm_tables()`.
+- Geração programática dos YAMLs de ITR.
+
+Detalhamento alinhado à §11.2/Fase D do ROADMAP:
 
 1. **`itr_fetch()` ponta-a-ponta** — primeiro alias com pipeline
    ZIP-based. Estende `source_cvm_http_get()` para
