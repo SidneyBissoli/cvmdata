@@ -57,23 +57,37 @@ função (palavra técnica internacionalizada); a coluna paralela em
 
 ### 2.1 Funções públicas
 
-Padrão `object_verb` (Dev Guide rOpenSci).
+Padrão `object_verb` (Dev Guide rOpenSci). **`cvm_fetch()` é a API
+principal para obtenção de dados de qualquer dataset.** Aliases tipados
+por dataset *não* são exportados — `cad_fetch()` permanece apenas por
+ergonomia da Sessão 01 (CAD = caso simples sem ZIP, sem variantes), e
+internamente delega para `cvm_fetch()`. **Decisão tomada em 2026-05-20**
+depois que comparação empírica entre dois caminhos de download mostrou
+que o portal de dados abertos (`dados.cvm.gov.br`) entrega TODOS os
+dados que o portal RAD/ENET por documento entrega, em formato tabular
+muito mais conveniente e 30× mais rápido (~0,93 s o ZIP anual inteiro
+contra ~30 s por documento individual). Vide `cvmdata_rodada3-1_*.md`
+e o histórico desta sessão.
 
 ```r
-# Espinha dorsal genérica
-cvm_fetch(dataset, table, companies = NULL, years = NULL,
-          source = "auto", on_error = "abort", validate = "strict", ...)
+# API principal — funciona para qualquer (dataset, table)
+cvm_fetch(dataset, table,
+          companies   = NULL,
+          years       = NULL,
+          source      = "mirror",
+          report_type = NULL,
+          on_error    = "abort",
+          validate    = "strict",
+          ...)
 
-# Aliases tipados v0.1
+# Alias mantido (Sessão 01) — internamente delega para cvm_fetch()
 cad_fetch(companies = NULL, ...)
-itr_fetch(table, companies = NULL, years = NULL, ...)
-dfp_fetch(table, companies = NULL, years = NULL, ...)
-fre_fetch(table, companies = NULL, years = NULL, ...)
 
 # Descoberta
-cvm_datasets()
-cvm_tables(dataset)
+cvm_datasets()                # lista de datasets disponíveis
+cvm_tables(dataset)           # tabelas de um dataset
 cvm_dictionary(dataset, table)
+cvm_dataset_years(dataset)    # range de anos com dados publicados
 
 # Cache
 cvm_cache_path()
@@ -86,13 +100,37 @@ cvm_source_get()
 cvm_source_set(source)
 
 # Utilidades
-cnpj_clean(x)   # exportada na v0.1
+cnpj_clean(x)                 # exportada na v0.1
 ```
 
-`source` aceita `"auto"` (portal → mirror fallback), `"portal"`,
-`"mirror"`. `validate` aceita `"strict"` (default), `"warn"`, `"skip"`.
-`on_error` aceita `"abort"` (default), `"warn"`, `"silent"`. Validação
-via `rlang::arg_match()`.
+Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
+
+- `source ∈ c("mirror", "cvm")`, default **`"mirror"`**. `"mirror"`
+  consulta parquet em GitHub Releases via DuckDB (com filtros pushdown
+  por companhia/ano antes do download); `"cvm"` bate no portal aberto
+  CVM. O mirror é mantido fresco por workflow semanal (Fase F do
+  ROADMAP).
+- `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
+- `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
+- `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para tabelas
+  que têm variantes individual/consolidada (`bpa`, `bpp`, `dre`, `dra`,
+  `dfc_md`, `dfc_mi`, `dmpl`, `dva`). **Erro** se passado a tabelas que
+  não têm essa distinção (`composicao_capital`, `submissao`, `parecer`).
+- `years`: integer vector ou `NULL`. `NULL` (default) → **último ano
+  disponível**, descoberto por `HEAD` probing decrescente a partir do
+  ano corrente. Para histórico, passar integer vector explícito
+  (`years = 2012:2024`). O helper `cvm_dataset_years(dataset)` devolve
+  o range disponível para enumeração. **Sem sentinela `"all"`** —
+  argumento permanece com tipo único (integer), evita observação de
+  type-mixing em review rOpenSci/CRAN.
+
+Sobre exercícios contidos em cada CSV anual: o portal CVM publica em
+cada ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — i.e., o ano
+declarado e seu N-1. O antepenúltimo do ano N é o último do ano N-2.
+`cvm_fetch()` não tenta reconstruir o antepenúltimo: retorna o conteúdo
+literal do CSV declarado em `years`. Usuários que queiram histórico
+mais longo pedem `years = (N-2):N` e empilham; a deduplicação por
+`(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
 
 ### 2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)
 
@@ -135,6 +173,49 @@ Em tabelas ITR/DFP contábeis: `VL_CONTA` é multiplicada por
 `ESCALA_MOEDA` (`UNIDADE`=1, `MIL`=1e3, `MILHÃO`=1e6, `BILHÃO`=1e9) e
 retornada em reais absolutos. `escala_moeda` é removida do tibble;
 `moeda` mantida (constante `"REAL"` na v0.1).
+
+### 2.7 Seleção de companhias via `companies`
+
+Argumento único com **detecção automática de tipo**:
+
+| Padrão do input (após `as.character()`) | Interpretação | Match contra |
+|---|---|---|
+| `^[0-9]{14}$` | CNPJ sem pontuação | `cnpj_clean(cnpj_cia)` |
+| Contém `.` ou `/` ou `-` e tem 14 dígitos | CNPJ com pontuação | `cnpj_cia` literal e/ou `cnpj_clean(cnpj_cia)` |
+| `^[0-9]{1,6}$` | CD_CVM | `cd_cvm` (com ou sem zero-padding) |
+| Resto (≥1 token alfabético) | Busca textual | `denom_cia` |
+
+Busca textual: tokeniza o input por espaços, normaliza (uppercase, sem
+acentos, sem pontuação), aplica **mapa de abreviações** conhecidas
+(`BANCO ↔ BCO`, `COMPANHIA ↔ CIA`, `S.A. ↔ S/A`, e outras a fechar
+quando enumerarmos `denom_cia` real), e exige que **todos os tokens**
+casem em `denom_cia` normalizada com **fronteira de palavra** (regex
+`\bTOKEN\b`). Exemplos:
+
+```r
+cvm_fetch("dfp", "bpa", companies = "banco brasil")
+# Tokens: "banco" + "brasil"
+# Expande: ("banco"|"bco") AND ("brasil")
+# Casa: "BCO BRASIL S.A." (cd_cvm 001023)
+# Não casa: "BCO BRASILEIRO DE DESCONTOS" (token "brasileiro" != "brasil")
+```
+
+Multiplas matches:
+
+- Modo interativo (`interactive()`): exibe lista numerada e pede ao
+  usuário escolher (via `utils::menu()` ou similar). `Esc` aborta com
+  `cvmdata_error_input`.
+- Modo não-interativo (CI/batch/scripts): aborta com
+  `cvmdata_error_input` listando todas as matches e instruindo o
+  usuário a passar CD_CVM ou CNPJ.
+
+Zero matches: aborta com `cvmdata_error_input` ("nenhuma companhia
+casa com `{input}`").
+
+Política de versão: por default, mantém apenas o registro de maior
+`VERSAO` por `(cnpj_cia, dt_refer)`. Implementado via transformação
+canônica `keep_latest_version` no YAML. Para histórico de versões, ver
+roadmap v0.2+.
 
 ---
 
@@ -183,11 +264,12 @@ cvmdata/
 ├── R/                             # FLAT, sem subpastas
 │   ├── cvmdata-package.R          # _PACKAGE sentinel
 │   ├── api-cad-fetch.R            # cad_fetch() e cvm_fetch_internal()
-│   ├── api-fetch-cvm.R            # cvm_fetch() — futuro
+│   ├── api-fetch-cvm.R            # cvm_fetch() — futuro (Sessão 2+)
 │   ├── schema-load.R              # load_schema()
 │   ├── source-cvm-http.R          # source_cvm_http_get()
 │   ├── transform-cad.R            # transform_cad()
 │   ├── util-attrs.R               # cvm_attach_metadata()
+│   ├── util-cnpj.R                # cnpj_clean()
 │   ├── util-csv-cvm.R             # read_cvm_csv()
 │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
 │   └── util-print-cvm-tbl.R       # print.cvm_tbl()
@@ -385,9 +467,21 @@ Invalidação:
 - TTL default 30 dias.
 - `cvm_cache_clear()` manual.
 
-Fallback hierárquico com `source = "auto"`:
-1. L4 (memória) → 2. L1 (raw no disco) → 3. CVM HTTP →
-4. Mirror GitHub Releases (via DuckDB HTTP range requests) → 5. erro.
+Fallback hierárquico depende de `source`:
+
+- `source = "mirror"` (default): L4 (memória) → L3 (parquet local) →
+  Mirror GitHub Releases (DuckDB HTTP range requests, com filtros
+  pushdown por companhia/ano antes do download) → erro.
+- `source = "cvm"`: L4 (memória) → L1 (ZIP raw em disco) →
+  CVM HTTP → erro.
+
+**Mirror parquet ativado em v0.1, não adiado.** Workflow semanal
+(`etl-mirror.yaml`, cron `0 7 * * 2`) valida o mirror contra a CVM e
+republica em caso de divergência (detecção via hash de `meta_*.txt` +
+`dictionary_entry_inventory.json` — Rodada 3.0.2 §4.3). Volume estimado
+para companhias abertas (CAD + DFP + ITR + FRE em parquet comprimido)
+≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo,
+100 GB por release).
 
 Limite default 100 MB, configurável via
 `options(cvmdata.cache_max_size_mb = ...)`. Eviction LRU quando atinge
@@ -429,19 +523,82 @@ Cada commit deve deixar o pacote **verde em `devtools::check()`**:
 - **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**. Usar
   YAMLs validados em `schemas_proto/` ou perguntar.
 
+### 12.1 Comandos comuns (PowerShell + Rscript)
+
+`Rscript.exe` resolve para `C:\Program Files\R\R-4.5.3\bin\Rscript.exe`
+no `PATH`. Todos os comandos abaixo rodam do diretório raiz do pacote.
+
+```powershell
+# Gate completo (precisa estar verde a cada commit)
+Rscript -e "devtools::check()"
+
+# Suite de testes (testthat 3.x edition 3)
+Rscript -e "devtools::test()"
+
+# Um único arquivo de teste — exige caminho relativo
+Rscript -e "devtools::test_active_file('tests/testthat/test-cad-fetch.R')"
+
+# Um único `test_that()` por nome — desc parcial casa por regex
+Rscript -e "testthat::test_file('tests/testthat/test-cad-fetch.R', desc = 'returns a cvm_tbl')"
+
+# Lint do pacote — deve retornar character(0)
+Rscript -e "lintr::lint_package()"
+
+# Cobertura (alvo ≥90%, gate atual ≥85%)
+Rscript -e "print(covr::package_coverage())"
+
+# Regenerar man/*.Rd + NAMESPACE a partir do roxygen
+Rscript -e "devtools::document()"
+
+# Regenerar README.md a partir de README.Rmd
+Rscript -e "devtools::build_readme()"
+
+# Carregar o pacote sem instalar (smoke check rápido)
+Rscript -e "devtools::load_all(); print(cad_fetch)"
+
+# R CMD INSTALL local
+Rscript -e "devtools::install(quick = TRUE, upgrade = 'never')"
+
+# Build do tarball CRAN (.tar.gz)
+Rscript -e "devtools::build()"
+```
+
+Notas:
+
+- `devtools::check()` executa `R CMD check` com `--as-cran`, roda a
+  vignette `cvmdata.Rmd` (configurada `eval = interactive()` para
+  não bater no portal CVM) e os testes. **Zero errors, zero warnings,
+  zero notes** é o gate.
+- Os testes `tests/testthat/test-cad-fetch.R` mockam HTTP via
+  `httr2::with_mocked_responses()`. Nenhum teste bate no portal CVM
+  real — testes de integração reais virão em arquivos
+  `test-integration-*.R` com guarda `CVMDATA_RUN_INTEGRATION=true`.
+- `inst/extdata/schemas/cad/companhias.yaml` declara
+  `expected_field_count: 47` (corrigido de 46 do protótipo na Sessão 01).
+- O cache real de produção fica em
+  `tools::R_user_dir("cvmdata", which = "cache")`. Em testes, é
+  redirecionado para tempdir via `options(cvmdata.cache_dir = ...)`.
+
 ---
 
-## 13. Stack técnica do pacote (Imports/Suggests previstos)
-
-`Imports` (populados conforme implementação avança):
-`tibble`, `vctrs`, `rlang`, `dplyr`, `purrr`, `stringr`, `readr`,
-`httr2`, `arrow`, `duckdb`, `cli`, `withr`, `yaml`.
-
-`Suggests`:
-`testthat (>= 3.0.0)`, `pointblank`, `knitr`, `rmarkdown`, `covr`,
-`lintr`, `styler`, `pkgdown`, `httptest2`, `ggplot2`, `scales`.
+## 13. Stack técnica do pacote (Imports/Suggests)
 
 `Depends`: `R (>= 4.1)` (para `|>`).
+
+**Estado atual da Sessão 01** (vide `DESCRIPTION`):
+
+- `Imports`: `cli`, `httr2`, `readr`, `rlang`, `tibble`, `yaml`.
+- `Suggests`: `covr`, `dplyr`, `httptest2`, `knitr`, `lintr`,
+  `pkgdown`, `rmarkdown`, `styler`, `testthat (>= 3.0.0)`, `withr`.
+
+**Previstos para fases seguintes** (entram no `DESCRIPTION` quando o
+código que os exige aterrissar):
+
+- `Imports`: `arrow` + `duckdb` (cache L3 Parquet + mirror DuckDB,
+  Fase F), `purrr`/`stringr`/`vctrs` (helpers internos quando o
+  pipeline genérico ganhar mais peso).
+- `Suggests`: `pointblank` (validação pre-publish do ETL, Fase F),
+  `ggplot2` + `scales` (vignettes ilustrativas, Fase E).
 
 ---
 

@@ -91,10 +91,33 @@ progresso sessão a sessão.
     fixture `cad_sample.csv` (51 linhas reais).
   - [x] Doc roxygen completa para `cad_fetch()` e `cnpj_clean()`.
   - [x] Vignette stub `cvmdata.Rmd` em `eval = interactive()`.
-- [ ] **Sessão 02**: `itr_fetch()` + pipeline ZIP-based +
-  `cvm_fetch()` genérico exportado + `cvm_datasets()` +
-  `cvm_tables()`. Resumo das pendências em
-  `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
+- [ ] **Sessão 02** (escopo atualizado 2026-05-20 após discussão de
+  design — vide CLAUDE.md §2.1, parágrafo de motivação):
+  - [ ] `cvm_fetch(dataset, table, ...)` como **API principal**
+    (substitui aliases `itr_fetch`/`dfp_fetch`/`fre_fetch` planejados
+    antes). `cad_fetch()` mantido como alias trivial sobre `cvm_fetch()`.
+  - [ ] Pipeline ZIP-yearly para `temporal_partitioning: yearly`:
+    download do ZIP anual do portal, extração no cache L1, leitura via
+    `read_cvm_csv()` da tabela alvo.
+  - [ ] `cvm_datasets()` (lista de datasets) e `cvm_tables(dataset)`
+    (tabelas de um dataset).
+  - [ ] `cvm_dataset_years(dataset)` — descoberta dinâmica do range
+    de anos disponíveis (HEAD probing decrescente a partir do ano
+    corrente).
+  - [ ] Default `years = NULL` → último ano disponível.
+  - [ ] Novo arg `report_type ∈ c("ind", "con")`, obrigatório para
+    tabelas com variantes; erro para `composicao_capital`/`submissao`/
+    `parecer`.
+  - [ ] `companies` com detecção automática (CNPJ/CD_CVM/busca textual)
+    + word boundary + mapa de abreviações + prompt interativo só em
+    `interactive()`.
+  - [ ] `source = c("mirror", "cvm")` com default `"mirror"`. Stub de
+    `"mirror"` antes da Fase F ficar pronta (aborta com mensagem clara
+    apontando para `"cvm"`).
+  - [ ] Tracer: `cvm_fetch(dataset = "dfp", table = "bpa",
+    report_type = "ind", companies = "BCO BRASIL", years = 2024)`.
+  - Pendências da Sessão 01 ainda válidas em
+    `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
 - [x] Cobertura ≥85% (atualmente 87.50%; preserva margem após
   itr_fetch).
 - [ ] Substituir heurística de Date em `read_cvm_csv()` pela regra
