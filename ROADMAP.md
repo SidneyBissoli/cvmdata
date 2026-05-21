@@ -6,6 +6,7 @@ progresso sessão a sessão.
 - [x] = entregue
 - [~] = parcial / em andamento
 - [ ] = pendente
+- [-] = descartado (anotado para preservar histórico da decisão)
 
 ---
 
@@ -35,15 +36,15 @@ progresso sessão a sessão.
 
 - [ ] `cvm_cache_path()`, `cvm_cache_set_path()`, `cvm_cache_info()`,
   `cvm_cache_clear()` (família pública).
-- [~] L1 (raw) implementado para CSV direto na Sessão 1
-  (`tools::R_user_dir("cvmdata", "cache")/raw/<dataset>/`); falta
-  L1 para ZIP, L3 (Parquet) e L4 (`cachem::cache_mem()`).
-- [~] Invalidação por ETag/Last-Modified implementada (sidecar RDS);
-  TTL ainda não imposto.
+- [~] L1 (raw) implementado para CSV direto (Sessão 01) e para ZIP
+  (Sessão 02, em `<cache>/raw/<dataset>/<year>/`). Falta L3 (Parquet,
+  Fase F) e L4 (`cachem::cache_mem()`).
+- [~] Invalidação por ETag/Last-Modified implementada (sidecar RDS),
+  estendida para ZIPs anuais na Sessão 02. TTL ainda não imposto.
 - [ ] Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e
   eviction LRU quando atinge 90%.
-- [~] `source_cvm_http_get()` para CSV direto OK; falta o caminho
-  ZIP-then-extract (`temporal_partitioning: yearly`).
+- [x] `source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly
+  (Sessão 02, com extração do CSV alvo via `report_type`).
 - [ ] `cvm_source_get()` / `cvm_source_set()`.
 - [x] Suite de testes mockados de HTTP via
   `httr2::with_mocked_responses` (com `httptest2` em Suggests
@@ -52,16 +53,27 @@ progresso sessão a sessão.
 ### Fase C — Dispatch + schemas (24-32h)
 
 - [x] `load_schema(dataset, table)` parser do YAML com validações
-  (mutual exclusion de URLs; `meta_status: missing` exige
-  `expected_field_names`; `temporal_partitioning ∈ {none, yearly}`).
-- [ ] `dispatch_class(dataset)` (companies → futures funds).
-- [ ] `dispatch_table(dataset, table)` (atualmente `switch()`
-  hardcoded em `cvm_fetch_internal()` — refatorar quando houver
-  ≥2 aliases).
+  (mutual exclusion de URLs e de `cvm_file_pattern` vs
+  `cvm_file_pattern_variants`; `meta_status: missing` exige
+  `expected_field_names`; `temporal_partitioning ∈ {none, yearly}`
+  com `first_year` obrigatório quando yearly; chaves de variants
+  restritas a `ind`/`con`).
+- [-] `dispatch_class(dataset)` (companies → futures funds) — descartado.
+  Pipeline genérico em `cvm_fetch_internal()` + schema YAML por tabela
+  torna o dispatch desnecessário; quando fundos entrarem, basta novo
+  dataset id e novos YAMLs.
+- [-] `dispatch_table(dataset, table)` — descartado pelo mesmo motivo.
+  Sessão 02 substituiu o `switch()` por `apply_schema_transformations()`
+  dirigido pelo YAML.
 - [x] YAML para CAD/companhias em `inst/extdata/schemas/cad/`
-  (`expected_field_count` corrigido para 47 vs protótipo 46).
-- [ ] YAMLs para ITR (19 tabelas: `bpa_con`/`bpa_ind`/.../`submissao`).
-- [ ] YAMLs para DFP (mesmo set que ITR).
+  (`expected_field_count` corrigido para 47 vs protótipo 46;
+  `transformations: []` explicitado na Sessão 02).
+- [x] YAMLs para DFP (11 tabelas conceituais, Sessão 02:
+  `submissao`, `bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`,
+  `dmpl`, `dva`, `composicao_capital`, `parecer`). As 8 com variantes
+  ind/con usam `cvm_file_pattern_variants`.
+- [ ] YAMLs para ITR (mesmo set que DFP — pipeline reusa
+  `cvm_file_pattern_variants`).
 - [ ] YAMLs para FRE (36 tabelas incluindo `submissao` + 8 com
   `meta_status: missing`).
 - [ ] Geração programática dos YAMLs restantes a partir do snapshot
@@ -91,52 +103,78 @@ progresso sessão a sessão.
     fixture `cad_sample.csv` (51 linhas reais).
   - [x] Doc roxygen completa para `cad_fetch()` e `cnpj_clean()`.
   - [x] Vignette stub `cvmdata.Rmd` em `eval = interactive()`.
-- [ ] **Sessão 02** (escopo atualizado 2026-05-20 após discussão de
-  design — vide CLAUDE.md §2.1, parágrafo de motivação):
-  - [ ] `cvm_fetch(dataset, table, ...)` como **API principal**
-    (substitui aliases `itr_fetch`/`dfp_fetch`/`fre_fetch` planejados
-    antes). `cad_fetch()` mantido como alias trivial sobre `cvm_fetch()`.
-  - [ ] Pipeline ZIP-yearly para `temporal_partitioning: yearly`:
-    download do ZIP anual do portal, extração no cache L1, leitura via
-    `read_cvm_csv()` da tabela alvo.
-  - [ ] `cvm_datasets()` (lista de datasets) e `cvm_tables(dataset)`
+- [x] **Sessão 02**: `cvm_fetch()` + DFP ponta-a-ponta — concluída
+  (commit `298c272`, 2026-05-21).
+  - [x] `cvm_fetch(dataset, table, ...)` como **API principal**.
+    `cad_fetch()` mantido como alias trivial sobre `cvm_fetch()` (passa
+    `source = "cvm"` até a Fase F entregar o mirror).
+  - [x] Pipeline ZIP-yearly em `source_cvm_http_get()`: download do ZIP
+    anual, extração do CSV alvo via `report_type`, cache com sidecar
+    ETag.
+  - [x] `cvm_datasets()` (lista de datasets) e `cvm_tables(dataset)`
     (tabelas de um dataset).
-  - [ ] `cvm_dataset_years(dataset)` — descoberta dinâmica do range
-    de anos disponíveis (HEAD probing decrescente a partir do ano
-    corrente).
-  - [ ] Default `years = NULL` → último ano disponível.
-  - [ ] Novo arg `report_type ∈ c("ind", "con")`, obrigatório para
+  - [x] `cvm_dataset_years(dataset)` — descoberta dinâmica via HTML
+    listing do diretório do portal, cacheado por sessão.
+  - [x] Default `years = NULL` → último ano disponível (via
+    `cvm_dataset_years()` interno).
+  - [x] Novo arg `report_type ∈ c("ind", "con")`, obrigatório para
     tabelas com variantes; erro para `composicao_capital`/`submissao`/
     `parecer`.
-  - [ ] `companies` com detecção automática (CNPJ/CD_CVM/busca textual)
-    + word boundary + mapa de abreviações + prompt interativo só em
-    `interactive()`.
-  - [ ] `source = c("mirror", "cvm")` com default `"mirror"`. Stub de
-    `"mirror"` antes da Fase F ficar pronta (aborta com mensagem clara
-    apontando para `"cvm"`).
-  - [ ] Tracer: `cvm_fetch(dataset = "dfp", table = "bpa",
+  - [x] `companies` com detecção automática (CNPJ 14 dígitos / CD_CVM
+    ≤6 dígitos / busca textual) + word boundary + mapa de abreviações
+    (BANCO↔BCO, COMPANHIA↔CIA, INDUSTRIA↔IND, PARTICIPACOES↔PART).
+    Prompt interativo planejado (`utils::menu()`); ainda só `interactive()`
+    pendente — hoje retorna todas as matches sem perguntar.
+  - [x] `source = c("mirror", "cvm")` com default `"mirror"`. Stub de
+    `"mirror"` aborta com `cvmdata_error_input` apontando para `"cvm"`
+    até a Fase F entregar o backend parquet.
+  - [x] Tracer: `cvm_fetch(dataset = "dfp", table = "bpa",
     report_type = "ind", companies = "BCO BRASIL", years = 2024)`.
-  - Pendências da Sessão 01 ainda válidas em
+  - [x] `apply_schema_transformations()` genérico cobre
+    `multiply_by_scale` (com `scale_factor()` UNIDADE/MIL/MILHÃO/BILHÃO),
+    `drop`, e `keep_latest_version` (groupby cnpj_cia+dt_refer, mantém
+    maior `versao`).
+  - [x] `transform_cad()` removido; CAD usa o pipeline genérico com
+    `transformations: []`.
+  - Pendências reabertas: prompt interativo de seleção de companhias
+    quando há múltiplas matches em `interactive()`. Pendências da Sessão
+    01 ainda válidas em
     `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
-- [x] Cobertura ≥85% (atualmente 87.50%; preserva margem após
-  itr_fetch).
+- [ ] **Sessão 03**: ITR + FRE ponta-a-ponta.
+  - [ ] 11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern`
+    troca DFP → ITR, `first_year: 2011`).
+  - [ ] 36 YAMLs FRE (1 header `submissao` + 35 detail; 8 desses com
+    `meta_status: missing` precisam `expected_field_names`).
+  - [ ] Política do reader para 8 tabelas FRE sem META (Rodada 3.0.2).
+  - [ ] Vignettes `itr-dfp.Rmd` e `fre.Rmd`.
+- [x] Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após
+  queda para 72% no merge de DFP).
 - [ ] Substituir heurística de Date em `read_cvm_csv()` pela regra
   canônica baseada no snapshot de dicionário (depende de Fase C).
 - [ ] Semântica diferenciada para `on_error = "warn"/"silent"`
-  (atualmente aceitos por `arg_match` mas só `"abort"` é
-  exercitado — relevante quando aliases multi-entity entrarem).
+  (atualmente aceitos por `arg_match0` mas só `"abort"` é exercitado).
 
-### Fase E — DFP + FRE (40-60h)
+### Fase E — Polimento e cobertura (20-30h)
 
-- [ ] `dfp_fetch()` reutilizando pipeline ITR.
-- [ ] `fre_fetch()` (35 tabelas detail + `submissao`).
-- [ ] Política do reader para 8 tabelas FRE sem META
-  (`meta_status: missing`; vide Rodada 3.0.2).
-- [ ] Exercitar branches `validate_field_names()` em
-  `read_cvm_csv()` (atualmente não cobertos).
+- [-] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` — descartados.
+  `cvm_fetch()` cobre tudo (decisão Sessão 02).
+- [~] Política do reader para 8 tabelas FRE sem META
+  (`meta_status: missing`; vide Rodada 3.0.2) — esqueleto pronto em
+  `validate_field_names()` + modo `warn`/`strict`/`skip`; falta
+  exercitar com YAMLs FRE reais (Sessão 03).
+- [~] Exercitar branches `validate_field_names()` em `read_cvm_csv()`
+  — modo `warn` coberto na Sessão 02; modo `strict` em `meta_status:
+  missing` ainda não exercitado por nenhum YAML real.
 - [ ] `cvm_dictionary()` lendo do snapshot.
-- [ ] Vignette `itr-dfp.Rmd`.
-- [ ] Vignette `fre.Rmd`.
+- [ ] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
+  `clear`).
+- [ ] `cvm_source_get()` / `cvm_source_set()`.
+- [ ] Prompt interativo de seleção de companhias com múltiplas matches
+  (`utils::menu()` em `interactive()`).
+- [ ] `cnpj_format()` (operação inversa de `cnpj_clean()`).
+- [ ] Subir cobertura para ≥90% (gate do marco v0.1.0; áreas baixas
+  hoje: `discovery.R` 60%, `source-cvm-http.R` 62%).
+- [ ] Vignette `cvm-fetch.Rmd` (substitui stub atual).
 - [ ] Vignette de defeitos conhecidos da CVM (Rodada 2.6 §11.5).
 
 ### Fase F — Pipeline ETL + mirror (24-32h)
