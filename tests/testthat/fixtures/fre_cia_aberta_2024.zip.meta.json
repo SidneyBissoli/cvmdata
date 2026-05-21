@@ -1,0 +1,15 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_2024.zip",
+  "fetched_at": "2026-05-21",
+  "companies_included": [
+    { "cd_cvm": "001023", "cnpj_cia": "00.000.000/0001-91", "denom_cia": "BCO BRASIL S.A." },
+    { "cd_cvm": "022470", "cnpj_cia": "47.960.950/0001-21", "denom_cia": "MAGAZINE LUIZA S.A." },
+    { "cd_cvm": "001228", "cnpj_cia": "07.237.373/0001-20", "denom_cia": "BCO NORDESTE DO BRASIL S.A." }
+  ],
+  "files_included": [
+    "fre_cia_aberta_2024.csv",
+    "fre_cia_aberta_auditor_2024.csv",
+    "fre_cia_aberta_empregado_PCD_2024.csv"
+  ],
+  "notes": "Subset filtered by CNPJ. ISO-8859-1 encoding preserved. Built from the 2024 yearly archive published by CVM (2026-05-17 snapshot). BCO BRASIL carries a synthetic VERSAO=99 row in auditor to exercise keep_latest_version on the (cnpj_companhia, data_referencia) key. empregado_PCD exercises meta_status: missing in the three validate modes."
+}

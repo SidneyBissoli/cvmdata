@@ -1,0 +1,32 @@
+# Schema: fre / submissao
+# Cabecalho do Formulario de Referencia (FRE) - uma linha por
+# documento submetido. Identifica a companhia e o documento.
+# Header convention follows DFP/ITR (cnpj_cia, dt_refer, cd_cvm).
+# Empirical verification: 2024 snapshot.
+
+dataset: fre
+table: submissao
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/META/meta_fre_cia_aberta.zip#meta_fre_cia_aberta.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 9
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).

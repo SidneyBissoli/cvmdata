@@ -1,0 +1,31 @@
+# Schema: fre / acao_entregue
+# FRE detail table. Detail tables usam convencao cnpj_companhia /
+# data_referencia / nome_companhia (CLAUDE.md Sec.2.2).
+# Empirical verification: 2024 snapshot.
+
+dataset: fre
+table: acao_entregue
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_acao_entregue_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/META/meta_fre_cia_aberta.zip#meta_fre_cia_aberta_acao_entregue.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 14
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia).

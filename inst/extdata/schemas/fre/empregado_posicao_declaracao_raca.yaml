@@ -1,0 +1,49 @@
+# Schema: fre / empregado_posicao_declaracao_raca
+# FRE detail table. META oficial nao publicado pela CVM -
+# `expected_field_names` enumerado a partir do header observado
+# em 2024. Detail tables usam convencao cnpj_companhia /
+# data_referencia / nome_companhia (CLAUDE.md Sec.2.2).
+# Empirical verification: 2024 snapshot.
+
+dataset: fre
+table: empregado_posicao_declaracao_raca
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_empregado_posicao_declaracao_raca_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: null
+meta_status: missing
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 13
+
+expected_field_names:
+  - CNPJ_Companhia
+  - Data_Referencia
+  - Versao
+  - ID_Documento
+  - Nome_Companhia
+  - Posicao
+  - Quantidade_Amarelo
+  - Quantidade_Branco
+  - Quantidade_Preto
+  - Quantidade_Pardo
+  - Quantidade_Indigena
+  - Quantidade_Outros
+  - Quantidade_Sem_Resposta
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia).
