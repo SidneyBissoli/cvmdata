@@ -1,0 +1,26 @@
+# Schema: itr / parecer
+# Pareceres dos auditores independentes e declarações dos diretores
+# sobre as demonstrações — ITR trimestral. Texto livre, quatro tipos
+# de relato: declarações de diretores sobre DFs, sobre relatório de
+# auditor, e parecer do conselho fiscal.
+# Sem variantes ind/con, sem multiplicação por escala.
+
+dataset: itr
+table: parecer
+
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "itr_cia_aberta_parecer_{year}.csv"
+
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/META/meta_itr_cia_aberta_txt.zip#meta_itr_cia_aberta_parecer.txt"
+
+encoding: ISO-8859-1
+delimiter: ";"
+
+temporal_partitioning: yearly
+first_year: 2011
+
+expected_field_count: 8
+
+transformations:
+  - action: keep_latest_version
