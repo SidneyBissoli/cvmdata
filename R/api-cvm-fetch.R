@@ -246,10 +246,40 @@ classify_company_tokens <- function(companies_chr) {
 }
 
 match_by_cnpj <- function(df, digits_only, mask) {
-  if (!any(mask) || !"cnpj_cia" %in% names(df)) {
+  if (!any(mask)) {
     return(rep(FALSE, nrow(df)))
   }
-  cnpj_clean(df$cnpj_cia) %in% digits_only[mask]
+  # CAD/ITR/DFP submissao use cnpj_cia; FRE-detail tables use
+  # cnpj_companhia (CLAUDE.md §2.2). Read whichever is present.
+  col <- cnpj_col(df)
+  if (is.null(col)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  cnpj_clean(df[[col]]) %in% digits_only[mask]
+}
+
+# Detect which CNPJ column the tibble uses. Returns NULL when neither
+# is present (CAD pre-filter, schemas without companies metadata).
+cnpj_col <- function(df) {
+  if ("cnpj_cia" %in% names(df)) {
+    return("cnpj_cia")
+  }
+  if ("cnpj_companhia" %in% names(df)) {
+    return("cnpj_companhia")
+  }
+  NULL
+}
+
+# Detect which company-name column the tibble uses, analogous to
+# cnpj_col(). FRE-detail uses nome_companhia; everything else denom_cia.
+name_col <- function(df) {
+  if ("denom_cia" %in% names(df)) {
+    return("denom_cia")
+  }
+  if ("nome_companhia" %in% names(df)) {
+    return("nome_companhia")
+  }
+  NULL
 }
 
 match_by_cd_cvm <- function(df, companies_chr, mask) {
@@ -271,12 +301,16 @@ match_by_cd_cvm <- function(df, companies_chr, mask) {
 }
 
 match_by_text <- function(df, companies_chr, mask) {
-  if (!any(mask) || !"denom_cia" %in% names(df)) {
+  if (!any(mask)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  ncol_name <- name_col(df)
+  if (is.null(ncol_name)) {
     return(rep(FALSE, nrow(df)))
   }
   match_vec <- rep(FALSE, nrow(df))
   for (term in companies_chr[mask]) {
-    hits <- search_companies_textual(df$denom_cia, term)
+    hits <- search_companies_textual(df[[ncol_name]], term)
     if (!any(hits)) {
       cvmdata_abort(
         c(
@@ -410,25 +444,42 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
 # `base::interactive` primitive (which isn't explicitly imported).
 disambiguate_text_match <- function(df, hits, term,
                                     is_interactive = interactive()) {
-  key_col <- if ("cd_cvm" %in% names(df)) "cd_cvm" else "denom_cia"
+  # Preferred id is cd_cvm (CAD/submissao); falls back to whichever
+  # CNPJ column the table carries (FRE-detail has only cnpj_companhia).
+  id_col <- if ("cd_cvm" %in% names(df)) "cd_cvm" else cnpj_col(df)
+  if (is.null(id_col)) {
+    return(hits)
+  }
+  label_col <- name_col(df)
   matched <- df[hits, , drop = FALSE]
-  unique_keys <- unique(matched[[key_col]])
+  unique_keys <- unique(matched[[id_col]])
   if (length(unique_keys) <= 1L) {
     return(hits)
   }
-  unique_rows <- !duplicated(matched[[key_col]])
+  unique_rows <- !duplicated(matched[[id_col]])
   matches_tbl <- matched[unique_rows, , drop = FALSE]
-  matches_tbl <- matches_tbl[order(matches_tbl$denom_cia), , drop = FALSE]
+  if (!is.null(label_col)) {
+    matches_tbl <- matches_tbl[order(matches_tbl[[label_col]]),
+                               , drop = FALSE]
+  }
 
   if (!is_interactive) {
-    abort_on_multiple_matches(term, matches_tbl)
+    abort_on_multiple_matches(term, matches_tbl, id_col, label_col)
   }
-  chosen <- prompt_for_company_choice(term, matches_tbl, key_col)
-  hits & df[[key_col]] %in% chosen
+  chosen <- prompt_for_company_choice(
+    term, matches_tbl, id_col, label_col
+  )
+  hits & df[[id_col]] %in% chosen
 }
 
-abort_on_multiple_matches <- function(term, matches_tbl) {
-  labels <- paste0(matches_tbl$cd_cvm, " : ", matches_tbl$denom_cia)
+abort_on_multiple_matches <- function(term, matches_tbl,
+                                      id_col, label_col) {
+  ids <- matches_tbl[[id_col]]
+  labels <- if (!is.null(label_col)) {
+    paste0(ids, " : ", matches_tbl[[label_col]])
+  } else {
+    ids
+  }
   bullets <- rlang::set_names(labels, rep("*", length(labels)))
   cvmdata_abort(
     c(
@@ -443,8 +494,14 @@ abort_on_multiple_matches <- function(term, matches_tbl) {
   )
 }
 
-prompt_for_company_choice <- function(term, matches_tbl, key_col) {
-  labels <- paste(matches_tbl$cd_cvm, "-", matches_tbl$denom_cia)
+prompt_for_company_choice <- function(term, matches_tbl,
+                                      id_col, label_col) {
+  ids <- matches_tbl[[id_col]]
+  labels <- if (!is.null(label_col)) {
+    paste(ids, "-", matches_tbl[[label_col]])
+  } else {
+    ids
+  }
   n <- length(labels)
   cli::cli_inform(c(
     "i" = "Multiple companies match {.val {term}}."
@@ -460,9 +517,9 @@ prompt_for_company_choice <- function(term, matches_tbl, key_col) {
     )
   }
   if (identical(as.integer(choice), as.integer(n + 1L))) {
-    return(matches_tbl[[key_col]])
+    return(matches_tbl[[id_col]])
   }
-  matches_tbl[[key_col]][choice]
+  matches_tbl[[id_col]][choice]
 }
 
 # Word-boundary substring matching with the abbreviation map of
