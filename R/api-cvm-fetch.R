@@ -277,9 +277,19 @@ match_by_text <- function(df, companies_chr, mask) {
   match_vec <- rep(FALSE, nrow(df))
   for (term in companies_chr[mask]) {
     hits <- search_companies_textual(df$denom_cia, term)
-    if (any(hits)) {
-      hits <- disambiguate_text_match(df, hits, term)
+    if (!any(hits)) {
+      cvmdata_abort(
+        c(
+          "No companies match {.val {term}}.",
+          "i" = paste(
+            "Verify the spelling, or pass {.arg companies} as CD_CVM",
+            "or CNPJ."
+          )
+        ),
+        class = "cvmdata_error_input"
+      )
     }
+    hits <- disambiguate_text_match(df, hits, term)
     match_vec <- match_vec | hits
   }
   match_vec
