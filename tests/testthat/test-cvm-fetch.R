@@ -132,6 +132,83 @@ test_that("cvm_fetch DFP filters by multiple unpadded CD_CVM (vector)", {
   expect_true(all(result$cd_cvm == "001023"))
 })
 
+# Multi-match disambiguation (CLAUDE.md §2.7) ------------------------
+
+# Helper: synthetic df with N distinct companies, all matched by `term`
+multi_match_df <- function() {
+  data.frame(
+    cnpj_cia = c("00.000.000/0001-91", "47.960.950/0001-21"),
+    cd_cvm = c("001023", "022470"),
+    denom_cia = c("BCO BRASIL S.A.", "MAGAZINE LUIZA S.A."),
+    stringsAsFactors = FALSE
+  )
+}
+
+test_that("disambiguate_text_match aborts in batch on multiple matches", {
+  df <- multi_match_df()
+  hits <- c(TRUE, TRUE)
+  expect_error(
+    cvmdata:::disambiguate_text_match(
+      df, hits, "sa", is_interactive = FALSE
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("disambiguate_text_match returns hits as-is on single match", {
+  df <- multi_match_df()
+  hits <- c(TRUE, FALSE)
+  expect_identical(
+    cvmdata:::disambiguate_text_match(
+      df, hits, "brasil", is_interactive = FALSE
+    ),
+    hits
+  )
+})
+
+test_that("disambiguate_text_match honours menu pick in interactive()", {
+  df <- multi_match_df()
+  hits <- c(TRUE, TRUE)
+  # Pick option 1 (alphabetical order: BCO BRASIL is first).
+  testthat::local_mocked_bindings(
+    menu = function(choices, ...) 1L,
+    .package = "utils"
+  )
+  out <- cvmdata:::disambiguate_text_match(
+    df, hits, "sa", is_interactive = TRUE
+  )
+  expect_identical(out, c(TRUE, FALSE))
+})
+
+test_that("disambiguate_text_match keeps all when user picks 'All'", {
+  df <- multi_match_df()
+  hits <- c(TRUE, TRUE)
+  # Last option is "All of the above" (n + 1 = 3 with 2 companies).
+  testthat::local_mocked_bindings(
+    menu = function(choices, ...) length(choices),
+    .package = "utils"
+  )
+  out <- cvmdata:::disambiguate_text_match(
+    df, hits, "sa", is_interactive = TRUE
+  )
+  expect_identical(out, c(TRUE, TRUE))
+})
+
+test_that("disambiguate_text_match aborts when user cancels", {
+  df <- multi_match_df()
+  hits <- c(TRUE, TRUE)
+  testthat::local_mocked_bindings(
+    menu = function(choices, ...) 0L,
+    .package = "utils"
+  )
+  expect_error(
+    cvmdata:::disambiguate_text_match(
+      df, hits, "sa", is_interactive = TRUE
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
 test_that("cvm_fetch DFP filters by CNPJ", {
   skip_if_not_installed("httptest2")
   local_prepare_dfp_cache()
@@ -158,6 +235,104 @@ test_that("cvm_fetch DFP filters by textual search with abbrev map", {
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(grepl("BRASIL", result$denom_cia)))
+})
+
+# Latest-year fallback (CLAUDE.md §6 cvmdata_warn_year_fallback) -----
+
+test_that("fetch_yearly_partitioned uses max year when no companies filter", {
+  schema <- load_schema("dfp", "bpa")
+  calls <- list()
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, schema = NULL) {
+      c(2024L, 2025L, 2026L)
+    },
+    fetch_one_year = function(schema, year, companies,
+                              report_type, validate, ...) {
+      calls[[length(calls) + 1L]] <<- year
+      data.frame(cd_cvm = "x", stringsAsFactors = FALSE)
+    }
+  )
+  out <- cvmdata:::fetch_yearly_partitioned(
+    schema, "dfp", years = NULL, companies = NULL,
+    report_type = "ind", validate = "skip"
+  )
+  expect_length(calls, 1L)
+  expect_identical(calls[[1L]], 2026L)
+  expect_equal(nrow(out), 1L)
+})
+
+test_that("fetch_yearly_partitioned falls back when max year empty", {
+  schema <- load_schema("dfp", "bpa")
+  calls <- integer(0L)
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, schema = NULL) {
+      c(2024L, 2025L, 2026L)
+    },
+    fetch_one_year = function(schema, year, companies,
+                              report_type, validate, ...) {
+      calls[[length(calls) + 1L]] <<- year
+      if (year == 2026L) {
+        data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
+      } else {
+        data.frame(cd_cvm = "001023", stringsAsFactors = FALSE)
+      }
+    }
+  )
+  expect_warning(
+    out <- cvmdata:::fetch_yearly_partitioned(
+      schema, "dfp", years = NULL, companies = "BCO BRASIL",
+      report_type = "ind", validate = "skip"
+    ),
+    class = "cvmdata_warn_year_fallback"
+  )
+  expect_identical(calls, c(2026L, 2025L))
+  expect_equal(nrow(out), 1L)
+})
+
+test_that("fetch_yearly_partitioned gives up after .latest_year_max_tries", {
+  schema <- load_schema("dfp", "bpa")
+  calls <- integer(0L)
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, schema = NULL) {
+      c(2020L, 2021L, 2022L, 2023L, 2024L, 2025L, 2026L)
+    },
+    fetch_one_year = function(schema, year, companies,
+                              report_type, validate, ...) {
+      calls[[length(calls) + 1L]] <<- year
+      data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
+    }
+  )
+  out <- suppressWarnings(cvmdata:::fetch_yearly_partitioned(
+    schema, "dfp", years = NULL, companies = "DOES_NOT_EXIST",
+    report_type = "ind", validate = "skip"
+  ))
+  # Tries exactly .latest_year_max_tries = 3 years (2026, 2025, 2024).
+  expect_identical(calls, c(2026L, 2025L, 2024L))
+  expect_equal(nrow(out), 0L)
+})
+
+test_that("fetch_yearly_partitioned with explicit years skips discovery", {
+  schema <- load_schema("dfp", "bpa")
+  discovery_called <- 0L
+  fetch_calls <- integer(0L)
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, schema = NULL) {
+      discovery_called <<- discovery_called + 1L
+      c(2024L)
+    },
+    fetch_one_year = function(schema, year, companies,
+                              report_type, validate, ...) {
+      fetch_calls[[length(fetch_calls) + 1L]] <<- year
+      data.frame(cd_cvm = "x", year = year, stringsAsFactors = FALSE)
+    }
+  )
+  out <- cvmdata:::fetch_yearly_partitioned(
+    schema, "dfp", years = c(2022L, 2023L), companies = NULL,
+    report_type = "ind", validate = "skip"
+  )
+  expect_identical(discovery_called, 0L)
+  expect_identical(fetch_calls, c(2022L, 2023L))
+  expect_equal(nrow(out), 2L)
 })
 
 # Schema validation --------------------------------------------------

@@ -110,22 +110,11 @@ cvm_fetch_internal <- function(dataset,
 
   schema <- load_schema(dataset, table)
 
-  # Resolve year selection. For yearly-partitioned tables, NULL means
-  # latest published year. For non-partitioned tables, year is irrelevant.
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "yearly")) {
-    if (is.null(years)) {
-      years <- cvm_dataset_years(dataset, schema = schema)
-      years <- max(years, na.rm = TRUE)
-    }
-    years <- as.integer(years)
-    raw_list <- lapply(years, function(yr) {
-      path <- source_cvm_http_get(
-        schema, year = yr, report_type = report_type, ...
-      )
-      read_cvm_csv(path, schema, validate = validate)
-    })
-    raw <- do.call(rbind, raw_list)
+    transformed <- fetch_yearly_partitioned(
+      schema, dataset, years, companies, report_type, validate, ...
+    )
   } else {
     if (!is.null(years)) {
       cvmdata_abort(
@@ -138,16 +127,10 @@ cvm_fetch_internal <- function(dataset,
         class = "cvmdata_error_input"
       )
     }
-    path <- source_cvm_http_get(
-      schema, report_type = report_type, ...
+    transformed <- fetch_one_year(
+      schema, year = NULL, companies = companies,
+      report_type = report_type, validate = validate, ...
     )
-    raw <- read_cvm_csv(path, schema, validate = validate)
-  }
-
-  transformed <- apply_schema_transformations(raw, schema)
-
-  if (!is.null(companies)) {
-    transformed <- filter_by_companies(transformed, companies)
   }
 
   cvm_attach_metadata(
@@ -156,6 +139,86 @@ cvm_fetch_internal <- function(dataset,
     dataset = dataset,
     table   = table
   )
+}
+
+# Fetch + transform + filter for a single year (or a non-yearly
+# table, when year is NULL). Returns the post-filter tibble.
+fetch_one_year <- function(schema, year, companies, report_type,
+                           validate, ...) {
+  path <- source_cvm_http_get(
+    schema, year = year, report_type = report_type, ...
+  )
+  raw <- read_cvm_csv(path, schema, validate = validate)
+  transformed <- apply_schema_transformations(raw, schema)
+  if (!is.null(companies)) {
+    transformed <- filter_by_companies(transformed, companies)
+  }
+  transformed
+}
+
+# Year-selection logic for yearly-partitioned tables:
+# - years explicit: fetch each year, rbind.
+# - years NULL + companies NULL: fetch max year.
+# - years NULL + companies non-NULL: try max year; if filter empty,
+#   walk down up to .latest_year_max_tries years emitting a warning
+#   when finally non-empty. The CVM portal lists the current civil
+#   year as soon as the first non-civil-calendar filing arrives
+#   (agribusiness companies often have fiscal years ending mid-year),
+#   so the max-year ZIP may exist but lack civil-year filers.
+.latest_year_max_tries <- 3L
+
+fetch_yearly_partitioned <- function(schema, dataset, years, companies,
+                                     report_type, validate, ...) {
+  if (!is.null(years)) {
+    years <- as.integer(years)
+    parts <- lapply(years, function(yr) {
+      fetch_one_year(schema, yr, companies, report_type, validate, ...)
+    })
+    return(do.call(rbind, parts))
+  }
+
+  available <- sort(
+    cvm_dataset_years(dataset, schema = schema),
+    decreasing = TRUE
+  )
+  candidates <- utils::head(available, .latest_year_max_tries)
+
+  if (is.null(companies)) {
+    return(fetch_one_year(
+      schema, candidates[1L], companies = NULL,
+      report_type = report_type, validate = validate, ...
+    ))
+  }
+
+  tried <- integer(0L)
+  out <- NULL
+  for (yr in candidates) {
+    tried <- c(tried, yr)
+    out <- fetch_one_year(
+      schema, yr, companies, report_type, validate, ...
+    )
+    if (nrow(out) > 0L) {
+      if (length(tried) > 1L) {
+        skipped <- tried[seq_len(length(tried) - 1L)]
+        cvmdata_warn(
+          c(
+            paste(
+              "{.arg years = NULL}: no rows for {.arg companies} in",
+              "{.val {skipped}}; returning {.val {yr}} instead."
+            ),
+            "i" = paste(
+              "The CVM portal publishes the current civil year as",
+              "soon as the first non-civil-calendar filing arrives",
+              "(e.g. agribusiness)."
+            )
+          ),
+          class = "cvmdata_warn_year_fallback"
+        )
+      }
+      return(out)
+    }
+  }
+  out
 }
 
 # Filter a tibble by automatic company-identifier detection.
@@ -198,11 +261,78 @@ filter_by_companies <- function(df, companies) {
   if (any(is_text) && "denom_cia" %in% names(df)) {
     for (term in companies_chr[is_text]) {
       hits <- search_companies_textual(df$denom_cia, term)
+      if (any(hits)) {
+        hits <- disambiguate_text_match(df, hits, term)
+      }
       match_vec <- match_vec | hits
     }
   }
 
   df[match_vec, , drop = FALSE]
+}
+
+# Apply CLAUDE.md §2.7 policy when a textual `companies` term matches
+# more than one company: interactive → utils::menu(); batch → abort.
+# Returns a logical vector aligned with `df` rows.
+#
+# `is_interactive` is injectable so tests can simulate both modes
+# without relying on testthat::local_mocked_bindings against the
+# `base::interactive` primitive (which isn't explicitly imported).
+disambiguate_text_match <- function(df, hits, term,
+                                    is_interactive = interactive()) {
+  key_col <- if ("cd_cvm" %in% names(df)) "cd_cvm" else "denom_cia"
+  matched <- df[hits, , drop = FALSE]
+  unique_keys <- unique(matched[[key_col]])
+  if (length(unique_keys) <= 1L) {
+    return(hits)
+  }
+  unique_rows <- !duplicated(matched[[key_col]])
+  matches_tbl <- matched[unique_rows, , drop = FALSE]
+  matches_tbl <- matches_tbl[order(matches_tbl$denom_cia), , drop = FALSE]
+
+  if (!is_interactive) {
+    abort_on_multiple_matches(term, matches_tbl)
+  }
+  chosen <- prompt_for_company_choice(term, matches_tbl, key_col)
+  hits & df[[key_col]] %in% chosen
+}
+
+abort_on_multiple_matches <- function(term, matches_tbl) {
+  labels <- paste0(matches_tbl$cd_cvm, " : ", matches_tbl$denom_cia)
+  bullets <- rlang::set_names(labels, rep("*", length(labels)))
+  cvmdata_abort(
+    c(
+      "Multiple companies match {.val {term}}.",
+      "i" = paste(
+        "Pass {.arg companies} as CD_CVM or CNPJ to disambiguate,",
+        "or run interactively to pick from a menu."
+      ),
+      bullets
+    ),
+    class = "cvmdata_error_input"
+  )
+}
+
+prompt_for_company_choice <- function(term, matches_tbl, key_col) {
+  labels <- paste(matches_tbl$cd_cvm, "-", matches_tbl$denom_cia)
+  n <- length(labels)
+  cli::cli_inform(c(
+    "i" = "Multiple companies match {.val {term}}."
+  ))
+  choice <- utils::menu(
+    choices = c(labels, "All of the above"),
+    title = "Select a company (0 to cancel):"
+  )
+  if (identical(as.integer(choice), 0L)) {
+    cvmdata_abort(
+      c("Company selection cancelled by user."),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (identical(as.integer(choice), as.integer(n + 1L))) {
+    return(matches_tbl[[key_col]])
+  }
+  matches_tbl[[key_col]][choice]
 }
 
 # Word-boundary substring matching with the abbreviation map of
