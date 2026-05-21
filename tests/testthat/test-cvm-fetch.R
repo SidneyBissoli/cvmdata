@@ -822,6 +822,21 @@ test_that("unknown CD_CVM in submissao aborts with cvmdata_error_input", {
   )
 })
 
+test_that("textual search with zero matches aborts (CLAUDE.md §2.7)", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  expect_error(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("itr", "bpa", report_type = "ind",
+                companies = "EMPRESA QUE NAO EXISTE XYZ",
+                years = 2024L, source = "cvm")
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
 test_that("tables with native cd_cvm bypass the lookup (no regression)", {
   skip_if_not_installed("httptest2")
   local_prepare_itr_cache()
