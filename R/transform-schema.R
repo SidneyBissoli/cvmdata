@@ -133,17 +133,27 @@ tx_drop <- function(df, tx, schema) {
   df[, setdiff(names(df), col), drop = FALSE]
 }
 
-# keep_latest_version: groups by (cnpj_cia, dt_refer); keeps max versao.
-# When the table lacks the version triple (cnpj_cia, dt_refer, versao),
-# this is a no-op (e.g., CAD has none of them).
+# keep_latest_version: groups by the (cnpj, ref_date) pair the table
+# carries and keeps the row of highest `versao`. CAD/ITR/DFP submissao
+# use (cnpj_cia, dt_refer); FRE-detail uses
+# (cnpj_companhia, data_referencia) per CLAUDE.md §2.2. When the triple
+# is absent (e.g., CAD has none of them) this is a no-op.
 tx_keep_latest_version <- function(df, tx, schema) {
-  needed <- c("cnpj_cia", "dt_refer", "versao")
-  if (!all(needed %in% names(df))) {
+  if (!"versao" %in% names(df)) {
+    return(df)
+  }
+  cnpj_c <- if ("cnpj_cia" %in% names(df)) "cnpj_cia"
+            else if ("cnpj_companhia" %in% names(df)) "cnpj_companhia"
+            else NULL
+  date_c <- if ("dt_refer" %in% names(df)) "dt_refer"
+            else if ("data_referencia" %in% names(df)) "data_referencia"
+            else NULL
+  if (is.null(cnpj_c) || is.null(date_c)) {
     return(df)
   }
   # Coerce versao to integer-like for stable ordering.
   ver <- suppressWarnings(as.integer(df$versao))
-  key <- paste(df$cnpj_cia, format(df$dt_refer), sep = "|")
+  key <- paste(df[[cnpj_c]], format(df[[date_c]]), sep = "|")
   # Build a logical mask: TRUE where this row's versao == max versao
   # within its key.
   max_ver <- ave(ver, key, FUN = function(v) max(v, na.rm = TRUE))
