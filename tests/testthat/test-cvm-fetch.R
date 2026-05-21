@@ -94,6 +94,44 @@ test_that("cvm_fetch DFP filters by CD_CVM", {
   expect_true(all(result$cd_cvm == "001023"))
 })
 
+test_that("cvm_fetch DFP filters by CD_CVM without zero-padding", {
+  # Regression: filter_by_companies used sprintf("%06s", ...) which
+  # pads with spaces, not zeros — so "1023" failed to match "009512".
+  # Now uses formatC(..., width = 6, flag = "0", format = "d").
+  skip_if_not_installed("httptest2")
+  local_prepare_dfp_cache()
+
+  unpadded <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm",
+              companies = "1023")
+  )
+  padded <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm",
+              companies = "001023")
+  )
+  expect_true(nrow(unpadded) > 0L)
+  expect_true(all(unpadded$cd_cvm == "001023"))
+  expect_identical(nrow(unpadded), nrow(padded))
+})
+
+test_that("cvm_fetch DFP filters by multiple unpadded CD_CVM (vector)", {
+  skip_if_not_installed("httptest2")
+  local_prepare_dfp_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm",
+              companies = c("1023", "999999"))
+  )
+  expect_true(nrow(result) > 0L)
+  expect_true(all(result$cd_cvm == "001023"))
+})
+
 test_that("cvm_fetch DFP filters by CNPJ", {
   skip_if_not_installed("httptest2")
   local_prepare_dfp_cache()

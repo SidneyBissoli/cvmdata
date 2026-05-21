@@ -21,3 +21,4 @@
 ^\.editorconfig$
 ^memory$
 ^\.claude$
+^teste\.R$

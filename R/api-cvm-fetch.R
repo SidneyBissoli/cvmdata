@@ -180,8 +180,16 @@ filter_by_companies <- function(df, companies) {
 
   if (any(is_cdcvm) && "cd_cvm" %in% names(df)) {
     targets <- companies_chr[is_cdcvm]
-    df_padded <- sprintf("%06s", df$cd_cvm)
-    targets_padded <- sprintf("%06s", targets)
+    # `%06s` pads with spaces, not zeros — must use formatC with a
+    # decimal format to get "9512" -> "009512".
+    df_padded <- formatC(
+      suppressWarnings(as.integer(df$cd_cvm)),
+      width = 6, flag = "0", format = "d"
+    )
+    targets_padded <- formatC(
+      as.integer(targets),
+      width = 6, flag = "0", format = "d"
+    )
     match_vec <- match_vec |
       df$cd_cvm %in% targets |
       df_padded %in% targets_padded
