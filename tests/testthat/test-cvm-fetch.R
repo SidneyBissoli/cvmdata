@@ -669,3 +669,91 @@ test_that("load_schema aborts for unknown table", {
     class = "cvmdata_error_input"
   )
 })
+
+# ITR (quarterly) tracer + discovery ---------------------------------
+
+local_prepare_itr_cache <- function(envir = parent.frame()) {
+  cache_root <- withr::local_tempdir(.local_envir = envir)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    .local_envir = envir
+  )
+  raw_dir <- file.path(cache_root, "raw", "itr", "2024")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(
+    test_path("fixtures", "itr_cia_aberta_2024.zip"),
+    file.path(raw_dir, "itr_cia_aberta_2024.zip")
+  )
+  saveRDS(
+    list(
+      etag = "\"fixture-etag\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2026-05-19T00:00:00.000Z"
+    ),
+    file.path(raw_dir, "itr_cia_aberta_2024.zip.etag.rds")
+  )
+  cache_root
+}
+
+test_that("cvm_fetch ITR BPA ind tracer returns cvm_tbl", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+
+  expect_s3_class(result, "cvm_tbl")
+  expect_s3_class(result, "tbl_df")
+  expect_identical(attr(result, "source"), "cvm")
+  expect_identical(attr(result, "dataset"), "itr")
+  expect_identical(attr(result, "table"), "bpa")
+  expect_true(nrow(result) > 0L)
+  expect_true(all(c("cnpj_cia", "cd_cvm", "vl_conta") %in% names(result)))
+  expect_false("escala_moeda" %in% names(result))
+  expect_type(result$vl_conta, "double")
+  # Quarterly cadence — at least two distinct dt_refer values in 2024.
+  expect_gte(length(unique(result$dt_refer)), 2L)
+})
+
+test_that("cvm_fetch ITR applies multiply_by_scale (MIL -> 1e3)", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "bpa",
+              report_type = "ind", years = 2024, source = "cvm",
+              companies = "001023")
+  )
+  # BCO BRASIL Ativo Total 1T 2024 ~ 2.2 trillion BRL (MIL scale).
+  ativo_total <- result[result$cd_conta == "1" &
+                          result$ordem_exerc == "ÚLTIMO" &
+                          result$dt_refer == as.Date("2024-03-31"),
+                        "vl_conta", drop = TRUE]
+  expect_length(ativo_total, 1L)
+  expect_gt(ativo_total, 1e12)
+  expect_lt(ativo_total, 1e13)
+})
+
+test_that("cvm_datasets includes itr", {
+  ds <- cvm_datasets()
+  expect_true("itr" %in% ds)
+})
+
+test_that("cvm_tables('itr') lists 11 conceptual tables", {
+  tabs <- cvm_tables("itr")
+  expected <- c("bpa", "bpp", "composicao_capital", "dfc_md", "dfc_mi",
+                "dmpl", "dra", "dre", "dva", "parecer", "submissao")
+  expect_setequal(tabs, expected)
+})
+
+test_that("load_schema accepts ITR bpa.yaml with first_year 2011", {
+  s <- load_schema("itr", "bpa")
+  expect_s3_class(s, "cvm_table_schema")
+  expect_identical(s$temporal_partitioning, "yearly")
+  expect_equal(s$first_year, 2011)
+  expect_named(s$cvm_file_pattern_variants, c("ind", "con"))
+})
