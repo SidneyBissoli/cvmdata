@@ -1,0 +1,39 @@
+# Schema: itr / submissao
+# Cabeçalho do Formulário de Informações Trimestrais — uma linha por
+# documento submetido. Identifica a companhia e o documento (LINK_DOC).
+# Estruturalmente idêntico ao dfp/submissao; difere apenas pela
+# periodicidade (trimestral) e pela URL do dataset.
+
+dataset: itr
+table: submissao
+
+# Download topology -------------------------------------------------------
+# ITR é publicada como ZIP anual contendo 19 CSVs. A submissão é o CSV
+# `itr_cia_aberta_{year}.csv` dentro do ZIP. O ano agrega quatro
+# trimestres (DT_REFER identifica o trimestre).
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "itr_cia_aberta_{year}.csv"
+
+# Dictionary --------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/META/meta_itr_cia_aberta_txt.zip#meta_itr_cia_aberta.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2011
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 9
+
+# Transformations ---------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantém apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).
+      Em ITR, dt_refer identifica o trimestre, então cada trimestre é
+      mantido independentemente. Reapresentações ficam acessíveis em
+      v0.2+ via argumento opcional.

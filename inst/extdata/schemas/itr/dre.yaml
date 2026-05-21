@@ -1,0 +1,32 @@
+# Schema: itr / dre
+# Demonstração do Resultado do Exercício — ITR trimestral.
+# 15 colunas (BPA/BPP têm 14 — DRE/DRA/DFC/DVA/DMPL têm DT_INI_EXERC
+# adicional porque o demonstrativo cobre um período, não um instante).
+
+dataset: itr
+table: dre
+
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+
+cvm_file_pattern_variants:
+  ind: "itr_cia_aberta_DRE_ind_{year}.csv"
+  con: "itr_cia_aberta_DRE_con_{year}.csv"
+
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/META/meta_itr_cia_aberta_txt.zip#meta_itr_cia_aberta_DRE.txt"
+
+encoding: ISO-8859-1
+delimiter: ";"
+
+temporal_partitioning: yearly
+first_year: 2011
+
+expected_field_count: 15
+
+transformations:
+  - column: vl_conta
+    action: multiply_by_scale
+    scale_column: escala_moeda
+  - column: escala_moeda
+    action: drop
+  - action: keep_latest_version

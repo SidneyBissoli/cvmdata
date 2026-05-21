@@ -1,0 +1,28 @@
+# Schema: itr / composicao_capital
+# Composição do Capital Social — ITR trimestral. Layout wide: uma linha
+# por (cnpj_cia, dt_refer, versao), com 6 colunas de quantidades de
+# ações (ordinárias + preferenciais + total, capital integralizado +
+# tesouraria).
+# Sem variantes ind/con — companhia tem uma composição apenas.
+# Sem multiplicação por escala_moeda — valores são quantidades de ações,
+# não valores monetários.
+
+dataset: itr
+table: composicao_capital
+
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "itr_cia_aberta_composicao_capital_{year}.csv"
+
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/META/meta_itr_cia_aberta_txt.zip#meta_itr_cia_aberta_composicao_capital.txt"
+
+encoding: ISO-8859-1
+delimiter: ";"
+
+temporal_partitioning: yearly
+first_year: 2011
+
+expected_field_count: 10
+
+transformations:
+  - action: keep_latest_version
