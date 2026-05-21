@@ -2,12 +2,14 @@
 
 Documento de referência para sessões do Claude Code no diretório
 `C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata`. Consolida o
-essencial de seis documentos canônicos da fase de planejamento (Rodadas
-1, 2.5, 2.6, 3.0, 3.0.2) para que sessões futuras não precisem reler
-tudo. Quando este `CLAUDE.md` divergir de um documento canônico,
-**prevalece o canônico** — em particular `cvmdata_rodada2-5_naming_unificado-v03.md`
-para naming e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para
-política do reader.
+essencial de sete documentos canônicos da fase de planejamento
+(Rodadas 1, 2, 2.5, 2.6, 3.0, 3.0.2, 3.1) para que sessões futuras não
+precisem reler tudo. Quando este `CLAUDE.md` divergir de um documento
+canônico, **prevalece o canônico** — em particular
+`cvmdata_rodada2-5_naming_unificado-v03.md` para naming,
+`cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para política do
+reader, e `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` para
+o estado pós-Sessão 01. Estado de execução por fase no `ROADMAP.md`.
 
 Comunicação com Sidney é em **português brasileiro**. Tom direto,
 técnico, sem fluff, sem puxa-saquismo. Quando ele perguntar problemas,
@@ -263,14 +265,24 @@ cvmdata/
 ├── ROADMAP.md
 ├── R/                             # FLAT, sem subpastas
 │   ├── cvmdata-package.R          # _PACKAGE sentinel
-│   ├── api-cad-fetch.R            # cad_fetch() e cvm_fetch_internal()
-│   ├── api-fetch-cvm.R            # cvm_fetch() — futuro (Sessão 2+)
-│   ├── schema-load.R              # load_schema()
-│   ├── source-cvm-http.R          # source_cvm_http_get()
-│   ├── transform-cad.R            # transform_cad()
+│   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
+│   │                              #   + filter_by_companies() + busca textual
+│   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
+│   ├── discovery.R                # cvm_datasets(), cvm_tables(),
+│   │                              #   cvm_dataset_years() (não segue prefixo
+│   │                              #   por enquanto — exceção tolerada)
+│   ├── schema-load.R              # load_schema() + validate_schema() +
+│   │                              #   resolve_file_pattern()
+│   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
+│   │                              #   ZIP-yearly) + download_with_etag()
+│   ├── transform-schema.R         # apply_schema_transformations() genérico
+│   │                              #   (multiply_by_scale / drop /
+│   │                              #   keep_latest_version) — substituiu
+│   │                              #   transform-cad.R na Sessão 02
 │   ├── util-attrs.R               # cvm_attach_metadata()
 │   ├── util-cnpj.R                # cnpj_clean()
-│   ├── util-csv-cvm.R             # read_cvm_csv()
+│   ├── util-csv-cvm.R             # read_cvm_csv() + validate_field_count() +
+│   │                              #   validate_field_names() + emit_validation()
 │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
 │   └── util-print-cvm-tbl.R       # print.cvm_tbl()
 ├── man/                           # auto-gerado
@@ -515,13 +527,21 @@ Cada commit deve deixar o pacote **verde em `devtools::check()`**:
 
 - Modo **tracer bullet**: implementar a função mais simples ponta-a-ponta
   antes de generalizar.
-- Sequência da Sessão 1: `cad_fetch()` é o tracer (CAD = CSV direto, sem
-  ZIP, sem variantes, sem transformações). `cvm_fetch()` genérico só
-  depois de ter pelo menos 2-3 aliases concretos.
+- **Estado pós-Sessão 02** (commit `298c272`, 2026-05-21): `cvm_fetch()`
+  é a API principal genérica; pipeline ZIP-yearly entregue para DFP;
+  11 YAMLs DFP em `inst/extdata/schemas/dfp/`; `cad_fetch()` rebaixado
+  a alias trivial sobre `cvm_fetch()` (passa `source = "cvm"` até a
+  Fase F entregar o mirror). `transform_cad()` removido — CAD usa o
+  pipeline genérico com `transformations: []`. Próximo tracer (Sessão
+  03): ITR + FRE ponta-a-ponta, incluindo os 8 YAMLs com
+  `meta_status: missing`. Detalhes por fase no `ROADMAP.md`.
 - **Não reabrir decisões travadas** (26 da 2.5, 7 da 2.6, 3 da 3.0, 4
-  da 3.0.2). Se acha que precisa rever, perguntar antes de agir.
+  da 3.0.2, mais a Sessão 02 sobre `cvm_fetch()` como API principal e
+  o portal de dados abertos como caminho default vs RAD/ENET). Se acha
+  que precisa rever, perguntar antes de agir.
 - **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**. Usar
-  YAMLs validados em `schemas_proto/` ou perguntar.
+  YAMLs validados em `inst/extdata/schemas/` (ou `schemas_proto/` para
+  protótipos ainda não promovidos) ou perguntar.
 
 ### 12.1 Comandos comuns (PowerShell + Rscript)
 
@@ -554,7 +574,7 @@ Rscript -e "devtools::document()"
 Rscript -e "devtools::build_readme()"
 
 # Carregar o pacote sem instalar (smoke check rápido)
-Rscript -e "devtools::load_all(); print(cad_fetch)"
+Rscript -e "devtools::load_all(); print(cvm_fetch)"
 
 # R CMD INSTALL local
 Rscript -e "devtools::install(quick = TRUE, upgrade = 'never')"
@@ -569,10 +589,14 @@ Notas:
   vignette `cvmdata.Rmd` (configurada `eval = interactive()` para
   não bater no portal CVM) e os testes. **Zero errors, zero warnings,
   zero notes** é o gate.
-- Os testes `tests/testthat/test-cad-fetch.R` mockam HTTP via
+- Os testes `tests/testthat/test-*.R` mockam HTTP via
   `httr2::with_mocked_responses()`. Nenhum teste bate no portal CVM
   real — testes de integração reais virão em arquivos
   `test-integration-*.R` com guarda `CVMDATA_RUN_INTEGRATION=true`.
+- Fixtures disponíveis em `tests/testthat/fixtures/`: `cad_sample.csv`
+  (51 linhas reais do CAD) e `dfp_cia_aberta_2024.zip` (ZIP DFP 2024
+  com subset de companhias, exercitado pelos testes ZIP-yearly da
+  Sessão 02).
 - `inst/extdata/schemas/cad/companhias.yaml` declara
   `expected_field_count: 47` (corrigido de 46 do protótipo na Sessão 01).
 - O cache real de produção fica em
