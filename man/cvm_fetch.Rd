@@ -28,7 +28,11 @@ selects the variant.}
 include. Accepts CNPJ (with or without punctuation), CD_CVM (with
 or without zero-padding), or free-text matched against
 \code{denom_cia}. Detection is automatic per element. \code{NULL} (default)
-returns every company.}
+returns every company. When the target table does not carry a
+\code{cd_cvm} column (e.g. \code{composicao_capital}, \code{parecer}), CD_CVM
+tokens are resolved to CNPJ via the dataset's \code{submissao} table
+for the same year — the user-facing interface is identical
+regardless of which table holds CD_CVM natively.}
 
 \item{years}{Integer vector of years to fetch. \code{NULL} (default)
 fetches the latest available year. Ignored for datasets with

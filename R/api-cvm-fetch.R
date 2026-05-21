@@ -17,7 +17,11 @@
 #'   include. Accepts CNPJ (with or without punctuation), CD_CVM (with
 #'   or without zero-padding), or free-text matched against
 #'   `denom_cia`. Detection is automatic per element. `NULL` (default)
-#'   returns every company.
+#'   returns every company. When the target table does not carry a
+#'   `cd_cvm` column (e.g. `composicao_capital`, `parecer`), CD_CVM
+#'   tokens are resolved to CNPJ via the dataset's `submissao` table
+#'   for the same year — the user-facing interface is identical
+#'   regardless of which table holds CD_CVM natively.
 #' @param years Integer vector of years to fetch. `NULL` (default)
 #'   fetches the latest available year. Ignored for datasets with
 #'   `temporal_partitioning: none` (e.g. CAD).
@@ -151,7 +155,9 @@ fetch_one_year <- function(schema, year, companies, report_type,
   raw <- read_cvm_csv(path, schema, validate = validate)
   transformed <- apply_schema_transformations(raw, schema)
   if (!is.null(companies)) {
-    transformed <- filter_by_companies(transformed, companies)
+    transformed <- filter_by_companies(
+      transformed, companies, schema = schema, year = year
+    )
   }
   transformed
 }
@@ -221,54 +227,168 @@ fetch_yearly_partitioned <- function(schema, dataset, years, companies,
   out
 }
 
-# Filter a tibble by automatic company-identifier detection.
-# Implements the rules of CLAUDE.md §2.7.
-filter_by_companies <- function(df, companies) {
-  companies_chr <- as.character(companies)
+# Classify each token in `companies` as CNPJ (14 digits), CD_CVM
+# (1-6 digits), or free-text. Returns a list with parallel logical
+# masks and the cleaned digits-only form (used for CNPJ matching).
+classify_company_tokens <- function(companies_chr) {
   digits_only <- gsub("[^0-9]", "", companies_chr)
-
   is_cnpj <- nchar(digits_only) == 14L &
     nchar(companies_chr) >= 14L
   is_cdcvm <- !is_cnpj &
     grepl("^[0-9]{1,6}$", companies_chr)
   is_text <- !is_cnpj & !is_cdcvm
+  list(
+    digits_only = digits_only,
+    is_cnpj = is_cnpj,
+    is_cdcvm = is_cdcvm,
+    is_text = is_text
+  )
+}
 
+match_by_cnpj <- function(df, digits_only, mask) {
+  if (!any(mask) || !"cnpj_cia" %in% names(df)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  cnpj_clean(df$cnpj_cia) %in% digits_only[mask]
+}
+
+match_by_cd_cvm <- function(df, companies_chr, mask) {
+  if (!any(mask) || !"cd_cvm" %in% names(df)) {
+    return(rep(FALSE, nrow(df)))
+  }
+  targets <- companies_chr[mask]
+  # `%06s` pads with spaces, not zeros — must use formatC with a
+  # decimal format to get "9512" -> "009512".
+  df_padded <- formatC(
+    suppressWarnings(as.integer(df$cd_cvm)),
+    width = 6, flag = "0", format = "d"
+  )
+  targets_padded <- formatC(
+    as.integer(targets),
+    width = 6, flag = "0", format = "d"
+  )
+  df$cd_cvm %in% targets | df_padded %in% targets_padded
+}
+
+match_by_text <- function(df, companies_chr, mask) {
+  if (!any(mask) || !"denom_cia" %in% names(df)) {
+    return(rep(FALSE, nrow(df)))
+  }
   match_vec <- rep(FALSE, nrow(df))
-
-  if (any(is_cnpj) && "cnpj_cia" %in% names(df)) {
-    targets <- digits_only[is_cnpj]
-    df_clean <- cnpj_clean(df$cnpj_cia)
-    match_vec <- match_vec | df_clean %in% targets
-  }
-
-  if (any(is_cdcvm) && "cd_cvm" %in% names(df)) {
-    targets <- companies_chr[is_cdcvm]
-    # `%06s` pads with spaces, not zeros — must use formatC with a
-    # decimal format to get "9512" -> "009512".
-    df_padded <- formatC(
-      suppressWarnings(as.integer(df$cd_cvm)),
-      width = 6, flag = "0", format = "d"
-    )
-    targets_padded <- formatC(
-      as.integer(targets),
-      width = 6, flag = "0", format = "d"
-    )
-    match_vec <- match_vec |
-      df$cd_cvm %in% targets |
-      df_padded %in% targets_padded
-  }
-
-  if (any(is_text) && "denom_cia" %in% names(df)) {
-    for (term in companies_chr[is_text]) {
-      hits <- search_companies_textual(df$denom_cia, term)
-      if (any(hits)) {
-        hits <- disambiguate_text_match(df, hits, term)
-      }
-      match_vec <- match_vec | hits
+  for (term in companies_chr[mask]) {
+    hits <- search_companies_textual(df$denom_cia, term)
+    if (any(hits)) {
+      hits <- disambiguate_text_match(df, hits, term)
     }
+    match_vec <- match_vec | hits
   }
+  match_vec
+}
+
+# Filter a tibble by automatic company-identifier detection.
+# Implements the rules of CLAUDE.md §2.7.
+#
+# When the target table does not carry a `cd_cvm` column (e.g.
+# composicao_capital, parecer in ITR/DFP) but the user supplied CD_CVM
+# identifiers, resolve them to CNPJs via the `submissao` table of the
+# same dataset/year. Requires `schema` and `year` to be passed by the
+# caller; without them the CD_CVM tokens silently fail to match.
+filter_by_companies <- function(df, companies,
+                                schema = NULL, year = NULL) {
+  companies_chr <- as.character(companies)
+  cls <- classify_company_tokens(companies_chr)
+
+  if (any(cls$is_cdcvm) && !("cd_cvm" %in% names(df)) &&
+      !is.null(schema) && !is.null(year)) {
+    resolved <- resolve_cd_cvm_via_submissao(
+      companies_chr[cls$is_cdcvm], schema, year
+    )
+    companies_chr[cls$is_cdcvm] <- resolved
+    cls <- classify_company_tokens(companies_chr)
+  }
+
+  match_vec <- match_by_cnpj(df, cls$digits_only, cls$is_cnpj) |
+    match_by_cd_cvm(df, companies_chr, cls$is_cdcvm) |
+    match_by_text(df, companies_chr, cls$is_text)
 
   df[match_vec, , drop = FALSE]
+}
+
+# Resolve CD_CVM identifiers to CNPJs via the dataset's `submissao`
+# table for the given year. Used when the target table lacks `cd_cvm`
+# but the user supplied CD_CVM tokens (CLAUDE.md §2.7, Opção D).
+# Aborts with cvmdata_error_input if any CD_CVM is not present in
+# submissao for that year, or if the dataset lacks a submissao table.
+resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
+  dataset <- schema$dataset
+  available <- tryCatch(
+    cvm_tables(dataset),
+    error = function(e) character(0L)
+  )
+  if (!"submissao" %in% available) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {dataset}}/{.val {schema$table}} does not carry",
+          "{.code cd_cvm}, and dataset {.val {dataset}} has no",
+          "{.code submissao} table to resolve CD_CVM identifiers."
+        ),
+        "i" = paste(
+          "Pass {.arg companies} as CNPJ (with or without punctuation)",
+          "or as free text matched against {.code denom_cia}."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+
+  cli::cli_inform(c(
+    "i" = paste0(
+      "Resolving CD_CVM ", paste(cd_cvm_targets, collapse = ", "),
+      " via {.val {dataset}}/submissao for {.val {year}}",
+      " (table {.val {schema$table}} does not carry {.code cd_cvm})."
+    )
+  ))
+
+  sub_schema <- load_schema(dataset, "submissao")
+  path <- source_cvm_http_get(
+    sub_schema, year = year, report_type = NULL
+  )
+  sub_df <- read_cvm_csv(path, sub_schema, validate = "skip")
+
+  sub_cd_padded <- formatC(
+    suppressWarnings(as.integer(sub_df$cd_cvm)),
+    width = 6, flag = "0", format = "d"
+  )
+  targets_padded <- formatC(
+    as.integer(cd_cvm_targets),
+    width = 6, flag = "0", format = "d"
+  )
+
+  resolved <- vapply(targets_padded, function(tp) {
+    idx <- which(sub_cd_padded == tp)[1L]
+    if (is.na(idx)) NA_character_ else sub_df$cnpj_cia[idx]
+  }, character(1L), USE.NAMES = FALSE)
+
+  missing_mask <- is.na(resolved)
+  if (any(missing_mask)) {
+    not_found <- cd_cvm_targets[missing_mask]
+    cvmdata_abort(
+      c(
+        paste(
+          "CD_CVM not found in {.val {dataset}}/submissao for",
+          "{.val {year}}: {.val {not_found}}."
+        ),
+        "i" = paste(
+          "Confirm the company filed in that year or pass",
+          "{.arg companies} as CNPJ."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+
+  resolved
 }
 
 # Apply CLAUDE.md §2.7 policy when a textual `companies` term matches

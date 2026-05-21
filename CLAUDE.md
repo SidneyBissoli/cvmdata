@@ -184,8 +184,22 @@ Argumento único com **detecção automática de tipo**:
 |---|---|---|
 | `^[0-9]{14}$` | CNPJ sem pontuação | `cnpj_clean(cnpj_cia)` |
 | Contém `.` ou `/` ou `-` e tem 14 dígitos | CNPJ com pontuação | `cnpj_cia` literal e/ou `cnpj_clean(cnpj_cia)` |
-| `^[0-9]{1,6}$` | CD_CVM | `cd_cvm` (com ou sem zero-padding) |
+| `^[0-9]{1,6}$` | CD_CVM | `cd_cvm` (com ou sem zero-padding); se a tabela alvo não tem `cd_cvm`, resolve para CNPJ via `submissao` (vide abaixo) |
 | Resto (≥1 token alfabético) | Busca textual | `denom_cia` |
+
+**Resolução CD_CVM → CNPJ via submissao** (decisão hotfix pós-Sessão
+03, 2026-05-21): quando o usuário passa CD_CVM contra uma tabela que
+não carrega `cd_cvm` (`composicao_capital`, `parecer` em DFP/ITR; e
+provavelmente várias FRE-detail no futuro), o pipeline lê a `submissao`
+do mesmo dataset/year (já no mesmo ZIP anual, custo extra mínimo) e
+faz lookup CD_CVM → CNPJ antes de aplicar o filtro. CD_CVMs ausentes
+na `submissao` daquele ano abortam com `cvmdata_error_input`. Caso o
+dataset não publique uma tabela `submissao` (não acontece para
+ITR/DFP/FRE; pode acontecer para datasets v0.2+), aborta com mensagem
+instruindo o uso de CNPJ ou texto. O caminho silencioso anterior
+(retornar tibble vazio sem aviso) foi removido. Para regressão zero:
+tabelas com `cd_cvm` nativo (`bpa`, `bpp`, etc.) continuam usando o
+filtro direto, sem o lookup adicional.
 
 Busca textual: tokeniza o input por espaços, normaliza (uppercase, sem
 acentos, sem pontuação), aplica **mapa de abreviações** conhecidas
