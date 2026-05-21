@@ -757,3 +757,92 @@ test_that("load_schema accepts ITR bpa.yaml with first_year 2011", {
   expect_equal(s$first_year, 2011)
   expect_named(s$cvm_file_pattern_variants, c("ind", "con"))
 })
+
+# CD_CVM -> CNPJ resolution via submissao (Opção D) ------------------
+
+test_that("cvm_fetch resolves CD_CVM via submissao for tables w/o cd_cvm", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "composicao_capital",
+              companies = "001023", years = 2024L, source = "cvm")
+  )
+  expect_s3_class(result, "cvm_tbl")
+  expect_true(nrow(result) > 0L)
+  expect_true(all(result$cnpj_cia == "00.000.000/0001-91"))
+})
+
+test_that("CD_CVM resolution accepts unpadded input", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  out_padded <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "composicao_capital",
+              companies = "001023", years = 2024L, source = "cvm")
+  )
+  out_unpadded <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "composicao_capital",
+              companies = "1023", years = 2024L, source = "cvm")
+  )
+  expect_identical(nrow(out_padded), nrow(out_unpadded))
+})
+
+test_that("CD_CVM resolution can mix with textual terms", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "composicao_capital",
+              companies = c("001023", "MAGAZINE LUIZA"),
+              years = 2024L, source = "cvm")
+  )
+  expect_setequal(
+    unique(result$cnpj_cia),
+    c("00.000.000/0001-91", "47.960.950/0001-21")
+  )
+})
+
+test_that("unknown CD_CVM in submissao aborts with cvmdata_error_input", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  expect_error(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("itr", "composicao_capital",
+                companies = "999999",
+                years = 2024L, source = "cvm")
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("tables with native cd_cvm bypass the lookup (no regression)", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  # If the lookup were invoked here it would read submissao too —
+  # but the fixture's submissao only has 001023/022470, so any
+  # accidental routing through resolve_cd_cvm_via_submissao would
+  # still work for these CDs. The signal we trust is the absence of
+  # the cli_inform message; we capture messages and assert no
+  # "Resolving CD_CVM" message was emitted.
+  msgs <- character(0L)
+  withCallingHandlers(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("itr", "bpa", report_type = "ind",
+                companies = "001023", years = 2024L, source = "cvm")
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_false(any(grepl("Resolving CD_CVM", msgs)))
+})

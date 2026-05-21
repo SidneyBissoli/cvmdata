@@ -159,6 +159,15 @@ progresso sessão a sessão.
     `tests/testthat/fixtures/itr_cia_aberta_2024.zip` (6.94 KB, 3 CSVs,
     BCO BRASIL + MAGAZINE LUIZA × 3 trimestres) com `.meta.json` de
     origem; tracer test + discovery em `test-cvm-fetch.R`.
+  - Hotfix pós-Sessão 03: tabelas sem `cd_cvm` (`composicao_capital`,
+    `parecer` em DFP e ITR) retornavam tibble vazio silenciosamente
+    quando `companies` recebia CD_CVM. Implementada resolução automática
+    CD_CVM → CNPJ via `submissao` do mesmo dataset/year
+    (`resolve_cd_cvm_via_submissao()` em `R/api-cvm-fetch.R`). Mesmo
+    custo de runtime apenas no primeiro lookup por sessão (cache de
+    disco + HEAD revalidando ETag). CD_CVMs inexistentes na submissao
+    daquele ano abortam com `cvmdata_error_input`. CLAUDE.md §2.7
+    atualizado.
   - [ ] 36 YAMLs FRE (1 header `submissao` + 35 detail; 8 desses com
     `meta_status: missing` precisam `expected_field_names`).
   - [ ] Política do reader para 8 tabelas FRE sem META (Rodada 3.0.2).
