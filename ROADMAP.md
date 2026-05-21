@@ -150,9 +150,15 @@ progresso sessão a sessão.
     `years = NULL` + companhia ausente no max year. Pendências da
     Sessão 01 ainda válidas em
     `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
-- [ ] **Sessão 03**: ITR + FRE ponta-a-ponta.
-  - [ ] 11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern`
-    troca DFP → ITR, `first_year: 2011`).
+- [~] **Sessão 03**: ITR + FRE ponta-a-ponta.
+  - [x] 11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern`
+    troca DFP → ITR, `first_year: 2011`). Auditoria empírica do ZIP
+    2024 confirmou paridade total de schema com DFP (`expected_field_count`
+    idêntico em todas as 11 tabelas, mesmo set de variantes ind/con,
+    mesmo padrão de naming de CSV). Fixture
+    `tests/testthat/fixtures/itr_cia_aberta_2024.zip` (6.94 KB, 3 CSVs,
+    BCO BRASIL + MAGAZINE LUIZA × 3 trimestres) com `.meta.json` de
+    origem; tracer test + discovery em `test-cvm-fetch.R`.
   - [ ] 36 YAMLs FRE (1 header `submissao` + 35 detail; 8 desses com
     `meta_status: missing` precisam `expected_field_names`).
   - [ ] Política do reader para 8 tabelas FRE sem META (Rodada 3.0.2).
