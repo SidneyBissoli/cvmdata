@@ -58,7 +58,8 @@ build_col_types <- function(csv_names) {
 }
 
 # Read a CVM-published CSV honouring schema rules and validate
-# according to the `validate` mode.
+# according to the `validate` mode. Returns a tibble with snake_case
+# column names (SCREAMING_SNAKE_CASE from CVM is lowered uniformly).
 #
 # @param path Local path to the CSV.
 # @param schema A `cvm_table_schema` returned by `load_schema()`.
@@ -83,7 +84,7 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
     validate_field_names(csv_names, schema, validate, path)
   }
 
-  readr::read_delim(
+  df <- readr::read_delim(
     path,
     delim = delim,
     locale = readr::locale(encoding = encoding),
@@ -91,6 +92,8 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
     show_col_types = FALSE,
     progress = FALSE
   )
+  colnames(df) <- tolower(colnames(df))
+  df
 }
 
 validate_field_count <- function(csv_names, schema, validate, path) {

@@ -6,52 +6,48 @@
 \usage{
 cad_fetch(
   companies = NULL,
-  source = "auto",
+  source = "cvm",
   on_error = "abort",
   validate = "strict",
   ...
 )
 }
 \arguments{
-\item{companies}{Optional character vector of CVM codes (\code{cd_cvm})
-or CNPJ numbers (with or without punctuation) used to filter the
-returned tibble. \code{NULL} (default) returns every row.}
+\item{companies}{Optional character vector identifying companies to
+include. Accepts CNPJ (with or without punctuation), CD_CVM (with
+or without zero-padding), or free-text matched against
+\code{denom_cia}. Detection is automatic per element. \code{NULL} (default)
+returns every company.}
 
-\item{source}{One of \code{"auto"} (default; portal with mirror
-fallback), \code{"portal"} or \code{"mirror"}. Only \code{"auto"} and \code{"portal"}
-are wired in v0.1; \code{"mirror"} triggers an internal error.}
+\item{source}{One of \code{"mirror"} (default, parquet via DuckDB) or
+\code{"cvm"} (CVM open-data portal). The mirror is refreshed weekly
+against the CVM portal.}
 
-\item{on_error}{One of \code{"abort"} (default), \code{"warn"} or
-\code{"silent"}. Controls behaviour on HTTP failures and partial-batch
-errors. Only \code{"abort"} is wired in v0.1; the other values are
-reserved for the multi-entity batch operations of later
-sessions.}
+\item{on_error}{One of \code{"abort"} (default), \code{"warn"} or \code{"silent"}.
+Controls behaviour on HTTP failures and partial-batch errors.}
 
 \item{validate}{One of \code{"strict"} (default), \code{"warn"} or \code{"skip"}.
-Controls schema validation strictness at parse time (field count
-and, for tables with \code{meta_status: missing}, field names).}
+Controls schema validation strictness at parse time.}
 
 \item{...}{Reserved for forward compatibility.}
 }
 \value{
-A tibble of class \code{cvm_tbl} carrying the five provenance
-attributes \code{source}, \code{fetched_at}, \code{dataset}, \code{table} and
-\code{package_version}. Identifier columns (\code{cnpj_cia}, \code{cd_cvm},
-\code{cep}, telephone-related fields) are coerced to character.
-Date columns (\verb{dt_*}) are parsed to \code{Date}.
+A tibble of class \code{cvm_tbl} carrying provenance attributes.
 }
 \description{
-Returns the current snapshot of the \emph{Cadastro de Companhias Abertas}
-published by CVM at \url{https://dados.cvm.gov.br/}. CAD is a
-single-file dataset without temporal partitioning: each download
-supersedes the previous one. Column names, categorical values and
-free-text fields are preserved in Portuguese exactly as published
-by CVM (snake_case minúsculo).
+Thin alias for \code{cvm_fetch(dataset = "cad", table = "companhias", ...)}, kept for ergonomics of the Session 01 release. Returns the
+current snapshot of the \emph{Cadastro de Companhias Abertas} published
+by CVM at \url{https://dados.cvm.gov.br/}.
 }
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 companies <- cad_fetch()
-dplyr::glimpse(companies)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[=cvm_fetch]{cvm_fetch()}} for the generic API.
+
+Other fetchers: 
+\code{\link{cvm_fetch}()}
 }
 \concept{fetchers}

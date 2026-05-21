@@ -1,0 +1,35 @@
+# Schema: dfp / submissao
+# Cabeçalho da Demonstração Financeira Padronizada — uma linha por
+# documento submetido. Identifica a companhia e o documento (LINK_DOC).
+# Empirical verification: 2024-12-31 snapshot, BCO BRASIL S.A. row.
+
+dataset: dfp
+table: submissao
+
+# Download topology -------------------------------------------------------
+# DFP é publicada como ZIP anual contendo 19 CSVs. A submissão é o CSV
+# `dfp_cia_aberta_{year}.csv` dentro do ZIP.
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "dfp_cia_aberta_{year}.csv"
+
+# Dictionary --------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/META/meta_dfp_cia_aberta_txt.zip#meta_dfp_cia_aberta.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 9
+
+# Transformations ---------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantém apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).
+      Reapresentações ficam acessíveis em v0.2+ via argumento opcional.
