@@ -861,3 +861,291 @@ test_that("tables with native cd_cvm bypass the lookup (no regression)", {
   )
   expect_false(any(grepl("Resolving CD_CVM", msgs)))
 })
+
+# FRE (annual reference form) tracer + discovery ---------------------
+
+local_prepare_fre_cache <- function(envir = parent.frame()) {
+  cache_root <- withr::local_tempdir(.local_envir = envir)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    .local_envir = envir
+  )
+  raw_dir <- file.path(cache_root, "raw", "fre", "2024")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(
+    test_path("fixtures", "fre_cia_aberta_2024.zip"),
+    file.path(raw_dir, "fre_cia_aberta_2024.zip")
+  )
+  saveRDS(
+    list(
+      etag = "\"fixture-etag\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2026-05-19T00:00:00.000Z"
+    ),
+    file.path(raw_dir, "fre_cia_aberta_2024.zip.etag.rds")
+  )
+  cache_root
+}
+
+# Variant: rebuilds the cached ZIP after rewriting empregado_PCD via
+# `modify_fn(lines) -> lines`. Used by the three validate-mode tests
+# against meta_status: missing.
+local_fre_cache_bad_pcd <- function(modify_fn,
+                                                     envir = parent.frame()) {
+  cache_root <- withr::local_tempdir(.local_envir = envir)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    .local_envir = envir
+  )
+  raw_dir <- file.path(cache_root, "raw", "fre", "2024")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+
+  stage <- withr::local_tempdir(.local_envir = envir)
+  utils::unzip(
+    test_path("fixtures", "fre_cia_aberta_2024.zip"),
+    exdir = stage
+  )
+  pcd_path <- file.path(stage, "fre_cia_aberta_empregado_PCD_2024.csv")
+  con <- file(pcd_path, "r", encoding = "ISO-8859-1")
+  lines <- readLines(con, warn = FALSE)
+  close(con)
+  con <- file(pcd_path, "w", encoding = "ISO-8859-1")
+  writeLines(modify_fn(lines), con)
+  close(con)
+
+  zip_path <- file.path(raw_dir, "fre_cia_aberta_2024.zip")
+  withr::with_dir(stage, {
+    utils::zip(zip_path, files = list.files("."), flags = "-q9X")
+  })
+  saveRDS(
+    list(
+      etag = "\"fixture-etag\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2026-05-19T00:00:00.000Z"
+    ),
+    file.path(raw_dir, "fre_cia_aberta_2024.zip.etag.rds")
+  )
+  cache_root
+}
+
+# Header-rewriting helper used by all three validate-mode tests.
+# Replaces the `Quantidade_PCD;Quantidade_Nao_PCD` boundary in the
+# header with a renamed field, preserving field count.
+rename_pcd_header <- function(lines) {
+  lines[1L] <- sub(
+    "Quantidade_PCD;Quantidade_Nao_PCD",
+    "Quantidade_PCD_X;Quantidade_Nao_PCD",
+    lines[1L], fixed = TRUE
+  )
+  lines
+}
+
+test_that("cvm_fetch FRE auditor tracer returns cvm_tbl", {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "auditor",
+              years = 2024L, source = "cvm")
+  )
+
+  expect_s3_class(result, "cvm_tbl")
+  expect_s3_class(result, "tbl_df")
+  expect_identical(attr(result, "source"), "cvm")
+  expect_identical(attr(result, "dataset"), "fre")
+  expect_identical(attr(result, "table"), "auditor")
+  expect_true(nrow(result) > 0L)
+  # FRE-detail uses cnpj_companhia / data_referencia / nome_companhia.
+  expect_true(all(c("cnpj_companhia", "data_referencia",
+                    "nome_companhia", "versao") %in% names(result)))
+  expect_false("cnpj_cia" %in% names(result))
+  expect_false("cd_cvm" %in% names(result))
+  # cnpj_companhia forced to character (identifier rule).
+  expect_type(result$cnpj_companhia, "character")
+  expect_s3_class(result$data_referencia, "Date")
+})
+
+test_that("cvm_datasets includes fre", {
+  ds <- cvm_datasets()
+  expect_true("fre" %in% ds)
+})
+
+test_that("cvm_tables('fre') lists 36 conceptual tables", {
+  tabs <- cvm_tables("fre")
+  expect_length(tabs, 36L)
+  expected_subset <- c("submissao", "auditor", "empregado_PCD",
+                       "administrador_PCD",
+                       "empregado_local_declaracao_genero",
+                       "empregado_local_faixa_etaria")
+  expect_true(all(expected_subset %in% tabs))
+})
+
+test_that("load_schema accepts FRE submissao.yaml with first_year 2010", {
+  s <- load_schema("fre", "submissao")
+  expect_s3_class(s, "cvm_table_schema")
+  expect_identical(s$temporal_partitioning, "yearly")
+  expect_equal(s$first_year, 2010)
+  expect_identical(s$cvm_file_pattern, "fre_cia_aberta_{year}.csv")
+})
+
+test_that("load_schema marks 8 detail tables as meta_status missing", {
+  expected_missing <- c(
+    "administrador_PCD", "empregado_PCD",
+    "empregado_local_declaracao_genero",
+    "empregado_local_declaracao_raca",
+    "empregado_posicao_declaracao_genero",
+    "empregado_posicao_declaracao_raca",
+    "empregado_posicao_faixa_etaria",
+    "empregado_posicao_local"
+  )
+  for (t in expected_missing) {
+    s <- load_schema("fre", t)
+    expect_identical(
+      s$meta_status, "missing",
+      info = paste("table:", t)
+    )
+    expect_true(
+      length(s$expected_field_names) > 0L,
+      info = paste("table:", t)
+    )
+  }
+})
+
+# Filter by CNPJ in FRE-detail (cnpj_companhia path) -----------------
+
+test_that("cvm_fetch FRE detail filters by CNPJ via cnpj_companhia", {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "auditor",
+              companies = "00.000.000/0001-91",
+              years = 2024L, source = "cvm")
+  )
+  expect_true(nrow(result) > 0L)
+  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
+})
+
+test_that("cvm_fetch FRE detail textual search filters via nome_companhia", {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "auditor",
+              companies = "MAGAZINE LUIZA",
+              years = 2024L, source = "cvm")
+  )
+  expect_true(nrow(result) > 0L)
+  expect_true(all(grepl("MAGAZINE LUIZA", result$nome_companhia)))
+})
+
+# CD_CVM resolution via fre/submissao --------------------------------
+
+test_that("cvm_fetch FRE resolves CD_CVM via submissao for detail", {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "auditor",
+              companies = "001023",
+              years = 2024L, source = "cvm")
+  )
+  expect_true(nrow(result) > 0L)
+  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
+})
+
+# keep_latest_version on (cnpj_companhia, data_referencia) ----------
+
+test_that(paste(
+  "FRE keep_latest_version groups by",
+  "(cnpj_companhia, data_referencia)"
+), {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  # Fixture: BB has 2 rows VERSAO=14 + 1 synthetic VERSAO=99 — all on
+  # the same (cnpj_companhia, data_referencia). After transform, BB
+  # should keep only the VERSAO=99 row.
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "auditor",
+              companies = "00.000.000/0001-91",
+              years = 2024L, source = "cvm")
+  )
+  expect_identical(nrow(result), 1L)
+  expect_identical(as.integer(result$versao), 99L)
+})
+
+# meta_status: missing — three validate modes -----------------------
+
+test_that("FRE meta_status:missing strict passes when header matches", {
+  skip_if_not_installed("httptest2")
+  local_prepare_fre_cache()
+
+  result <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("fre", "empregado_PCD",
+              years = 2024L, source = "cvm",
+              validate = "strict")
+  )
+  expect_s3_class(result, "cvm_tbl")
+  expect_true(nrow(result) > 0L)
+  expect_true("quantidade_pcd" %in% names(result))
+})
+
+test_that("FRE meta_status:missing strict aborts on field-name mismatch", {
+  skip_if_not_installed("httptest2")
+  local_fre_cache_bad_pcd(rename_pcd_header)
+
+  expect_error(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("fre", "empregado_PCD",
+                years = 2024L, source = "cvm",
+                validate = "strict")
+    ),
+    class = "cvmdata_error_parse"
+  )
+})
+
+test_that("FRE meta_status:missing warn emits validation warning", {
+  skip_if_not_installed("httptest2")
+  local_fre_cache_bad_pcd(rename_pcd_header)
+
+  expect_warning(
+    result <- httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("fre", "empregado_PCD",
+                years = 2024L, source = "cvm",
+                validate = "warn")
+    ),
+    class = "cvmdata_warn_validation"
+  )
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("FRE meta_status:missing skip suppresses validation", {
+  skip_if_not_installed("httptest2")
+  local_fre_cache_bad_pcd(rename_pcd_header)
+
+  warnings_seen <- character(0L)
+  result <- withCallingHandlers(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("fre", "empregado_PCD",
+                years = 2024L, source = "cvm",
+                validate = "skip")
+    ),
+    cvmdata_warn_validation = function(w) {
+      warnings_seen <<- c(warnings_seen, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_length(warnings_seen, 0L)
+  expect_s3_class(result, "cvm_tbl")
+  expect_true(nrow(result) > 0L)
+})

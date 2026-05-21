@@ -72,10 +72,10 @@ progresso sessão a sessão.
   `submissao`, `bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`,
   `dmpl`, `dva`, `composicao_capital`, `parecer`). As 8 com variantes
   ind/con usam `cvm_file_pattern_variants`.
-- [ ] YAMLs para ITR (mesmo set que DFP — pipeline reusa
-  `cvm_file_pattern_variants`).
-- [ ] YAMLs para FRE (36 tabelas incluindo `submissao` + 8 com
-  `meta_status: missing`).
+- [x] YAMLs para ITR (mesmo set que DFP — pipeline reusa
+  `cvm_file_pattern_variants`) — Sessão 03.
+- [x] YAMLs para FRE (36 tabelas incluindo `submissao` + 8 com
+  `meta_status: missing`) — Sessão 03.2.
 - [ ] Geração programática dos YAMLs restantes a partir do snapshot
   de dicionário.
 - [ ] Snapshot de dicionário `cvm_dictionary_snapshot.csv` em
@@ -150,7 +150,7 @@ progresso sessão a sessão.
     `years = NULL` + companhia ausente no max year. Pendências da
     Sessão 01 ainda válidas em
     `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
-- [~] **Sessão 03**: ITR + FRE ponta-a-ponta.
+- [x] **Sessão 03**: ITR + FRE ponta-a-ponta.
   - [x] 11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern`
     troca DFP → ITR, `first_year: 2011`). Auditoria empírica do ZIP
     2024 confirmou paridade total de schema com DFP (`expected_field_count`
@@ -168,9 +168,30 @@ progresso sessão a sessão.
     disco + HEAD revalidando ETag). CD_CVMs inexistentes na submissao
     daquele ano abortam com `cvmdata_error_input`. CLAUDE.md §2.7
     atualizado.
-  - [ ] 36 YAMLs FRE (1 header `submissao` + 35 detail; 8 desses com
-    `meta_status: missing` precisam `expected_field_names`).
-  - [ ] Política do reader para 8 tabelas FRE sem META (Rodada 3.0.2).
+  - [x] **Sessão 03.2**: 36 YAMLs FRE (1 header `submissao` + 35
+    detail; 8 com `meta_status: missing` + `expected_field_names`).
+    Auditoria empírica do ZIP 2024 (URL META é
+    `meta_fre_cia_aberta.zip`, sem o sufixo `_txt.zip` previsto;
+    `first_year = 2010`; META de `empregado_local_faixa_etaria` vive
+    sem o prefixo `meta_` no entry dentro do ZIP — anomalia tratada
+    como `available` mesmo assim). Nenhum `multiply_by_scale` em FRE
+    (sem `VL_CONTA`/`ESCALA_MOEDA`). Fixture
+    `tests/testthat/fixtures/fre_cia_aberta_2024.zip` (4.4 KB, 3 CSVs:
+    `submissao`, `auditor`, `empregado_PCD`; BCO BRASIL + MAGAZINE
+    LUIZA + BCO NORDESTE; BB carrega linha sintética VERSAO=99 em
+    `auditor` para exercitar `keep_latest_version` na chave
+    `(cnpj_companhia, data_referencia)`).
+  - [x] **Sessão 03.2**: ajustes cirúrgicos para FRE-detail. Detail
+    tables FRE usam header diferente do CAD/ITR/DFP (CLAUDE.md §2.2):
+    `cnpj_companhia`/`data_referencia`/`nome_companhia`, sem `cd_cvm`.
+    `match_by_cnpj()`, `match_by_text()`, `disambiguate_text_match()` e
+    `tx_keep_latest_version()` agora aceitam o par alternativo via
+    helpers `cnpj_col()`/`name_col()` em `R/api-cvm-fetch.R`. Zero
+    efeito em CAD/ITR/DFP.
+  - [x] **Sessão 03.2**: política do reader exercitada pela primeira
+    vez contra YAMLs reais com `meta_status: missing` — três modos
+    (`strict`/`warn`/`skip`) cobertos por testes que reescrevem o
+    header de `empregado_PCD` no cache.
   - [ ] Vignettes `itr-dfp.Rmd` e `fre.Rmd`.
 - [x] Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após
   queda para 72% no merge de DFP).
@@ -183,13 +204,13 @@ progresso sessão a sessão.
 
 - [-] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` — descartados.
   `cvm_fetch()` cobre tudo (decisão Sessão 02).
-- [~] Política do reader para 8 tabelas FRE sem META
-  (`meta_status: missing`; vide Rodada 3.0.2) — esqueleto pronto em
-  `validate_field_names()` + modo `warn`/`strict`/`skip`; falta
-  exercitar com YAMLs FRE reais (Sessão 03).
-- [~] Exercitar branches `validate_field_names()` em `read_cvm_csv()`
-  — modo `warn` coberto na Sessão 02; modo `strict` em `meta_status:
-  missing` ainda não exercitado por nenhum YAML real.
+- [x] Política do reader para 8 tabelas FRE sem META
+  (`meta_status: missing`; vide Rodada 3.0.2) — esqueleto em
+  `validate_field_names()` exercitado contra YAMLs reais nos três
+  modos (`strict`/`warn`/`skip`) na Sessão 03.2.
+- [x] Exercitar branches `validate_field_names()` em `read_cvm_csv()`
+  — modo `warn` coberto na Sessão 02; modos `strict` e `skip` em
+  `meta_status: missing` cobertos na Sessão 03.2.
 - [ ] `cvm_dictionary()` lendo do snapshot.
 - [ ] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
   `clear`).
