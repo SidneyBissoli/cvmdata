@@ -45,3 +45,4 @@ expected_field_count: 47
 # stored without leading-zero padding (range 35..28010), whereas in ITR/DFP
 # it is zero-padded to 6 chars. The package preserves CD_CVM as character
 # in all datasets (see naming doc §11.2 — pending entry resolved here).
+transformations: []

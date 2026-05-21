@@ -8,6 +8,7 @@
 ^PROMPT_CLAUDE_CODE_.*\.md$
 ^CLAUDE\.md$
 ^ROADMAP\.md$
+^ROADMAP\.html$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$

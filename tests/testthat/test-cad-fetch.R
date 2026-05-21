@@ -55,7 +55,7 @@ test_that("cad_fetch() returns a cvm_tbl with provenance attributes", {
 
   expect_s3_class(result, "cvm_tbl")
   expect_s3_class(result, "tbl_df")
-  expect_identical(attr(result, "source"), "portal")
+  expect_identical(attr(result, "source"), "cvm")
   expect_identical(attr(result, "dataset"), "cad")
   expect_identical(attr(result, "table"), "companhias")
   expect_s3_class(attr(result, "fetched_at"), "POSIXct")
@@ -281,20 +281,20 @@ test_that("source_cvm_http_get re-downloads when ETag changes", {
   expect_identical(call_count, 2L)
 })
 
-test_that("source_cvm_http_get rejects yearly partitioning", {
+test_that("source_cvm_http_get requires year for yearly schema", {
   schema <- list(
-    dataset = "itr", table = "bpa_con",
+    dataset = "dfp", table = "bpa",
     cvm_archive_url_pattern = "https://example.com/x_{year}.zip",
     cvm_file_url_pattern = NULL,
     cvm_file_pattern = "x_{year}.csv",
-    temporal_partitioning = "yearly", first_year = 2011L,
+    temporal_partitioning = "yearly", first_year = 2010L,
     encoding = "ISO-8859-1", delimiter = ";",
     expected_field_count = 14L,
     transformations = list()
   )
   class(schema) <- c("cvm_table_schema", "list")
   expect_error(
-    source_cvm_http_get(schema, year = 2024L),
+    source_cvm_http_get(schema),
     class = "cvmdata_error_internal"
   )
 })

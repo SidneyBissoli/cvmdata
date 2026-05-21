@@ -1,7 +1,13 @@
-# HTTP source backend for the CVM Open Data Portal. Implements the
-# Phase B contract for `temporal_partitioning: none` only (Session 1).
-# `yearly` partitioning is rejected with a "not implemented yet"
-# internal error — handled in Session 2.
+# HTTP source backend for the CVM Open Data Portal. Two paths:
+#
+# 1. `temporal_partitioning: none` — single CSV (used by CAD).
+# 2. `temporal_partitioning: yearly` — yearly ZIP that contains many
+#    CSVs, one of which (optionally selected by report_type) is the
+#    target table.
+#
+# Both paths cache the raw upstream artifact (CSV or ZIP) under
+# `<cache_root>/raw/<dataset>/...` with a sidecar `.etag.rds` for
+# ETag/Last-Modified comparison.
 
 # Resolve the cache root. Overridable via `options(cvmdata.cache_dir)`
 # so that tests can swap the user's cache for a tempdir.
@@ -12,34 +18,58 @@ cvm_cache_root <- function() {
   )
 }
 
-# Download (or serve from cache) the CSV referenced by a schema.
-# Returns the local path to the cached CSV. Cache layout follows
-# `cvmdata_rodada2_arquitetura_estavel.md` §5.2:
-# `<cache_root>/raw/<dataset>/<filename>` with a sidecar RDS holding
-# ETag and Last-Modified.
+# Download (or serve from cache) the CSV referenced by a schema. Returns
+# the local path to the CSV ready to read.
 #
 # @param schema A `cvm_table_schema`.
-# @param year Required when `schema$temporal_partitioning == "yearly"`;
-#   ignored otherwise.
-# @return Local filesystem path to the CSV ready to read.
-source_cvm_http_get <- function(schema, year = NULL, ...) {
+# @param year Required when `schema$temporal_partitioning == "yearly"`.
+# @param report_type Required when the schema declares
+#   `cvm_file_pattern_variants`.
+# @return Local filesystem path to the CSV.
+source_cvm_http_get <- function(schema, year = NULL,
+                                report_type = NULL, ...) {
   partitioning <- schema$temporal_partitioning %||% "none"
-  if (!identical(partitioning, "none")) {
+  if (identical(partitioning, "none")) {
+    return(get_simple_csv(schema, report_type))
+  }
+  if (identical(partitioning, "yearly")) {
+    if (is.null(year)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Table {.val {schema$dataset}}/{.val {schema$table}}",
+            "is yearly-partitioned; {.arg year} is required."
+          )
+        ),
+        class = "cvmdata_error_internal"
+      )
+    }
+    return(get_yearly_csv(schema, as.integer(year), report_type))
+  }
+  cvmdata_abort(
+    c(
+      paste(
+        "Unknown {.field temporal_partitioning} value",
+        "{.val {partitioning}}."
+      )
+    ),
+    class = "cvmdata_error_internal"
+  )
+}
+
+# Path for non-partitioned datasets (CAD-style).
+get_simple_csv <- function(schema, report_type) {
+  if (!is.null(report_type)) {
     cvmdata_abort(
       c(
         paste(
-          "Temporal partitioning {.val {partitioning}} not",
-          "implemented yet."
-        ),
-        "i" = paste(
-          "Session 1 covers only {.code temporal_partitioning: none}.",
-          "Yearly partitioning lands in Session 2."
+          "Table {.val {schema$dataset}}/{.val {schema$table}} does",
+          "not support {.arg report_type}; pass {.code NULL}."
         )
       ),
-      class = "cvmdata_error_internal"
+      class = "cvmdata_error_input"
     )
   }
-
   url <- schema$cvm_file_url_pattern
   if (is.null(url) || !nzchar(url)) {
     cvmdata_abort(
@@ -50,15 +80,62 @@ source_cvm_http_get <- function(schema, year = NULL, ...) {
       class = "cvmdata_error_internal"
     )
   }
-
   cache_dir <- file.path(cvm_cache_root(), "raw", schema$dataset)
-  if (!dir.exists(cache_dir)) {
-    dir.create(cache_dir, recursive = TRUE, showWarnings = FALSE)
-  }
-
+  ensure_dir(cache_dir)
   csv_path <- file.path(cache_dir, basename(url))
-  etag_path <- paste0(csv_path, ".etag.rds")
+  download_with_etag(url, csv_path)
+  csv_path
+}
 
+# Path for yearly-partitioned datasets (DFP/ITR/FRE-detail).
+get_yearly_csv <- function(schema, year, report_type) {
+  archive_url <- sub("\\{year\\}", year, schema$cvm_archive_url_pattern,
+                     fixed = FALSE)
+  csv_pattern <- resolve_file_pattern(schema, report_type)
+  csv_name <- sub("\\{year\\}", year, csv_pattern, fixed = FALSE)
+
+  cache_dir <- file.path(cvm_cache_root(), "raw", schema$dataset,
+                         as.character(year))
+  ensure_dir(cache_dir)
+  zip_path <- file.path(cache_dir, basename(archive_url))
+  download_with_etag(archive_url, zip_path)
+
+  csv_path <- file.path(cache_dir, csv_name)
+  if (!file.exists(csv_path) ||
+        file.mtime(csv_path) < file.mtime(zip_path)) {
+    unzip(zip_path, files = csv_name, exdir = cache_dir, overwrite = TRUE)
+  }
+  if (!file.exists(csv_path)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "CSV {.val {csv_name}} not found inside ZIP",
+          "{.path {basename(zip_path)}}."
+        ),
+        "i" = paste(
+          "Either the schema declares the wrong",
+          "{.field cvm_file_pattern_variants} or the upstream archive",
+          "layout changed."
+        )
+      ),
+      class = "cvmdata_error_parse"
+    )
+  }
+  csv_path
+}
+
+# Create a directory if it does not exist; silent on success.
+ensure_dir <- function(path) {
+  if (!dir.exists(path)) {
+    dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  }
+  invisible(path)
+}
+
+# Download a URL into `dest_path`, honoring ETag/Last-Modified for
+# freshness. Writes a sidecar `.etag.rds` with cache headers.
+download_with_etag <- function(url, dest_path) {
+  etag_path <- paste0(dest_path, ".etag.rds")
   cached_meta <- if (file.exists(etag_path)) {
     tryCatch(readRDS(etag_path), error = function(e) NULL)
   } else {
@@ -66,7 +143,7 @@ source_cvm_http_get <- function(schema, year = NULL, ...) {
   }
 
   fresh <- FALSE
-  if (file.exists(csv_path) && !is.null(cached_meta)) {
+  if (file.exists(dest_path) && !is.null(cached_meta)) {
     head_resp <- tryCatch(
       httr2::req_perform(httr2::req_method(httr2::request(url), "HEAD")),
       error = function(e) {
@@ -101,7 +178,7 @@ source_cvm_http_get <- function(schema, year = NULL, ...) {
         )
       }
     )
-    writeBin(httr2::resp_body_raw(download_resp), csv_path)
+    writeBin(httr2::resp_body_raw(download_resp), dest_path)
     saveRDS(
       list(
         etag = httr2::resp_header(download_resp, "ETag"),
@@ -118,6 +195,5 @@ source_cvm_http_get <- function(schema, year = NULL, ...) {
       etag_path
     )
   }
-
-  csv_path
+  invisible(dest_path)
 }
