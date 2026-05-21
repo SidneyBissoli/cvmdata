@@ -116,15 +116,20 @@ progresso sessão a sessão.
   - [x] `cvm_dataset_years(dataset)` — descoberta dinâmica via HTML
     listing do diretório do portal, cacheado por sessão.
   - [x] Default `years = NULL` → último ano disponível (via
-    `cvm_dataset_years()` interno).
+    `cvm_dataset_years()` interno). Hotfix pós-Sessão 02: quando
+    `companies != NULL`, faz fallback descendente até 3 anos quando o
+    max year não tem dados da companhia pedida (companhias com
+    calendário fiscal não-civil — agros etc. — fazem o portal listar
+    ZIPs do ano corrente sem cobertura de empresas civis), emitindo
+    `cvmdata_warn_year_fallback`.
   - [x] Novo arg `report_type ∈ c("ind", "con")`, obrigatório para
     tabelas com variantes; erro para `composicao_capital`/`submissao`/
     `parecer`.
   - [x] `companies` com detecção automática (CNPJ 14 dígitos / CD_CVM
     ≤6 dígitos / busca textual) + word boundary + mapa de abreviações
     (BANCO↔BCO, COMPANHIA↔CIA, INDUSTRIA↔IND, PARTICIPACOES↔PART).
-    Prompt interativo planejado (`utils::menu()`); ainda só `interactive()`
-    pendente — hoje retorna todas as matches sem perguntar.
+    Prompt interativo via `utils::menu()` em `interactive()` e abort em
+    batch entregues como hotfix pós-Sessão 02 (vide Fase E).
   - [x] `source = c("mirror", "cvm")` com default `"mirror"`. Stub de
     `"mirror"` aborta com `cvmdata_error_input` apontando para `"cvm"`
     até a Fase F entregar o backend parquet.
@@ -136,9 +141,14 @@ progresso sessão a sessão.
     maior `versao`).
   - [x] `transform_cad()` removido; CAD usa o pipeline genérico com
     `transformations: []`.
-  - Pendências reabertas: prompt interativo de seleção de companhias
-    quando há múltiplas matches em `interactive()`. Pendências da Sessão
-    01 ainda válidas em
+  - Hotfixes pós-Sessão 02 entregues: (a) `filter_by_companies()`
+    usava `sprintf("%06s", ...)` que pad com espaços, não zeros — CD_CVM
+    sem zero-padding (`"1023"`) nunca casava `"001023"`; trocado por
+    `formatC(as.integer(.), width = 6, flag = "0", format = "d")`.
+    (b) Prompt interativo `utils::menu()` para múltiplas matches em
+    busca textual, abort em batch. (c) Fallback descendente quando
+    `years = NULL` + companhia ausente no max year. Pendências da
+    Sessão 01 ainda válidas em
     `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
 - [ ] **Sessão 03**: ITR + FRE ponta-a-ponta.
   - [ ] 11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern`
@@ -169,8 +179,9 @@ progresso sessão a sessão.
 - [ ] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
   `clear`).
 - [ ] `cvm_source_get()` / `cvm_source_set()`.
-- [ ] Prompt interativo de seleção de companhias com múltiplas matches
-  (`utils::menu()` em `interactive()`).
+- [x] Prompt interativo de seleção de companhias com múltiplas matches
+  (`utils::menu()` em `interactive()`); aborta com `cvmdata_error_input`
+  em batch listando as matches. CLAUDE.md §2.7.
 - [ ] `cnpj_format()` (operação inversa de `cnpj_clean()`).
 - [ ] Subir cobertura para ≥90% (gate do marco v0.1.0; áreas baixas
   hoje: `discovery.R` 60%, `source-cvm-http.R` 62%).
