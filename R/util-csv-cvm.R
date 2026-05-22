@@ -14,10 +14,11 @@
 .identifier_patterns <- c(
   "^cnpj($|_)",
   "^cd_cvm$",
+  "^codigo_cvm($|_)",
   "^cep$",
   "^tel($|_)",
   "^ddd($|_)",
-  "^cpf$",
+  "^cpf($|_)",
   "^id_doc$",
   "^id_documento$",
   "^versao$"
