@@ -200,9 +200,12 @@ progresso sessão a sessão.
   - [ ] Vignettes `itr-dfp.Rmd` e `fre.Rmd`.
 - [x] Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após
   queda para 72% no merge de DFP).
-- [ ] Substituir heurística de Date em `read_cvm_csv()` pela regra
+- [x] Substituir heurística de Date em `read_cvm_csv()` pela regra
   canônica baseada no snapshot de dicionário (`tipo_dados = "date"`).
-  Snapshot já disponível (Fase C); pendente desde Sessão 3.3.
+  `build_col_types()` consulta `cvm_dictionary()` via
+  `resolve_dict_columns()`; snapshot prevalece para colunas cobertas
+  e heurística `^(dt_|data_)` atua como fallback para
+  `meta_status: missing` e schemas sintéticos (Sessão 3.4).
 - [ ] Semântica diferenciada para `on_error = "warn"/"silent"`
   (atualmente aceitos por `arg_match0` mas só `"abort"` é exercitado).
 
