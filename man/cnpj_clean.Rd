@@ -29,4 +29,8 @@ later.
 cnpj_clean("12.345.678/0001-90")
 cnpj_clean(c("12.345.678/0001-90", NA, "99999999000191"))
 }
+\seealso{
+Other utilities: 
+\code{\link{cnpj_format}()}
+}
 \concept{utilities}
