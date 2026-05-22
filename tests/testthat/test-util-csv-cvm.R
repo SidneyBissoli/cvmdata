@@ -63,3 +63,108 @@ test_that("FRE/auditor fixture: cpf/codigo_cvm columns are character", {
   expect_type(df$codigo_cvm_auditor, "character")
   expect_type(df$cnpj_auditor, "character")
 })
+
+test_that("snapshot declares non-date `vencimento` => Date column", {
+  # Snapshot declares `vencimento` (no dt_/data_ prefix) as date. The
+  # canonical lookup must promote it over the name-based heuristic,
+  # which would otherwise leave it to col_guess.
+  fake_dict <- tibble::tibble(
+    column     = c("cnpj_cia", "vencimento", "outro"),
+    campo      = c("CNPJ_CIA", "Vencimento", "OUTRO"),
+    descricao  = NA_character_,
+    dominio    = NA_character_,
+    tipo_dados = c("varchar", "date", "varchar"),
+    tamanho    = NA_integer_,
+    precisao   = NA_integer_,
+    scale      = NA_integer_
+  )
+  local_mocked_bindings(
+    cvm_dictionary = function(dataset, table) fake_dict,
+    .package = "cvmdata"
+  )
+
+  csv <- paste(
+    "CNPJ_CIA;Vencimento;OUTRO",
+    "00.000.000/0001-91;2024-12-31;text",
+    sep = "\n"
+  )
+  path <- write_csv_iso(csv)
+  schema <- list(
+    dataset = "stub", table = "stub",
+    delimiter = ";", encoding = "ISO-8859-1",
+    expected_field_count = 3L, meta_status = "available"
+  )
+  df <- read_cvm_csv(path, schema, validate = "strict")
+  expect_s3_class(df$vencimento, "Date")
+})
+
+test_that("snapshot declares dt_/data_ as non-date => not parsed as Date", {
+  # Snapshot declares `dt_pseudo` as varchar despite the dt_ prefix.
+  # The legacy heuristic would force col_date and fail to parse the
+  # non-ISO content; the snapshot must take precedence and let col_guess
+  # decide. Values are deliberately non-ISO so the test does not depend
+  # on readr's guesser preferring character over Date.
+  fake_dict <- tibble::tibble(
+    column     = c("cnpj_cia", "dt_pseudo"),
+    campo      = c("CNPJ_CIA", "DT_PSEUDO"),
+    descricao  = NA_character_,
+    dominio    = NA_character_,
+    tipo_dados = c("varchar", "varchar"),
+    tamanho    = NA_integer_,
+    precisao   = NA_integer_,
+    scale      = NA_integer_
+  )
+  local_mocked_bindings(
+    cvm_dictionary = function(dataset, table) fake_dict,
+    .package = "cvmdata"
+  )
+
+  csv <- paste(
+    "CNPJ_CIA;DT_PSEUDO",
+    "00.000.000/0001-91;rotulo_nao_data",
+    "11.111.111/0001-11;outro_rotulo",
+    sep = "\n"
+  )
+  path <- write_csv_iso(csv)
+  schema <- list(
+    dataset = "stub", table = "stub",
+    delimiter = ";", encoding = "ISO-8859-1",
+    expected_field_count = 2L, meta_status = "available"
+  )
+  df <- read_cvm_csv(path, schema, validate = "strict")
+  expect_type(df$dt_pseudo, "character")
+  expect_identical(
+    df$dt_pseudo,
+    c("rotulo_nao_data", "outro_rotulo")
+  )
+})
+
+test_that("meta_status:missing falls back to dt_/data_ heuristic", {
+  csv <- paste(
+    "CNPJ_Companhia;Data_Inventada;OUTRO",
+    "00.000.000/0001-91;2024-01-15;text",
+    sep = "\n"
+  )
+  path <- write_csv_iso(csv)
+  schema <- list(
+    dataset = "fre", table = "stub_missing",
+    delimiter = ";", encoding = "ISO-8859-1",
+    expected_field_count = 3L, meta_status = "missing",
+    expected_field_names = c(
+      "CNPJ_Companhia", "Data_Inventada", "OUTRO"
+    )
+  )
+  df <- read_cvm_csv(path, schema, validate = "skip")
+  expect_s3_class(df$data_inventada, "Date")
+})
+
+test_that("synthetic schema without dataset/table uses heuristic", {
+  csv <- paste(
+    "CNPJ_CIA;dt_synthetic;OUTRO",
+    "00.000.000/0001-91;2024-01-15;text",
+    sep = "\n"
+  )
+  path <- write_csv_iso(csv)
+  df <- read_cvm_csv(path, minimal_schema(3L), validate = "skip")
+  expect_s3_class(df$dt_synthetic, "Date")
+})

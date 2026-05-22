@@ -3,11 +3,13 @@
 # character regardless of the META declaration (naming doc v03 §11.2),
 # and date columns auto-converted from AAAA-MM-DD.
 #
-# Pre-v0.1 caveat: the CVM dictionary snapshot is not built yet
-# (Phase B/C of ROADMAP). Until it exists, date columns are detected
-# heuristically by name (`DT_*` or `Data_*`) and ISO-8601 content.
-# This heuristic is replaced by the dictionary-driven rule once the
-# snapshot lands.
+# Date detection is driven canonically by the dictionary snapshot
+# (cvm_dictionary(dataset, table), tipo_dados = "date"): when the
+# snapshot covers a column, its declared type prevails over the
+# legacy name-based heuristic. Columns not covered by the snapshot
+# (meta_status: missing tables, synthetic schemas without a dataset,
+# or CSV headers added since the last snapshot build) fall back to
+# the heuristic `^dt_` / `^data_` match.
 
 # Names matching these patterns (case-insensitive) are forced to
 # character. Sourced from naming doc v03 §11.2.
@@ -24,10 +26,40 @@
   "^versao$"
 )
 
+# Resolve dictionary coverage for the schema's (dataset, table).
+# Returns NULL when no canonical info is available (schema lacks
+# dataset/table, meta_status is "missing", or the snapshot has no
+# entry for the pair). Otherwise returns a list with the columns
+# known to the snapshot (`known`) and the subset declared as
+# `tipo_dados = "date"` (`date`).
+resolve_dict_columns <- function(schema) {
+  if (is.null(schema) || is.null(schema$dataset) ||
+        is.null(schema$table)) {
+    return(NULL)
+  }
+  if (identical(schema$meta_status %||% "available", "missing")) {
+    return(NULL)
+  }
+  dict <- tryCatch(
+    cvm_dictionary(schema$dataset, schema$table),
+    cvmdata_error = function(e) NULL
+  )
+  if (is.null(dict) || !nrow(dict)) {
+    return(NULL)
+  }
+  list(
+    known = dict$column,
+    date = dict$column[
+      !is.na(dict$tipo_dados) & dict$tipo_dados == "date"
+    ]
+  )
+}
+
 # Build a `readr::cols()` specification: force identifiers to
-# character, parse `DT_*`/`Data_*` columns as Date, let readr guess
-# the rest.
-build_col_types <- function(csv_names) {
+# character, parse date columns per the dictionary snapshot (with a
+# heuristic fallback for columns the snapshot does not cover), let
+# readr guess the rest.
+build_col_types <- function(csv_names, schema = NULL) {
   csv_lower <- tolower(csv_names)
   is_identifier <- vapply(
     csv_lower,
@@ -40,7 +72,14 @@ build_col_types <- function(csv_names) {
     },
     logical(1L)
   )
-  is_date <- grepl("^(dt_|data_)", csv_lower) & !is_identifier
+
+  dict_info <- resolve_dict_columns(schema)
+  is_date <- vapply(
+    csv_lower,
+    function(nm) classify_date(nm, dict_info),
+    logical(1L)
+  )
+  is_date <- is_date & !is_identifier
 
   spec_list <- vector("list", length(csv_names))
   names(spec_list) <- csv_names
@@ -56,6 +95,16 @@ build_col_types <- function(csv_names) {
     readr::cols,
     c(spec_list, list(.default = readr::col_guess()))
   )
+}
+
+# Decide whether a lowered column name should be parsed as Date.
+# Snapshot coverage prevails over the name heuristic; the heuristic
+# only fires for columns the snapshot does not cover.
+classify_date <- function(nm, dict_info) {
+  if (!is.null(dict_info) && nm %in% dict_info$known) {
+    return(nm %in% dict_info$date)
+  }
+  grepl("^(dt_|data_)", nm)
 }
 
 # Read a CVM-published CSV honouring schema rules and validate
@@ -89,7 +138,7 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
     path,
     delim = delim,
     locale = readr::locale(encoding = encoding),
-    col_types = build_col_types(csv_names),
+    col_types = build_col_types(csv_names, schema),
     show_col_types = FALSE,
     progress = FALSE
   )
