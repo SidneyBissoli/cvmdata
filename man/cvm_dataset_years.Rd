@@ -32,6 +32,7 @@ cvm_dataset_years("dfp")
 }
 \seealso{
 Other discovery: 
+\code{\link{cvm_codelist}()},
 \code{\link{cvm_datasets}()},
 \code{\link{cvm_dictionary}()},
 \code{\link{cvm_tables}()}

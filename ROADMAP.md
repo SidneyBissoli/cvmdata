@@ -82,7 +82,11 @@ progresso sessão a sessão.
   `inst/extdata/` (865 linhas cobrindo 51 tabelas com META oficial +
   8 FRE-detail `meta_status: missing` com placeholders). Gerador
   reprodutível em `data-raw/build-dictionary-snapshot.R`.
-- [ ] Snapshot de codelists `cvm_codelists_snapshot.csv`.
+- [x] Snapshot de codelists `cvm_codelists_snapshot.csv` em
+  `inst/extdata/` (445 valores em 133 colunas codelist sobre 46
+  tabelas: 46 do dicionário S/N+PF/PJ + 87 promovidas por
+  cardinalidade observada ≤ 50 no último ano disponível). Gerador
+  reprodutível em `data-raw/build-codelists-snapshot.R`.
 
 ### Fase D — CAD + ITR ponta-a-ponta (20-28h)
 
@@ -215,6 +219,10 @@ progresso sessão a sessão.
   `meta_status: missing` cobertos na Sessão 03.2.
 - [x] `cvm_dictionary(dataset, table)` lendo do snapshot, com cache
   por sessão; atributo `meta_status = "missing"` quando aplicável.
+- [x] `cvm_codelist(dataset, table, column)` lendo do snapshot de
+  codelists embarcado, com cache por sessão. Erros distinguem
+  dataset/table/column desconhecidos vs. coluna conhecida mas não-
+  codelist (Sessão 3.4).
 - [ ] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
   `clear`).
 - [ ] `cvm_source_get()` / `cvm_source_set()`.
