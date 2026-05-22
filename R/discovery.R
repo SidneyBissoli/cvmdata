@@ -52,6 +52,133 @@ cvm_tables <- function(dataset) {
   sort(sub("\\.yaml$", "", files))
 }
 
+#' Look up the CVM-published dictionary for a table
+#'
+#' Returns the dictionary metadata (field names, descriptions, domain,
+#' data type, size/precision/scale) for a single `(dataset, table)`
+#' pair, sourced from the snapshot embedded under
+#' `inst/extdata/cvm_dictionary_snapshot.csv`. The snapshot is built
+#' offline from the CVM META resources by
+#' `data-raw/build-dictionary-snapshot.R`.
+#'
+#' Tables whose META is not published by CVM (`meta_status: missing` in
+#' the schema YAML) return rows with `NA` in every metadata column
+#' except `campo`/`column` (sourced from the YAML's
+#' `expected_field_names`). In that case the returned tibble carries an
+#' attribute `meta_status = "missing"`.
+#'
+#' @param dataset Short dataset id (e.g. `"dfp"`).
+#' @param table Table name within the dataset (e.g. `"bpa"`).
+#'
+#' @return A tibble with one row per column of the table, columns
+#'   `column`, `campo`, `descricao`, `dominio`, `tipo_dados`,
+#'   `tamanho`, `precisao`, `scale`.
+#'
+#' @examples
+#' cvm_dictionary("dfp", "bpa")
+#' cvm_dictionary("fre", "empregado_PCD")
+#' @family discovery
+#' @seealso [cvm_tables()]
+#' @export
+cvm_dictionary <- function(dataset, table) {
+  if (!is.character(dataset) || length(dataset) != 1L ||
+        !nzchar(dataset)) {
+    cvmdata_abort(
+      c("{.arg dataset} must be a single non-empty string."),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (!is.character(table) || length(table) != 1L || !nzchar(table)) {
+    cvmdata_abort(
+      c("{.arg table} must be a single non-empty string."),
+      class = "cvmdata_error_input"
+    )
+  }
+  snapshot_path <- system.file(
+    "extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"
+  )
+  if (!nzchar(snapshot_path)) {
+    cvmdata_abort(
+      c(
+        "Dictionary snapshot not found in {.pkg cvmdata}.",
+        "i" = paste(
+          "Expected {.path inst/extdata/cvm_dictionary_snapshot.csv};",
+          "regenerate via {.path data-raw/build-dictionary-snapshot.R}."
+        )
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
+  snapshot <- .read_dictionary_snapshot(snapshot_path)
+  hit <- snapshot[
+    snapshot$dataset == dataset & snapshot$table == table, ,
+    drop = FALSE
+  ]
+  if (!nrow(hit)) {
+    available_datasets <- cvm_datasets()
+    if (!dataset %in% available_datasets) {
+      cvmdata_abort(
+        c(
+          "Unknown dataset {.val {dataset}}.",
+          "i" = "Available: {.val {available_datasets}}."
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    available_tables <- cvm_tables(dataset)
+    cvmdata_abort(
+      c(
+        "No dictionary entries for {.val {dataset}}/{.val {table}}.",
+        "i" = "Tables in {.val {dataset}}: {.val {available_tables}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  out <- tibble::tibble(
+    column     = hit$column,
+    campo      = hit$campo,
+    descricao  = hit$descricao,
+    dominio    = hit$dominio,
+    tipo_dados = hit$tipo_dados,
+    tamanho    = hit$tamanho,
+    precisao   = hit$precisao,
+    scale      = hit$scale
+  )
+  if (any(hit$meta_status == "missing", na.rm = TRUE)) {
+    attr(out, "meta_status") <- "missing"
+  }
+  out
+}
+
+# Session-scoped cache for the parsed snapshot — read it once.
+.dictionary_snapshot_cache <- new.env(parent = emptyenv())
+
+.read_dictionary_snapshot <- function(path) {
+  cached <- .dictionary_snapshot_cache[[path]]
+  if (!is.null(cached)) {
+    return(cached)
+  }
+  df <- readr::read_csv(
+    path,
+    col_types = readr::cols(
+      dataset     = readr::col_character(),
+      table       = readr::col_character(),
+      column      = readr::col_character(),
+      campo       = readr::col_character(),
+      descricao   = readr::col_character(),
+      dominio     = readr::col_character(),
+      tipo_dados  = readr::col_character(),
+      tamanho     = readr::col_integer(),
+      precisao    = readr::col_integer(),
+      scale       = readr::col_integer(),
+      meta_status = readr::col_character()
+    ),
+    progress = FALSE
+  )
+  .dictionary_snapshot_cache[[path]] <- df
+  df
+}
+
 #' Range of years available for a yearly-partitioned dataset
 #'
 #' Discovers the years currently published for the dataset by reading
