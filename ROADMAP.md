@@ -78,9 +78,10 @@ progresso sessão a sessão.
   `meta_status: missing`) — Sessão 03.2.
 - [ ] Geração programática dos YAMLs restantes a partir do snapshot
   de dicionário.
-- [ ] Snapshot de dicionário `cvm_dictionary_snapshot.csv` em
-  `inst/extdata/` (substitui heurística de Date atual em
-  `read_cvm_csv()` pela regra canônica `tipo_dados = "date"`).
+- [x] Snapshot de dicionário `cvm_dictionary_snapshot.csv` em
+  `inst/extdata/` (865 linhas cobrindo 51 tabelas com META oficial +
+  8 FRE-detail `meta_status: missing` com placeholders). Gerador
+  reprodutível em `data-raw/build-dictionary-snapshot.R`.
 - [ ] Snapshot de codelists `cvm_codelists_snapshot.csv`.
 
 ### Fase D — CAD + ITR ponta-a-ponta (20-28h)
@@ -196,7 +197,8 @@ progresso sessão a sessão.
 - [x] Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após
   queda para 72% no merge de DFP).
 - [ ] Substituir heurística de Date em `read_cvm_csv()` pela regra
-  canônica baseada no snapshot de dicionário (depende de Fase C).
+  canônica baseada no snapshot de dicionário (`tipo_dados = "date"`).
+  Snapshot já disponível (Fase C); pendente desde Sessão 3.3.
 - [ ] Semântica diferenciada para `on_error = "warn"/"silent"`
   (atualmente aceitos por `arg_match0` mas só `"abort"` é exercitado).
 
@@ -211,7 +213,8 @@ progresso sessão a sessão.
 - [x] Exercitar branches `validate_field_names()` em `read_cvm_csv()`
   — modo `warn` coberto na Sessão 02; modos `strict` e `skip` em
   `meta_status: missing` cobertos na Sessão 03.2.
-- [ ] `cvm_dictionary()` lendo do snapshot.
+- [x] `cvm_dictionary(dataset, table)` lendo do snapshot, com cache
+  por sessão; atributo `meta_status = "missing"` quando aplicável.
 - [ ] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
   `clear`).
 - [ ] `cvm_source_get()` / `cvm_source_set()`.
