@@ -1,0 +1,446 @@
+dataset,table,column,value
+cad,companhias,categ_reg,Categoria A
+cad,companhias,categ_reg,Categoria B
+cad,companhias,controle_acionario,ESTATAL
+cad,companhias,controle_acionario,ESTATAL HOLDING
+cad,companhias,controle_acionario,ESTRANGEIRO
+cad,companhias,controle_acionario,ESTRANGEIRO HOLDING
+cad,companhias,controle_acionario,PRIVADO
+cad,companhias,controle_acionario,PRIVADO HOLDING
+cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 03/78
+cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 229/95
+cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTRUÇÃO CVM Nº 361/02
+cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO
+cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO (Cia Incentivada)
+cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO
+cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO C/BASE INSTR. CVM 287/98
+cad,companhias,motivo_cancel,CANCELAMENTO OFICIO COM BASE INSTR. CVM 29/84
+cad,companhias,motivo_cancel,CANCELAMENTO VOLUNTÁRIO
+cad,companhias,motivo_cancel,ELISÃO DEVIDO A CANCELAMENTO DO RPJ PELO BACEN
+cad,companhias,motivo_cancel,ELISÃO POR EXTINÇÃO DA CIA
+cad,companhias,motivo_cancel,ELISÃO POR INCORPORAÇÃO
+cad,companhias,motivo_cancel,ELISÃO POR LIQUIDAÇÃO
+cad,companhias,motivo_cancel,ELISÃO POR TRANSFORMAÇÃO
+cad,companhias,motivo_cancel,ENQUADRAMENTO EXCEÇÕES DA INSTR. CVM 03/78
+cad,companhias,motivo_cancel,ENQUADRAMENTO HIPÓTESE ESTAB P/ COML EM 29/10/79
+cad,companhias,motivo_cancel,INCORPORAÇÃO
+cad,companhias,motivo_cancel,LIQUIDAÇÃO EXTRAJUDICIAL
+cad,companhias,motivo_cancel,Migração de Registro (Resolução n° 60)
+cad,companhias,pais,BRASIL
+cad,companhias,pais,EGITO
+cad,companhias,pais_resp,BRASIL
+cad,companhias,sit,ATIVO
+cad,companhias,sit,CANCELADA
+cad,companhias,sit,SUSPENSO(A) - DECISÃO ADM
+cad,companhias,tp_merc,BALCÃO NÃO ORGANIZADO
+cad,companhias,tp_merc,BALCÃO ORGANIZADO
+cad,companhias,tp_merc,BOLSA
+cad,companhias,tp_resp,DIRETOR DE RELAÇÕES COM INVESTIDORES
+dfp,bpa,escala_moeda,MIL
+dfp,bpa,moeda,REAL
+dfp,bpa,ordem_exerc,PENÚLTIMO
+dfp,bpa,ordem_exerc,ÚLTIMO
+dfp,bpa,st_conta_fixa,N
+dfp,bpa,st_conta_fixa,S
+dfp,bpp,escala_moeda,MIL
+dfp,bpp,moeda,REAL
+dfp,bpp,ordem_exerc,PENÚLTIMO
+dfp,bpp,ordem_exerc,ÚLTIMO
+dfp,bpp,st_conta_fixa,N
+dfp,bpp,st_conta_fixa,S
+dfp,dfc_md,st_conta_fixa,N
+dfp,dfc_md,st_conta_fixa,S
+dfp,dfc_mi,escala_moeda,MIL
+dfp,dfc_mi,moeda,REAL
+dfp,dfc_mi,ordem_exerc,PENÚLTIMO
+dfp,dfc_mi,ordem_exerc,ÚLTIMO
+dfp,dfc_mi,st_conta_fixa,N
+dfp,dfc_mi,st_conta_fixa,S
+dfp,dmpl,coluna_df,Capital Social Integralizado
+dfp,dmpl,coluna_df,Lucros ou Prejuízos Acumulados
+dfp,dmpl,coluna_df,Outros Resultados Abrangentes
+dfp,dmpl,coluna_df,Patrimônio Líquido
+dfp,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria"
+dfp,dmpl,coluna_df,Reservas de Lucro
+dfp,dmpl,escala_moeda,MIL
+dfp,dmpl,moeda,REAL
+dfp,dmpl,ordem_exerc,PENÚLTIMO
+dfp,dmpl,ordem_exerc,ÚLTIMO
+dfp,dmpl,st_conta_fixa,N
+dfp,dmpl,st_conta_fixa,S
+dfp,dra,escala_moeda,MIL
+dfp,dra,moeda,REAL
+dfp,dra,ordem_exerc,PENÚLTIMO
+dfp,dra,ordem_exerc,ÚLTIMO
+dfp,dra,st_conta_fixa,N
+dfp,dra,st_conta_fixa,S
+dfp,dre,escala_moeda,MIL
+dfp,dre,moeda,REAL
+dfp,dre,ordem_exerc,PENÚLTIMO
+dfp,dre,ordem_exerc,ÚLTIMO
+dfp,dre,st_conta_fixa,N
+dfp,dre,st_conta_fixa,S
+dfp,dva,escala_moeda,MIL
+dfp,dva,moeda,REAL
+dfp,dva,ordem_exerc,PENÚLTIMO
+dfp,dva,ordem_exerc,ÚLTIMO
+dfp,dva,st_conta_fixa,N
+dfp,dva,st_conta_fixa,S
+dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras
+dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente
+dfp,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente
+dfp,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)"
+dfp,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)"
+dfp,parecer,tp_parecer_decl,Relatório do Auditor Independente
+dfp,parecer,tp_relat_aud,Sem Ressalva
+dfp,submissao,categ_doc,DFP
+dfp,submissao,link_doc,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=156875
+fre,acao_entregue,orgao_administracao,Conselho Fiscal
+fre,acao_entregue,orgao_administracao,Conselho de Administração
+fre,acao_entregue,orgao_administracao,Diretoria Estatutária
+fre,administrador_declaracao_genero,nao_aplicavel,N
+fre,administrador_declaracao_genero,nao_aplicavel,S
+fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Efetivos
+fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Suplentes
+fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Efetivos
+fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Suplentes
+fre,administrador_declaracao_genero,orgao_administracao,Diretoria
+fre,administrador_declaracao_raca,nao_aplicavel,N
+fre,administrador_declaracao_raca,nao_aplicavel,S
+fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Efetivos
+fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Suplentes
+fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Efetivos
+fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Suplentes
+fre,administrador_declaracao_raca,orgao_administracao,Diretoria
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,10 - Diretor Presidente / Superintendente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,11 - Diretor Vice Presidente/ Superintendente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,12 - Diretor de Relações com Investidores
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,13 - Diretor Presidente / Diretor de Relações com Investidores
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,14 - Diretor Financeiro
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,15 - Diretor Financeiro / Diretor de Relações com Investidores
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,19 - Outros Diretores
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,20 - Presidente do Conselho de Administração
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,21 - Vice Presidente Cons. de Administração
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,22 - Conselho de Administração (Efetivo)
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,23 - Conselho de Administração (Suplente)
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,24 - Presidente do Conselho de Administração Independente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,27 - Conselho de Adm. Independente (Efetivo)
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,28 - Conselho de Adm. Independente (Suplente)
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,29 - Outros Conselheiros
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,30 - Presidente do C.A. e Diretor Presidente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,31 - Vice Pres. C.A. e Diretor Presidente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,33 - Conselheiro(Efetivo) e Dir. Presidente
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,35 - Conselheiro(Efetivo) e Dir. Rel. Invest.
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,38 - Conselheiro(Suplente)/ Dir. Rel. Invest.
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,39 - Outros Conselheiros / Diretores
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,40 - Pres. C.F.Eleito p/Controlador
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,41 - Pres. C.F.Eleito p/Preferencialistas
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,42 - Pres. C.F.Eleito p/Minor.Ordinaristas
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,43 - C.F.(Efetivo)Eleito p/Controlador
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,44 - C.F.(Efetivo)Eleito p/preferencialistas
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,45 - C.F.(Efetivo)Eleito p/Minor.Ordinaristas
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,46 - C.F.(Suplent)Eleito p/Controlador
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,47 - C.F.(Suplent)Eleito p/preferencialistas
+fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,48 - C.F.(Suplent)Eleito p/Minor.Ordinaristas
+fre,administrador_membro_conselho_fiscal,eleito_controlador,N
+fre,administrador_membro_conselho_fiscal,eleito_controlador,S
+fre,administrador_membro_conselho_fiscal,orgao_administracao,Conselho Fiscal
+fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas ao Conselho de Administração
+fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas à Diretoria
+fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence à Diretoria e ao Conselho de Administração
+fre,auditor,auditor,AUDITÓR - AUDITORES INDEPENDENTES LTDA
+fre,auditor,auditor,BAKER TILLY BRASIL RJ AUDITORES INDEPENDENTES LTDA
+fre,auditor,auditor,BDO RCS Auditores Independentes - Sociedade Simples Limitada
+fre,auditor,auditor,CLA CLIFTON LARSON ALLEN BRASIL AUDITORES INDEPENDENTE S/S
+fre,auditor,auditor,DELOITTE TOUCHE TOHMATSU AUDITORES INDEPENDENTES LTDA
+fre,auditor,auditor,ERNST & YOUNG AUDITORES INDEPENDENTES S/S Ltda
+fre,auditor,auditor,Grant Thornton Auditores Independentes Ltda
+fre,auditor,auditor,KPMG AUDITORES INDEPENDENTES LTDA
+fre,auditor,auditor,MCS MARKUP AUDITORES INDEPENDENTES S/S
+fre,auditor,auditor,MOREIRA ASSOCIADOS AUDITORES INDEPENDENTES S/S
+fre,auditor,auditor,MÜLLER & PREI AUDITORES INDEPENDENTES S/S - BLUMENAU
+fre,auditor,auditor,P & L AUDITORES INDEPENDENTES S/S
+fre,auditor,auditor,PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA
+fre,auditor,auditor,PSW Brasil Auditores Independentes
+fre,auditor,auditor,RUSSELL BEDFORD GM AUDITORES INDEPENDENTES S/S
+fre,auditor,auditor,STEINBACH & AUDITORES ASSOCIADOS
+fre,auditor,auditor,TATICCA AUDITORES INDEPENDENTES S.S. - EPP
+fre,auditor,auditor,UHY BENDORAYTES & CIA AUDITORES INDEPENDENTES
+fre,auditor,auditor,VILLELA E ASSOCIADOS AUDITORIA E CONSULTORIA S/S
+fre,auditor,tipo_origem_auditor,Nacional
+fre,capital_social,prazo_integralizacao,-
+fre,capital_social,prazo_integralizacao,07/10/2019
+fre,capital_social,prazo_integralizacao,10/09/1997
+fre,capital_social,prazo_integralizacao,30/04/2026
+fre,capital_social,prazo_integralizacao,360 dias
+fre,capital_social,prazo_integralizacao,"704.798.668,00"
+fre,capital_social,prazo_integralizacao,A ser fixado pelo Cons de Adm
+fre,capital_social,prazo_integralizacao,Imediato
+fre,capital_social,prazo_integralizacao,N/A
+fre,capital_social,prazo_integralizacao,Não aplicável
+fre,capital_social,prazo_integralizacao,Não aplicável.
+fre,capital_social,prazo_integralizacao,Totalmente integralizado
+fre,capital_social,tipo_capital,Capital Autorizado
+fre,capital_social,tipo_capital,Capital Emitido
+fre,capital_social,tipo_capital,Capital Integralizado
+fre,capital_social,tipo_capital,Capital Subscrito
+fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A
+fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
+fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
+fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
+fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe A
+fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe A
+fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe B
+fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe C
+fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,ONA
+fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNA
+fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNB
+fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNC
+fre,empregado_local_faixa_etaria,local,Centro-Oeste
+fre,empregado_local_faixa_etaria,local,Exterior
+fre,empregado_local_faixa_etaria,local,Nordeste
+fre,empregado_local_faixa_etaria,local,Norte
+fre,empregado_local_faixa_etaria,local,Sudeste
+fre,empregado_local_faixa_etaria,local,Sul
+fre,membro_comite,cargo_ocupado,Membro do Comitê (Coordenador)
+fre,membro_comite,cargo_ocupado,Membro do Comitê (Efetivo)
+fre,membro_comite,cargo_ocupado,Outros
+fre,membro_comite,cargo_ocupado,Presidente do Comitê
+fre,membro_comite,descricao_outro_cargo_ocupado,Membro do Comitê (Coordenador)
+fre,membro_comite,descricao_outro_cargo_ocupado,Membro do Comitê (Efetivo)
+fre,membro_comite,descricao_outro_cargo_ocupado,Outros
+fre,membro_comite,descricao_outro_cargo_ocupado,Presidente do Comitê
+fre,membro_comite,prazo_mandato,01/02/2027
+fre,membro_comite,prazo_mandato,02 anos
+fre,membro_comite,prazo_mandato,05 anos
+fre,membro_comite,prazo_mandato,09/12/2026
+fre,membro_comite,prazo_mandato,1 ano 4 meses 3 dias
+fre,membro_comite,prazo_mandato,10 meses
+fre,membro_comite,prazo_mandato,16/08/2027
+fre,membro_comite,prazo_mandato,2 Anos
+fre,membro_comite,prazo_mandato,2 anos
+fre,membro_comite,prazo_mandato,2 anos até AGO de 2027
+fre,membro_comite,prazo_mandato,22/10/2027
+fre,membro_comite,prazo_mandato,23/07/2026
+fre,membro_comite,prazo_mandato,23/08/2026
+fre,membro_comite,prazo_mandato,23082026
+fre,membro_comite,prazo_mandato,25/07/2026
+fre,membro_comite,prazo_mandato,26/02/2028
+fre,membro_comite,prazo_mandato,26/05/2027
+fre,membro_comite,prazo_mandato,26/09/2024    26/09/2026
+fre,membro_comite,prazo_mandato,26/09/2024   26/09/2026
+fre,membro_comite,prazo_mandato,28/04/2025   28/04/2027
+fre,membro_comite,prazo_mandato,28/04/2025  28/04/2027
+fre,membro_comite,prazo_mandato,3 ANOS
+fre,membro_comite,prazo_mandato,30/04/2028
+fre,membro_comite,prazo_mandato,31/05/2026
+fre,membro_comite,prazo_mandato,31/06/2026
+fre,membro_comite,prazo_mandato,31/07/2027
+fre,membro_comite,prazo_mandato,5 anos
+fre,membro_comite,prazo_mandato,AGO 2027
+fre,membro_comite,prazo_mandato,Até AGO de 2027
+fre,membro_comite,prazo_mandato,Até RCA que  eleger o Comitê  para mandato  2027-2029
+fre,membro_comite,prazo_mandato,Até RCA que eleger o Comitê para mandato 2027-2029
+fre,membro_comite,prazo_mandato,Até a AGO de 2029
+fre,membro_comite,prazo_mandato,Até a AGO de 2030
+fre,membro_comite,prazo_mandato,Até a AGOE de 2026
+fre,membro_comite,prazo_mandato,Até a AGOE de 2027
+fre,membro_comite,prazo_mandato,Até a RCA após a AGO de 2027
+fre,membro_comite,prazo_mandato,Até a reunião do  CA que eleger o  Comitê para  mandato 2027- 2029
+fre,membro_comite,prazo_mandato,Até a reunião do CA que eleger o Comitê para mandato 2025-2027
+fre,membro_comite,prazo_mandato,Até a reunião do CA que eleger o Comitê para mandato 2027 - 2029
+fre,membro_comite,prazo_mandato,Até a reunião do CA que eleger o Comitê para mandato 2027- 2029
+fre,membro_comite,prazo_mandato,Até a reunião do CA que eleger o Comitê para mandato 2027-2029
+fre,membro_comite,prazo_mandato,Dois anos
+fre,membro_comite,prazo_mandato,INDETERMINADO
+fre,membro_comite,prazo_mandato,Indeterminado
+fre,membro_comite,prazo_mandato,Prazo indeterminado
+fre,membro_comite,prazo_mandato,Primeira RCA após AGO 2027
+fre,membro_comite,prazo_mandato,RCA a ser realizada até 01/08/2027
+fre,membro_comite,prazo_mandato,RCA após AGO 2027
+fre,membro_comite,prazo_mandato,indeterminado
+fre,membro_comite,tipo_comite,Comitê Financeiro
+fre,membro_comite,tipo_comite,Comitê de Auditoria
+fre,membro_comite,tipo_comite,Comitê de Remuneração
+fre,membro_comite,tipo_comite,Comitê de Risco
+fre,membro_comite,tipo_comite,Outros Comitês
+fre,mercado_estrangeiro,administradora,Nasdaq Stock Market
+fre,mercado_estrangeiro,identificacao_valor_mobiliario,INTR
+fre,mercado_estrangeiro,mercado,Nasdaq Stock Market
+fre,mercado_estrangeiro,pais_negociacao,Estados Unidos
+fre,mercado_estrangeiro,valor_mobiliario,Ações Ordinárias Classe A
+fre,outro_valor_mobiliario,conversibilidade,Sim
+fre,outro_valor_mobiliario,resgatavel,Sim
+fre,outro_valor_mobiliario,restricao_circulacao,Sim
+fre,outro_valor_mobiliario,valor_mobiliario,Bônus de Subscrição
+fre,outro_valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio
+fre,outro_valor_mobiliario,valor_mobiliario,Debêntures
+fre,outro_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis
+fre,outro_valor_mobiliario,valor_mobiliario,Letras Financeiras
+fre,outro_valor_mobiliario,valor_mobiliario,Nota Comercial
+fre,posicao_acionaria,acionista_controlador,N
+fre,posicao_acionaria,acionista_controlador,S
+fre,posicao_acionaria,nacionalidade,Argentina
+fre,posicao_acionaria,nacionalidade,Bermudas
+fre,posicao_acionaria,nacionalidade,Brasil
+fre,posicao_acionaria,nacionalidade,Bélgica
+fre,posicao_acionaria,nacionalidade,Cingapura
+fre,posicao_acionaria,nacionalidade,Colômbia
+fre,posicao_acionaria,nacionalidade,Escócia
+fre,posicao_acionaria,nacionalidade,Estados Unidos
+fre,posicao_acionaria,nacionalidade,França
+fre,posicao_acionaria,nacionalidade,"Gr?-Bretanha (Reino Unido, UK)"
+fre,posicao_acionaria,nacionalidade,"Grã-Bretanha (Reino Unido, UK)"
+fre,posicao_acionaria,nacionalidade,Holanda
+fre,posicao_acionaria,nacionalidade,Ilhas Cayman
+fre,posicao_acionaria,nacionalidade,Ilhas Virgens (Britânicas)
+fre,posicao_acionaria,nacionalidade,Inglesa
+fre,posicao_acionaria,nacionalidade,Luxemburgo
+fre,posicao_acionaria,nacionalidade,Noruega
+fre,posicao_acionaria,participante_acordo_acionistas,N
+fre,posicao_acionaria,participante_acordo_acionistas,S
+fre,posicao_acionaria,residente_exterior,N
+fre,posicao_acionaria,residente_exterior,S
+fre,posicao_acionaria,tipo_pessoa_acionista,PF
+fre,posicao_acionaria,tipo_pessoa_acionista,PJ
+fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PF
+fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PJ
+fre,posicao_acionaria,tipo_pessoa_representante_legal,PF
+fre,posicao_acionaria,tipo_pessoa_representante_legal,PJ
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe B
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe F
+fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe S
+fre,relacao_familiar,tipo_parentesco,Avô ou Avó (2º grau por consangüinidade)
+fre,relacao_familiar,tipo_parentesco,Genro ou Nora (2º grau por afinidade)
+fre,relacao_familiar,tipo_parentesco,Irmão ou Irmã (1º grau por consangüinidade)
+fre,relacao_familiar,tipo_parentesco,Marido ou Esposa (1º grau por afinidade)
+fre,relacao_familiar,tipo_parentesco,Padrasto e Madrasta (2º grau por afinidade)
+fre,relacao_familiar,tipo_parentesco,Pai ou Mãe (1º grau por consangüinidade)
+fre,relacao_familiar,tipo_parentesco,Sogra ou Sogro (2º grau por afinidade)
+fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Direta
+fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Indireta
+fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Direto
+fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Indireto
+fre,relacao_subordinacao,tipo_pessoa_relacionada,PF
+fre,relacao_subordinacao,tipo_pessoa_relacionada,PJ
+fre,relacao_subordinacao,tipo_relacao,Controle
+fre,relacao_subordinacao,tipo_relacao,Prestação de serviço
+fre,relacao_subordinacao,tipo_relacao,Subordinação
+fre,remuneracao_acao,orgao_administracao,Conselho Fiscal
+fre,remuneracao_acao,orgao_administracao,Conselho de Administração
+fre,remuneracao_acao,orgao_administracao,Diretoria Estatutária
+fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho Fiscal
+fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho de Administração
+fre,remuneracao_maxima_minima_media,orgao_administracao,Diretoria Estatutária
+fre,remuneracao_total_orgao,orgao_administracao,Conselho Fiscal
+fre,remuneracao_total_orgao,orgao_administracao,Conselho de Administração
+fre,remuneracao_total_orgao,orgao_administracao,Diretoria Estatutária
+fre,remuneracao_variavel,orgao_administracao,Conselho Fiscal
+fre,remuneracao_variavel,orgao_administracao,Conselho de Administração
+fre,remuneracao_variavel,orgao_administracao,Diretoria Estatutária
+fre,responsavel,cargo_responsavel,Diretor Presidente
+fre,responsavel,cargo_responsavel,Diretor Presidente/Relações com Investidores
+fre,responsavel,cargo_responsavel,Diretor de Relações com Investidores
+fre,submissao,categ_doc,FRE WEB
+fre,titular_valor_mobiliario,valor_mobiliario,Debêntures
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2027 (ISIN USL7909CAA55)
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2032 (ISIN USL7909CAJ64)
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2034 (ISIN USL7909CAC12)
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2035 (ISIN USL7909CAE77)
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2037 (ISIN USL7909CAG26)
+fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2054 (ISIN USL7909CAD94)
+fre,titulo_exterior,identificacao_valor_mobiliario,"CUSIP - A35155 AA7 (""Notas 10 Anos"")"
+fre,titulo_exterior,identificacao_valor_mobiliario,"CUSIP - A35155 AB5 (""Notas 30 Anos"")"
+fre,titulo_exterior,identificacao_valor_mobiliario,CUSIP - A35155 AE9
+fre,titulo_exterior,identificacao_valor_mobiliario,N/A
+fre,titulo_exterior,identificacao_valor_mobiliario,Unsecured Senior Notes
+fre,titulo_exterior,possibilidade_resgate,S
+fre,titulo_exterior,restricao_circulacao,S
+fre,titulo_exterior,valor_mobiliario,Debêntures
+fre,titulo_exterior,valor_mobiliario,Outros
+fre,transacao_parte_relacionada,emprestimo_divida,N
+fre,transacao_parte_relacionada,emprestimo_divida,S
+fre,transacao_parte_relacionada,posicao_contratual_emissor," 5,13% a.a."
+fre,transacao_parte_relacionada,posicao_contratual_emissor,Credor
+fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor
+fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra
+fre,transacao_parte_relacionada,tipo_pessoa,PF
+fre,transacao_parte_relacionada,tipo_pessoa,PJ
+itr,bpa,escala_moeda,MIL
+itr,bpa,escala_moeda,UNIDADE
+itr,bpa,moeda,REAL
+itr,bpa,ordem_exerc,PENÚLTIMO
+itr,bpa,ordem_exerc,ÚLTIMO
+itr,bpa,st_conta_fixa,N
+itr,bpa,st_conta_fixa,S
+itr,bpp,escala_moeda,MIL
+itr,bpp,escala_moeda,UNIDADE
+itr,bpp,moeda,REAL
+itr,bpp,ordem_exerc,PENÚLTIMO
+itr,bpp,ordem_exerc,ÚLTIMO
+itr,bpp,st_conta_fixa,N
+itr,bpp,st_conta_fixa,S
+itr,dfc_md,escala_moeda,MIL
+itr,dfc_md,escala_moeda,UNIDADE
+itr,dfc_md,moeda,REAL
+itr,dfc_md,ordem_exerc,PENÚLTIMO
+itr,dfc_md,ordem_exerc,ÚLTIMO
+itr,dfc_md,st_conta_fixa,N
+itr,dfc_md,st_conta_fixa,S
+itr,dfc_mi,escala_moeda,MIL
+itr,dfc_mi,escala_moeda,UNIDADE
+itr,dfc_mi,moeda,REAL
+itr,dfc_mi,ordem_exerc,PENÚLTIMO
+itr,dfc_mi,ordem_exerc,ÚLTIMO
+itr,dfc_mi,st_conta_fixa,N
+itr,dfc_mi,st_conta_fixa,S
+itr,dmpl,coluna_df,Capital Social Integralizado
+itr,dmpl,coluna_df,Lucros ou Prejuízos Acumulados
+itr,dmpl,coluna_df,Outros Resultados Abrangentes
+itr,dmpl,coluna_df,Participação dos Não Controladores
+itr,dmpl,coluna_df,Patrimônio Líquido
+itr,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria"
+itr,dmpl,coluna_df,Reservas de Lucro
+itr,dmpl,escala_moeda,MIL
+itr,dmpl,escala_moeda,UNIDADE
+itr,dmpl,moeda,REAL
+itr,dmpl,ordem_exerc,PENÚLTIMO
+itr,dmpl,ordem_exerc,ÚLTIMO
+itr,dmpl,st_conta_fixa,N
+itr,dmpl,st_conta_fixa,S
+itr,dra,escala_moeda,MIL
+itr,dra,escala_moeda,UNIDADE
+itr,dra,moeda,REAL
+itr,dra,ordem_exerc,PENÚLTIMO
+itr,dra,ordem_exerc,ÚLTIMO
+itr,dra,st_conta_fixa,N
+itr,dra,st_conta_fixa,S
+itr,dre,escala_moeda,MIL
+itr,dre,escala_moeda,UNIDADE
+itr,dre,moeda,REAL
+itr,dre,ordem_exerc,PENÚLTIMO
+itr,dre,ordem_exerc,ÚLTIMO
+itr,dre,st_conta_fixa,N
+itr,dre,st_conta_fixa,S
+itr,dva,escala_moeda,MIL
+itr,dva,escala_moeda,UNIDADE
+itr,dva,moeda,REAL
+itr,dva,ordem_exerc,PENÚLTIMO
+itr,dva,ordem_exerc,ÚLTIMO
+itr,dva,st_conta_fixa,N
+itr,dva,st_conta_fixa,S
+itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras
+itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente
+itr,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente
+itr,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)"
+itr,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)"
+itr,parecer,tp_parecer_decl,Relatório da Revisão Especial
+itr,parecer,tp_relat_esp,Com Ressalva
+itr,parecer,tp_relat_esp,Negativa de Opinião
+itr,parecer,tp_relat_esp,Sem Ressalva
+itr,submissao,categ_doc,ITR

@@ -150,6 +150,142 @@ cvm_dictionary <- function(dataset, table) {
   out
 }
 
+#' Look up the codelist for a categorical column
+#'
+#' Returns the set of categorical values observed for a single
+#' `(dataset, table, column)` triple, sourced from the snapshot
+#' embedded under `inst/extdata/cvm_codelists_snapshot.csv`. The
+#' snapshot is built offline by `data-raw/build-codelists-snapshot.R`
+#' from the CVM open-data CSVs.
+#'
+#' Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
+#' columns whose dictionary `dominio` enumerates values (e.g. `S/N`,
+#' `PF/PJ`), and `varchar` columns with `tamanho < 200` and ≤ 50
+#' distinct values observed in the latest available year.
+#'
+#' @param dataset Short dataset id (e.g. `"cad"`).
+#' @param table Table name within the dataset (e.g. `"companhias"`).
+#' @param column Snake-case column name (e.g. `"sit"`).
+#'
+#' @return A tibble with one row per categorical value, sorted
+#'   alphabetically. Column: `value` (character).
+#'
+#' @examples
+#' cvm_codelist("cad", "companhias", "sit")
+#' @family discovery
+#' @seealso [cvm_dictionary()]
+#' @export
+cvm_codelist <- function(dataset, table, column) {
+  for (arg_name in c("dataset", "table", "column")) {
+    val <- get(arg_name)
+    if (!is.character(val) || length(val) != 1L || !nzchar(val)) {
+      cvmdata_abort(
+        c("{.arg {arg_name}} must be a single non-empty string."),
+        class = "cvmdata_error_input"
+      )
+    }
+  }
+  snapshot_path <- system.file(
+    "extdata", "cvm_codelists_snapshot.csv", package = "cvmdata"
+  )
+  if (!nzchar(snapshot_path)) {
+    cvmdata_abort(
+      c(
+        "Codelists snapshot not found in {.pkg cvmdata}.",
+        "i" = paste(
+          "Expected {.path inst/extdata/cvm_codelists_snapshot.csv};",
+          "regenerate via {.path data-raw/build-codelists-snapshot.R}."
+        )
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
+  snapshot <- .read_codelists_snapshot(snapshot_path)
+  hit <- snapshot[
+    snapshot$dataset == dataset &
+      snapshot$table == table &
+      snapshot$column == column, ,
+    drop = FALSE
+  ]
+  if (nrow(hit)) {
+    return(tibble::tibble(value = hit$value))
+  }
+  if (!dataset %in% cvm_datasets()) {
+    cvmdata_abort(
+      c(
+        "Unknown dataset {.val {dataset}}.",
+        "i" = "Available: {.val {cvm_datasets()}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (!table %in% cvm_tables(dataset)) {
+    cvmdata_abort(
+      c(
+        "Unknown table {.val {table}} in {.val {dataset}}.",
+        "i" = "Tables: {.val {cvm_tables(dataset)}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  dict <- cvm_dictionary(dataset, table)
+  available_codes <- sort(unique(snapshot$column[
+    snapshot$dataset == dataset & snapshot$table == table
+  ]))
+  if (column %in% dict$column) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Column {.val {column}} in {.val {dataset}}/{.val {table}}",
+          "is not a codelist."
+        ),
+        "i" = if (length(available_codes)) {
+          "Codelist columns: {.val {available_codes}}."
+        } else {
+          "No codelist columns in this table."
+        }
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  cvmdata_abort(
+    c(
+      paste(
+        "Unknown column {.val {column}} in",
+        "{.val {dataset}}/{.val {table}}."
+      ),
+      "i" = if (length(available_codes)) {
+        "Codelist columns: {.val {available_codes}}."
+      } else {
+        "No codelist columns in this table."
+      }
+    ),
+    class = "cvmdata_error_input"
+  )
+}
+
+# Session-scoped cache for the parsed codelists snapshot.
+.codelists_snapshot_cache <- new.env(parent = emptyenv())
+
+.read_codelists_snapshot <- function(path) {
+  cached <- .codelists_snapshot_cache[[path]]
+  if (!is.null(cached)) {
+    return(cached)
+  }
+  df <- readr::read_csv(
+    path,
+    col_types = readr::cols(
+      dataset = readr::col_character(),
+      table   = readr::col_character(),
+      column  = readr::col_character(),
+      value   = readr::col_character()
+    ),
+    progress = FALSE
+  )
+  .codelists_snapshot_cache[[path]] <- df
+  df
+}
+
 # Session-scoped cache for the parsed snapshot — read it once.
 .dictionary_snapshot_cache <- new.env(parent = emptyenv())
 

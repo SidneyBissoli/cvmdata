@@ -59,3 +59,60 @@ test_that("cvm_dictionary errors on non-string arguments", {
   expect_error(cvm_dictionary("", "bpa"), class = "cvmdata_error_input")
   expect_error(cvm_dictionary(c("a", "b"), "c"), class = "cvmdata_error_input")
 })
+
+test_that("cvm_codelist returns categorical values for cad/companhias/sit", {
+  cl <- cvm_codelist("cad", "companhias", "sit")
+  expect_s3_class(cl, "tbl_df")
+  expect_named(cl, "value")
+  expect_gte(nrow(cl), 2L)
+  expect_true("ATIVO" %in% cl$value)
+  expect_true("CANCELADA" %in% cl$value)
+})
+
+test_that("cvm_codelist returns S/N for dfp/bpa/st_conta_fixa", {
+  cl <- cvm_codelist("dfp", "bpa", "st_conta_fixa")
+  expect_setequal(cl$value, c("S", "N"))
+})
+
+test_that("cvm_codelist errors on identifier columns (not a codelist)", {
+  # cnpj_cia exists in cad/companhias dictionary but is an identifier,
+  # so it must not be in the codelists snapshot.
+  expect_error(
+    cvm_codelist("cad", "companhias", "cnpj_cia"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_codelist errors on unknown dataset / table / column", {
+  expect_error(
+    cvm_codelist("nope", "companhias", "sit"),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist("cad", "no_such_table", "sit"),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist("cad", "companhias", "no_such_column_xyz"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_codelist errors on non-string arguments", {
+  expect_error(
+    cvm_codelist(NULL, "companhias", "sit"),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist("cad", NULL, "sit"),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist("cad", "companhias", NULL),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist(c("a", "b"), "x", "y"),
+    class = "cvmdata_error_input"
+  )
+})

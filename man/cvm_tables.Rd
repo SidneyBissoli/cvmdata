@@ -20,6 +20,7 @@ cvm_tables("dfp")
 }
 \seealso{
 Other discovery: 
+\code{\link{cvm_codelist}()},
 \code{\link{cvm_dataset_years}()},
 \code{\link{cvm_datasets}()},
 \code{\link{cvm_dictionary}()}

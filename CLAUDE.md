@@ -462,7 +462,7 @@ ausentes.
 
 ### `cvm_codelists_snapshot.csv`
 
-CSV UTF-8, delimitador `,`. 4 colunas obrigatórias + 1 opcional:
+CSV UTF-8, delimitador `,`. 4 colunas (v0.1):
 
 | Coluna | Tipo | Conteúdo |
 |---|---|---|
@@ -470,10 +470,37 @@ CSV UTF-8, delimitador `,`. 4 colunas obrigatórias + 1 opcional:
 | `table` | character | chave |
 | `column` | character | chave |
 | `value` | character | valor categórico em PT como vem da CVM |
-| `first_seen_year` | integer (opcional, incluído v0.1) | primeiro ano observado |
 
-Chave composta `(dataset, table, column)`. `frequency` e
-`last_seen_year` deferidos para v0.2+ (ruído de diff Git).
+Chave composta `(dataset, table, column, value)`. `first_seen_year`,
+`last_seen_year` e `frequency` deferidos para v0.2+ (decisão Sessão
+3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset
+(~30 s de geração); marcar `first_seen_year` com o único ano amostrado
+entrega informação enganosa (parece "categoria nova" quando é só "ano
+único na amostra") e, quando v0.2 trouxer cobertura histórica, todos
+os valores cairão para 2010-2015 — exatamente o "ruído de diff Git"
+que motivou deferir as outras duas. Schema do CSV embarcado é estável
+dentro da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor
+interno.
+
+Critério de inclusão (Sessão 3.4):
+
+- **Pelo dicionário**: colunas onde `dominio` enumera valores com
+  separador `/` ou `|` (capta `S/N`, `PF/PJ`).
+- **Por cardinalidade observada**: colunas `tipo_dados = "varchar"`
+  com `tamanho < 200` e ≤ 50 valores distintos no último ano
+  disponível, EXCLUINDO pelos seguintes prefixos (texto livre,
+  identificadores e PII corporativa/pessoal):
+  - identificadores `.identifier_patterns` do reader (`cnpj`,
+    `cd_cvm`, `codigo_cvm`, `cep`, `tel`, `ddd`, `cpf`, `id_doc`,
+    `id_documento`, `versao`);
+  - `^cd_` (códigos contábeis como `cd_conta`);
+  - `^nome_`, `^denom_` (nomes próprios e razões sociais);
+  - `^ds_` (descrições de conta, texto livre);
+  - `^email`, `^logradouro`, `^compl`, `^bairro`, `^mun($|_)`,
+    `^municipio_` (componentes de endereço com universo grande).
+- **Tabelas `meta_status: missing`**: excluídas (sem META oficial,
+  declarar codelist é decisão do pacote sem ancoragem CVM — viola a
+  régua "se vem da CVM, fica como na CVM").
 
 ---
 
