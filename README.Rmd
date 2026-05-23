@@ -48,24 +48,31 @@ CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
 official dictionary as an embedded snapshot, so column types are picked
 up automatically.
 
-Two existing R packages by Marcelo Perlin address adjacent slices of
-this problem:
+Existing R packages cover adjacent slices of the Brazilian
+open-financial-data space:
 
-- [`GetITRData`](https://github.com/msperlin/GetITRData) covered the
-  quarterly statements (ITR), but was archived by its author in
-  March 2020 and is no longer maintained.
-- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2) is actively
-  maintained and is the right choice if you need DFP only. Its
-  exported API (`get_dfp_data()`) covers the *annual* statements;
-  ITR, FRE and the company registry (CAD) are out of scope.
+- [`GetITRData`](https://github.com/msperlin/GetITRData) by Marcelo
+  Perlin covered the quarterly statements (ITR), but was archived by
+  its author in March 2020 and is no longer maintained.
+- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2), also by
+  Marcelo Perlin, is actively maintained and is the right choice if
+  you need DFP only. Its exported API (`get_dfp_data()`) covers the
+  *annual* statements; ITR, FRE and the company registry (CAD) are
+  out of scope.
+- [`rb3`](https://github.com/wilsonfreitas/rb3) by Wilson Freitas
+  (with Marcelo Perlin as co-author) is a **complement**, not an
+  alternative: it covers exchange-side data released by B3 (prices,
+  volumes, tickers, indices, calendars), whereas `cvmdata` covers
+  issuer-side filings released by CVM. Analyses that join market
+  microstructure with financial statements use the two side by side.
 
-`cvmdata` unifies CAD, ITR, DFP and FRE behind a single
-`cvm_fetch()` entry point, with consistent filtering semantics for
-companies (CNPJ / CD_CVM / free text with abbreviation expansion),
-ETag/Last-Modified-aware HTTP caching with a configurable TTL window,
-and the CVM dictionary and code lists shipped as embedded snapshots
-(so column types and categorical values are canonical without a
-runtime fetch).
+Against the issuer-side packages, `cvmdata` unifies CAD, ITR, DFP and
+FRE behind a single `cvm_fetch()` entry point, with consistent
+filtering semantics for companies (CNPJ / CD_CVM / free text with
+abbreviation expansion), ETag/Last-Modified-aware HTTP caching with a
+configurable TTL window, and the CVM dictionary and code lists shipped
+as embedded snapshots (so column types and categorical values are
+canonical without a runtime fetch).
 
 ## Installation
 
