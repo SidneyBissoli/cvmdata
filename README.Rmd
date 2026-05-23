@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+**English** | [Português](README.pt-BR.md)
+
 # cvmdata
 
 <!-- badges: start -->
