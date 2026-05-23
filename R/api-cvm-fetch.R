@@ -25,9 +25,11 @@
 #' @param years Integer vector of years to fetch. `NULL` (default)
 #'   fetches the latest available year. Ignored for datasets with
 #'   `temporal_partitioning: none` (e.g. CAD).
-#' @param source One of `"mirror"` (default, parquet via DuckDB) or
-#'   `"cvm"` (CVM open-data portal). The mirror is refreshed weekly
-#'   against the CVM portal.
+#' @param source One of `"cvm"` (CVM Open Data Portal) or `"mirror"`
+#'   (parquet via DuckDB; available from Phase F of the roadmap).
+#'   `NULL` (default) resolves to the active backend via
+#'   [cvm_source_get()] — `"cvm"` in the v0.1 series unless the user
+#'   has flipped it with [cvm_source_set()].
 #' @param report_type One of `"ind"`, `"con"`, or `NULL`. Required for
 #'   tables that publish individual and consolidated variants
 #'   (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`).
@@ -58,11 +60,14 @@
 cvm_fetch <- function(dataset, table,
                       companies   = NULL,
                       years       = NULL,
-                      source      = "mirror",
+                      source      = NULL,
                       report_type = NULL,
                       on_error    = "abort",
                       validate    = "strict",
                       ...) {
+  if (is.null(source)) {
+    source <- cvm_source_get()
+  }
   cvm_fetch_internal(
     dataset     = dataset,
     table       = table,
@@ -102,13 +107,14 @@ cvm_fetch_internal <- function(dataset,
   if (identical(source, "mirror")) {
     cvmdata_abort(
       c(
-        "{.code source = \"mirror\"} not implemented in v0.1.",
+        "{.code source = \"mirror\"} not yet available.",
         "i" = paste(
-          "The GitHub Releases mirror lands in Phase F (still in",
-          "v0.1). Use {.val cvm} meanwhile."
+          "The GitHub Releases parquet mirror ships in Phase F of",
+          "the roadmap. Until then, pass {.code source = \"cvm\"}",
+          "explicitly or leave it as the default."
         )
       ),
-      class = "cvmdata_error_input"
+      class = "cvmdata_error_internal"
     )
   }
 

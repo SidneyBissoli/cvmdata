@@ -76,7 +76,7 @@ e o histórico desta sessão.
 cvm_fetch(dataset, table,
           companies   = NULL,
           years       = NULL,
-          source      = "mirror",
+          source      = NULL,   # default resolvido via cvm_source_get()
           report_type = NULL,
           on_error    = "abort",
           validate    = "strict",
@@ -109,11 +109,25 @@ cnpj_format(x)                # inverso de cnpj_clean — formata 14 dígitos
 
 Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
 
-- `source ∈ c("mirror", "cvm")`, default **`"mirror"`**. `"mirror"`
-  consulta parquet em GitHub Releases via DuckDB (com filtros pushdown
-  por companhia/ano antes do download); `"cvm"` bate no portal aberto
-  CVM. O mirror é mantido fresco por workflow semanal (Fase F do
-  ROADMAP).
+- `source ∈ c("cvm", "mirror")`. Default em **v0.1 = `"cvm"`** (portal
+  aberto via HTTP, em `dados.cvm.gov.br`). Transiciona para **`"mirror"`**
+  na release que ativar a Fase F (parquet em GitHub Releases consultado
+  via DuckDB com filtros pushdown por companhia/ano antes do download;
+  mirror mantido fresco por workflow semanal `etl-mirror.yaml`). A flip
+  do default é documentada em `NEWS.md` da release correspondente;
+  scripts que precisem de reprodutibilidade entre v0.1 e a release
+  pós-Fase F devem chamar `cvm_source_set("cvm")` antes do primeiro
+  `cvm_fetch()`, ou passar `source = "cvm"` explícito em cada chamada.
+  A precedência é: arg explícito > `getOption("cvmdata.source")` >
+  built-in default. **Decisão tomada na Sessão 3.6** (2026-05-22): Alt 2
+  do trio default-mirror/default-cvm/auto-fallback. Mirror só existe em
+  Fase F; declarar default mirror em v0.1 deixaria o pacote
+  inutilizável out-of-the-box. A "quebra de reprodutibilidade" da flip
+  é controlável via `cvm_source_set()` e pelo atributo `source` que o
+  tibble já carrega via `cvm_attach_metadata()`. A assinatura pública
+  de `cvm_fetch()` declara `source = NULL` para que o option seja
+  consultado dinamicamente — alinhamento com o padrão da família cache
+  (`cvm_cache_path()` ↔ `cvm_cache_set_path()`).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
 - `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para tabelas
