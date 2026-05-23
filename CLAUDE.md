@@ -480,8 +480,8 @@ CSV UTF-8, delimitador `,`. 10 colunas obrigatórias + 1 opcional:
 |---|---|---|
 | `dataset` | character | chave |
 | `table` | character | chave |
-| `column` | character | chave |
-| `campo` | character | nome original CVM (preserva caps) |
+| `campo` | character | chave; nome snake_case minúsculo (bate com `cvm_fetch()`) |
+| `campo_original` | character | nome do campo como publicado no META CVM (preserva caps/mixed case) |
 | `descricao` | character | descrição oficial CVM |
 | `dominio` | character | domínio oficial CVM |
 | `tipo_dados` | character | tipo oficial CVM |

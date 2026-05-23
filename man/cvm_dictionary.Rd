@@ -13,8 +13,10 @@ cvm_dictionary(dataset, table)
 }
 \value{
 A tibble with one row per column of the table, columns
-\code{column}, \code{campo}, \code{descricao}, \code{dominio}, \code{tipo_dados},
-\code{tamanho}, \code{precisao}, \code{scale}.
+\code{campo} (snake-case name matching \code{\link[=cvm_fetch]{cvm_fetch()}} output),
+\code{campo_original} (field name as published by CVM in the META,
+preserving the original casing), \code{descricao}, \code{dominio},
+\code{tipo_dados}, \code{tamanho}, \code{precisao}, \code{scale}.
 }
 \description{
 Returns the dictionary metadata (field names, descriptions, domain,
@@ -27,7 +29,7 @@ offline from the CVM META resources by
 \details{
 Tables whose META is not published by CVM (\code{meta_status: missing} in
 the schema YAML) return rows with \code{NA} in every metadata column
-except \code{campo}/\code{column} (sourced from the YAML's
+except \code{campo}/\code{campo_original} (sourced from the YAML's
 \code{expected_field_names}). In that case the returned tibble carries an
 attribute \code{meta_status = "missing"}.
 }

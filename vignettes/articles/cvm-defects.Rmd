@@ -107,7 +107,7 @@ cvm_fetch("fre", "empregado_PCD",
 `validate = "warn"` returns the data and emits
 `cvmdata_warn_meta_unavailable`; `"skip"` silences the warning.
 `cvm_dictionary()` for these tables returns `NA` in every metadata
-column except `column` / `campo` — the package never invents
+column except `campo` / `campo_original` — the package never invents
 content CVM did not publish.
 
 See the **fre** article for the worked example.

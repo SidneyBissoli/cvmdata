@@ -59,8 +59,12 @@ read_iso_lines <- function(path) {
 }
 
 # Recognized META keys (UTF-8, accented), mapped to canonical names.
+# Note: the META "Campo" token is the field name as published by CVM
+# (mixed/upper case). It maps to the `campo_original` column in the
+# snapshot. The user-facing `campo` column is derived later as
+# tolower(campo_original).
 .meta_keys <- list(
-  list(key = "Campo",       canonical = "campo"),
+  list(key = "Campo",       canonical = "campo_original"),
   list(key = "Descrição",  canonical = "descricao"),
   list(key = "Domínio",  canonical = "dominio"),
   list(key = "Tipo Dados",  canonical = "tipo_dados"),
@@ -100,13 +104,13 @@ parse_meta_block <- function(lines) {
   }
   to_int <- function(x) suppressWarnings(as.integer(x %||% NA_character_))
   tibble::tibble(
-    campo      = values$campo      %||% NA_character_,
-    descricao  = values$descricao  %||% NA_character_,
-    dominio    = values$dominio    %||% NA_character_,
-    tipo_dados = values$tipo_dados %||% NA_character_,
-    tamanho    = to_int(values$tamanho_str),
-    precisao   = to_int(values$precisao_str),
-    scale      = to_int(values$scale_str)
+    campo_original = values$campo_original %||% NA_character_,
+    descricao      = values$descricao      %||% NA_character_,
+    dominio        = values$dominio        %||% NA_character_,
+    tipo_dados     = values$tipo_dados     %||% NA_character_,
+    tamanho        = to_int(values$tamanho_str),
+    precisao       = to_int(values$precisao_str),
+    scale          = to_int(values$scale_str)
   )
 }
 
@@ -173,17 +177,17 @@ build_dictionary_snapshot <- function() {
         ))
       }
       all_rows[[length(all_rows) + 1L]] <- tibble::tibble(
-        dataset    = info$dataset,
-        table      = info$table,
-        column     = tolower(fields),
-        campo      = fields,
-        descricao  = NA_character_,
-        dominio    = NA_character_,
-        tipo_dados = NA_character_,
-        tamanho    = NA_integer_,
-        precisao   = NA_integer_,
-        scale      = NA_integer_,
-        meta_status = "missing"
+        dataset        = info$dataset,
+        table          = info$table,
+        campo          = tolower(fields),
+        campo_original = fields,
+        descricao      = NA_character_,
+        dominio        = NA_character_,
+        tipo_dados     = NA_character_,
+        tamanho        = NA_integer_,
+        precisao       = NA_integer_,
+        scale          = NA_integer_,
+        meta_status    = "missing"
       )
       next
     }
@@ -243,13 +247,13 @@ build_dictionary_snapshot <- function() {
 
     all_rows[[length(all_rows) + 1L]] <- entries |>
       dplyr::mutate(
-        dataset = info$dataset,
-        table   = info$table,
-        column  = tolower(.data$campo),
+        dataset     = info$dataset,
+        table       = info$table,
+        campo       = tolower(.data$campo_original),
         meta_status = "available"
       ) |>
       dplyr::select(
-        dataset, table, column, campo, descricao, dominio,
+        dataset, table, campo, campo_original, descricao, dominio,
         tipo_dados, tamanho, precisao, scale, meta_status
       )
   }

@@ -194,7 +194,7 @@ build_codelists_snapshot <- function() {
     enum_rows[[length(enum_rows) + 1L]] <- tibble::tibble(
       dataset = dict$dataset[i],
       table   = dict$table[i],
-      column  = dict$column[i],
+      column  = dict$campo[i],
       value   = values,
       source  = "dominio"
     )
@@ -218,7 +218,7 @@ build_codelists_snapshot <- function() {
     ,
     drop = FALSE
   ]
-  excluded <- vapply(candidates$column, is_excluded_column, logical(1L))
+  excluded <- vapply(candidates$campo, is_excluded_column, logical(1L))
   candidates <- candidates[!excluded, , drop = FALSE]
   enum_keys <- if (!is.null(enum_df) && nrow(enum_df)) {
     paste(enum_df$dataset, enum_df$table, enum_df$column)
@@ -226,7 +226,7 @@ build_codelists_snapshot <- function() {
     character(0L)
   }
   candidates <- candidates[
-    !(paste(candidates$dataset, candidates$table, candidates$column) %in%
+    !(paste(candidates$dataset, candidates$table, candidates$campo) %in%
         enum_keys),
     , drop = FALSE
   ]
@@ -283,7 +283,7 @@ build_codelists_snapshot <- function() {
     delim <- schema$delimiter %||% ";"
     enc <- schema$encoding %||% "ISO-8859-1"
     for (i in seq_len(nrow(g))) {
-      col_lower <- g$column[i]
+      col_lower <- g$campo[i]
       vals <- tryCatch(
         quietly(distinct_values(csv_path, enc, delim, col_lower)),
         error = function(e) {
