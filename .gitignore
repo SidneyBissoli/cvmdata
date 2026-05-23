@@ -85,3 +85,7 @@ VERIFICACAO_SESSAO_*.md
 
 # Locally rendered ROADMAP preview
 ROADMAP.html
+
+# Per-dataset smoke tests at the repo root — kept locally only.
+# .Rbuildignore already excludes them from the tarball.
+teste_*.R
