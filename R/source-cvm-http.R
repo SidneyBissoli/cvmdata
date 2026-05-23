@@ -9,15 +9,6 @@
 # `<cache_root>/raw/<dataset>/...` with a sidecar `.etag.rds` for
 # ETag/Last-Modified comparison.
 
-# Resolve the cache root. Overridable via `options(cvmdata.cache_dir)`
-# so that tests can swap the user's cache for a tempdir.
-cvm_cache_root <- function() {
-  getOption(
-    "cvmdata.cache_dir",
-    tools::R_user_dir("cvmdata", which = "cache")
-  )
-}
-
 # Download (or serve from cache) the CSV referenced by a schema. Returns
 # the local path to the CSV ready to read.
 #
@@ -80,7 +71,7 @@ get_simple_csv <- function(schema, report_type) {
       class = "cvmdata_error_internal"
     )
   }
-  cache_dir <- file.path(cvm_cache_root(), "raw", schema$dataset)
+  cache_dir <- file.path(cvm_cache_path(), "raw", schema$dataset)
   ensure_dir(cache_dir)
   csv_path <- file.path(cache_dir, basename(url))
   download_with_etag(url, csv_path)
@@ -94,7 +85,7 @@ get_yearly_csv <- function(schema, year, report_type) {
   csv_pattern <- resolve_file_pattern(schema, report_type)
   csv_name <- sub("\\{year\\}", year, csv_pattern, fixed = FALSE)
 
-  cache_dir <- file.path(cvm_cache_root(), "raw", schema$dataset,
+  cache_dir <- file.path(cvm_cache_path(), "raw", schema$dataset,
                          as.character(year))
   ensure_dir(cache_dir)
   zip_path <- file.path(cache_dir, basename(archive_url))
@@ -122,14 +113,6 @@ get_yearly_csv <- function(schema, year, report_type) {
     )
   }
   csv_path
-}
-
-# Create a directory if it does not exist; silent on success.
-ensure_dir <- function(path) {
-  if (!dir.exists(path)) {
-    dir.create(path, recursive = TRUE, showWarnings = FALSE)
-  }
-  invisible(path)
 }
 
 # Download a URL into `dest_path`, honoring ETag/Last-Modified for
