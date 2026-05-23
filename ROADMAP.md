@@ -223,8 +223,17 @@ progresso sessão a sessão.
   `resolve_dict_columns()`; snapshot prevalece para colunas cobertas
   e heurística `^(dt_|data_)` atua como fallback para
   `meta_status: missing` e schemas sintéticos (Sessão 3.4).
-- [ ] Semântica diferenciada para `on_error = "warn"/"silent"`
-  (atualmente aceitos por `arg_match0` mas só `"abort"` é exercitado).
+- [x] Semântica diferenciada para `on_error = "warn"/"silent"` —
+  Sessão 3.7. Escopo: HTTP failures em batches yearly
+  (`years = c(...)` com >1 elementos). `"warn"` empilha os anos
+  sobreviventes e emite `cvmdata_warn_partial_failure` listando os
+  que falharam; `"silent"` empilha sem emitir warning; `"abort"`
+  (default) propaga a primeira falha. Total failure (todos os anos)
+  sempre aborta com `cvmdata_error_http`. Single-year, non-yearly
+  (CAD) e o fallback descendente quando `years = NULL` continuam
+  abortando regardless. Parse/validation continuam governados por
+  `validate` — fora do escopo do `on_error` por design (evita
+  mascarar drift de schema da CVM).
 
 ### Fase E — Polimento e cobertura (20-30h)
 

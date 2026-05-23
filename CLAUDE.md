@@ -371,9 +371,14 @@ cvmdata_error                          (pai genérico de erros)
 cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_validation            (divergência no warn mode)
 ├── cvmdata_warn_meta_unavailable      (META ausente, warn mode)
-└── cvmdata_warn_year_fallback         (years = NULL caiu para ano anterior
-                                        porque max year não tinha dados da
-                                        companhia pedida)
+├── cvmdata_warn_year_fallback         (years = NULL caiu para ano anterior
+│                                       porque max year não tinha dados da
+│                                       companhia pedida)
+└── cvmdata_warn_partial_failure       (batch yearly: alguns anos
+                                        falharam HTTP sob
+                                        on_error = "warn"; demais
+                                        sobreviventes foram empilhados
+                                        e retornados)
 ```
 
 Implementação via wrapper interno `cvmdata_abort(message, class, ...)`
