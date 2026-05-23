@@ -1,4 +1,6 @@
 ^LICENSE\.md$
+^CODE_OF_CONDUCT\.md$
+^CONTRIBUTING\.md$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^archive$
@@ -6,6 +8,7 @@
 ^cvmdata_.*\.md$
 ^cvmdata_rodada.*\.md$
 ^PROMPT_CLAUDE_CODE_.*\.md$
+^VERIFICACAO_.*\.md$
 ^CLAUDE\.md$
 ^ROADMAP\.md$
 ^ROADMAP\.html$
