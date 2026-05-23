@@ -23,6 +23,17 @@ window is controlled by the option \code{cvmdata.cache_ttl_seconds}
 every call, or to \code{Inf} to skip revalidation entirely until
 \code{\link[=cvm_cache_clear]{cvm_cache_clear()}} is called.
 
+The cache size is bounded by \code{options(cvmdata.cache_max_size_mb)}
+(default \code{100} MiB). Whenever the total counted across yearly
+bundles and non-partitioned \verb{\{artifact, sidecar\}} pairs exceeds
+90\% of the limit, the next download evicts the oldest units
+(by ZIP/CSV \code{mtime}) until the cache is at or below 80\% of the
+limit. Set the option to \code{0}, a negative number, or \code{Inf} to
+disable eviction. Interactive sessions see a
+\code{cvmdata_warn_eviction} warning after each eviction round;
+batch jobs stay silent unless
+\code{options(cvmdata.cache_warn_evictions = TRUE)} is set.
+
 Read-only: this function does not create the directory.
 }
 \examples{

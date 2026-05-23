@@ -11,8 +11,10 @@ A tibble with one row per cached file, sorted by
 \code{dataset} then \code{file}. Columns: \code{dataset} (character),
 \code{file} (basename), \code{path} (absolute), \code{size_bytes} (integer),
 \code{mtime} (POSIXct), \code{etag} (character; \code{NA} when absent),
-\code{last_modified} (character; \code{NA} when absent). Returns a
-zero-row tibble with the same schema when the cache is empty.
+\code{last_modified} (character; \code{NA} when absent). The tibble has
+an attribute \code{total_size_bytes} (numeric scalar) with the
+total bytes counted toward the cache size limit. Returns a
+zero-row tibble with the same schema (and \code{total_size_bytes = 0}) when the cache is empty.
 }
 \description{
 Lists every artifact currently stored under
@@ -28,6 +30,14 @@ columns).
 Extracted CSVs have no sidecar of their own — the freshness of
 the parent ZIP covers them — so they appear with
 \code{etag = NA_character_} and \code{last_modified = NA_character_}.
+
+The returned tibble carries an attribute \code{total_size_bytes} with
+the sum of \code{size_bytes}, useful for comparing against the
+eviction limit set via \code{options(cvmdata.cache_max_size_mb)}
+(default 100 MiB). When the total exceeds 90\% of the limit, the
+next download triggers LRU eviction of the oldest year directories
+(yearly datasets) or artifact+sidecar pairs (non-partitioned).
+See \code{\link[=cvm_cache_path]{cvm_cache_path()}} for the option's semantics.
 }
 \examples{
 cvm_cache_info()
