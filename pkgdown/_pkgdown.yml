@@ -3,6 +3,19 @@ url: https://sidneybissoli.github.io/cvmdata/
 template:
   bootstrap: 5
 
+articles:
+  - title: Get started
+    navbar: ~
+    contents:
+      - cvmdata
+  - title: Deep dives
+    navbar: Deep dives
+    contents:
+      - matches("^articles/cvm-fetch$")
+      - matches("^articles/itr-dfp$")
+      - matches("^articles/fre$")
+      - matches("^articles/cvm-defects$")
+
 reference:
   - title: Fetchers
     desc: >
