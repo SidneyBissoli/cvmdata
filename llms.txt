@@ -76,13 +76,13 @@ for every column:
 
 dict <- cvm_dictionary("dfp", "bpa")
 tbl <- knitr::kable(
-  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
+  dict[1:8, c("campo", "descricao", "tipo_dados", "tamanho")],
   format = "html"
 )
 cat('<div align="center">', tbl, '</div>', sep = "\n")
 ```
 
-| column       | descricao                       | tipo_dados | tamanho |
+| campo        | descricao                       | tipo_dados | tamanho |
 |:-------------|:--------------------------------|:-----------|--------:|
 | cd_conta     | Código da conta                 | varchar    |      18 |
 | cd_cvm       | Código CVM                      | char       |       6 |

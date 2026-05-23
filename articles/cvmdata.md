@@ -391,13 +391,13 @@ cvm_tables("dfp")
 # CVM META resources at snapshot time.
 head(cvm_dictionary("dfp", "bpa"), 5)
 #> # A tibble: 5 × 8
-#>   column    campo     descricao        dominio tipo_dados tamanho precisao scale
-#>   <chr>     <chr>     <chr>            <chr>   <chr>        <int>    <int> <int>
-#> 1 cd_conta  CD_CONTA  Código da conta  Numéri… varchar         18       NA    NA
-#> 2 cd_cvm    CD_CVM    Código CVM       Numéri… char             6       NA    NA
-#> 3 cnpj_cia  CNPJ_CIA  CNPJ da companh… Alfanu… varchar         20       NA    NA
-#> 4 denom_cia DENOM_CIA Nome empresaria… Alfanu… varchar        100       NA    NA
-#> 5 ds_conta  DS_CONTA  Descrição da co… Alfanu… varchar        100       NA    NA
+#>   campo     campo_original descricao   dominio tipo_dados tamanho precisao scale
+#>   <chr>     <chr>          <chr>       <chr>   <chr>        <int>    <int> <int>
+#> 1 cd_conta  CD_CONTA       Código da … Numéri… varchar         18       NA    NA
+#> 2 cd_cvm    CD_CVM         Código CVM  Numéri… char             6       NA    NA
+#> 3 cnpj_cia  CNPJ_CIA       CNPJ da co… Alfanu… varchar         20       NA    NA
+#> 4 denom_cia DENOM_CIA      Nome empre… Alfanu… varchar        100       NA    NA
+#> 5 ds_conta  DS_CONTA       Descrição … Alfanu… varchar        100       NA    NA
 ```
 
 `cvm_codelist(dataset, table, column)` returns the enumerated values of

@@ -117,7 +117,7 @@ bpa <- cvm_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "cvm" | fetched_at: 2026-05-23 14:11:25.269251
+#> ℹ source: "cvm" | fetched_at: 2026-05-23 14:38:33.800533
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -139,7 +139,7 @@ cvm_fetch("fre", "empregado_PCD",
           companies = "1023", years = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-05-23 14:11:26.193674
+#> ℹ source: "cvm" | fetched_at: 2026-05-23 14:38:34.75297
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 10
 #> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -151,8 +151,9 @@ cvm_fetch("fre", "empregado_PCD",
 `validate = "warn"` returns the data and emits
 `cvmdata_warn_meta_unavailable`; `"skip"` silences the warning.
 [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
-for these tables returns `NA` in every metadata column except `column` /
-`campo` — the package never invents content CVM did not publish.
+for these tables returns `NA` in every metadata column except `campo` /
+`campo_original` — the package never invents content CVM did not
+publish.
 
 See the **fre** article for the worked example.
 

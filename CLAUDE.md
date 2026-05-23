@@ -497,19 +497,19 @@ profundidade).
 
 CSV UTF-8, delimitador `,`. 10 colunas obrigatórias + 1 opcional:
 
-| Coluna        | Tipo                 | Origem                                  |
-|---------------|----------------------|-----------------------------------------|
-| `dataset`     | character            | chave                                   |
-| `table`       | character            | chave                                   |
-| `column`      | character            | chave                                   |
-| `campo`       | character            | nome original CVM (preserva caps)       |
-| `descricao`   | character            | descrição oficial CVM                   |
-| `dominio`     | character            | domínio oficial CVM                     |
-| `tipo_dados`  | character            | tipo oficial CVM                        |
-| `tamanho`     | integer              | tamanho oficial CVM (NA quando ausente) |
-| `precisao`    | integer              | precisão oficial CVM (NA)               |
-| `scale`       | integer              | escala oficial CVM (NA)                 |
-| `meta_status` | character (opcional) | `"available"` (default) ou `"missing"`  |
+| Coluna | Tipo | Origem |
+|----|----|----|
+| `dataset` | character | chave |
+| `table` | character | chave |
+| `campo` | character | chave; nome snake_case minúsculo (bate com [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)) |
+| `campo_original` | character | nome do campo como publicado no META CVM (preserva caps/mixed case) |
+| `descricao` | character | descrição oficial CVM |
+| `dominio` | character | domínio oficial CVM |
+| `tipo_dados` | character | tipo oficial CVM |
+| `tamanho` | integer | tamanho oficial CVM (NA quando ausente) |
+| `precisao` | integer | precisão oficial CVM (NA) |
+| `scale` | integer | escala oficial CVM (NA) |
+| `meta_status` | character (opcional) | `"available"` (default) ou `"missing"` |
 
 Quando `meta_status = "missing"`: `descricao`, `dominio`, `tipo_dados`,
 `tamanho`, `precisao`, `scale` ficam `NA`. **Não inventamos** descrições
@@ -519,14 +519,14 @@ ausentes.
 
 CSV UTF-8, delimitador `,`. 4 colunas (v0.1):
 
-| Coluna    | Tipo      | Conteúdo                               |
-|-----------|-----------|----------------------------------------|
-| `dataset` | character | chave                                  |
-| `table`   | character | chave                                  |
-| `column`  | character | chave                                  |
-| `value`   | character | valor categórico em PT como vem da CVM |
+| Coluna | Tipo | Conteúdo |
+|----|----|----|
+| `dataset` | character | chave |
+| `table` | character | chave |
+| `campo` | character | chave; snake_case minúsculo (mesma convenção de [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)) |
+| `value` | character | valor categórico em PT como vem da CVM |
 
-Chave composta `(dataset, table, column, value)`. `first_seen_year`,
+Chave composta `(dataset, table, campo, value)`. `first_seen_year`,
 `last_seen_year` e `frequency` deferidos para v0.2+ (decisão Sessão
 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset
 (~30 s de geração); marcar `first_seen_year` com o único ano amostrado

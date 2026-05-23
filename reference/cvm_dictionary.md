@@ -25,17 +25,20 @@ cvm_dictionary(dataset, table)
 
 ## Value
 
-A tibble with one row per column of the table, columns `column`,
-`campo`, `descricao`, `dominio`, `tipo_dados`, `tamanho`, `precisao`,
-`scale`.
+A tibble with one row per column of the table, columns `campo`
+(snake-case name matching
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+output), `campo_original` (field name as published by CVM in the META,
+preserving the original casing), `descricao`, `dominio`, `tipo_dados`,
+`tamanho`, `precisao`, `scale`.
 
 ## Details
 
 Tables whose META is not published by CVM (`meta_status: missing` in the
 schema YAML) return rows with `NA` in every metadata column except
-`campo`/`column` (sourced from the YAML's `expected_field_names`). In
-that case the returned tibble carries an attribute
-`meta_status = "missing"`.
+`campo`/`campo_original` (sourced from the YAML's
+`expected_field_names`). In that case the returned tibble carries an
+attribute `meta_status = "missing"`.
 
 ## See also
 
@@ -52,34 +55,34 @@ Other discovery:
 ``` r
 cvm_dictionary("dfp", "bpa")
 #> # A tibble: 14 × 8
-#>    column        campo       descricao dominio tipo_dados tamanho precisao scale
-#>    <chr>         <chr>       <chr>     <chr>   <chr>        <int>    <int> <int>
-#>  1 cd_conta      CD_CONTA    Código d… Numéri… varchar         18       NA    NA
-#>  2 cd_cvm        CD_CVM      Código C… Numéri… char             6       NA    NA
-#>  3 cnpj_cia      CNPJ_CIA    CNPJ da … Alfanu… varchar         20       NA    NA
-#>  4 denom_cia     DENOM_CIA   Nome emp… Alfanu… varchar        100       NA    NA
-#>  5 ds_conta      DS_CONTA    Descriçã… Alfanu… varchar        100       NA    NA
-#>  6 dt_fim_exerc  DT_FIM_EXE… Data fim… AAAA-M… date            10       NA    NA
-#>  7 dt_refer      DT_REFER    Data de … AAAA-M… date            10       NA    NA
-#>  8 escala_moeda  ESCALA_MOE… Escala m… Alfanu… varchar        100       NA    NA
-#>  9 grupo_dfp     GRUPO_DFP   Nome e n… Alfanu… varchar        206       NA    NA
-#> 10 moeda         MOEDA       Moeda     Alfanu… varchar        100       NA    NA
-#> 11 ordem_exerc   ORDEM_EXERC Ordem do… Alfanu… varchar          9       NA    NA
-#> 12 st_conta_fixa ST_CONTA_F… Indica s… S/N     varchar          1       NA    NA
-#> 13 versao        VERSAO      Versão d… Numéri… smallint        NA        5     0
-#> 14 vl_conta      VL_CONTA    Valor da… Numéri… decimal         NA       29    10
+#>    campo      campo_original descricao dominio tipo_dados tamanho precisao scale
+#>    <chr>      <chr>          <chr>     <chr>   <chr>        <int>    <int> <int>
+#>  1 cd_conta   CD_CONTA       Código d… Numéri… varchar         18       NA    NA
+#>  2 cd_cvm     CD_CVM         Código C… Numéri… char             6       NA    NA
+#>  3 cnpj_cia   CNPJ_CIA       CNPJ da … Alfanu… varchar         20       NA    NA
+#>  4 denom_cia  DENOM_CIA      Nome emp… Alfanu… varchar        100       NA    NA
+#>  5 ds_conta   DS_CONTA       Descriçã… Alfanu… varchar        100       NA    NA
+#>  6 dt_fim_ex… DT_FIM_EXERC   Data fim… AAAA-M… date            10       NA    NA
+#>  7 dt_refer   DT_REFER       Data de … AAAA-M… date            10       NA    NA
+#>  8 escala_mo… ESCALA_MOEDA   Escala m… Alfanu… varchar        100       NA    NA
+#>  9 grupo_dfp  GRUPO_DFP      Nome e n… Alfanu… varchar        206       NA    NA
+#> 10 moeda      MOEDA          Moeda     Alfanu… varchar        100       NA    NA
+#> 11 ordem_exe… ORDEM_EXERC    Ordem do… Alfanu… varchar          9       NA    NA
+#> 12 st_conta_… ST_CONTA_FIXA  Indica s… S/N     varchar          1       NA    NA
+#> 13 versao     VERSAO         Versão d… Numéri… smallint        NA        5     0
+#> 14 vl_conta   VL_CONTA       Valor da… Numéri… decimal         NA       29    10
 cvm_dictionary("fre", "empregado_PCD")
 #> # A tibble: 10 × 8
-#>    column              campo descricao dominio tipo_dados tamanho precisao scale
-#>    <chr>               <chr> <chr>     <chr>   <chr>        <int>    <int> <int>
-#>  1 cnpj_companhia      CNPJ… NA        NA      NA              NA       NA    NA
-#>  2 data_referencia     Data… NA        NA      NA              NA       NA    NA
-#>  3 versao              Vers… NA        NA      NA              NA       NA    NA
-#>  4 id_documento        ID_D… NA        NA      NA              NA       NA    NA
-#>  5 nome_companhia      Nome… NA        NA      NA              NA       NA    NA
-#>  6 codigo_posicao      Codi… NA        NA      NA              NA       NA    NA
-#>  7 posicao             Posi… NA        NA      NA              NA       NA    NA
-#>  8 quantidade_pcd      Quan… NA        NA      NA              NA       NA    NA
-#>  9 quantidade_nao_pcd  Quan… NA        NA      NA              NA       NA    NA
-#> 10 quantidade_sem_res… Quan… NA        NA      NA              NA       NA    NA
+#>    campo      campo_original descricao dominio tipo_dados tamanho precisao scale
+#>    <chr>      <chr>          <chr>     <chr>   <chr>        <int>    <int> <int>
+#>  1 cnpj_comp… CNPJ_Companhia NA        NA      NA              NA       NA    NA
+#>  2 data_refe… Data_Referenc… NA        NA      NA              NA       NA    NA
+#>  3 versao     Versao         NA        NA      NA              NA       NA    NA
+#>  4 id_docume… ID_Documento   NA        NA      NA              NA       NA    NA
+#>  5 nome_comp… Nome_Companhia NA        NA      NA              NA       NA    NA
+#>  6 codigo_po… Codigo_Posicao NA        NA      NA              NA       NA    NA
+#>  7 posicao    Posicao        NA        NA      NA              NA       NA    NA
+#>  8 quantidad… Quantidade_PCD NA        NA      NA              NA       NA    NA
+#>  9 quantidad… Quantidade_Na… NA        NA      NA              NA       NA    NA
+#> 10 quantidad… Quantidade_Se… NA        NA      NA              NA       NA    NA
 ```

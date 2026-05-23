@@ -430,12 +430,12 @@ cvmdata_warn                           (pai genérico de warnings)
 </tr><tr><td><code>table</code></td>
 <td>character</td>
 <td>chave</td>
-</tr><tr><td><code>column</code></td>
-<td>character</td>
-<td>chave</td>
 </tr><tr><td><code>campo</code></td>
 <td>character</td>
-<td>nome original CVM (preserva caps)</td>
+<td>chave; nome snake_case minúsculo (bate com <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>)</td>
+</tr><tr><td><code>campo_original</code></td>
+<td>character</td>
+<td>nome do campo como publicado no META CVM (preserva caps/mixed case)</td>
 </tr><tr><td><code>descricao</code></td>
 <td>character</td>
 <td>descrição oficial CVM</td>
@@ -464,7 +464,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <div class="section level3">
 <h3 id="cvm_codelists_snapshotcsv"><code>cvm_codelists_snapshot.csv</code><a class="anchor" aria-label="anchor" href="#cvm_codelists_snapshotcsv"></a></h3>
 <p>CSV UTF-8, delimitador <code>,</code>. 4 colunas (v0.1):</p>
-<table class="table"><thead><tr><th>Coluna</th>
+<table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Coluna</th>
 <th>Tipo</th>
 <th>Conteúdo</th>
 </tr></thead><tbody><tr><td><code>dataset</code></td>
@@ -473,13 +473,13 @@ cvmdata_warn                           (pai genérico de warnings)
 </tr><tr><td><code>table</code></td>
 <td>character</td>
 <td>chave</td>
-</tr><tr><td><code>column</code></td>
+</tr><tr><td><code>campo</code></td>
 <td>character</td>
-<td>chave</td>
+<td>chave; snake_case minúsculo (mesma convenção de <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>)</td>
 </tr><tr><td><code>value</code></td>
 <td>character</td>
 <td>valor categórico em PT como vem da CVM</td>
-</tr></tbody></table><p>Chave composta <code>(dataset, table, column, value)</code>. <code>first_seen_year</code>, <code>last_seen_year</code> e <code>frequency</code> deferidos para v0.2+ (decisão Sessão 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset (~30 s de geração); marcar <code>first_seen_year</code> com o único ano amostrado entrega informação enganosa (parece “categoria nova” quando é só “ano único na amostra”) e, quando v0.2 trouxer cobertura histórica, todos os valores cairão para 2010-2015 — exatamente o “ruído de diff Git” que motivou deferir as outras duas. Schema do CSV embarcado é estável dentro da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor interno.</p>
+</tr></tbody></table><p>Chave composta <code>(dataset, table, campo, value)</code>. <code>first_seen_year</code>, <code>last_seen_year</code> e <code>frequency</code> deferidos para v0.2+ (decisão Sessão 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset (~30 s de geração); marcar <code>first_seen_year</code> com o único ano amostrado entrega informação enganosa (parece “categoria nova” quando é só “ano único na amostra”) e, quando v0.2 trouxer cobertura histórica, todos os valores cairão para 2010-2015 — exatamente o “ruído de diff Git” que motivou deferir as outras duas. Schema do CSV embarcado é estável dentro da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor interno.</p>
 <p>Critério de inclusão (Sessão 3.4):</p>
 <ul><li>
 <strong>Pelo dicionário</strong>: colunas onde <code>dominio</code> enumera valores com separador <code>/</code> ou <code>|</code> (capta <code>S/N</code>, <code>PF/PJ</code>).</li>
