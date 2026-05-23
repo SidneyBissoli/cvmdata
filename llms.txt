@@ -1,5 +1,8 @@
 # cvmdata
 
+**English** \|
+[Português](https://sidneybissoli.github.io/cvmdata/README.pt-BR.md)
+
 `cvmdata` provides a tidy API to the open data published by the
 Brazilian Securities and Exchange Commission (CVM — Comissão de Valores
 Mobiliários). The first release covers the core publicly-traded-company
