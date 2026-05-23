@@ -86,10 +86,11 @@ cvm_fetch(dataset, table,
 cad_fetch(companies = NULL, ...)
 
 # Descoberta
-cvm_datasets()                # lista de datasets disponíveis
-cvm_tables(dataset)           # tabelas de um dataset
-cvm_dictionary(dataset, table)
-cvm_dataset_years(dataset)    # range de anos com dados publicados
+cvm_datasets()                       # lista de datasets disponíveis
+cvm_tables(dataset)                  # tabelas de um dataset
+cvm_dictionary(dataset, table)       # dicionário oficial do snapshot
+cvm_codelist(dataset, table, column) # valores categóricos do snapshot
+cvm_dataset_years(dataset)           # range de anos com dados publicados
 
 # Cache
 cvm_cache_path()
@@ -103,6 +104,7 @@ cvm_source_set(source)
 
 # Utilidades
 cnpj_clean(x)                 # exportada na v0.1
+cnpj_format(x)                # inverso de cnpj_clean — formata 14 dígitos
 ```
 
 Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
@@ -283,6 +285,7 @@ cvmdata/
 │   │                              #   + filter_by_companies() + busca textual
 │   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
 │   ├── discovery.R                # cvm_datasets(), cvm_tables(),
+│   │                              #   cvm_dictionary(), cvm_codelist(),
 │   │                              #   cvm_dataset_years() (não segue prefixo
 │   │                              #   por enquanto — exceção tolerada)
 │   ├── schema-load.R              # load_schema() + validate_schema() +
@@ -571,14 +574,17 @@ Cada commit deve deixar o pacote **verde em `devtools::check()`**:
 
 - Modo **tracer bullet**: implementar a função mais simples ponta-a-ponta
   antes de generalizar.
-- **Estado pós-Sessão 02** (commit `298c272`, 2026-05-21): `cvm_fetch()`
-  é a API principal genérica; pipeline ZIP-yearly entregue para DFP;
-  11 YAMLs DFP em `inst/extdata/schemas/dfp/`; `cad_fetch()` rebaixado
-  a alias trivial sobre `cvm_fetch()` (passa `source = "cvm"` até a
-  Fase F entregar o mirror). `transform_cad()` removido — CAD usa o
-  pipeline genérico com `transformations: []`. Próximo tracer (Sessão
-  03): ITR + FRE ponta-a-ponta, incluindo os 8 YAMLs com
-  `meta_status: missing`. Detalhes por fase no `ROADMAP.md`.
+- **Estado pós-Sessão 3.4** (2026-05-22): `cvm_fetch()` é a API
+  principal genérica; pipeline ZIP-yearly entregue para DFP (11 YAMLs),
+  ITR (11 YAMLs) e FRE (36 YAMLs, incluindo 8 com `meta_status: missing`).
+  `cad_fetch()` rebaixado a alias trivial sobre `cvm_fetch()` (passa
+  `source = "cvm"` até a Fase F entregar o mirror). `transform_cad()`
+  removido — CAD usa o pipeline genérico com `transformations: []`.
+  Snapshots embarcados: `cvm_dictionary_snapshot.csv` e
+  `cvm_codelists_snapshot.csv` em `inst/extdata/`, com
+  `cvm_dictionary()` e `cvm_codelist()` exportadas. Detecção canônica
+  de Date via dicionário ativada no reader. `cnpj_format()` adicionado
+  como inverso de `cnpj_clean()`. Detalhes por fase no `ROADMAP.md`.
 - **Não reabrir decisões travadas** (26 da 2.5, 7 da 2.6, 3 da 3.0, 4
   da 3.0.2, mais a Sessão 02 sobre `cvm_fetch()` como API principal e
   o portal de dados abertos como caminho default vs RAD/ENET). Se acha
@@ -638,9 +644,11 @@ Notas:
   real — testes de integração reais virão em arquivos
   `test-integration-*.R` com guarda `CVMDATA_RUN_INTEGRATION=true`.
 - Fixtures disponíveis em `tests/testthat/fixtures/`: `cad_sample.csv`
-  (51 linhas reais do CAD) e `dfp_cia_aberta_2024.zip` (ZIP DFP 2024
-  com subset de companhias, exercitado pelos testes ZIP-yearly da
-  Sessão 02).
+  (51 linhas reais do CAD), `dfp_cia_aberta_2024.zip` (ZIP DFP 2024
+  com subset de companhias, Sessão 02), `itr_cia_aberta_2024.zip`
+  (ZIP ITR 2024, Sessão 03) e `fre_cia_aberta_2024.zip` (ZIP FRE 2024,
+  Sessão 3.2 — exercita as 8 tabelas `meta_status: missing`). Cada ZIP
+  vem com `*.meta.json` registrando a origem.
 - `inst/extdata/schemas/cad/companhias.yaml` declara
   `expected_field_count: 47` (corrigido de 46 do protótipo na Sessão 01).
 - O cache real de produção fica em
@@ -653,7 +661,7 @@ Notas:
 
 `Depends`: `R (>= 4.1)` (para `|>`).
 
-**Estado atual da Sessão 01** (vide `DESCRIPTION`):
+**Estado atual** (vide `DESCRIPTION`):
 
 - `Imports`: `cli`, `httr2`, `readr`, `rlang`, `tibble`, `yaml`.
 - `Suggests`: `covr`, `dplyr`, `httptest2`, `knitr`, `lintr`,
