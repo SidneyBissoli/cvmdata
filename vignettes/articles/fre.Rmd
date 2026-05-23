@@ -1,0 +1,157 @@
+---
+title: "Reference Form (FRE)"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+The **Formulário de Referência** (FRE) is the annual reference form
+filed by every publicly-traded company in Brazil. It bundles
+governance, executive compensation, capital structure, related-party
+transactions, employment, and ESG/diversity disclosures into a
+single 35-table dataset, plus the `submissao` header — 36 tables in
+total.
+
+Two quirks set FRE apart from ITR/DFP and are worth surfacing
+up-front:
+
+* FRE detail tables use a different header convention from
+  CAD/ITR/DFP: `cnpj_companhia`, `data_referencia`,
+  `nome_companhia` (no `cd_cvm` column in the detail rows).
+  `cvm_fetch()` smooths over this — CD_CVM filters resolve via the
+  dataset's `submissao` and the user-facing interface stays identical.
+* Eight tables in FRE ship **without published META** (CVM never
+  released the dictionary file). The package declares them with
+  `meta_status: missing` and requires `validate = "warn"` or
+  `"skip"` to read them.
+
+```{r setup}
+library(cvmdata)
+```
+
+## Reference: 36 tables, by theme
+
+| Theme                | Tables                                                                                                                                                                                                                                          |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Header               | `submissao`                                                                                                                                                                                                                                     |
+| Audit                | `auditor`, `responsavel`                                                                                                                                                                                                                        |
+| Capital structure    | `capital_social`, `capital_social_classe_acao`, `capital_social_titulo_conversivel`, `distribuicao_capital`, `distribuicao_capital_classe_acao`, `acao_entregue`, `outro_valor_mobiliario`, `mercado_estrangeiro`, `titulo_exterior`             |
+| Ownership            | `posicao_acionaria`, `posicao_acionaria_classe_acao`, `titular_valor_mobiliario`, `participacao_sociedade`, `transacao_parte_relacionada`                                                                                                       |
+| Board & committees   | `administrador_membro_conselho_fiscal`, `membro_comite`, `relacao_familiar`, `relacao_subordinacao`                                                                                                                                             |
+| Diversity (board)    | `administrador_declaracao_genero`, `administrador_declaracao_raca`, `administrador_PCD`                                                                                                                                                         |
+| Compensation         | `remuneracao_total_orgao`, `remuneracao_variavel`, `remuneracao_acao`, `remuneracao_maxima_minima_media`                                                                                                                                        |
+| Diversity (workforce)| `empregado_PCD`✱, `empregado_local_declaracao_genero`✱, `empregado_local_declaracao_raca`✱, `empregado_local_faixa_etaria`, `empregado_posicao_declaracao_genero`✱, `empregado_posicao_declaracao_raca`✱, `empregado_posicao_faixa_etaria`✱, `empregado_posicao_local`✱ |
+
+✱ — `meta_status: missing`: dictionary not published by CVM; reader
+requires `validate = "warn"` or `"skip"`.
+
+Use `cvm_tables("fre")` for the full list and
+`cvm_dictionary("fre", "<table>")` for per-column metadata. Tables
+marked ✱ return rows with `NA` in every dictionary column except
+`campo`/`column` (which come from the YAML's
+`expected_field_names`) and carry an attribute `meta_status = "missing"`.
+
+## Workflow 1 — Audit and ESG/PCD disclosures for one issuer
+
+Goal: pull the audit firm history and the PCD (*Pessoa com
+Deficiência*) employment counts for **BCO BRASIL S.A.** (CD_CVM
+`1023`), reference year 2024.
+
+### The audit firm
+
+```{r workflow-1-auditor}
+auditor <- cvm_fetch(
+  "fre", "auditor",
+  companies = "1023",
+  years     = 2024
+)
+auditor
+```
+
+Notice the header columns: `cnpj_companhia`, `data_referencia`,
+`nome_companhia` (no `cd_cvm`). The package looked up CNPJ for
+CD_CVM `1023` through `fre/submissao` of the same year, then
+filtered on CNPJ. `keep_latest_version` has already de-duplicated
+re-filings.
+
+### PCD employment counts (table without published META)
+
+`empregado_PCD` is one of the eight FRE tables that CVM never
+released a dictionary for. With the default `validate = "strict"`
+the package refuses to read it:
+
+```{r workflow-1-pcd-strict, error = TRUE}
+cvm_fetch("fre", "empregado_PCD",
+          companies = "1023", years = 2024)
+```
+
+The reader expects the user to opt in by relaxing validation. With
+`validate = "warn"` the package emits `cvmdata_warn_meta_unavailable`
+and returns the tibble; with `validate = "skip"` it runs silently:
+
+```{r workflow-1-pcd-warn, warning = TRUE}
+pcd <- cvm_fetch(
+  "fre", "empregado_PCD",
+  companies = "1023",
+  years     = 2024,
+  validate  = "warn"
+)
+pcd
+```
+
+`cvm_dictionary("fre", "empregado_PCD")` returns the column list
+(from the YAML's `expected_field_names`) with `NA` in every
+metadata column — by design, because the package never invents
+content the CVM did not publish.
+
+## Workflow 2 — Shareholder positions (cap table)
+
+Goal: extract the top shareholders of BCO BRASIL recorded in the
+2024 FRE filing.
+
+```{r workflow-2-posicao}
+posicao <- cvm_fetch(
+  "fre", "posicao_acionaria",
+  companies = "1023",
+  years     = 2024
+)
+
+# Columns covering shareholder identity and stake:
+cols <- intersect(
+  c("acionista", "cpf_cnpj_acionista",
+    "percentual_total_acoes_circulacao",
+    "percentual_acao_ordinaria_circulacao"),
+  names(posicao)
+)
+posicao[, c("nome_companhia", "data_referencia", cols)]
+```
+
+The same approach works for `posicao_acionaria_classe_acao` (one row
+per share class held), `capital_social` (issued and paid-in capital
+totals), and `distribuicao_capital` (treasury and free-float
+breakdown).
+
+## A note on the workforce-diversity bundle
+
+The eight workforce-diversity tables (PCD, race, gender, age,
+location, by position and by site) share both the header convention
+(`cnpj_companhia` / `data_referencia` / `nome_companhia`) and — in
+seven of them — the absence of published META. They are intentionally
+kept in the package: research on diversity outcomes in
+publicly-traded firms is a heavy use case, and the snapshot a user
+gets here is the same one a CVM auditor sees. `validate = "warn"`
+plus the `expected_field_names` declared in each YAML guard against
+silent schema drift.
+
+## Where to read next
+
+* **cvm-fetch** — `companies` / `years` / `validate` semantics in
+  full.
+* **itr-dfp** — financial statements; same package, different table
+  semantics.
+* **cvm-defects** — why eight FRE tables lack META, plus the broader
+  list of CVM publication quirks the package handles.
