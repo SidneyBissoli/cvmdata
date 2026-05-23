@@ -1,0 +1,114 @@
+# Stage 3 — Publish parquet outputs to GitHub Releases.
+#
+# Uploads every parquet under <workspace>/out/parquet/<dataset>/ as an
+# asset of the moving release "mirror-<dataset>-latest". Encodes the
+# Hive-style partition path in the asset name via "__" separators,
+# because GitHub Releases asset names are flat (no slashes allowed).
+#
+# Example: parquet/dfp/bpa/report_type=ind/year=2024/part-0.parquet
+#       -> asset "bpa__report_type=ind__year=2024__part-0.parquet"
+#       -> URL https://github.com/<repo>/releases/download/<tag>/<asset>
+#
+# The future R/source-mirror-duckdb.R consumer reconstructs the
+# partition tree client-side from these encoded names and feeds the
+# resulting URL list to arrow::open_dataset().
+#
+# Requires `gh` CLI on PATH and an authenticated token (built-in on
+# GitHub Actions via GITHUB_TOKEN; locally via `gh auth login`).
+#
+# Usage:
+#   Rscript inst/etl/03-publish.R --dataset cad
+
+source("inst/etl/00-config.R")
+
+args <- commandArgs(trailingOnly = TRUE)
+dataset <- NULL
+i <- 1L
+while (i <= length(args)) {
+  if (args[i] == "--dataset") {
+    dataset <- args[i + 1L]
+    i <- i + 2L
+    next
+  }
+  i <- i + 1L
+}
+if (is.null(dataset)) {
+  stop("--dataset is required", call. = FALSE)
+}
+if (!dataset %in% mirror_datasets_v0_1) {
+  stop(sprintf("dataset '%s' not in mirror_datasets_v0_1", dataset),
+       call. = FALSE)
+}
+
+gh_bin <- Sys.which("gh")
+if (!nzchar(gh_bin)) {
+  stop("`gh` CLI not found on PATH", call. = FALSE)
+}
+
+workspace <- mirror_workspace()
+dataset_dir <- file.path(workspace, "out", "parquet", dataset)
+if (!dir.exists(dataset_dir)) {
+  stop(sprintf("no parquet output for dataset '%s' (expected at %s)",
+               dataset, dataset_dir),
+       call. = FALSE)
+}
+
+parquets <- list.files(
+  dataset_dir, pattern = "\\.parquet$",
+  recursive = TRUE, full.names = TRUE
+)
+if (!length(parquets)) {
+  stop(sprintf("no parquet files under %s", dataset_dir),
+       call. = FALSE)
+}
+
+tag <- mirror_tag_latest(dataset)
+title <- sprintf("Mirror: %s (latest)", dataset)
+notes <- sprintf(paste0(
+  "Auto-generated parquet mirror snapshot for dataset '%s'.\n",
+  "Updated: %s\n\n",
+  "See https://sidneybissoli.github.io/cvmdata/articles/",
+  "cache-and-mirror.html for client usage."
+), dataset, format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC"))
+
+# Recreate the release on every run so assets always reflect the
+# current parquet tree. `gh release delete` is idempotent under
+# --yes; missing release -> exit 1, which we swallow.
+suppressWarnings(
+  system2("gh", c(
+    "release", "delete", tag,
+    "--repo", mirror_repo,
+    "--yes",
+    "--cleanup-tag"
+  ), stdout = NULL, stderr = NULL)
+)
+
+message(sprintf("[03-publish] creating release %s", tag))
+notes_file <- tempfile(fileext = ".md")
+writeLines(notes, notes_file)
+status <- system2("gh", c(
+  "release", "create", tag,
+  "--repo", mirror_repo,
+  "--title", title,
+  "--notes-file", notes_file
+))
+if (status != 0L) {
+  stop("gh release create failed", call. = FALSE)
+}
+
+message(sprintf("[03-publish] uploading %d asset(s)", length(parquets)))
+for (f in parquets) {
+  rel <- substring(f, nchar(dataset_dir) + 2L)
+  asset_name <- gsub("[/\\\\]", "__", rel)
+  message("  ", asset_name)
+  status <- system2("gh", c(
+    "release", "upload", tag,
+    paste0(f, "#", asset_name),
+    "--repo", mirror_repo,
+    "--clobber"
+  ))
+  if (status != 0L) {
+    stop(sprintf("upload failed for %s", asset_name), call. = FALSE)
+  }
+}
+message(sprintf("[03-publish] release %s ready.", tag))
