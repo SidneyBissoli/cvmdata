@@ -1,0 +1,45 @@
+url: https://sidneybissoli.github.io/cvmdata/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: Fetchers
+    desc: >
+      Functions to retrieve any CVM open-data table covered by the
+      package.
+    contents:
+      - cvm_fetch
+      - cad_fetch
+  - title: Cache
+    desc: >
+      Inspect and manage the on-disk cache of downloaded artifacts.
+      The TTL window for HTTP revalidation is configurable via the
+      `cvmdata.cache_ttl_seconds` option (default 30 days).
+    contents:
+      - cvm_cache_path
+      - cvm_cache_set_path
+      - cvm_cache_info
+      - cvm_cache_clear
+  - title: Source backend
+    desc: >
+      Configure which backend `cvm_fetch()` queries (direct CVM portal
+      or the Phase F parquet mirror, when available).
+    contents:
+      - cvm_source_get
+      - cvm_source_set
+  - title: Discovery
+    desc: >
+      Browse the datasets, tables, dictionaries and code lists carried
+      by the package.
+    contents:
+      - cvm_datasets
+      - cvm_tables
+      - cvm_dictionary
+      - cvm_codelist
+      - cvm_dataset_years
+  - title: Utilities
+    desc: CNPJ formatting helpers.
+    contents:
+      - cnpj_clean
+      - cnpj_format
