@@ -18,14 +18,25 @@ cvm_cache_info()
 A tibble with one row per cached file, sorted by `dataset` then `file`.
 Columns: `dataset` (character), `file` (basename), `path` (absolute),
 `size_bytes` (integer), `mtime` (POSIXct), `etag` (character; `NA` when
-absent), `last_modified` (character; `NA` when absent). Returns a
-zero-row tibble with the same schema when the cache is empty.
+absent), `last_modified` (character; `NA` when absent). The tibble has
+an attribute `total_size_bytes` (numeric scalar) with the total bytes
+counted toward the cache size limit. Returns a zero-row tibble with the
+same schema (and `total_size_bytes = 0`) when the cache is empty.
 
 ## Details
 
 Extracted CSVs have no sidecar of their own — the freshness of the
 parent ZIP covers them — so they appear with `etag = NA_character_` and
 `last_modified = NA_character_`.
+
+The returned tibble carries an attribute `total_size_bytes` with the sum
+of `size_bytes`, useful for comparing against the eviction limit set via
+`options(cvmdata.cache_max_size_mb)` (default 100 MiB). When the total
+exceeds 90% of the limit, the next download triggers LRU eviction of the
+oldest year directories (yearly datasets) or artifact+sidecar pairs
+(non-partitioned). See
+[`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
+for the option's semantics.
 
 ## See also
 

@@ -33,6 +33,17 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/cvmdata.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
+    <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -273,6 +284,12 @@ varchar
 <p>Bug reports and feature requests: <a href="https://github.com/SidneyBissoli/cvmdata/issues" class="external-link uri">https://github.com/SidneyBissoli/cvmdata/issues</a>.</p>
 </div>
 <div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>Pull requests are welcome. See <a href="CONTRIBUTING.html">CONTRIBUTING.md</a> for the development setup, the quality gate run on every commit, and the schema-YAML format used when adding a new dataset.</p>
+<p>Please note that the cvmdata project is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+</div>
+<div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>MIT © Sidney Bissoli.</p>
@@ -294,6 +311,13 @@ varchar
 </ul>
 </div>
 
+<div class="community">
+<h2 data-toc-skip>Community</h2>
+<ul class="list-unstyled">
+<li><a href="CONTRIBUTING.html">Contributing guide</a></li>
+<li><a href="CODE_OF_CONDUCT.html">Code of conduct</a></li>
+</ul>
+</div>
 
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>

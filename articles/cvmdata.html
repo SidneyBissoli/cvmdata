@@ -31,6 +31,17 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/cvmdata.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
+    <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="../articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -60,36 +71,460 @@
 
     
     
-<p><code>cvmdata</code> provides a tidy API to the open data published
-by the Brazilian Securities and Exchange Commission (CVM — <em>Comissão
-de Valores Mobiliários</em>). The package fetches official CSV releases
-from the CVM portal at <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>, parses them respecting the
-upstream encoding (ISO-8859-1) and the published field conventions, and
-returns tibbles whose table names, column names and categorical values
-are preserved in Portuguese exactly as published by CVM. Function names,
-arguments and metadata attributes are in English, following rOpenSci and
-tidyverse conventions.</p>
-<p>This first vignette demonstrates the simplest entry point —
-<code><a href="../reference/cad_fetch.html">cad_fetch()</a></code>, which returns the current snapshot of the
-<em>Cadastro de Companhias Abertas</em> (registry of publicly-traded
-companies). Because this call hits the live CVM portal, the chunk runs
-only in interactive sessions.</p>
+<div class="section level2">
+<h2 id="what-cvmdata-does">What <code>cvmdata</code> does<a class="anchor" aria-label="anchor" href="#what-cvmdata-does"></a>
+</h2>
+<p><code>cvmdata</code> provides a tidy R API to the open data published
+by the Brazilian Securities and Exchange Commission — <em>Comissão de
+Valores Mobiliários</em> (CVM). It fetches official CSV releases from
+the CVM portal at <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>, parses them respecting the
+upstream encoding (<code>ISO-8859-1</code>) and the published field
+conventions, and returns tibbles whose <strong>table names, column names
+and categorical values are preserved in Portuguese</strong> exactly as
+published by CVM. Function names, arguments and metadata attributes are
+in English, following the rOpenSci and tidyverse conventions.</p>
+<p>The package’s first release covers four core publicly-traded-company
+datasets:</p>
+<table class="table">
+<colgroup>
+<col width="16%">
+<col width="83%">
+</colgroup>
+<thead><tr class="header">
+<th>Dataset id</th>
+<th>Coverage</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><code>cad</code></td>
+<td>Company registry (<code>Cadastro de Companhias Abertas</code>).</td>
+</tr>
+<tr class="even">
+<td><code>itr</code></td>
+<td>Quarterly financial statements
+(<code>Informações Trimestrais</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>dfp</code></td>
+<td>Annual financial statements
+(<code>Demonstrações Financeiras Padronizadas</code>).</td>
+</tr>
+<tr class="even">
+<td><code>fre</code></td>
+<td>Reference form, including ESG/governance tables
+(<code>Formulário de Referência</code>).</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">companies</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cad_fetch.html">cad_fetch</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">companies</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "cad" "dfp" "fre" "itr"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="first-call-the-company-registry">First call — the company registry<a class="anchor" aria-label="anchor" href="#first-call-the-company-registry"></a>
+</h2>
+<p>The simplest entry point is <code><a href="../reference/cad_fetch.html">cad_fetch()</a></code>, a thin alias
+for <code>cvm_fetch("cad", "companhias")</code>. It returns the current
+snapshot of the open-company registry. The chunk below loads a small
+slice of a real call pre-computed for this vignette (the package itself
+hits the CVM portal on every invocation):</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">companies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>  <span class="st">"extdata"</span>, <span class="st">"vignette-data"</span>, <span class="st">"cad_companhias_sample.rds"</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"cvmdata"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">companies</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-23 13:06:15.690987</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"cad"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"companhias"</span></span></span>
+<span><span class="co">#&gt;              cnpj_cia                                         denom_social</span></span>
+<span><span class="co">#&gt; 1  08.773.135/0001-00            2W ECOBANK S.A. - EM RECUPERAÇÃO JUDICIAL</span></span>
+<span><span class="co">#&gt; 2  11.396.633/0001-87                          3A COMPANHIA SECURITIZADORA</span></span>
+<span><span class="co">#&gt; 3  01.547.749/0001-16 521 PARTICIPAÇOES S.A. - EM LIQUIDAÇÃO EXTRAJUDICIAL</span></span>
+<span><span class="co">#&gt; 4  01.851.771/0001-55                                 524 PARTICIPAÇOES SA</span></span>
+<span><span class="co">#&gt; 5  01.919.008/0001-19                                 525 PARTICIPAÇOES SA</span></span>
+<span><span class="co">#&gt; 6  92.659.614/0001-06                           A J RENNER SA IND E PARTIP</span></span>
+<span><span class="co">#&gt; 7  02.288.752/0001-25                                A.P. PARTICIPAÇOES SA</span></span>
+<span><span class="co">#&gt; 8  21.649.280/0001-33                           ABC DADOS E INFORMATICA SA</span></span>
+<span><span class="co">#&gt; 9  02.258.274/0001-00                                 ABC SUPERMERCADOS SA</span></span>
+<span><span class="co">#&gt; 10 42.275.727/0001-21                          ABC XTAL MICROELETRONICA SA</span></span>
+<span><span class="co">#&gt; 11 34.033.779/0001-63                   ABN AMRO ARRENDAMENTO MERCANTIL SA</span></span>
+<span><span class="co">#&gt; 12 44.597.052/0001-62                                             ABRIL SA</span></span>
+<span><span class="co">#&gt; 13 07.794.351/0001-60                  ABYARA PLANEJAMENTO IMOBILIÁRIO S/A</span></span>
+<span><span class="co">#&gt; 14 07.636.657/0001-99                              ACO VERDE DO BRASIL S.A</span></span>
+<span><span class="co">#&gt; 15 18.451.005/0001-04                       ACOPALMA CIA INDL ACOS V PALMA</span></span>
+<span><span class="co">#&gt;                          denom_comerc     dt_reg   dt_const  dt_cancel</span></span>
+<span><span class="co">#&gt; 1                     2W ECOBANK S.A. 2020-10-29 2007-03-23       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 2  TRIPLO A  COMPANHIA SECURITIZADORA 2010-03-08 2009-11-03 2015-12-18</span></span>
+<span><span class="co">#&gt; 3               521 PARTICIPAÇÕES S/A 1997-07-11 1996-07-30       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4                524 PARTICIPACOES SA 1997-05-30 1997-04-02       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 5                525 PARTICIPACOES SA 1997-07-16 1997-04-02 2006-05-30</span></span>
+<span><span class="co">#&gt; 6                          A J RENNER 1969-06-24       &lt;NA&gt; 1998-06-17</span></span>
+<span><span class="co">#&gt; 7             A.P. PARTICIPAÇÕES S.A. 1998-01-21 1997-12-14 2004-12-23</span></span>
+<span><span class="co">#&gt; 8                    ABC COMPUTADORES 1988-06-03       &lt;NA&gt; 1993-03-05</span></span>
+<span><span class="co">#&gt; 9                   ABC SUPERMERCADOS 1998-02-27 1997-09-30 2001-12-17</span></span>
+<span><span class="co">#&gt; 10                               XTAL 1986-09-15       &lt;NA&gt; 1997-09-11</span></span>
+<span><span class="co">#&gt; 11                     AYMORÉ LEASING 1995-12-20 1970-01-06 2009-09-30</span></span>
+<span><span class="co">#&gt; 12                           ABRIL SA 1994-05-06       &lt;NA&gt; 1999-12-21</span></span>
+<span><span class="co">#&gt; 13                             ABYARA 2006-07-24 2006-01-04 2010-05-28</span></span>
+<span><span class="co">#&gt; 14            AÃO VERDE DO BRASIL S.A 2021-11-29 1985-05-07       &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 15     ACOPALMA CIA INDL ACOS V PALMA 1978-05-09 1973-03-15 2007-08-07</span></span>
+<span><span class="co">#&gt;                                       motivo_cancel                       sit</span></span>
+<span><span class="co">#&gt; 1                                              &lt;NA&gt; SUSPENSO(A) - DECISÃO ADM</span></span>
+<span><span class="co">#&gt; 2                           CANCELAMENTO VOLUNTÁRIO                 CANCELADA</span></span>
+<span><span class="co">#&gt; 3                                              &lt;NA&gt;                     ATIVO</span></span>
+<span><span class="co">#&gt; 4                                              &lt;NA&gt;                     ATIVO</span></span>
+<span><span class="co">#&gt; 5                           ELISÃO POR INCORPORAÇÃO                 CANCELADA</span></span>
+<span><span class="co">#&gt; 6          ATENDIMENTO AS NORMAS DA INSTR CVM 03/78                 CANCELADA</span></span>
+<span><span class="co">#&gt; 7  ATENDIMENTO AS NORMAS DA INSTRUÇÃO CVM Nº 361/02                 CANCELADA</span></span>
+<span><span class="co">#&gt; 8        ENQUADRAMENTO EXCEÇÕES DA INSTR. CVM 03/78                 CANCELADA</span></span>
+<span><span class="co">#&gt; 9         ATENDIMENTO AS NORMAS DA INSTR CVM 229/95                 CANCELADA</span></span>
+<span><span class="co">#&gt; 10         ATENDIMENTO AS NORMAS DA INSTR CVM 03/78                 CANCELADA</span></span>
+<span><span class="co">#&gt; 11                          ELISÃO POR INCORPORAÇÃO                 CANCELADA</span></span>
+<span><span class="co">#&gt; 12        ATENDIMENTO AS NORMAS DA INSTR CVM 229/95                 CANCELADA</span></span>
+<span><span class="co">#&gt; 13                          CANCELAMENTO VOLUNTÁRIO                 CANCELADA</span></span>
+<span><span class="co">#&gt; 14                                             &lt;NA&gt;                     ATIVO</span></span>
+<span><span class="co">#&gt; 15  CANCELAMENTO DE OFÍCIO C/BASE INSTR. CVM 287/98                 CANCELADA</span></span>
+<span><span class="co">#&gt;    dt_ini_sit cd_cvm                                              setor_ativ</span></span>
+<span><span class="co">#&gt; 1  2026-05-19  25224                                        Energia Elétrica</span></span>
+<span><span class="co">#&gt; 2  2015-12-18  21954                             Securitização de Recebíveis</span></span>
+<span><span class="co">#&gt; 3  1997-07-11  16330                      Emp. Adm. Part. - Energia Elétrica</span></span>
+<span><span class="co">#&gt; 4  1997-05-30  16284                   Emp. Adm. Part. - Sem Setor Principal</span></span>
+<span><span class="co">#&gt; 5  2006-05-30  16349                   Emp. Adm. Part. - Sem Setor Principal</span></span>
+<span><span class="co">#&gt; 6  1998-06-17     35                                 Emp. Adm. Participações</span></span>
+<span><span class="co">#&gt; 7  2004-12-23  16802                                 Emp. Adm. Participações</span></span>
+<span><span class="co">#&gt; 8  1993-03-05  13307                Máquinas, Equipamentos, Veículos e Peças</span></span>
+<span><span class="co">#&gt; 9  2001-12-17  16934                             Comércio (Atacado e Varejo)</span></span>
+<span><span class="co">#&gt; 10 1997-09-11  13005                Máquinas, Equipamentos, Veículos e Peças</span></span>
+<span><span class="co">#&gt; 11 2009-09-30  15270                                  Arrendamento Mercantil</span></span>
+<span><span class="co">#&gt; 12 1999-12-21  14370                                     Gráficas e Editoras</span></span>
+<span><span class="co">#&gt; 13 2010-05-28  20206 Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração</span></span>
+<span><span class="co">#&gt; 14 2021-11-29  26425                                 Metalurgia e Siderurgia</span></span>
+<span><span class="co">#&gt; 15 2007-08-07     60                                 Metalurgia e Siderurgia</span></span>
+<span><span class="co">#&gt;              tp_merc   categ_reg dt_ini_categ</span></span>
+<span><span class="co">#&gt; 1               &lt;NA&gt; Categoria A   2020-10-29</span></span>
+<span><span class="co">#&gt; 2               &lt;NA&gt; Categoria B   2010-03-08</span></span>
+<span><span class="co">#&gt; 3               &lt;NA&gt; Categoria B   2011-04-28</span></span>
+<span><span class="co">#&gt; 4              BOLSA Categoria A   2010-01-01</span></span>
+<span><span class="co">#&gt; 5               &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6               &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 7               &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 8               &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 9               &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 10              &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 11              &lt;NA&gt; Categoria A   2010-01-01</span></span>
+<span><span class="co">#&gt; 12              &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 13              &lt;NA&gt; Categoria A   2010-01-01</span></span>
+<span><span class="co">#&gt; 14 BALCÃO ORGANIZADO Categoria B   2021-11-29</span></span>
+<span><span class="co">#&gt; 15              &lt;NA&gt;        &lt;NA&gt;         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                               sit_emissor dt_ini_sit_emissor controle_acionario</span></span>
+<span><span class="co">#&gt; 1  EM RECUPERAÇÃO JUDICIAL OU EQUIVALENTE         2025-04-23            PRIVADO</span></span>
+<span><span class="co">#&gt; 2                    FASE PRÉ-OPERACIONAL         2010-03-08            PRIVADO</span></span>
+<span><span class="co">#&gt; 3                LIQUIDAÇÃO EXTRAJUDICIAL         2015-04-30            PRIVADO</span></span>
+<span><span class="co">#&gt; 4                        FASE OPERACIONAL         1997-05-30            PRIVADO</span></span>
+<span><span class="co">#&gt; 5                                    &lt;NA&gt;               &lt;NA&gt;    PRIVADO HOLDING</span></span>
+<span><span class="co">#&gt; 6                                    &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 7                                    &lt;NA&gt;               &lt;NA&gt;            ESTATAL</span></span>
+<span><span class="co">#&gt; 8                                    &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 9                                    &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 10                                   &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 11                                   &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 12                                   &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 13                                   &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt; 14                       FASE OPERACIONAL         2021-08-17            PRIVADO</span></span>
+<span><span class="co">#&gt; 15                                   &lt;NA&gt;               &lt;NA&gt;            PRIVADO</span></span>
+<span><span class="co">#&gt;    tp_ender                           logradouro                compl</span></span>
+<span><span class="co">#&gt; 1      SEDE      Avenida Dr. Chucri Zaidan, 1550  8 and-conj 815-sl 1</span></span>
+<span><span class="co">#&gt; 2      SEDE        Avenida Erasmo Braga, nº. 299             sala 703</span></span>
+<span><span class="co">#&gt; 3      SEDE                     Av. Ayrton Senna     3000 - sala 4098</span></span>
+<span><span class="co">#&gt; 4      SEDE Av. Presidente Antônio Carlos, nº 51      10º andar (pte)</span></span>
+<span><span class="co">#&gt; 5      SEDE                     RUA LAURO MULLER       116, SALA 2201</span></span>
+<span><span class="co">#&gt; 6      SEDE               R FREDERICO MENTZ 1606                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 7      SEDE       AV. PRESIDENTE WILSON, 231 - 2             7º ANDAR</span></span>
+<span><span class="co">#&gt; 8      SEDE               RUA FLORIDA 1670 12AND                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 9      SEDE           RUA PAULO BARBOSA, 161/201                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 10     SEDE                      AV BRASIL 20201                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 11     SEDE       ALAMEDA ARAGUAIA, 731 PAV.SUP.              PARTE A</span></span>
+<span><span class="co">#&gt; 12     SEDE       AV OTAVIANO ALVES DE LIMA 7221                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 13     SEDE                   AVENIDA IBIRAPUERA   2332/T. 1/ 11ANDAR</span></span>
+<span><span class="co">#&gt; 14     SEDE              Rodovia BR 222, Km 14,5 Gleba Itinga,Lote 71</span></span>
+<span><span class="co">#&gt; 15     SEDE         ALAMEDA LOURIVAL BOECHAT 550                 &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                  bairro             mun uf   pais      cep ddd_tel      tel</span></span>
+<span><span class="co">#&gt; 1  Chacara Santo Antoni       SÃO PAULO SP BRASIL  4711130      11 39579400</span></span>
+<span><span class="co">#&gt; 2                Centro  RIO DE JANEIRO RJ BRASIL 20020000      21 22338867</span></span>
+<span><span class="co">#&gt; 3       Barra da Tijuca  RIO DE JANEIRO RJ BRASIL 22775003      21 25560809</span></span>
+<span><span class="co">#&gt; 4                Centro  RIO DE JANEIRO RJ BRASIL 20020010      21 38043700</span></span>
+<span><span class="co">#&gt; 5              BOTAFOGO  RIO DE JANEIRO RJ BRASIL 22290160      21 21967200</span></span>
+<span><span class="co">#&gt; 6                  &lt;NA&gt;    PORTO ALEGRE RS BRASIL 90240111      51  3372033</span></span>
+<span><span class="co">#&gt; 7                CENTRO  RIO DE JANEIRO RJ BRASIL 20030021      21 22208866</span></span>
+<span><span class="co">#&gt; 8                  &lt;NA&gt;       SÃO PAULO SP BRASIL  4565000      11  5427188</span></span>
+<span><span class="co">#&gt; 9                CENTRO      PETRÓPOLIS RJ BRASIL 25635000      24  2331415</span></span>
+<span><span class="co">#&gt; 10                 &lt;NA&gt;  RIO DE JANEIRO RJ BRASIL 21515000      21 33726363</span></span>
+<span><span class="co">#&gt; 11           ALPHAVILLE         BARUERI SP BRASIL  6455000      11 31746507</span></span>
+<span><span class="co">#&gt; 12            PINHEIROS       SÃO PAULO SP BRASIL  5425902      11 30372010</span></span>
+<span><span class="co">#&gt; 13           IBIRAPUERA       SÃO PAULO SP BRASIL  4028002      11 32960202</span></span>
+<span><span class="co">#&gt; 14   Distrito de Pequiá      AÇAILÂNDIA MA BRASIL 65930000      99  5355122</span></span>
+<span><span class="co">#&gt; 15           N.S.FATIMA VÁRZEA DA PALMA MG BRASIL 39250000      31 33352590</span></span>
+<span><span class="co">#&gt;    ddd_fax      fax                       email</span></span>
+<span><span class="co">#&gt; 1       11 39579499         ri@2wecobank.com.br</span></span>
+<span><span class="co">#&gt; 2       21 22338867            dri@3asec.com.br</span></span>
+<span><span class="co">#&gt; 3       21 25560809    eximia@eximiacapital.com</span></span>
+<span><span class="co">#&gt; 4       21 38043480      gar@opportunity.com.br</span></span>
+<span><span class="co">#&gt; 5       21 21967201                        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 6       51  3423595                        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 7       21 25333830  contabilidade3@acal.com.br</span></span>
+<span><span class="co">#&gt; 8     &lt;NA&gt;       NA                        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 9       24  2311222        mfranca@abcsa.com.br</span></span>
+<span><span class="co">#&gt; 10      21 33726950                        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 11      11 31746257 rubens.rossi@br.abnamro.com</span></span>
+<span><span class="co">#&gt; 12      11 30372040       jaugusto@abril.com.br</span></span>
+<span><span class="co">#&gt; 13    &lt;NA&gt;       NA            ri@abyara.com.br</span></span>
+<span><span class="co">#&gt; 14      99  5355139         ri@ferroeste.com.br</span></span>
+<span><span class="co">#&gt; 15      31 33442596                        &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;                                 tp_resp                                resp</span></span>
+<span><span class="co">#&gt; 1  DIRETOR DE RELAÇÕES COM INVESTIDORES              FERNANDO GUEDES VIEIRA</span></span>
+<span><span class="co">#&gt; 2  DIRETOR DE RELAÇÕES COM INVESTIDORES           FELIPE MARQUES DA FONSECA</span></span>
+<span><span class="co">#&gt; 3                                  &lt;NA&gt;                                &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4  DIRETOR DE RELAÇÕES COM INVESTIDORES Maria Amalia Delfim de Melo Coutrim</span></span>
+<span><span class="co">#&gt; 5  DIRETOR DE RELAÇÕES COM INVESTIDORES                 KEVIN MICHAEL ALTIT</span></span>
+<span><span class="co">#&gt; 6  DIRETOR DE RELAÇÕES COM INVESTIDORES                  VERNER EGON RENNER</span></span>
+<span><span class="co">#&gt; 7  DIRETOR DE RELAÇÕES COM INVESTIDORES            GILBERTO AUDELINO CORREA</span></span>
+<span><span class="co">#&gt; 8  DIRETOR DE RELAÇÕES COM INVESTIDORES          JOSE GABRIEL CORREIA DAVID</span></span>
+<span><span class="co">#&gt; 9  DIRETOR DE RELAÇÕES COM INVESTIDORES              MARCELO FRANÇA DE LIMA</span></span>
+<span><span class="co">#&gt; 10 DIRETOR DE RELAÇÕES COM INVESTIDORES      WALTER EDUARDO TEIXEIRA MACHAD</span></span>
+<span><span class="co">#&gt; 11 DIRETOR DE RELAÇÕES COM INVESTIDORES          CARLOS ALBERTO LÓPEZ GALÁN</span></span>
+<span><span class="co">#&gt; 12 DIRETOR DE RELAÇÕES COM INVESTIDORES          JOSE AUGUSTO PINTO MOREIRA</span></span>
+<span><span class="co">#&gt; 13 DIRETOR DE RELAÇÕES COM INVESTIDORES                   MARCOS YUITI MORI</span></span>
+<span><span class="co">#&gt; 14 DIRETOR DE RELAÇÕES COM INVESTIDORES           Gustavo Rozenbaum Bcheche</span></span>
+<span><span class="co">#&gt; 15 DIRETOR DE RELAÇÕES COM INVESTIDORES      MILTON ALENCAR ASSIS DE TOLEDO</span></span>
+<span><span class="co">#&gt;    dt_ini_resp               logradouro_resp        compl_resp</span></span>
+<span><span class="co">#&gt; 1   2026-04-22    AV DR. CHUCRI ZAIDAN, 1550 8 AND-CONJ815-SL1</span></span>
+<span><span class="co">#&gt; 2   2011-06-16 AVENIDA ERASMO BRAGA, Nº. 299          SALA 703</span></span>
+<span><span class="co">#&gt; 3         &lt;NA&gt;                          &lt;NA&gt;              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4   2026-05-06 Av. Presidente Antônio Carlos                51</span></span>
+<span><span class="co">#&gt; 5   2005-06-14          RUA LAURO MULLER 116      2201 (PARTE)</span></span>
+<span><span class="co">#&gt; 6   1969-06-24     RUA FREDERICO MENTZ, 1606              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 7   2004-10-11                     RUA CEARá          1305/802</span></span>
+<span><span class="co">#&gt; 8   1988-06-03        RUA FLORIDA 1670 12AND              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 9   1998-02-27               RUA TEREZA 1415              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 10  1986-09-15               AV BRASIL 20201              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 11  2009-08-12              AVENIDA PAULISTA              1374</span></span>
+<span><span class="co">#&gt; 12  1994-05-06 AV NAÇÕES UNIDAS, 7221/2º AND              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 13  2009-06-08   RUA GOMES DE CARVALHO, 1510          6º ANDAR</span></span>
+<span><span class="co">#&gt; 14  2021-08-09      Avenida do Contorno 3800         19º andar</span></span>
+<span><span class="co">#&gt; 15  1978-05-09         RUA ALVES DO VALE, 14              &lt;NA&gt;</span></span>
+<span><span class="co">#&gt;             bairro_resp       mun_resp uf_resp pais_resp cep_resp ddd_tel_resp</span></span>
+<span><span class="co">#&gt; 1  CHÁCARA STO. ANTÔNIO      SÃO PAULO      SP      &lt;NA&gt;  4711130           11</span></span>
+<span><span class="co">#&gt; 2                CENTRO RIO DE JANEIRO      RJ      &lt;NA&gt; 20020000           21</span></span>
+<span><span class="co">#&gt; 3                  &lt;NA&gt;           &lt;NA&gt;    &lt;NA&gt;      &lt;NA&gt;       NA         &lt;NA&gt;</span></span>
+<span><span class="co">#&gt; 4                Centro RIO DE JANEIRO      RJ      &lt;NA&gt; 20020010           21</span></span>
+<span><span class="co">#&gt; 5              BOTAFOGO RIO DE JANEIRO      RJ      &lt;NA&gt; 22290160           21</span></span>
+<span><span class="co">#&gt; 6                  &lt;NA&gt;   PORTO ALEGRE      RS      &lt;NA&gt; 90000000           51</span></span>
+<span><span class="co">#&gt; 7          FUNCIONáRIOS BELO HORIZONTE      MG      &lt;NA&gt; 30150311           31</span></span>
+<span><span class="co">#&gt; 8                  &lt;NA&gt;      SÃO PAULO      SP      &lt;NA&gt; 21510000           21</span></span>
+<span><span class="co">#&gt; 9         ALTO DA SERRA     PETRÓPOLIS      RJ      &lt;NA&gt; 25635000           24</span></span>
+<span><span class="co">#&gt; 10                 &lt;NA&gt; RIO DE JANEIRO      RJ      &lt;NA&gt; 21510000           21</span></span>
+<span><span class="co">#&gt; 11           BELA VISTA      SÃO PAULO      SP      &lt;NA&gt;  1310916           11</span></span>
+<span><span class="co">#&gt; 12            PINHEIROS      SÃO PAULO      SP      &lt;NA&gt;  5425902           11</span></span>
+<span><span class="co">#&gt; 13         VILA OLÍMPIA      SÃO PAULO      SP      &lt;NA&gt;  4547005           11</span></span>
+<span><span class="co">#&gt; 14       Santa Efigênia BELO HORIZONTE      MG      &lt;NA&gt; 30110022           31</span></span>
+<span><span class="co">#&gt; 15        CORAçAO JESUS BELO HORIZONTE      MG      &lt;NA&gt; 30380320           31</span></span>
+<span><span class="co">#&gt;    tel_resp ddd_fax_resp fax_resp                 email_resp       cnpj_auditor</span></span>
+<span><span class="co">#&gt; 1  39579400         &lt;NA&gt;       NA  juridico@2wecobank.com.br 10.830.108/0001-65</span></span>
+<span><span class="co">#&gt; 2  22338867           21 22338867 juridico@triploasec.com.br 60.525.706/0001-07</span></span>
+<span><span class="co">#&gt; 3      &lt;NA&gt;         &lt;NA&gt;       NA                       &lt;NA&gt; 02.878.522/0001-16</span></span>
+<span><span class="co">#&gt; 4  38043700         &lt;NA&gt;       NA     gar@opportunity.com.br 10.830.108/0001-65</span></span>
+<span><span class="co">#&gt; 5  21967200           21 21967201   kevin@mattosfilho.com.br 11.245.719/0001-09</span></span>
+<span><span class="co">#&gt; 6   3142033         0051  3743595                       &lt;NA&gt; 44.038.248/0001-17</span></span>
+<span><span class="co">#&gt; 7  32354268           31 32737218    gilberto@acesita.com.br 02.248.211/0001-73</span></span>
+<span><span class="co">#&gt; 8   5427188         0021       NA                       &lt;NA&gt; 33.017.310/0001-78</span></span>
+<span><span class="co">#&gt; 9   2331415           24  2311231       mfranca@abcsa.com.br 33.017.310/0001-78</span></span>
+<span><span class="co">#&gt; 10 33726363         0021       NA                       &lt;NA&gt; 61.562.112/0001-20</span></span>
+<span><span class="co">#&gt; 11 31749611           11 31746751    cgalan@santander.com.br 49.928.567/0001-11</span></span>
+<span><span class="co">#&gt; 12 30372010           11 30372040      jaugusto@abril.com.br 33.017.310/0001-78</span></span>
+<span><span class="co">#&gt; 13 32960202           11 32960201           ri@abyara.com.br 00.326.016/0001-99</span></span>
+<span><span class="co">#&gt; 14 32282500         &lt;NA&gt;       NA        ri@ferroeste.com.br 61.562.112/0001-20</span></span>
+<span><span class="co">#&gt; 15 33352590           31 33442596       maatoledo@uol.com.br 61.411.393/0001-10</span></span>
+<span><span class="co">#&gt;                                                   auditor</span></span>
+<span><span class="co">#&gt; 1            GRANT THORNTON AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 2    MOORE STEPHENS LIMA LUCCHESI AUDITORES INDEPENDENTES</span></span>
+<span><span class="co">#&gt; 3            IRKO HIRASHIMA AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 4            GRANT THORNTON AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 5                                       DIRECTA AUDITORES</span></span>
+<span><span class="co">#&gt; 6                          ARTHUR ANDERSEN BIEDERMANN A I</span></span>
+<span><span class="co">#&gt; 7                            CANARIM AUDITORES ASSOCIADOS</span></span>
+<span><span class="co">#&gt; 8                                              RUHTRA S/C</span></span>
+<span><span class="co">#&gt; 9                                              RUHTRA S/C</span></span>
+<span><span class="co">#&gt; 10   PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 11 DELOITTE TOUCHE TOHMATSU AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 12                                             RUHTRA S/C</span></span>
+<span><span class="co">#&gt; 13      TERCO AUDITORES INDEPENDENTES - SOCIEDADE SIMPLES</span></span>
+<span><span class="co">#&gt; 14   PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA.</span></span>
+<span><span class="co">#&gt; 15                   WALTER HEUER AUDITORES INDEPENDENTES</span></span></code></pre></div>
 <p>Every tibble returned by a <code>cvmdata</code> fetcher carries five
-provenance attributes — <code>source</code>, <code>fetched_at</code>,
-<code>dataset</code>, <code>table</code> and
-<code>package_version</code> — which are displayed when the tibble is
-printed.</p>
-<p>Subsequent releases will add vignettes covering the quarterly and
-annual financial statements (<code>itr</code>, <code>dfp</code>), the
-reference form (<code>fre</code>, including ESG/governance tables), and
-the cache/mirror architecture.</p>
-  </main>
+provenance attributes:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"source"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "cvm"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"dataset"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "cad"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"table"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "companhias"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"package_version"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "0.0.0.9000"</span></span>
+<span><span class="co"># `fetched_at` is a POSIXct timestamp set at download time.</span></span></code></pre></div>
+<p>These attributes survive subsetting via standard tibble operations
+and are displayed at the top of the print output, so the dataset’s
+origin and freshness travel with the data.</p>
+</div>
+<div class="section level2">
+<h2 id="the-general-api-cvm_fetch">The general API — <code>cvm_fetch()</code><a class="anchor" aria-label="anchor" href="#the-general-api-cvm_fetch"></a>
+</h2>
+<p><code><a href="../reference/cad_fetch.html">cad_fetch()</a></code> is convenience. The single entry point for
+every dataset and every table is
+<code>cvm_fetch(dataset, table, ...)</code>. The example below shows
+what eight rows of BCO BRASIL’s individual balance sheet look like for
+2024 — also pre-computed:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bb_bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
+<span>  <span class="st">"extdata"</span>, <span class="st">"vignette-data"</span>, <span class="st">"dfp_bpa_bb_2024_sample.rds"</span>,</span>
+<span>  package <span class="op">=</span> <span class="st">"cvmdata"</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">bb_bpa</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-23 13:06:16.55788</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
+<span><span class="co">#&gt;             cnpj_cia   dt_refer versao       denom_cia cd_cvm</span></span>
+<span><span class="co">#&gt; 1 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 2 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 3 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 4 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 5 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 6 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 7 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt; 8 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023</span></span>
+<span><span class="co">#&gt;                                   grupo_dfp moeda ordem_exerc dt_fim_exerc</span></span>
+<span><span class="co">#&gt; 1 DF Individual - Balanço Patrimonial Ativo  REAL   PENÚLTIMO   2023-12-31</span></span>
+<span><span class="co">#&gt; 2 DF Individual - Balanço Patrimonial Ativo  REAL      ÚLTIMO   2024-12-31</span></span>
+<span><span class="co">#&gt; 3 DF Individual - Balanço Patrimonial Ativo  REAL   PENÚLTIMO   2023-12-31</span></span>
+<span><span class="co">#&gt; 4 DF Individual - Balanço Patrimonial Ativo  REAL      ÚLTIMO   2024-12-31</span></span>
+<span><span class="co">#&gt; 5 DF Individual - Balanço Patrimonial Ativo  REAL   PENÚLTIMO   2023-12-31</span></span>
+<span><span class="co">#&gt; 6 DF Individual - Balanço Patrimonial Ativo  REAL      ÚLTIMO   2024-12-31</span></span>
+<span><span class="co">#&gt; 7 DF Individual - Balanço Patrimonial Ativo  REAL   PENÚLTIMO   2023-12-31</span></span>
+<span><span class="co">#&gt; 8 DF Individual - Balanço Patrimonial Ativo  REAL      ÚLTIMO   2024-12-31</span></span>
+<span><span class="co">#&gt;   cd_conta                      ds_conta     vl_conta st_conta_fixa</span></span>
+<span><span class="co">#&gt; 1        1                   Ativo Total 2.208054e+12             S</span></span>
+<span><span class="co">#&gt; 2        1                   Ativo Total 2.395432e+12             S</span></span>
+<span><span class="co">#&gt; 3     1.01 Caixa e Equivalentes de Caixa 6.017770e+10             S</span></span>
+<span><span class="co">#&gt; 4     1.01 Caixa e Equivalentes de Caixa 8.115033e+10             S</span></span>
+<span><span class="co">#&gt; 5  1.01.01                         Caixa 1.402270e+10             S</span></span>
+<span><span class="co">#&gt; 6  1.01.01                         Caixa 1.718812e+10             S</span></span>
+<span><span class="co">#&gt; 7  1.01.02        Aplicações de Liquidez 4.615499e+10             S</span></span>
+<span><span class="co">#&gt; 8  1.01.02        Aplicações de Liquidez 6.396220e+10             S</span></span></code></pre></div>
+<p>Two things are worth noting on the output:</p>
+<ul>
+<li>
+<code>vl_conta</code> (account amount) is already in absolute
+Brazilian reais. CVM publishes a separate <code>ESCALA_MOEDA</code>
+field (<code>UNIDADE</code>, <code>MIL</code>, <code>MILHÃO</code>,
+<code>BILHÃO</code>); <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> multiplies
+<code>VL_CONTA</code> by the scale and drops the scale column. The
+“known defects” article walks through this transformation
+explicitly.</li>
+<li>
+<code>dt_refer</code>, <code>dt_fim_exerc</code> and other dates
+arrive as proper R <code>Date</code>, even though CVM ships them as
+<code>YYYY-MM-DD</code> strings. The conversion is driven by the
+published dictionary (<code>tipo_dados = "date"</code>).</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="selecting-companies">Selecting companies<a class="anchor" aria-label="anchor" href="#selecting-companies"></a>
+</h2>
+<p>The <code>companies</code> argument accepts CNPJ (with or without
+punctuation), CD_CVM (with or without zero-padding), or a free-text
+search against <code>denom_cia</code>. Detection is automatic per
+element. In non-interactive sessions, ambiguous text matches abort with
+a list of candidates so batch scripts never silently take the wrong
+issuer.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Three equivalent forms for one issuer:</span></span>
+<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          companies <span class="op">=</span> <span class="st">"1023"</span>,                 years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          companies <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,   years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          companies <span class="op">=</span> <span class="st">"BCO BRASIL S.A."</span>,      years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span> <span class="co"># exact</span></span></code></pre></div>
+<p>The <code>cvm-fetch</code> article goes through CNPJ vs. CD_CVM
+vs. text in depth, including the CD_CVM-to-CNPJ lookup performed
+automatically for tables that lack a <code>cd_cvm</code> column
+(e.g. <code>composicao_capital</code>).</p>
+</div>
+<div class="section level2">
+<h2 id="discovery">Discovery<a class="anchor" aria-label="anchor" href="#discovery"></a>
+</h2>
+<p>Two helpers describe what the package knows without touching the
+network:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
+<span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>
+<span><span class="co">#&gt;  [7] "dra"                "dre"                "dva"               </span></span>
+<span><span class="co">#&gt; [10] "parecer"            "submissao"</span></span>
+<span></span>
+<span><span class="co"># Dictionary for the columns of dfp/bpa, sourced from the published</span></span>
+<span><span class="co"># CVM META resources at snapshot time.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 8</span></span></span>
+<span><span class="co">#&gt;   column    campo     descricao        dominio tipo_dados tamanho precisao scale</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> cd_conta  CD_CONTA  Código da conta  Numéri… varchar         18       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> cd_cvm    CD_CVM    Código CVM       Numéri… char             6       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> cnpj_cia  CNPJ_CIA  CNPJ da companh… Alfanu… varchar         20       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> denom_cia DENOM_CIA Nome empresaria… Alfanu… varchar        100       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ds_conta  DS_CONTA  Descrição da co… Alfanu… varchar        100       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<p><code>cvm_codelist(dataset, table, column)</code> returns the
+enumerated values of categorical columns (e.g. <code>sit</code> in
+<code>cad/companhias</code> —
+<code>ATIVO</code>/<code>CONCEDIDO REGISTRO</code>/etc.);
+<code>cvm_dataset_years(dataset)</code> discovers the years available
+upstream for a yearly-partitioned dataset.</p>
+</div>
+<div class="section level2">
+<h2 id="cache-source-backend-and-where-to-read-next">Cache, source backend, and where to read next<a class="anchor" aria-label="anchor" href="#cache-source-backend-and-where-to-read-next"></a>
+</h2>
+<p><code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> caches downloaded artefacts under
+<code>tools::R_user_dir("cvmdata", "cache")</code> with HTTP
+revalidation gated by a 30-day TTL. Cached units are LRU-evicted once
+the cache exceeds the configurable size limit
+(<code>cvmdata.cache_max_size_mb</code>, default 100 MiB).
+<code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> reports current size and unit breakdown;
+<code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> resets it.</p>
+<p>The <code>source</code> argument selects the backend. v0.1 defaults
+to <code>"cvm"</code> (direct HTTP to the open-data portal); a planned
+<code>"mirror"</code> backend will route requests to a parquet snapshot
+consulted via DuckDB with column- and partition-level pushdown, kept
+fresh by a weekly workflow. The mirror is configured through
+<code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code> once it ships.</p>
+<p>Further reading on the pkgdown site:</p>
+<ul>
+<li>
+<strong>cvm-fetch</strong> — deep dive on <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>,
+including
+<code>companies</code>/<code>years</code>/<code>report_type</code>/<code>on_error</code>/<code>validate</code>
+semantics.</li>
+<li>
+<strong>itr-dfp</strong> — quarterly and annual financial
+statements, with two end-to-end workflows.</li>
+<li>
+<strong>fre</strong> — reference form, including the eight
+ESG/governance tables that ship without CVM-published META.</li>
+<li>
+<strong>cvm-defects</strong> — known quirks of the CVM publication
+and how <code>cvmdata</code> handles each one.</li>
+</ul>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

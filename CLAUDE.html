@@ -17,6 +17,15 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="articles/cvmdata.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
+    <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -257,12 +266,17 @@
 │   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
 │   │                              #   + filter_by_companies() + busca textual
 │   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
+│   ├── cache.R                    # API pública de cache:
+│   │                              #   cvm_cache_path(), cvm_cache_set_path(),
+│   │                              #   cvm_cache_info(), cvm_cache_clear()
 │   ├── discovery.R                # cvm_datasets(), cvm_tables(),
 │   │                              #   cvm_dictionary(), cvm_codelist(),
 │   │                              #   cvm_dataset_years() (não segue prefixo
 │   │                              #   por enquanto — exceção tolerada)
 │   ├── schema-load.R              # load_schema() + validate_schema() +
 │   │                              #   resolve_file_pattern()
+│   ├── source.R                   # API pública de source:
+│   │                              #   cvm_source_get(), cvm_source_set()
 │   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
 │   │                              #   ZIP-yearly) + download_with_etag()
 │   ├── transform-schema.R         # apply_schema_transformations() genérico
@@ -321,11 +335,18 @@ cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_year_fallback         (years = NULL caiu para ano anterior
 │                                       porque max year não tinha dados da
 │                                       companhia pedida)
-└── cvmdata_warn_partial_failure       (batch yearly: alguns anos
-                                        falharam HTTP sob
-                                        on_error = "warn"; demais
-                                        sobreviventes foram empilhados
-                                        e retornados)</code></pre>
+├── cvmdata_warn_partial_failure       (batch yearly: alguns anos
+│                                       falharam HTTP sob
+│                                       on_error = "warn"; demais
+│                                       sobreviventes foram empilhados
+│                                       e retornados)
+└── cvmdata_warn_eviction              (LRU eviction removeu unidades
+                                        do cache local para honrar
+                                        options(cvmdata.cache_max_size_mb);
+                                        default emite em interactive()
+                                        e silencia em batch, controlado
+                                        por
+                                        options(cvmdata.cache_warn_evictions))</code></pre>
 <p>Implementação via wrapper interno <code>cvmdata_abort(message, class, ...)</code> que adiciona <code>"cvmdata_error"</code> ao final do vetor de classes automaticamente. Análogo <code>cvmdata_warn()</code> para warnings.</p>
 <hr></div>
 <div class="section level2">
@@ -498,7 +519,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <li>
 <code>source = "cvm"</code>: L4 (memória) → L1 (ZIP raw em disco) → CVM HTTP → erro.</li>
 </ul><p><strong>Mirror parquet ativado em v0.1, não adiado.</strong> Workflow semanal (<code>etl-mirror.yaml</code>, cron <code>0 7 * * 2</code>) valida o mirror contra a CVM e republica em caso de divergência (detecção via hash de <code>meta_*.txt</code> + <code>dictionary_entry_inventory.json</code> — Rodada 3.0.2 §4.3). Volume estimado para companhias abertas (CAD + DFP + ITR + FRE em parquet comprimido) ≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo, 100 GB por release).</p>
-<p>Limite default 100 MB, configurável via <code>options(cvmdata.cache_max_size_mb = ...)</code>. Eviction LRU quando atinge 90% do limite.</p>
+<p>Limite default 100 MiB, configurável via <code>options(cvmdata.cache_max_size_mb = ...)</code> — imposto na Sessão 3.8. Quando a soma das <strong>unidades de cache</strong> ultrapassa 90% do limite, o próximo download (no fim do ramo de gravação real de <code>download_with_etag()</code>, depois do <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> do sidecar) dispara LRU eviction até cair para 80% do limite <strong>ou</strong> esgotar a lista de candidatos. A engine vive em <code>R/cache.R</code> (<code>read_cache_max_size()</code>, <code>build_cache_units()</code>, <code>cache_current_size_bytes()</code>, <code>cache_enforce_limit()</code>). Unidade de eviction: diretório do ano <code>&lt;cache&gt;/raw/&lt;dataset&gt;/&lt;YYYY&gt;/</code> para datasets yearly (DFP/ITR/FRE), par <code>{artifact, sidecar}</code> para não-particionados (CAD); âncora de ordenação é <code><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.mtime()</a></code> do upstream artifact (ZIP/CSV). Files órfãos (artifact sem sidecar, sidecar sem artifact) são ignorados na contabilidade — <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> segue sendo o caminho para limpá-los. O artefato recém-gravado é protegido contra self-eviction (parâmetro <code>protect</code> passado pelo trigger). Valores especiais: <code>0</code> ou negativo desligam a engine; <code>Inf</code> idem; tipo inválido cai para o default 100 MiB (defesa). Observabilidade: <code>cvmdata_warn_eviction</code> é emitida agregada ao fim de cada rodada (<code>{N} unit(s)</code>, <code>{X} MiB</code> liberados, limite atual); default <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> via <code>options(cvmdata.cache_warn_evictions)</code> — batch silencia, REPL avisa. Atributo <code>total_size_bytes</code> em <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> (Sessão 3.8) entrega a contagem corrente. CSVs extraídos via <code><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip()</a></code> contam para o limite (mesma unidade do ZIP), mas o trigger só dispara em downloads reais — não em extrações; cache acima de 90% pós-<code>unzip</code> se auto-corrige no próximo download.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_11-política-de-testes">11. Política de testes<a class="anchor" aria-label="anchor" href="#id_11-pol%C3%ADtica-de-testes"></a></h2>

@@ -1,6 +1,17 @@
 # Articles
 
-### All vignettes
+### Get started
 
 - [Introduction to
   cvmdata](https://sidneybissoli.github.io/cvmdata/articles/cvmdata.md):
+
+### Deep dives
+
+- [cvm_fetch(): the generic
+  API](https://sidneybissoli.github.io/cvmdata/articles/cvm-fetch.md):
+- [Quarterly and annual statements (ITR &
+  DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
+- [Reference Form
+  (FRE)](https://sidneybissoli.github.io/cvmdata/articles/fre.md):
+- [Known defects of the CVM
+  publication](https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.md):

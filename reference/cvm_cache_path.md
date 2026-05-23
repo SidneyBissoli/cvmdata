@@ -26,6 +26,16 @@ to `Inf` to skip revalidation entirely until
 [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
 is called.
 
+The cache size is bounded by `options(cvmdata.cache_max_size_mb)`
+(default `100` MiB). Whenever the total counted across yearly bundles
+and non-partitioned `{artifact, sidecar}` pairs exceeds 90% of the
+limit, the next download evicts the oldest units (by ZIP/CSV `mtime`)
+until the cache is at or below 80% of the limit. Set the option to `0`,
+a negative number, or `Inf` to disable eviction. Interactive sessions
+see a `cvmdata_warn_eviction` warning after each eviction round; batch
+jobs stay silent unless `options(cvmdata.cache_warn_evictions = TRUE)`
+is set.
+
 Read-only: this function does not create the directory.
 
 ## See also

@@ -173,6 +173,18 @@ the two side by side.
 Bug reports and feature requests:
 <https://github.com/SidneyBissoli/cvmdata/issues>.
 
+## Contributing
+
+Pull requests are welcome. See
+[CONTRIBUTING.md](https://sidneybissoli.github.io/cvmdata/CONTRIBUTING.md)
+for the development setup, the quality gate run on every commit, and the
+schema-YAML format used when adding a new dataset.
+
+Please note that the cvmdata project is released with a [Contributor
+Code of
+Conduct](https://sidneybissoli.github.io/cvmdata/CODE_OF_CONDUCT.md). By
+contributing to this project, you agree to abide by its terms.
+
 ## License
 
 MIT © Sidney Bissoli.

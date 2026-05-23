@@ -31,6 +31,15 @@ columns)."></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/cvmdata.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
+    <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="../articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -70,14 +79,23 @@ columns).</p>
 <code>dataset</code> then <code>file</code>. Columns: <code>dataset</code> (character),
 <code>file</code> (basename), <code>path</code> (absolute), <code>size_bytes</code> (integer),
 <code>mtime</code> (POSIXct), <code>etag</code> (character; <code>NA</code> when absent),
-<code>last_modified</code> (character; <code>NA</code> when absent). Returns a
-zero-row tibble with the same schema when the cache is empty.</p>
+<code>last_modified</code> (character; <code>NA</code> when absent). The tibble has
+an attribute <code>total_size_bytes</code> (numeric scalar) with the
+total bytes counted toward the cache size limit. Returns a
+zero-row tibble with the same schema (and <code>total_size_bytes = 0</code>) when the cache is empty.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Extracted CSVs have no sidecar of their own — the freshness of
 the parent ZIP covers them — so they appear with
 <code>etag = NA_character_</code> and <code>last_modified = NA_character_</code>.</p>
+<p>The returned tibble carries an attribute <code>total_size_bytes</code> with
+the sum of <code>size_bytes</code>, useful for comparing against the
+eviction limit set via <code>options(cvmdata.cache_max_size_mb)</code>
+(default 100 MiB). When the total exceeds 90% of the limit, the
+next download triggers LRU eviction of the oldest year directories
+(yearly datasets) or artifact+sidecar pairs (non-partitioned).
+See <code><a href="cvm_cache_path.html">cvm_cache_path()</a></code> for the option's semantics.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

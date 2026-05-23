@@ -58,7 +58,16 @@ Workflow `pkgdown.yaml` — Sessão 3.7. Deploy via
 `cache`, `source`, `discovery`, `utilities`) agrupando as 14 funções
 exportadas até a 3.6.
 
-`CODE_OF_CONDUCT.md` e `CONTRIBUTING.md`.
+`CODE_OF_CONDUCT.md` e `CONTRIBUTING.md` — Sessão 3.10. Contributor
+Covenant 2.1 (canônico, sem desvios) com endpoint de report
+`sbissoli76@gmail.com` (Alt 1 do trio email-pessoal/issue-
+tracker/email-dedicado; mesmo email já público em `Authors@R`).
+`CONTRIBUTING.md` médio (~150 linhas, Alt 2 do trio mínimo/médio/
+completo): Reporting issues, Submitting a PR, Development setup, Quality
+gate (comandos literais), Adding/modifying schema YAML (formato mínimo +
+ações de `transformations`), Project goals. README.Rmd ganhou seção
+`Contributing` com paragrafo padrão rOpenSci/usethis apontando para
+ambos; pkgdown 2.x detecta CoC/ CONTRIBUTING automaticamente no navbar.
 
 ### Fase B — Cache + source CVM (16-20h)
 
@@ -92,7 +101,23 @@ existir; sidecar sem `fetched_at` parseável cai para HEAD para refrescar
 metadados).
 
 Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e eviction
-LRU quando atinge 90%.
+LRU quando atinge 90% — Sessão 3.8. Default 100 MiB. Engine em
+`R/cache.R` (`read_cache_max_size()`, `build_cache_units()`,
+`cache_current_size_bytes()`, `cache_enforce_limit()`); trigger
+amortizado em `download_with_etag()` no ramo que grava bytes (TTL/304
+fast paths pulam). Métrica de ordenação
+[`file.mtime()`](https://rdrr.io/r/base/file.info.html) do upstream
+artifact (Alt 1 da decisão 1); escopo todo o conteúdo de `<cache>/raw/`
+com unidade atômica = diretório do ano (yearly) ou par
+`{artifact, sidecar}` (none) (Alt 2 da decisão 2); gatilho após
+gravação + target 80% (Alt 1 da decisão 3). Limite `0`/negativo/ `Inf`
+desliga; tipo inválido cai para default. Observabilidade via
+`cvmdata_warn_eviction` (nova classe em §6 do CLAUDE.md), default
+[`interactive()`](https://rdrr.io/r/base/interactive.html) via
+`options(cvmdata.cache_warn_evictions)` (Alt 3 da decisão 5). Atributo
+`total_size_bytes` adicionado a
+[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+(Alt 1 da decisão 4). Sem export novo (Alt 1 da decisão 6).
 
 `source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly (Sessão
 02, com extração do CSV alvo via `report_type`).
@@ -312,7 +337,12 @@ YAMLs reais com `meta_status: missing` — três modos
 (`strict`/`warn`/`skip`) cobertos por testes que reescrevem o header de
 `empregado_PCD` no cache.
 
-Vignettes `itr-dfp.Rmd` e `fre.Rmd`.
+**Sessão 3.9**: Articles `itr-dfp.Rmd` e `fre.Rmd` em
+`vignettes/articles/` (eval = TRUE, CVM real). Reference table no topo
+de cada um (11/36 tabelas); 2 workflows por article. itr-dfp cobre
+`multiply_by_scale` + `keep_latest_version` + lookup CD_CVM→CNPJ via
+`submissao`; fre cobre header alternativo (`cnpj_companhia`),
+`meta_status: missing` (workflow PCD), cap table (`posicao_acionaria`).
 
 Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após queda
 para 72% no merge de DFP).
@@ -385,9 +415,18 @@ Subir cobertura para ≥90% (gate do marco v0.1.0). Pós-Sessão 3.6 total
 só guards defensivos (snapshot ausente / pacote não instalado / dataset
 com schema dir vazio).
 
-Vignette `cvm-fetch.Rmd` (substitui stub atual).
+**Sessão 3.9**: Article `cvm-fetch.Rmd` (deep dive da API) em
+`vignettes/articles/`. Stub `vignettes/cvmdata.Rmd` reescrito como intro
+CRAN-safe (RDS pré-computado em `inst/extdata/vignette-data/`);
+`data-raw/build-vignette-data.R` regera as RDS hitando a CVM. Layout
+final: 1 vignette (`cvmdata.Rmd`) + 4 articles (`cvm-fetch`, `itr-dfp`,
+`fre`, `cvm-defects`).
 
-Vignette de defeitos conhecidos da CVM (Rodada 2.6 §11.5).
+**Sessão 3.9**: Article `cvm-defects.Rmd` cobrindo os 13 defeitos
+conhecidos da publicação CVM (naming doc §11.5 + descobertos em
+implementação). Híbrido: tabela-índice no topo + mini-exemplo para os 5
+estruturais (#5 padding CD_CVM, \#7 `multiply_by_scale`, \#8 META
+missing, \#11 `keep_latest_version`, \#13 lookup CD_CVM→CNPJ).
 
 ### Fase F — Pipeline ETL + mirror (24-32h)
 

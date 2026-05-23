@@ -23,6 +23,15 @@ option cvmdata.cache_dir (see cvm_cache_set_path())."></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/cvmdata.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
+    <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="../articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -64,6 +73,16 @@ window is controlled by the option <code>cvmdata.cache_ttl_seconds</code>
 (default <code>2592000</code>, i.e. 30 days); set it to <code>0</code> to revalidate on
 every call, or to <code>Inf</code> to skip revalidation entirely until
 <code><a href="cvm_cache_clear.html">cvm_cache_clear()</a></code> is called.</p>
+<p>The cache size is bounded by <code>options(cvmdata.cache_max_size_mb)</code>
+(default <code>100</code> MiB). Whenever the total counted across yearly
+bundles and non-partitioned <code>{artifact, sidecar}</code> pairs exceeds
+90% of the limit, the next download evicts the oldest units
+(by ZIP/CSV <code>mtime</code>) until the cache is at or below 80% of the
+limit. Set the option to <code>0</code>, a negative number, or <code>Inf</code> to
+disable eviction. Interactive sessions see a
+<code>cvmdata_warn_eviction</code> warning after each eviction round;
+batch jobs stay silent unless
+<code>options(cvmdata.cache_warn_evictions = TRUE)</code> is set.</p>
 <p>Read-only: this function does not create the directory.</p>
     </div>
     <div class="section level2">
