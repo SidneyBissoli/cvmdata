@@ -1,0 +1,117 @@
+# cvmdata
+
+`cvmdata` provides a tidy API to the open data published by the
+Brazilian Securities and Exchange Commission (CVM — Comissão de Valores
+Mobiliários). The first release covers the core publicly-traded-company
+datasets: company registry (`cad`), quarterly financial statements
+(`itr`), annual financial statements (`dfp`) and the reference form
+(`fre`), the latter including ESG/governance tables on board diversity,
+compensation and shareholder structure.
+
+The package preserves table names, column names, categorical values and
+free text in Portuguese exactly as CVM publishes them. Function names,
+arguments and metadata attributes follow English-language rOpenSci and
+tidyverse conventions.
+
+## Installation
+
+`cvmdata` is not yet on CRAN. The development version can be installed
+from GitHub:
+
+``` r
+
+# install.packages("pak")
+pak::pak("SidneyBissoli/cvmdata")
+```
+
+## Quick start
+
+``` r
+
+library(cvmdata)
+
+# Fetch the full company registry (single snapshot, no temporal partitioning)
+companies <- cad_fetch()
+```
+
+## Data provenance
+
+Data is fetched from the official CVM Open Data Portal
+(<https://dados.cvm.gov.br/>). A package-managed mirror on GitHub
+Releases serves as automatic fallback when an upstream file becomes
+unavailable. Every returned tibble carries provenance attributes
+(`source`, `fetched_at`, `dataset`, `table`, `package_version`).
+
+## License
+
+MIT © Sidney da Silva Pereira Bissoli.
+
+# Package index
+
+## Fetchers
+
+Functions to retrieve any CVM open-data table covered by the package.
+
+- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  : Fetch a CVM open-data table
+- [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
+  : Fetch the CVM company registry (CAD)
+
+## Cache
+
+Inspect and manage the on-disk cache of downloaded artifacts. The TTL
+window for HTTP revalidation is configurable via the
+`cvmdata.cache_ttl_seconds` option (default 30 days).
+
+- [`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
+  : Path to the cvmdata cache directory
+- [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)
+  : Set the cvmdata cache directory
+- [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+  : Inventory of files in the cvmdata cache
+- [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+  : Clear cached files
+
+## Source backend
+
+Configure which backend
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+queries (direct CVM portal or the Phase F parquet mirror, when
+available).
+
+- [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
+  : Get the active cvmdata source backend
+- [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
+  : Set the active cvmdata source backend
+
+## Discovery
+
+Browse the datasets, tables, dictionaries and code lists carried by the
+package.
+
+- [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
+  : List datasets covered by the package
+- [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+  : List the tables published in a dataset
+- [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+  : Look up the CVM-published dictionary for a table
+- [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
+  : Look up the codelist for a categorical column
+- [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  : Range of years available for a yearly-partitioned dataset
+
+## Utilities
+
+CNPJ formatting helpers.
+
+- [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
+  : Strip punctuation from a CNPJ vector
+- [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)
+  : Format a CNPJ vector with the canonical punctuation
+
+# Articles
+
+### All vignettes
+
+- [Introduction to
+  cvmdata](https://sidneybissoli.github.io/cvmdata/articles/cvmdata.md):
