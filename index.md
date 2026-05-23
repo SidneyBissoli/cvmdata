@@ -76,7 +76,9 @@ for every column:
 
 dict <- cvm_dictionary("dfp", "bpa")
 knitr::kable(
-  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")]
+  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
+  format = "html",
+  table.attr = 'width="100%"'
 )
 ```
 

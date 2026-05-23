@@ -88,69 +88,137 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
-<span>  <span class="va">dict</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"column"</span>, <span class="st">"descricao"</span>, <span class="st">"tipo_dados"</span>, <span class="st">"tamanho"</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="va">dict</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"column"</span>, <span class="st">"descricao"</span>, <span class="st">"tipo_dados"</span>, <span class="st">"tamanho"</span><span class="op">)</span><span class="op">]</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"html"</span>,</span>
+<span>  table.attr <span class="op">=</span> <span class="st">'width="100%"'</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<colgroup>
-<col width="20%">
-<col width="48%">
-<col width="17%">
-<col width="13%">
-</colgroup>
+<table width="100%" class="table">
 <thead><tr>
-<th align="left">column</th>
-<th align="left">descricao</th>
-<th align="left">tipo_dados</th>
-<th align="right">tamanho</th>
+<th style="text-align:left;">
+column
+</th>
+<th style="text-align:left;">
+descricao
+</th>
+<th style="text-align:left;">
+tipo_dados
+</th>
+<th style="text-align:right;">
+tamanho
+</th>
 </tr></thead>
 <tbody>
 <tr>
-<td align="left">cd_conta</td>
-<td align="left">Código da conta</td>
-<td align="left">varchar</td>
-<td align="right">18</td>
+<td style="text-align:left;">
+cd_conta
+</td>
+<td style="text-align:left;">
+Código da conta
+</td>
+<td style="text-align:left;">
+varchar
+</td>
+<td style="text-align:right;">
+18
+</td>
 </tr>
 <tr>
-<td align="left">cd_cvm</td>
-<td align="left">Código CVM</td>
-<td align="left">char</td>
-<td align="right">6</td>
+<td style="text-align:left;">
+cd_cvm
+</td>
+<td style="text-align:left;">
+Código CVM
+</td>
+<td style="text-align:left;">
+char
+</td>
+<td style="text-align:right;">
+6
+</td>
 </tr>
 <tr>
-<td align="left">cnpj_cia</td>
-<td align="left">CNPJ da companhia</td>
-<td align="left">varchar</td>
-<td align="right">20</td>
+<td style="text-align:left;">
+cnpj_cia
+</td>
+<td style="text-align:left;">
+CNPJ da companhia
+</td>
+<td style="text-align:left;">
+varchar
+</td>
+<td style="text-align:right;">
+20
+</td>
 </tr>
 <tr>
-<td align="left">denom_cia</td>
-<td align="left">Nome empresarial da companhia</td>
-<td align="left">varchar</td>
-<td align="right">100</td>
+<td style="text-align:left;">
+denom_cia
+</td>
+<td style="text-align:left;">
+Nome empresarial da companhia
+</td>
+<td style="text-align:left;">
+varchar
+</td>
+<td style="text-align:right;">
+100
+</td>
 </tr>
 <tr>
-<td align="left">ds_conta</td>
-<td align="left">Descrição da conta</td>
-<td align="left">varchar</td>
-<td align="right">100</td>
+<td style="text-align:left;">
+ds_conta
+</td>
+<td style="text-align:left;">
+Descrição da conta
+</td>
+<td style="text-align:left;">
+varchar
+</td>
+<td style="text-align:right;">
+100
+</td>
 </tr>
 <tr>
-<td align="left">dt_fim_exerc</td>
-<td align="left">Data fim do exercício social</td>
-<td align="left">date</td>
-<td align="right">10</td>
+<td style="text-align:left;">
+dt_fim_exerc
+</td>
+<td style="text-align:left;">
+Data fim do exercício social
+</td>
+<td style="text-align:left;">
+date
+</td>
+<td style="text-align:right;">
+10
+</td>
 </tr>
 <tr>
-<td align="left">dt_refer</td>
-<td align="left">Data de referência do documento</td>
-<td align="left">date</td>
-<td align="right">10</td>
+<td style="text-align:left;">
+dt_refer
+</td>
+<td style="text-align:left;">
+Data de referência do documento
+</td>
+<td style="text-align:left;">
+date
+</td>
+<td style="text-align:right;">
+10
+</td>
 </tr>
 <tr>
-<td align="left">escala_moeda</td>
-<td align="left">Escala monetária</td>
-<td align="left">varchar</td>
-<td align="right">100</td>
+<td style="text-align:left;">
+escala_moeda
+</td>
+<td style="text-align:left;">
+Escala monetária
+</td>
+<td style="text-align:left;">
+varchar
+</td>
+<td style="text-align:right;">
+100
+</td>
 </tr>
 </tbody>
 </table>
