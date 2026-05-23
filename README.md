@@ -86,14 +86,16 @@ for every column:
 
 ``` r
 dict <- cvm_dictionary("dfp", "bpa")
-knitr::kable(
+tbl <- knitr::kable(
   dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
-  format = "html",
-  table.attr = 'width="100%"'
+  format = "html"
 )
+cat('<div align="center">', tbl, '</div>', sep = "\n")
 ```
 
-<table width="100%">
+<div align="center">
+
+<table>
 
 <thead>
 
@@ -320,6 +322,8 @@ varchar
 </tbody>
 
 </table>
+
+</div>
 
 Fetch quarterly individual balance sheets (“BPA individual”) for two
 companies across recent years. Companies can be identified by CNPJ,
