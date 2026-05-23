@@ -1,0 +1,146 @@
+---
+title: "Quarterly and annual statements (ITR & DFP)"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+CVM publishes two financial-statement datasets with the **same eleven
+tables** and the same schema, differing only in cadence:
+
+* **ITR** — *Informações Trimestrais*. One CSV per table per year, with
+  one row per `(company, quarter, account)`.
+* **DFP** — *Demonstrações Financeiras Padronizadas*. One CSV per
+  table per year, with one row per `(company, fiscal year, account)`.
+
+The package's tooling is identical for both: pass `"itr"` or `"dfp"`
+as `dataset`, the same `table` name, and the same arguments. Eight
+tables out of eleven publish individual / consolidated variants
+selected through `report_type`.
+
+```{r setup}
+library(cvmdata)
+```
+
+## Reference: tables available
+
+| Table                | What it carries                                        | `report_type` required? | Notes                                                        |
+|----------------------|--------------------------------------------------------|-------------------------|--------------------------------------------------------------|
+| `bpa`                | Asset side of the balance sheet                        | Yes (`ind` / `con`)     | `VL_CONTA × ESCALA_MOEDA` applied (`multiply_by_scale`).     |
+| `bpp`                | Liabilities + equity side                              | Yes                     | Idem.                                                        |
+| `dre`                | Income statement                                       | Yes                     | Idem.                                                        |
+| `dra`                | Statement of comprehensive income                      | Yes                     | Idem.                                                        |
+| `dfc_md`             | Cash-flow statement, direct method                     | Yes                     | Idem.                                                        |
+| `dfc_mi`             | Cash-flow statement, indirect method                   | Yes                     | Idem.                                                        |
+| `dmpl`               | Statement of changes in equity                         | Yes                     | Idem; wider table (multiple equity columns).                 |
+| `dva`                | Statement of value added (Brazilian-specific)          | Yes                     | Idem.                                                        |
+| `composicao_capital` | Capital composition (share counts by class)            | No (`NULL`)             | No `cd_cvm` column — CD_CVM filters resolve via `submissao`. |
+| `parecer`            | Auditor opinion (free-text)                            | No                      | One row per filing, with full opinion text in `texto`.       |
+| `submissao`          | Filing header — `id_doc`, `dt_receb`, `link_doc`, etc. | No                      | The dataset's index. Every filing has exactly one row here.  |
+
+Use `cvm_dictionary("dfp", "<table>")` to see the column-level
+metadata (descriptions, domain, data type, size) for any of the
+eleven tables; `cvm_codelist("dfp", "<table>", "<column>")` returns
+enumerated categorical values.
+
+## Workflow 1 — Side-by-side total assets across two issuers
+
+Goal: compare 2024 total assets for **BCO BRASIL S.A.** (CD_CVM
+`1023`) and **MAGAZINE LUIZA S.A.** (CD_CVM `22470`) using the
+individual balance sheet (`dfp/bpa`).
+
+```{r workflow-1-fetch}
+bpa <- cvm_fetch(
+  "dfp", "bpa",
+  report_type = "ind",
+  companies   = c("1023", "22470"),
+  years       = 2024
+)
+bpa
+```
+
+The tibble carries provenance attributes and the package has already:
+
+* multiplied `VL_CONTA` by `ESCALA_MOEDA` and dropped the scale column
+  (values are in absolute reais);
+* converted `DT_REFER`, `DT_FIM_EXERC` to R `Date`;
+* kept only the latest `VERSAO` per `(cnpj_cia, dt_refer)` — so
+  re-filings do not produce duplicated rows.
+
+Total assets is the top of the asset hierarchy (`cd_conta == "1"`):
+
+```{r workflow-1-summary}
+ativo_total <- bpa[
+  bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO",
+  c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
+]
+ativo_total
+```
+
+CVM publishes each fiscal year's CSV with two reference columns —
+`ÚLTIMO` (the declared year, here 2024) and `PENÚLTIMO` (the
+comparative previous year). To pick up an older comparative,
+request the matching upstream year explicitly:
+
+```{r workflow-1-history}
+bpa_history <- cvm_fetch(
+  "dfp", "bpa",
+  report_type = "ind",
+  companies   = "1023",
+  years       = 2022:2024
+)
+ativo_history <- bpa_history[
+  bpa_history$cd_conta == "1" & bpa_history$ordem_exerc == "ÚLTIMO",
+  c("dt_fim_exerc", "vl_conta")
+]
+ativo_history[order(ativo_history$dt_fim_exerc), ]
+```
+
+## Workflow 2 — Capital composition through `submissao` lookup
+
+`composicao_capital` does not carry `cd_cvm` — it indexes by
+`cnpj_cia`. The package reads the dataset's `submissao` table for
+the same year, looks up CNPJ for each CD_CVM passed in `companies`,
+and applies the filter on CNPJ. The user-facing interface is
+identical:
+
+```{r workflow-2-fetch}
+cap <- cvm_fetch(
+  "dfp", "composicao_capital",
+  companies = c("1023", "22470"),
+  years     = 2024
+)
+cap
+```
+
+Note: no `report_type` argument — `composicao_capital` is a single
+concept, not split into individual / consolidated.
+
+Cross-check against the underlying submissao header:
+
+```{r workflow-2-header}
+sub <- cvm_fetch(
+  "dfp", "submissao",
+  companies = c("1023", "22470"),
+  years     = 2024
+)
+sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
+```
+
+ITR works the same way — replace `"dfp"` with `"itr"`. The trimester
+breakdown then shows up in `dt_fim_exerc` and in the `ds_conta` /
+`grupo_dfp` columns; the underlying mechanics
+(`multiply_by_scale`, `keep_latest_version`, date conversion via
+the dictionary) are shared.
+
+## Where to read next
+
+* **cvm-fetch** — argument reference and the full `companies` /
+  `years` / `report_type` / `validate` / `on_error` semantics.
+* **fre** — reference form. Same package, different table semantics.
+* **cvm-defects** — known publication quirks behind the
+  transformations applied here.
