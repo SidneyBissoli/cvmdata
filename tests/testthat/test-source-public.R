@@ -140,11 +140,11 @@ test_that("cvm_fetch() explicit source argument wins over option", {
   expect_identical(attr(result, "source"), "cvm")
 })
 
-test_that("cvm_fetch() aborts on source='mirror' (internal — Phase F)", {
+test_that("cvm_fetch() aborts on source='mirror' (stub — Phase F)", {
   withr::local_options(cvmdata.source = NULL)
   expect_error(
     cvm_fetch("dfp", "bpa", source = "mirror"),
-    class = "cvmdata_error_internal"
+    class = "cvmdata_error_input"
   )
 })
 
@@ -152,7 +152,7 @@ test_that("cvm_fetch() via cvmdata.source='mirror' aborts identically", {
   withr::local_options(cvmdata.source = "mirror")
   expect_error(
     cvm_fetch("dfp", "bpa"),
-    class = "cvmdata_error_internal"
+    class = "cvmdata_error_input"
   )
 })
 
