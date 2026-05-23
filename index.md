@@ -75,11 +75,11 @@ for every column:
 ``` r
 
 dict <- cvm_dictionary("dfp", "bpa")
-knitr::kable(
+tbl <- knitr::kable(
   dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
-  format = "html",
-  table.attr = 'width="100%"'
+  format = "html"
 )
+cat('<div align="center">', tbl, '</div>', sep = "\n")
 ```
 
 | column       | descricao                       | tipo_dados | tamanho |

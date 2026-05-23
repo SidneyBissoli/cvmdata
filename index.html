@@ -87,12 +87,13 @@
 <p>The bundled dictionary surfaces the types and descriptions CVM publishes for every column:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
 <span>  <span class="va">dict</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"column"</span>, <span class="st">"descricao"</span>, <span class="st">"tipo_dados"</span>, <span class="st">"tamanho"</span><span class="op">)</span><span class="op">]</span>,</span>
-<span>  format <span class="op">=</span> <span class="st">"html"</span>,</span>
-<span>  table.attr <span class="op">=</span> <span class="st">'width="100%"'</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<table width="100%" class="table">
+<span>  format <span class="op">=</span> <span class="st">"html"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">'&lt;div align="center"&gt;'</span>, <span class="va">tbl</span>, <span class="st">'&lt;/div&gt;'</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
+<div align="center">
+<table class="table">
 <thead><tr>
 <th style="text-align:left;">
 column
@@ -222,6 +223,7 @@ varchar
 </tr>
 </tbody>
 </table>
+</div>
 <p>Fetch quarterly individual balance sheets (“BPA individual”) for two companies across recent years. Companies can be identified by CNPJ, CD_CVM, or free text — the latter with abbreviation expansion (<code>BANCO</code> matches <code>BCO</code>, <code>COMPANHIA</code> matches <code>CIA</code>, and so on):</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
