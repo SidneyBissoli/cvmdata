@@ -225,7 +225,12 @@ varchar
 </ul></div>
 <div class="section level2">
 <h2 id="proveniência-dos-dados">Proveniência dos dados<a class="anchor" aria-label="anchor" href="#proveni%C3%AAncia-dos-dados"></a></h2>
-<p>Os dados vêm do Portal de Dados Abertos da CVM (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). Um mirror gerenciado pelo pacote publicado em GitHub Releases serve como fallback automático quando um arquivo upstream fica indisponível. Todo tibble retornado carrega atributos de proveniência (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>).</p>
+<p>Os dados vêm do Portal de Dados Abertos da CVM (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). O backend ativo é selecionável via <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> (ou pelo argumento <code>source</code> de <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>):</p>
+<ul><li>
+<code>"cvm"</code> (default na v0.1) — HTTP direto ao Portal de Dados Abertos da CVM.</li>
+<li>
+<code>"mirror"</code> (default a partir da release que entrega a Fase F) — snapshots em parquet publicados em GitHub Releases e consultados via DuckDB com filter pushdown por ano, atualizados semanalmente por um workflow de ETL neste repositório.</li>
+</ul><p>Todo tibble retornado carrega atributos de proveniência (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>), permitindo a qualquer consumidor auditar qual backend serviu os dados.</p>
 </div>
 <div class="section level2">
 <h2 id="trabalhos-relacionados">Trabalhos relacionados<a class="anchor" aria-label="anchor" href="#trabalhos-relacionados"></a></h2>

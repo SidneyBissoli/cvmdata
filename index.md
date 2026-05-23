@@ -154,10 +154,19 @@ The exported API is grouped into five families:
 ## Data provenance
 
 Data is fetched from the official CVM Open Data Portal
-(<https://dados.cvm.gov.br/>). A package-managed mirror on GitHub
-Releases serves as automatic fallback when an upstream file becomes
-unavailable. Every returned tibble carries provenance attributes
-(`source`, `fetched_at`, `dataset`, `table`, `package_version`).
+(<https://dados.cvm.gov.br/>). The active backend is selectable via
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
+(or the `source` argument of
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
+
+- `"cvm"` (default in v0.1) — HTTP directly to the CVM Open Data Portal.
+- `"mirror"` (default from the release that ships Phase F) — parquet
+  snapshots in GitHub Releases queried via DuckDB with year-partition
+  filter pushdown, refreshed weekly by an ETL workflow in this repo.
+
+Every returned tibble carries provenance attributes (`source`,
+`fetched_at`, `dataset`, `table`, `package_version`) so a downstream
+caller can audit which backend served the data.
 
 ## Related work
 

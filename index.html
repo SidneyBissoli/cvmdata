@@ -272,7 +272,14 @@ varchar
 <div class="section level2">
 <h2 id="data-provenance">Data provenance<a class="anchor" aria-label="anchor" href="#data-provenance"></a>
 </h2>
-<p>Data is fetched from the official CVM Open Data Portal (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). A package-managed mirror on GitHub Releases serves as automatic fallback when an upstream file becomes unavailable. Every returned tibble carries provenance attributes (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>).</p>
+<p>Data is fetched from the official CVM Open Data Portal (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). The active backend is selectable via <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> (or the <code>source</code> argument of <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>):</p>
+<ul>
+<li>
+<code>"cvm"</code> (default in v0.1) — HTTP directly to the CVM Open Data Portal.</li>
+<li>
+<code>"mirror"</code> (default from the release that ships Phase F) — parquet snapshots in GitHub Releases queried via DuckDB with year-partition filter pushdown, refreshed weekly by an ETL workflow in this repo.</li>
+</ul>
+<p>Every returned tibble carries provenance attributes (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>) so a downstream caller can audit which backend served the data.</p>
 </div>
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>
