@@ -19,6 +19,17 @@
 #' every call, or to `Inf` to skip revalidation entirely until
 #' [cvm_cache_clear()] is called.
 #'
+#' The cache size is bounded by `options(cvmdata.cache_max_size_mb)`
+#' (default `100` MiB). Whenever the total counted across yearly
+#' bundles and non-partitioned `{artifact, sidecar}` pairs exceeds
+#' 90% of the limit, the next download evicts the oldest units
+#' (by ZIP/CSV `mtime`) until the cache is at or below 80% of the
+#' limit. Set the option to `0`, a negative number, or `Inf` to
+#' disable eviction. Interactive sessions see a
+#' `cvmdata_warn_eviction` warning after each eviction round;
+#' batch jobs stay silent unless
+#' `options(cvmdata.cache_warn_evictions = TRUE)` is set.
+#'
 #' Read-only: this function does not create the directory.
 #'
 #' @return A character scalar with the absolute path.
@@ -116,12 +127,23 @@ cvm_cache_set_path <- function(path) {
 #' the parent ZIP covers them — so they appear with
 #' `etag = NA_character_` and `last_modified = NA_character_`.
 #'
+#' The returned tibble carries an attribute `total_size_bytes` with
+#' the sum of `size_bytes`, useful for comparing against the
+#' eviction limit set via `options(cvmdata.cache_max_size_mb)`
+#' (default 100 MiB). When the total exceeds 90% of the limit, the
+#' next download triggers LRU eviction of the oldest year directories
+#' (yearly datasets) or artifact+sidecar pairs (non-partitioned).
+#' See [cvm_cache_path()] for the option's semantics.
+#'
 #' @return A tibble with one row per cached file, sorted by
 #'   `dataset` then `file`. Columns: `dataset` (character),
 #'   `file` (basename), `path` (absolute), `size_bytes` (integer),
 #'   `mtime` (POSIXct), `etag` (character; `NA` when absent),
-#'   `last_modified` (character; `NA` when absent). Returns a
-#'   zero-row tibble with the same schema when the cache is empty.
+#'   `last_modified` (character; `NA` when absent). The tibble has
+#'   an attribute `total_size_bytes` (numeric scalar) with the
+#'   total bytes counted toward the cache size limit. Returns a
+#'   zero-row tibble with the same schema (and `total_size_bytes
+#'   = 0`) when the cache is empty.
 #'
 #' @examples
 #' cvm_cache_info()
@@ -137,6 +159,7 @@ cvm_cache_info <- function() {
     etag          = character(0L),
     last_modified = character(0L)
   )
+  attr(schema, "total_size_bytes") <- 0
   raw_root <- file.path(cvm_cache_path(), "raw")
   if (!dir.exists(raw_root)) {
     return(schema)
@@ -179,7 +202,9 @@ cvm_cache_info <- function() {
     etag          = etag,
     last_modified = last_modified
   )
-  out[order(out$dataset, out$file), , drop = FALSE]
+  out <- out[order(out$dataset, out$file), , drop = FALSE]
+  attr(out, "total_size_bytes") <- cache_current_size_bytes()
+  out
 }
 
 #' Clear cached files
@@ -467,6 +492,7 @@ cache_enforce_limit <- function(protect = NULL) {
   }
   ord <- order(units$mtime)
   removed <- 0L
+  freed_bytes <- 0
   for (i in ord) {
     if (total <= target) {
       break
@@ -476,9 +502,59 @@ cache_enforce_limit <- function(protect = NULL) {
     }
     .cache_evict_unit(units$units[[i]])
     total <- total - units$size_bytes[[i]]
+    freed_bytes <- freed_bytes + units$size_bytes[[i]]
     removed <- removed + 1L
   }
+  if (removed > 0L) {
+    cache_emit_eviction_warning(removed, freed_bytes, limit)
+  }
   invisible(removed)
+}
+
+# Emit `cvmdata_warn_eviction` after a successful eviction round.
+# Defaults are tuned so interactive users see that the cache is being
+# managed under them, while batch jobs (CI/ETL) stay silent unless
+# explicitly opted in via `options(cvmdata.cache_warn_evictions =
+# TRUE)`. The warning carries the number of units removed and the
+# bytes freed, plus the active limit so the user can decide whether
+# to bump it.
+cache_emit_eviction_warning <- function(removed, freed_bytes,
+                                        limit_bytes) {
+  if (!should_warn_eviction()) {
+    return(invisible())
+  }
+  freed_mb <- round(freed_bytes / 1024 / 1024, 2)
+  limit_mb <- round(limit_bytes / 1024 / 1024, 2)
+  cvmdata_warn(
+    c(
+      paste0(
+        "Cache eviction removed {removed} unit{?s} ",
+        "({freed_mb} MiB) to honour the ",
+        "{limit_mb} MiB size limit."
+      ),
+      "i" = paste(
+        "Re-fetching evicted years/datasets will redownload.",
+        "Silence with",
+        "{.code options(cvmdata.cache_warn_evictions = FALSE)}",
+        "or raise the limit via",
+        "{.code options(cvmdata.cache_max_size_mb = N)}."
+      )
+    ),
+    class = "cvmdata_warn_eviction"
+  )
+  invisible()
+}
+
+# Read `options(cvmdata.cache_warn_evictions)`. Default is
+# `interactive()` (interactive users see the warning; batch jobs do
+# not). Malformed values (non-logical, length != 1, NA) fall back to
+# the default — never crash a cache operation because of a bad opt.
+should_warn_eviction <- function() {
+  raw <- getOption("cvmdata.cache_warn_evictions", interactive())
+  if (!is.logical(raw) || length(raw) != 1L || is.na(raw)) {
+    return(interactive())
+  }
+  raw
 }
 
 # Whether the just-written path lives in this unit. Both sides are

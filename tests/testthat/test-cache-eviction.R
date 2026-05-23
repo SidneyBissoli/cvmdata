@@ -224,6 +224,78 @@ test_that("cache_enforce_limit is a no-op when cache dir is missing", {
   expect_equal(cache_current_size_bytes(), 0)
 })
 
+# cvmdata_warn_eviction surfaces removal counts when opted in ------------
+
+test_that("cache_enforce_limit emits cvmdata_warn_eviction when opted in", {
+  cache <- local_cache_dir()
+  withr::local_options(
+    cvmdata.cache_max_size_mb = 1L,
+    cvmdata.cache_warn_evictions = TRUE
+  )
+  now <- Sys.time()
+  write_unit_yearly(cache, "dfp", 2020, 600L * 1024L, now - 4000)
+  write_unit_yearly(cache, "dfp", 2024, 600L * 1024L, now - 1000)
+  expect_warning(
+    cache_enforce_limit(),
+    class = "cvmdata_warn_eviction"
+  )
+})
+
+test_that("cache_enforce_limit stays silent when warn opt-out is FALSE", {
+  cache <- local_cache_dir()
+  withr::local_options(
+    cvmdata.cache_max_size_mb = 1L,
+    cvmdata.cache_warn_evictions = FALSE
+  )
+  now <- Sys.time()
+  write_unit_yearly(cache, "dfp", 2020, 600L * 1024L, now - 4000)
+  write_unit_yearly(cache, "dfp", 2024, 600L * 1024L, now - 1000)
+  expect_silent(cache_enforce_limit())
+})
+
+test_that("cache_enforce_limit default is silent under non-interactive tests", {
+  # testthat sessions are non-interactive; the default
+  # (`interactive()`) evaluates to FALSE, so no warning.
+  cache <- local_cache_dir()
+  withr::local_options(cvmdata.cache_max_size_mb = 1L)
+  now <- Sys.time()
+  write_unit_yearly(cache, "dfp", 2020, 600L * 1024L, now - 4000)
+  write_unit_yearly(cache, "dfp", 2024, 600L * 1024L, now - 1000)
+  expect_silent(cache_enforce_limit())
+})
+
+test_that("invalid cache_warn_evictions option falls back to default", {
+  cache <- local_cache_dir()
+  withr::local_options(
+    cvmdata.cache_max_size_mb = 1L,
+    cvmdata.cache_warn_evictions = "yes"
+  )
+  now <- Sys.time()
+  write_unit_yearly(cache, "dfp", 2020, 600L * 1024L, now - 4000)
+  write_unit_yearly(cache, "dfp", 2024, 600L * 1024L, now - 1000)
+  # Test session is non-interactive → default FALSE → silent.
+  expect_silent(cache_enforce_limit())
+})
+
+# total_size_bytes attribute on cvm_cache_info() --------------------------
+
+test_that("cvm_cache_info() carries total_size_bytes attribute", {
+  cache <- local_cache_dir()
+  # Empty cache: attribute is 0.
+  info_empty <- cvm_cache_info()
+  expect_equal(attr(info_empty, "total_size_bytes"), 0)
+  expect_equal(nrow(info_empty), 0L)
+
+  # Populated cache: attribute equals cache_current_size_bytes().
+  write_unit_yearly(cache, "dfp", 2024, 100L * 1024L)
+  info <- cvm_cache_info()
+  expect_equal(
+    attr(info, "total_size_bytes"),
+    cache_current_size_bytes()
+  )
+  expect_gt(attr(info, "total_size_bytes"), 0)
+})
+
 # Integration: trigger fires via download_with_etag() ---------------------
 
 test_that("download_with_etag triggers eviction after a real write", {
