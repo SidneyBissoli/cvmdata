@@ -79,12 +79,28 @@ library(cvmdata)
 
 cvm_datasets()
 #> [1] "cad" "dfp" "fre" "itr"
-cvm_tables("dfp")
-#>  [1] "bpa"                "bpp"                "composicao_capital"
-#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              
-#>  [7] "dra"                "dre"                "dva"               
-#> [10] "parecer"            "submissao"
 ```
+
+The bundled dictionary surfaces the types and descriptions CVM publishes
+for every column:
+
+``` r
+dict <- cvm_dictionary("dfp", "bpa")
+knitr::kable(
+  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")]
+)
+```
+
+| column       | descricao                       | tipo_dados | tamanho |
+|:-------------|:--------------------------------|:-----------|--------:|
+| cd_conta     | Código da conta                 | varchar    |      18 |
+| cd_cvm       | Código CVM                      | char       |       6 |
+| cnpj_cia     | CNPJ da companhia               | varchar    |      20 |
+| denom_cia    | Nome empresarial da companhia   | varchar    |     100 |
+| ds_conta     | Descrição da conta              | varchar    |     100 |
+| dt_fim_exerc | Data fim do exercício social    | date       |      10 |
+| dt_refer     | Data de referência do documento | date       |      10 |
+| escala_moeda | Escala monetária                | varchar    |     100 |
 
 Fetch quarterly individual balance sheets (“BPA individual”) for two
 companies across recent years. Companies can be identified by CNPJ,
