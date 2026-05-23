@@ -55,9 +55,14 @@
 <p><code>cvmdata</code> provides a tidy API to the open data published by the Brazilian Securities and Exchange Commission (CVM — Comissão de Valores Mobiliários). The first release covers the core publicly-traded-company datasets: company registry (<code>cad</code>), quarterly financial statements (<code>itr</code>), annual financial statements (<code>dfp</code>) and the reference form (<code>fre</code>), the latter including ESG/governance tables on board diversity, compensation and shareholder structure.</p>
 <p>The package preserves table names, column names, categorical values and free text in Portuguese exactly as CVM publishes them. Function names, arguments and metadata attributes follow English-language rOpenSci and tidyverse conventions.</p>
 <div class="section level2">
+<h2 id="why-cvmdata">Why cvmdata<a class="anchor" aria-label="anchor" href="#why-cvmdata"></a>
+</h2>
+<p>CVM publishes filings as yearly ZIPs of CSVs with mixed encodings, table-specific schemas, and no unified data dictionary. Common workflows — “give me DFP for company X across 2018-2024” — typically require manual ZIP downloads, ISO-8859-1 handling, scale-by-<code>ESCALA_MOEDA</code> conversion, and joins against a separate <code>submissao</code> header to translate CD_CVM to CNPJ. <code>cvmdata</code> consolidates these steps behind a single <code>cvm_fetch(dataset, table, companies, years, ...)</code> call and ships the official dictionary as an embedded snapshot, so column types are picked up automatically.</p>
+</div>
+<div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p><code>cvmdata</code> is not yet on CRAN. The development version can be installed from GitHub:</p>
+<p><code>cvmdata</code> requires R ≥ 4.1 (native pipe) and is not yet on CRAN. The development version can be installed from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"SidneyBissoli/cvmdata"</span><span class="op">)</span></span></code></pre></div>
@@ -65,11 +70,48 @@
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
+<p>Browse what’s covered (offline — discovery reads from embedded snapshots):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fetch the full company registry (single snapshot, no temporal partitioning)</span></span>
-<span><span class="va">companies</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cad_fetch.html">cad_fetch</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "cad" "dfp" "fre" "itr"</span></span>
+<span><span class="fu"><a href="reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
+<span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>
+<span><span class="co">#&gt;  [7] "dra"                "dre"                "dva"               </span></span>
+<span><span class="co">#&gt; [10] "parecer"            "submissao"</span></span></code></pre></div>
+<p>Fetch quarterly individual balance sheets (“BPA individual”) for two companies across recent years. Companies can be identified by CNPJ, CD_CVM, or free text — the latter with abbreviation expansion (<code>BANCO</code> matches <code>BCO</code>, <code>COMPANHIA</code> matches <code>CIA</code>, and so on):</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
+<span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>  companies   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BCO BRASIL"</span>, <span class="st">"MAGAZINE LUIZA"</span><span class="op">)</span>,</span>
+<span>  years       <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "00000000000191"</span></span>
+<span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "00.000.000/0001-91"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>Reference and articles at <a href="https://sidneybissoli.github.io/cvmdata/" class="uri">https://sidneybissoli.github.io/cvmdata/</a>. The exported API is grouped into five families:</p>
+<ul>
+<li>
+<strong>Fetchers</strong> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>, <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> (alias kept for ergonomics).</li>
+<li>
+<strong>Discovery</strong> — <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="reference/cvm_tables.html">cvm_tables()</a></code>, <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code>, <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code>.</li>
+<li>
+<strong>Cache</strong> — <code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code>, <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>, <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code>, <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code>. The TTL window for HTTP revalidation is configurable via <code>options(cvmdata.cache_ttl_seconds)</code> (default 30 days).</li>
+<li>
+<strong>Source backend</strong> — <code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code>, <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code>.</li>
+<li>
+<strong>Utilities</strong> — <code><a href="reference/cnpj_clean.html">cnpj_clean()</a></code>, <code><a href="reference/cnpj_format.html">cnpj_format()</a></code>.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="data-provenance">Data provenance<a class="anchor" aria-label="anchor" href="#data-provenance"></a>
@@ -77,9 +119,26 @@
 <p>Data is fetched from the official CVM Open Data Portal (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). A package-managed mirror on GitHub Releases serves as automatic fallback when an upstream file becomes unavailable. Every returned tibble carries provenance attributes (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>).</p>
 </div>
 <div class="section level2">
+<h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>
+</h2>
+<p>Two other R packages address overlapping problems:</p>
+<ul>
+<li>
+<a href="https://github.com/msperlin/GetDFPData2" class="external-link"><code>GetDFPData2</code></a> by Marcelo Perlin downloads DFP/ITR filings via the per-document RAD/ENET interface. Comprehensive coverage but typically ~30 s per document.</li>
+<li>
+<a href="https://github.com/msperlin/GetITRData" class="external-link"><code>GetITRData</code></a> is the earlier ITR-only sibling.</li>
+</ul>
+<p><code>cvmdata</code> differs by pulling the bulk yearly ZIPs from <code>dados.cvm.gov.br</code> (~1 s per dataset-year for any number of companies), shipping the official dictionary and code lists as embedded snapshots (so column types and categorical values are canonical without a runtime fetch), and unifying CAD / DFP / ITR / FRE behind a single <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> entry point with consistent filtering semantics for companies (<code>CNPJ</code> / <code>CD_CVM</code> / free text).</p>
+</div>
+<div class="section level2">
+<h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
+</h2>
+<p>Bug reports and feature requests: <a href="https://github.com/SidneyBissoli/cvmdata/issues" class="external-link uri">https://github.com/SidneyBissoli/cvmdata/issues</a>.</p>
+</div>
+<div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>MIT © Sidney da Silva Pereira Bissoli.</p>
+<p>MIT © Sidney Bissoli.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -119,6 +178,7 @@
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/SidneyBissoli/cvmdata" class="external-link"><img src="https://codecov.io/gh/SidneyBissoli/cvmdata/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 <li><a href="https://CRAN.R-project.org/package=cvmdata" class="external-link"><img src="https://www.r-pkg.org/badges/version/cvmdata" alt="CRAN status"></a></li>
 </ul>
 </div>
