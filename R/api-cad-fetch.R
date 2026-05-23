@@ -16,7 +16,7 @@
 #' @seealso [cvm_fetch()] for the generic API.
 #' @export
 cad_fetch <- function(companies = NULL,
-                      source = "cvm",
+                      source = NULL,
                       on_error = "abort",
                       validate = "strict",
                       ...) {

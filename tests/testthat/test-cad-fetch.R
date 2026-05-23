@@ -133,9 +133,11 @@ test_that("cad_fetch() filters by cd_cvm in `companies`", {
 })
 
 test_that("cad_fetch() rejects unsupported source values cleanly", {
+  # "mirror" is in the documented domain but not implemented yet —
+  # cvmdata_error_internal, not cvmdata_error_input.
   expect_error(
     cad_fetch(source = "mirror"),
-    class = "cvmdata_error_input"
+    class = "cvmdata_error_internal"
   )
   expect_error(
     cad_fetch(source = "bogus"),

@@ -6,7 +6,7 @@
 \usage{
 cad_fetch(
   companies = NULL,
-  source = "cvm",
+  source = NULL,
   on_error = "abort",
   validate = "strict",
   ...
@@ -23,9 +23,11 @@ tokens are resolved to CNPJ via the dataset's \code{submissao} table
 for the same year — the user-facing interface is identical
 regardless of which table holds CD_CVM natively.}
 
-\item{source}{One of \code{"mirror"} (default, parquet via DuckDB) or
-\code{"cvm"} (CVM open-data portal). The mirror is refreshed weekly
-against the CVM portal.}
+\item{source}{One of \code{"cvm"} (CVM Open Data Portal) or \code{"mirror"}
+(parquet via DuckDB; available from Phase F of the roadmap).
+\code{NULL} (default) resolves to the active backend via
+\code{\link[=cvm_source_get]{cvm_source_get()}} — \code{"cvm"} in the v0.1 series unless the user
+has flipped it with \code{\link[=cvm_source_set]{cvm_source_set()}}.}
 
 \item{on_error}{One of \code{"abort"} (default), \code{"warn"} or \code{"silent"}.
 Controls behaviour on HTTP failures and partial-batch errors.}

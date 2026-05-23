@@ -9,7 +9,7 @@ cvm_fetch(
   table,
   companies = NULL,
   years = NULL,
-  source = "mirror",
+  source = NULL,
   report_type = NULL,
   on_error = "abort",
   validate = "strict",
@@ -38,9 +38,11 @@ regardless of which table holds CD_CVM natively.}
 fetches the latest available year. Ignored for datasets with
 \code{temporal_partitioning: none} (e.g. CAD).}
 
-\item{source}{One of \code{"mirror"} (default, parquet via DuckDB) or
-\code{"cvm"} (CVM open-data portal). The mirror is refreshed weekly
-against the CVM portal.}
+\item{source}{One of \code{"cvm"} (CVM Open Data Portal) or \code{"mirror"}
+(parquet via DuckDB; available from Phase F of the roadmap).
+\code{NULL} (default) resolves to the active backend via
+\code{\link[=cvm_source_get]{cvm_source_get()}} — \code{"cvm"} in the v0.1 series unless the user
+has flipped it with \code{\link[=cvm_source_set]{cvm_source_set()}}.}
 
 \item{report_type}{One of \code{"ind"}, \code{"con"}, or \code{NULL}. Required for
 tables that publish individual and consolidated variants
