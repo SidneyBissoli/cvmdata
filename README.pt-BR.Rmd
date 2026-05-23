@@ -143,11 +143,19 @@ agrupada em cinco famílias:
 ## Proveniência dos dados
 
 Os dados vêm do Portal de Dados Abertos da CVM
-(<https://dados.cvm.gov.br/>). Um mirror gerenciado pelo pacote
-publicado em GitHub Releases serve como fallback automático quando um
-arquivo upstream fica indisponível. Todo tibble retornado carrega
-atributos de proveniência (`source`, `fetched_at`, `dataset`,
-`table`, `package_version`).
+(<https://dados.cvm.gov.br/>). O backend ativo é selecionável via
+`cvm_source_set()` (ou pelo argumento `source` de `cvm_fetch()`):
+
+- `"cvm"` (default na v0.1) — HTTP direto ao Portal de Dados Abertos
+  da CVM.
+- `"mirror"` (default a partir da release que entrega a Fase F) —
+  snapshots em parquet publicados em GitHub Releases e consultados via
+  DuckDB com filter pushdown por ano, atualizados semanalmente por um
+  workflow de ETL neste repositório.
+
+Todo tibble retornado carrega atributos de proveniência (`source`,
+`fetched_at`, `dataset`, `table`, `package_version`), permitindo a
+qualquer consumidor auditar qual backend serviu os dados.
 
 ## Trabalhos relacionados
 
