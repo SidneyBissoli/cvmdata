@@ -261,6 +261,178 @@ test_that("get_simple_csv aborts when report_type is supplied", {
   )
 })
 
+# TTL gate -----------------------------------------------------------------
+
+# Mock that fails the test if any HTTP call is performed. Used to prove
+# the TTL shortcut bypasses both HEAD and GET.
+no_http_mock <- function(req) {
+  testthat::fail(
+    sprintf("expected no HTTP call; got %s %s", req$method, req$url)
+  )
+}
+
+test_that("download_with_etag skips HEAD when within TTL", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = format(
+        Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"
+      )
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = 30L * 24L * 3600L)
+
+  result <- httr2::with_mocked_responses(
+    no_http_mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("download_with_etag triggers HEAD when fetched_at older than TTL", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2020-01-01T00:00:00.000Z"
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = 60L)
+
+  head_called <- FALSE
+  mock <- function(req) {
+    if (identical(req$method, "HEAD")) {
+      head_called <<- TRUE
+      return(httr2::response(
+        status_code = 200L,
+        headers = list("ETag" = "\"FRESH\"")
+      ))
+    }
+    testthat::fail("GET should not fire when HEAD matches cached ETag")
+  }
+  result <- httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_true(head_called)
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("cvmdata.cache_ttl_seconds = 0 forces HEAD on every call", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = format(
+        Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"
+      )
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = 0)
+
+  head_called <- FALSE
+  mock <- function(req) {
+    if (identical(req$method, "HEAD")) {
+      head_called <<- TRUE
+      return(httr2::response(
+        status_code = 200L,
+        headers = list("ETag" = "\"FRESH\"")
+      ))
+    }
+    testthat::fail("GET should not fire when HEAD matches cached ETag")
+  }
+  result <- httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_true(head_called)
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("cvmdata.cache_ttl_seconds = Inf disables HEAD with sidecar", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2020-01-01T00:00:00.000Z"
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = Inf)
+
+  result <- httr2::with_mocked_responses(
+    no_http_mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("sidecar without fetched_at triggers HEAD even when TTL = Inf", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT"
+      # fetched_at deliberately absent (legacy sidecar)
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = Inf)
+
+  head_called <- FALSE
+  mock <- function(req) {
+    if (identical(req$method, "HEAD")) {
+      head_called <<- TRUE
+      return(httr2::response(
+        status_code = 200L,
+        headers = list("ETag" = "\"FRESH\"")
+      ))
+    }
+    testthat::fail("GET should not fire when HEAD matches cached ETag")
+  }
+  result <- httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_true(head_called)
+  expect_s3_class(result, "cvm_tbl")
+})
+
+test_that("invalid cvmdata.cache_ttl_seconds falls back to HEAD", {
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"FRESH\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = format(
+        Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"
+      )
+    )
+  )
+  withr::local_options(cvmdata.cache_ttl_seconds = "not-a-number")
+
+  head_called <- FALSE
+  mock <- function(req) {
+    if (identical(req$method, "HEAD")) {
+      head_called <<- TRUE
+      return(httr2::response(
+        status_code = 200L,
+        headers = list("ETag" = "\"FRESH\"")
+      ))
+    }
+    testthat::fail("GET should not fire when HEAD matches cached ETag")
+  }
+  result <- httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa",
+              report_type = "ind", years = 2024, source = "cvm")
+  )
+  expect_true(head_called)
+  expect_s3_class(result, "cvm_tbl")
+})
+
 # CSV missing inside the ZIP ----------------------------------------------
 
 test_that("get_yearly_csv aborts with parse error when CSV missing in ZIP", {

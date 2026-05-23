@@ -16,6 +16,13 @@ The default is the user-level cache slot from
 option \code{cvmdata.cache_dir} (see \code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}).
 }
 \details{
+Cached artifacts are revalidated against the CVM portal (HEAD with
+ETag/Last-Modified) only after the freshness window expires. The
+window is controlled by the option \code{cvmdata.cache_ttl_seconds}
+(default \code{2592000}, i.e. 30 days); set it to \code{0} to revalidate on
+every call, or to \code{Inf} to skip revalidation entirely until
+\code{\link[=cvm_cache_clear]{cvm_cache_clear()}} is called.
+
 Read-only: this function does not create the directory.
 }
 \examples{
