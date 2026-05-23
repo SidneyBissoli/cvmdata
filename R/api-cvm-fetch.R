@@ -36,7 +36,16 @@
 #'   Must be `NULL` for tables without that distinction
 #'   (`composicao_capital`, `submissao`, `parecer`, `companhias`).
 #' @param on_error One of `"abort"` (default), `"warn"` or `"silent"`.
-#'   Controls behaviour on HTTP failures and partial-batch errors.
+#'   Controls behaviour on HTTP failures for batches of yearly tables
+#'   (`years = c(...)` with more than one element). With `"warn"`, the
+#'   failed years are skipped and a `cvmdata_warn_partial_failure`
+#'   warning lists them; with `"silent"`, the failed years are skipped
+#'   silently; with `"abort"`, the first failure aborts the call. Total
+#'   batch failure (every year fails) always aborts regardless of the
+#'   setting — there is no partial result to return. Parse/validation
+#'   failures are governed by `validate`, not `on_error`. Single-year
+#'   calls, non-yearly tables, and the implicit fallback when
+#'   `years = NULL` always abort on HTTP failure.
 #' @param validate One of `"strict"` (default), `"warn"` or `"skip"`.
 #'   Controls schema validation strictness at parse time.
 #' @param ... Reserved for forward compatibility.
@@ -123,7 +132,8 @@ cvm_fetch_internal <- function(dataset,
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "yearly")) {
     transformed <- fetch_yearly_partitioned(
-      schema, dataset, years, companies, report_type, validate, ...
+      schema, dataset, years, companies, report_type, validate,
+      on_error, ...
     )
   } else {
     if (!is.null(years)) {
@@ -180,13 +190,12 @@ fetch_one_year <- function(schema, year, companies, report_type,
 .latest_year_max_tries <- 3L
 
 fetch_yearly_partitioned <- function(schema, dataset, years, companies,
-                                     report_type, validate, ...) {
+                                     report_type, validate,
+                                     on_error = "abort", ...) {
   if (!is.null(years)) {
-    years <- as.integer(years)
-    parts <- lapply(years, function(yr) {
-      fetch_one_year(schema, yr, companies, report_type, validate, ...)
-    })
-    return(do.call(rbind, parts))
+    return(fetch_explicit_years(
+      schema, years, companies, report_type, validate, on_error, ...
+    ))
   }
 
   available <- sort(
@@ -231,6 +240,71 @@ fetch_yearly_partitioned <- function(schema, dataset, years, companies,
     }
   }
   out
+}
+
+# Explicit-years branch of fetch_yearly_partitioned. Honors `on_error`
+# for HTTP failures only (parse/validation failures still abort — they
+# are governed by `validate`). With `"abort"` (default) the first
+# failure propagates; with `"warn"` failing years are skipped and a
+# `cvmdata_warn_partial_failure` warning lists them; with `"silent"`
+# failing years are skipped without notice. Total batch failure always
+# aborts with `cvmdata_error_http` regardless of `on_error` — there is
+# no partial result to return and silently producing an empty tibble
+# would mask outages.
+fetch_explicit_years <- function(schema, years, companies, report_type,
+                                 validate, on_error, ...) {
+  years <- as.integer(years)
+  if (identical(on_error, "abort")) {
+    parts <- lapply(years, function(yr) {
+      fetch_one_year(schema, yr, companies, report_type, validate, ...)
+    })
+    return(do.call(rbind, parts))
+  }
+  attempts <- lapply(years, function(yr) {
+    tryCatch(
+      list(year = yr, ok = TRUE, value = fetch_one_year(
+        schema, yr, companies, report_type, validate, ...
+      )),
+      cvmdata_error_http = function(e) {
+        list(year = yr, ok = FALSE, error = e)
+      }
+    )
+  })
+  ok_mask <- vapply(attempts, `[[`, logical(1L), "ok")
+  successes <- lapply(attempts[ok_mask], `[[`, "value")
+  failures <- attempts[!ok_mask]
+  if (!length(successes)) {
+    failed_years <- vapply(failures, `[[`, integer(1L), "year")
+    n_failed <- length(failed_years)
+    cvmdata_abort(
+      c(
+        "All {n_failed} requested year{?s} failed to download.",
+        "x" = "Failed: {.val {failed_years}}.",
+        "i" = paste(
+          "First failure:",
+          conditionMessage(failures[[1L]]$error)
+        )
+      ),
+      class = "cvmdata_error_http"
+    )
+  }
+  if (length(failures) && identical(on_error, "warn")) {
+    failed_years <- vapply(failures, `[[`, integer(1L), "year")
+    n_failed <- length(failed_years)
+    n_total <- length(years)
+    n_ok <- length(successes)
+    cvmdata_warn(
+      c(
+        paste(
+          "{n_failed} of {n_total} year{?s} failed to download;",
+          "returning the {n_ok} that succeeded."
+        ),
+        "i" = "Failed: {.val {failed_years}}."
+      ),
+      class = "cvmdata_warn_partial_failure"
+    )
+  }
+  do.call(rbind, successes)
 }
 
 # Classify each token in `companies` as CNPJ (14 digits), CD_CVM

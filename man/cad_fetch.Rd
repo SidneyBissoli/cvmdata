@@ -30,7 +30,16 @@ regardless of which table holds CD_CVM natively.}
 has flipped it with \code{\link[=cvm_source_set]{cvm_source_set()}}.}
 
 \item{on_error}{One of \code{"abort"} (default), \code{"warn"} or \code{"silent"}.
-Controls behaviour on HTTP failures and partial-batch errors.}
+Controls behaviour on HTTP failures for batches of yearly tables
+(\code{years = c(...)} with more than one element). With \code{"warn"}, the
+failed years are skipped and a \code{cvmdata_warn_partial_failure}
+warning lists them; with \code{"silent"}, the failed years are skipped
+silently; with \code{"abort"}, the first failure aborts the call. Total
+batch failure (every year fails) always aborts regardless of the
+setting — there is no partial result to return. Parse/validation
+failures are governed by \code{validate}, not \code{on_error}. Single-year
+calls, non-yearly tables, and the implicit fallback when
+\code{years = NULL} always abort on HTTP failure.}
 
 \item{validate}{One of \code{"strict"} (default), \code{"warn"} or \code{"skip"}.
 Controls schema validation strictness at parse time.}
