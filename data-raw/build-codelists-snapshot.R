@@ -194,14 +194,14 @@ build_codelists_snapshot <- function() {
     enum_rows[[length(enum_rows) + 1L]] <- tibble::tibble(
       dataset = dict$dataset[i],
       table   = dict$table[i],
-      column  = dict$campo[i],
+      campo   = dict$campo[i],
       value   = values,
       source  = "dominio"
     )
   }
   enum_df <- dplyr::bind_rows(enum_rows)
   cli::cli_alert_info(
-    "Enumerated columns: {.val {dplyr::n_distinct(paste(enum_df$dataset, enum_df$table, enum_df$column))}}; ",
+    "Enumerated columns: {.val {dplyr::n_distinct(paste(enum_df$dataset, enum_df$table, enum_df$campo))}}; ",
     "values: {.val {nrow(enum_df)}}."
   )
 
@@ -221,7 +221,7 @@ build_codelists_snapshot <- function() {
   excluded <- vapply(candidates$campo, is_excluded_column, logical(1L))
   candidates <- candidates[!excluded, , drop = FALSE]
   enum_keys <- if (!is.null(enum_df) && nrow(enum_df)) {
-    paste(enum_df$dataset, enum_df$table, enum_df$column)
+    paste(enum_df$dataset, enum_df$table, enum_df$campo)
   } else {
     character(0L)
   }
@@ -231,7 +231,7 @@ build_codelists_snapshot <- function() {
     , drop = FALSE
   ]
   cli::cli_alert_info(
-    "Candidate (dataset,table,column) for cardinality test: {.val {nrow(candidates)}}."
+    "Candidate (dataset,table,campo) for cardinality test: {.val {nrow(candidates)}}."
   )
 
   # Resolve latest year per dataset (only for yearly-partitioned ones).
@@ -299,7 +299,7 @@ build_codelists_snapshot <- function() {
       card_rows[[length(card_rows) + 1L]] <- tibble::tibble(
         dataset = dataset,
         table   = table,
-        column  = col_lower,
+        campo   = col_lower,
         value   = vals,
         source  = "cardinality"
       )
@@ -307,15 +307,15 @@ build_codelists_snapshot <- function() {
   }
   card_df <- dplyr::bind_rows(card_rows)
   cli::cli_alert_info(
-    "Cardinality-promoted columns: {.val {dplyr::n_distinct(paste(card_df$dataset, card_df$table, card_df$column))}}; ",
+    "Cardinality-promoted columns: {.val {dplyr::n_distinct(paste(card_df$dataset, card_df$table, card_df$campo))}}; ",
     "values: {.val {nrow(card_df)}}."
   )
 
   # --- Merge --------------------------------------------------------
   all_df <- dplyr::bind_rows(enum_df, card_df) |>
-    dplyr::distinct(dataset, table, column, value, .keep_all = TRUE) |>
-    dplyr::arrange(dataset, table, column, value) |>
-    dplyr::select(dataset, table, column, value)
+    dplyr::distinct(dataset, table, campo, value, .keep_all = TRUE) |>
+    dplyr::arrange(dataset, table, campo, value) |>
+    dplyr::select(dataset, table, campo, value)
 
   list(
     rows = all_df,
@@ -339,15 +339,15 @@ per_ds <- df |>
   dplyr::group_by(dataset) |>
   dplyr::summarise(
     n_tabelas_com_codelists = dplyr::n_distinct(table),
-    n_colunas_codelist = dplyr::n_distinct(paste(table, column)),
+    n_colunas_codelist = dplyr::n_distinct(paste(table, campo)),
     n_valores_unicos_total = dplyr::n(),
     .groups = "drop"
   )
 print(per_ds)
 
-cli::cli_h2("Top-5 (dataset, table, column) by cardinality")
+cli::cli_h2("Top-5 (dataset, table, campo) by cardinality")
 top5 <- df |>
-  dplyr::group_by(dataset, table, column) |>
+  dplyr::group_by(dataset, table, campo) |>
   dplyr::summarise(n_values = dplyr::n(), .groups = "drop") |>
   dplyr::arrange(dplyr::desc(n_values)) |>
   head(5L)
@@ -356,7 +356,7 @@ print(top5)
 cli::cli_h2("Totals")
 cli::cli_bullets(c(
   "*" = "Total rows: {nrow(df)}",
-  "*" = "Distinct (dataset, table, column): {dplyr::n_distinct(paste(df$dataset, df$table, df$column))}",
+  "*" = "Distinct (dataset, table, campo): {dplyr::n_distinct(paste(df$dataset, df$table, df$campo))}",
   "*" = "From dominio enumeration: {result$enum_n}",
   "*" = "From observed cardinality: {result$card_n}"
 ))
