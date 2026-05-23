@@ -114,17 +114,7 @@ cvm_fetch_internal <- function(dataset,
   }
 
   if (identical(source, "mirror")) {
-    cvmdata_abort(
-      c(
-        "{.code source = \"mirror\"} not yet available.",
-        "i" = paste(
-          "The GitHub Releases parquet mirror ships in Phase F of",
-          "the roadmap. Until then, pass {.code source = \"cvm\"}",
-          "explicitly or leave it as the default."
-        )
-      ),
-      class = "cvmdata_error_internal"
-    )
+    source_mirror_duckdb_get(schema = NULL)
   }
 
   schema <- load_schema(dataset, table)

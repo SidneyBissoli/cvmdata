@@ -361,10 +361,10 @@ test_that("cvm_fetch CAD rejects years argument", {
 
 test_that("cvm_fetch rejects source = mirror (v0.1 stub)", {
   # "mirror" is in the documented domain but ships in Phase F —
-  # cvmdata_error_internal, not cvmdata_error_input.
+  # the stub aborts with cvmdata_error_input and an actionable message.
   expect_error(
     cvm_fetch("cad", "companhias", source = "mirror"),
-    class = "cvmdata_error_internal"
+    class = "cvmdata_error_input"
   )
 })
 
