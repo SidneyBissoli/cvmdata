@@ -96,7 +96,8 @@ CD_CVM, or free text — the latter with abbreviation expansion
 
 ``` r
 bpa <- cvm_fetch(
-  "dfp", "bpa",
+  dataset     = "dfp",
+  table       = "bpa",
   report_type = "ind",
   companies   = c("BCO BRASIL", "MAGAZINE LUIZA"),
   years       = 2022:2024

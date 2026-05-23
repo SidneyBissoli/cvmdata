@@ -93,7 +93,8 @@ matches `BCO`, `COMPANHIA` matches `CIA`, and so on):
 
 ``` r
 bpa <- cvm_fetch(
-  "dfp", "bpa",
+  dataset     = "dfp",
+  table       = "bpa",
   report_type = "ind",
   companies   = c("BCO BRASIL", "MAGAZINE LUIZA"),
   years       = 2022:2024
