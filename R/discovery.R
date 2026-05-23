@@ -206,7 +206,7 @@ cvm_codelist <- function(dataset, table, column) {
   hit <- snapshot[
     snapshot$dataset == dataset &
       snapshot$table == table &
-      snapshot$column == column, ,
+      snapshot$campo == column, ,
     drop = FALSE
   ]
   if (nrow(hit)) {
@@ -231,7 +231,7 @@ cvm_codelist <- function(dataset, table, column) {
     )
   }
   dict <- cvm_dictionary(dataset, table)
-  available_codes <- sort(unique(snapshot$column[
+  available_codes <- sort(unique(snapshot$campo[
     snapshot$dataset == dataset & snapshot$table == table
   ]))
   if (column %in% dict$campo) {
@@ -279,7 +279,7 @@ cvm_codelist <- function(dataset, table, column) {
     col_types = readr::cols(
       dataset = readr::col_character(),
       table   = readr::col_character(),
-      column  = readr::col_character(),
+      campo   = readr::col_character(),
       value   = readr::col_character()
     ),
     progress = FALSE

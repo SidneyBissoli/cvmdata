@@ -502,10 +502,10 @@ CSV UTF-8, delimitador `,`. 4 colunas (v0.1):
 |---|---|---|
 | `dataset` | character | chave |
 | `table` | character | chave |
-| `column` | character | chave |
+| `campo` | character | chave; snake_case minúsculo (mesma convenção de `cvm_dictionary()`) |
 | `value` | character | valor categórico em PT como vem da CVM |
 
-Chave composta `(dataset, table, column, value)`. `first_seen_year`,
+Chave composta `(dataset, table, campo, value)`. `first_seen_year`,
 `last_seen_year` e `frequency` deferidos para v0.2+ (decisão Sessão
 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset
 (~30 s de geração); marcar `first_seen_year` com o único ano amostrado
