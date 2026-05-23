@@ -53,7 +53,12 @@ progresso sessão a sessão.
   eviction LRU quando atinge 90%.
 - [x] `source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly
   (Sessão 02, com extração do CSV alvo via `report_type`).
-- [ ] `cvm_source_get()` / `cvm_source_set()`.
+- [x] `cvm_source_get()` / `cvm_source_set()` — entregues na Sessão 3.6
+  em `R/source.R`. `cvm_fetch()` agora declara `source = NULL` e
+  resolve via `cvm_source_get()` (precedência: arg > option > default).
+  Default em v0.1 é `"cvm"`; transiciona para `"mirror"` na release
+  que ativar a Fase F. Mirror permanece bloqueado por
+  `cvmdata_error_internal` até lá.
 - [x] Suite de testes mockados de HTTP via
   `httr2::with_mocked_responses` (com `httptest2` em Suggests
   para uso futuro).
@@ -236,7 +241,8 @@ progresso sessão a sessão.
   codelist (Sessão 3.4).
 - [x] Família `cvm_cache_*()` pública (`path`, `set_path`, `info`,
   `clear`) — Sessão 3.5. Detalhes na entrada equivalente da Fase B.
-- [ ] `cvm_source_get()` / `cvm_source_set()`.
+- [x] `cvm_source_get()` / `cvm_source_set()` — Sessão 3.6. Detalhes
+  na entrada equivalente da Fase B.
 - [x] Prompt interativo de seleção de companhias com múltiplas matches
   (`utils::menu()` em `interactive()`); aborta com `cvmdata_error_input`
   em batch listando as matches. CLAUDE.md §2.7.
@@ -245,10 +251,11 @@ progresso sessão a sessão.
   `cvmdata_error_input`; vetor com elementos sem 14 dígitos retorna
   `NA_character_` para esses e emite `cvmdata_warn` listando posições
   (Sessão 3.4).
-- [ ] Subir cobertura para ≥90% (gate do marco v0.1.0; pós-Sessão 3.5
-  total 88.26%, áreas baixas: `source-cvm-http.R` 60.45%,
-  `discovery.R` 78.41%, `transform-schema.R` 86.27%; cache.R em
-  95.91%).
+- [x] Subir cobertura para ≥90% (gate do marco v0.1.0). Pós-Sessão 3.6
+  total **95.31%**: `source-cvm-http.R` 60.45% → 100%; `discovery.R`
+  78.41% → 90.53%; `transform-schema.R` 86.27% → 100%. Branches
+  ainda fora cobrem só guards defensivos (snapshot ausente / pacote
+  não instalado / dataset com schema dir vazio).
 - [ ] Vignette `cvm-fetch.Rmd` (substitui stub atual).
 - [ ] Vignette de defeitos conhecidos da CVM (Rodada 2.6 §11.5).
 

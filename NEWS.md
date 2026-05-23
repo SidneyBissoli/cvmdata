@@ -31,3 +31,14 @@
   `what ∈ c("all", "raw")` plus optional `dataset` and `year`
   filters; in interactive sessions it asks for confirmation via
   `utils::askYesNo()`.
+* Public source API: `cvm_source_get()` and `cvm_source_set()`.
+  `cvm_source_get()` reads `getOption("cvmdata.source", "cvm")`;
+  `cvm_source_set()` validates the value against
+  `c("cvm", "mirror")` and persists it. `cvm_fetch()` now declares
+  `source = NULL` and resolves the default via `cvm_source_get()`,
+  so precedence is arg > option > built-in default. The built-in
+  default is `"cvm"` in the v0.1 series and transitions to
+  `"mirror"` in the release that ships the Phase F mirror; this
+  flip will be announced in NEWS.md of that release. Until then,
+  passing `source = "mirror"` aborts with
+  `cvmdata_error_internal` (in-domain value, not yet implemented).
