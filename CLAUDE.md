@@ -537,7 +537,14 @@ Invalidação:
 
 - HEAD HTTP em `cvm_dictionary_url`/`cvm_file_url_pattern` antes de
   servir cache; comparar ETag/Last-Modified.
-- TTL default 30 dias.
+- **TTL default 30 dias** via `options(cvmdata.cache_ttl_seconds)`
+  (imposto na Sessão 3.7). Dentro da janela, `download_with_etag()`
+  retorna o `dest_path` sem HEAD nem GET — economiza round-trip
+  quando o ZIP anual já está em cache local fresco. Valores
+  especiais: `0` = sempre HEAD (comportamento legado); `Inf` = nunca
+  HEAD enquanto o sidecar existir. Sidecar sem `fetched_at`
+  parseável (legado ou corrompido) cai para HEAD para refrescar
+  metadados.
 - `cvm_cache_clear()` manual.
 
 Fallback hierárquico depende de `source`:

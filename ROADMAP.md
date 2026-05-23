@@ -47,8 +47,12 @@ progresso sessão a sessão.
 - [~] L1 (raw) implementado para CSV direto (Sessão 01) e para ZIP
   (Sessão 02, em `<cache>/raw/<dataset>/<year>/`). Falta L3 (Parquet,
   Fase F) e L4 (`cachem::cache_mem()`).
-- [~] Invalidação por ETag/Last-Modified implementada (sidecar RDS),
-  estendida para ZIPs anuais na Sessão 02. TTL ainda não imposto.
+- [x] Invalidação por ETag/Last-Modified implementada (sidecar RDS),
+  estendida para ZIPs anuais na Sessão 02. TTL imposto na Sessão 3.7
+  via `options(cvmdata.cache_ttl_seconds)` (default 30 dias =
+  2 592 000 s; `0` força HEAD em toda chamada; `Inf` desliga HEAD
+  enquanto o sidecar existir; sidecar sem `fetched_at` parseável cai
+  para HEAD para refrescar metadados).
 - [ ] Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e
   eviction LRU quando atinge 90%.
 - [x] `source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly

@@ -12,6 +12,13 @@
 #' [tools::R_user_dir()], which can be overridden by setting the
 #' option `cvmdata.cache_dir` (see [cvm_cache_set_path()]).
 #'
+#' Cached artifacts are revalidated against the CVM portal (HEAD with
+#' ETag/Last-Modified) only after the freshness window expires. The
+#' window is controlled by the option `cvmdata.cache_ttl_seconds`
+#' (default `2592000`, i.e. 30 days); set it to `0` to revalidate on
+#' every call, or to `Inf` to skip revalidation entirely until
+#' [cvm_cache_clear()] is called.
+#'
 #' Read-only: this function does not create the directory.
 #'
 #' @return A character scalar with the absolute path.
