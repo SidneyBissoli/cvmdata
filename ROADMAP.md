@@ -42,7 +42,17 @@ progresso sessão a sessão.
 - [x] `pkgdown/_pkgdown.yml` configurado — Sessão 3.7. 5 famílias
   (`fetchers`, `cache`, `source`, `discovery`, `utilities`)
   agrupando as 14 funções exportadas até a 3.6.
-- [ ] `CODE_OF_CONDUCT.md` e `CONTRIBUTING.md`.
+- [x] `CODE_OF_CONDUCT.md` e `CONTRIBUTING.md` — Sessão 3.10.
+  Contributor Covenant 2.1 (canônico, sem desvios) com endpoint de
+  report `sbissoli76@gmail.com` (Alt 1 do trio email-pessoal/issue-
+  tracker/email-dedicado; mesmo email já público em `Authors@R`).
+  `CONTRIBUTING.md` médio (~150 linhas, Alt 2 do trio mínimo/médio/
+  completo): Reporting issues, Submitting a PR, Development setup,
+  Quality gate (comandos literais), Adding/modifying schema YAML
+  (formato mínimo + ações de `transformations`), Project goals.
+  README.Rmd ganhou seção `Contributing` com paragrafo padrão
+  rOpenSci/usethis apontando para ambos; pkgdown 2.x detecta CoC/
+  CONTRIBUTING automaticamente no navbar.
 
 ### Fase B — Cache + source CVM (16-20h)
 
