@@ -25,25 +25,18 @@ CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
 official dictionary as an embedded snapshot, so column types are picked
 up automatically.
 
-Existing R packages cover adjacent slices of the Brazilian
-open-financial-data space:
+Two existing R packages by Marcelo Perlin address adjacent slices of
+this problem:
 
-- [`GetITRData`](https://github.com/msperlin/GetITRData) by Marcelo
-  Perlin covered the quarterly statements (ITR), but was archived by its
-  author in March 2020 and is no longer maintained.
-- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2), also by
-  Marcelo Perlin, is actively maintained and is the right choice if you
-  need DFP only. Its exported API (`get_dfp_data()`) covers the *annual*
-  statements; ITR, FRE and the company registry (CAD) are out of scope.
-- [`rb3`](https://github.com/wilsonfreitas/rb3) by Wilson Freitas (with
-  Marcelo Perlin as co-author) is a **complement**, not an alternative:
-  it covers exchange-side data released by B3 (prices, volumes, tickers,
-  indices, calendars), whereas `cvmdata` covers issuer-side filings
-  released by CVM. Analyses that join market microstructure with
-  financial statements use the two side by side.
+- [`GetITRData`](https://github.com/msperlin/GetITRData) covered the
+  quarterly statements (ITR), but was archived by its author in March
+  2020 and is no longer maintained.
+- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2) is actively
+  maintained and is the right choice if you need DFP only. Its exported
+  API (`get_dfp_data()`) covers the *annual* statements; ITR, FRE and
+  the company registry (CAD) are out of scope.
 
-Against the issuer-side packages, `cvmdata` unifies CAD, ITR, DFP and
-FRE behind a single
+`cvmdata` unifies CAD, ITR, DFP and FRE behind a single
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 entry point, with consistent filtering semantics for companies (CNPJ /
 CD_CVM / free text with abbreviation expansion),
@@ -142,6 +135,18 @@ Data is fetched from the official CVM Open Data Portal
 Releases serves as automatic fallback when an upstream file becomes
 unavailable. Every returned tibble carries provenance attributes
 (`source`, `fetched_at`, `dataset`, `table`, `package_version`).
+
+## Related work
+
+For exchange-side market data (prices, volumes, tickers, indices,
+trading calendars), the natural companion is
+[`rb3`](https://github.com/wilsonfreitas/rb3) by Wilson Freitas (with
+Marcelo Perlin as co-author), which downloads and parses public files
+released by B3. `rb3` and `cvmdata` are complements: `cvmdata` covers
+issuer-side filings released by the regulator (CVM); `rb3` covers
+exchange-side trading data released by the market operator (B3).
+Analyses that join market microstructure with financial statements use
+the two side by side.
 
 ## Getting help
 
