@@ -328,16 +328,46 @@ progresso sessão a sessão.
 
 ### Fase F — Pipeline ETL + mirror (24-32h)
 
-- [ ] Scripts `inst/etl/01-07.R`.
-- [ ] Workflow `etl-mirror.yaml` (cron `0 7 * * 2`).
+Decisões de arquitetura travadas na Sessão 3.11
+(`data-raw/mirror-capacity-audit.md`):
+
+- **Provedor**: GitHub Releases (mesmo repo `SidneyBissoli/cvmdata`).
+  v1.0 projetado em 26.36 GB parquet snappy (92% concentrado em
+  FI/ICVM 555). Pior arquivo individual = 451 MB (FI/CDA anual), bem
+  abaixo do limite de 2 GB/arquivo.
+- **Escopo**: modular — 1 release por dataset
+  (`mirror-<dataset>-latest`).
+- **URL policy**: latest móvel + snapshots datados
+  (`mirror-<dataset>-snapshot-YYYY-MM-DD`).
+- **Formato**: parquet snappy + Hive-style `year=YYYY/` (compatível
+  com `arrow::open_dataset()` e DuckDB filter pushdown).
+
+Itens entregues nesta sessão:
+
+- [~] Scripts ETL em `inst/etl/`: `00-config.R`, `01-fetch-cvm.R`,
+  `02-csv-to-parquet.R`, `03-publish.R`. Pipeline completo
+  (fetch → parquet → upload via `gh release`) idempotente; suporta
+  variants `report_type` (ind/con) em DFP/ITR contábeis.
+- [~] Workflow `.github/workflows/etl-mirror.yaml` com trigger
+  `workflow_dispatch` apenas (smoke test de 1 dataset / 1 ano).
+  Cron `0 7 * * 2` fica para Sessão 3.12.
+- [x] `R/source-mirror-duckdb.R` criado como stub. Bloco
+  `source = "mirror"` em `cvm_fetch_internal()` agora delega para
+  `source_mirror_duckdb_get()`; classe trocada de
+  `cvmdata_error_internal` para `cvmdata_error_input` com mensagem
+  acionável apontando para `cvm_source_set("cvm")`.
+
+Itens pendentes para Sessões 3.12-3.14:
+
+- [ ] Cron real (`0 7 * * 2`) no workflow após smoke test bem-sucedido.
 - [ ] Detecção de mudança via hash de `meta_*.txt` +
   `dictionary_entry_inventory.json` (defesa em profundidade
   contra mudanças silenciosas; Rodada 3.0.2 §4.3).
 - [ ] Validação pre-publish com `pointblank`.
 - [ ] Primeiro snapshot publicado em GitHub Releases.
-- [ ] `source-mirror-duckdb.R` integrado ao dispatch
-  (`source = "mirror"`; atualmente aborta com
-  `cvmdata_error_input`).
+- [ ] `source-mirror-duckdb.R` funcional (DuckDB HTTP range requests
+  com filter pushdown por `year` + `companies`); stub atual aborta com
+  `cvmdata_error_input`.
 - [ ] Vignette `cache-and-mirror.Rmd`.
 
 ### Marco — release v0.1.0
