@@ -92,7 +92,8 @@
 <p>Fetch quarterly individual balance sheets (“BPA individual”) for two companies across recent years. Companies can be identified by CNPJ, CD_CVM, or free text — the latter with abbreviation expansion (<code>BANCO</code> matches <code>BCO</code>, <code>COMPANHIA</code> matches <code>CIA</code>, and so on):</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
-<span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
+<span>  dataset     <span class="op">=</span> <span class="st">"dfp"</span>,</span>
+<span>  table       <span class="op">=</span> <span class="st">"bpa"</span>,</span>
 <span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>  companies   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BCO BRASIL"</span>, <span class="st">"MAGAZINE LUIZA"</span><span class="op">)</span>,</span>
 <span>  years       <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span></span>
