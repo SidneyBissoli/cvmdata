@@ -298,12 +298,17 @@ cvmdata/
 │   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
 │   │                              #   + filter_by_companies() + busca textual
 │   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
+│   ├── cache.R                    # API pública de cache:
+│   │                              #   cvm_cache_path(), cvm_cache_set_path(),
+│   │                              #   cvm_cache_info(), cvm_cache_clear()
 │   ├── discovery.R                # cvm_datasets(), cvm_tables(),
 │   │                              #   cvm_dictionary(), cvm_codelist(),
 │   │                              #   cvm_dataset_years() (não segue prefixo
 │   │                              #   por enquanto — exceção tolerada)
 │   ├── schema-load.R              # load_schema() + validate_schema() +
 │   │                              #   resolve_file_pattern()
+│   ├── source.R                   # API pública de source:
+│   │                              #   cvm_source_get(), cvm_source_set()
 │   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
 │   │                              #   ZIP-yearly) + download_with_etag()
 │   ├── transform-schema.R         # apply_schema_transformations() genérico
@@ -374,11 +379,18 @@ cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_year_fallback         (years = NULL caiu para ano anterior
 │                                       porque max year não tinha dados da
 │                                       companhia pedida)
-└── cvmdata_warn_partial_failure       (batch yearly: alguns anos
-                                        falharam HTTP sob
-                                        on_error = "warn"; demais
-                                        sobreviventes foram empilhados
-                                        e retornados)
+├── cvmdata_warn_partial_failure       (batch yearly: alguns anos
+│                                       falharam HTTP sob
+│                                       on_error = "warn"; demais
+│                                       sobreviventes foram empilhados
+│                                       e retornados)
+└── cvmdata_warn_eviction              (LRU eviction removeu unidades
+                                        do cache local para honrar
+                                        options(cvmdata.cache_max_size_mb);
+                                        default emite em interactive()
+                                        e silencia em batch, controlado
+                                        por
+                                        options(cvmdata.cache_warn_evictions))
 ```
 
 Implementação via wrapper interno `cvmdata_abort(message, class, ...)`
@@ -568,9 +580,34 @@ para companhias abertas (CAD + DFP + ITR + FRE em parquet comprimido)
 ≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo,
 100 GB por release).
 
-Limite default 100 MB, configurável via
-`options(cvmdata.cache_max_size_mb = ...)`. Eviction LRU quando atinge
-90% do limite.
+Limite default 100 MiB, configurável via
+`options(cvmdata.cache_max_size_mb = ...)` — imposto na Sessão 3.8.
+Quando a soma das **unidades de cache** ultrapassa 90% do limite, o
+próximo download (no fim do ramo de gravação real de
+`download_with_etag()`, depois do `saveRDS()` do sidecar) dispara
+LRU eviction até cair para 80% do limite **ou** esgotar a lista de
+candidatos. A engine vive em `R/cache.R`
+(`read_cache_max_size()`, `build_cache_units()`,
+`cache_current_size_bytes()`, `cache_enforce_limit()`). Unidade de
+eviction: diretório do ano `<cache>/raw/<dataset>/<YYYY>/` para
+datasets yearly (DFP/ITR/FRE), par `{artifact, sidecar}` para
+não-particionados (CAD); âncora de ordenação é
+`file.mtime()` do upstream artifact (ZIP/CSV). Files órfãos
+(artifact sem sidecar, sidecar sem artifact) são ignorados na
+contabilidade — `cvm_cache_clear()` segue sendo o caminho para
+limpá-los. O artefato recém-gravado é protegido contra
+self-eviction (parâmetro `protect` passado pelo trigger). Valores
+especiais: `0` ou negativo desligam a engine; `Inf` idem; tipo
+inválido cai para o default 100 MiB (defesa). Observabilidade:
+`cvmdata_warn_eviction` é emitida agregada ao fim de cada rodada
+(`{N} unit(s)`, `{X} MiB` liberados, limite atual); default
+`interactive()` via `options(cvmdata.cache_warn_evictions)` — batch
+silencia, REPL avisa. Atributo `total_size_bytes` em
+`cvm_cache_info()` (Sessão 3.8) entrega a contagem corrente. CSVs
+extraídos via `unzip()` contam para o limite (mesma unidade do
+ZIP), mas o trigger só dispara em downloads reais — não em
+extrações; cache acima de 90% pós-`unzip` se auto-corrige no
+próximo download.
 
 ---
 

@@ -65,8 +65,23 @@ progresso sessão a sessão.
   2 592 000 s; `0` força HEAD em toda chamada; `Inf` desliga HEAD
   enquanto o sidecar existir; sidecar sem `fetched_at` parseável cai
   para HEAD para refrescar metadados).
-- [ ] Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e
-  eviction LRU quando atinge 90%.
+- [x] Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e
+  eviction LRU quando atinge 90% — Sessão 3.8. Default 100 MiB.
+  Engine em `R/cache.R` (`read_cache_max_size()`,
+  `build_cache_units()`, `cache_current_size_bytes()`,
+  `cache_enforce_limit()`); trigger amortizado em
+  `download_with_etag()` no ramo que grava bytes (TTL/304 fast paths
+  pulam). Métrica de ordenação `file.mtime()` do upstream artifact
+  (Alt 1 da decisão 1); escopo todo o conteúdo de `<cache>/raw/`
+  com unidade atômica = diretório do ano (yearly) ou par
+  `{artifact, sidecar}` (none) (Alt 2 da decisão 2); gatilho após
+  gravação + target 80% (Alt 1 da decisão 3). Limite `0`/negativo/
+  `Inf` desliga; tipo inválido cai para default. Observabilidade
+  via `cvmdata_warn_eviction` (nova classe em §6 do CLAUDE.md),
+  default `interactive()` via
+  `options(cvmdata.cache_warn_evictions)` (Alt 3 da decisão 5).
+  Atributo `total_size_bytes` adicionado a `cvm_cache_info()` (Alt
+  1 da decisão 4). Sem export novo (Alt 1 da decisão 6).
 - [x] `source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly
   (Sessão 02, com extração do CSV alvo via `report_type`).
 - [x] `cvm_source_get()` / `cvm_source_set()` — entregues na Sessão 3.6
