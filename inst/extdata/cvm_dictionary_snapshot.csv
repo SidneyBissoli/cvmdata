@@ -1,4 +1,4 @@
-dataset,table,column,campo,descricao,dominio,tipo_dados,tamanho,precisao,scale,meta_status
+dataset,table,campo,campo_original,descricao,dominio,tipo_dados,tamanho,precisao,scale,meta_status
 cad,companhias,auditor,AUDITOR,Nome do Auditor,Alfanumérico,varchar,100,,,available
 cad,companhias,bairro,BAIRRO,Bairro,Alfanumérico,varchar,100,,,available
 cad,companhias,bairro_resp,BAIRRO_RESP,Bairro do responsável,Alfanumérico,varchar,100,,,available

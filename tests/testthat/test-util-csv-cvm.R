@@ -69,14 +69,14 @@ test_that("snapshot declares non-date `vencimento` => Date column", {
   # canonical lookup must promote it over the name-based heuristic,
   # which would otherwise leave it to col_guess.
   fake_dict <- tibble::tibble(
-    column     = c("cnpj_cia", "vencimento", "outro"),
-    campo      = c("CNPJ_CIA", "Vencimento", "OUTRO"),
-    descricao  = NA_character_,
-    dominio    = NA_character_,
-    tipo_dados = c("varchar", "date", "varchar"),
-    tamanho    = NA_integer_,
-    precisao   = NA_integer_,
-    scale      = NA_integer_
+    campo          = c("cnpj_cia", "vencimento", "outro"),
+    campo_original = c("CNPJ_CIA", "Vencimento", "OUTRO"),
+    descricao      = NA_character_,
+    dominio        = NA_character_,
+    tipo_dados     = c("varchar", "date", "varchar"),
+    tamanho        = NA_integer_,
+    precisao       = NA_integer_,
+    scale          = NA_integer_
   )
   local_mocked_bindings(
     cvm_dictionary = function(dataset, table) fake_dict,
@@ -105,14 +105,14 @@ test_that("snapshot declares dt_/data_ as non-date => not parsed as Date", {
   # decide. Values are deliberately non-ISO so the test does not depend
   # on readr's guesser preferring character over Date.
   fake_dict <- tibble::tibble(
-    column     = c("cnpj_cia", "dt_pseudo"),
-    campo      = c("CNPJ_CIA", "DT_PSEUDO"),
-    descricao  = NA_character_,
-    dominio    = NA_character_,
-    tipo_dados = c("varchar", "varchar"),
-    tamanho    = NA_integer_,
-    precisao   = NA_integer_,
-    scale      = NA_integer_
+    campo          = c("cnpj_cia", "dt_pseudo"),
+    campo_original = c("CNPJ_CIA", "DT_PSEUDO"),
+    descricao      = NA_character_,
+    dominio        = NA_character_,
+    tipo_dados     = c("varchar", "varchar"),
+    tamanho        = NA_integer_,
+    precisao       = NA_integer_,
+    scale          = NA_integer_
   )
   local_mocked_bindings(
     cvm_dictionary = function(dataset, table) fake_dict,

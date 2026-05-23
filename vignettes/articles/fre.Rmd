@@ -52,7 +52,7 @@ requires `validate = "warn"` or `"skip"`.
 Use `cvm_tables("fre")` for the full list and
 `cvm_dictionary("fre", "<table>")` for per-column metadata. Tables
 marked ✱ return rows with `NA` in every dictionary column except
-`campo`/`column` (which come from the YAML's
+`campo`/`campo_original` (which come from the YAML's
 `expected_field_names`) and carry an attribute `meta_status = "missing"`.
 
 ## Workflow 1 — Audit and ESG/PCD disclosures for one issuer

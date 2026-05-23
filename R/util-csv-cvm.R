@@ -48,8 +48,8 @@ resolve_dict_columns <- function(schema) {
     return(NULL)
   }
   list(
-    known = dict$column,
-    date = dict$column[
+    known = dict$campo,
+    date = dict$campo[
       !is.na(dict$tipo_dados) & dict$tipo_dados == "date"
     ]
   )

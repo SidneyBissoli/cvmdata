@@ -87,7 +87,7 @@ for every column:
 ``` r
 dict <- cvm_dictionary("dfp", "bpa")
 tbl <- knitr::kable(
-  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
+  dict[1:8, c("campo", "descricao", "tipo_dados", "tamanho")],
   format = "html"
 )
 cat('<div align="center">', tbl, '</div>', sep = "\n")
@@ -103,7 +103,7 @@ cat('<div align="center">', tbl, '</div>', sep = "\n")
 
 <th style="text-align:left;">
 
-column
+campo
 </th>
 
 <th style="text-align:left;">

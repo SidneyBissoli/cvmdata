@@ -26,7 +26,7 @@ test_that("cvm_dictionary('dfp', 'bpa') returns parsed rows", {
   expect_s3_class(d, "tbl_df")
   expect_named(
     d,
-    c("column", "campo", "descricao", "dominio", "tipo_dados",
+    c("campo", "campo_original", "descricao", "dominio", "tipo_dados",
       "tamanho", "precisao", "scale")
   )
   expect_gt(nrow(d), 0L)

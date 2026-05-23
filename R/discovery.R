@@ -63,7 +63,7 @@ cvm_tables <- function(dataset) {
 #'
 #' Tables whose META is not published by CVM (`meta_status: missing` in
 #' the schema YAML) return rows with `NA` in every metadata column
-#' except `campo`/`column` (sourced from the YAML's
+#' except `campo`/`campo_original` (sourced from the YAML's
 #' `expected_field_names`). In that case the returned tibble carries an
 #' attribute `meta_status = "missing"`.
 #'
@@ -71,8 +71,10 @@ cvm_tables <- function(dataset) {
 #' @param table Table name within the dataset (e.g. `"bpa"`).
 #'
 #' @return A tibble with one row per column of the table, columns
-#'   `column`, `campo`, `descricao`, `dominio`, `tipo_dados`,
-#'   `tamanho`, `precisao`, `scale`.
+#'   `campo` (snake-case name matching [cvm_fetch()] output),
+#'   `campo_original` (field name as published by CVM in the META,
+#'   preserving the original casing), `descricao`, `dominio`,
+#'   `tipo_dados`, `tamanho`, `precisao`, `scale`.
 #'
 #' @examples
 #' cvm_dictionary("dfp", "bpa")
@@ -135,14 +137,14 @@ cvm_dictionary <- function(dataset, table) {
     )
   }
   out <- tibble::tibble(
-    column     = hit$column,
-    campo      = hit$campo,
-    descricao  = hit$descricao,
-    dominio    = hit$dominio,
-    tipo_dados = hit$tipo_dados,
-    tamanho    = hit$tamanho,
-    precisao   = hit$precisao,
-    scale      = hit$scale
+    campo          = hit$campo,
+    campo_original = hit$campo_original,
+    descricao      = hit$descricao,
+    dominio        = hit$dominio,
+    tipo_dados     = hit$tipo_dados,
+    tamanho        = hit$tamanho,
+    precisao       = hit$precisao,
+    scale          = hit$scale
   )
   if (any(hit$meta_status == "missing", na.rm = TRUE)) {
     attr(out, "meta_status") <- "missing"
@@ -232,7 +234,7 @@ cvm_codelist <- function(dataset, table, column) {
   available_codes <- sort(unique(snapshot$column[
     snapshot$dataset == dataset & snapshot$table == table
   ]))
-  if (column %in% dict$column) {
+  if (column %in% dict$campo) {
     cvmdata_abort(
       c(
         paste(
@@ -297,17 +299,17 @@ cvm_codelist <- function(dataset, table, column) {
   df <- readr::read_csv(
     path,
     col_types = readr::cols(
-      dataset     = readr::col_character(),
-      table       = readr::col_character(),
-      column      = readr::col_character(),
-      campo       = readr::col_character(),
-      descricao   = readr::col_character(),
-      dominio     = readr::col_character(),
-      tipo_dados  = readr::col_character(),
-      tamanho     = readr::col_integer(),
-      precisao    = readr::col_integer(),
-      scale       = readr::col_integer(),
-      meta_status = readr::col_character()
+      dataset        = readr::col_character(),
+      table          = readr::col_character(),
+      campo          = readr::col_character(),
+      campo_original = readr::col_character(),
+      descricao      = readr::col_character(),
+      dominio        = readr::col_character(),
+      tipo_dados     = readr::col_character(),
+      tamanho        = readr::col_integer(),
+      precisao       = readr::col_integer(),
+      scale          = readr::col_integer(),
+      meta_status    = readr::col_character()
     ),
     progress = FALSE
   )
