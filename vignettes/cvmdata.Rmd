@@ -10,39 +10,158 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment  = "#>"
 )
 ```
 
-`cvmdata` provides a tidy API to the open data published by the
-Brazilian Securities and Exchange Commission (CVM — *Comissão de
-Valores Mobiliários*). The package fetches official CSV releases from
-the CVM portal at <https://dados.cvm.gov.br/>, parses them respecting
-the upstream encoding (ISO-8859-1) and the published field
-conventions, and returns tibbles whose table names, column names and
-categorical values are preserved in Portuguese exactly as published
-by CVM. Function names, arguments and metadata attributes are in
-English, following rOpenSci and tidyverse conventions.
+## What `cvmdata` does
 
-This first vignette demonstrates the simplest entry point —
-`cad_fetch()`, which returns the current snapshot of the *Cadastro de
-Companhias Abertas* (registry of publicly-traded companies). Because
-this call hits the live CVM portal, the chunk runs only in interactive
-sessions.
+`cvmdata` provides a tidy R API to the open data published by the
+Brazilian Securities and Exchange Commission — *Comissão de Valores
+Mobiliários* (CVM). It fetches official CSV releases from the CVM
+portal at <https://dados.cvm.gov.br/>, parses them respecting the
+upstream encoding (`ISO-8859-1`) and the published field conventions,
+and returns tibbles whose **table names, column names and categorical
+values are preserved in Portuguese** exactly as published by CVM.
+Function names, arguments and metadata attributes are in English,
+following the rOpenSci and tidyverse conventions.
 
-```{r, eval = interactive()}
+The package's first release covers four core publicly-traded-company
+datasets:
+
+| Dataset id | Coverage                                                  |
+|------------|-----------------------------------------------------------|
+| `cad`      | Company registry (`Cadastro de Companhias Abertas`).      |
+| `itr`      | Quarterly financial statements (`Informações Trimestrais`).|
+| `dfp`      | Annual financial statements (`Demonstrações Financeiras Padronizadas`). |
+| `fre`      | Reference form, including ESG/governance tables (`Formulário de Referência`). |
+
+```{r}
 library(cvmdata)
-library(dplyr)
+cvm_datasets()
+```
 
-companies <- cad_fetch()
-glimpse(companies)
+## First call — the company registry
+
+The simplest entry point is `cad_fetch()`, a thin alias for
+`cvm_fetch("cad", "companhias")`. It returns the current snapshot of
+the open-company registry. The chunk below loads a small slice of a
+real call pre-computed for this vignette (the package itself hits the
+CVM portal on every invocation):
+
+```{r}
+companies <- readRDS(system.file(
+  "extdata", "vignette-data", "cad_companhias_sample.rds",
+  package = "cvmdata"
+))
+companies
 ```
 
 Every tibble returned by a `cvmdata` fetcher carries five provenance
-attributes — `source`, `fetched_at`, `dataset`, `table` and
-`package_version` — which are displayed when the tibble is printed.
+attributes:
 
-Subsequent releases will add vignettes covering the quarterly and
-annual financial statements (`itr`, `dfp`), the reference form
-(`fre`, including ESG/governance tables), and the cache/mirror
-architecture.
+```{r}
+attr(companies, "source")
+attr(companies, "dataset")
+attr(companies, "table")
+attr(companies, "package_version")
+# `fetched_at` is a POSIXct timestamp set at download time.
+```
+
+These attributes survive subsetting via standard tibble operations
+and are displayed at the top of the print output, so the dataset's
+origin and freshness travel with the data.
+
+## The general API — `cvm_fetch()`
+
+`cad_fetch()` is convenience. The single entry point for every dataset
+and every table is `cvm_fetch(dataset, table, ...)`. The example below
+shows what eight rows of BCO BRASIL's individual balance sheet look
+like for 2024 — also pre-computed:
+
+```{r}
+bb_bpa <- readRDS(system.file(
+  "extdata", "vignette-data", "dfp_bpa_bb_2024_sample.rds",
+  package = "cvmdata"
+))
+bb_bpa
+```
+
+Two things are worth noting on the output:
+
+* `vl_conta` (account amount) is already in absolute Brazilian reais.
+  CVM publishes a separate `ESCALA_MOEDA` field (`UNIDADE`, `MIL`,
+  `MILHÃO`, `BILHÃO`); `cvm_fetch()` multiplies `VL_CONTA` by the
+  scale and drops the scale column. The "known defects" article
+  walks through this transformation explicitly.
+* `dt_refer`, `dt_fim_exerc` and other dates arrive as proper R
+  `Date`, even though CVM ships them as `YYYY-MM-DD` strings. The
+  conversion is driven by the published dictionary
+  (`tipo_dados = "date"`).
+
+## Selecting companies
+
+The `companies` argument accepts CNPJ (with or without punctuation),
+CD_CVM (with or without zero-padding), or a free-text search against
+`denom_cia`. Detection is automatic per element. In non-interactive
+sessions, ambiguous text matches abort with a list of candidates so
+batch scripts never silently take the wrong issuer.
+
+```{r, eval = FALSE}
+# Three equivalent forms for one issuer:
+cvm_fetch("dfp", "bpa", report_type = "ind",
+          companies = "1023",                 years = 2024)
+cvm_fetch("dfp", "bpa", report_type = "ind",
+          companies = "00.000.000/0001-91",   years = 2024)
+cvm_fetch("dfp", "bpa", report_type = "ind",
+          companies = "BCO BRASIL S.A.",      years = 2024) # exact
+```
+
+The `cvm-fetch` article goes through CNPJ vs. CD_CVM vs. text in
+depth, including the CD_CVM-to-CNPJ lookup performed automatically
+for tables that lack a `cd_cvm` column (e.g. `composicao_capital`).
+
+## Discovery
+
+Two helpers describe what the package knows without touching the
+network:
+
+```{r}
+cvm_tables("dfp")
+
+# Dictionary for the columns of dfp/bpa, sourced from the published
+# CVM META resources at snapshot time.
+head(cvm_dictionary("dfp", "bpa"), 5)
+```
+
+`cvm_codelist(dataset, table, column)` returns the enumerated values
+of categorical columns (e.g. `sit` in `cad/companhias` —
+`ATIVO`/`CONCEDIDO REGISTRO`/etc.); `cvm_dataset_years(dataset)`
+discovers the years available upstream for a yearly-partitioned
+dataset.
+
+## Cache, source backend, and where to read next
+
+`cvm_fetch()` caches downloaded artefacts under
+`tools::R_user_dir("cvmdata", "cache")` with HTTP revalidation gated
+by a 30-day TTL. Cached units are LRU-evicted once the cache
+exceeds the configurable size limit (`cvmdata.cache_max_size_mb`,
+default 100 MiB). `cvm_cache_info()` reports current size and unit
+breakdown; `cvm_cache_clear()` resets it.
+
+The `source` argument selects the backend. v0.1 defaults to `"cvm"`
+(direct HTTP to the open-data portal); a planned `"mirror"` backend
+will route requests to a parquet snapshot consulted via DuckDB with
+column- and partition-level pushdown, kept fresh by a weekly workflow.
+The mirror is configured through `cvm_source_set()` once it ships.
+
+Further reading on the pkgdown site:
+
+* **cvm-fetch** — deep dive on `cvm_fetch()`, including
+  `companies`/`years`/`report_type`/`on_error`/`validate` semantics.
+* **itr-dfp** — quarterly and annual financial statements, with two
+  end-to-end workflows.
+* **fre** — reference form, including the eight ESG/governance tables
+  that ship without CVM-published META.
+* **cvm-defects** — known quirks of the CVM publication and how
+  `cvmdata` handles each one.

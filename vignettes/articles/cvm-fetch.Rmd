@@ -1,0 +1,232 @@
+---
+title: "cvm_fetch(): the generic API"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+`cvm_fetch(dataset, table, ...)` is the single entry point for every
+CVM dataset and every table covered by the package. `cad_fetch()` and
+any future dataset-specific helpers are thin wrappers around it.
+
+This article walks through each argument, the company-detection
+logic, the years semantics, the `report_type` rule, the `validate` and
+`on_error` modes, and the cache/source plumbing.
+
+```{r setup}
+library(cvmdata)
+```
+
+## Anatomy
+
+```r
+cvm_fetch(
+  dataset,
+  table,
+  companies   = NULL,
+  years       = NULL,
+  source      = NULL,
+  report_type = NULL,
+  on_error    = "abort",
+  validate    = "strict",
+  ...
+)
+```
+
+Returns a tibble of subclass `cvm_tbl` carrying five provenance
+attributes (`source`, `fetched_at`, `dataset`, `table`,
+`package_version`). Column names, table names and categorical values
+are preserved in Portuguese as published by CVM; the API surface is
+in English.
+
+```{r anatomy}
+bb_bpa <- cvm_fetch(
+  "dfp", "bpa",
+  report_type = "ind",
+  companies   = "1023",
+  years       = 2024
+)
+bb_bpa
+
+# Provenance:
+attr(bb_bpa, "source")
+attr(bb_bpa, "dataset")
+attr(bb_bpa, "table")
+```
+
+## Identifying companies
+
+`companies` accepts a character vector. Each element is classified
+**per element** by the pattern it matches:
+
+| Pattern                              | Interpretation         | Match against              |
+|--------------------------------------|------------------------|----------------------------|
+| 14 digits, no punctuation            | CNPJ (clean)           | `cnpj_clean(cnpj_cia)`     |
+| 14 digits with `.` / `/` / `-`       | CNPJ (formatted)       | `cnpj_cia` (literal)       |
+| 1–6 digits                           | CD_CVM                 | `cd_cvm` (with / without zero-padding) |
+| Anything else (≥ 1 alphabetic token) | Free-text search       | `denom_cia` (normalized)   |
+
+### CNPJ, CD_CVM, free text — same issuer, three calls
+
+```{r identifiers}
+# Each call returns identical rows.
+a <- cvm_fetch("dfp", "bpa", report_type = "ind",
+               companies = "1023",                years = 2024)
+b <- cvm_fetch("dfp", "bpa", report_type = "ind",
+               companies = "001023",              years = 2024)
+c <- cvm_fetch("dfp", "bpa", report_type = "ind",
+               companies = "00.000.000/0001-91",  years = 2024)
+
+identical(nrow(a), nrow(b))
+identical(nrow(a), nrow(c))
+```
+
+### Free-text matching with abbreviations
+
+Text search tokenizes the input by whitespace, normalizes (uppercase,
+no accents, no punctuation), applies a built-in abbreviation map
+(`BANCO ↔ BCO`, `COMPANHIA ↔ CIA`, etc.) and requires every token to
+match `denom_cia` with a word boundary.
+
+```{r text-search}
+# A distinctive stem resolves cleanly to one issuer:
+magalu <- cvm_fetch("dfp", "bpa", report_type = "ind",
+                    companies = "MAGAZINE LUIZA", years = 2024)
+unique(magalu$denom_cia)
+```
+
+A non-unique stem aborts (in batch) with the list of candidates so
+scripts never silently grab the wrong issuer:
+
+```{r text-ambiguous, error = TRUE}
+cvm_fetch("dfp", "bpa", report_type = "ind",
+          companies = "BCO BRASIL", years = 2024)
+```
+
+In `interactive()` sessions an `utils::menu()` prompt appears
+instead. Zero matches abort with the same error class.
+
+### CD_CVM lookup for tables without `cd_cvm`
+
+Some tables (e.g. `composicao_capital`, `parecer` in ITR/DFP) do not
+carry a `cd_cvm` column. When the user passes CD_CVM tokens against
+such a table, `cvm_fetch()` reads the dataset's `submissao` for the
+same year, looks up CNPJ for each CD_CVM and applies the filter on
+CNPJ. The interface is identical to the user:
+
+```{r cd-cvm-lookup}
+cap <- cvm_fetch("dfp", "composicao_capital",
+                 companies = "1023", years = 2024)
+cap
+```
+
+## Selecting years
+
+`years` is an integer vector. `NULL` (default) fetches the **latest
+available year**, discovered by HEAD-probing CVM's listing.
+
+```{r years-discovery}
+# What's published upstream?
+cvm_dataset_years("dfp")
+
+# Pass an explicit vector to back-fill history:
+history <- cvm_fetch("dfp", "bpa", report_type = "ind",
+                     companies = "1023", years = 2022:2024)
+sort(unique(format(history$dt_refer, "%Y")))
+```
+
+Each CSV publishes `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — the
+declared year and N − 1. The antepenultimate of year N is the last
+of year N − 2. `cvm_fetch()` does not synthesize the antepenultimate;
+ask for `years = (N - 2):N` if you need it.
+
+```{r exercise-ordering}
+table(history$ordem_exerc)
+```
+
+### Partial failure with `on_error`
+
+For multi-year calls (more than one element in `years`),
+`on_error = "warn"` keeps surviving years and emits
+`cvmdata_warn_partial_failure` listing failures.
+`on_error = "silent"` does the same without the warning.
+`on_error = "abort"` (default) aborts at the first HTTP failure.
+Total failure (every year fails) always aborts regardless. Single-year
+calls, non-yearly tables (CAD) and the implicit `years = NULL`
+fallback always abort on HTTP failure.
+
+Parse and schema-validation failures are governed by `validate`, not
+by `on_error` — schema drift is treated as a separate signal.
+
+## `report_type`
+
+Eight tables in ITR/DFP publish both **individual** and **consolidated**
+variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
+`dfc_mi`, `dmpl`, `dva`). `report_type` is **required** for those:
+
+```{r report-type-required, error = TRUE}
+cvm_fetch("dfp", "bpa", companies = "1023", years = 2024)
+```
+
+And **must be `NULL`** for tables without the distinction
+(`companhias`, `submissao`, `parecer`, `composicao_capital`):
+
+```{r report-type-forbidden, error = TRUE}
+cvm_fetch("dfp", "composicao_capital",
+          companies = "1023", years = 2024,
+          report_type = "ind")
+```
+
+## `validate`
+
+Controls the strictness of schema validation at parse time. Three
+modes:
+
+| Mode       | Table with META published         | Table with `meta_status: missing`                  |
+|------------|------------------------------------|----------------------------------------------------|
+| `"strict"` | Validates; mismatch aborts.        | Aborts with `cvmdata_error_meta_unavailable`.      |
+| `"warn"`   | Validates; mismatch warns.         | Warns with `cvmdata_warn_meta_unavailable`; data returned. |
+| `"skip"`   | Skips validation silently.         | Skips silently.                                    |
+
+The eight FRE tables without published META (`empregado_PCD`,
+`empregado_local_declaracao_genero`, etc.) need `validate = "warn"`
+or `"skip"` to be readable. See the **fre** article for a worked
+example.
+
+## Cache, TTL and source backend
+
+Downloaded artefacts are cached under
+`tools::R_user_dir("cvmdata", "cache")`. Each ZIP / CSV stores an
+ETag/Last-Modified sidecar; HTTP revalidation is throttled by a
+30-day TTL (configurable via `options(cvmdata.cache_ttl_seconds)`).
+Cached units are LRU-evicted once total size exceeds the limit set
+by `options(cvmdata.cache_max_size_mb)` (default 100 MiB).
+
+```{r cache-info}
+info <- cvm_cache_info()
+info
+attr(info, "total_size_bytes")
+```
+
+`source` selects the backend: `"cvm"` (default in v0.1) is direct
+HTTP to the open-data portal; `"mirror"` will route requests to a
+DuckDB-queried parquet snapshot once it ships (Phase F). The current
+backend is read by `cvm_source_get()` and changed at session scope by
+`cvm_source_set()`:
+
+```{r source}
+cvm_source_get()
+```
+
+## Where to read next
+
+* **itr-dfp** — quarterly and annual financial statements; two
+  end-to-end workflows.
+* **fre** — reference form, including the eight ESG/governance
+  tables without published META.
+* **cvm-defects** — known publication quirks and how `cvmdata`
+  handles each one.
