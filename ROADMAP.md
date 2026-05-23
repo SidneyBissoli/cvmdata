@@ -241,7 +241,13 @@ progresso sessão a sessão.
     vez contra YAMLs reais com `meta_status: missing` — três modos
     (`strict`/`warn`/`skip`) cobertos por testes que reescrevem o
     header de `empregado_PCD` no cache.
-  - [ ] Vignettes `itr-dfp.Rmd` e `fre.Rmd`.
+  - [x] **Sessão 3.9**: Articles `itr-dfp.Rmd` e `fre.Rmd` em
+    `vignettes/articles/` (eval = TRUE, CVM real). Reference table
+    no topo de cada um (11/36 tabelas); 2 workflows por article.
+    itr-dfp cobre `multiply_by_scale` + `keep_latest_version` +
+    lookup CD_CVM→CNPJ via `submissao`; fre cobre header alternativo
+    (`cnpj_companhia`), `meta_status: missing` (workflow PCD), cap
+    table (`posicao_acionaria`).
 - [x] Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após
   queda para 72% no merge de DFP).
 - [x] Substituir heurística de Date em `read_cvm_csv()` pela regra
@@ -296,8 +302,19 @@ progresso sessão a sessão.
   78.41% → 90.53%; `transform-schema.R` 86.27% → 100%. Branches
   ainda fora cobrem só guards defensivos (snapshot ausente / pacote
   não instalado / dataset com schema dir vazio).
-- [ ] Vignette `cvm-fetch.Rmd` (substitui stub atual).
-- [ ] Vignette de defeitos conhecidos da CVM (Rodada 2.6 §11.5).
+- [x] **Sessão 3.9**: Article `cvm-fetch.Rmd` (deep dive da API) em
+  `vignettes/articles/`. Stub `vignettes/cvmdata.Rmd` reescrito como
+  intro CRAN-safe (RDS pré-computado em
+  `inst/extdata/vignette-data/`); `data-raw/build-vignette-data.R`
+  regera as RDS hitando a CVM. Layout final:
+  1 vignette (`cvmdata.Rmd`) + 4 articles (`cvm-fetch`, `itr-dfp`,
+  `fre`, `cvm-defects`).
+- [x] **Sessão 3.9**: Article `cvm-defects.Rmd` cobrindo os 13
+  defeitos conhecidos da publicação CVM (naming doc §11.5 +
+  descobertos em implementação). Híbrido: tabela-índice no topo +
+  mini-exemplo para os 5 estruturais (#5 padding CD_CVM, #7
+  `multiply_by_scale`, #8 META missing, #11 `keep_latest_version`,
+  #13 lookup CD_CVM→CNPJ).
 
 ### Fase F — Pipeline ETL + mirror (24-32h)
 
