@@ -1,0 +1,73 @@
+name: ETL mirror (manual)
+
+# Sessao 3.11 scaffold — manual dispatch only.
+# Cron-based weekly publishing arrives in Sessao 3.12 after a manual
+# end-to-end run validates the path. The workflow runs all three ETL
+# stages (fetch -> parquet -> publish) for a single dataset, optionally
+# scoped to one year for fast smoke testing.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: Dataset id to publish
+        required: true
+        type: choice
+        options:
+          - cad
+          - dfp
+          - itr
+          - fre
+      year:
+        description: Year (optional, default = all published)
+        required: false
+        type: string
+
+permissions:
+  contents: write  # gh release create/delete/upload
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CVMDATA_ETL_WORKSPACE: ${{ runner.temp }}/cvmdata-etl
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::arrow, any::devtools
+          needs: check
+
+      - name: Install cvmdata from source
+        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = "never")'
+
+      - name: Stage 01 — fetch CVM
+        run: |
+          if [ -n "${{ inputs.year }}" ]; then
+            Rscript inst/etl/01-fetch-cvm.R \
+              --dataset ${{ inputs.dataset }} \
+              --year ${{ inputs.year }}
+          else
+            Rscript inst/etl/01-fetch-cvm.R --dataset ${{ inputs.dataset }}
+          fi
+
+      - name: Stage 02 — CSV to parquet
+        run: |
+          if [ -n "${{ inputs.year }}" ]; then
+            Rscript inst/etl/02-csv-to-parquet.R \
+              --dataset ${{ inputs.dataset }} \
+              --year ${{ inputs.year }}
+          else
+            Rscript inst/etl/02-csv-to-parquet.R \
+              --dataset ${{ inputs.dataset }}
+          fi
+
+      - name: Stage 03 — publish to GitHub Releases
+        run: Rscript inst/etl/03-publish.R --dataset ${{ inputs.dataset }}
