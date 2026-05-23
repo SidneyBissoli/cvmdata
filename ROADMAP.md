@@ -26,10 +26,22 @@ progresso sessão a sessão.
   release / Windows release / Ubuntu devel-release-oldrel1).
 - [x] `.lintr` config travada (linha 80, snake_case, cyclocomp ≤ 20).
 - [x] `.Rbuildignore` e `.gitignore` (incluindo `.claude/` e `memory/`).
-- [ ] Workflow `test-coverage.yaml`.
-- [ ] Workflow `lint.yaml`.
-- [ ] Workflow `pkgdown.yaml`.
-- [ ] `pkgdown/_pkgdown.yml` configurado.
+- [x] Workflow `test-coverage.yaml` — Sessão 3.7. Usa
+  `codecov/codecov-action@v4` com `CODECOV_TOKEN` secret (Alt 1 do
+  trio codecov-oficial/artifact). Badge já existe em README.Rmd
+  apontando para `app.codecov.io/gh/SidneyBissoli/cvmdata` — primeiro
+  run real do workflow precisa do token criado em codecov.io.
+- [x] Workflow `lint.yaml` — Sessão 3.7. Roda `lintr::lint_package()`
+  com `LINTR_ERROR_ON_LINT=true` (PR falha em qualquer divergência
+  de `.lintr`).
+- [x] Workflow `pkgdown.yaml` — Sessão 3.7. Deploy via
+  `JamesIves/github-pages-deploy-action@v4.5.0` na branch órfã
+  `gh-pages` (Alt 1 do par branch/actions-deploy-pages, padrão
+  `usethis::use_pkgdown_github_pages()`). Site em
+  `https://sidneybissoli.github.io/cvmdata/` após primeiro push.
+- [x] `pkgdown/_pkgdown.yml` configurado — Sessão 3.7. 5 famílias
+  (`fetchers`, `cache`, `source`, `discovery`, `utilities`)
+  agrupando as 14 funções exportadas até a 3.6.
 - [ ] `CODE_OF_CONDUCT.md` e `CONTRIBUTING.md`.
 
 ### Fase B — Cache + source CVM (16-20h)
