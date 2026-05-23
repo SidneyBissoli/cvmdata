@@ -68,3 +68,14 @@ memory/
 
 # Claude Code local settings
 .claude/
+
+# Planning artefacts (round decision docs) — kept locally, not part of
+# the public repo or tarball
+cvmdata_rodada*.md
+
+# Session prompts driving Claude Code work — kept locally only
+PROMPT_CLAUDE_CODE_SESSAO_*.md
+
+# Project custom instructions (Claude Code project memory drafts) —
+# kept locally, source for CLAUDE.md
+cvmdata_projeto_instrucoes_customizadas*.md

@@ -18,6 +18,8 @@
 ^\.github$
 ^codecov\.yml$
 ^README\.Rmd$
+^README\.pt-BR\.Rmd$
+^README\.pt-BR\.md$
 ^cran-comments\.md$
 ^data-raw$
 ^\.lintr$
