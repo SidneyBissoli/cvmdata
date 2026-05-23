@@ -46,7 +46,7 @@ bb_bpa <- cvm_fetch(
   years       = 2024
 )
 bb_bpa
-#> ℹ source: "cvm" | fetched_at: 2026-05-23 15:16:51.572107
+#> ℹ source: "cvm" | fetched_at: 2026-05-23 20:58:27.551324
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 13
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -160,7 +160,7 @@ cap <- cvm_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-05-23 15:16:54.399684
+#> ℹ source: "cvm" | fetched_at: 2026-05-23 20:58:30.401124
 #> ℹ dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 1 × 10
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
@@ -276,18 +276,18 @@ info
 #> # A tibble: 12 × 7
 #>    dataset file         path  size_bytes mtime               etag  last_modified
 #>    <chr>   <chr>        <chr>      <int> <dttm>              <chr> <chr>        
-#>  1 dfp     dfp_cia_abe… /hom…   13447749 2026-05-23 15:16:57 "\"6… Sun, 17 May …
-#>  2 dfp     dfp_cia_abe… /hom…   13562178 2026-05-23 15:16:58 "\"6… Sun, 17 May …
-#>  3 dfp     dfp_cia_abe… /hom…     182978 2026-05-23 15:16:54  NA   NA           
-#>  4 dfp     dfp_cia_abe… /hom…   13395094 2026-05-23 15:16:46 "\"6… Sun, 17 May …
-#>  5 dfp     dfp_cia_abe… /hom…   19075356 2026-05-23 15:16:57  NA   NA           
-#>  6 dfp     dfp_cia_abe… /hom…   19571240 2026-05-23 15:16:58  NA   NA           
-#>  7 dfp     dfp_cia_abe… /hom…   18582919 2026-05-23 15:16:46  NA   NA           
-#>  8 dfp     dfp_cia_abe… /hom…      65827 2026-05-23 15:16:54  NA   NA           
-#>  9 fre     fre_cia_abe… /hom…    1084961 2026-05-23 15:16:48  NA   NA           
-#> 10 fre     fre_cia_abe… /hom…    8408545 2026-05-23 15:16:48 "\"6… Sun, 17 May …
-#> 11 fre     fre_cia_abe… /hom…    1180773 2026-05-23 15:16:48  NA   NA           
-#> 12 fre     fre_cia_abe… /hom…       7716 2026-05-23 15:16:48  NA   NA
+#>  1 dfp     dfp_cia_abe… /hom…   13447749 2026-05-23 20:58:33 "\"6… Sun, 17 May …
+#>  2 dfp     dfp_cia_abe… /hom…   13562178 2026-05-23 20:58:34 "\"6… Sun, 17 May …
+#>  3 dfp     dfp_cia_abe… /hom…     182978 2026-05-23 20:58:30  NA   NA           
+#>  4 dfp     dfp_cia_abe… /hom…   13395094 2026-05-23 20:58:22 "\"6… Sun, 17 May …
+#>  5 dfp     dfp_cia_abe… /hom…   19075356 2026-05-23 20:58:33  NA   NA           
+#>  6 dfp     dfp_cia_abe… /hom…   19571240 2026-05-23 20:58:34  NA   NA           
+#>  7 dfp     dfp_cia_abe… /hom…   18582919 2026-05-23 20:58:22  NA   NA           
+#>  8 dfp     dfp_cia_abe… /hom…      65827 2026-05-23 20:58:30  NA   NA           
+#>  9 fre     fre_cia_abe… /hom…    1084961 2026-05-23 20:58:24  NA   NA           
+#> 10 fre     fre_cia_abe… /hom…    8408545 2026-05-23 20:58:24 "\"6… Sun, 17 May …
+#> 11 fre     fre_cia_abe… /hom…    1180773 2026-05-23 20:58:24  NA   NA           
+#> 12 fre     fre_cia_abe… /hom…       7716 2026-05-23 20:58:24  NA   NA
 attr(info, "total_size_bytes")
 #> [1] 108566080
 ```

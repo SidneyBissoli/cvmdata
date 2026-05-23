@@ -156,12 +156,25 @@
 </ul></div>
 <div class="section level3">
 <h3 id="fase-f--pipeline-etl--mirror-24-32h">Fase F — Pipeline ETL + mirror (24-32h)<a class="anchor" aria-label="anchor" href="#fase-f--pipeline-etl--mirror-24-32h"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox">Scripts <code>inst/etl/01-07.R</code>.</label></li>
-<li><label><input type="checkbox">Workflow <code>etl-mirror.yaml</code> (cron <code>0 7 * * 2</code>).</label></li>
+<p>Decisões de arquitetura travadas na Sessão 3.11 (<code>data-raw/mirror-capacity-audit.md</code>):</p>
+<ul><li>
+<strong>Provedor</strong>: GitHub Releases (mesmo repo <code>SidneyBissoli/cvmdata</code>). v1.0 projetado em 26.36 GB parquet snappy (92% concentrado em FI/ICVM 555). Pior arquivo individual = 451 MB (FI/CDA anual), bem abaixo do limite de 2 GB/arquivo.</li>
+<li>
+<strong>Escopo</strong>: modular — 1 release por dataset (<code>mirror-&lt;dataset&gt;-latest</code>).</li>
+<li>
+<strong>URL policy</strong>: latest móvel + snapshots datados (<code>mirror-&lt;dataset&gt;-snapshot-YYYY-MM-DD</code>).</li>
+<li>
+<strong>Formato</strong>: parquet snappy + Hive-style <code>year=YYYY/</code> (compatível com <code>arrow::open_dataset()</code> e DuckDB filter pushdown).</li>
+</ul><p>Itens entregues nesta sessão:</p>
+<ul><li>[~] Scripts ETL em <code>inst/etl/</code>: <code>00-config.R</code>, <code>01-fetch-cvm.R</code>, <code>02-csv-to-parquet.R</code>, <code>03-publish.R</code>. Pipeline completo (fetch → parquet → upload via <code>gh release</code>) idempotente; suporta variants <code>report_type</code> (ind/con) em DFP/ITR contábeis.</li>
+<li>[~] Workflow <code>.github/workflows/etl-mirror.yaml</code> com trigger <code>workflow_dispatch</code> apenas (smoke test de 1 dataset / 1 ano). Cron <code>0 7 * * 2</code> fica para Sessão 3.12.</li>
+<li><label><input type="checkbox" checked><code>R/source-mirror-duckdb.R</code> criado como stub. Bloco <code>source = "mirror"</code> em <code>cvm_fetch_internal()</code> agora delega para <code>source_mirror_duckdb_get()</code>; classe trocada de <code>cvmdata_error_internal</code> para <code>cvmdata_error_input</code> com mensagem acionável apontando para <code>cvm_source_set("cvm")</code>.</label></li>
+</ul><p>Itens pendentes para Sessões 3.12-3.14:</p>
+<ul class="task-list"><li><label><input type="checkbox">Cron real (<code>0 7 * * 2</code>) no workflow após smoke test bem-sucedido.</label></li>
 <li><label><input type="checkbox">Detecção de mudança via hash de <code>meta_*.txt</code> + <code>dictionary_entry_inventory.json</code> (defesa em profundidade contra mudanças silenciosas; Rodada 3.0.2 §4.3).</label></li>
 <li><label><input type="checkbox">Validação pre-publish com <code>pointblank</code>.</label></li>
 <li><label><input type="checkbox">Primeiro snapshot publicado em GitHub Releases.</label></li>
-<li><label><input type="checkbox"><code>source-mirror-duckdb.R</code> integrado ao dispatch (<code>source = "mirror"</code>; atualmente aborta com <code>cvmdata_error_input</code>).</label></li>
+<li><label><input type="checkbox"><code>source-mirror-duckdb.R</code> funcional (DuckDB HTTP range requests com filter pushdown por <code>year</code> + <code>companies</code>); stub atual aborta com <code>cvmdata_error_input</code>.</label></li>
 <li><label><input type="checkbox">Vignette <code>cache-and-mirror.Rmd</code>.</label></li>
 </ul></div>
 <div class="section level3">
