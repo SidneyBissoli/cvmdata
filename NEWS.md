@@ -21,3 +21,13 @@
   `match_by_text()`, `disambiguate_text_match()` and
   `tx_keep_latest_version()` accept either column pair; existing
   CAD/ITR/DFP behaviour is unchanged.
+* Public cache API: `cvm_cache_path()`, `cvm_cache_set_path()`,
+  `cvm_cache_info()` and `cvm_cache_clear()`. The internal source
+  backend now consumes `cvm_cache_path()` as the single source of
+  truth for the cache root. `cvm_cache_info()` lists every artifact
+  under `<cache>/raw/` (upstream CSV/ZIP plus CSVs extracted from
+  yearly ZIPs) with ETag/Last-Modified metadata sourced from
+  `*.etag.rds` sidecars when present. `cvm_cache_clear()` accepts
+  `what ∈ c("all", "raw")` plus optional `dataset` and `year`
+  filters; in interactive sessions it asks for confirmation via
+  `utils::askYesNo()`.
