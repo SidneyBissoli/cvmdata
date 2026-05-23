@@ -336,3 +336,177 @@ ensure_dir <- function(path) {
   }
   invisible(path)
 }
+
+# Read and validate `options(cvmdata.cache_max_size_mb)`. Returns the
+# limit in bytes. `Inf` is the sentinel for "eviction disabled" — the
+# option being `0`, negative, or `Inf` all map to it. Malformed values
+# (non-numeric, length != 1, NA) fall back to the default 100 MB so
+# that a corrupt user option cannot accidentally unbound the cache.
+read_cache_max_size <- function() {
+  raw <- getOption("cvmdata.cache_max_size_mb", 100L)
+  if (!is.numeric(raw) || length(raw) != 1L || is.na(raw)) {
+    return(100 * 1024 * 1024)
+  }
+  if (raw <= 0 || is.infinite(raw)) {
+    return(Inf)
+  }
+  as.numeric(raw) * 1024 * 1024
+}
+
+# Build the list of cache units that the eviction engine considers.
+# A "unit" is anchored by an upstream artifact (a file with a sibling
+# `*.etag.rds` sidecar). Two layouts are recognised:
+#
+#   - Yearly (DFP/ITR/FRE): the unit is the year directory
+#     `<cache>/raw/<dataset>/<YYYY>/`, which holds the ZIP, the
+#     sidecar, and any CSV(s) extracted via `unzip()`. mtime anchor
+#     is the upstream ZIP itself.
+#   - Non-partitioned (CAD): the unit is the pair
+#     `{anchor, anchor.etag.rds}`. mtime anchor is the artifact.
+#
+# Orphan sidecars (sidecar without artifact) and orphan files
+# (artifact without sidecar) are ignored: they do not count toward
+# the cache size and are not removed by eviction. Cleaning them up
+# is the user's job via `cvm_cache_clear()`.
+build_cache_units <- function(raw_root) {
+  empty <- list(
+    units = list(),
+    mtime = .POSIXct(numeric(0L), tz = "UTC"),
+    size_bytes = numeric(0L)
+  )
+  if (!dir.exists(raw_root)) {
+    return(empty)
+  }
+  all_files <- list.files(
+    raw_root, recursive = TRUE, full.names = TRUE, no.. = TRUE
+  )
+  sidecars <- all_files[grepl("\\.etag\\.rds$", all_files)]
+  if (!length(sidecars)) {
+    return(empty)
+  }
+  anchors <- sub("\\.etag\\.rds$", "", sidecars)
+  ok <- file.exists(anchors)
+  anchors <- anchors[ok]
+  sidecars <- sidecars[ok]
+  if (!length(anchors)) {
+    return(empty)
+  }
+  unit_keys <- vapply(anchors, .cache_unit_key, character(1L))
+  unique_keys <- unique(unit_keys)
+  units <- vector("list", length(unique_keys))
+  mtimes <- .POSIXct(numeric(length(unique_keys)), tz = "UTC")
+  sizes <- numeric(length(unique_keys))
+  for (i in seq_along(unique_keys)) {
+    key <- unique_keys[[i]]
+    idx <- which(unit_keys == key)
+    mtimes[[i]] <- max(file.mtime(anchors[idx]))
+    if (dir.exists(key)) {
+      files <- list.files(
+        key, recursive = TRUE, full.names = TRUE, no.. = TRUE
+      )
+    } else {
+      files <- c(anchors[[idx[[1L]]]], sidecars[[idx[[1L]]]])
+    }
+    units[[i]] <- files
+    sizes[[i]] <- sum(file.size(files), na.rm = TRUE)
+  }
+  list(units = units, mtime = mtimes, size_bytes = sizes)
+}
+
+# Map an anchor path to the unit key under which `build_cache_units()`
+# groups files. For yearly partitionings the key is the year directory
+# (parent of the anchor when that parent's basename looks like a
+# 4-digit year). For non-partitioned datasets the key is the anchor
+# path itself.
+.cache_unit_key <- function(anchor) {
+  parent <- dirname(anchor)
+  if (grepl("^[0-9]{4}$", basename(parent))) {
+    parent
+  } else {
+    anchor
+  }
+}
+
+# Total bytes counted toward the cache size limit. Sums sizes across
+# every unit returned by `build_cache_units()`; orphan files and
+# orphan sidecars are excluded by design (see that helper for the
+# accounting rules).
+cache_current_size_bytes <- function() {
+  units <- build_cache_units(file.path(cvm_cache_path(), "raw"))
+  sum(units$size_bytes)
+}
+
+# Enforce the cache size limit. Triggered after `download_with_etag()`
+# writes fresh bytes (see `R/source-cvm-http.R`); when the total
+# exceeds 90% of `options(cvmdata.cache_max_size_mb)`, evict units in
+# ascending mtime order (oldest first) until at or below 80% of the
+# limit, or the candidate list is exhausted. The `protect` argument
+# names a path that must not be evicted (set by the trigger to the
+# just-written `dest_path`, so a single download larger than the
+# limit cannot delete itself). Returns the number of units removed,
+# invisibly.
+cache_enforce_limit <- function(protect = NULL) {
+  limit <- read_cache_max_size()
+  if (is.infinite(limit)) {
+    return(invisible(0L))
+  }
+  raw_root <- file.path(cvm_cache_path(), "raw")
+  units <- build_cache_units(raw_root)
+  if (!length(units$units)) {
+    return(invisible(0L))
+  }
+  total <- sum(units$size_bytes)
+  if (total <= 0.9 * limit) {
+    return(invisible(0L))
+  }
+  target <- 0.8 * limit
+  protect_norm <- if (is.null(protect)) {
+    NULL
+  } else {
+    normalizePath(protect, winslash = "/", mustWork = FALSE)
+  }
+  ord <- order(units$mtime)
+  removed <- 0L
+  for (i in ord) {
+    if (total <= target) {
+      break
+    }
+    if (.cache_unit_protects(units$units[[i]], protect_norm)) {
+      next
+    }
+    .cache_evict_unit(units$units[[i]])
+    total <- total - units$size_bytes[[i]]
+    removed <- removed + 1L
+  }
+  invisible(removed)
+}
+
+# Whether the just-written path lives in this unit. Both sides are
+# normalised to forward-slash form so the mixed separators
+# `file.path()` and `list.files()` can return on Windows do not
+# defeat the comparison.
+.cache_unit_protects <- function(unit_files, protect_norm) {
+  if (is.null(protect_norm)) {
+    return(FALSE)
+  }
+  normalised <- normalizePath(
+    unit_files, winslash = "/", mustWork = FALSE
+  )
+  protect_norm %in% normalised
+}
+
+# Remove every file in a unit and prune the unit's directory if the
+# unit was a yearly bundle (i.e., all its files lived inside a single
+# directory that is now empty). Non-partitioned units share their
+# parent directory with other datasets, so the dir is left alone.
+.cache_evict_unit <- function(files) {
+  unlink(files, force = TRUE)
+  parent_dirs <- unique(dirname(files))
+  for (d in parent_dirs) {
+    if (dir.exists(d) &&
+          !length(list.files(d, all.files = TRUE, no.. = TRUE))) {
+      unlink(d, recursive = TRUE, force = TRUE)
+    }
+  }
+  invisible()
+}

@@ -185,6 +185,11 @@ download_with_etag <- function(url, dest_path) {
       ),
       etag_path
     )
+    # Amortised LRU eviction: only fires after a real write (the TTL
+    # and 304-not-modified branches above return without touching
+    # disk, so steady-state reads pay zero eviction cost). The
+    # just-written artifact is protected against self-eviction.
+    cache_enforce_limit(protect = dest_path)
   }
   invisible(dest_path)
 }
