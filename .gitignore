@@ -79,3 +79,9 @@ PROMPT_CLAUDE_CODE_SESSAO_*.md
 # Project custom instructions (Claude Code project memory drafts) —
 # kept locally, source for CLAUDE.md
 cvmdata_projeto_instrucoes_customizadas*.md
+
+# Per-session verification runbooks — kept locally only
+VERIFICACAO_SESSAO_*.md
+
+# Locally rendered ROADMAP preview
+ROADMAP.html
