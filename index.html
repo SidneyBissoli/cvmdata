@@ -83,14 +83,79 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad" "dfp" "fre" "itr"</span></span>
-<span><span class="fu"><a href="reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
-<span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>
-<span><span class="co">#&gt;  [7] "dra"                "dre"                "dva"               </span></span>
-<span><span class="co">#&gt; [10] "parecer"            "submissao"</span></span></code></pre></div>
-<p>Fetch quarterly individual balance sheets (“BPA individual”) for two companies across recent years. Companies can be identified by CNPJ, CD_CVM, or free text — the latter with abbreviation expansion (<code>BANCO</code> matches <code>BCO</code>, <code>COMPANHIA</code> matches <code>CIA</code>, and so on):</p>
+<span><span class="co">#&gt; [1] "cad" "dfp" "fre" "itr"</span></span></code></pre></div>
+<p>The bundled dictionary surfaces the types and descriptions CVM publishes for every column:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">dict</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"column"</span>, <span class="st">"descricao"</span>, <span class="st">"tipo_dados"</span>, <span class="st">"tamanho"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="20%">
+<col width="48%">
+<col width="17%">
+<col width="13%">
+</colgroup>
+<thead><tr>
+<th align="left">column</th>
+<th align="left">descricao</th>
+<th align="left">tipo_dados</th>
+<th align="right">tamanho</th>
+</tr></thead>
+<tbody>
+<tr>
+<td align="left">cd_conta</td>
+<td align="left">Código da conta</td>
+<td align="left">varchar</td>
+<td align="right">18</td>
+</tr>
+<tr>
+<td align="left">cd_cvm</td>
+<td align="left">Código CVM</td>
+<td align="left">char</td>
+<td align="right">6</td>
+</tr>
+<tr>
+<td align="left">cnpj_cia</td>
+<td align="left">CNPJ da companhia</td>
+<td align="left">varchar</td>
+<td align="right">20</td>
+</tr>
+<tr>
+<td align="left">denom_cia</td>
+<td align="left">Nome empresarial da companhia</td>
+<td align="left">varchar</td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td align="left">ds_conta</td>
+<td align="left">Descrição da conta</td>
+<td align="left">varchar</td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td align="left">dt_fim_exerc</td>
+<td align="left">Data fim do exercício social</td>
+<td align="left">date</td>
+<td align="right">10</td>
+</tr>
+<tr>
+<td align="left">dt_refer</td>
+<td align="left">Data de referência do documento</td>
+<td align="left">date</td>
+<td align="right">10</td>
+</tr>
+<tr>
+<td align="left">escala_moeda</td>
+<td align="left">Escala monetária</td>
+<td align="left">varchar</td>
+<td align="right">100</td>
+</tr>
+</tbody>
+</table>
+<p>Fetch quarterly individual balance sheets (“BPA individual”) for two companies across recent years. Companies can be identified by CNPJ, CD_CVM, or free text — the latter with abbreviation expansion (<code>BANCO</code> matches <code>BCO</code>, <code>COMPANHIA</code> matches <code>CIA</code>, and so on):</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  dataset     <span class="op">=</span> <span class="st">"dfp"</span>,</span>
 <span>  table       <span class="op">=</span> <span class="st">"bpa"</span>,</span>
@@ -99,7 +164,7 @@
 <span>  years       <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
