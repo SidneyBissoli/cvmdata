@@ -87,20 +87,239 @@ for every column:
 ``` r
 dict <- cvm_dictionary("dfp", "bpa")
 knitr::kable(
-  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")]
+  dict[1:8, c("column", "descricao", "tipo_dados", "tamanho")],
+  format = "html",
+  table.attr = 'width="100%"'
 )
 ```
 
-| column       | descricao                       | tipo_dados | tamanho |
-|:-------------|:--------------------------------|:-----------|--------:|
-| cd_conta     | Código da conta                 | varchar    |      18 |
-| cd_cvm       | Código CVM                      | char       |       6 |
-| cnpj_cia     | CNPJ da companhia               | varchar    |      20 |
-| denom_cia    | Nome empresarial da companhia   | varchar    |     100 |
-| ds_conta     | Descrição da conta              | varchar    |     100 |
-| dt_fim_exerc | Data fim do exercício social    | date       |      10 |
-| dt_refer     | Data de referência do documento | date       |      10 |
-| escala_moeda | Escala monetária                | varchar    |     100 |
+<table width="100%">
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+column
+</th>
+
+<th style="text-align:left;">
+
+descricao
+</th>
+
+<th style="text-align:left;">
+
+tipo_dados
+</th>
+
+<th style="text-align:right;">
+
+tamanho
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+cd_conta
+</td>
+
+<td style="text-align:left;">
+
+Código da conta
+</td>
+
+<td style="text-align:left;">
+
+varchar
+</td>
+
+<td style="text-align:right;">
+
+18
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+cd_cvm
+</td>
+
+<td style="text-align:left;">
+
+Código CVM
+</td>
+
+<td style="text-align:left;">
+
+char
+</td>
+
+<td style="text-align:right;">
+
+6
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+cnpj_cia
+</td>
+
+<td style="text-align:left;">
+
+CNPJ da companhia
+</td>
+
+<td style="text-align:left;">
+
+varchar
+</td>
+
+<td style="text-align:right;">
+
+20
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+denom_cia
+</td>
+
+<td style="text-align:left;">
+
+Nome empresarial da companhia
+</td>
+
+<td style="text-align:left;">
+
+varchar
+</td>
+
+<td style="text-align:right;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+ds_conta
+</td>
+
+<td style="text-align:left;">
+
+Descrição da conta
+</td>
+
+<td style="text-align:left;">
+
+varchar
+</td>
+
+<td style="text-align:right;">
+
+100
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+dt_fim_exerc
+</td>
+
+<td style="text-align:left;">
+
+Data fim do exercício social
+</td>
+
+<td style="text-align:left;">
+
+date
+</td>
+
+<td style="text-align:right;">
+
+10
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+dt_refer
+</td>
+
+<td style="text-align:left;">
+
+Data de referência do documento
+</td>
+
+<td style="text-align:left;">
+
+date
+</td>
+
+<td style="text-align:right;">
+
+10
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+escala_moeda
+</td>
+
+<td style="text-align:left;">
+
+Escala monetária
+</td>
+
+<td style="text-align:left;">
+
+varchar
+</td>
+
+<td style="text-align:right;">
+
+100
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 Fetch quarterly individual balance sheets (“BPA individual”) for two
 companies across recent years. Companies can be identified by CNPJ,
