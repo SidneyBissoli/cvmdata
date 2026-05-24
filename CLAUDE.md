@@ -313,6 +313,10 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     ├── LICENSE.md
     ├── README.md                      # gerado de README.Rmd
     ├── README.Rmd
+    ├── README.pt-BR.md                # gerado de README.pt-BR.Rmd
+    ├── README.pt-BR.Rmd
+    ├── CODE_OF_CONDUCT.md             # Contributor Covenant 2.1
+    ├── CONTRIBUTING.md
     ├── CLAUDE.md                      # este arquivo
     ├── ROADMAP.md
     ├── R/                             # FLAT, sem subpastas
@@ -320,9 +324,10 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
     │   │                              #   + filter_by_companies() + busca textual
     │   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
-    │   ├── cache.R                    # API pública de cache:
+    │   ├── cache.R                    # API pública de cache + engine de eviction:
     │   │                              #   cvm_cache_path(), cvm_cache_set_path(),
-    │   │                              #   cvm_cache_info(), cvm_cache_clear()
+    │   │                              #   cvm_cache_info(), cvm_cache_clear();
+    │   │                              #   build_cache_units(), cache_enforce_limit()
     │   ├── discovery.R                # cvm_datasets(), cvm_tables(),
     │   │                              #   cvm_dictionary(), cvm_codelist(),
     │   │                              #   cvm_dataset_years() (não segue prefixo
@@ -333,12 +338,14 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │   │                              #   cvm_source_get(), cvm_source_set()
     │   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
     │   │                              #   ZIP-yearly) + download_with_etag()
+    │   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() — stub Fase F;
+    │   │                              #   aborta com instrução até Sessão 3.13
     │   ├── transform-schema.R         # apply_schema_transformations() genérico
     │   │                              #   (multiply_by_scale / drop /
     │   │                              #   keep_latest_version) — substituiu
     │   │                              #   transform-cad.R na Sessão 02
     │   ├── util-attrs.R               # cvm_attach_metadata()
-    │   ├── util-cnpj.R                # cnpj_clean()
+    │   ├── util-cnpj.R                # cnpj_clean(), cnpj_format()
     │   ├── util-csv-cvm.R             # read_cvm_csv() + validate_field_count() +
     │   │                              #   validate_field_names() + emit_validation()
     │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
@@ -347,19 +354,27 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     ├── tests/
     │   ├── testthat.R
     │   └── testthat/
-    │       ├── fixtures/              # CSV/ZIP de amostra
+    │       ├── fixtures/              # CSV/ZIP de amostra (cad_sample.csv +
+    │       │                          #   dfp/itr/fre cia_aberta_2024.zip)
     │       ├── _snaps/
     │       ├── helper-*.R
-    │       └── test-*.R
+    │       └── test-*.R               # ~13 arquivos, mock HTTP via httptest2
     ├── inst/
+    │   ├── etl/                       # ETL do mirror (rodado por etl-mirror.yaml)
+    │   │   ├── 00-config.R            # constantes + helpers compartilhados
+    │   │   ├── 01-fetch-cvm.R         # baixa ZIPs anuais do portal CVM
+    │   │   ├── 02-csv-to-parquet.R    # converte CSV → parquet particionado por ano
+    │   │   └── 03-publish.R           # hash-detection + publica em GitHub Releases
     │   └── extdata/
     │       ├── schemas/<dataset>/<table>.yaml
     │       ├── cvm_dictionary_snapshot.csv
-    │       └── cvm_codelists_snapshot.csv
+    │       ├── cvm_codelists_snapshot.csv
+    │       └── vignette-data/         # dados pré-computados para vignettes
     ├── data-raw/                      # scripts geradores (out of tarball)
     ├── vignettes/
-    ├── pkgdown/
-    ├── .github/workflows/
+    ├── pkgdown/                       # _pkgdown.yml + assets do site
+    ├── .github/workflows/             # R-CMD-check, test-coverage, lint,
+    │                                  #   pkgdown, etl-mirror
     └── ...
 
 Mapeamento agrupamento → prefixo: `api-`, `schema-`, `source-`,
@@ -665,33 +680,15 @@ funcionando. Gate não-negociável.
 
 - Modo **tracer bullet**: implementar a função mais simples
   ponta-a-ponta antes de generalizar.
-- **Estado pós-Sessão 3.4** (2026-05-22):
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  é a API principal genérica; pipeline ZIP-yearly entregue para DFP (11
-  YAMLs), ITR (11 YAMLs) e FRE (36 YAMLs, incluindo 8 com
-  `meta_status: missing`).
-  [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-  rebaixado a alias trivial sobre
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  (passa `source = "cvm"` até a Fase F entregar o mirror).
-  `transform_cad()` removido — CAD usa o pipeline genérico com
-  `transformations: []`. Snapshots embarcados:
-  `cvm_dictionary_snapshot.csv` e `cvm_codelists_snapshot.csv` em
-  `inst/extdata/`, com
-  [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
-  e
-  [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
-  exportadas. Detecção canônica de Date via dicionário ativada no
-  reader.
-  [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)
-  adicionado como inverso de
-  [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md).
-  Detalhes por fase no `ROADMAP.md`.
+- **Estado atual de execução vive em `ROADMAP.md`** — sessão por sessão,
+  fase por fase. `CLAUDE.md` não duplica status; consulta o roadmap
+  antes de assumir que algo está ou não entregue.
 - **Não reabrir decisões travadas** (26 da 2.5, 7 da 2.6, 3 da 3.0, 4 da
   3.0.2, mais a Sessão 02 sobre
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   como API principal e o portal de dados abertos como caminho default vs
-  RAD/ENET). Se acha que precisa rever, perguntar antes de agir.
+  RAD/ENET, e as decisões pós-3.4 anotadas no `ROADMAP.md`). Se acha que
+  precisa rever, perguntar antes de agir.
 - **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**.
   Usar YAMLs validados em `inst/extdata/schemas/` (ou `schemas_proto/`
   para protótipos ainda não promovidos) ou perguntar.
@@ -734,6 +731,15 @@ Rscript -e "devtools::install(quick = TRUE, upgrade = 'never')"
 
 # Build do tarball CRAN (.tar.gz)
 Rscript -e "devtools::build()"
+
+# ETL do mirror — dispatch manual do workflow (precisa gh CLI autenticado);
+# o cron `0 7 * * 2` em .github/workflows/etl-mirror.yaml dispara semanalmente
+gh workflow run etl-mirror.yaml
+
+# ETL local (smoke) — rodar os scripts individualmente sem subir release
+Rscript inst/etl/01-fetch-cvm.R
+Rscript inst/etl/02-csv-to-parquet.R
+Rscript inst/etl/03-publish.R
 ```
 
 Notas:
@@ -742,23 +748,27 @@ Notas:
   vignette `cvmdata.Rmd` (configurada `eval = interactive()` para não
   bater no portal CVM) e os testes. **Zero errors, zero warnings, zero
   notes** é o gate.
-- Os testes `tests/testthat/test-*.R` mockam HTTP via
-  [`httr2::with_mocked_responses()`](https://httr2.r-lib.org/reference/with_mocked_responses.html).
+- Os testes `tests/testthat/test-*.R` mockam HTTP via `httptest2` (e em
+  alguns casos
+  [`httr2::with_mocked_responses()`](https://httr2.r-lib.org/reference/with_mocked_responses.html)).
   Nenhum teste bate no portal CVM real — testes de integração reais
   virão em arquivos `test-integration-*.R` com guarda
   `CVMDATA_RUN_INTEGRATION=true`.
-- Fixtures disponíveis em `tests/testthat/fixtures/`: `cad_sample.csv`
-  (51 linhas reais do CAD), `dfp_cia_aberta_2024.zip` (ZIP DFP 2024 com
-  subset de companhias, Sessão 02), `itr_cia_aberta_2024.zip` (ZIP ITR
-  2024, Sessão 03) e `fre_cia_aberta_2024.zip` (ZIP FRE 2024, Sessão 3.2
-  — exercita as 8 tabelas `meta_status: missing`). Cada ZIP vem com
-  `*.meta.json` registrando a origem.
+- Fixtures em `tests/testthat/fixtures/`: `cad_sample.csv` (51 linhas
+  reais do CAD), `dfp_cia_aberta_2024.zip`, `itr_cia_aberta_2024.zip` e
+  `fre_cia_aberta_2024.zip` (cada ZIP com subset de companhias e
+  `*.meta.json` registrando a origem; o FRE exercita as 8 tabelas
+  `meta_status: missing`).
 - `inst/extdata/schemas/cad/companhias.yaml` declara
   `expected_field_count: 47` (corrigido de 46 do protótipo na Sessão
   01).
 - O cache real de produção fica em
   `tools::R_user_dir("cvmdata", which = "cache")`. Em testes, é
   redirecionado para tempdir via `options(cvmdata.cache_dir = ...)`.
+- Workflows GitHub Actions em `.github/workflows/`: `R-CMD-check.yaml`
+  (matriz macOS/Windows/Ubuntu), `test-coverage.yaml` (codecov),
+  `lint.yaml` (`LINTR_ERROR_ON_LINT=true`), `pkgdown.yaml` (deploy para
+  `gh-pages`), `etl-mirror.yaml` (cron semanal + manual dispatch).
 
 ------------------------------------------------------------------------
 
