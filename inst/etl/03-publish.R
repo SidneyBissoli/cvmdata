@@ -86,11 +86,15 @@ suppressWarnings(
 message(sprintf("[03-publish] creating release %s", tag))
 notes_file <- tempfile(fileext = ".md")
 writeLines(notes, notes_file)
+# system2 on Windows does not auto-quote vector args, so any string
+# with spaces, parens or other shell metacharacters must be shQuote()d
+# explicitly. Otherwise gh re-parses them as positional args (e.g. a
+# title "Mirror: cad (latest)" becomes 3 file-pattern args).
 status <- system2("gh", c(
   "release", "create", tag,
   "--repo", mirror_repo,
-  "--title", title,
-  "--notes-file", notes_file
+  "--title", shQuote(title),
+  "--notes-file", shQuote(notes_file)
 ))
 if (status != 0L) {
   stop("gh release create failed", call. = FALSE)
@@ -103,7 +107,7 @@ for (f in parquets) {
   message("  ", asset_name)
   status <- system2("gh", c(
     "release", "upload", tag,
-    paste0(f, "#", asset_name),
+    shQuote(paste0(f, "#", asset_name)),
     "--repo", mirror_repo,
     "--clobber"
   ))
