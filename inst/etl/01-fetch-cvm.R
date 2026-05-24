@@ -105,6 +105,9 @@ for (tbl in tables) {
 message(sprintf(
   "[01-fetch] done. %d ok / %d failed", n_ok, n_fail
 ))
-if (n_fail > 0L) {
+# Tolerate partial misses (CVM has not published year N+1 yet for some
+# tables; certain (table, year) combos never existed). Only abort when
+# every fetch failed — same policy as stage 02.
+if (n_fail > 0L && n_ok == 0L) {
   quit(status = 1L)
 }
