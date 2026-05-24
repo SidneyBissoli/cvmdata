@@ -610,24 +610,36 @@ cvmdata_warn                           (pai genérico de warnings)
 <span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co"># Regenerar README.md a partir de README.Rmd</span></span>
 <span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::build_readme()"</span></span>
 <span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co"># Carregar o pacote sem instalar (smoke check rápido)</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::load_all(); print(cvm_fetch)"</span></span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co"># R CMD INSTALL local</span></span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::install(quick = TRUE, upgrade = 'never')"</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a></span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co"># Build do tarball CRAN (.tar.gz)</span></span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::build()"</span></span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a></span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co"># ETL do mirror — dispatch manual do workflow (precisa gh CLI autenticado);</span></span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co"># o cron `0 7 * * 2` em .github/workflows/etl-mirror.yaml dispara semanalmente</span></span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>gh <span class="kw">workflow</span> run etl-mirror<span class="op">.</span><span class="fu">yaml</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co"># Regenerar README.pt-BR.md a partir de README.pt-BR.Rmd</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co"># (devtools::build_readme() só cobre o canônico README.Rmd)</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co"># Carregar o pacote sem instalar (smoke check rápido)</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::load_all(); print(cvm_fetch)"</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co"># R CMD INSTALL local</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::install(quick = TRUE, upgrade = 'never')"</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co"># Build do tarball CRAN (.tar.gz)</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::build()"</span></span>
 <span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a></span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co"># ETL local (smoke) — rodar os scripts individualmente sem subir release</span></span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">01</span><span class="op">-</span>fetch-cvm<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad</span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">02</span><span class="op">-</span>csv-to-parquet<span class="op">.</span><span class="fu">R</span>  <span class="op">--</span>dataset cad</span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span>02b-validate<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad   <span class="co"># Sessão 3.14</span></span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">03</span><span class="op">-</span>publish<span class="op">.</span><span class="fu">R</span>         <span class="op">--</span>dataset cad</span></code></pre></div>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co"># Regenerar snapshots e fixtures embarcados (rodar quando os scripts</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co"># fonte em data-raw/ ou os YAMLs em inst/extdata/schemas/ mudarem).</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co"># Os scripts batem no portal CVM real — exigem rede e levam ~30 s cada.</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>Rscript data-raw<span class="op">/</span>build-dictionary-snapshot<span class="op">.</span><span class="fu">R</span>    <span class="co"># inst/extdata/cvm_dictionary_snapshot.csv</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>Rscript data-raw<span class="op">/</span>build-codelists-snapshot<span class="op">.</span><span class="fu">R</span>     <span class="co"># inst/extdata/cvm_codelists_snapshot.csv</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>Rscript data-raw<span class="op">/</span>build-mirror-test-fixtures<span class="op">.</span><span class="fu">R</span>   <span class="co"># tests/testthat/fixtures/mirror-*.parquet</span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a>Rscript data-raw<span class="op">/</span>build-vignette-data<span class="op">.</span><span class="fu">R</span>          <span class="co"># inst/extdata/vignette-data/*.rds</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co"># ETL do mirror — dispatch manual do workflow (precisa gh CLI autenticado);</span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co"># o cron `0 7 * * 2` em .github/workflows/etl-mirror.yaml dispara semanalmente</span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a>gh <span class="kw">workflow</span> run etl-mirror<span class="op">.</span><span class="fu">yaml</span></span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co"># ETL local (smoke) — rodar os scripts individualmente sem subir release</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">01</span><span class="op">-</span>fetch-cvm<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad</span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">02</span><span class="op">-</span>csv-to-parquet<span class="op">.</span><span class="fu">R</span>  <span class="op">--</span>dataset cad</span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span>02b-validate<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad   <span class="co"># Sessão 3.14</span></span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">03</span><span class="op">-</span>publish<span class="op">.</span><span class="fu">R</span>         <span class="op">--</span>dataset cad</span></code></pre></div>
 <p>Notas:</p>
 <ul><li>
 <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> executa <code>R CMD check</code> com <code>--as-cran</code>, roda a vignette <code>cvmdata.Rmd</code> (configurada <code>eval = interactive()</code> para não bater no portal CVM) e os testes. <strong>Zero errors, zero warnings, zero notes</strong> é o gate.</li>
@@ -637,7 +649,12 @@ cvmdata_warn                           (pai genérico de warnings)
 <code>inst/extdata/schemas/cad/companhias.yaml</code> declara <code>expected_field_count: 47</code> (corrigido de 46 do protótipo na Sessão 01).</li>
 <li>O cache real de produção fica em <code>tools::R_user_dir("cvmdata", which = "cache")</code>. Em testes, é redirecionado para tempdir via <code>options(cvmdata.cache_dir = ...)</code>.</li>
 <li>Workflows GitHub Actions em <code>.github/workflows/</code>: <code>R-CMD-check.yaml</code> (matriz macOS/Windows/Ubuntu), <code>test-coverage.yaml</code> (codecov), <code>lint.yaml</code> (<code>LINTR_ERROR_ON_LINT=true</code>), <code>pkgdown.yaml</code> (deploy para <code>gh-pages</code>), <code>etl-mirror.yaml</code> (cron semanal + manual dispatch).</li>
-</ul><hr></div>
+</ul></div>
+<div class="section level3">
+<h3 id="id_122-stage-schemas_proto">12.2 Stage <code>schemas_proto/</code>
+<a class="anchor" aria-label="anchor" href="#id_122-stage-schemas_proto"></a></h3>
+<p>Diretório <code>schemas_proto/</code> na raiz (excluído da tarball via <code>.Rbuildignore</code>) é a área de stage para YAMLs de schema antes da promoção para <code>inst/extdata/schemas/&lt;dataset&gt;/&lt;table&gt;.yaml</code>. Workflow: escrever o YAML em <code>schemas_proto/&lt;dataset&gt;/&lt;table&gt;.yaml</code>, validar contra dados reais com <code>cvm_fetch(..., validate = "warn")</code>, ajustar <code>expected_field_count</code>/<code>expected_field_names</code>/<code>transformations</code> até zero divergência, então mover para <code>inst/extdata/schemas/</code>. Conteúdo atual: rascunhos parciais (não confiar como fonte canônica até o homônimo aparecer em <code>inst/extdata/schemas/</code>).</p>
+<hr></div>
 </div>
 <div class="section level2">
 <h2 id="id_13-stack-técnica-do-pacote-importssuggests">13. Stack técnica do pacote (Imports/Suggests)<a class="anchor" aria-label="anchor" href="#id_13-stack-t%C3%A9cnica-do-pacote-importssuggests"></a></h2>
