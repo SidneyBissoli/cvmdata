@@ -73,23 +73,32 @@ n_ok <- 0L
 n_fail <- 0L
 for (tbl in tables) {
   for (y in years_to_fetch) {
-    label <- if (is.na(y)) sprintf("%s/%s", dataset, tbl) else
-      sprintf("%s/%s/%d", dataset, tbl, y)
-    message("  -> ", label)
-    res <- tryCatch(
-      {
-        years_arg <- if (is.na(y)) NULL else y
-        cvmdata::cvm_fetch(dataset, tbl, years = years_arg, source = "cvm")
-      },
-      error = function(e) {
-        message("     ABORT: ", conditionMessage(e))
-        NULL
+    for (rt in mirror_variants_for(tbl)) {
+      rt_label <- if (is.null(rt)) "" else sprintf("/%s", rt)
+      label <- if (is.na(y)) sprintf("%s/%s%s", dataset, tbl, rt_label) else
+        sprintf("%s/%s%s/%d", dataset, tbl, rt_label, y)
+      message("  -> ", label)
+      res <- tryCatch(
+        {
+          years_arg <- if (is.na(y)) NULL else y
+          rt_arg <- if (is.null(rt)) NULL else rt
+          cvmdata::cvm_fetch(
+            dataset, tbl,
+            years = years_arg,
+            report_type = rt_arg,
+            source = "cvm"
+          )
+        },
+        error = function(e) {
+          message("     ABORT: ", conditionMessage(e))
+          NULL
+        }
+      )
+      if (is.null(res)) {
+        n_fail <- n_fail + 1L
+      } else {
+        n_ok <- n_ok + 1L
       }
-    )
-    if (is.null(res)) {
-      n_fail <- n_fail + 1L
-    } else {
-      n_ok <- n_ok + 1L
     }
   }
 }

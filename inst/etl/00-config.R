@@ -79,3 +79,18 @@ mirror_tables <- function(dataset) {
   files <- list.files(mirror_schema_dir(dataset), pattern = "\\.yaml$")
   tools::file_path_sans_ext(files)
 }
+
+# Variant tables --------------------------------------------------------
+
+# Tables that require `report_type = "ind" | "con"`. Closed list — the
+# API contract is part of the package surface (CLAUDE.md §2.1). All
+# ETL stages iterate over these variants when scheduling work.
+mirror_variant_tables <- c(
+  "bpa", "bpp", "dre", "dra", "dfc_md", "dfc_mi", "dmpl", "dva"
+)
+
+# Returns the report_type values to iterate for a given table.
+# List(NULL) means "single pass with report_type = NULL".
+mirror_variants_for <- function(tbl) {
+  if (tbl %in% mirror_variant_tables) c("ind", "con") else list(NULL)
+}

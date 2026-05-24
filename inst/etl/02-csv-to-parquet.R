@@ -58,17 +58,6 @@ years_to_process <- if (identical(partitioning, "yearly")) {
   NA_integer_
 }
 
-# Variant tables — kept here as a closed list because the API contract
-# is part of the package surface (CLAUDE.md §2.1). When new variants
-# arrive, this list is the single source of truth for the ETL.
-variant_tables <- c(
-  "bpa", "bpp", "dre", "dra", "dfc_md", "dfc_mi", "dmpl", "dva"
-)
-
-variants_for <- function(tbl) {
-  if (tbl %in% variant_tables) c("ind", "con") else list(NULL)
-}
-
 out_root <- file.path(workspace, "out")
 dir.create(out_root, recursive = TRUE, showWarnings = FALSE)
 
@@ -116,7 +105,7 @@ n_ok <- 0L
 n_fail <- 0L
 for (tbl in tables) {
   for (y in years_to_process) {
-    for (rt in variants_for(tbl)) {
+    for (rt in mirror_variants_for(tbl)) {
       label <- if (is.null(rt)) tbl else sprintf("%s/%s", tbl, rt)
       message(sprintf(
         "  -> %s/%s/%s", dataset, label,
