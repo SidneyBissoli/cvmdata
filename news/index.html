@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,10 +44,11 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0" id="cvmdata-010-in-development">cvmdata 0.1.0 (in development)<a class="anchor" aria-label="anchor" href="#cvmdata-010-in-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="cvmdata-010-2026-05-24">cvmdata 0.1.0 (2026-05-24)<a class="anchor" aria-label="anchor" href="#cvmdata-010-2026-05-24"></a></h2>
+<p>First public release. Covers the four core CVM publicly-traded-company datasets — CAD (registry), DFP (annual statements), ITR (quarterly statements) and FRE (reference form) — with a tidy <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> API, year-partitioned mirror in GitHub Releases (refreshed weekly), and an HTTP-with-cache backend against <code>dados.cvm.gov.br</code> for byte-level freshness.</p>
 <div class="section level3">
-<h3 id="breaking-changes-pending--flips-at-release-tag-0-1-0">Breaking changes (pending — flips at release tag)<a class="anchor" aria-label="anchor" href="#breaking-changes-pending--flips-at-release-tag-0-1-0"></a></h3>
-<ul><li>The default <code>source</code> of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> will flip from <code>"cvm"</code> to <code>"mirror"</code> at the v0.1.0 release tag. Scripts that rely on the implicit default and need byte-level CVM freshness should pass <code>source = "cvm"</code> explicitly or persist the choice with <code>cvm_source_set("cvm")</code> before upgrading.</li>
+<h3 id="breaking-changes-0-1-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-1-0"></a></h3>
+<ul><li>The default <code>source</code> of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> is now <code>"mirror"</code> (parquet via DuckDB), not <code>"cvm"</code> (CVM Open Data Portal). Scripts that need byte-level freshness from the regulator should pass <code>source = "cvm"</code> explicitly or persist the choice with <code>cvm_source_set("cvm")</code>. The <code>"cvm"</code> backend remains fully supported.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="etl-and-mirror-0-1-0">ETL and mirror<a class="anchor" aria-label="anchor" href="#etl-and-mirror-0-1-0"></a></h3>

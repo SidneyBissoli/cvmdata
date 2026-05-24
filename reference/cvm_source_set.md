@@ -17,8 +17,8 @@ cvm_source_set(source)
 
 - source:
 
-  One of `"cvm"` (CVM Open Data Portal) or `"mirror"` (parquet via
-  DuckDB; available from Phase F).
+  One of `"mirror"` (parquet via DuckDB; default from v0.1.0) or `"cvm"`
+  (CVM Open Data Portal).
 
 ## Value
 

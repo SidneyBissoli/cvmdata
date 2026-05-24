@@ -18,8 +18,8 @@ library(cvmdata)
 
 | Backend | What it queries | When to prefer it |
 |----|----|----|
-| `"cvm"` | The CVM Open Data Portal over HTTP (`dados.cvm.gov.br`). | Default in v0.1. Highest freshness — bytes are direct from the regulator. |
-| `"mirror"` | Parquet snapshots in GitHub Releases, queried via DuckDB. | Default from the release that ships Phase F. ~30× faster on yearly bundles; ~7-day staleness window vs. CVM live. |
+| `"mirror"` | Parquet snapshots in GitHub Releases, queried via DuckDB. | Default from v0.1.0. ~30× faster on yearly bundles; staleness bounded by the weekly refresh window vs. CVM live. |
+| `"cvm"` | The CVM Open Data Portal over HTTP (`dados.cvm.gov.br`). | Highest freshness — bytes are direct from the regulator. Opt in when you need the latest publication within the refresh window. |
 
 The active backend is selected at three precedence levels: an explicit
 `source = ...` argument to
@@ -51,7 +51,7 @@ evicts (with `what` of `"all"`, `"raw"`, or `"parquet"`).
 cvm_cache_path()
 #> [1] "/home/runner/.cache/R/cvmdata"
 cvm_source_get()
-#> [1] "cvm"
+#> [1] "mirror"
 ```
 
 ## Mirror pipeline validation
@@ -81,16 +81,19 @@ worst case (empty / unreadable / wrong-type), soft checks bound the
 content noise the CVM occasionally publishes. New checks land in the
 same script; documenting them here is the rOpenSci-auditable surface.
 
-## Workflow 1 — Switching to the mirror
+## Workflow 1 — Working with the mirror (default)
 
-The mirror is opt-in until the v0.1.0 release tag flips the default.
-Activate it for the session and let
+From v0.1.0 the mirror is the default backend, so
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-route every subsequent call through DuckDB:
+routes every call through DuckDB without further configuration. The
+snippet below makes the choice explicit (helpful in scripts that may
+inherit a different session option) and exercises both the cold and warm
+cache paths:
 
 ``` r
 
-# Persist the choice in the session.
+# Make the choice explicit (a no-op when the option is already unset
+# from the built-in default).
 cvm_source_set("mirror")
 
 # First call: the mirror's release inventory is fetched once via the

@@ -53,12 +53,11 @@ cvm_fetch(
 
 - source:
 
-  One of `"cvm"` (CVM Open Data Portal) or `"mirror"` (parquet via
-  DuckDB; available from Phase F of the roadmap). `NULL` (default)
-  resolves to the active backend via
+  One of `"mirror"` (parquet via DuckDB) or `"cvm"` (CVM Open Data
+  Portal). `NULL` (default) resolves to the active backend via
   [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
-  — `"cvm"` in the v0.1 series unless the user has flipped it with
-  [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
+  — `"mirror"` from v0.1.0 onward unless the user has flipped it via
+  `cvm_source_set("cvm")`.
 
 - report_type:
 

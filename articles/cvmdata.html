@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -500,12 +500,13 @@ the cache exceeds the configurable size limit
 (<code>cvmdata.cache_max_size_mb</code>, default 100 MiB).
 <code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> reports current size and unit breakdown;
 <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> resets it.</p>
-<p>The <code>source</code> argument selects the backend. v0.1 defaults
-to <code>"cvm"</code> (direct HTTP to the open-data portal); a planned
-<code>"mirror"</code> backend will route requests to a parquet snapshot
-consulted via DuckDB with column- and partition-level pushdown, kept
-fresh by a weekly workflow. The mirror is configured through
-<code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code> once it ships.</p>
+<p>The <code>source</code> argument selects the backend. From v0.1.0 the
+default is <code>"mirror"</code>: a parquet snapshot in GitHub Releases
+consulted via DuckDB with year-partition filter pushdown, refreshed
+weekly by an ETL workflow in this repo. The <code>"cvm"</code> backend
+(direct HTTP to the open-data portal) remains fully supported and is
+selected per call or persisted via
+<code>cvm_source_set("cvm")</code>.</p>
 <p>Further reading on the pkgdown site:</p>
 <ul>
 <li>

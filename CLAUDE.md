@@ -116,11 +116,12 @@ cnpj_format(x)                # inverso de cnpj_clean — formata 14 dígitos
 Domínio dos argumentos enumerados (validados via
 [`rlang::arg_match0()`](https://rlang.r-lib.org/reference/arg_match.html)):
 
-- `source ∈ c("cvm", "mirror")`. **Backend `"mirror"` está funcional
-  desde a Sessão 3.13** (2026-05-24): lê parquets do release
-  `mirror-<dataset>-latest` via API GitHub (inventário cacheado por
-  sessão) + DuckDB local. Pipeline: filter pushdown manual por nome de
-  asset (years/report_type extraídos do encoding
+- `source ∈ c("mirror", "cvm")`. **Default a partir de v0.1.0 =
+  `"mirror"`** (commit isolado do flip executado na sessão do marco,
+  marcado ⚠️ breaking em `NEWS.md`). Backend mirror lê parquets do
+  release `mirror-<dataset>-latest` via API GitHub (inventário cacheado
+  por sessão) + DuckDB local. Pipeline: filter pushdown manual por nome
+  de asset (years/report_type extraídos do encoding
   `<table>__report_type=R__year=Y__part-0.parquet`, com a sanitização
   `=` → `.` aplicada pelo GitHub Releases) → download para L3 em
   `<cache>/parquet/<dataset>/<table>/[report_type=R/] year=Y/part-0.parquet`
@@ -128,31 +129,25 @@ Domínio dos argumentos enumerados (validados via
   regulares no tibble (Decisão 2 da 3.13 = Alt 1). Cache L3 é invalidado
   por hash via sidecar `<cache>/parquet/<dataset>/__source_hash.json`,
   confrontado contra o asset homônimo do release; quando o hash muda, o
-  L3 inteiro do dataset é evicted antes da próxima leitura. Default em
-  **v0.1 = `"cvm"`** (portal aberto via HTTP em `dados.cvm.gov.br`);
-  flip para `"mirror"` ainda atrelado ao release tag v0.1.0, documentado
-  em `NEWS.md` como item breaking. Scripts que precisem de
-  reprodutibilidade entre v0.1 pré-flip e pós-flip devem chamar
-  `cvm_source_set("cvm")` ou passar `source = "cvm"` explícito. A
-  precedência é: arg explícito \> `getOption("cvmdata.source")` \>
-  built-in default. **Decisão tomada na Sessão 3.6** (2026-05-22): Alt 2
-  do trio default-mirror/default-cvm/auto-fallback — declarar default
-  mirror em v0.1 antes do release deixaria o pacote inutilizável
-  out-of-the-box; pós-flip (Sessão 3.14 ou tag), mirror passa a ser o
-  default natural por ser ~30× mais rápido. A “quebra de
-  reprodutibilidade” da flip é controlável via
-  [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-  e pelo atributo `source` que o tibble já carrega via
-  `cvm_attach_metadata()`. A assinatura pública de
+  L3 inteiro do dataset é evicted antes da próxima leitura. Backend
+  `"cvm"` (portal aberto via HTTP em `dados.cvm.gov.br`) permanece
+  totalmente suportado e selecionável por chamada (`source = "cvm"`) ou
+  via `cvm_source_set("cvm")` quando se precisa de frescor byte a byte
+  contra o regulador. A precedência é: arg explícito \>
+  `getOption("cvmdata.source")` \> built-in default. **Decisão tomada na
+  Sessão 3.6** (2026-05-22): Alt 2 do trio
+  default-mirror/default-cvm/auto-fallback — declarar default mirror em
+  v0.1 antes do release deixaria o pacote inutilizável out-of-the-box;
+  com mirror já depositado em GitHub Releases, default natural por ser
+  ~30× mais rápido. A “quebra de reprodutibilidade” do flip é
+  controlável via `cvm_source_set("cvm")` e pelo atributo `source` que o
+  tibble já carrega via `cvm_attach_metadata()`. A assinatura pública de
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   declara `source = NULL` para que o option seja consultado
   dinamicamente — alinhamento com o padrão da família cache
   ([`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
   ↔︎
   [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)).
-  **Sessão 3.14 travou (Decisão 3 = Alt 2)** que o flip não acontece em
-  sessão intermediária: vira commit isolado no início do tag v0.1.0
-  (marcado ⚠️ breaking em `NEWS.md`).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
 - `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para

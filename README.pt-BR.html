@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -228,9 +228,9 @@ varchar
 <h2 id="proveniência-dos-dados">Proveniência dos dados<a class="anchor" aria-label="anchor" href="#proveni%C3%AAncia-dos-dados"></a></h2>
 <p>Os dados vêm do Portal de Dados Abertos da CVM (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). O backend ativo é selecionável via <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> (ou pelo argumento <code>source</code> de <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>):</p>
 <ul><li>
-<code>"cvm"</code> (default na v0.1) — HTTP direto ao Portal de Dados Abertos da CVM.</li>
+<code>"mirror"</code> (default a partir da v0.1.0) — snapshots em parquet publicados em GitHub Releases e consultados via DuckDB com filter pushdown por ano, atualizados semanalmente por um workflow de ETL neste repositório.</li>
 <li>
-<code>"mirror"</code> (default a partir da release que entrega a Fase F) — snapshots em parquet publicados em GitHub Releases e consultados via DuckDB com filter pushdown por ano, atualizados semanalmente por um workflow de ETL neste repositório.</li>
+<code>"cvm"</code> — HTTP direto ao Portal de Dados Abertos da CVM. Selecionável por chamada quando se precisa de frescor byte a byte contra o regulador.</li>
 </ul><p>Todo tibble retornado carrega atributos de proveniência (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>), permitindo a qualquer consumidor auditar qual backend serviu os dados.</p>
 </div>
 <div class="section level2">

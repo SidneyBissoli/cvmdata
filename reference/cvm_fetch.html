@@ -13,7 +13,7 @@ returns a tibble carrying provenance attributes."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,11 +106,11 @@ fetches the latest available year. Ignored for datasets with
 
 
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
-<dd><p>One of <code>"cvm"</code> (CVM Open Data Portal) or <code>"mirror"</code>
-(parquet via DuckDB; available from Phase F of the roadmap).
-<code>NULL</code> (default) resolves to the active backend via
-<code><a href="cvm_source_get.html">cvm_source_get()</a></code> — <code>"cvm"</code> in the v0.1 series unless the user
-has flipped it with <code><a href="cvm_source_set.html">cvm_source_set()</a></code>.</p></dd>
+<dd><p>One of <code>"mirror"</code> (parquet via DuckDB) or <code>"cvm"</code>
+(CVM Open Data Portal). <code>NULL</code> (default) resolves to the active
+backend via <code><a href="cvm_source_get.html">cvm_source_get()</a></code> — <code>"mirror"</code> from v0.1.0 onward
+unless the user has flipped it via
+<code>cvm_source_set("cvm")</code>.</p></dd>
 
 
 <dt id="arg-report-type">report_type<a class="anchor" aria-label="anchor" href="#arg-report-type"></a></dt>

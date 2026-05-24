@@ -65,19 +65,19 @@ auditor <- cvm_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:43.713312
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:20.376941
 #> ℹ dataset: "fre" | table: "auditor"
-#> # A tibble: 2 × 18
+#> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
 #>   <chr>            <date>          <chr>  <chr>        <chr>               <dbl>
 #> 1 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     131376
 #> 2 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     131377
-#> # ℹ 12 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
+#> # ℹ 13 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
 #> #   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,
 #> #   data_inicio_contratacao <date>, data_fim_contratacao <date>,
 #> #   data_inicio_prestacao_servico <date>, servico_contratado <chr>,
 #> #   remuneracao_auditor <chr>, justificativa_substituicao <chr>,
-#> #   razao_apresentada <chr>
+#> #   razao_apresentada <chr>, year <int>
 ```
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
@@ -97,13 +97,13 @@ cvm_fetch("fre", "empregado_PCD",
           companies = "1023", years = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:43.898993
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:20.736551
 #> ℹ dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 10
-#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> # A tibble: 0 × 11
+#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <dbl>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>
+#> #   quantidade_sem_resposta <dbl>, year <int>
 ```
 
 The reader expects the user to opt in by relaxing validation. With
@@ -121,13 +121,13 @@ pcd <- cvm_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:44.047986
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:20.952639
 #> ℹ dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 10
-#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> # A tibble: 0 × 11
+#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <dbl>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>
+#> #   quantidade_sem_resposta <dbl>, year <int>
 ```
 
 `cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
@@ -158,7 +158,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:44.377925
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:21.3434
 #> ℹ dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista

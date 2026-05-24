@@ -162,10 +162,11 @@ Data is fetched from the official CVM Open Data Portal
 (or the `source` argument of
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
 
-- `"cvm"` (default in v0.1) — HTTP directly to the CVM Open Data Portal.
-- `"mirror"` (default from the release that ships Phase F) — parquet
-  snapshots in GitHub Releases queried via DuckDB with year-partition
-  filter pushdown, refreshed weekly by an ETL workflow in this repo.
+- `"mirror"` (default from v0.1.0) — parquet snapshots in GitHub
+  Releases queried via DuckDB with year-partition filter pushdown,
+  refreshed weekly by an ETL workflow in this repo.
+- `"cvm"` — HTTP directly to the CVM Open Data Portal. Opt in when
+  byte-level freshness against the regulator is required.
 
 Every returned tibble carries provenance attributes (`source`,
 `fetched_at`, `dataset`, `table`, `package_version`) so a downstream

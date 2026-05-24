@@ -417,13 +417,12 @@ reports current size and unit breakdown;
 [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
 resets it.
 
-The `source` argument selects the backend. v0.1 defaults to `"cvm"`
-(direct HTTP to the open-data portal); a planned `"mirror"` backend will
-route requests to a parquet snapshot consulted via DuckDB with column-
-and partition-level pushdown, kept fresh by a weekly workflow. The
-mirror is configured through
-[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-once it ships.
+The `source` argument selects the backend. From v0.1.0 the default is
+`"mirror"`: a parquet snapshot in GitHub Releases consulted via DuckDB
+with year-partition filter pushdown, refreshed weekly by an ETL workflow
+in this repo. The `"cvm"` backend (direct HTTP to the open-data portal)
+remains fully supported and is selected per call or persisted via
+`cvm_source_set("cvm")`.
 
 Further reading on the pkgdown site:
 

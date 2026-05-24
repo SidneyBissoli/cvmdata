@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,17 +98,17 @@ inspecting the cache, and tuning the TTL and eviction options.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td><code>"mirror"</code></td>
+<td>Parquet snapshots in GitHub Releases, queried via DuckDB.</td>
+<td>Default from v0.1.0. ~30× faster on yearly bundles; staleness
+bounded by the weekly refresh window vs. CVM live.</td>
+</tr>
+<tr class="even">
 <td><code>"cvm"</code></td>
 <td>The CVM Open Data Portal over HTTP
 (<code>dados.cvm.gov.br</code>).</td>
-<td>Default in v0.1. Highest freshness — bytes are direct from the
-regulator.</td>
-</tr>
-<tr class="even">
-<td><code>"mirror"</code></td>
-<td>Parquet snapshots in GitHub Releases, queried via DuckDB.</td>
-<td>Default from the release that ships Phase F. ~30× faster on yearly
-bundles; ~7-day staleness window vs. CVM live.</td>
+<td>Highest freshness — bytes are direct from the regulator. Opt in when
+you need the latest publication within the refresh window.</td>
 </tr>
 </tbody>
 </table>
@@ -168,7 +168,7 @@ and timestamps; <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clea
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_cache_path.html">cvm_cache_path</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "/home/runner/.cache/R/cvmdata"</span></span>
 <span><span class="fu"><a href="../reference/cvm_source_get.html">cvm_source_get</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cvm"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "mirror"</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -254,13 +254,16 @@ same script; documenting them here is the rOpenSci-auditable
 surface.</p>
 </div>
 <div class="section level2">
-<h2 id="workflow-1-switching-to-the-mirror">Workflow 1 — Switching to the mirror<a class="anchor" aria-label="anchor" href="#workflow-1-switching-to-the-mirror"></a>
+<h2 id="workflow-1-working-with-the-mirror-default">Workflow 1 — Working with the mirror (default)<a class="anchor" aria-label="anchor" href="#workflow-1-working-with-the-mirror-default"></a>
 </h2>
-<p>The mirror is opt-in until the v0.1.0 release tag flips the default.
-Activate it for the session and let <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> route every
-subsequent call through DuckDB:</p>
+<p>From v0.1.0 the mirror is the default backend, so
+<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> routes every call through DuckDB without
+further configuration. The snippet below makes the choice explicit
+(helpful in scripts that may inherit a different session option) and
+exercises both the cold and warm cache paths:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Persist the choice in the session.</span></span>
+<code class="sourceCode R"><span><span class="co"># Make the choice explicit (a no-op when the option is already unset</span></span>
+<span><span class="co"># from the built-in default).</span></span>
 <span><span class="fu"><a href="../reference/cvm_source_set.html">cvm_source_set</a></span><span class="op">(</span><span class="st">"mirror"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># First call: the mirror's release inventory is fetched once via the</span></span>

@@ -165,12 +165,13 @@ Os dados vêm do Portal de Dados Abertos da CVM
 (ou pelo argumento `source` de
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
 
-- `"cvm"` (default na v0.1) — HTTP direto ao Portal de Dados Abertos da
-  CVM.
-- `"mirror"` (default a partir da release que entrega a Fase F) —
-  snapshots em parquet publicados em GitHub Releases e consultados via
-  DuckDB com filter pushdown por ano, atualizados semanalmente por um
-  workflow de ETL neste repositório.
+- `"mirror"` (default a partir da v0.1.0) — snapshots em parquet
+  publicados em GitHub Releases e consultados via DuckDB com filter
+  pushdown por ano, atualizados semanalmente por um workflow de ETL
+  neste repositório.
+- `"cvm"` — HTTP direto ao Portal de Dados Abertos da CVM. Selecionável
+  por chamada quando se precisa de frescor byte a byte contra o
+  regulador.
 
 Todo tibble retornado carrega atributos de proveniência (`source`,
 `fetched_at`, `dataset`, `table`, `package_version`), permitindo a

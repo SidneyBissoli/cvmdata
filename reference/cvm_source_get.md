@@ -1,7 +1,7 @@
 # Get the active cvmdata source backend
 
-Reads the option `cvmdata.source`, falling back to `"cvm"` (the direct
-CVM Open Data Portal backend) when the option is unset.
+Reads the option `cvmdata.source`, falling back to `"mirror"` (parquet
+via DuckDB) when the option is unset.
 
 ## Usage
 
@@ -11,15 +11,16 @@ cvm_source_get()
 
 ## Value
 
-A character scalar: `"cvm"` or `"mirror"`.
+A character scalar: `"mirror"` or `"cvm"`.
 
 ## Details
 
-The built-in default is `"cvm"` in the v0.1 series; it transitions to
-`"mirror"` in the release that ships the GitHub Releases parquet mirror
-(Phase F of the roadmap). Persist a specific value with
-[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-to make scripts robust against that flip.
+From v0.1.0 onward the built-in default is `"mirror"`: it ships the full
+historical series for CAD, DFP, ITR and FRE as parquet assets on GitHub
+Releases, refreshed weekly. The `"cvm"` backend, which reads the CVM
+Open Data Portal directly, remains fully supported and can be selected
+per call or persisted with
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
 
 ## See also
 
@@ -32,5 +33,5 @@ Other source:
 
 ``` r
 cvm_source_get()
-#> [1] "cvm"
+#> [1] "mirror"
 ```

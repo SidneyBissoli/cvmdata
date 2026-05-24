@@ -54,9 +54,9 @@ bpa <- cvm_fetch(
   years       = 2024
 )
 bpa
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:46.675506
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:24.052581
 #> ℹ dataset: "dfp" | table: "bpa"
-#> # A tibble: 226 × 13
+#> # A tibble: 226 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
 #>    <chr>          <date>     <chr>  <chr>     <chr>  <chr>     <chr> <chr>      
 #>  1 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
@@ -70,8 +70,8 @@ bpa
 #>  9 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
 #> 10 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     
 #> # ℹ 216 more rows
-#> # ℹ 5 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
-#> #   vl_conta <dbl>, st_conta_fixa <chr>
+#> # ℹ 7 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
+#> #   vl_conta <dbl>, st_conta_fixa <chr>, report_type <chr>, year <int>
 ```
 
 The tibble carries provenance attributes and the package has already:
@@ -91,7 +91,7 @@ ativo_total <- bpa[
   c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
 ]
 ativo_total
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:46.675506
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:24.052581
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 2 × 4
 #>   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta
@@ -118,7 +118,7 @@ ativo_history <- bpa_history[
   c("dt_fim_exerc", "vl_conta")
 ]
 ativo_history[order(ativo_history$dt_fim_exerc), ]
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:48.001641
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:25.000981
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 3 × 2
 #>   dt_fim_exerc      vl_conta
@@ -145,17 +145,17 @@ cap <- cvm_fetch(
 #> ℹ Resolving CD_CVM 1023, 22470 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:48.151469
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:25.395686
 #> ℹ dataset: "dfp" | table: "composicao_capital"
-#> # A tibble: 2 × 10
+#> # A tibble: 2 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹
 #>   <chr>              <date>     <chr>  <chr>                               <dbl>
 #> 1 00.000.000/0001-91 2024-12-31 1      BCO BRASIL S.A.                5730834040
 #> 2 47.960.950/0001-21 2024-12-31 1      MAGAZINE LUIZA S.…              738995248
 #> # ℹ abbreviated name: ¹​qt_acao_ordin_cap_integr
-#> # ℹ 5 more variables: qt_acao_pref_cap_integr <dbl>,
+#> # ℹ 6 more variables: qt_acao_pref_cap_integr <dbl>,
 #> #   qt_acao_total_cap_integr <dbl>, qt_acao_ordin_tesouro <dbl>,
-#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>
+#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>, year <int>
 ```
 
 Note: no `report_type` argument — `composicao_capital` is a single
@@ -171,7 +171,7 @@ sub <- cvm_fetch(
   years     = 2024
 )
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
-#> ℹ source: "cvm" | fetched_at: 2026-05-24 14:15:48.275317
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:25.723039
 #> ℹ dataset: "dfp" | table: "submissao"
 #> # A tibble: 2 × 4
 #>   cd_cvm denom_cia           dt_refer   id_doc

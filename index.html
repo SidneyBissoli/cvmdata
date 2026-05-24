@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -276,9 +276,9 @@ varchar
 <p>Data is fetched from the official CVM Open Data Portal (<a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>). The active backend is selectable via <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> (or the <code>source</code> argument of <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>):</p>
 <ul>
 <li>
-<code>"cvm"</code> (default in v0.1) — HTTP directly to the CVM Open Data Portal.</li>
+<code>"mirror"</code> (default from v0.1.0) — parquet snapshots in GitHub Releases queried via DuckDB with year-partition filter pushdown, refreshed weekly by an ETL workflow in this repo.</li>
 <li>
-<code>"mirror"</code> (default from the release that ships Phase F) — parquet snapshots in GitHub Releases queried via DuckDB with year-partition filter pushdown, refreshed weekly by an ETL workflow in this repo.</li>
+<code>"cvm"</code> — HTTP directly to the CVM Open Data Portal. Opt in when byte-level freshness against the regulator is required.</li>
 </ul>
 <p>Every returned tibble carries provenance attributes (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>) so a downstream caller can audit which backend served the data.</p>
 </div>

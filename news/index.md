@@ -1,15 +1,23 @@
 # Changelog
 
-## cvmdata 0.1.0 (in development)
+## cvmdata 0.1.0 (2026-05-24)
 
-### Breaking changes (pending — flips at release tag)
+First public release. Covers the four core CVM publicly-traded-company
+datasets — CAD (registry), DFP (annual statements), ITR (quarterly
+statements) and FRE (reference form) — with a tidy
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+API, year-partitioned mirror in GitHub Releases (refreshed weekly), and
+an HTTP-with-cache backend against `dados.cvm.gov.br` for byte-level
+freshness.
+
+### Breaking changes
 
 - The default `source` of
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  will flip from `"cvm"` to `"mirror"` at the v0.1.0 release tag.
-  Scripts that rely on the implicit default and need byte-level CVM
-  freshness should pass `source = "cvm"` explicitly or persist the
-  choice with `cvm_source_set("cvm")` before upgrading.
+  is now `"mirror"` (parquet via DuckDB), not `"cvm"` (CVM Open Data
+  Portal). Scripts that need byte-level freshness from the regulator
+  should pass `source = "cvm"` explicitly or persist the choice with
+  `cvm_source_set("cvm")`. The `"cvm"` backend remains fully supported.
 
 ### ETL and mirror
 
