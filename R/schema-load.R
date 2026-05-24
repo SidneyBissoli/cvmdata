@@ -23,9 +23,26 @@ load_schema <- function(dataset, table) {
       class = "cvmdata_error_input"
     )
   }
-  raw <- yaml::read_yaml(path)
+  raw <- read_schema_yaml(path)
   validate_schema(raw, dataset, table)
   structure(raw, class = c("cvm_table_schema", "list"))
+}
+
+# Read a YAML schema file forcing UTF-8 regardless of the user's
+# `LC_CTYPE`. `yaml::read_yaml(path)` delegates to an internal
+# `readLines(path)` whose encoding follows the active locale; under
+# `LC_CTYPE = "C"` (common in non-interactive R or stripped-down REPL
+# sessions on Windows), multibyte UTF-8 bytes in our schema comments
+# (e.g. "Demonstração", "Exercício") get rejected as invalid input and
+# the file is silently truncated, leaving `yaml::read_yaml()` to return
+# `NULL` and downstream validators to abort with confusing "empty
+# field" messages. Opening the connection ourselves with
+# `encoding = "UTF-8"` sidesteps the locale entirely.
+read_schema_yaml <- function(path) {
+  con <- file(path, encoding = "UTF-8")
+  on.exit(close(con), add = TRUE)
+  txt <- paste(readLines(con, warn = FALSE), collapse = "\n")
+  yaml::yaml.load(txt)
 }
 
 # Validate schema invariants. Mutating no state; either returns
