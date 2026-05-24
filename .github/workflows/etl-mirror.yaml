@@ -65,7 +65,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::arrow, any::devtools, any::digest, any::jsonlite
+          extra-packages: any::arrow, any::devtools, any::digest, any::jsonlite, any::pointblank
           needs: check
 
       - name: Install cvmdata from source
@@ -93,6 +93,29 @@ jobs:
             Rscript inst/etl/02-csv-to-parquet.R \
               --dataset ${{ matrix.dataset }}
           fi
+
+      - name: Stage 02b — validate parquets
+        # Hybrid checks (Sessao 3.14 decisions 1 & 2): structural
+        # failures exit 1 and block publish; content warnings are
+        # logged. Report file is uploaded as an artifact below for
+        # post-hoc inspection regardless of outcome.
+        run: |
+          if [ -n "${{ inputs.year }}" ]; then
+            Rscript inst/etl/02b-validate.R \
+              --dataset ${{ matrix.dataset }} \
+              --year ${{ inputs.year }}
+          else
+            Rscript inst/etl/02b-validate.R \
+              --dataset ${{ matrix.dataset }}
+          fi
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ matrix.dataset }}
+          path: ${{ env.CVMDATA_ETL_WORKSPACE }}/out/validation/${{ matrix.dataset }}.md
+          if-no-files-found: ignore
 
       - name: Stage 03 — publish to GitHub Releases
         run: Rscript inst/etl/03-publish.R --dataset ${{ matrix.dataset }}
