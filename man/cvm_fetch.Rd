@@ -38,11 +38,11 @@ regardless of which table holds CD_CVM natively.}
 fetches the latest available year. Ignored for datasets with
 \code{temporal_partitioning: none} (e.g. CAD).}
 
-\item{source}{One of \code{"cvm"} (CVM Open Data Portal) or \code{"mirror"}
-(parquet via DuckDB; available from Phase F of the roadmap).
-\code{NULL} (default) resolves to the active backend via
-\code{\link[=cvm_source_get]{cvm_source_get()}} — \code{"cvm"} in the v0.1 series unless the user
-has flipped it with \code{\link[=cvm_source_set]{cvm_source_set()}}.}
+\item{source}{One of \code{"mirror"} (parquet via DuckDB) or \code{"cvm"}
+(CVM Open Data Portal). \code{NULL} (default) resolves to the active
+backend via \code{\link[=cvm_source_get]{cvm_source_get()}} — \code{"mirror"} from v0.1.0 onward
+unless the user has flipped it via
+\code{cvm_source_set("cvm")}.}
 
 \item{report_type}{One of \code{"ind"}, \code{"con"}, or \code{NULL}. Required for
 tables that publish individual and consolidated variants

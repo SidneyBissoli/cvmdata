@@ -25,11 +25,11 @@
 #' @param years Integer vector of years to fetch. `NULL` (default)
 #'   fetches the latest available year. Ignored for datasets with
 #'   `temporal_partitioning: none` (e.g. CAD).
-#' @param source One of `"cvm"` (CVM Open Data Portal) or `"mirror"`
-#'   (parquet via DuckDB; available from Phase F of the roadmap).
-#'   `NULL` (default) resolves to the active backend via
-#'   [cvm_source_get()] — `"cvm"` in the v0.1 series unless the user
-#'   has flipped it with [cvm_source_set()].
+#' @param source One of `"mirror"` (parquet via DuckDB) or `"cvm"`
+#'   (CVM Open Data Portal). `NULL` (default) resolves to the active
+#'   backend via [cvm_source_get()] — `"mirror"` from v0.1.0 onward
+#'   unless the user has flipped it via
+#'   `cvm_source_set("cvm")`.
 #' @param report_type One of `"ind"`, `"con"`, or `NULL`. Required for
 #'   tables that publish individual and consolidated variants
 #'   (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`).

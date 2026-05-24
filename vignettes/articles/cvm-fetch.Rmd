@@ -212,11 +212,11 @@ info
 attr(info, "total_size_bytes")
 ```
 
-`source` selects the backend: `"cvm"` (default in v0.1) is direct
-HTTP to the open-data portal; `"mirror"` will route requests to a
-DuckDB-queried parquet snapshot once it ships (Phase F). The current
-backend is read by `cvm_source_get()` and changed at session scope by
-`cvm_source_set()`:
+`source` selects the backend: from v0.1.0 the default is `"mirror"`,
+which reads parquet snapshots from GitHub Releases via DuckDB with
+year-partition filter pushdown; `"cvm"` reads the open-data portal
+over HTTP and remains fully supported. The current backend is read by
+`cvm_source_get()` and changed at session scope by `cvm_source_set()`:
 
 ```{r source}
 cvm_source_get()

@@ -50,7 +50,7 @@ test_that("cad_fetch() returns a cvm_tbl with provenance attributes", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch()
+    cad_fetch(source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -71,7 +71,7 @@ test_that("cad_fetch() returns identifier columns as character", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch()
+    cad_fetch(source = "cvm")
   )
 
   expect_true("cnpj_cia" %in% names(result))
@@ -90,7 +90,7 @@ test_that("cad_fetch() parses date columns as Date", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch()
+    cad_fetch(source = "cvm")
   )
 
   date_cols <- grep("^dt_", names(result), value = TRUE)
@@ -106,7 +106,7 @@ test_that("cad_fetch() applies the snake_case column rename", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch()
+    cad_fetch(source = "cvm")
   )
 
   expect_true(all(names(result) == tolower(names(result))))
@@ -119,13 +119,13 @@ test_that("cad_fetch() filters by cd_cvm in `companies`", {
 
   full <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch()
+    cad_fetch(source = "cvm")
   )
   pick <- full$cd_cvm[1L]
 
   filtered <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(companies = pick)
+    cad_fetch(companies = pick, source = "cvm")
   )
 
   expect_true(nrow(filtered) >= 1L)
