@@ -3,10 +3,12 @@
 Deletes cached files selectively. `what = "all"` removes the entire
 cache tree (everything under
 [`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md));
-`what = "raw"` removes only the raw download area (`<cache>/raw/`). When
-`dataset` (and optionally `year`) is supplied, the scope is narrowed to
-`<cache>/raw/<dataset>/[<year>/]`; `what` is implicit and must be
-`"raw"` in that case.
+`what = "raw"` removes only the raw download area (`<cache>/raw/`);
+`what = "parquet"` removes only the L3 mirror cache
+(`<cache>/parquet/`). When `dataset` (and optionally `year`) is
+supplied, the scope is narrowed to the matching subtree under the chosen
+area; passing `dataset` without an explicit `what` defaults to `"raw"`
+for backwards compatibility.
 
 ## Usage
 
@@ -23,17 +25,18 @@ cvm_cache_clear(
 
 - what:
 
-  One of `"all"` or `"raw"`. Default `"all"`.
+  One of `"all"`, `"raw"` or `"parquet"`. Default `"all"`.
 
 - dataset:
 
-  Optional dataset id (e.g. `"dfp"`). Restricts deletion to
-  `<cache>/raw/<dataset>/`.
+  Optional dataset id (e.g. `"dfp"`). Restricts deletion to the matching
+  `<cache>/<what>/<dataset>/` subtree.
 
 - year:
 
   Optional integer year. Requires `dataset` to be non-`NULL`. Restricts
-  deletion to `<cache>/raw/<dataset>/<year>/`.
+  deletion to the matching `year=<YYYY>/` slot (raw) or `year=<YYYY>/`
+  slot (parquet).
 
 - confirm:
 
