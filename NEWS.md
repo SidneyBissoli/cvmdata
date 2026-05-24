@@ -1,3 +1,35 @@
+# cvmdata 0.1.0 (in development)
+
+## Breaking changes (pending — flips at release tag)
+
+* The default `source` of `cvm_fetch()` will flip from `"cvm"` to
+  `"mirror"` at the v0.1.0 release tag. Scripts that rely on the
+  implicit default and need byte-level CVM freshness should pass
+  `source = "cvm"` explicitly or persist the choice with
+  `cvm_source_set("cvm")` before upgrading.
+
+## ETL and mirror
+
+* New stage `inst/etl/02b-validate.R` runs between csv-to-parquet
+  generation and the GitHub Releases publish. Applies a hybrid set of
+  `pointblank` checks: structural failures (missing parquet,
+  unreadable file, `n_rows == 0`, wrong identifier type) exit 1 and
+  block the publish; content failures (CNPJ format, `cd_cvm` regex,
+  date range) emit a warning and let the publish proceed. The
+  validation markdown report is uploaded as a workflow artifact for
+  post-hoc inspection regardless of outcome.
+* `arrow` and `pointblank` join the `Suggests` field — both are
+  consumed only by the ETL scripts.
+
+## Documentation
+
+* New article `cache-and-mirror.Rmd` (CRAN-safe via bundled RDS)
+  documents the dual-backend contract, the L1 / L3 cache layout, the
+  four common workflows (mirror switch, CVM vs Mirror equivalence,
+  cache inspection, TTL + LRU tuning) and the eight pre-publish
+  checks the mirror ETL runs. Linked from `README.Rmd` and the
+  pkgdown navbar.
+
 # cvmdata 0.0.0.9000
 
 * Initial scaffolding.
