@@ -753,6 +753,10 @@ Rscript -e "devtools::document()"
 # Regenerar README.md a partir de README.Rmd
 Rscript -e "devtools::build_readme()"
 
+# Regenerar README.pt-BR.md a partir de README.pt-BR.Rmd
+# (devtools::build_readme() só cobre o canônico README.Rmd)
+Rscript -e "knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"
+
 # Carregar o pacote sem instalar (smoke check rápido)
 Rscript -e "devtools::load_all(); print(cvm_fetch)"
 
@@ -761,6 +765,14 @@ Rscript -e "devtools::install(quick = TRUE, upgrade = 'never')"
 
 # Build do tarball CRAN (.tar.gz)
 Rscript -e "devtools::build()"
+
+# Regenerar snapshots e fixtures embarcados (rodar quando os scripts
+# fonte em data-raw/ ou os YAMLs em inst/extdata/schemas/ mudarem).
+# Os scripts batem no portal CVM real — exigem rede e levam ~30 s cada.
+Rscript data-raw/build-dictionary-snapshot.R    # inst/extdata/cvm_dictionary_snapshot.csv
+Rscript data-raw/build-codelists-snapshot.R     # inst/extdata/cvm_codelists_snapshot.csv
+Rscript data-raw/build-mirror-test-fixtures.R   # tests/testthat/fixtures/mirror-*.parquet
+Rscript data-raw/build-vignette-data.R          # inst/extdata/vignette-data/*.rds
 
 # ETL do mirror — dispatch manual do workflow (precisa gh CLI autenticado);
 # o cron `0 7 * * 2` em .github/workflows/etl-mirror.yaml dispara semanalmente
@@ -797,6 +809,18 @@ Notas:
   (matriz macOS/Windows/Ubuntu), `test-coverage.yaml` (codecov),
   `lint.yaml` (`LINTR_ERROR_ON_LINT=true`), `pkgdown.yaml` (deploy
   para `gh-pages`), `etl-mirror.yaml` (cron semanal + manual dispatch).
+
+### 12.2 Stage `schemas_proto/`
+
+Diretório `schemas_proto/` na raiz (excluído da tarball via
+`.Rbuildignore`) é a área de stage para YAMLs de schema antes da
+promoção para `inst/extdata/schemas/<dataset>/<table>.yaml`. Workflow:
+escrever o YAML em `schemas_proto/<dataset>/<table>.yaml`, validar
+contra dados reais com `cvm_fetch(..., validate = "warn")`, ajustar
+`expected_field_count`/`expected_field_names`/`transformations` até
+zero divergência, então mover para `inst/extdata/schemas/`. Conteúdo
+atual: rascunhos parciais (não confiar como fonte canônica até o
+homônimo aparecer em `inst/extdata/schemas/`).
 
 ---
 
