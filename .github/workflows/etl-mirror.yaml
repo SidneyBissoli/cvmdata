@@ -1,19 +1,33 @@
-name: ETL mirror (manual)
+name: ETL mirror
 
-# Sessao 3.11 scaffold — manual dispatch only.
-# Cron-based weekly publishing arrives in Sessao 3.12 after a manual
-# end-to-end run validates the path. The workflow runs all three ETL
-# stages (fetch -> parquet -> publish) for a single dataset, optionally
-# scoped to one year for fast smoke testing.
+# Publishes the parquet mirror to GitHub Releases.
+#
+# Triggers:
+#   - schedule: weekly Tuesday 04:00 BRT (07:00 UTC). Runs the full v0.1
+#     dataset matrix in parallel.
+#   - workflow_dispatch: manual trigger; leave `dataset` empty to expand
+#     to the full matrix (same path as the cron), or pick one dataset for
+#     a single-dataset run. `year` (optional) scopes to a single year for
+#     smoke testing.
+#
+# The matrix uses fail-fast: false so a single dataset failure does not
+# kill the rest of the week.
+#
+# 03-publish.R compares the SHA-256 of the CVM META files against the
+# `__source_hash.json` asset of the previous release and skips publishing
+# when nothing changed upstream.
 
 on:
+  schedule:
+    - cron: '0 7 * * 2'
   workflow_dispatch:
     inputs:
       dataset:
-        description: Dataset id to publish
-        required: true
+        description: Dataset id (leave empty for the full v0.1 matrix)
+        required: false
         type: choice
         options:
+          - ''
           - cad
           - dfp
           - itr
@@ -29,6 +43,12 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Schedule triggers and "empty input" manual dispatches expand to
+        # the full v0.1 matrix; otherwise we run the single chosen dataset.
+        dataset: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('["cad","dfp","itr","fre"]') || fromJSON(format('["{0}"]', inputs.dataset)) }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # runner.* contexts are not allowed at job-level env, only inside
@@ -45,7 +65,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::arrow, any::devtools
+          extra-packages: any::arrow, any::devtools, any::digest, any::jsonlite
           needs: check
 
       - name: Install cvmdata from source
@@ -57,22 +77,22 @@ jobs:
         run: |
           if [ -n "${{ inputs.year }}" ]; then
             Rscript inst/etl/01-fetch-cvm.R \
-              --dataset ${{ inputs.dataset }} \
+              --dataset ${{ matrix.dataset }} \
               --year ${{ inputs.year }}
           else
-            Rscript inst/etl/01-fetch-cvm.R --dataset ${{ inputs.dataset }}
+            Rscript inst/etl/01-fetch-cvm.R --dataset ${{ matrix.dataset }}
           fi
 
       - name: Stage 02 — CSV to parquet
         run: |
           if [ -n "${{ inputs.year }}" ]; then
             Rscript inst/etl/02-csv-to-parquet.R \
-              --dataset ${{ inputs.dataset }} \
+              --dataset ${{ matrix.dataset }} \
               --year ${{ inputs.year }}
           else
             Rscript inst/etl/02-csv-to-parquet.R \
-              --dataset ${{ inputs.dataset }}
+              --dataset ${{ matrix.dataset }}
           fi
 
       - name: Stage 03 — publish to GitHub Releases
-        run: Rscript inst/etl/03-publish.R --dataset ${{ inputs.dataset }}
+        run: Rscript inst/etl/03-publish.R --dataset ${{ matrix.dataset }}
