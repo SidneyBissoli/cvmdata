@@ -34,7 +34,7 @@ cnpj_format(c("12345678000190", NA, "12.345.678/0001-90"))
 \seealso{
 \code{\link[=cnpj_clean]{cnpj_clean()}}
 
-Other utilities: 
-\code{\link{cnpj_clean}()}
+Other utilities:
+\code{\link[=cnpj_clean]{cnpj_clean()}}
 }
 \concept{utilities}

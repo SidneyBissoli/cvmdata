@@ -62,7 +62,7 @@ companies <- cad_fetch()
 \seealso{
 \code{\link[=cvm_fetch]{cvm_fetch()}} for the generic API.
 
-Other fetchers: 
-\code{\link{cvm_fetch}()}
+Other fetchers:
+\code{\link[=cvm_fetch]{cvm_fetch()}}
 }
 \concept{fetchers}

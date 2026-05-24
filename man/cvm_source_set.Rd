@@ -27,7 +27,7 @@ cvm_source_set("cvm")
 \seealso{
 \code{\link[=cvm_source_get]{cvm_source_get()}}
 
-Other source: 
-\code{\link{cvm_source_get}()}
+Other source:
+\code{\link[=cvm_source_get]{cvm_source_get()}}
 }
 \concept{source}

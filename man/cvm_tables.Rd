@@ -19,10 +19,10 @@ List the tables published in a dataset
 cvm_tables("dfp")
 }
 \seealso{
-Other discovery: 
-\code{\link{cvm_codelist}()},
-\code{\link{cvm_dataset_years}()},
-\code{\link{cvm_datasets}()},
-\code{\link{cvm_dictionary}()}
+Other discovery:
+\code{\link[=cvm_codelist]{cvm_codelist()}},
+\code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
+\code{\link[=cvm_datasets]{cvm_datasets()}},
+\code{\link[=cvm_dictionary]{cvm_dictionary()}}
 }
 \concept{discovery}

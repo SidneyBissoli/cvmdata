@@ -12,7 +12,7 @@ A character scalar with the absolute path.
 \description{
 Returns the directory where downloaded CSV/ZIP artifacts are cached.
 The default is the user-level cache slot from
-\code{\link[tools:userdir]{tools::R_user_dir()}}, which can be overridden by setting the
+\code{\link[tools:R_user_dir]{tools::R_user_dir()}}, which can be overridden by setting the
 option \code{cvmdata.cache_dir} (see \code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}).
 }
 \details{
@@ -43,9 +43,9 @@ cvm_cache_path()
 \code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}, \code{\link[=cvm_cache_info]{cvm_cache_info()}},
 \code{\link[=cvm_cache_clear]{cvm_cache_clear()}}
 
-Other cache: 
-\code{\link{cvm_cache_clear}()},
-\code{\link{cvm_cache_info}()},
-\code{\link{cvm_cache_set_path}()}
+Other cache:
+\code{\link[=cvm_cache_clear]{cvm_cache_clear()}},
+\code{\link[=cvm_cache_info]{cvm_cache_info()}},
+\code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}
 }
 \concept{cache}

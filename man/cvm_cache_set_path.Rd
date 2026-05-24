@@ -26,9 +26,9 @@ cvm_cache_set_path(tempfile("cvmdata-"))
 \seealso{
 \code{\link[=cvm_cache_path]{cvm_cache_path()}}
 
-Other cache: 
-\code{\link{cvm_cache_clear}()},
-\code{\link{cvm_cache_info}()},
-\code{\link{cvm_cache_path}()}
+Other cache:
+\code{\link[=cvm_cache_clear]{cvm_cache_clear()}},
+\code{\link[=cvm_cache_info]{cvm_cache_info()}},
+\code{\link[=cvm_cache_path]{cvm_cache_path()}}
 }
 \concept{cache}

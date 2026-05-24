@@ -95,7 +95,7 @@ bb <- cvm_fetch("dfp", "bpa",
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other fetchers: 
-\code{\link{cad_fetch}()}
+Other fetchers:
+\code{\link[=cad_fetch]{cad_fetch()}}
 }
 \concept{fetchers}
