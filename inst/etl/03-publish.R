@@ -9,6 +9,13 @@
 #       -> asset "bpa__report_type=ind__year=2024__part-0.parquet"
 #       -> URL https://github.com/<repo>/releases/download/<tag>/<asset>
 #
+# Note: `gh release upload path#label` makes `label` only a *display*
+# string on the release UI — the asset name (and download URL) always
+# comes from the file basename. Since every parquet on disk is named
+# "part-0.parquet" (Hive-style layout), we stage a renamed copy in a
+# temp dir before uploading, so each asset lands with its encoded
+# partition name and they don't collide on basename.
+#
 # The future R/source-mirror-duckdb.R consumer reconstructs the
 # partition tree client-side from these encoded names and feeds the
 # resulting URL list to arrow::open_dataset().
@@ -101,13 +108,19 @@ if (status != 0L) {
 }
 
 message(sprintf("[03-publish] uploading %d asset(s)", length(parquets)))
+stage_dir <- tempfile("cvmdata-mirror-stage-")
+dir.create(stage_dir)
+on.exit(unlink(stage_dir, recursive = TRUE), add = TRUE)
+
 for (f in parquets) {
   rel <- substring(f, nchar(dataset_dir) + 2L)
   asset_name <- gsub("[/\\\\]", "__", rel)
+  staged <- file.path(stage_dir, asset_name)
+  file.copy(f, staged, overwrite = TRUE)
   message("  ", asset_name)
   status <- system2("gh", c(
     "release", "upload", tag,
-    shQuote(paste0(f, "#", asset_name)),
+    shQuote(staged),
     "--repo", mirror_repo,
     "--clobber"
   ))
