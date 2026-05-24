@@ -97,9 +97,10 @@ progresso sessão a sessão.
 - [x] `cvm_source_get()` / `cvm_source_set()` — entregues na Sessão 3.6
   em `R/source.R`. `cvm_fetch()` agora declara `source = NULL` e
   resolve via `cvm_source_get()` (precedência: arg > option > default).
-  Default em v0.1 é `"cvm"`; transiciona para `"mirror"` na release
-  que ativar a Fase F. Mirror permanece bloqueado por
-  `cvmdata_error_internal` até lá.
+  Default era `"cvm"` na faixa Sessão 3.6 → 3.14; **flipado para
+  `"mirror"` no tag v0.1.0** (Sessão Marco, 2026-05-24). Backend
+  `"mirror"` ficou funcional na Sessão 3.13 e o flip do default
+  passou a ser uma decisão de release, não de implementação.
 - [x] Suite de testes mockados de HTTP via
   `httr2::with_mocked_responses` (com `httptest2` em Suggests
   para uso futuro).
@@ -189,9 +190,10 @@ progresso sessão a sessão.
     (BANCO↔BCO, COMPANHIA↔CIA, INDUSTRIA↔IND, PARTICIPACOES↔PART).
     Prompt interativo via `utils::menu()` em `interactive()` e abort em
     batch entregues como hotfix pós-Sessão 02 (vide Fase E).
-  - [x] `source = c("mirror", "cvm")` com default `"mirror"`. Stub de
-    `"mirror"` aborta com `cvmdata_error_input` apontando para `"cvm"`
-    até a Fase F entregar o backend parquet.
+  - [x] `source = c("mirror", "cvm")` introduzido (default `"cvm"` na
+    Sessão 02; flipado para `"mirror"` no tag v0.1.0). Stub de
+    `"mirror"` abortava com `cvmdata_error_input` apontando para
+    `"cvm"` até a Fase F entregar o backend parquet (Sessão 3.13).
   - [x] Tracer: `cvm_fetch(dataset = "dfp", table = "bpa",
     report_type = "ind", companies = "BCO BRASIL", years = 2024)`.
   - [x] `apply_schema_transformations()` genérico cobre
@@ -436,23 +438,83 @@ Itens entregues na Sessão 3.14:
   reusa output da Tarefa C da 3.13). `pkgdown/_pkgdown.yml` +
   `README.Rmd` apontam para o novo article.
 
-Itens pendentes para o release tag v0.1.0:
+Itens entregues na Sessão Marco — v0.1.0 (2026-05-24):
 
-- [ ] Flip do default de `source` de `"cvm"` para `"mirror"`
-  (Decisão 3 = Alt 2 da Sessão 3.14): commit isolado no início do
-  tag v0.1.0, item ⚠️ breaking no NEWS.md. Pré-flip: varredura de
-  testes que assumem `source = "cvm"` implícito (a maioria já passa
-  explícito).
+- [x] Flip do default de `source` de `"cvm"` para `"mirror"`
+  (Decisão 3 = Alt 2 da Sessão 3.14). Commit A (`feat(source)!`,
+  `ca9730c`) cobriu `R/source.R`, roxygen de `cvm_fetch()`/`cad_fetch()`,
+  vignettes (cvmdata, cvm-fetch, cache-and-mirror), README EN+PT-BR e
+  CLAUDE.md §2.1. Pre-flip audit: 5 testes em `test-cad-fetch.R` que
+  chamavam `cad_fetch()` sem `source` ganharam `source = "cvm"`
+  explícito; 2 testes obsoletos em `test-source-public.R`
+  (aborts on `"mirror"` stub) deletados — cobertura do path mirror já
+  vive em `test-source-mirror-duckdb.R`. Suite estabilizou em 587
+  PASS (= 589 baseline – 2 obsoletos).
+
+### Sessão Marco — v0.1.0 (2026-05-24)
+
+Decisões prévias travadas com o Sidney (em janela limpa, contra o
+cron audit `gh run list --workflow=etl-mirror.yaml`):
+
+- **Decisão 1** = Tag agora. O cron schedule ainda não disparou (1ª
+  ativação em 2026-05-26), mas 3 dispatches verdes consecutivos com
+  publish real de 31min + 02b validator + cobertura mirror dos 4
+  datasets (CAD/DFP/ITR/FRE, séries históricas 2010-2026) bastam
+  como evidência. Gate de "≥30 dias" relaxado por subsumido no 02b.
+- **Decisão 2** = Pre-submission inquiry no rOpenSci (vs submission
+  formal direto). Primeira submissão do mantenedor — inquiry baixa o
+  risco de "out of scope" no formal.
+
+Implementação:
+
+- [x] Commit A: `feat(source)!: flip default backend to "mirror"`
+  (`ca9730c`). Detalhes acima.
+- [x] Commit B: `chore(release): bump to 0.1.0` (`c0f9868`).
+  DESCRIPTION `0.0.0.9000` → `0.1.0`; NEWS.md release section dated
+  + bloco "Breaking changes" sem "pending"; `cran-comments.md`
+  seeded com test-environments + nota rOpenSci-first;
+  `inst/CITATION` com bibentry apontando pra pkgdown site.
+- [x] Tag git `v0.1.0` + push.
+- [x] GitHub release `v0.1.0` (`gh release create`) com release notes
+  extraídas do NEWS.md via awk. URL:
+  <https://github.com/SidneyBissoli/cvmdata/releases/tag/v0.1.0>
+- [x] Commit C: `chore(release): start 0.1.0.9000 dev cycle`
+  (`135d742`). DESCRIPTION `0.1.0` → `0.1.0.9000`; nova seção
+  `# cvmdata 0.1.0.9000 (in development)` no topo do NEWS.md.
+
+Gates rodados nesta sessão:
+
+- [x] `devtools::check()` local pós-bump: 0 errors / 0 warnings /
+  0 notes.
+- [x] `devtools::test()`: 587 PASS / 0 FAIL.
+- [x] `lintr::lint_package()`: clean.
+- [x] `covr::package_coverage()`: 93.70% (gate ≥90%).
+- [x] `devtools::check_win_devel()`: tarball enviado, resposta por
+  email em `sbissoli76@gmail.com` (~15-30min).
+- [~] `devtools::check_mac_release()`: 504 Gateway Timeout em 2
+  tentativas — retentar manualmente quando o serviço normalizar.
+- [-] `revdepcheck::revdep_check()`: n/a (primeira submissão, no
+  reverse dependencies). Documentado no `cran-comments.md`.
+- [x] Pkgdown rebuild verde pós-push (3m46s); site reflete versão
+  `0.1.0` e o bibentry de citação.
+- [x] Pre-submission inquiry rOpenSci: **draft completo pronto**,
+  mas **não submetido** nesta sessão — Sidney optou por exercitar o
+  pacote em ambiente real antes de abrir issue em fórum externo.
 
 ### Marco — release v0.1.0
 
-- [ ] R-CMD-check verde nos 5 jobs (Ubuntu devel/release/oldrel-1,
-  macOS release, Windows release).
-- [ ] Cobertura ≥90%.
-- [ ] `revdepcheck::revdep_check()` limpo.
-- [ ] `devtools::check_win_devel()` e `check_mac_release()` limpos.
-- [ ] ≥30 dias de ETL rodando estável.
+- [~] R-CMD-check verde nos 5 jobs (Ubuntu devel/release/oldrel-1,
+  macOS release, Windows release). Local OK pós-commit C; matrix do
+  GitHub Actions dispara automaticamente em cada push.
+- [x] Cobertura ≥90% (93.70%).
+- [-] `revdepcheck::revdep_check()` limpo — n/a, sem revdeps.
+- [~] `devtools::check_win_devel()` enviado;
+  `check_mac_release()` pendente (504).
+- [-] ≥30 dias de ETL rodando estável — gate relaxado pela
+  Decisão 1 da Sessão Marco, com o 02b validator absorvendo a função
+  do gate.
 - [ ] Submissão rOpenSci (<https://github.com/ropensci/software-review>).
+  Draft pronto; submissão adiada por escolha do Sidney.
 - [ ] Aceitação rOpenSci.
 - [ ] Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).
 
@@ -484,8 +546,9 @@ Itens pendentes para o release tag v0.1.0:
   `cvmdata_rodada3-0-2_politica_reader_sem_meta.md`).
 - [ ] Aplicar refinamentos da Rodada 3.0 ao naming doc (parcialmente
   feito na v03 — vide cabeçalho do naming doc).
-- [ ] Acrescentar `cran-comments.md` quando aparecer a primeira NOTE
-  inevitável.
+- [x] Acrescentar `cran-comments.md` — criado na Sessão Marco com
+  test-environments matrix e nota indicando rOpenSci-first como
+  workflow de submissão.
 - [ ] Atualizar `schemas_proto/cad/companhias.yaml` com
   `expected_field_count: 47` ou marcar como registro histórico
   congelado (decidir na próxima sessão).
