@@ -364,7 +364,10 @@ The exported API is grouped into five families:
   `cvm_cache_info()`, `cvm_cache_clear()`. The TTL window for HTTP
   revalidation is configurable via `options(cvmdata.cache_ttl_seconds)`
   (default 30 days).
-- **Source backend** — `cvm_source_get()`, `cvm_source_set()`.
+- **Source backend** — `cvm_source_get()`, `cvm_source_set()`. The
+  cache/mirror integration is documented in detail in the
+  [cache-and-mirror](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html)
+  article.
 - **Utilities** — `cnpj_clean()`, `cnpj_format()`.
 
 ## Data provenance
