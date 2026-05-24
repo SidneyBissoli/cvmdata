@@ -669,7 +669,8 @@ próximo download.
 - **Cobertura alvo 90%** via
   [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md).
 
-Cada commit deve deixar o pacote **verde em `devtools::check()`**:
+Cada commit deve deixar o pacote **verde em
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)**:
 `0 errors`, `0 warnings`, testes passando, lint clean,
 [`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
 funcionando. Gate não-negociável.
@@ -744,10 +745,10 @@ Rscript inst/etl/03-publish.R
 
 Notas:
 
-- `devtools::check()` executa `R CMD check` com `--as-cran`, roda a
-  vignette `cvmdata.Rmd` (configurada `eval = interactive()` para não
-  bater no portal CVM) e os testes. **Zero errors, zero warnings, zero
-  notes** é o gate.
+- [`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+  executa `R CMD check` com `--as-cran`, roda a vignette `cvmdata.Rmd`
+  (configurada `eval = interactive()` para não bater no portal CVM) e os
+  testes. **Zero errors, zero warnings, zero notes** é o gate.
 - Os testes `tests/testthat/test-*.R` mockam HTTP via `httptest2` (e em
   alguns casos
   [`httr2::with_mocked_responses()`](https://httr2.r-lib.org/reference/with_mocked_responses.html)).

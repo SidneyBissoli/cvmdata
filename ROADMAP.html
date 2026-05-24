@@ -63,7 +63,7 @@
 <li><label><input type="checkbox" checked><code>.Rbuildignore</code> e <code>.gitignore</code> (incluindo <code>.claude/</code> e <code>memory/</code>).</label></li>
 <li><label><input type="checkbox" checked>Workflow <code>test-coverage.yaml</code> — Sessão 3.7. Usa <code>codecov/codecov-action@v4</code> com <code>CODECOV_TOKEN</code> secret (Alt 1 do trio codecov-oficial/artifact). Badge já existe em README.Rmd apontando para <code>app.codecov.io/gh/SidneyBissoli/cvmdata</code> — primeiro run real do workflow precisa do token criado em codecov.io.</label></li>
 <li><label><input type="checkbox" checked>Workflow <code>lint.yaml</code> — Sessão 3.7. Roda <code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code> com <code>LINTR_ERROR_ON_LINT=true</code> (PR falha em qualquer divergência de <code>.lintr</code>).</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>pkgdown.yaml</code> — Sessão 3.7. Deploy via <code>JamesIves/github-pages-deploy-action@v4.5.0</code> na branch órfã <code>gh-pages</code> (Alt 1 do par branch/actions-deploy-pages, padrão <code>usethis::use_pkgdown_github_pages()</code>). Site em <code>https://sidneybissoli.github.io/cvmdata/</code> após primeiro push.</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>pkgdown.yaml</code> — Sessão 3.7. Deploy via <code>JamesIves/github-pages-deploy-action@v4.5.0</code> na branch órfã <code>gh-pages</code> (Alt 1 do par branch/actions-deploy-pages, padrão <code><a href="https://usethis.r-lib.org/reference/use_pkgdown.html" class="external-link">usethis::use_pkgdown_github_pages()</a></code>). Site em <code>https://sidneybissoli.github.io/cvmdata/</code> após primeiro push.</label></li>
 <li><label><input type="checkbox" checked><code>pkgdown/_pkgdown.yml</code> configurado — Sessão 3.7. 5 famílias (<code>fetchers</code>, <code>cache</code>, <code>source</code>, <code>discovery</code>, <code>utilities</code>) agrupando as 14 funções exportadas até a 3.6.</label></li>
 <li><label><input type="checkbox" checked><code>CODE_OF_CONDUCT.md</code> e <code>CONTRIBUTING.md</code> — Sessão 3.10. Contributor Covenant 2.1 (canônico, sem desvios) com endpoint de report <code>sbissoli76@gmail.com</code> (Alt 1 do trio email-pessoal/issue- tracker/email-dedicado; mesmo email já público em <code>Authors@R</code>). <code>CONTRIBUTING.md</code> médio (~150 linhas, Alt 2 do trio mínimo/médio/ completo): Reporting issues, Submitting a PR, Development setup, Quality gate (comandos literais), Adding/modifying schema YAML (formato mínimo + ações de <code>transformations</code>), Project goals. README.Rmd ganhou seção <code>Contributing</code> com paragrafo padrão rOpenSci/usethis apontando para ambos; pkgdown 2.x detecta CoC/ CONTRIBUTING automaticamente no navbar.</label></li>
 </ul></div>
@@ -164,7 +164,7 @@
 <li>
 <strong>URL policy</strong>: latest móvel + snapshots datados (<code>mirror-&lt;dataset&gt;-snapshot-YYYY-MM-DD</code>).</li>
 <li>
-<strong>Formato</strong>: parquet snappy + Hive-style <code>year=YYYY/</code> (compatível com <code>arrow::open_dataset()</code> e DuckDB filter pushdown).</li>
+<strong>Formato</strong>: parquet snappy + Hive-style <code>year=YYYY/</code> (compatível com <code><a href="https://arrow.apache.org/docs/r/reference/open_dataset.html" class="external-link">arrow::open_dataset()</a></code> e DuckDB filter pushdown).</li>
 </ul><p>Itens entregues:</p>
 <ul><li><label><input type="checkbox" checked>Scripts ETL em <code>inst/etl/</code>: <code>00-config.R</code>, <code>01-fetch-cvm.R</code>, <code>02-csv-to-parquet.R</code>, <code>03-publish.R</code>. Pipeline completo (fetch → parquet → upload via <code>gh release</code>) idempotente; suporta variants <code>report_type</code> (ind/con) em DFP/ITR contábeis. Entregue na Sessão 3.11.</label></li>
 <li><label><input type="checkbox" checked>Workflow <code>.github/workflows/etl-mirror.yaml</code> com trigger <code>workflow_dispatch</code> (Sessão 3.11) + cron <code>0 7 * * 2</code> e matrix de 4 datasets com <code>fail-fast: false</code> (Sessão 3.12).</label></li>
@@ -183,7 +183,7 @@
 <ul class="task-list"><li><label><input type="checkbox">R-CMD-check verde nos 5 jobs (Ubuntu devel/release/oldrel-1, macOS release, Windows release).</label></li>
 <li><label><input type="checkbox">Cobertura ≥90%.</label></li>
 <li><label><input type="checkbox"><code>revdepcheck::revdep_check()</code> limpo.</label></li>
-<li><label><input type="checkbox"><code>devtools::check_win_devel()</code> e <code>check_mac_release()</code> limpos.</label></li>
+<li><label><input type="checkbox"><code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel()</a></code> e <code>check_mac_release()</code> limpos.</label></li>
 <li><label><input type="checkbox">≥30 dias de ETL rodando estável.</label></li>
 <li><label><input type="checkbox">Submissão rOpenSci (<a href="https://github.com/ropensci/software-review" class="external-link uri">https://github.com/ropensci/software-review</a>).</label></li>
 <li><label><input type="checkbox">Aceitação rOpenSci.</label></li>

@@ -51,8 +51,8 @@ com `LINTR_ERROR_ON_LINT=true` (PR falha em qualquer divergência de
 Workflow `pkgdown.yaml` — Sessão 3.7. Deploy via
 `JamesIves/github-pages-deploy-action@v4.5.0` na branch órfã `gh-pages`
 (Alt 1 do par branch/actions-deploy-pages, padrão
-`usethis::use_pkgdown_github_pages()`). Site em
-`https://sidneybissoli.github.io/cvmdata/` após primeiro push.
+[`usethis::use_pkgdown_github_pages()`](https://usethis.r-lib.org/reference/use_pkgdown.html)).
+Site em `https://sidneybissoli.github.io/cvmdata/` após primeiro push.
 
 `pkgdown/_pkgdown.yml` configurado — Sessão 3.7. 5 famílias (`fetchers`,
 `cache`, `source`, `discovery`, `utilities`) agrupando as 14 funções
@@ -442,7 +442,8 @@ Decisões de arquitetura travadas na Sessão 3.11
 - **URL policy**: latest móvel + snapshots datados
   (`mirror-<dataset>-snapshot-YYYY-MM-DD`).
 - **Formato**: parquet snappy + Hive-style `year=YYYY/` (compatível com
-  `arrow::open_dataset()` e DuckDB filter pushdown).
+  [`arrow::open_dataset()`](https://arrow.apache.org/docs/r/reference/open_dataset.html)
+  e DuckDB filter pushdown).
 
 Itens entregues:
 
@@ -500,7 +501,8 @@ Cobertura ≥90%.
 
 `revdepcheck::revdep_check()` limpo.
 
-`devtools::check_win_devel()` e `check_mac_release()` limpos.
+[`devtools::check_win_devel()`](https://devtools.r-lib.org/reference/check_win.html)
+e `check_mac_release()` limpos.
 
 ≥30 dias de ETL rodando estável.
 

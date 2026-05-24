@@ -550,7 +550,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <strong>Snapshot tests</strong> para mensagens de erro, atributos serializados, estrutura de output (<code><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">dplyr::glimpse()</a></code> snapshotado).</li>
 <li>
 <strong>Cobertura alvo 90%</strong> via <code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>.</li>
-</ul><p>Cada commit deve deixar o pacote <strong>verde em <code>devtools::check()</code></strong>: <code>0 errors</code>, <code>0 warnings</code>, testes passando, lint clean, <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> funcionando. Gate não-negociável.</p>
+</ul><p>Cada commit deve deixar o pacote <strong>verde em <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code></strong>: <code>0 errors</code>, <code>0 warnings</code>, testes passando, lint clean, <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> funcionando. Gate não-negociável.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_12-workflow-de-desenvolvimento">12. Workflow de desenvolvimento<a class="anchor" aria-label="anchor" href="#id_12-workflow-de-desenvolvimento"></a></h2>
@@ -607,7 +607,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">03</span><span class="op">-</span>publish<span class="op">.</span><span class="fu">R</span></span></code></pre></div>
 <p>Notas:</p>
 <ul><li>
-<code>devtools::check()</code> executa <code>R CMD check</code> com <code>--as-cran</code>, roda a vignette <code>cvmdata.Rmd</code> (configurada <code>eval = interactive()</code> para não bater no portal CVM) e os testes. <strong>Zero errors, zero warnings, zero notes</strong> é o gate.</li>
+<code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> executa <code>R CMD check</code> com <code>--as-cran</code>, roda a vignette <code>cvmdata.Rmd</code> (configurada <code>eval = interactive()</code> para não bater no portal CVM) e os testes. <strong>Zero errors, zero warnings, zero notes</strong> é o gate.</li>
 <li>Os testes <code>tests/testthat/test-*.R</code> mockam HTTP via <code>httptest2</code> (e em alguns casos <code><a href="https://httr2.r-lib.org/reference/with_mocked_responses.html" class="external-link">httr2::with_mocked_responses()</a></code>). Nenhum teste bate no portal CVM real — testes de integração reais virão em arquivos <code>test-integration-*.R</code> com guarda <code>CVMDATA_RUN_INTEGRATION=true</code>.</li>
 <li>Fixtures em <code>tests/testthat/fixtures/</code>: <code>cad_sample.csv</code> (51 linhas reais do CAD), <code>dfp_cia_aberta_2024.zip</code>, <code>itr_cia_aberta_2024.zip</code> e <code>fre_cia_aberta_2024.zip</code> (cada ZIP com subset de companhias e <code>*.meta.json</code> registrando a origem; o FRE exercita as 8 tabelas <code>meta_status: missing</code>).</li>
 <li>
