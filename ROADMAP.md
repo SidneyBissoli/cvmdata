@@ -1,8 +1,6 @@
 # ROADMAP — `cvmdata`
 
-Plano de execução por fases. Lista o que precisa ser entregue. O
-"como" e o "quando" vivem em `CLAUDE.md`, `NEWS.md`, commits e nos
-documentos canônicos da fase de planejamento.
+Plano de execução por fases. 
 
 - [x] = entregue
 - [~] = parcial / em andamento
@@ -11,7 +9,7 @@ documentos canônicos da fase de planejamento.
 
 ---
 
-## Pré-v0.1 (companhias abertas — Resolução CVM 80/22)
+## Pré-v0.1 - companhias abertas
 
 ### Fase A — Esqueleto
 
