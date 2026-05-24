@@ -113,11 +113,19 @@ cvm_fetch_internal <- function(dataset,
     report_type <- rlang::arg_match0(report_type, c("ind", "con"))
   }
 
-  if (identical(source, "mirror")) {
-    source_mirror_duckdb_get(schema = NULL)
-  }
-
   schema <- load_schema(dataset, table)
+
+  if (identical(source, "mirror")) {
+    transformed <- fetch_via_mirror(
+      schema, dataset, years, companies, report_type
+    )
+    return(cvm_attach_metadata(
+      transformed,
+      source  = source,
+      dataset = dataset,
+      table   = table
+    ))
+  }
 
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "yearly")) {
@@ -149,6 +157,35 @@ cvm_fetch_internal <- function(dataset,
     dataset = dataset,
     table   = table
   )
+}
+
+# Mirror path of `cvm_fetch_internal()`. The backend already returns a
+# tibble in the post-transformation shape (the ETL applied the same
+# `apply_schema_transformations()` step before writing parquet), so
+# the orchestrator only has to layer `filter_by_companies()` and the
+# provenance metadata on top.
+fetch_via_mirror <- function(schema, dataset, years, companies,
+                             report_type) {
+  transformed <- source_mirror_duckdb_get(
+    schema, years = years, report_type = report_type
+  )
+  if (!is.null(companies)) {
+    # `filter_by_companies()` may need the dataset's `submissao` table
+    # to resolve CD_CVM tokens when the target table lacks `cd_cvm`.
+    # `resolve_cd_cvm_via_submissao()` uses the CVM HTTP path because
+    # it loads the submissao via `source_cvm_http_get()`. That keeps
+    # the resolution self-consistent within v0.1; a future iteration
+    # may route the submissao lookup through the mirror as well.
+    resolved_year <- if (!is.null(years)) years[[1L]] else
+      max(transformed$year %||% NA_integer_, na.rm = TRUE)
+    if (is.infinite(resolved_year) || is.na(resolved_year)) {
+      resolved_year <- NULL
+    }
+    transformed <- filter_by_companies(
+      transformed, companies, schema = schema, year = resolved_year
+    )
+  }
+  transformed
 }
 
 # Fetch + transform + filter for a single year (or a non-yearly

@@ -30,6 +30,8 @@ Depends:
     R (>= 4.1)
 Imports:
     cli,
+    DBI,
+    duckdb,
     httr2,
     readr,
     rlang,

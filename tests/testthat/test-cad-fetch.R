@@ -133,12 +133,8 @@ test_that("cad_fetch() filters by cd_cvm in `companies`", {
 })
 
 test_that("cad_fetch() rejects unsupported source values cleanly", {
-  # "mirror" is in the documented domain but ships in Phase F —
-  # the stub aborts with cvmdata_error_input and an actionable message.
-  expect_error(
-    cad_fetch(source = "mirror"),
-    class = "cvmdata_error_input"
-  )
+  # "mirror" now ships (Sessao 3.13); only truly unsupported source
+  # values abort. arg_match0() raises an `rlang_error`.
   expect_error(
     cad_fetch(source = "bogus"),
     class = "rlang_error"

@@ -359,12 +359,21 @@ test_that("cvm_fetch CAD rejects years argument", {
   )
 })
 
-test_that("cvm_fetch rejects source = mirror (v0.1 stub)", {
-  # "mirror" is in the documented domain but ships in Phase F —
-  # the stub aborts with cvmdata_error_input and an actionable message.
+test_that("cvm_fetch aborts on unreachable mirror release", {
+  # Sessao 3.13 shipped the mirror backend; an unreachable release
+  # aborts with cvmdata_error_http. We exercise the network failure
+  # path here so the inverted contract (was: cvmdata_error_input stub)
+  # is caught if it ever regresses.
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  mock <- function(req) stop("simulated DNS error")
   expect_error(
-    cvm_fetch("cad", "companhias", source = "mirror"),
-    class = "cvmdata_error_input"
+    httr2::with_mocked_responses(
+      mock,
+      cvm_fetch("cad", "companhias", source = "mirror")
+    ),
+    class = "cvmdata_error_http"
   )
 })
 
