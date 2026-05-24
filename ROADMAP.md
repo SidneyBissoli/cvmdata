@@ -519,14 +519,35 @@ em mirror duckdb (87.25%) e util-mirror-assets (83.71%) são guards
 defensivos (DuckDB connection failure, etc.) e error paths
 conservadores; alcançá-los exige mocks de baixo valor.
 
-Itens pendentes para Sessão 3.14:
+Itens entregues na Sessão 3.14:
 
-Validação pre-publish com `pointblank`.
+Validação pre-publish com `pointblank` em `inst/etl/02b-validate.R`.
+Escopo híbrido (Decisão 1 = Alt 3): 3 checks sintéticos (existência,
+leitura, n_rows \> 0) + 5 checks pointblank universais (identifier
+character, `vl_conta` numeric, CNPJ regex, cd_cvm regex, faixa de
+datas). Política de falha (Decisão 2 = Alt 3): hard estrutural aborta
+(exit 1, bloqueia publish); soft de conteúdo emite warning e segue.
+Workflow `etl-mirror.yaml` ganhou step “Stage 02b” entre 02 e 03 +
+upload do markdown report como artifact. Coverage cresceu de 93.70% para
+target (gates ≥ 90%); helper `validate_*` em `inst/etl/` cobertos por
+`tests/testthat/test-etl-validate.R` (23 testes novos, total 589).
 
-Vignette `cache-and-mirror.Rmd`. Sessão 3.14.
+Article CRAN-safe `vignettes/articles/cache-and-mirror.Rmd`. Documenta
+os dois backends (`cvm`/`mirror`), as três camadas de cache (L1 ETag, L3
+hash, L4 planejado), os 4 workflows do usuário (switch para mirror, CVM
+vs Mirror, inspect/clear, TTL/LRU) e a tabela de 8 checks do 02b —
+superfície rOpenSci-auditável das regras de validação. Equivalência CVM
+vs Mirror lê RDS bundled
+(`inst/extdata/vignette-data/cache-and-mirror/cvm-vs-mirror.rds`, reusa
+output da Tarefa C da 3.13). `pkgdown/_pkgdown.yml` + `README.Rmd`
+apontam para o novo article.
 
-Flip do default de `source` de `"cvm"` para `"mirror"`. Sessão 3.14 (ou
-início v0.1.0).
+Itens pendentes para o release tag v0.1.0:
+
+Flip do default de `source` de `"cvm"` para `"mirror"` (Decisão 3 = Alt
+2 da Sessão 3.14): commit isolado no início do tag v0.1.0, item ⚠️
+breaking no NEWS.md. Pré-flip: varredura de testes que assumem
+`source = "cvm"` implícito (a maioria já passa explícito).
 
 ### Marco — release v0.1.0
 

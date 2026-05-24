@@ -150,6 +150,9 @@ Domínio dos argumentos enumerados (validados via
   ([`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
   ↔︎
   [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)).
+  **Sessão 3.14 travou (Decisão 3 = Alt 2)** que o flip não acontece em
+  sessão intermediária: vira commit isolado no início do tag v0.1.0
+  (marcado ⚠️ breaking em `NEWS.md`).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
 - `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para
@@ -386,6 +389,12 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │   │   ├── 00-config.R            # constantes + helpers compartilhados
     │   │   ├── 01-fetch-cvm.R         # baixa ZIPs anuais do portal CVM
     │   │   ├── 02-csv-to-parquet.R    # converte CSV → parquet particionado por ano
+    │   │   ├── 02b-validate.R         # pointblank pre-publish (Sessão 3.14):
+    │   │   │                          #   3 checks sintéticos (existence, readable,
+    │   │   │                          #   n_rows > 0) + 5 pointblank universais
+    │   │   │                          #   (cnpj/cd_cvm regex, vl_conta numeric,
+    │   │   │                          #   identifier character, date range);
+    │   │   │                          #   hard estrutural aborta, soft conteúdo warna
     │   │   ├── 03-publish.R           # hash-detection + publica em GitHub Releases
     │   │   └── util-hash.R            # compute_source_hash(dataset) consumido por
     │   │                              #   03-publish.R (Sessão 3.12)
@@ -785,9 +794,10 @@ Rscript -e "devtools::build()"
 gh workflow run etl-mirror.yaml
 
 # ETL local (smoke) — rodar os scripts individualmente sem subir release
-Rscript inst/etl/01-fetch-cvm.R
-Rscript inst/etl/02-csv-to-parquet.R
-Rscript inst/etl/03-publish.R
+Rscript inst/etl/01-fetch-cvm.R       --dataset cad
+Rscript inst/etl/02-csv-to-parquet.R  --dataset cad
+Rscript inst/etl/02b-validate.R       --dataset cad   # Sessão 3.14
+Rscript inst/etl/03-publish.R         --dataset cad
 ```
 
 Notas:
@@ -829,21 +839,22 @@ Notas:
 - `Imports`: `cli`, `DBI`, `duckdb`, `httr2`, `readr`, `rlang`,
   `tibble`, `yaml`. `DBI` + `duckdb` entraram na **Sessão 3.13**
   (backend `source = "mirror"`).
-- `Suggests`: `covr`, `digest`, `dplyr`, `httptest2`, `jsonlite`,
-  `knitr`, `lintr`, `pkgdown`, `rmarkdown`, `styler`,
-  `testthat (>= 3.0.0)`, `withr`. `digest` + `jsonlite` são consumidos
-  pelo ETL (`inst/etl/util-hash.R`); no path de leitura do usuário,
-  `mirror_list_assets()` usa `jsonlite` indiretamente via
+- `Suggests`: `arrow`, `covr`, `digest`, `dplyr`, `httptest2`,
+  `jsonlite`, `knitr`, `lintr`, `pkgdown`, `pointblank`, `rmarkdown`,
+  `styler`, `testthat (>= 3.0.0)`, `withr`. `digest` + `jsonlite` são
+  consumidos pelo ETL (`inst/etl/util-hash.R`); no path de leitura do
+  usuário, `mirror_list_assets()` usa `jsonlite` indiretamente via
   [`httr2::resp_body_json()`](https://httr2.r-lib.org/reference/resp_body_raw.html).
+  `arrow` + `pointblank` entraram na **Sessão 3.14** (consumidos por
+  `inst/etl/02b-validate.R`).
 
 **Previstos para fases seguintes** (entram no `DESCRIPTION` quando o
 código que os exige aterrissar):
 
 - `Imports`: `purrr`/`stringr`/`vctrs` (helpers internos quando o
-  pipeline genérico ganhar mais peso); `arrow` deixou de ser necessário
+  pipeline genérico ganhar mais peso). `arrow` deixou de ser necessário
   no path padrão porque DuckDB lê Parquet local diretamente.
-- `Suggests`: `pointblank` (validação pre-publish do ETL, **Sessão
-  3.14**), `ggplot2` + `scales` (vignettes ilustrativas, Fase E).
+- `Suggests`: `ggplot2` + `scales` (vignettes ilustrativas, Fase E).
 
 ------------------------------------------------------------------------
 

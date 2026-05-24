@@ -44,6 +44,23 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="cvmdata-010-in-development">cvmdata 0.1.0 (in development)<a class="anchor" aria-label="anchor" href="#cvmdata-010-in-development"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-pending--flips-at-release-tag-0-1-0">Breaking changes (pending — flips at release tag)<a class="anchor" aria-label="anchor" href="#breaking-changes-pending--flips-at-release-tag-0-1-0"></a></h3>
+<ul><li>The default <code>source</code> of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> will flip from <code>"cvm"</code> to <code>"mirror"</code> at the v0.1.0 release tag. Scripts that rely on the implicit default and need byte-level CVM freshness should pass <code>source = "cvm"</code> explicitly or persist the choice with <code>cvm_source_set("cvm")</code> before upgrading.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="etl-and-mirror-0-1-0">ETL and mirror<a class="anchor" aria-label="anchor" href="#etl-and-mirror-0-1-0"></a></h3>
+<ul><li>New stage <code>inst/etl/02b-validate.R</code> runs between csv-to-parquet generation and the GitHub Releases publish. Applies a hybrid set of <code>pointblank</code> checks: structural failures (missing parquet, unreadable file, <code>n_rows == 0</code>, wrong identifier type) exit 1 and block the publish; content failures (CNPJ format, <code>cd_cvm</code> regex, date range) emit a warning and let the publish proceed. The validation markdown report is uploaded as a workflow artifact for post-hoc inspection regardless of outcome.</li>
+<li>
+<code>arrow</code> and <code>pointblank</code> join the <code>Suggests</code> field — both are consumed only by the ETL scripts.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-1-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0"></a></h3>
+<ul><li>New article <code>cache-and-mirror.Rmd</code> (CRAN-safe via bundled RDS) documents the dual-backend contract, the L1 / L3 cache layout, the four common workflows (mirror switch, CVM vs Mirror equivalence, cache inspection, TTL + LRU tuning) and the eight pre-publish checks the mirror ETL runs. Linked from <code>README.Rmd</code> and the pkgdown navbar.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="cvmdata-0009000">cvmdata 0.0.0.9000<a class="anchor" aria-label="anchor" href="#cvmdata-0009000"></a></h2>
 <ul><li>Initial scaffolding.</li>
 <li>First implementation: <code><a href="../reference/cad_fetch.html">cad_fetch()</a></code> for the CAD registry.</li>
@@ -57,7 +74,8 @@
 <li>Public cache API: <code><a href="../reference/cvm_cache_path.html">cvm_cache_path()</a></code>, <code><a href="../reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>, <code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> and <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code>. The internal source backend now consumes <code><a href="../reference/cvm_cache_path.html">cvm_cache_path()</a></code> as the single source of truth for the cache root. <code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> lists every artifact under <code>&lt;cache&gt;/raw/</code> (upstream CSV/ZIP plus CSVs extracted from yearly ZIPs) with ETag/Last-Modified metadata sourced from <code>*.etag.rds</code> sidecars when present. <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> accepts <code>what ∈ c("all", "raw")</code> plus optional <code>dataset</code> and <code>year</code> filters; in interactive sessions it asks for confirmation via <code><a href="https://rdrr.io/r/utils/askYesNo.html" class="external-link">utils::askYesNo()</a></code>.</li>
 <li>Public source API: <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code> and <code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code>. <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code> reads <code>getOption("cvmdata.source", "cvm")</code>; <code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code> validates the value against <code>c("cvm", "mirror")</code> and persists it. <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> now declares <code>source = NULL</code> and resolves the default via <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code>, so precedence is arg &gt; option &gt; built-in default. The built-in default is <code>"cvm"</code> in the v0.1 series and transitions to <code>"mirror"</code> in the release that ships the Phase F mirror; this flip will be announced in NEWS.md of that release. Until then, passing <code>source = "mirror"</code> aborts with <code>cvmdata_error_internal</code> (in-domain value, not yet implemented).</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
