@@ -3,9 +3,9 @@
 
 # cvm_source_get() -------------------------------------------------------
 
-test_that("cvm_source_get() defaults to 'cvm' when option unset", {
+test_that("cvm_source_get() defaults to 'mirror' when option unset", {
   withr::local_options(cvmdata.source = NULL)
-  expect_identical(cvm_source_get(), "cvm")
+  expect_identical(cvm_source_get(), "mirror")
 })
 
 test_that("cvm_source_get() reflects cvmdata.source option override", {
@@ -140,21 +140,11 @@ test_that("cvm_fetch() explicit source argument wins over option", {
   expect_identical(attr(result, "source"), "cvm")
 })
 
-test_that("cvm_fetch() aborts on source='mirror' (stub — Phase F)", {
-  withr::local_options(cvmdata.source = NULL)
-  expect_error(
-    cvm_fetch("dfp", "bpa", source = "mirror"),
-    class = "cvmdata_error_input"
-  )
-})
-
-test_that("cvm_fetch() via cvmdata.source='mirror' aborts identically", {
-  withr::local_options(cvmdata.source = "mirror")
-  expect_error(
-    cvm_fetch("dfp", "bpa"),
-    class = "cvmdata_error_input"
-  )
-})
+# The `source = "mirror"` path (live since the mirror backend landed)
+# is covered end-to-end in test-source-mirror-duckdb.R, which mocks the
+# GitHub API and serves parquet fixtures locally. Here we only verify
+# that arg-vs-option resolution feeds the right backend; the backend
+# itself is exercised there.
 
 test_that("cvm_fetch() aborts on source outside domain", {
   withr::local_options(cvmdata.source = NULL)

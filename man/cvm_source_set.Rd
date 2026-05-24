@@ -7,8 +7,8 @@
 cvm_source_set(source)
 }
 \arguments{
-\item{source}{One of \code{"cvm"} (CVM Open Data Portal) or \code{"mirror"}
-(parquet via DuckDB; available from Phase F).}
+\item{source}{One of \code{"mirror"} (parquet via DuckDB; default from
+v0.1.0) or \code{"cvm"} (CVM Open Data Portal).}
 }
 \value{
 The chosen source, invisibly.
