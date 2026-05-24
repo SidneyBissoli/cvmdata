@@ -280,7 +280,9 @@ roadmap v0.2+.
 ## 3. Convenções de código R
 
 - Pipe: `|>` (nunca `%>%`). `R (>= 4.1)` no `Depends`.
-- Strings: aspas duplas por padrão; `stringr::str_c()` em vez de
+- Strings: aspas duplas por padrão;
+  [`stringr::str_c()`](https://stringr.tidyverse.org/reference/str_c.html)
+  em vez de
   [`paste()`](https://rdrr.io/r/base/paste.html)/[`paste0()`](https://rdrr.io/r/base/paste.html).
 - Indentação 2 espaços, sem tabs.
 - Largura máxima 80 chars (tolerância até 100).
