@@ -31,7 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CVMDATA_ETL_WORKSPACE: ${{ runner.temp }}/cvmdata-etl
+      # runner.* contexts are not allowed at job-level env, only inside
+      # steps. Hardcoding /tmp works on ubuntu-latest and keeps the env
+      # readable across all stages without per-step duplication.
+      CVMDATA_ETL_WORKSPACE: /tmp/cvmdata-etl
     steps:
       - uses: actions/checkout@v4
 
