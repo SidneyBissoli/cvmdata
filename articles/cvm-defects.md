@@ -117,7 +117,7 @@ bpa <- cvm_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:01.418325
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:47:06.798211
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -139,7 +139,7 @@ cvm_fetch("fre", "empregado_PCD",
           companies = "1023", years = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:45:05.00146
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 14:47:09.891677
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
