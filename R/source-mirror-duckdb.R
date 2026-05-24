@@ -37,6 +37,7 @@ source_mirror_duckdb_get <- function(schema, years = NULL,
                        years, report_type)
 
   inventory <- mirror_list_assets(dataset)
+  mirror_l3_validate_hash(dataset, attr(inventory, "source_hash"))
   resolved_years <- resolve_mirror_years(
     inventory, table, years, report_type, partitioning
   )
@@ -276,6 +277,52 @@ mirror_l3_path <- function(dataset, table, year, report_type) {
 mirror_quote_sql <- function(path) {
   normalised <- gsub("\\\\", "/", path, fixed = FALSE)
   sprintf("'%s'", gsub("'", "''", normalised, fixed = TRUE))
+}
+
+# Compare the current release source-hash against the sidecar stored
+# alongside the L3 cache for the dataset. When they differ, evict the
+# entire `<cache>/parquet/<dataset>/` tree before the next read so we
+# never serve stale bytes. The sidecar is then refreshed with the
+# current hash so subsequent calls in this session can short-circuit.
+#
+# - `current_hash = NA_character_` (the release predates the
+#   hash-detection feature) is treated as "do not evict" so users on
+#   older mirrors are not punished with redownloads. The local sidecar
+#   is not refreshed in that case either.
+# - Missing local sidecar with a non-NA current hash is the common
+#   "first call" path: nothing is evicted and the new hash is
+#   recorded.
+mirror_l3_validate_hash <- function(dataset, current_hash) {
+  if (is.null(current_hash) || is.na(current_hash) ||
+        !nzchar(current_hash)) {
+    return(invisible())
+  }
+  dataset_root <- file.path(cvm_cache_path(), "parquet", dataset)
+  sidecar <- file.path(dataset_root, "__source_hash.json")
+
+  if (file.exists(sidecar)) {
+    cached <- tryCatch(
+      readLines(sidecar, warn = FALSE),
+      error = function(e) character(0L)
+    )
+    cached <- if (length(cached)) trimws(paste(cached, collapse = "")) else ""
+    if (identical(cached, current_hash)) {
+      return(invisible())
+    }
+    if (dir.exists(dataset_root)) {
+      unlink(dataset_root, recursive = TRUE, force = TRUE)
+      cli::cli_inform(c(
+        "i" = paste(
+          "Mirror source-hash changed; evicted L3 cache for dataset",
+          "{.val {dataset}}."
+        )
+      ))
+    }
+  }
+
+  ensure_dir(dataset_root)
+  writeLines(current_hash, sidecar)
+  invisible()
 }
 
 # Pretty-print helpers for the error messages — keep `format_chr` and
