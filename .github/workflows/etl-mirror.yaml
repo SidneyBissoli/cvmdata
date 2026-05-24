@@ -49,7 +49,9 @@ jobs:
           needs: check
 
       - name: Install cvmdata from source
-        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = "never")'
+        # `upgrade = "never"` worked on older devtools; current devtools
+        # accepts only TRUE/FALSE/NA.
+        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = FALSE)'
 
       - name: Stage 01 — fetch CVM
         run: |
