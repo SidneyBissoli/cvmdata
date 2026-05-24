@@ -95,7 +95,8 @@ cvm_dataset_years(dataset)           # range de anos com dados publicados
 # Cache
 cvm_cache_path()
 cvm_cache_set_path(path)
-cvm_cache_clear(what = "all", ...)
+cvm_cache_clear(what = c("all", "raw", "parquet"), dataset = NULL,
+                year = NULL, confirm = interactive())
 cvm_cache_info()
 
 # Source
@@ -109,25 +110,37 @@ cnpj_format(x)                # inverso de cnpj_clean — formata 14 dígitos
 
 Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
 
-- `source ∈ c("cvm", "mirror")`. Default em **v0.1 = `"cvm"`** (portal
-  aberto via HTTP, em `dados.cvm.gov.br`). Transiciona para **`"mirror"`**
-  na release que ativar a Fase F (parquet em GitHub Releases consultado
-  via DuckDB com filtros pushdown por companhia/ano antes do download;
-  mirror mantido fresco por workflow semanal `etl-mirror.yaml`). A flip
-  do default é documentada em `NEWS.md` da release correspondente;
-  scripts que precisem de reprodutibilidade entre v0.1 e a release
-  pós-Fase F devem chamar `cvm_source_set("cvm")` antes do primeiro
-  `cvm_fetch()`, ou passar `source = "cvm"` explícito em cada chamada.
+- `source ∈ c("cvm", "mirror")`. **Backend `"mirror"` está funcional
+  desde a Sessão 3.13** (2026-05-24): lê parquets do release
+  `mirror-<dataset>-latest` via API GitHub (inventário cacheado por
+  sessão) + DuckDB local. Pipeline: filter pushdown manual por nome
+  de asset (years/report_type extraídos do encoding
+  `<table>__report_type=R__year=Y__part-0.parquet`, com a
+  sanitização `=` → `.` aplicada pelo GitHub Releases) → download
+  para L3 em `<cache>/parquet/<dataset>/<table>/[report_type=R/]
+  year=Y/part-0.parquet` → DuckDB lê local → reattach de
+  `year`/`report_type` como colunas regulares no tibble (Decisão 2
+  da 3.13 = Alt 1). Cache L3 é invalidado por hash via sidecar
+  `<cache>/parquet/<dataset>/__source_hash.json`, confrontado contra
+  o asset homônimo do release; quando o hash muda, o L3 inteiro do
+  dataset é evicted antes da próxima leitura. Default em
+  **v0.1 = `"cvm"`** (portal aberto via HTTP em `dados.cvm.gov.br`);
+  flip para `"mirror"` ainda atrelado ao release tag v0.1.0,
+  documentado em `NEWS.md` como item breaking. Scripts que precisem
+  de reprodutibilidade entre v0.1 pré-flip e pós-flip devem chamar
+  `cvm_source_set("cvm")` ou passar `source = "cvm"` explícito.
   A precedência é: arg explícito > `getOption("cvmdata.source")` >
-  built-in default. **Decisão tomada na Sessão 3.6** (2026-05-22): Alt 2
-  do trio default-mirror/default-cvm/auto-fallback. Mirror só existe em
-  Fase F; declarar default mirror em v0.1 deixaria o pacote
-  inutilizável out-of-the-box. A "quebra de reprodutibilidade" da flip
-  é controlável via `cvm_source_set()` e pelo atributo `source` que o
-  tibble já carrega via `cvm_attach_metadata()`. A assinatura pública
-  de `cvm_fetch()` declara `source = NULL` para que o option seja
-  consultado dinamicamente — alinhamento com o padrão da família cache
-  (`cvm_cache_path()` ↔ `cvm_cache_set_path()`).
+  built-in default. **Decisão tomada na Sessão 3.6** (2026-05-22):
+  Alt 2 do trio default-mirror/default-cvm/auto-fallback —
+  declarar default mirror em v0.1 antes do release deixaria o
+  pacote inutilizável out-of-the-box; pós-flip (Sessão 3.14 ou tag),
+  mirror passa a ser o default natural por ser ~30× mais rápido. A
+  "quebra de reprodutibilidade" da flip é controlável via
+  `cvm_source_set()` e pelo atributo `source` que o tibble já
+  carrega via `cvm_attach_metadata()`. A assinatura pública de
+  `cvm_fetch()` declara `source = NULL` para que o option seja
+  consultado dinamicamente — alinhamento com o padrão da família
+  cache (`cvm_cache_path()` ↔ `cvm_cache_set_path()`).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
 - `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para tabelas
@@ -316,8 +329,11 @@ cvmdata/
 │   │                              #   cvm_source_get(), cvm_source_set()
 │   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
 │   │                              #   ZIP-yearly) + download_with_etag()
-│   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() — stub Fase F;
-│   │                              #   aborta com instrução até Sessão 3.13
+│   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() funcional
+│   │                              #   (Sessão 3.13): filter pushdown por
+│   │                              #   nome de asset, download → L3, DuckDB
+│   │                              #   read local, reattach year/report_type,
+│   │                              #   hash-based eviction via sidecar
 │   ├── transform-schema.R         # apply_schema_transformations() genérico
 │   │                              #   (multiply_by_scale / drop /
 │   │                              #   keep_latest_version) — substituiu
@@ -327,22 +343,32 @@ cvmdata/
 │   ├── util-csv-cvm.R             # read_cvm_csv() + validate_field_count() +
 │   │                              #   validate_field_names() + emit_validation()
 │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
+│   ├── util-mirror-assets.R       # mirror_list_assets() (inventário GitHub
+│   │                              #   API cacheado por sessão) +
+│   │                              #   parse_mirror_asset_name() (tolera = e .)
+│   │                              #   + filter_mirror_assets() — Sessão 3.13
 │   └── util-print-cvm-tbl.R       # print.cvm_tbl()
 ├── man/                           # auto-gerado
 ├── tests/
 │   ├── testthat.R
 │   └── testthat/
 │       ├── fixtures/              # CSV/ZIP de amostra (cad_sample.csv +
-│       │                          #   dfp/itr/fre cia_aberta_2024.zip)
+│       │                          #   dfp/itr/fre cia_aberta_2024.zip) +
+│       │                          #   parquet mini-fixtures mirror-*.parquet
+│       │                          #   gerados por data-raw/build-mirror-test-
+│       │                          #   fixtures.R (Sessão 3.13)
 │       ├── _snaps/
 │       ├── helper-*.R
-│       └── test-*.R               # ~13 arquivos, mock HTTP via httptest2
+│       └── test-*.R               # ~15 arquivos, mock HTTP via httr2
+│                                  #   with_mocked_responses + httptest2
 ├── inst/
 │   ├── etl/                       # ETL do mirror (rodado por etl-mirror.yaml)
 │   │   ├── 00-config.R            # constantes + helpers compartilhados
 │   │   ├── 01-fetch-cvm.R         # baixa ZIPs anuais do portal CVM
 │   │   ├── 02-csv-to-parquet.R    # converte CSV → parquet particionado por ano
-│   │   └── 03-publish.R           # hash-detection + publica em GitHub Releases
+│   │   ├── 03-publish.R           # hash-detection + publica em GitHub Releases
+│   │   └── util-hash.R            # compute_source_hash(dataset) consumido por
+│   │                              #   03-publish.R (Sessão 3.12)
 │   └── extdata/
 │       ├── schemas/<dataset>/<table>.yaml
 │       ├── cvm_dictionary_snapshot.csv
@@ -559,41 +585,65 @@ Cache em `tools::R_user_dir("cvmdata", which = "cache")`.
 
 Níveis:
 
-- L1: ZIP raw da CVM (`raw/<dataset>/`)
-- L3: Parquet transformado (`parquet/<dataset>/<table>/year=<ano>/`)
-- L4: tibble em memória da sessão (`cachem::cache_mem()`, 50 MB)
+- L1: ZIP raw da CVM (`<cache>/raw/<dataset>/[<year>/]`). Cobre CAD
+  (CSV direto) e DFP/ITR/FRE (ZIP yearly). Sidecar
+  `*.etag.rds` carrega ETag/Last-Modified/`fetched_at`.
+- L3: Parquet do mirror (`<cache>/parquet/<dataset>/<table>/
+  [report_type=R/]year=Y/part-0.parquet`). Sidecar
+  `<cache>/parquet/<dataset>/__source_hash.json` armazena o
+  SHA-256 do release atual para invalidação. Ativado de fato na
+  **Sessão 3.13**.
+- L4: tibble em memória da sessão (`cachem::cache_mem()`, 50 MB —
+  planejado, ainda não implementado em v0.1).
 
 L2 (CSV descompactado) **não** é usado.
 
 Invalidação:
 
-- HEAD HTTP em `cvm_dictionary_url`/`cvm_file_url_pattern` antes de
-  servir cache; comparar ETag/Last-Modified.
-- **TTL default 30 dias** via `options(cvmdata.cache_ttl_seconds)`
-  (imposto na Sessão 3.7). Dentro da janela, `download_with_etag()`
-  retorna o `dest_path` sem HEAD nem GET — economiza round-trip
-  quando o ZIP anual já está em cache local fresco. Valores
-  especiais: `0` = sempre HEAD (comportamento legado); `Inf` = nunca
-  HEAD enquanto o sidecar existir. Sidecar sem `fetched_at`
-  parseável (legado ou corrompido) cai para HEAD para refrescar
-  metadados.
-- `cvm_cache_clear()` manual.
+- **L1**: HEAD HTTP em `cvm_dictionary_url`/`cvm_file_url_pattern`
+  antes de servir cache, comparando ETag/Last-Modified. TTL default
+  30 dias via `options(cvmdata.cache_ttl_seconds)` (imposto na
+  Sessão 3.7). Dentro da janela, `download_with_etag()` retorna o
+  `dest_path` sem HEAD nem GET. Valores especiais: `0` = sempre
+  HEAD; `Inf` = nunca HEAD enquanto o sidecar existir; sidecar sem
+  `fetched_at` parseável cai para HEAD para refrescar metadados.
+- **L3**: comparação de hash via sidecar
+  `<cache>/parquet/<dataset>/__source_hash.json` contra o asset
+  `__source_hash.json` do release `mirror-<dataset>-latest` (a API
+  GitHub é consultada em `mirror_list_assets()` no início de cada
+  `cvm_fetch(..., source = "mirror")`). Hash igual → no-op; hash
+  diferente → `unlink(<cache>/parquet/<dataset>/)` antes da próxima
+  leitura. Hash `NA` (release antigo sem o sidecar publicado) →
+  L3 preservado por respeito a mirrors legados. Não há TTL no L3:
+  invalidação é exclusivamente content-addressed.
+- `cvm_cache_clear()` manual aceita
+  `what ∈ c("all", "raw", "parquet")` (extensão da Sessão 3.13).
+  `what = "parquet"` rejeita `year` porque o layout L3 aninha year
+  sob table — passar `dataset` sozinho evict o dataset inteiro;
+  para granularidade year-level, usar `what = "raw"`.
 
 Fallback hierárquico depende de `source`:
 
-- `source = "mirror"` (default): L4 (memória) → L3 (parquet local) →
-  Mirror GitHub Releases (DuckDB HTTP range requests, com filtros
-  pushdown por companhia/ano antes do download) → erro.
-- `source = "cvm"`: L4 (memória) → L1 (ZIP raw em disco) →
-  CVM HTTP → erro.
+- `source = "mirror"` (default pós-flip): L4 (planejado) → L3
+  (parquet local) → Mirror GitHub Releases (filter pushdown manual
+  por nome de asset → download → DuckDB lê local) → erro.
+- `source = "cvm"` (default em v0.1 pré-flip): L4 (planejado) → L1
+  (ZIP raw em disco) → CVM HTTP → erro.
 
-**Mirror parquet ativado em v0.1, não adiado.** Workflow semanal
-(`etl-mirror.yaml`, cron `0 7 * * 2`) valida o mirror contra a CVM e
-republica em caso de divergência (detecção via hash de `meta_*.txt` +
-`dictionary_entry_inventory.json` — Rodada 3.0.2 §4.3). Volume estimado
-para companhias abertas (CAD + DFP + ITR + FRE em parquet comprimido)
-≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo,
-100 GB por release).
+**Mirror parquet ativado em v0.1.** Workflow semanal
+(`etl-mirror.yaml`, cron `0 7 * * 2`) executa matrix paralela de 4
+datasets (`fail-fast: false`); cada job roda `01-fetch-cvm.R` →
+`02-csv-to-parquet.R` → `03-publish.R`. O publish detecta mudança
+via hash SHA-256 das URLs de `cvm_dictionary_url` (`util-hash.R`,
+Sessão 3.12) e skipa republish quando o hash bate o do release
+anterior. Volume estimado para companhias abertas (CAD + DFP + ITR
++ FRE em parquet snappy) ≈ 3 GB, cabe folgado em GitHub Releases
+(limite 2 GB por arquivo, 100 GB por release). Encoding dos asset
+names: `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style
+achatado por `gsub("[/\\\\]", "__", rel)` em `03-publish.R`); o
+GitHub Releases sanitiza `=` → `.` no URL público, e o reader
+(`parse_mirror_asset_name()` em `R/util-mirror-assets.R`) tolera
+ambos os encodings.
 
 Limite default 100 MiB, configurável via
 `options(cvmdata.cache_max_size_mb = ...)` — imposto na Sessão 3.8.
@@ -746,18 +796,26 @@ Notas:
 
 **Estado atual** (vide `DESCRIPTION`):
 
-- `Imports`: `cli`, `httr2`, `readr`, `rlang`, `tibble`, `yaml`.
-- `Suggests`: `covr`, `dplyr`, `httptest2`, `knitr`, `lintr`,
-  `pkgdown`, `rmarkdown`, `styler`, `testthat (>= 3.0.0)`, `withr`.
+- `Imports`: `cli`, `DBI`, `duckdb`, `httr2`, `readr`, `rlang`,
+  `tibble`, `yaml`. `DBI` + `duckdb` entraram na **Sessão 3.13**
+  (backend `source = "mirror"`).
+- `Suggests`: `covr`, `digest`, `dplyr`, `httptest2`, `jsonlite`,
+  `knitr`, `lintr`, `pkgdown`, `rmarkdown`, `styler`,
+  `testthat (>= 3.0.0)`, `withr`. `digest` + `jsonlite` são
+  consumidos pelo ETL (`inst/etl/util-hash.R`); no path de leitura
+  do usuário, `mirror_list_assets()` usa `jsonlite` indiretamente
+  via `httr2::resp_body_json()`.
 
 **Previstos para fases seguintes** (entram no `DESCRIPTION` quando o
 código que os exige aterrissar):
 
-- `Imports`: `arrow` + `duckdb` (cache L3 Parquet + mirror DuckDB,
-  Fase F), `purrr`/`stringr`/`vctrs` (helpers internos quando o
-  pipeline genérico ganhar mais peso).
-- `Suggests`: `pointblank` (validação pre-publish do ETL, Fase F),
-  `ggplot2` + `scales` (vignettes ilustrativas, Fase E).
+- `Imports`: `purrr`/`stringr`/`vctrs` (helpers internos quando o
+  pipeline genérico ganhar mais peso); `arrow` deixou de ser
+  necessário no path padrão porque DuckDB lê Parquet local
+  diretamente.
+- `Suggests`: `pointblank` (validação pre-publish do ETL,
+  **Sessão 3.14**), `ggplot2` + `scales` (vignettes ilustrativas,
+  Fase E).
 
 ---
 
