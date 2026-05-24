@@ -342,33 +342,47 @@ Decisões de arquitetura travadas na Sessão 3.11
 - **Formato**: parquet snappy + Hive-style `year=YYYY/` (compatível
   com `arrow::open_dataset()` e DuckDB filter pushdown).
 
-Itens entregues nesta sessão:
+Itens entregues:
 
-- [~] Scripts ETL em `inst/etl/`: `00-config.R`, `01-fetch-cvm.R`,
+- [x] Scripts ETL em `inst/etl/`: `00-config.R`, `01-fetch-cvm.R`,
   `02-csv-to-parquet.R`, `03-publish.R`. Pipeline completo
   (fetch → parquet → upload via `gh release`) idempotente; suporta
-  variants `report_type` (ind/con) em DFP/ITR contábeis.
-- [~] Workflow `.github/workflows/etl-mirror.yaml` com trigger
-  `workflow_dispatch` apenas (smoke test de 1 dataset / 1 ano).
-  Cron `0 7 * * 2` fica para Sessão 3.12.
+  variants `report_type` (ind/con) em DFP/ITR contábeis. Entregue na
+  Sessão 3.11.
+- [x] Workflow `.github/workflows/etl-mirror.yaml` com trigger
+  `workflow_dispatch` (Sessão 3.11) + cron `0 7 * * 2` e matrix de
+  4 datasets com `fail-fast: false` (Sessão 3.12).
 - [x] `R/source-mirror-duckdb.R` criado como stub. Bloco
   `source = "mirror"` em `cvm_fetch_internal()` agora delega para
   `source_mirror_duckdb_get()`; classe trocada de
   `cvmdata_error_internal` para `cvmdata_error_input` com mensagem
-  acionável apontando para `cvm_source_set("cvm")`.
+  acionável apontando para `cvm_source_set("cvm")`. Sessão 3.11.
+- [x] Detecção de mudança via hash SHA-256 das URLs de
+  `cvm_dictionary_url` (meta_*.txt e fragmentos de
+  meta_*_txt.zip). `inst/etl/util-hash.R` traz
+  `compute_source_hash(dataset)`; `03-publish.R` baixa o
+  `__source_hash.json` do release anterior, compara, e skipa publish
+  quando o hash bate. Sessão 3.12.
+- [x] Primeiro bulk publish do v0.1 (cad + dfp + itr + fre) via
+  dispatch manual do workflow exercitando matrix completa.
+  Sessão 3.12.
+- [-] Snapshots datados imutáveis (`mirror-<dataset>-snapshot-YYYY-MM-DD`)
+  ficam para releases do pacote (v0.1.0+), não para o cron semanal.
+  Decisão da Sessão 3.12: 26 GB/snapshot × 52/ano = pagar storage por
+  reprodutibilidade que ninguém pede em cadência semanal; vignette/paper
+  fixam release de pacote, não data arbitrária. Cron mantém só
+  `latest`. Helper `mirror_tag_snapshot()` em `00-config.R` continua
+  pronto para o uso manual em releases.
 
-Itens pendentes para Sessões 3.12-3.14:
+Itens pendentes para Sessões 3.13-3.14:
 
-- [ ] Cron real (`0 7 * * 2`) no workflow após smoke test bem-sucedido.
-- [ ] Detecção de mudança via hash de `meta_*.txt` +
-  `dictionary_entry_inventory.json` (defesa em profundidade
-  contra mudanças silenciosas; Rodada 3.0.2 §4.3).
 - [ ] Validação pre-publish com `pointblank`.
-- [ ] Primeiro snapshot publicado em GitHub Releases.
 - [ ] `source-mirror-duckdb.R` funcional (DuckDB HTTP range requests
   com filter pushdown por `year` + `companies`); stub atual aborta com
-  `cvmdata_error_input`.
-- [ ] Vignette `cache-and-mirror.Rmd`.
+  `cvmdata_error_input`. Sessão 3.13.
+- [ ] Vignette `cache-and-mirror.Rmd`. Sessão 3.14.
+- [ ] Flip do default de `source` de `"cvm"` para `"mirror"`.
+  Sessão 3.14 (ou início v0.1.0).
 
 ### Marco — release v0.1.0
 
