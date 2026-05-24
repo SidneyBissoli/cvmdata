@@ -38,6 +38,7 @@ Imports:
     tibble,
     yaml
 Suggests:
+    arrow,
     covr,
     digest,
     dplyr,
@@ -46,6 +47,7 @@ Suggests:
     knitr,
     lintr,
     pkgdown,
+    pointblank,
     rmarkdown,
     styler,
     testthat (>= 3.0.0),
