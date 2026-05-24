@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/SidneyBissoli/cvmdata/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/SidneyBissoli/cvmdata/blob/mirror-dfp-latest/DESCRIPTION)
 
 Bissoli S (2026). *cvmdata: Tidy Access to Brazilian CVM Open Data*. R
 package version 0.0.0.9000, <https://github.com/SidneyBissoli/cvmdata>.
