@@ -46,7 +46,7 @@ bb_bpa <- cvm_fetch(
   years       = 2024
 )
 bb_bpa
-#> ℹ source: "mirror" | fetched_at: 2026-05-24 17:20:40.119811
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 20:34:45.046659
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -160,7 +160,7 @@ cap <- cvm_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "mirror" | fetched_at: 2026-05-24 17:20:44.646528
+#> ℹ source: "mirror" | fetched_at: 2026-05-24 20:34:49.922132
 #> ℹ dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 1 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
@@ -273,10 +273,10 @@ info
 #> # A tibble: 4 × 7
 #>   dataset file          path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>         <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 dfp     dfp_cia_aber… /hom…     182978 2026-05-24 17:20:44  NA   NA           
-#> 2 dfp     dfp_cia_aber… /hom…   13395083 2026-05-24 17:20:44 "\"6… Sun, 24 May …
-#> 3 fre     fre_cia_aber… /hom…    1085173 2026-05-24 17:20:36  NA   NA           
-#> 4 fre     fre_cia_aber… /hom…    8408826 2026-05-24 17:20:36 "\"6… Sun, 24 May …
+#> 1 dfp     dfp_cia_aber… /hom…     182978 2026-05-24 20:34:49  NA   NA           
+#> 2 dfp     dfp_cia_aber… /hom…   13395083 2026-05-24 20:34:49 "\"6… Sun, 24 May …
+#> 3 fre     fre_cia_aber… /hom…    1085173 2026-05-24 20:34:41  NA   NA           
+#> 4 fre     fre_cia_aber… /hom…    8408826 2026-05-24 20:34:41 "\"6… Sun, 24 May …
 attr(info, "total_size_bytes")
 #> [1] 23072430
 ```

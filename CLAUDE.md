@@ -377,7 +377,7 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │       │                          #   fixtures.R (Sessão 3.13)
     │       ├── _snaps/
     │       ├── helper-*.R
-    │       └── test-*.R               # ~15 arquivos, mock HTTP via httr2
+    │       └── test-*.R               # ~17 arquivos, mock HTTP via httr2
     │                                  #   with_mocked_responses + httptest2
     ├── inst/
     │   ├── etl/                       # ETL do mirror (rodado por etl-mirror.yaml)
@@ -398,7 +398,16 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │       ├── cvm_dictionary_snapshot.csv
     │       ├── cvm_codelists_snapshot.csv
     │       └── vignette-data/         # dados pré-computados para vignettes
-    ├── data-raw/                      # scripts geradores (out of tarball)
+    ├── data-raw/                      # out of tarball; mistura build scripts
+    │                                  #   (build-dictionary-snapshot.R,
+    │                                  #   build-codelists-snapshot.R,
+    │                                  #   build-mirror-test-fixtures.R,
+    │                                  #   build-vignette-data.R) com auditorias
+    │                                  #   one-shot (run-capacity-audit.R,
+    │                                  #   validate-mirror-end-to-end.R,
+    │                                  #   mirror-capacity-audit.md). Apenas os
+    │                                  #   build scripts são regenerados em ciclo
+    │                                  #   normal (vide §12.1).
     ├── vignettes/
     ├── pkgdown/                       # _pkgdown.yml + assets do site
     ├── .github/workflows/             # R-CMD-check, test-coverage, lint,
@@ -406,7 +415,7 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     └── ...
 
 Mapeamento agrupamento → prefixo: `api-`, `schema-`, `source-`,
-`transform-`, `dispatch-`, `validate-`, `util-`.
+`transform-`, `util-`.
 
 ------------------------------------------------------------------------
 
