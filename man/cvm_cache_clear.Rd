@@ -52,9 +52,9 @@ cvm_cache_clear(what = "raw")
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other cache: 
-\code{\link{cvm_cache_info}()},
-\code{\link{cvm_cache_path}()},
-\code{\link{cvm_cache_set_path}()}
+Other cache:
+\code{\link[=cvm_cache_info]{cvm_cache_info()}},
+\code{\link[=cvm_cache_path]{cvm_cache_path()}},
+\code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}
 }
 \concept{cache}

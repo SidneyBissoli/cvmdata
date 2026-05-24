@@ -18,10 +18,10 @@ covered. Discovered from the schemas installed under
 cvm_datasets()
 }
 \seealso{
-Other discovery: 
-\code{\link{cvm_codelist}()},
-\code{\link{cvm_dataset_years}()},
-\code{\link{cvm_dictionary}()},
-\code{\link{cvm_tables}()}
+Other discovery:
+\code{\link[=cvm_codelist]{cvm_codelist()}},
+\code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
+\code{\link[=cvm_dictionary]{cvm_dictionary()}},
+\code{\link[=cvm_tables]{cvm_tables()}}
 }
 \concept{discovery}

@@ -43,9 +43,9 @@ See \code{\link[=cvm_cache_path]{cvm_cache_path()}} for the option's semantics.
 cvm_cache_info()
 }
 \seealso{
-Other cache: 
-\code{\link{cvm_cache_clear}()},
-\code{\link{cvm_cache_path}()},
-\code{\link{cvm_cache_set_path}()}
+Other cache:
+\code{\link[=cvm_cache_clear]{cvm_cache_clear()}},
+\code{\link[=cvm_cache_path]{cvm_cache_path()}},
+\code{\link[=cvm_cache_set_path]{cvm_cache_set_path()}}
 }
 \concept{cache}
