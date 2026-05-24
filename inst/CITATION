@@ -1,0 +1,13 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "{cvmdata}: Tidy Access to Brazilian CVM Open Data",
+  author   = person(
+    given   = "Sidney da Silva Pereira",
+    family  = "Bissoli",
+    email   = "sbissoli76@gmail.com",
+    comment = c(ORCID = "0009-0001-0442-3700")
+  ),
+  year     = format(Sys.Date(), "%Y"),
+  note     = sprintf("R package version %s", meta$Version),
+  url      = "https://sidneybissoli.github.io/cvmdata/"
+)
