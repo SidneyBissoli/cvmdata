@@ -67,6 +67,20 @@ cli::cli_alert_info(
 )
 bb_bpa_sample <- slice_cvm_tbl(bb_bpa, 8L)
 
+cli::cli_h1("Capturing CVM vs Mirror equivalence table")
+# Reuses the table produced by data-raw/validate-mirror-end-to-end.R.
+# Generating it here would require a second cross-backend run and that
+# script is already the source of truth for the comparison.
+cmp_src <- "data-raw/validate-mirror-end-to-end.rds"
+cvm_vs_mirror <- if (file.exists(cmp_src)) {
+  readRDS(cmp_src)
+} else {
+  cli::cli_alert_warning(
+    "{.path {cmp_src}} missing — run validate-mirror-end-to-end.R first."
+  )
+  NULL
+}
+
 if (write_mode) {
   cad_path <- file.path(out_dir, "cad_companhias_sample.rds")
   bb_path  <- file.path(out_dir, "dfp_bpa_bb_2024_sample.rds")
@@ -78,6 +92,16 @@ if (write_mode) {
   cli::cli_alert_success(
     "Wrote {.path {bb_path}} ({file.size(bb_path)} bytes)"
   )
+
+  cm_dir <- file.path(out_dir, "cache-and-mirror")
+  if (!dir.exists(cm_dir)) dir.create(cm_dir, recursive = TRUE)
+  if (!is.null(cvm_vs_mirror)) {
+    cm_path <- file.path(cm_dir, "cvm-vs-mirror.rds")
+    saveRDS(cvm_vs_mirror, cm_path, version = 2L)
+    cli::cli_alert_success(
+      "Wrote {.path {cm_path}} ({file.size(cm_path)} bytes)"
+    )
+  }
 } else {
   cli::cli_alert_info(
     "Dry run. Re-run with {.code --write} to persist the RDS files."
