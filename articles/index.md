@@ -13,5 +13,7 @@
   DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
 - [Reference Form
   (FRE)](https://sidneybissoli.github.io/cvmdata/articles/fre.md):
+- [Cache and mirror
+  backend](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.md):
 - [Known defects of the CVM
   publication](https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.md):

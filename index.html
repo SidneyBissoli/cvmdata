@@ -41,6 +41,7 @@
     <li><a class="dropdown-item" href="articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
     <li><a class="dropdown-item" href="articles/cvm-defects.html">Known defects of the CVM publication</a></li>
   </ul>
 </li>
@@ -264,7 +265,7 @@ varchar
 <li>
 <strong>Cache</strong> — <code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code>, <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>, <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code>, <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code>. The TTL window for HTTP revalidation is configurable via <code>options(cvmdata.cache_ttl_seconds)</code> (default 30 days).</li>
 <li>
-<strong>Source backend</strong> — <code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code>, <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code>.</li>
+<strong>Source backend</strong> — <code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code>, <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code>. The cache/mirror integration is documented in detail in the <a href="https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html">cache-and-mirror</a> article.</li>
 <li>
 <strong>Utilities</strong> — <code><a href="reference/cnpj_clean.html">cnpj_clean()</a></code>, <code><a href="reference/cnpj_format.html">cnpj_format()</a></code>.</li>
 </ul>

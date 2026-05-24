@@ -147,6 +147,9 @@ The exported API is grouped into five families:
 - **Source backend** —
   [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md),
   [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
+  The cache/mirror integration is documented in detail in the
+  [cache-and-mirror](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html)
+  article.
 - **Utilities** —
   [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
   [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
@@ -279,5 +282,7 @@ CNPJ formatting helpers.
   DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
 - [Reference Form
   (FRE)](https://sidneybissoli.github.io/cvmdata/articles/fre.md):
+- [Cache and mirror
+  backend](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.md):
 - [Known defects of the CVM
   publication](https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.md):
