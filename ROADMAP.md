@@ -1,7 +1,8 @@
 # ROADMAP — cvmdata
 
-Plano de execução organizado por fases (não por datas). Rastreia o
-progresso sessão a sessão.
+Plano de execução por fases. Lista o que precisa ser entregue. O “como”
+e o “quando” vivem em `CLAUDE.md`, `NEWS.md`, commits e nos documentos
+canônicos da fase de planejamento.
 
 = entregue
 
@@ -9,645 +10,208 @@ progresso sessão a sessão.
 
 = pendente
 
-\[-\] = descartado (anotado para preservar histórico da decisão)
+\[-\] = descartado
 
 ------------------------------------------------------------------------
 
 ## Pré-v0.1 (companhias abertas — Resolução CVM 80/22)
 
-### Fase A — Esqueleto (8-12h)
+### Fase A — Esqueleto
 
 Inicialização do pacote (`DESCRIPTION`, `NAMESPACE`, `LICENSE`,
 `LICENSE.md`).
 
 Estrutura de diretórios (`R/` flat com prefixos hífen;
-`tests/testthat/`, `inst/extdata/schemas/cad/`, `data-raw/`,
-`vignettes/`, `.github/workflows/`).
+`tests/testthat/`, `inst/extdata/schemas/`, `data-raw/`, `vignettes/`,
+`.github/workflows/`).
 
-`NEWS.md` inicial (formato `# cvmdata 0.0.0.9000`).
+`NEWS.md` inicial.
 
-`README.Rmd` com badges + `README.md` renderizado.
+`README.Rmd` + `README.md` com badges.
 
-`CLAUDE.md` (contexto persistente) e `ROADMAP.md` (este arquivo).
+`README.pt-BR.Rmd` + `README.pt-BR.md`.
 
-Workflow `R-CMD-check.yaml` (matriz r-lib check-standard: macOS release
-/ Windows release / Ubuntu devel-release-oldrel1).
+`CLAUDE.md` e `ROADMAP.md`.
 
 `.lintr` config travada (linha 80, snake_case, cyclocomp ≤ 20).
 
-`.Rbuildignore` e `.gitignore` (incluindo `.claude/` e `memory/`).
+`.Rbuildignore` e `.gitignore`.
 
-Workflow `test-coverage.yaml` — Sessão 3.7. Usa
-`codecov/codecov-action@v4` com `CODECOV_TOKEN` secret (Alt 1 do trio
-codecov-oficial/artifact). Badge já existe em README.Rmd apontando para
-`app.codecov.io/gh/SidneyBissoli/cvmdata` — primeiro run real do
-workflow precisa do token criado em codecov.io.
+Workflow `R-CMD-check.yaml` (matriz macOS release / Windows release /
+Ubuntu devel-release-oldrel1).
 
-Workflow `lint.yaml` — Sessão 3.7. Roda
-[`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html)
-com `LINTR_ERROR_ON_LINT=true` (PR falha em qualquer divergência de
-`.lintr`).
+Workflow `test-coverage.yaml`.
 
-Workflow `pkgdown.yaml` — Sessão 3.7. Deploy via
-`JamesIves/github-pages-deploy-action@v4.5.0` na branch órfã `gh-pages`
-(Alt 1 do par branch/actions-deploy-pages, padrão
-[`usethis::use_pkgdown_github_pages()`](https://usethis.r-lib.org/reference/use_pkgdown.html)).
-Site em `https://sidneybissoli.github.io/cvmdata/` após primeiro push.
+Workflow `lint.yaml`.
 
-`pkgdown/_pkgdown.yml` configurado — Sessão 3.7. 5 famílias (`fetchers`,
-`cache`, `source`, `discovery`, `utilities`) agrupando as 14 funções
-exportadas até a 3.6.
+Workflow `pkgdown.yaml` + `pkgdown/_pkgdown.yml`.
 
-`CODE_OF_CONDUCT.md` e `CONTRIBUTING.md` — Sessão 3.10. Contributor
-Covenant 2.1 (canônico, sem desvios) com endpoint de report
-`sbissoli76@gmail.com` (Alt 1 do trio email-pessoal/issue-
-tracker/email-dedicado; mesmo email já público em `Authors@R`).
-`CONTRIBUTING.md` médio (~150 linhas, Alt 2 do trio mínimo/médio/
-completo): Reporting issues, Submitting a PR, Development setup, Quality
-gate (comandos literais), Adding/modifying schema YAML (formato mínimo +
-ações de `transformations`), Project goals. README.Rmd ganhou seção
-`Contributing` com paragrafo padrão rOpenSci/usethis apontando para
-ambos; pkgdown 2.x detecta CoC/ CONTRIBUTING automaticamente no navbar.
+`CODE_OF_CONDUCT.md` e `CONTRIBUTING.md`.
 
-### Fase B — Cache + source CVM (16-20h)
+### Fase B — Cache + source CVM
 
-[`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md),
+Família cache pública
+([`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md),
 [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md),
 [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md),
-[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
-(família pública) — entregues na Sessão 3.5 em `R/cache.R`.
-`source-cvm-http.R` passou a consumir
-[`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
-como single source of truth para a raiz do cache.
-[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
-lista upstream artifacts + CSVs extraídos como linhas separadas, com
-etag/last_modified vindo dos sidecars `*.etag.rds` quando presentes.
-[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
-aceita `what ∈ c("all", "raw")` + filtros opcionais `dataset` e `year`;
-`confirm = interactive()` pede confirmação via
-[`utils::askYesNo()`](https://rdrr.io/r/utils/askYesNo.html) em sessão
-interativa, apaga direto em batch.
+[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)).
 
-\[~\] L1 (raw) implementado para CSV direto (Sessão 01) e para ZIP
-(Sessão 02, em `<cache>/raw/<dataset>/<year>/`). Falta L3 (Parquet, Fase
-F) e L4
-([`cachem::cache_mem()`](https://cachem.r-lib.org/reference/cache_mem.html)).
+Cache L1 (raw) para CSV direto e ZIP yearly.
 
-Invalidação por ETag/Last-Modified implementada (sidecar RDS), estendida
-para ZIPs anuais na Sessão 02. TTL imposto na Sessão 3.7 via
-`options(cvmdata.cache_ttl_seconds)` (default 30 dias = 2 592 000 s; `0`
-força HEAD em toda chamada; `Inf` desliga HEAD enquanto o sidecar
-existir; sidecar sem `fetched_at` parseável cai para HEAD para refrescar
-metadados).
+Invalidação por ETag/Last-Modified com TTL configurável.
 
-Limite de tamanho via `options(cvmdata.cache_max_size_mb)` e eviction
-LRU quando atinge 90% — Sessão 3.8. Default 100 MiB. Engine em
-`R/cache.R` (`read_cache_max_size()`, `build_cache_units()`,
-`cache_current_size_bytes()`, `cache_enforce_limit()`); trigger
-amortizado em `download_with_etag()` no ramo que grava bytes (TTL/304
-fast paths pulam). Métrica de ordenação
-[`file.mtime()`](https://rdrr.io/r/base/file.info.html) do upstream
-artifact (Alt 1 da decisão 1); escopo todo o conteúdo de `<cache>/raw/`
-com unidade atômica = diretório do ano (yearly) ou par
-`{artifact, sidecar}` (none) (Alt 2 da decisão 2); gatilho após
-gravação + target 80% (Alt 1 da decisão 3). Limite `0`/negativo/ `Inf`
-desliga; tipo inválido cai para default. Observabilidade via
-`cvmdata_warn_eviction` (nova classe em §6 do CLAUDE.md), default
-[`interactive()`](https://rdrr.io/r/base/interactive.html) via
-`options(cvmdata.cache_warn_evictions)` (Alt 3 da decisão 5). Atributo
-`total_size_bytes` adicionado a
-[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
-(Alt 1 da decisão 4). Sem export novo (Alt 1 da decisão 6).
+Limite de tamanho + eviction LRU.
 
-`source_cvm_http_get()` para CSV direto (Sessão 01) e ZIP-yearly (Sessão
-02, com extração do CSV alvo via `report_type`).
+`source_cvm_http_get()` para CSV direto e ZIP yearly.
 
 [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
 /
-[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-— entregues na Sessão 3.6 em `R/source.R`.
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-agora declara `source = NULL` e resolve via
-[`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
-(precedência: arg \> option \> default). Default era `"cvm"` na faixa
-Sessão 3.6 → 3.14; **flipado para `"mirror"` no tag v0.1.0** (Sessão
-Marco, 2026-05-24). Backend `"mirror"` ficou funcional na Sessão 3.13 e
-o flip do default passou a ser uma decisão de release, não de
-implementação.
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
 
-Suite de testes mockados de HTTP via
-[`httr2::with_mocked_responses`](https://httr2.r-lib.org/reference/with_mocked_responses.html)
-(com `httptest2` em Suggests para uso futuro).
+Suite de testes mockados de HTTP.
 
-### Fase C — Dispatch + schemas (24-32h)
+### Fase C — Dispatch + schemas
 
-`load_schema(dataset, table)` parser do YAML com validações (mutual
-exclusion de URLs e de `cvm_file_pattern` vs
-`cvm_file_pattern_variants`; `meta_status: missing` exige
-`expected_field_names`; `temporal_partitioning ∈ {none, yearly}` com
-`first_year` obrigatório quando yearly; chaves de variants restritas a
-`ind`/`con`).
+`load_schema(dataset, table)` com validações.
 
-\[-\] `dispatch_class(dataset)` (companies → futures funds) —
-descartado. Pipeline genérico em `cvm_fetch_internal()` + schema YAML
-por tabela torna o dispatch desnecessário; quando fundos entrarem, basta
-novo dataset id e novos YAMLs.
+\[-\] `dispatch_class(dataset)` — pipeline genérico + YAML por tabela
+tornou desnecessário.
 
-\[-\] `dispatch_table(dataset, table)` — descartado pelo mesmo motivo.
-Sessão 02 substituiu o [`switch()`](https://rdrr.io/r/base/switch.html)
-por `apply_schema_transformations()` dirigido pelo YAML.
+\[-\] `dispatch_table(dataset, table)` — idem.
 
-YAML para CAD/companhias em `inst/extdata/schemas/cad/`
-(`expected_field_count` corrigido para 47 vs protótipo 46;
-`transformations: []` explicitado na Sessão 02).
+YAML CAD/companhias.
 
-YAMLs para DFP (11 tabelas conceituais, Sessão 02: `submissao`, `bpa`,
-`bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`,
-`composicao_capital`, `parecer`). As 8 com variantes ind/con usam
-`cvm_file_pattern_variants`.
+YAMLs DFP (11 tabelas).
 
-YAMLs para ITR (mesmo set que DFP — pipeline reusa
-`cvm_file_pattern_variants`) — Sessão 03.
+YAMLs ITR (11 tabelas).
 
-YAMLs para FRE (36 tabelas incluindo `submissao` + 8 com
-`meta_status: missing`) — Sessão 03.2.
+YAMLs FRE (36 tabelas, 8 com `meta_status: missing`).
 
 Geração programática dos YAMLs restantes a partir do snapshot de
 dicionário.
 
-Snapshot de dicionário `cvm_dictionary_snapshot.csv` em `inst/extdata/`
-(865 linhas cobrindo 51 tabelas com META oficial + 8 FRE-detail
-`meta_status: missing` com placeholders). Gerador reprodutível em
-`data-raw/build-dictionary-snapshot.R`.
+`cvm_dictionary_snapshot.csv` + gerador em `data-raw/`.
 
-Snapshot de codelists `cvm_codelists_snapshot.csv` em `inst/extdata/`
-(445 valores em 133 colunas codelist sobre 46 tabelas: 46 do dicionário
-S/N+PF/PJ + 87 promovidas por cardinalidade observada ≤ 50 no último ano
-disponível). Gerador reprodutível em
-`data-raw/build-codelists-snapshot.R`.
+`cvm_codelists_snapshot.csv` + gerador em `data-raw/`.
 
-### Fase D — CAD + ITR ponta-a-ponta (20-28h)
-
-**Sessão 01**:
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-ponta-a-ponta — concluída.
-
-YAML CAD em `inst/extdata/schemas/cad/companhias.yaml`.
-
-`load_schema()` mínimo.
-
-`source_cvm_http_get()` para CSV direto (sem ZIP).
-
-`read_cvm_csv()` com regra de identificadores → character e heurística
-de Date interim (`dt_*`/`data_*`).
-
-`transform_cad()` (tolower colnames).
-
-`cvm_fetch_internal()` orquestrador não-exportado.
+### Fase D — Datasets ponta-a-ponta
 
 [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-API pública.
+ponta-a-ponta.
 
-`cvm_attach_metadata()` + classe `cvm_tbl`.
+`cvm_fetch(dataset, table, ...)` como API principal.
 
-`print.cvm_tbl()`.
-
-Hierarquia `cvmdata_error_*` / `cvmdata_warn_*` via
-`cvmdata_abort()`/`cvmdata_warn()`.
-
-[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
-exportada (utilitária do naming doc §1.6).
-
-Testes mockados via
-[`httr2::with_mocked_responses`](https://httr2.r-lib.org/reference/with_mocked_responses.html) +
-fixture `cad_sample.csv` (51 linhas reais).
-
-Doc roxygen completa para
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-e
-[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md).
-
-Vignette stub `cvmdata.Rmd` em `eval = interactive()`.
-
-**Sessão 02**:
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) +
-DFP ponta-a-ponta — concluída (commit `298c272`, 2026-05-21).
-
-`cvm_fetch(dataset, table, ...)` como **API principal**.
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-mantido como alias trivial sobre
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-(passa `source = "cvm"` até a Fase F entregar o mirror).
-
-Pipeline ZIP-yearly em `source_cvm_http_get()`: download do ZIP anual,
-extração do CSV alvo via `report_type`, cache com sidecar ETag.
+Pipeline ZIP-yearly em `source_cvm_http_get()`.
 
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
-(lista de datasets) e `cvm_tables(dataset)` (tabelas de um dataset).
+e `cvm_tables(dataset)`.
 
-`cvm_dataset_years(dataset)` — descoberta dinâmica via HTML listing do
-diretório do portal, cacheado por sessão.
+`cvm_dataset_years(dataset)`.
 
-Default `years = NULL` → último ano disponível (via
-[`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
-interno). Hotfix pós-Sessão 02: quando `companies != NULL`, faz fallback
-descendente até 3 anos quando o max year não tem dados da companhia
-pedida (companhias com calendário fiscal não-civil — agros etc. — fazem
-o portal listar ZIPs do ano corrente sem cobertura de empresas civis),
-emitindo `cvmdata_warn_year_fallback`.
+Default `years = NULL` → último ano disponível, com fallback descendente
+quando companhia ausente no max year.
 
-Novo arg `report_type ∈ c("ind", "con")`, obrigatório para tabelas com
-variantes; erro para `composicao_capital`/`submissao`/ `parecer`.
+Argumento `report_type ∈ c("ind", "con")`.
 
-`companies` com detecção automática (CNPJ 14 dígitos / CD_CVM ≤6 dígitos
-/ busca textual) + word boundary + mapa de abreviações (BANCO↔︎BCO,
-COMPANHIA↔︎CIA, INDUSTRIA↔︎IND, PARTICIPACOES↔︎PART). Prompt interativo via
-[`utils::menu()`](https://rdrr.io/r/utils/menu.html) em
-[`interactive()`](https://rdrr.io/r/base/interactive.html) e abort em
-batch entregues como hotfix pós-Sessão 02 (vide Fase E).
+Argumento `companies` com detecção automática (CNPJ / CD_CVM / busca
+textual).
 
-`source = c("mirror", "cvm")` introduzido (default `"cvm"` na Sessão 02;
-flipado para `"mirror"` no tag v0.1.0). Stub de `"mirror"` abortava com
-`cvmdata_error_input` apontando para `"cvm"` até a Fase F entregar o
-backend parquet (Sessão 3.13).
+Argumento `source ∈ c("mirror", "cvm")`.
 
-Tracer:
-`cvm_fetch(dataset = "dfp", table = "bpa", report_type = "ind", companies = "BCO BRASIL", years = 2024)`.
+DFP ponta-a-ponta.
 
-`apply_schema_transformations()` genérico cobre `multiply_by_scale` (com
-`scale_factor()` UNIDADE/MIL/MILHÃO/BILHÃO), `drop`, e
-`keep_latest_version` (groupby cnpj_cia+dt_refer, mantém maior
-`versao`).
+ITR ponta-a-ponta.
 
-`transform_cad()` removido; CAD usa o pipeline genérico com
-`transformations: []`.
+FRE ponta-a-ponta (header detail com `cnpj_companhia` /
+`data_referencia`, sem `cd_cvm`).
 
-Hotfixes pós-Sessão 02 entregues: (a) `filter_by_companies()` usava
-`sprintf("%06s", ...)` que pad com espaços, não zeros — CD_CVM sem
-zero-padding (`"1023"`) nunca casava `"001023"`; trocado por
-`formatC(as.integer(.), width = 6, flag = "0", format = "d")`.
+Lookup automático CD_CVM → CNPJ via `submissao` para tabelas sem
+`cd_cvm` nativo.
 
-2.  Prompt interativo
-    [`utils::menu()`](https://rdrr.io/r/utils/menu.html) para múltiplas
-    matches em busca textual, abort em batch. (c) Fallback descendente
-    quando `years = NULL` + companhia ausente no max year. Pendências da
-    Sessão 01 ainda válidas em
-    `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` §6.
+`apply_schema_transformations()` genérico (`multiply_by_scale`, `drop`,
+`keep_latest_version`).
 
-**Sessão 03**: ITR + FRE ponta-a-ponta.
+Conversão automática de datas via dicionário (`tipo_dados = "date"`).
 
-11 YAMLs ITR (paralelos aos DFP, `cvm_archive_url_pattern` troca DFP →
-ITR, `first_year: 2011`). Auditoria empírica do ZIP 2024 confirmou
-paridade total de schema com DFP (`expected_field_count` idêntico em
-todas as 11 tabelas, mesmo set de variantes ind/con, mesmo padrão de
-naming de CSV). Fixture
-`tests/testthat/fixtures/itr_cia_aberta_2024.zip` (6.94 KB, 3 CSVs, BCO
-BRASIL + MAGAZINE LUIZA × 3 trimestres) com `.meta.json` de origem;
-tracer test + discovery em `test-cvm-fetch.R`.
+Semântica diferenciada para `on_error = "warn"`/`"silent"`.
 
-Hotfix pós-Sessão 03: tabelas sem `cd_cvm` (`composicao_capital`,
-`parecer` em DFP e ITR) retornavam tibble vazio silenciosamente quando
-`companies` recebia CD_CVM. Implementada resolução automática CD_CVM →
-CNPJ via `submissao` do mesmo dataset/year
-(`resolve_cd_cvm_via_submissao()` em `R/api-cvm-fetch.R`). Mesmo custo
-de runtime apenas no primeiro lookup por sessão (cache de disco + HEAD
-revalidando ETag). CD_CVMs inexistentes na submissao daquele ano abortam
-com `cvmdata_error_input`. CLAUDE.md §2.7 atualizado.
+### Fase E — Polimento e cobertura
 
-**Sessão 03.2**: 36 YAMLs FRE (1 header `submissao` + 35 detail; 8 com
-`meta_status: missing` + `expected_field_names`). Auditoria empírica do
-ZIP 2024 (URL META é `meta_fre_cia_aberta.zip`, sem o sufixo `_txt.zip`
-previsto; `first_year = 2010`; META de `empregado_local_faixa_etaria`
-vive sem o prefixo `meta_` no entry dentro do ZIP — anomalia tratada
-como `available` mesmo assim). Nenhum `multiply_by_scale` em FRE (sem
-`VL_CONTA`/`ESCALA_MOEDA`). Fixture
-`tests/testthat/fixtures/fre_cia_aberta_2024.zip` (4.4 KB, 3 CSVs:
-`submissao`, `auditor`, `empregado_PCD`; BCO BRASIL + MAGAZINE LUIZA +
-BCO NORDESTE; BB carrega linha sintética VERSAO=99 em `auditor` para
-exercitar `keep_latest_version` na chave
-`(cnpj_companhia, data_referencia)`).
-
-**Sessão 03.2**: ajustes cirúrgicos para FRE-detail. Detail tables FRE
-usam header diferente do CAD/ITR/DFP (CLAUDE.md §2.2):
-`cnpj_companhia`/`data_referencia`/`nome_companhia`, sem `cd_cvm`.
-`match_by_cnpj()`, `match_by_text()`, `disambiguate_text_match()` e
-`tx_keep_latest_version()` agora aceitam o par alternativo via helpers
-`cnpj_col()`/`name_col()` em `R/api-cvm-fetch.R`. Zero efeito em
-CAD/ITR/DFP.
-
-**Sessão 03.2**: política do reader exercitada pela primeira vez contra
-YAMLs reais com `meta_status: missing` — três modos
-(`strict`/`warn`/`skip`) cobertos por testes que reescrevem o header de
-`empregado_PCD` no cache.
-
-**Sessão 3.9**: Articles `itr-dfp.Rmd` e `fre.Rmd` em
-`vignettes/articles/` (eval = TRUE, CVM real). Reference table no topo
-de cada um (11/36 tabelas); 2 workflows por article. itr-dfp cobre
-`multiply_by_scale` + `keep_latest_version` + lookup CD_CVM→CNPJ via
-`submissao`; fre cobre header alternativo (`cnpj_companhia`),
-`meta_status: missing` (workflow PCD), cap table (`posicao_acionaria`).
-
-Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após queda
-para 72% no merge de DFP).
-
-Substituir heurística de Date em `read_cvm_csv()` pela regra canônica
-baseada no snapshot de dicionário (`tipo_dados = "date"`).
-`build_col_types()` consulta
-[`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
-via `resolve_dict_columns()`; snapshot prevalece para colunas cobertas e
-heurística `^(dt_|data_)` atua como fallback para `meta_status: missing`
-e schemas sintéticos (Sessão 3.4).
-
-Semântica diferenciada para `on_error = "warn"/"silent"` — Sessão 3.7.
-Escopo: HTTP failures em batches yearly (`years = c(...)` com \>1
-elementos). `"warn"` empilha os anos sobreviventes e emite
-`cvmdata_warn_partial_failure` listando os que falharam; `"silent"`
-empilha sem emitir warning; `"abort"` (default) propaga a primeira
-falha. Total failure (todos os anos) sempre aborta com
-`cvmdata_error_http`. Single-year, non-yearly (CAD) e o fallback
-descendente quando `years = NULL` continuam abortando regardless.
-Parse/validation continuam governados por `validate` — fora do escopo do
-`on_error` por design (evita mascarar drift de schema da CVM).
-
-### Fase E — Polimento e cobertura (20-30h)
-
-\[-\] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` — descartados.
+\[-\] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` —
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-cobre tudo (decisão Sessão 02).
+cobre tudo.
 
-Política do reader para 8 tabelas FRE sem META (`meta_status: missing`;
-vide Rodada 3.0.2) — esqueleto em `validate_field_names()` exercitado
-contra YAMLs reais nos três modos (`strict`/`warn`/`skip`) na Sessão
-03.2.
+Política do reader em três modos (`strict`/`warn`/`skip`) para tabelas
+com e sem META.
 
-Exercitar branches `validate_field_names()` em `read_cvm_csv()` — modo
-`warn` coberto na Sessão 02; modos `strict` e `skip` em
-`meta_status: missing` cobertos na Sessão 03.2.
+`cvm_dictionary(dataset, table)`.
 
-`cvm_dictionary(dataset, table)` lendo do snapshot, com cache por
-sessão; atributo `meta_status = "missing"` quando aplicável.
+`cvm_codelist(dataset, table, column)`.
 
-`cvm_codelist(dataset, table, column)` lendo do snapshot de codelists
-embarcado, com cache por sessão. Erros distinguem dataset/table/column
-desconhecidos vs. coluna conhecida mas não- codelist (Sessão 3.4).
+Prompt interativo de seleção de companhias com múltiplas matches.
 
-Família `cvm_cache_*()` pública (`path`, `set_path`, `info`, `clear`) —
-Sessão 3.5. Detalhes na entrada equivalente da Fase B.
+[`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
 
-[`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
-/
-[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-— Sessão 3.6. Detalhes na entrada equivalente da Fase B.
+Cobertura ≥90%.
 
-Prompt interativo de seleção de companhias com múltiplas matches
-([`utils::menu()`](https://rdrr.io/r/utils/menu.html) em
-[`interactive()`](https://rdrr.io/r/base/interactive.html)); aborta com
-`cvmdata_error_input` em batch listando as matches. CLAUDE.md §2.7.
+Vignette `cvmdata.Rmd` (intro CRAN-safe).
 
-[`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)
-(operação inversa de
-[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)).
-Política estrita-tolerante: input não-character aborta com
-`cvmdata_error_input`; vetor com elementos sem 14 dígitos retorna
-`NA_character_` para esses e emite `cvmdata_warn` listando posições
-(Sessão 3.4).
+Article `cvm-fetch.Rmd`.
 
-Subir cobertura para ≥90% (gate do marco v0.1.0). Pós-Sessão 3.6 total
-**95.31%**: `source-cvm-http.R` 60.45% → 100%; `discovery.R` 78.41% →
-90.53%; `transform-schema.R` 86.27% → 100%. Branches ainda fora cobrem
-só guards defensivos (snapshot ausente / pacote não instalado / dataset
-com schema dir vazio).
+Article `itr-dfp.Rmd`.
 
-**Sessão 3.9**: Article `cvm-fetch.Rmd` (deep dive da API) em
-`vignettes/articles/`. Stub `vignettes/cvmdata.Rmd` reescrito como intro
-CRAN-safe (RDS pré-computado em `inst/extdata/vignette-data/`);
-`data-raw/build-vignette-data.R` regera as RDS hitando a CVM. Layout
-final: 1 vignette (`cvmdata.Rmd`) + 4 articles (`cvm-fetch`, `itr-dfp`,
-`fre`, `cvm-defects`).
+Article `fre.Rmd`.
 
-**Sessão 3.9**: Article `cvm-defects.Rmd` cobrindo os 13 defeitos
-conhecidos da publicação CVM (naming doc §11.5 + descobertos em
-implementação). Híbrido: tabela-índice no topo + mini-exemplo para os 5
-estruturais (#5 padding CD_CVM, \#7 `multiply_by_scale`, \#8 META
-missing, \#11 `keep_latest_version`, \#13 lookup CD_CVM→CNPJ).
+Article `cvm-defects.Rmd`.
 
-### Fase F — Pipeline ETL + mirror (24-32h)
+Article `cache-and-mirror.Rmd`.
 
-Decisões de arquitetura travadas na Sessão 3.11
-(`data-raw/mirror-capacity-audit.md`):
+### Fase F — Pipeline ETL + mirror
 
-- **Provedor**: GitHub Releases (mesmo repo `SidneyBissoli/cvmdata`).
-  v1.0 projetado em 26.36 GB parquet snappy (92% concentrado em FI/ICVM
-  555). Pior arquivo individual = 451 MB (FI/CDA anual), bem abaixo do
-  limite de 2 GB/arquivo.
-- **Escopo**: modular — 1 release por dataset
-  (`mirror-<dataset>-latest`).
-- **URL policy**: latest móvel + snapshots datados
-  (`mirror-<dataset>-snapshot-YYYY-MM-DD`).
-- **Formato**: parquet snappy + Hive-style `year=YYYY/` (compatível com
-  [`arrow::open_dataset()`](https://arrow.apache.org/docs/r/reference/open_dataset.html)
-  e DuckDB filter pushdown).
+Scripts ETL em `inst/etl/` (`00-config.R`, `01-fetch-cvm.R`,
+`02-csv-to-parquet.R`, `02b-validate.R`, `03-publish.R`).
 
-Itens entregues:
+Workflow `etl-mirror.yaml` (`workflow_dispatch` + cron semanal, matrix
+de 4 datasets).
 
-Scripts ETL em `inst/etl/`: `00-config.R`, `01-fetch-cvm.R`,
-`02-csv-to-parquet.R`, `03-publish.R`. Pipeline completo (fetch →
-parquet → upload via `gh release`) idempotente; suporta variants
-`report_type` (ind/con) em DFP/ITR contábeis. Entregue na Sessão 3.11.
+Detecção de mudança via hash SHA-256.
 
-Workflow `.github/workflows/etl-mirror.yaml` com trigger
-`workflow_dispatch` (Sessão 3.11) + cron `0 7 * * 2` e matrix de 4
-datasets com `fail-fast: false` (Sessão 3.12).
+Primeiro bulk publish do v0.1 (cad + dfp + itr + fre).
 
-`R/source-mirror-duckdb.R` criado como stub. Bloco `source = "mirror"`
-em `cvm_fetch_internal()` agora delega para
-`source_mirror_duckdb_get()`; classe trocada de `cvmdata_error_internal`
-para `cvmdata_error_input` com mensagem acionável apontando para
-`cvm_source_set("cvm")`. Sessão 3.11.
+Backend mirror funcional (`source = "mirror"`): inventário GitHub
+Releases + DuckDB local + filter pushdown por nome de asset.
 
-Detecção de mudança via hash SHA-256 das URLs de `cvm_dictionary_url`
-(meta\_*.txt e fragmentos de meta\_*\_txt.zip). `inst/etl/util-hash.R`
-traz `compute_source_hash(dataset)`; `03-publish.R` baixa o
-`__source_hash.json` do release anterior, compara, e skipa publish
-quando o hash bate. Sessão 3.12.
+Cache L3 (parquet local) com invalidação por hash.
 
-Primeiro bulk publish do v0.1 (cad + dfp + itr + fre) via dispatch
-manual do workflow exercitando matrix completa. Sessão 3.12.
+`cvm_cache_clear(what = "parquet")`.
 
-\[-\] Snapshots datados imutáveis
-(`mirror-<dataset>-snapshot-YYYY-MM-DD`) ficam para releases do pacote
-(v0.1.0+), não para o cron semanal. Decisão da Sessão 3.12: 26
-GB/snapshot × 52/ano = pagar storage por reprodutibilidade que ninguém
-pede em cadência semanal; vignette/paper fixam release de pacote, não
-data arbitrária. Cron mantém só `latest`. Helper `mirror_tag_snapshot()`
-em `00-config.R` continua pronto para o uso manual em releases.
+Validação pre-publish via `pointblank` (`02b-validate.R`).
 
-Itens entregues na Sessão 3.13:
-
-`R/source-mirror-duckdb.R` funcional. Backend lê parquets do release
-`mirror-<dataset>-latest` via GitHub REST API (inventário cacheado por
-sessão) + DuckDB local. Filter pushdown manual por asset name (Decisão 1
-= Alt 3 com refinamento de implementação: download → ler local, em vez
-de DuckDB httpfs direto, para robustez contra redirects do GitHub
-Releases em Windows). Colunas de partição `year` e `report_type`
-reanexadas via parser do nome do asset (Decisão 2 = Alt 1, parser tolera
-tanto `=` quanto a sanitização `.` que GitHub aplica).
-
-Cache L3 em
-`<cache>/parquet/<dataset>/<table>/[report_type=R/] year=Y/part-0.parquet`.
-Invalidação por hash via sidecar
-`<cache>/parquet/<dataset>/__source_hash.json`, que confronta o
-`__source_hash.json` publicado pelo ETL (Sessão 3.12). Quando o hash
-muda, o L3 inteiro do dataset é evicted antes da próxima leitura; quando
-o release é antigo e não publica hash (`NA_character_`), L3 é preservado
-por respeito a mirrors legados.
-
-`cvm_cache_clear(what = "parquet")` para evict só L3 (scoped
-opcionalmente por `dataset`). `year` rejeitado nesse modo porque o
-layout L3 aninha year sob table.
-
-Validação end-to-end (Tarefa C) batendo CVM vs Mirror em 4 chamadas
-(cad/dfp/itr/fre); colunas em comum têm tipos idênticos. Mirror traz
-`year`/`report_type` adicionais (reattach Decisão 2). Pequenas
-diferenças de nrow em datasets yearly refletem o gap entre o último cron
-(terça, 04h BRT) e a chamada live na CVM — feature esperada do snapshot
-semanal, não bug.
-
-`actions/checkout@v4` -\> `@v6` em `etl-mirror.yaml` para alinhar com os
-outros 4 workflows do repo (lint/R-CMD-check/ pkgdown/test-coverage).
-Trivial, isola a deprecation warning de Node.js 20 (2026-06-02).
-
-Cobertura subiu de 92.98% para **93.70%** (gate 90%). Branches restantes
-em mirror duckdb (87.25%) e util-mirror-assets (83.71%) são guards
-defensivos (DuckDB connection failure, etc.) e error paths
-conservadores; alcançá-los exige mocks de baixo valor.
-
-Itens entregues na Sessão 3.14:
-
-Validação pre-publish com `pointblank` em `inst/etl/02b-validate.R`.
-Escopo híbrido (Decisão 1 = Alt 3): 3 checks sintéticos (existência,
-leitura, n_rows \> 0) + 5 checks pointblank universais (identifier
-character, `vl_conta` numeric, CNPJ regex, cd_cvm regex, faixa de
-datas). Política de falha (Decisão 2 = Alt 3): hard estrutural aborta
-(exit 1, bloqueia publish); soft de conteúdo emite warning e segue.
-Workflow `etl-mirror.yaml` ganhou step “Stage 02b” entre 02 e 03 +
-upload do markdown report como artifact. Coverage cresceu de 93.70% para
-target (gates ≥ 90%); helper `validate_*` em `inst/etl/` cobertos por
-`tests/testthat/test-etl-validate.R` (23 testes novos, total 589).
-
-Article CRAN-safe `vignettes/articles/cache-and-mirror.Rmd`. Documenta
-os dois backends (`cvm`/`mirror`), as três camadas de cache (L1 ETag, L3
-hash, L4 planejado), os 4 workflows do usuário (switch para mirror, CVM
-vs Mirror, inspect/clear, TTL/LRU) e a tabela de 8 checks do 02b —
-superfície rOpenSci-auditável das regras de validação. Equivalência CVM
-vs Mirror lê RDS bundled
-(`inst/extdata/vignette-data/cache-and-mirror/cvm-vs-mirror.rds`, reusa
-output da Tarefa C da 3.13). `pkgdown/_pkgdown.yml` + `README.Rmd`
-apontam para o novo article.
-
-Itens entregues na Sessão Marco — v0.1.0 (2026-05-24):
-
-Flip do default de `source` de `"cvm"` para `"mirror"` (Decisão 3 = Alt
-2 da Sessão 3.14). Commit A (`feat(source)!`, `ca9730c`) cobriu
-`R/source.R`, roxygen de
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)/[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md),
-vignettes (cvmdata, cvm-fetch, cache-and-mirror), README EN+PT-BR e
-CLAUDE.md §2.1. Pre-flip audit: 5 testes em `test-cad-fetch.R` que
-chamavam
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-sem `source` ganharam `source = "cvm"` explícito; 2 testes obsoletos em
-`test-source-public.R` (aborts on `"mirror"` stub) deletados — cobertura
-do path mirror já vive em `test-source-mirror-duckdb.R`. Suite
-estabilizou em 587 PASS (= 589 baseline – 2 obsoletos).
-
-### Sessão Marco — v0.1.0 (2026-05-24)
-
-Decisões prévias travadas com o Sidney (em janela limpa, contra o cron
-audit `gh run list --workflow=etl-mirror.yaml`):
-
-- **Decisão 1** = Tag agora. O cron schedule ainda não disparou (1ª
-  ativação em 2026-05-26), mas 3 dispatches verdes consecutivos com
-  publish real de 31min + 02b validator + cobertura mirror dos 4
-  datasets (CAD/DFP/ITR/FRE, séries históricas 2010-2026) bastam como
-  evidência. Gate de “≥30 dias” relaxado por subsumido no 02b.
-- **Decisão 2** = Pre-submission inquiry no rOpenSci (vs submission
-  formal direto). Primeira submissão do mantenedor — inquiry baixa o
-  risco de “out of scope” no formal.
-
-Implementação:
-
-Commit A: `feat(source)!: flip default backend to "mirror"` (`ca9730c`).
-Detalhes acima.
-
-Commit B: `chore(release): bump to 0.1.0` (`c0f9868`). DESCRIPTION
-`0.0.0.9000` → `0.1.0`; NEWS.md release section dated
-
-- bloco “Breaking changes” sem “pending”; `cran-comments.md` seeded com
-  test-environments + nota rOpenSci-first; `inst/CITATION` com bibentry
-  apontando pra pkgdown site.
-
-Tag git `v0.1.0` + push.
-
-GitHub release `v0.1.0` (`gh release create`) com release notes
-extraídas do NEWS.md via awk. URL:
-<https://github.com/SidneyBissoli/cvmdata/releases/tag/v0.1.0>
-
-Commit C: `chore(release): start 0.1.0.9000 dev cycle` (`135d742`).
-DESCRIPTION `0.1.0` → `0.1.0.9000`; nova seção
-`# cvmdata 0.1.0.9000 (in development)` no topo do NEWS.md.
-
-Gates rodados nesta sessão:
-
-[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
-local pós-bump: 0 errors / 0 warnings / 0 notes.
-
-[`devtools::test()`](https://devtools.r-lib.org/reference/test.html):
-587 PASS / 0 FAIL.
-
-[`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html):
-clean.
-
-[`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md):
-93.70% (gate ≥90%).
-
-[`devtools::check_win_devel()`](https://devtools.r-lib.org/reference/check_win.html):
-tarball enviado, resposta por email em `sbissoli76@gmail.com`
-(~15-30min).
-
-\[~\]
-[`devtools::check_mac_release()`](https://devtools.r-lib.org/reference/check_mac_release.html):
-504 Gateway Timeout em 2 tentativas — retentar manualmente quando o
-serviço normalizar.
-
-\[-\] `revdepcheck::revdep_check()`: n/a (primeira submissão, no reverse
-dependencies). Documentado no `cran-comments.md`.
-
-Pkgdown rebuild verde pós-push (3m46s); site reflete versão `0.1.0` e o
-bibentry de citação.
-
-Pre-submission inquiry rOpenSci: **draft completo pronto**, mas **não
-submetido** nesta sessão — Sidney optou por exercitar o pacote em
-ambiente real antes de abrir issue em fórum externo.
+\[-\] Snapshots datados imutáveis do mirror — adiados para releases
+manuais do pacote, não para o cron.
 
 ### Marco — release v0.1.0
 
-\[~\] R-CMD-check verde nos 5 jobs (Ubuntu devel/release/oldrel-1, macOS
-release, Windows release). Local OK pós-commit C; matrix do GitHub
-Actions dispara automaticamente em cada push.
+Flip do default de `source` para `"mirror"`.
 
-Cobertura ≥90% (93.70%).
+Bump `DESCRIPTION` para `0.1.0`.
 
-\[-\] `revdepcheck::revdep_check()` limpo — n/a, sem revdeps.
+`cran-comments.md`.
+
+`inst/CITATION`.
+
+Tag git `v0.1.0` + GitHub release.
+
+Reabrir ciclo de dev `0.1.0.9000`.
+
+[`devtools::check_win_devel()`](https://devtools.r-lib.org/reference/check_win.html)
+enviado.
 
 \[~\]
-[`devtools::check_win_devel()`](https://devtools.r-lib.org/reference/check_win.html)
-enviado; `check_mac_release()` pendente (504).
+[`devtools::check_mac_release()`](https://devtools.r-lib.org/reference/check_mac_release.html)
+— pendente (504 transitório, retentar).
 
-\[-\] ≥30 dias de ETL rodando estável — gate relaxado pela Decisão 1 da
-Sessão Marco, com o 02b validator absorvendo a função do gate.
-
-Submissão rOpenSci (<https://github.com/ropensci/software-review>).
-Draft pronto; submissão adiada por escolha do Sidney.
+Submissão rOpenSci (pre-submission inquiry).
 
 Aceitação rOpenSci.
 
@@ -655,17 +219,15 @@ Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).
 
 ------------------------------------------------------------------------
 
-## v0.2+ (escopo futuro, fora do v0.1)
+## v0.2+ (escopo futuro)
 
 **v0.2**: `fca`, `vlmo`, `cgvn`, `ipe` (companhias parte 2).
 
-Suporte a ticker B3 no argumento `companies` (atualmente só CD_CVM e
-CNPJ; ticker exige join com mapping externo).
+Suporte a ticker B3 no argumento `companies`.
 
 **v0.3**: eventos societários + estrangeiras + incentivadas.
 
-**v0.4**: ICVM 555 (fundos de investimento — primeira classe
-não-companhia; pode exigir revisar L1/L3 cache para volume diário).
+**v0.4**: ICVM 555 (fundos de investimento).
 
 **v0.5**: FII (fundos imobiliários).
 
@@ -677,23 +239,16 @@ não-companhia; pode exigir revisar L1/L3 cache para volume diário).
 
 ## Pendências documentais
 
-Nota corretiva sobre `R/` flat aplicada ao
-`cvmdata_rodada2_arquitetura_estavel.md` §2.1.3 (Sessão 01).
+Nota corretiva sobre `R/` flat no canônico.
 
-`inst/extdata/schemas/cad/companhias.yaml` atualizado com
-`expected_field_count: 47` (Sessão 01).
+`inst/extdata/schemas/cad/companhias.yaml` com
+`expected_field_count: 47`.
 
-Aplicar refinamentos da Rodada 3.0.2 ao naming doc v03 → v04 (subsessão
-dedicada de edição editorial; item 9 do §7 de
-`cvmdata_rodada3-0-2_politica_reader_sem_meta.md`).
+Refinamentos da Rodada 3.0.2 ao naming doc v04.
 
-Aplicar refinamentos da Rodada 3.0 ao naming doc (parcialmente feito na
-v03 — vide cabeçalho do naming doc).
+Refinamentos da Rodada 3.0 ao naming doc.
 
-Acrescentar `cran-comments.md` — criado na Sessão Marco com
-test-environments matrix e nota indicando rOpenSci-first como workflow
-de submissão.
+`cran-comments.md`.
 
-Atualizar `schemas_proto/cad/companhias.yaml` com
-`expected_field_count: 47` ou marcar como registro histórico congelado
-(decidir na próxima sessão).
+`schemas_proto/cad/companhias.yaml` — atualizar ou marcar como histórico
+congelado.

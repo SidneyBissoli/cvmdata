@@ -45,206 +45,134 @@
 
 <div id="roadmap--cvmdata" class="section level1">
 
-<p>Plano de execução organizado por fases (não por datas). Rastreia o progresso sessão a sessão.</p>
+<p>Plano de execução por fases. Lista o que precisa ser entregue. O “como” e o “quando” vivem em <code>CLAUDE.md</code>, <code>NEWS.md</code>, commits e nos documentos canônicos da fase de planejamento.</p>
 <ul><li><label><input type="checkbox" checked>= entregue</label></li>
 <li>[~] = parcial / em andamento</li>
 <li><label><input type="checkbox">= pendente</label></li>
-<li>[-] = descartado (anotado para preservar histórico da decisão)</li>
+<li>[-] = descartado</li>
 </ul><hr><div class="section level2">
 <h2 id="pré-v01-companhias-abertas--resolução-cvm-8022">Pré-v0.1 (companhias abertas — Resolução CVM 80/22)<a class="anchor" aria-label="anchor" href="#pr%C3%A9-v01-companhias-abertas--resolu%C3%A7%C3%A3o-cvm-8022"></a></h2>
 <div class="section level3">
-<h3 id="fase-a--esqueleto-8-12h">Fase A — Esqueleto (8-12h)<a class="anchor" aria-label="anchor" href="#fase-a--esqueleto-8-12h"></a></h3>
+<h3 id="fase-a--esqueleto">Fase A — Esqueleto<a class="anchor" aria-label="anchor" href="#fase-a--esqueleto"></a></h3>
 <ul class="task-list"><li><label><input type="checkbox" checked>Inicialização do pacote (<code>DESCRIPTION</code>, <code>NAMESPACE</code>, <code>LICENSE</code>, <code>LICENSE.md</code>).</label></li>
-<li><label><input type="checkbox" checked>Estrutura de diretórios (<code>R/</code> flat com prefixos hífen; <code>tests/testthat/</code>, <code>inst/extdata/schemas/cad/</code>, <code>data-raw/</code>, <code>vignettes/</code>, <code>.github/workflows/</code>).</label></li>
-<li><label><input type="checkbox" checked><code>NEWS.md</code> inicial (formato <code># cvmdata 0.0.0.9000</code>).</label></li>
-<li><label><input type="checkbox" checked><code>README.Rmd</code> com badges + <code>README.md</code> renderizado.</label></li>
-<li><label><input type="checkbox" checked><code>CLAUDE.md</code> (contexto persistente) e <code>ROADMAP.md</code> (este arquivo).</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>R-CMD-check.yaml</code> (matriz r-lib check-standard: macOS release / Windows release / Ubuntu devel-release-oldrel1).</label></li>
+<li><label><input type="checkbox" checked>Estrutura de diretórios (<code>R/</code> flat com prefixos hífen; <code>tests/testthat/</code>, <code>inst/extdata/schemas/</code>, <code>data-raw/</code>, <code>vignettes/</code>, <code>.github/workflows/</code>).</label></li>
+<li><label><input type="checkbox" checked><code>NEWS.md</code> inicial.</label></li>
+<li><label><input type="checkbox" checked><code>README.Rmd</code> + <code>README.md</code> com badges.</label></li>
+<li><label><input type="checkbox" checked><code>README.pt-BR.Rmd</code> + <code>README.pt-BR.md</code>.</label></li>
+<li><label><input type="checkbox" checked><code>CLAUDE.md</code> e <code>ROADMAP.md</code>.</label></li>
 <li><label><input type="checkbox" checked><code>.lintr</code> config travada (linha 80, snake_case, cyclocomp ≤ 20).</label></li>
-<li><label><input type="checkbox" checked><code>.Rbuildignore</code> e <code>.gitignore</code> (incluindo <code>.claude/</code> e <code>memory/</code>).</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>test-coverage.yaml</code> — Sessão 3.7. Usa <code>codecov/codecov-action@v4</code> com <code>CODECOV_TOKEN</code> secret (Alt 1 do trio codecov-oficial/artifact). Badge já existe em README.Rmd apontando para <code>app.codecov.io/gh/SidneyBissoli/cvmdata</code> — primeiro run real do workflow precisa do token criado em codecov.io.</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>lint.yaml</code> — Sessão 3.7. Roda <code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code> com <code>LINTR_ERROR_ON_LINT=true</code> (PR falha em qualquer divergência de <code>.lintr</code>).</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>pkgdown.yaml</code> — Sessão 3.7. Deploy via <code>JamesIves/github-pages-deploy-action@v4.5.0</code> na branch órfã <code>gh-pages</code> (Alt 1 do par branch/actions-deploy-pages, padrão <code><a href="https://usethis.r-lib.org/reference/use_pkgdown.html" class="external-link">usethis::use_pkgdown_github_pages()</a></code>). Site em <code>https://sidneybissoli.github.io/cvmdata/</code> após primeiro push.</label></li>
-<li><label><input type="checkbox" checked><code>pkgdown/_pkgdown.yml</code> configurado — Sessão 3.7. 5 famílias (<code>fetchers</code>, <code>cache</code>, <code>source</code>, <code>discovery</code>, <code>utilities</code>) agrupando as 14 funções exportadas até a 3.6.</label></li>
-<li><label><input type="checkbox" checked><code>CODE_OF_CONDUCT.md</code> e <code>CONTRIBUTING.md</code> — Sessão 3.10. Contributor Covenant 2.1 (canônico, sem desvios) com endpoint de report <code>sbissoli76@gmail.com</code> (Alt 1 do trio email-pessoal/issue- tracker/email-dedicado; mesmo email já público em <code>Authors@R</code>). <code>CONTRIBUTING.md</code> médio (~150 linhas, Alt 2 do trio mínimo/médio/ completo): Reporting issues, Submitting a PR, Development setup, Quality gate (comandos literais), Adding/modifying schema YAML (formato mínimo + ações de <code>transformations</code>), Project goals. README.Rmd ganhou seção <code>Contributing</code> com paragrafo padrão rOpenSci/usethis apontando para ambos; pkgdown 2.x detecta CoC/ CONTRIBUTING automaticamente no navbar.</label></li>
+<li><label><input type="checkbox" checked><code>.Rbuildignore</code> e <code>.gitignore</code>.</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>R-CMD-check.yaml</code> (matriz macOS release / Windows release / Ubuntu devel-release-oldrel1).</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>test-coverage.yaml</code>.</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>lint.yaml</code>.</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>pkgdown.yaml</code> + <code>pkgdown/_pkgdown.yml</code>.</label></li>
+<li><label><input type="checkbox" checked><code>CODE_OF_CONDUCT.md</code> e <code>CONTRIBUTING.md</code>.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fase-b--cache--source-cvm-16-20h">Fase B — Cache + source CVM (16-20h)<a class="anchor" aria-label="anchor" href="#fase-b--cache--source-cvm-16-20h"></a></h3>
-<ul><li><label><input type="checkbox" checked><code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code>, <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>, <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code>, <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> (família pública) — entregues na Sessão 3.5 em <code>R/cache.R</code>. <code>source-cvm-http.R</code> passou a consumir <code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code> como single source of truth para a raiz do cache. <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> lista upstream artifacts + CSVs extraídos como linhas separadas, com etag/last_modified vindo dos sidecars <code>*.etag.rds</code> quando presentes. <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> aceita <code>what ∈ c("all", "raw")</code> + filtros opcionais <code>dataset</code> e <code>year</code>; <code>confirm = interactive()</code> pede confirmação via <code><a href="https://rdrr.io/r/utils/askYesNo.html" class="external-link">utils::askYesNo()</a></code> em sessão interativa, apaga direto em batch.</label></li>
-<li>[~] L1 (raw) implementado para CSV direto (Sessão 01) e para ZIP (Sessão 02, em <code>&lt;cache&gt;/raw/&lt;dataset&gt;/&lt;year&gt;/</code>). Falta L3 (Parquet, Fase F) e L4 (<code><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cachem::cache_mem()</a></code>).</li>
-<li><label><input type="checkbox" checked>Invalidação por ETag/Last-Modified implementada (sidecar RDS), estendida para ZIPs anuais na Sessão 02. TTL imposto na Sessão 3.7 via <code>options(cvmdata.cache_ttl_seconds)</code> (default 30 dias = 2 592 000 s; <code>0</code> força HEAD em toda chamada; <code>Inf</code> desliga HEAD enquanto o sidecar existir; sidecar sem <code>fetched_at</code> parseável cai para HEAD para refrescar metadados).</label></li>
-<li><label><input type="checkbox" checked>Limite de tamanho via <code>options(cvmdata.cache_max_size_mb)</code> e eviction LRU quando atinge 90% — Sessão 3.8. Default 100 MiB. Engine em <code>R/cache.R</code> (<code>read_cache_max_size()</code>, <code>build_cache_units()</code>, <code>cache_current_size_bytes()</code>, <code>cache_enforce_limit()</code>); trigger amortizado em <code>download_with_etag()</code> no ramo que grava bytes (TTL/304 fast paths pulam). Métrica de ordenação <code><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.mtime()</a></code> do upstream artifact (Alt 1 da decisão 1); escopo todo o conteúdo de <code>&lt;cache&gt;/raw/</code> com unidade atômica = diretório do ano (yearly) ou par <code>{artifact, sidecar}</code> (none) (Alt 2 da decisão 2); gatilho após gravação + target 80% (Alt 1 da decisão 3). Limite <code>0</code>/negativo/ <code>Inf</code> desliga; tipo inválido cai para default. Observabilidade via <code>cvmdata_warn_eviction</code> (nova classe em §6 do CLAUDE.md), default <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> via <code>options(cvmdata.cache_warn_evictions)</code> (Alt 3 da decisão 5). Atributo <code>total_size_bytes</code> adicionado a <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> (Alt 1 da decisão 4). Sem export novo (Alt 1 da decisão 6).</label></li>
-<li><label><input type="checkbox" checked><code>source_cvm_http_get()</code> para CSV direto (Sessão 01) e ZIP-yearly (Sessão 02, com extração do CSV alvo via <code>report_type</code>).</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code> / <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> — entregues na Sessão 3.6 em <code>R/source.R</code>. <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> agora declara <code>source = NULL</code> e resolve via <code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code> (precedência: arg &gt; option &gt; default). Default era <code>"cvm"</code> na faixa Sessão 3.6 → 3.14; <strong>flipado para <code>"mirror"</code> no tag v0.1.0</strong> (Sessão Marco, 2026-05-24). Backend <code>"mirror"</code> ficou funcional na Sessão 3.13 e o flip do default passou a ser uma decisão de release, não de implementação.</label></li>
-<li><label><input type="checkbox" checked>Suite de testes mockados de HTTP via <code><a href="https://httr2.r-lib.org/reference/with_mocked_responses.html" class="external-link">httr2::with_mocked_responses</a></code> (com <code>httptest2</code> em Suggests para uso futuro).</label></li>
+<h3 id="fase-b--cache--source-cvm">Fase B — Cache + source CVM<a class="anchor" aria-label="anchor" href="#fase-b--cache--source-cvm"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox" checked>Família cache pública (<code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code>, <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>, <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code>, <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code>).</label></li>
+<li><label><input type="checkbox" checked>Cache L1 (raw) para CSV direto e ZIP yearly.</label></li>
+<li><label><input type="checkbox" checked>Invalidação por ETag/Last-Modified com TTL configurável.</label></li>
+<li><label><input type="checkbox" checked>Limite de tamanho + eviction LRU.</label></li>
+<li><label><input type="checkbox" checked><code>source_cvm_http_get()</code> para CSV direto e ZIP yearly.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code> / <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code>.</label></li>
+<li><label><input type="checkbox" checked>Suite de testes mockados de HTTP.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fase-c--dispatch--schemas-24-32h">Fase C — Dispatch + schemas (24-32h)<a class="anchor" aria-label="anchor" href="#fase-c--dispatch--schemas-24-32h"></a></h3>
-<ul><li><label><input type="checkbox" checked><code>load_schema(dataset, table)</code> parser do YAML com validações (mutual exclusion de URLs e de <code>cvm_file_pattern</code> vs <code>cvm_file_pattern_variants</code>; <code>meta_status: missing</code> exige <code>expected_field_names</code>; <code>temporal_partitioning ∈ {none, yearly}</code> com <code>first_year</code> obrigatório quando yearly; chaves de variants restritas a <code>ind</code>/<code>con</code>).</label></li>
-<li>[-] <code>dispatch_class(dataset)</code> (companies → futures funds) — descartado. Pipeline genérico em <code>cvm_fetch_internal()</code> + schema YAML por tabela torna o dispatch desnecessário; quando fundos entrarem, basta novo dataset id e novos YAMLs.</li>
-<li>[-] <code>dispatch_table(dataset, table)</code> — descartado pelo mesmo motivo. Sessão 02 substituiu o <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> por <code>apply_schema_transformations()</code> dirigido pelo YAML.</li>
-<li><label><input type="checkbox" checked>YAML para CAD/companhias em <code>inst/extdata/schemas/cad/</code> (<code>expected_field_count</code> corrigido para 47 vs protótipo 46; <code>transformations: []</code> explicitado na Sessão 02).</label></li>
-<li><label><input type="checkbox" checked>YAMLs para DFP (11 tabelas conceituais, Sessão 02: <code>submissao</code>, <code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dva</code>, <code>composicao_capital</code>, <code>parecer</code>). As 8 com variantes ind/con usam <code>cvm_file_pattern_variants</code>.</label></li>
-<li><label><input type="checkbox" checked>YAMLs para ITR (mesmo set que DFP — pipeline reusa <code>cvm_file_pattern_variants</code>) — Sessão 03.</label></li>
-<li><label><input type="checkbox" checked>YAMLs para FRE (36 tabelas incluindo <code>submissao</code> + 8 com <code>meta_status: missing</code>) — Sessão 03.2.</label></li>
+<h3 id="fase-c--dispatch--schemas">Fase C — Dispatch + schemas<a class="anchor" aria-label="anchor" href="#fase-c--dispatch--schemas"></a></h3>
+<ul><li><label><input type="checkbox" checked><code>load_schema(dataset, table)</code> com validações.</label></li>
+<li>[-] <code>dispatch_class(dataset)</code> — pipeline genérico + YAML por tabela tornou desnecessário.</li>
+<li>[-] <code>dispatch_table(dataset, table)</code> — idem.</li>
+<li><label><input type="checkbox" checked>YAML CAD/companhias.</label></li>
+<li><label><input type="checkbox" checked>YAMLs DFP (11 tabelas).</label></li>
+<li><label><input type="checkbox" checked>YAMLs ITR (11 tabelas).</label></li>
+<li><label><input type="checkbox" checked>YAMLs FRE (36 tabelas, 8 com <code>meta_status: missing</code>).</label></li>
 <li><label><input type="checkbox">Geração programática dos YAMLs restantes a partir do snapshot de dicionário.</label></li>
-<li><label><input type="checkbox" checked>Snapshot de dicionário <code>cvm_dictionary_snapshot.csv</code> em <code>inst/extdata/</code> (865 linhas cobrindo 51 tabelas com META oficial + 8 FRE-detail <code>meta_status: missing</code> com placeholders). Gerador reprodutível em <code>data-raw/build-dictionary-snapshot.R</code>.</label></li>
-<li><label><input type="checkbox" checked>Snapshot de codelists <code>cvm_codelists_snapshot.csv</code> em <code>inst/extdata/</code> (445 valores em 133 colunas codelist sobre 46 tabelas: 46 do dicionário S/N+PF/PJ + 87 promovidas por cardinalidade observada ≤ 50 no último ano disponível). Gerador reprodutível em <code>data-raw/build-codelists-snapshot.R</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_dictionary_snapshot.csv</code> + gerador em <code>data-raw/</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_codelists_snapshot.csv</code> + gerador em <code>data-raw/</code>.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fase-d--cad--itr-ponta-a-ponta-20-28h">Fase D — CAD + ITR ponta-a-ponta (20-28h)<a class="anchor" aria-label="anchor" href="#fase-d--cad--itr-ponta-a-ponta-20-28h"></a></h3>
-<ul class="task-list"><li>
-<label><input type="checkbox" checked><strong>Sessão 01</strong>: <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> ponta-a-ponta — concluída.</label>
-<ul class="task-list"><li><label><input type="checkbox" checked>YAML CAD em <code>inst/extdata/schemas/cad/companhias.yaml</code>.</label></li>
-<li><label><input type="checkbox" checked><code>load_schema()</code> mínimo.</label></li>
-<li><label><input type="checkbox" checked><code>source_cvm_http_get()</code> para CSV direto (sem ZIP).</label></li>
-<li><label><input type="checkbox" checked><code>read_cvm_csv()</code> com regra de identificadores → character e heurística de Date interim (<code>dt_*</code>/<code>data_*</code>).</label></li>
-<li><label><input type="checkbox" checked><code>transform_cad()</code> (tolower colnames).</label></li>
-<li><label><input type="checkbox" checked><code>cvm_fetch_internal()</code> orquestrador não-exportado.</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cad_fetch.html">cad_fetch()</a></code> API pública.</label></li>
-<li><label><input type="checkbox" checked><code>cvm_attach_metadata()</code> + classe <code>cvm_tbl</code>.</label></li>
-<li><label><input type="checkbox" checked><code>print.cvm_tbl()</code>.</label></li>
-<li><label><input type="checkbox" checked>Hierarquia <code>cvmdata_error_*</code> / <code>cvmdata_warn_*</code> via <code>cvmdata_abort()</code>/<code>cvmdata_warn()</code>.</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cnpj_clean.html">cnpj_clean()</a></code> exportada (utilitária do naming doc §1.6).</label></li>
-<li><label><input type="checkbox" checked>Testes mockados via <code><a href="https://httr2.r-lib.org/reference/with_mocked_responses.html" class="external-link">httr2::with_mocked_responses</a></code> + fixture <code>cad_sample.csv</code> (51 linhas reais).</label></li>
-<li><label><input type="checkbox" checked>Doc roxygen completa para <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> e <code><a href="reference/cnpj_clean.html">cnpj_clean()</a></code>.</label></li>
-<li><label><input type="checkbox" checked>Vignette stub <code>cvmdata.Rmd</code> em <code>eval = interactive()</code>.</label></li>
-</ul></li>
-<li>
-<label><input type="checkbox" checked><strong>Sessão 02</strong>: <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> + DFP ponta-a-ponta — concluída (commit <code>298c272</code>, 2026-05-21).</label>
-<ul><li><label><input type="checkbox" checked><code>cvm_fetch(dataset, table, ...)</code> como <strong>API principal</strong>. <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> mantido como alias trivial sobre <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> (passa <code>source = "cvm"</code> até a Fase F entregar o mirror).</label></li>
-<li><label><input type="checkbox" checked>Pipeline ZIP-yearly em <code>source_cvm_http_get()</code>: download do ZIP anual, extração do CSV alvo via <code>report_type</code>, cache com sidecar ETag.</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code> (lista de datasets) e <code>cvm_tables(dataset)</code> (tabelas de um dataset).</label></li>
-<li><label><input type="checkbox" checked><code>cvm_dataset_years(dataset)</code> — descoberta dinâmica via HTML listing do diretório do portal, cacheado por sessão.</label></li>
-<li><label><input type="checkbox" checked>Default <code>years = NULL</code> → último ano disponível (via <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> interno). Hotfix pós-Sessão 02: quando <code>companies != NULL</code>, faz fallback descendente até 3 anos quando o max year não tem dados da companhia pedida (companhias com calendário fiscal não-civil — agros etc. — fazem o portal listar ZIPs do ano corrente sem cobertura de empresas civis), emitindo <code>cvmdata_warn_year_fallback</code>.</label></li>
-<li><label><input type="checkbox" checked>Novo arg <code>report_type ∈ c("ind", "con")</code>, obrigatório para tabelas com variantes; erro para <code>composicao_capital</code>/<code>submissao</code>/ <code>parecer</code>.</label></li>
-<li><label><input type="checkbox" checked><code>companies</code> com detecção automática (CNPJ 14 dígitos / CD_CVM ≤6 dígitos / busca textual) + word boundary + mapa de abreviações (BANCO↔︎BCO, COMPANHIA↔︎CIA, INDUSTRIA↔︎IND, PARTICIPACOES↔︎PART). Prompt interativo via <code><a href="https://rdrr.io/r/utils/menu.html" class="external-link">utils::menu()</a></code> em <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> e abort em batch entregues como hotfix pós-Sessão 02 (vide Fase E).</label></li>
-<li><label><input type="checkbox" checked><code>source = c("mirror", "cvm")</code> introduzido (default <code>"cvm"</code> na Sessão 02; flipado para <code>"mirror"</code> no tag v0.1.0). Stub de <code>"mirror"</code> abortava com <code>cvmdata_error_input</code> apontando para <code>"cvm"</code> até a Fase F entregar o backend parquet (Sessão 3.13).</label></li>
-<li><label><input type="checkbox" checked>Tracer: <code>cvm_fetch(dataset = "dfp", table = "bpa", report_type = "ind", companies = "BCO BRASIL", years = 2024)</code>.</label></li>
-<li><label><input type="checkbox" checked><code>apply_schema_transformations()</code> genérico cobre <code>multiply_by_scale</code> (com <code>scale_factor()</code> UNIDADE/MIL/MILHÃO/BILHÃO), <code>drop</code>, e <code>keep_latest_version</code> (groupby cnpj_cia+dt_refer, mantém maior <code>versao</code>).</label></li>
-<li><label><input type="checkbox" checked><code>transform_cad()</code> removido; CAD usa o pipeline genérico com <code>transformations: []</code>.</label></li>
-<li>Hotfixes pós-Sessão 02 entregues: (a) <code>filter_by_companies()</code> usava <code>sprintf("%06s", ...)</code> que pad com espaços, não zeros — CD_CVM sem zero-padding (<code>"1023"</code>) nunca casava <code>"001023"</code>; trocado por <code>formatC(as.integer(.), width = 6, flag = "0", format = "d")</code>.
-<ol start="2" style="list-style-type: lower-alpha"><li>Prompt interativo <code><a href="https://rdrr.io/r/utils/menu.html" class="external-link">utils::menu()</a></code> para múltiplas matches em busca textual, abort em batch. (c) Fallback descendente quando <code>years = NULL</code> + companhia ausente no max year. Pendências da Sessão 01 ainda válidas em <code>cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md</code> §6.</li>
-</ol></li>
-</ul></li>
-<li>
-<label><input type="checkbox" checked><strong>Sessão 03</strong>: ITR + FRE ponta-a-ponta.</label>
-<ul><li><label><input type="checkbox" checked>11 YAMLs ITR (paralelos aos DFP, <code>cvm_archive_url_pattern</code> troca DFP → ITR, <code>first_year: 2011</code>). Auditoria empírica do ZIP 2024 confirmou paridade total de schema com DFP (<code>expected_field_count</code> idêntico em todas as 11 tabelas, mesmo set de variantes ind/con, mesmo padrão de naming de CSV). Fixture <code>tests/testthat/fixtures/itr_cia_aberta_2024.zip</code> (6.94 KB, 3 CSVs, BCO BRASIL + MAGAZINE LUIZA × 3 trimestres) com <code>.meta.json</code> de origem; tracer test + discovery em <code>test-cvm-fetch.R</code>.</label></li>
-<li>Hotfix pós-Sessão 03: tabelas sem <code>cd_cvm</code> (<code>composicao_capital</code>, <code>parecer</code> em DFP e ITR) retornavam tibble vazio silenciosamente quando <code>companies</code> recebia CD_CVM. Implementada resolução automática CD_CVM → CNPJ via <code>submissao</code> do mesmo dataset/year (<code>resolve_cd_cvm_via_submissao()</code> em <code>R/api-cvm-fetch.R</code>). Mesmo custo de runtime apenas no primeiro lookup por sessão (cache de disco + HEAD revalidando ETag). CD_CVMs inexistentes na submissao daquele ano abortam com <code>cvmdata_error_input</code>. CLAUDE.md §2.7 atualizado.</li>
-<li><label><input type="checkbox" checked><strong>Sessão 03.2</strong>: 36 YAMLs FRE (1 header <code>submissao</code> + 35 detail; 8 com <code>meta_status: missing</code> + <code>expected_field_names</code>). Auditoria empírica do ZIP 2024 (URL META é <code>meta_fre_cia_aberta.zip</code>, sem o sufixo <code>_txt.zip</code> previsto; <code>first_year = 2010</code>; META de <code>empregado_local_faixa_etaria</code> vive sem o prefixo <code>meta_</code> no entry dentro do ZIP — anomalia tratada como <code>available</code> mesmo assim). Nenhum <code>multiply_by_scale</code> em FRE (sem <code>VL_CONTA</code>/<code>ESCALA_MOEDA</code>). Fixture <code>tests/testthat/fixtures/fre_cia_aberta_2024.zip</code> (4.4 KB, 3 CSVs: <code>submissao</code>, <code>auditor</code>, <code>empregado_PCD</code>; BCO BRASIL + MAGAZINE LUIZA + BCO NORDESTE; BB carrega linha sintética VERSAO=99 em <code>auditor</code> para exercitar <code>keep_latest_version</code> na chave <code>(cnpj_companhia, data_referencia)</code>).</label></li>
-<li><label><input type="checkbox" checked><strong>Sessão 03.2</strong>: ajustes cirúrgicos para FRE-detail. Detail tables FRE usam header diferente do CAD/ITR/DFP (CLAUDE.md §2.2): <code>cnpj_companhia</code>/<code>data_referencia</code>/<code>nome_companhia</code>, sem <code>cd_cvm</code>. <code>match_by_cnpj()</code>, <code>match_by_text()</code>, <code>disambiguate_text_match()</code> e <code>tx_keep_latest_version()</code> agora aceitam o par alternativo via helpers <code>cnpj_col()</code>/<code>name_col()</code> em <code>R/api-cvm-fetch.R</code>. Zero efeito em CAD/ITR/DFP.</label></li>
-<li><label><input type="checkbox" checked><strong>Sessão 03.2</strong>: política do reader exercitada pela primeira vez contra YAMLs reais com <code>meta_status: missing</code> — três modos (<code>strict</code>/<code>warn</code>/<code>skip</code>) cobertos por testes que reescrevem o header de <code>empregado_PCD</code> no cache.</label></li>
-<li><label><input type="checkbox" checked><strong>Sessão 3.9</strong>: Articles <code>itr-dfp.Rmd</code> e <code>fre.Rmd</code> em <code>vignettes/articles/</code> (eval = TRUE, CVM real). Reference table no topo de cada um (11/36 tabelas); 2 workflows por article. itr-dfp cobre <code>multiply_by_scale</code> + <code>keep_latest_version</code> + lookup CD_CVM→CNPJ via <code>submissao</code>; fre cobre header alternativo (<code>cnpj_companhia</code>), <code>meta_status: missing</code> (workflow PCD), cap table (<code>posicao_acionaria</code>).</label></li>
-</ul></li>
-<li><label><input type="checkbox" checked>Cobertura ≥85% (atualmente 85.34% pós-Sessão 02, retomada após queda para 72% no merge de DFP).</label></li>
-<li><label><input type="checkbox" checked>Substituir heurística de Date em <code>read_cvm_csv()</code> pela regra canônica baseada no snapshot de dicionário (<code>tipo_dados = "date"</code>). <code>build_col_types()</code> consulta <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code> via <code>resolve_dict_columns()</code>; snapshot prevalece para colunas cobertas e heurística <code>^(dt_|data_)</code> atua como fallback para <code>meta_status: missing</code> e schemas sintéticos (Sessão 3.4).</label></li>
-<li><label><input type="checkbox" checked>Semântica diferenciada para <code>on_error = "warn"/"silent"</code> — Sessão 3.7. Escopo: HTTP failures em batches yearly (<code>years = c(...)</code> com &gt;1 elementos). <code>"warn"</code> empilha os anos sobreviventes e emite <code>cvmdata_warn_partial_failure</code> listando os que falharam; <code>"silent"</code> empilha sem emitir warning; <code>"abort"</code> (default) propaga a primeira falha. Total failure (todos os anos) sempre aborta com <code>cvmdata_error_http</code>. Single-year, non-yearly (CAD) e o fallback descendente quando <code>years = NULL</code> continuam abortando regardless. Parse/validation continuam governados por <code>validate</code> — fora do escopo do <code>on_error</code> por design (evita mascarar drift de schema da CVM).</label></li>
+<h3 id="fase-d--datasets-ponta-a-ponta">Fase D — Datasets ponta-a-ponta<a class="anchor" aria-label="anchor" href="#fase-d--datasets-ponta-a-ponta"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox" checked><code><a href="reference/cad_fetch.html">cad_fetch()</a></code> ponta-a-ponta.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_fetch(dataset, table, ...)</code> como API principal.</label></li>
+<li><label><input type="checkbox" checked>Pipeline ZIP-yearly em <code>source_cvm_http_get()</code>.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code> e <code>cvm_tables(dataset)</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_dataset_years(dataset)</code>.</label></li>
+<li><label><input type="checkbox" checked>Default <code>years = NULL</code> → último ano disponível, com fallback descendente quando companhia ausente no max year.</label></li>
+<li><label><input type="checkbox" checked>Argumento <code>report_type ∈ c("ind", "con")</code>.</label></li>
+<li><label><input type="checkbox" checked>Argumento <code>companies</code> com detecção automática (CNPJ / CD_CVM / busca textual).</label></li>
+<li><label><input type="checkbox" checked>Argumento <code>source ∈ c("mirror", "cvm")</code>.</label></li>
+<li><label><input type="checkbox" checked>DFP ponta-a-ponta.</label></li>
+<li><label><input type="checkbox" checked>ITR ponta-a-ponta.</label></li>
+<li><label><input type="checkbox" checked>FRE ponta-a-ponta (header detail com <code>cnpj_companhia</code> / <code>data_referencia</code>, sem <code>cd_cvm</code>).</label></li>
+<li><label><input type="checkbox" checked>Lookup automático CD_CVM → CNPJ via <code>submissao</code> para tabelas sem <code>cd_cvm</code> nativo.</label></li>
+<li><label><input type="checkbox" checked><code>apply_schema_transformations()</code> genérico (<code>multiply_by_scale</code>, <code>drop</code>, <code>keep_latest_version</code>).</label></li>
+<li><label><input type="checkbox" checked>Conversão automática de datas via dicionário (<code>tipo_dados = "date"</code>).</label></li>
+<li><label><input type="checkbox" checked>Semântica diferenciada para <code>on_error = "warn"</code>/<code>"silent"</code>.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fase-e--polimento-e-cobertura-20-30h">Fase E — Polimento e cobertura (20-30h)<a class="anchor" aria-label="anchor" href="#fase-e--polimento-e-cobertura-20-30h"></a></h3>
-<ul><li>[-] <code>dfp_fetch()</code> / <code>itr_fetch()</code> / <code>fre_fetch()</code> — descartados. <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> cobre tudo (decisão Sessão 02).</li>
-<li><label><input type="checkbox" checked>Política do reader para 8 tabelas FRE sem META (<code>meta_status: missing</code>; vide Rodada 3.0.2) — esqueleto em <code>validate_field_names()</code> exercitado contra YAMLs reais nos três modos (<code>strict</code>/<code>warn</code>/<code>skip</code>) na Sessão 03.2.</label></li>
-<li><label><input type="checkbox" checked>Exercitar branches <code>validate_field_names()</code> em <code>read_cvm_csv()</code> — modo <code>warn</code> coberto na Sessão 02; modos <code>strict</code> e <code>skip</code> em <code>meta_status: missing</code> cobertos na Sessão 03.2.</label></li>
-<li><label><input type="checkbox" checked><code>cvm_dictionary(dataset, table)</code> lendo do snapshot, com cache por sessão; atributo <code>meta_status = "missing"</code> quando aplicável.</label></li>
-<li><label><input type="checkbox" checked><code>cvm_codelist(dataset, table, column)</code> lendo do snapshot de codelists embarcado, com cache por sessão. Erros distinguem dataset/table/column desconhecidos vs. coluna conhecida mas não- codelist (Sessão 3.4).</label></li>
-<li><label><input type="checkbox" checked>Família <code>cvm_cache_*()</code> pública (<code>path</code>, <code>set_path</code>, <code>info</code>, <code>clear</code>) — Sessão 3.5. Detalhes na entrada equivalente da Fase B.</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cvm_source_get.html">cvm_source_get()</a></code> / <code><a href="reference/cvm_source_set.html">cvm_source_set()</a></code> — Sessão 3.6. Detalhes na entrada equivalente da Fase B.</label></li>
-<li><label><input type="checkbox" checked>Prompt interativo de seleção de companhias com múltiplas matches (<code><a href="https://rdrr.io/r/utils/menu.html" class="external-link">utils::menu()</a></code> em <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code>); aborta com <code>cvmdata_error_input</code> em batch listando as matches. CLAUDE.md §2.7.</label></li>
-<li><label><input type="checkbox" checked><code><a href="reference/cnpj_format.html">cnpj_format()</a></code> (operação inversa de <code><a href="reference/cnpj_clean.html">cnpj_clean()</a></code>). Política estrita-tolerante: input não-character aborta com <code>cvmdata_error_input</code>; vetor com elementos sem 14 dígitos retorna <code>NA_character_</code> para esses e emite <code>cvmdata_warn</code> listando posições (Sessão 3.4).</label></li>
-<li><label><input type="checkbox" checked>Subir cobertura para ≥90% (gate do marco v0.1.0). Pós-Sessão 3.6 total <strong>95.31%</strong>: <code>source-cvm-http.R</code> 60.45% → 100%; <code>discovery.R</code> 78.41% → 90.53%; <code>transform-schema.R</code> 86.27% → 100%. Branches ainda fora cobrem só guards defensivos (snapshot ausente / pacote não instalado / dataset com schema dir vazio).</label></li>
-<li><label><input type="checkbox" checked><strong>Sessão 3.9</strong>: Article <code>cvm-fetch.Rmd</code> (deep dive da API) em <code>vignettes/articles/</code>. Stub <code>vignettes/cvmdata.Rmd</code> reescrito como intro CRAN-safe (RDS pré-computado em <code>inst/extdata/vignette-data/</code>); <code>data-raw/build-vignette-data.R</code> regera as RDS hitando a CVM. Layout final: 1 vignette (<code>cvmdata.Rmd</code>) + 4 articles (<code>cvm-fetch</code>, <code>itr-dfp</code>, <code>fre</code>, <code>cvm-defects</code>).</label></li>
-<li><label><input type="checkbox" checked><strong>Sessão 3.9</strong>: Article <code>cvm-defects.Rmd</code> cobrindo os 13 defeitos conhecidos da publicação CVM (naming doc §11.5 + descobertos em implementação). Híbrido: tabela-índice no topo + mini-exemplo para os 5 estruturais (#5 padding CD_CVM, #7 <code>multiply_by_scale</code>, #8 META missing, #11 <code>keep_latest_version</code>, #13 lookup CD_CVM→CNPJ).</label></li>
+<h3 id="fase-e--polimento-e-cobertura">Fase E — Polimento e cobertura<a class="anchor" aria-label="anchor" href="#fase-e--polimento-e-cobertura"></a></h3>
+<ul><li>[-] <code>dfp_fetch()</code> / <code>itr_fetch()</code> / <code>fre_fetch()</code> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> cobre tudo.</li>
+<li><label><input type="checkbox" checked>Política do reader em três modos (<code>strict</code>/<code>warn</code>/<code>skip</code>) para tabelas com e sem META.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_dictionary(dataset, table)</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_codelist(dataset, table, column)</code>.</label></li>
+<li><label><input type="checkbox" checked>Prompt interativo de seleção de companhias com múltiplas matches.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/cnpj_format.html">cnpj_format()</a></code>.</label></li>
+<li><label><input type="checkbox" checked>Cobertura ≥90%.</label></li>
+<li><label><input type="checkbox" checked>Vignette <code>cvmdata.Rmd</code> (intro CRAN-safe).</label></li>
+<li><label><input type="checkbox" checked>Article <code>cvm-fetch.Rmd</code>.</label></li>
+<li><label><input type="checkbox" checked>Article <code>itr-dfp.Rmd</code>.</label></li>
+<li><label><input type="checkbox" checked>Article <code>fre.Rmd</code>.</label></li>
+<li><label><input type="checkbox" checked>Article <code>cvm-defects.Rmd</code>.</label></li>
+<li><label><input type="checkbox" checked>Article <code>cache-and-mirror.Rmd</code>.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fase-f--pipeline-etl--mirror-24-32h">Fase F — Pipeline ETL + mirror (24-32h)<a class="anchor" aria-label="anchor" href="#fase-f--pipeline-etl--mirror-24-32h"></a></h3>
-<p>Decisões de arquitetura travadas na Sessão 3.11 (<code>data-raw/mirror-capacity-audit.md</code>):</p>
-<ul><li>
-<strong>Provedor</strong>: GitHub Releases (mesmo repo <code>SidneyBissoli/cvmdata</code>). v1.0 projetado em 26.36 GB parquet snappy (92% concentrado em FI/ICVM 555). Pior arquivo individual = 451 MB (FI/CDA anual), bem abaixo do limite de 2 GB/arquivo.</li>
-<li>
-<strong>Escopo</strong>: modular — 1 release por dataset (<code>mirror-&lt;dataset&gt;-latest</code>).</li>
-<li>
-<strong>URL policy</strong>: latest móvel + snapshots datados (<code>mirror-&lt;dataset&gt;-snapshot-YYYY-MM-DD</code>).</li>
-<li>
-<strong>Formato</strong>: parquet snappy + Hive-style <code>year=YYYY/</code> (compatível com <code><a href="https://arrow.apache.org/docs/r/reference/open_dataset.html" class="external-link">arrow::open_dataset()</a></code> e DuckDB filter pushdown).</li>
-</ul><p>Itens entregues:</p>
-<ul><li><label><input type="checkbox" checked>Scripts ETL em <code>inst/etl/</code>: <code>00-config.R</code>, <code>01-fetch-cvm.R</code>, <code>02-csv-to-parquet.R</code>, <code>03-publish.R</code>. Pipeline completo (fetch → parquet → upload via <code>gh release</code>) idempotente; suporta variants <code>report_type</code> (ind/con) em DFP/ITR contábeis. Entregue na Sessão 3.11.</label></li>
-<li><label><input type="checkbox" checked>Workflow <code>.github/workflows/etl-mirror.yaml</code> com trigger <code>workflow_dispatch</code> (Sessão 3.11) + cron <code>0 7 * * 2</code> e matrix de 4 datasets com <code>fail-fast: false</code> (Sessão 3.12).</label></li>
-<li><label><input type="checkbox" checked><code>R/source-mirror-duckdb.R</code> criado como stub. Bloco <code>source = "mirror"</code> em <code>cvm_fetch_internal()</code> agora delega para <code>source_mirror_duckdb_get()</code>; classe trocada de <code>cvmdata_error_internal</code> para <code>cvmdata_error_input</code> com mensagem acionável apontando para <code>cvm_source_set("cvm")</code>. Sessão 3.11.</label></li>
-<li><label><input type="checkbox" checked>Detecção de mudança via hash SHA-256 das URLs de <code>cvm_dictionary_url</code> (meta_<em>.txt e fragmentos de meta_</em>_txt.zip). <code>inst/etl/util-hash.R</code> traz <code>compute_source_hash(dataset)</code>; <code>03-publish.R</code> baixa o <code>__source_hash.json</code> do release anterior, compara, e skipa publish quando o hash bate. Sessão 3.12.</label></li>
-<li><label><input type="checkbox" checked>Primeiro bulk publish do v0.1 (cad + dfp + itr + fre) via dispatch manual do workflow exercitando matrix completa. Sessão 3.12.</label></li>
-<li>[-] Snapshots datados imutáveis (<code>mirror-&lt;dataset&gt;-snapshot-YYYY-MM-DD</code>) ficam para releases do pacote (v0.1.0+), não para o cron semanal. Decisão da Sessão 3.12: 26 GB/snapshot × 52/ano = pagar storage por reprodutibilidade que ninguém pede em cadência semanal; vignette/paper fixam release de pacote, não data arbitrária. Cron mantém só <code>latest</code>. Helper <code>mirror_tag_snapshot()</code> em <code>00-config.R</code> continua pronto para o uso manual em releases.</li>
-</ul><p>Itens entregues na Sessão 3.13:</p>
-<ul class="task-list"><li><label><input type="checkbox" checked><code>R/source-mirror-duckdb.R</code> funcional. Backend lê parquets do release <code>mirror-&lt;dataset&gt;-latest</code> via GitHub REST API (inventário cacheado por sessão) + DuckDB local. Filter pushdown manual por asset name (Decisão 1 = Alt 3 com refinamento de implementação: download → ler local, em vez de DuckDB httpfs direto, para robustez contra redirects do GitHub Releases em Windows). Colunas de partição <code>year</code> e <code>report_type</code> reanexadas via parser do nome do asset (Decisão 2 = Alt 1, parser tolera tanto <code>=</code> quanto a sanitização <code>.</code> que GitHub aplica).</label></li>
-<li><label><input type="checkbox" checked>Cache L3 em <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/&lt;table&gt;/[report_type=R/] year=Y/part-0.parquet</code>. Invalidação por hash via sidecar <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/__source_hash.json</code>, que confronta o <code>__source_hash.json</code> publicado pelo ETL (Sessão 3.12). Quando o hash muda, o L3 inteiro do dataset é evicted antes da próxima leitura; quando o release é antigo e não publica hash (<code>NA_character_</code>), L3 é preservado por respeito a mirrors legados.</label></li>
-<li><label><input type="checkbox" checked><code>cvm_cache_clear(what = "parquet")</code> para evict só L3 (scoped opcionalmente por <code>dataset</code>). <code>year</code> rejeitado nesse modo porque o layout L3 aninha year sob table.</label></li>
-<li><label><input type="checkbox" checked>Validação end-to-end (Tarefa C) batendo CVM vs Mirror em 4 chamadas (cad/dfp/itr/fre); colunas em comum têm tipos idênticos. Mirror traz <code>year</code>/<code>report_type</code> adicionais (reattach Decisão 2). Pequenas diferenças de nrow em datasets yearly refletem o gap entre o último cron (terça, 04h BRT) e a chamada live na CVM — feature esperada do snapshot semanal, não bug.</label></li>
-<li><label><input type="checkbox" checked><code>actions/checkout@v4</code> -&gt; <code>@v6</code> em <code>etl-mirror.yaml</code> para alinhar com os outros 4 workflows do repo (lint/R-CMD-check/ pkgdown/test-coverage). Trivial, isola a deprecation warning de Node.js 20 (2026-06-02).</label></li>
-<li><label><input type="checkbox" checked>Cobertura subiu de 92.98% para <strong>93.70%</strong> (gate 90%). Branches restantes em mirror duckdb (87.25%) e util-mirror-assets (83.71%) são guards defensivos (DuckDB connection failure, etc.) e error paths conservadores; alcançá-los exige mocks de baixo valor.</label></li>
-</ul><p>Itens entregues na Sessão 3.14:</p>
-<ul class="task-list"><li><label><input type="checkbox" checked>Validação pre-publish com <code>pointblank</code> em <code>inst/etl/02b-validate.R</code>. Escopo híbrido (Decisão 1 = Alt 3): 3 checks sintéticos (existência, leitura, n_rows &gt; 0) + 5 checks pointblank universais (identifier character, <code>vl_conta</code> numeric, CNPJ regex, cd_cvm regex, faixa de datas). Política de falha (Decisão 2 = Alt 3): hard estrutural aborta (exit 1, bloqueia publish); soft de conteúdo emite warning e segue. Workflow <code>etl-mirror.yaml</code> ganhou step “Stage 02b” entre 02 e 03 + upload do markdown report como artifact. Coverage cresceu de 93.70% para target (gates ≥ 90%); helper <code>validate_*</code> em <code>inst/etl/</code> cobertos por <code>tests/testthat/test-etl-validate.R</code> (23 testes novos, total 589).</label></li>
-<li><label><input type="checkbox" checked>Article CRAN-safe <code>vignettes/articles/cache-and-mirror.Rmd</code>. Documenta os dois backends (<code>cvm</code>/<code>mirror</code>), as três camadas de cache (L1 ETag, L3 hash, L4 planejado), os 4 workflows do usuário (switch para mirror, CVM vs Mirror, inspect/clear, TTL/LRU) e a tabela de 8 checks do 02b — superfície rOpenSci-auditável das regras de validação. Equivalência CVM vs Mirror lê RDS bundled (<code>inst/extdata/vignette-data/cache-and-mirror/cvm-vs-mirror.rds</code>, reusa output da Tarefa C da 3.13). <code>pkgdown/_pkgdown.yml</code> + <code>README.Rmd</code> apontam para o novo article.</label></li>
-</ul><p>Itens entregues na Sessão Marco — v0.1.0 (2026-05-24):</p>
-<ul class="task-list"><li><label><input type="checkbox" checked>Flip do default de <code>source</code> de <code>"cvm"</code> para <code>"mirror"</code> (Decisão 3 = Alt 2 da Sessão 3.14). Commit A (<code>feat(source)!</code>, <code>ca9730c</code>) cobriu <code>R/source.R</code>, roxygen de <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>/<code><a href="reference/cad_fetch.html">cad_fetch()</a></code>, vignettes (cvmdata, cvm-fetch, cache-and-mirror), README EN+PT-BR e CLAUDE.md §2.1. Pre-flip audit: 5 testes em <code>test-cad-fetch.R</code> que chamavam <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> sem <code>source</code> ganharam <code>source = "cvm"</code> explícito; 2 testes obsoletos em <code>test-source-public.R</code> (aborts on <code>"mirror"</code> stub) deletados — cobertura do path mirror já vive em <code>test-source-mirror-duckdb.R</code>. Suite estabilizou em 587 PASS (= 589 baseline – 2 obsoletos).</label></li>
-</ul></div>
-<div class="section level3">
-<h3 id="sessão-marco--v010-2026-05-24">Sessão Marco — v0.1.0 (2026-05-24)<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-marco--v010-2026-05-24"></a></h3>
-<p>Decisões prévias travadas com o Sidney (em janela limpa, contra o cron audit <code>gh run list --workflow=etl-mirror.yaml</code>):</p>
-<ul><li>
-<strong>Decisão 1</strong> = Tag agora. O cron schedule ainda não disparou (1ª ativação em 2026-05-26), mas 3 dispatches verdes consecutivos com publish real de 31min + 02b validator + cobertura mirror dos 4 datasets (CAD/DFP/ITR/FRE, séries históricas 2010-2026) bastam como evidência. Gate de “≥30 dias” relaxado por subsumido no 02b.</li>
-<li>
-<strong>Decisão 2</strong> = Pre-submission inquiry no rOpenSci (vs submission formal direto). Primeira submissão do mantenedor — inquiry baixa o risco de “out of scope” no formal.</li>
-</ul><p>Implementação:</p>
-<ul class="task-list"><li><label><input type="checkbox" checked>Commit A: <code>feat(source)!: flip default backend to "mirror"</code> (<code>ca9730c</code>). Detalhes acima.</label></li>
-<li>
-<label><input type="checkbox" checked>Commit B: <code>chore(release): bump to 0.1.0</code> (<code>c0f9868</code>). DESCRIPTION <code>0.0.0.9000</code> → <code>0.1.0</code>; NEWS.md release section dated</label>
-<ul><li>bloco “Breaking changes” sem “pending”; <code>cran-comments.md</code> seeded com test-environments + nota rOpenSci-first; <code>inst/CITATION</code> com bibentry apontando pra pkgdown site.</li>
-</ul></li>
-<li><label><input type="checkbox" checked>Tag git <code>v0.1.0</code> + push.</label></li>
-<li><label><input type="checkbox" checked>GitHub release <code>v0.1.0</code> (<code>gh release create</code>) com release notes extraídas do NEWS.md via awk. URL: <a href="https://github.com/SidneyBissoli/cvmdata/releases/tag/v0.1.0" class="external-link uri">https://github.com/SidneyBissoli/cvmdata/releases/tag/v0.1.0</a></label></li>
-<li><label><input type="checkbox" checked>Commit C: <code>chore(release): start 0.1.0.9000 dev cycle</code> (<code>135d742</code>). DESCRIPTION <code>0.1.0</code> → <code>0.1.0.9000</code>; nova seção <code># cvmdata 0.1.0.9000 (in development)</code> no topo do NEWS.md.</label></li>
-</ul><p>Gates rodados nesta sessão:</p>
-<ul><li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> local pós-bump: 0 errors / 0 warnings / 0 notes.</label></li>
-<li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code>: 587 PASS / 0 FAIL.</label></li>
-<li><label><input type="checkbox" checked><code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code>: clean.</label></li>
-<li><label><input type="checkbox" checked><code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>: 93.70% (gate ≥90%).</label></li>
-<li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel()</a></code>: tarball enviado, resposta por email em <code>sbissoli76@gmail.com</code> (~15-30min).</label></li>
-<li>[~] <code><a href="https://devtools.r-lib.org/reference/check_mac_release.html" class="external-link">devtools::check_mac_release()</a></code>: 504 Gateway Timeout em 2 tentativas — retentar manualmente quando o serviço normalizar.</li>
-<li>[-] <code>revdepcheck::revdep_check()</code>: n/a (primeira submissão, no reverse dependencies). Documentado no <code>cran-comments.md</code>.</li>
-<li><label><input type="checkbox" checked>Pkgdown rebuild verde pós-push (3m46s); site reflete versão <code>0.1.0</code> e o bibentry de citação.</label></li>
-<li><label><input type="checkbox" checked>Pre-submission inquiry rOpenSci: <strong>draft completo pronto</strong>, mas <strong>não submetido</strong> nesta sessão — Sidney optou por exercitar o pacote em ambiente real antes de abrir issue em fórum externo.</label></li>
+<h3 id="fase-f--pipeline-etl--mirror">Fase F — Pipeline ETL + mirror<a class="anchor" aria-label="anchor" href="#fase-f--pipeline-etl--mirror"></a></h3>
+<ul><li><label><input type="checkbox" checked>Scripts ETL em <code>inst/etl/</code> (<code>00-config.R</code>, <code>01-fetch-cvm.R</code>, <code>02-csv-to-parquet.R</code>, <code>02b-validate.R</code>, <code>03-publish.R</code>).</label></li>
+<li><label><input type="checkbox" checked>Workflow <code>etl-mirror.yaml</code> (<code>workflow_dispatch</code> + cron semanal, matrix de 4 datasets).</label></li>
+<li><label><input type="checkbox" checked>Detecção de mudança via hash SHA-256.</label></li>
+<li><label><input type="checkbox" checked>Primeiro bulk publish do v0.1 (cad + dfp + itr + fre).</label></li>
+<li><label><input type="checkbox" checked>Backend mirror funcional (<code>source = "mirror"</code>): inventário GitHub Releases + DuckDB local + filter pushdown por nome de asset.</label></li>
+<li><label><input type="checkbox" checked>Cache L3 (parquet local) com invalidação por hash.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_cache_clear(what = "parquet")</code>.</label></li>
+<li><label><input type="checkbox" checked>Validação pre-publish via <code>pointblank</code> (<code>02b-validate.R</code>).</label></li>
+<li>[-] Snapshots datados imutáveis do mirror — adiados para releases manuais do pacote, não para o cron.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="marco--release-v010">Marco — release v0.1.0<a class="anchor" aria-label="anchor" href="#marco--release-v010"></a></h3>
-<ul><li>[~] R-CMD-check verde nos 5 jobs (Ubuntu devel/release/oldrel-1, macOS release, Windows release). Local OK pós-commit C; matrix do GitHub Actions dispara automaticamente em cada push.</li>
-<li><label><input type="checkbox" checked>Cobertura ≥90% (93.70%).</label></li>
-<li>[-] <code>revdepcheck::revdep_check()</code> limpo — n/a, sem revdeps.</li>
-<li>[~] <code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel()</a></code> enviado; <code>check_mac_release()</code> pendente (504).</li>
-<li>[-] ≥30 dias de ETL rodando estável — gate relaxado pela Decisão 1 da Sessão Marco, com o 02b validator absorvendo a função do gate.</li>
-<li><label><input type="checkbox">Submissão rOpenSci (<a href="https://github.com/ropensci/software-review" class="external-link uri">https://github.com/ropensci/software-review</a>). Draft pronto; submissão adiada por escolha do Sidney.</label></li>
+<ul><li><label><input type="checkbox" checked>Flip do default de <code>source</code> para <code>"mirror"</code>.</label></li>
+<li><label><input type="checkbox" checked>Bump <code>DESCRIPTION</code> para <code>0.1.0</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cran-comments.md</code>.</label></li>
+<li><label><input type="checkbox" checked><code>inst/CITATION</code>.</label></li>
+<li><label><input type="checkbox" checked>Tag git <code>v0.1.0</code> + GitHub release.</label></li>
+<li><label><input type="checkbox" checked>Reabrir ciclo de dev <code>0.1.0.9000</code>.</label></li>
+<li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel()</a></code> enviado.</label></li>
+<li>[~] <code><a href="https://devtools.r-lib.org/reference/check_mac_release.html" class="external-link">devtools::check_mac_release()</a></code> — pendente (504 transitório, retentar).</li>
+<li><label><input type="checkbox">Submissão rOpenSci (pre-submission inquiry).</label></li>
 <li><label><input type="checkbox">Aceitação rOpenSci.</label></li>
 <li><label><input type="checkbox">Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).</label></li>
 </ul><hr></div>
 </div>
 <div class="section level2">
-<h2 id="v02-escopo-futuro-fora-do-v01">v0.2+ (escopo futuro, fora do v0.1)<a class="anchor" aria-label="anchor" href="#v02-escopo-futuro-fora-do-v01"></a></h2>
+<h2 id="v02-escopo-futuro">v0.2+ (escopo futuro)<a class="anchor" aria-label="anchor" href="#v02-escopo-futuro"></a></h2>
 <ul class="task-list"><li>
 <label><input type="checkbox"><strong>v0.2</strong>: <code>fca</code>, <code>vlmo</code>, <code>cgvn</code>, <code>ipe</code> (companhias parte 2).</label>
-<ul class="task-list"><li><label><input type="checkbox">Suporte a ticker B3 no argumento <code>companies</code> (atualmente só CD_CVM e CNPJ; ticker exige join com mapping externo).</label></li>
+<ul class="task-list"><li><label><input type="checkbox">Suporte a ticker B3 no argumento <code>companies</code>.</label></li>
 </ul></li>
 <li><label><input type="checkbox"><strong>v0.3</strong>: eventos societários + estrangeiras + incentivadas.</label></li>
-<li><label><input type="checkbox"><strong>v0.4</strong>: ICVM 555 (fundos de investimento — primeira classe não-companhia; pode exigir revisar L1/L3 cache para volume diário).</label></li>
+<li><label><input type="checkbox"><strong>v0.4</strong>: ICVM 555 (fundos de investimento).</label></li>
 <li><label><input type="checkbox"><strong>v0.5</strong>: FII (fundos imobiliários).</label></li>
 <li><label><input type="checkbox"><strong>v0.6</strong>: FIDC + estruturados.</label></li>
 <li><label><input type="checkbox"><strong>v1.0</strong>: estabilização + paper no The R Journal.</label></li>
 </ul><hr></div>
 <div class="section level2">
 <h2 id="pendências-documentais">Pendências documentais<a class="anchor" aria-label="anchor" href="#pend%C3%AAncias-documentais"></a></h2>
-<ul class="task-list"><li><label><input type="checkbox" checked>Nota corretiva sobre <code>R/</code> flat aplicada ao <code>cvmdata_rodada2_arquitetura_estavel.md</code> §2.1.3 (Sessão 01).</label></li>
-<li><label><input type="checkbox" checked><code>inst/extdata/schemas/cad/companhias.yaml</code> atualizado com <code>expected_field_count: 47</code> (Sessão 01).</label></li>
-<li><label><input type="checkbox">Aplicar refinamentos da Rodada 3.0.2 ao naming doc v03 → v04 (subsessão dedicada de edição editorial; item 9 do §7 de <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code>).</label></li>
-<li><label><input type="checkbox">Aplicar refinamentos da Rodada 3.0 ao naming doc (parcialmente feito na v03 — vide cabeçalho do naming doc).</label></li>
-<li><label><input type="checkbox" checked>Acrescentar <code>cran-comments.md</code> — criado na Sessão Marco com test-environments matrix e nota indicando rOpenSci-first como workflow de submissão.</label></li>
-<li><label><input type="checkbox">Atualizar <code>schemas_proto/cad/companhias.yaml</code> com <code>expected_field_count: 47</code> ou marcar como registro histórico congelado (decidir na próxima sessão).</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked>Nota corretiva sobre <code>R/</code> flat no canônico.</label></li>
+<li><label><input type="checkbox" checked><code>inst/extdata/schemas/cad/companhias.yaml</code> com <code>expected_field_count: 47</code>.</label></li>
+<li><label><input type="checkbox">Refinamentos da Rodada 3.0.2 ao naming doc v04.</label></li>
+<li><label><input type="checkbox">Refinamentos da Rodada 3.0 ao naming doc.</label></li>
+<li><label><input type="checkbox" checked><code>cran-comments.md</code>.</label></li>
+<li><label><input type="checkbox"><code>schemas_proto/cad/companhias.yaml</code> — atualizar ou marcar como histórico congelado.</label></li>
 </ul></div>
 </div>
 
