@@ -73,8 +73,8 @@ memory/
 # the public repo or tarball
 cvmdata_rodada*.md
 
-# Session prompts driving Claude Code work — kept locally only
-PROMPT_CLAUDE_CODE_SESSAO_*.md
+# Session and milestone prompts driving Claude Code work — local only
+PROMPT_CLAUDE_CODE_*.md
 
 # Project custom instructions (Claude Code project memory drafts) —
 # kept locally, source for CLAUDE.md
