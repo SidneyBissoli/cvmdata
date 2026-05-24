@@ -212,10 +212,11 @@ cvm_cache_info <- function() {
 #' Deletes cached files selectively. `what = "all"` removes the
 #' entire cache tree (everything under [cvm_cache_path()]);
 #' `what = "raw"` removes only the raw download area
-#' (`<cache>/raw/`). When `dataset` (and optionally `year`) is
-#' supplied, the scope is narrowed to
-#' `<cache>/raw/<dataset>/[<year>/]`; `what` is implicit and must
-#' be `"raw"` in that case.
+#' (`<cache>/raw/`); `what = "parquet"` removes only the L3 mirror
+#' cache (`<cache>/parquet/`). When `dataset` (and optionally `year`)
+#' is supplied, the scope is narrowed to the matching subtree under
+#' the chosen area; passing `dataset` without an explicit `what`
+#' defaults to `"raw"` for backwards compatibility.
 #'
 #' In interactive sessions the user is asked to confirm via
 #' [utils::askYesNo()] before deletion. In batch sessions the
@@ -223,12 +224,13 @@ cvm_cache_info <- function() {
 #' deletion proceeds silently — pass `confirm = TRUE` explicitly to
 #' force a prompt.
 #'
-#' @param what One of `"all"` or `"raw"`. Default `"all"`.
+#' @param what One of `"all"`, `"raw"` or `"parquet"`. Default
+#'   `"all"`.
 #' @param dataset Optional dataset id (e.g. `"dfp"`). Restricts
-#'   deletion to `<cache>/raw/<dataset>/`.
+#'   deletion to the matching `<cache>/<what>/<dataset>/` subtree.
 #' @param year Optional integer year. Requires `dataset` to be
-#'   non-`NULL`. Restricts deletion to
-#'   `<cache>/raw/<dataset>/<year>/`.
+#'   non-`NULL`. Restricts deletion to the matching `year=<YYYY>/`
+#'   slot (raw) or `year=<YYYY>/` slot (parquet).
 #' @param confirm Logical scalar. When `TRUE`, asks for confirmation
 #'   before deleting. Default: [interactive()].
 #'
@@ -282,9 +284,10 @@ cvm_cache_clear <- function(what = "all",
 
 # Validate the four arguments of cvm_cache_clear(); returns the
 # normalized (what, dataset, year, confirm) list. `what` is widened
-# to "raw" when a dataset filter is supplied.
+# to "raw" when a dataset filter is supplied without an explicit
+# parquet target.
 .validate_cache_clear_args <- function(what, dataset, year, confirm) {
-  what <- rlang::arg_match0(what, c("all", "raw"))
+  what <- rlang::arg_match0(what, c("all", "raw", "parquet"))
   if (!is.null(year) && is.null(dataset)) {
     cvmdata_abort(
       c("{.arg year} requires {.arg dataset} to be supplied."),
@@ -296,6 +299,23 @@ cvm_cache_clear <- function(what = "all",
     what <- "raw"
   }
   year <- .check_year_arg(year)
+  if (!is.null(year) && identical(what, "parquet")) {
+    cvmdata_abort(
+      c(
+        paste(
+          "{.arg year} is not supported with",
+          "{.code what = \"parquet\"}."
+        ),
+        "i" = paste(
+          "The L3 parquet cache partitions year under each table",
+          "(`<dataset>/<table>/[report_type=R/]year=Y/`); pass",
+          "{.arg dataset} alone to evict the whole dataset, or",
+          "{.code what = \"raw\"} for year-level eviction."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
   .check_confirm_arg(confirm)
   list(what = what, dataset = dataset, year = year, confirm = confirm)
 }
@@ -338,12 +358,13 @@ cvm_cache_clear <- function(what = "all",
   invisible()
 }
 
-# Compose the absolute path the cleanup should target.
+# Compose the absolute path the cleanup should target. `year` only
+# applies to `what = "raw"` (the .validate step aborts otherwise).
 .cache_clear_target <- function(cache_root, what, dataset, year) {
   if (identical(what, "all")) {
     return(cache_root)
   }
-  base <- file.path(cache_root, "raw")
+  base <- file.path(cache_root, what)
   if (is.null(dataset)) {
     return(base)
   }

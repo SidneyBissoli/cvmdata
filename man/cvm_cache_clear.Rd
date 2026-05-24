@@ -12,14 +12,15 @@ cvm_cache_clear(
 )
 }
 \arguments{
-\item{what}{One of \code{"all"} or \code{"raw"}. Default \code{"all"}.}
+\item{what}{One of \code{"all"}, \code{"raw"} or \code{"parquet"}. Default
+\code{"all"}.}
 
 \item{dataset}{Optional dataset id (e.g. \code{"dfp"}). Restricts
-deletion to \verb{<cache>/raw/<dataset>/}.}
+deletion to the matching \verb{<cache>/<what>/<dataset>/} subtree.}
 
 \item{year}{Optional integer year. Requires \code{dataset} to be
-non-\code{NULL}. Restricts deletion to
-\verb{<cache>/raw/<dataset>/<year>/}.}
+non-\code{NULL}. Restricts deletion to the matching \verb{year=<YYYY>/}
+slot (raw) or \verb{year=<YYYY>/} slot (parquet).}
 
 \item{confirm}{Logical scalar. When \code{TRUE}, asks for confirmation
 before deleting. Default: \code{\link[=interactive]{interactive()}}.}
@@ -31,10 +32,11 @@ The number of files deleted, invisibly.
 Deletes cached files selectively. \code{what = "all"} removes the
 entire cache tree (everything under \code{\link[=cvm_cache_path]{cvm_cache_path()}});
 \code{what = "raw"} removes only the raw download area
-(\verb{<cache>/raw/}). When \code{dataset} (and optionally \code{year}) is
-supplied, the scope is narrowed to
-\verb{<cache>/raw/<dataset>/[<year>/]}; \code{what} is implicit and must
-be \code{"raw"} in that case.
+(\verb{<cache>/raw/}); \code{what = "parquet"} removes only the L3 mirror
+cache (\verb{<cache>/parquet/}). When \code{dataset} (and optionally \code{year})
+is supplied, the scope is narrowed to the matching subtree under
+the chosen area; passing \code{dataset} without an explicit \code{what}
+defaults to \code{"raw"} for backwards compatibility.
 }
 \details{
 In interactive sessions the user is asked to confirm via

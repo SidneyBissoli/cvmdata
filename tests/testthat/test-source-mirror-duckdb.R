@@ -155,6 +155,126 @@ test_that("cvm_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
 
 # Latest year resolution --------------------------------------------------
 
+test_that("cvm_fetch concatenates multiple years from mirror", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+
+  entries <- list(
+    list(
+      name = "bpa__report_type.ind__year.2023__part-0.parquet",
+      parquet = dfp_fx()
+    ),
+    list(
+      name = "bpa__report_type.ind__year.2024__part-0.parquet",
+      parquet = dfp_fx()
+    )
+  )
+  mock <- build_mock(entries)
+  result <- httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa", report_type = "ind",
+              years = c(2023L, 2024L), source = "mirror")
+  )
+  expect_true(nrow(result) > 0L)
+  expect_setequal(unique(result$year), c(2023L, 2024L))
+})
+
+test_that("cvm_fetch aborts when no asset matches with years=NULL", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  # Inventory has bpa but caller asks for bpp; default years path
+  # walks resolve_mirror_years() into its zero-rows abort.
+  entries <- list(list(
+    name = "bpa__report_type.ind__year.2024__part-0.parquet",
+    parquet = dfp_fx()
+  ))
+  mock <- build_mock(entries)
+  expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      cvm_fetch("dfp", "bpp", report_type = "ind", source = "mirror")
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  entries <- list(list(
+    name = "bpa__report_type.ind__year.2024__part-0.parquet",
+    parquet = dfp_fx()
+  ))
+  mock <- function(req) {
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response_json(
+        status_code = 200L, body = fake_release(entries)
+      ))
+    }
+    httr2::response(status_code = 500L, body = "Server Error")
+  }
+  expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      cvm_fetch("dfp", "bpa", report_type = "ind",
+                years = 2024L, source = "mirror")
+    ),
+    class = "cvmdata_error_http"
+  )
+})
+
+test_that("mirror short-circuits when hash matches sidecar", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  entries <- list(
+    list(
+      name = "bpa__report_type.ind__year.2024__part-0.parquet",
+      parquet = dfp_fx()
+    ),
+    list(name = "__source_hash.json", parquet = NULL)
+  )
+  hash <- list(value = "stable-hash")
+  asset_calls <- 0L
+  mock <- function(req) {
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response_json(
+        status_code = 200L, body = fake_release(entries)
+      ))
+    }
+    if (grepl("__source_hash.json", req$url)) {
+      return(httr2::response_json(
+        status_code = 200L,
+        body = list(hash = hash$value, components = list())
+      ))
+    }
+    asset_calls <<- asset_calls + 1L
+    body_raw <- readBin(
+      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+    )
+    httr2::response(
+      status_code = 200L,
+      headers = list("Content-Type" = "application/octet-stream"),
+      body = body_raw
+    )
+  }
+  httr2::with_mocked_responses(
+    mock,
+    {
+      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+                source = "mirror")
+      cvmdata:::mirror_assets_cache_clear()
+      # Second call: sidecar matches, L3 retained, no asset re-fetch.
+      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+                source = "mirror")
+    }
+  )
+  expect_equal(asset_calls, 1L)
+})
+
 test_that("cvm_fetch resolves years=NULL to latest mirror year", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
@@ -339,4 +459,182 @@ test_that("mirror reuses the L3 cache on a second call", {
   )
   # The asset is downloaded only once; the second call reads from L3.
   expect_equal(asset_calls, 1L)
+})
+
+# L3 hash invalidation ----------------------------------------------------
+
+# Mock that always serves the same parquet body and returns a
+# configurable hash from the API.
+make_hash_mock <- function(entries, hash_holder) {
+  function(req) {
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response_json(
+        status_code = 200L, body = fake_release(entries)
+      ))
+    }
+    if (grepl("__source_hash.json", req$url)) {
+      return(httr2::response_json(
+        status_code = 200L,
+        body = list(hash = hash_holder$value, components = list())
+      ))
+    }
+    body_raw <- readBin(
+      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+    )
+    httr2::response(
+      status_code = 200L,
+      headers = list("Content-Type" = "application/octet-stream"),
+      body = body_raw
+    )
+  }
+}
+
+test_that("L3 sidecar is created on first fetch with a known hash", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  entries <- list(
+    list(
+      name = "bpa__report_type.ind__year.2024__part-0.parquet",
+      parquet = dfp_fx()
+    ),
+    list(name = "__source_hash.json", parquet = NULL)
+  )
+  hash <- list(value = "abc-first")
+  httr2::with_mocked_responses(
+    make_hash_mock(entries, hash),
+    cvm_fetch("dfp", "bpa", report_type = "ind",
+              years = 2024L, source = "mirror")
+  )
+  sidecar <- file.path(cache_root, "parquet", "dfp",
+                       "__source_hash.json")
+  expect_true(file.exists(sidecar))
+  expect_identical(readLines(sidecar), "abc-first")
+})
+
+test_that("L3 cache evicts the dataset tree when the hash changes", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  entries <- list(
+    list(
+      name = "bpa__report_type.ind__year.2024__part-0.parquet",
+      parquet = dfp_fx()
+    ),
+    list(name = "__source_hash.json", parquet = NULL)
+  )
+  hash <- list(value = "v1")
+  asset_calls <- 0L
+  mock <- function(req) {
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response_json(
+        status_code = 200L, body = fake_release(entries)
+      ))
+    }
+    if (grepl("__source_hash.json", req$url)) {
+      return(httr2::response_json(
+        status_code = 200L,
+        body = list(hash = hash$value, components = list())
+      ))
+    }
+    asset_calls <<- asset_calls + 1L
+    body_raw <- readBin(
+      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+    )
+    httr2::response(
+      status_code = 200L,
+      headers = list("Content-Type" = "application/octet-stream"),
+      body = body_raw
+    )
+  }
+
+  httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+              source = "mirror")
+  )
+  expect_equal(asset_calls, 1L)
+
+  # Flip the upstream hash and bust the session cache. The next call
+  # must evict the L3 tree and redownload.
+  hash$value <- "v2"
+  cvmdata:::mirror_assets_cache_clear()
+  httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+              source = "mirror")
+  )
+  expect_equal(asset_calls, 2L)
+  sidecar <- file.path(cache_root, "parquet", "dfp",
+                       "__source_hash.json")
+  expect_identical(readLines(sidecar), "v2")
+})
+
+test_that("L3 cache is left alone when current hash is NA", {
+  # Pre-populate the L3 with a sidecar carrying some hash. A release
+  # that does not publish __source_hash.json (NA on the client side)
+  # must not evict.
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  dataset_root <- file.path(cache_root, "parquet", "dfp")
+  dir.create(dataset_root, recursive = TRUE)
+  writeLines("legacy-hash", file.path(dataset_root, "__source_hash.json"))
+
+  entries <- list(list(
+    name = "bpa__report_type.ind__year.2024__part-0.parquet",
+    parquet = dfp_fx()
+  ))
+  mock <- build_mock(entries)  # no __source_hash.json asset
+  httr2::with_mocked_responses(
+    mock,
+    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+              source = "mirror")
+  )
+  expect_identical(
+    readLines(file.path(dataset_root, "__source_hash.json")),
+    "legacy-hash"
+  )
+})
+
+# cvm_cache_clear(what = "parquet") --------------------------------------
+
+test_that("cvm_cache_clear what = parquet drops the L3 tree only", {
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  # Seed both layers.
+  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  dir.create(raw_dir, recursive = TRUE)
+  writeLines("a", file.path(raw_dir, "marker.txt"))
+  parquet_dir <- file.path(cache_root, "parquet", "dfp", "bpa",
+                           "report_type=ind", "year=2024")
+  dir.create(parquet_dir, recursive = TRUE)
+  writeLines("b", file.path(parquet_dir, "part-0.parquet"))
+
+  cvm_cache_clear(what = "parquet", confirm = FALSE)
+
+  expect_false(dir.exists(file.path(cache_root, "parquet")))
+  expect_true(file.exists(file.path(raw_dir, "marker.txt")))
+})
+
+test_that("cvm_cache_clear what = parquet scoped by dataset", {
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  for (ds in c("dfp", "itr")) {
+    dir.create(file.path(cache_root, "parquet", ds), recursive = TRUE)
+    writeLines(ds, file.path(cache_root, "parquet", ds, "x.txt"))
+  }
+  cvm_cache_clear(what = "parquet", dataset = "dfp", confirm = FALSE)
+  expect_false(dir.exists(file.path(cache_root, "parquet", "dfp")))
+  expect_true(dir.exists(file.path(cache_root, "parquet", "itr")))
+})
+
+test_that("cvm_cache_clear rejects year with what = parquet", {
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+  expect_error(
+    cvm_cache_clear(what = "parquet", dataset = "dfp", year = 2024L,
+                    confirm = FALSE),
+    class = "cvmdata_error_input"
+  )
 })
