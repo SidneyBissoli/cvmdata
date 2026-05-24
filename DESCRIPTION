@@ -37,8 +37,10 @@ Imports:
     yaml
 Suggests:
     covr,
+    digest,
     dplyr,
     httptest2,
+    jsonlite,
     knitr,
     lintr,
     pkgdown,
