@@ -479,13 +479,49 @@ pede em cadência semanal; vignette/paper fixam release de pacote, não
 data arbitrária. Cron mantém só `latest`. Helper `mirror_tag_snapshot()`
 em `00-config.R` continua pronto para o uso manual em releases.
 
-Itens pendentes para Sessões 3.13-3.14:
+Itens entregues na Sessão 3.13:
+
+`R/source-mirror-duckdb.R` funcional. Backend lê parquets do release
+`mirror-<dataset>-latest` via GitHub REST API (inventário cacheado por
+sessão) + DuckDB local. Filter pushdown manual por asset name (Decisão 1
+= Alt 3 com refinamento de implementação: download → ler local, em vez
+de DuckDB httpfs direto, para robustez contra redirects do GitHub
+Releases em Windows). Colunas de partição `year` e `report_type`
+reanexadas via parser do nome do asset (Decisão 2 = Alt 1, parser tolera
+tanto `=` quanto a sanitização `.` que GitHub aplica).
+
+Cache L3 em
+`<cache>/parquet/<dataset>/<table>/[report_type=R/] year=Y/part-0.parquet`.
+Invalidação por hash via sidecar
+`<cache>/parquet/<dataset>/__source_hash.json`, que confronta o
+`__source_hash.json` publicado pelo ETL (Sessão 3.12). Quando o hash
+muda, o L3 inteiro do dataset é evicted antes da próxima leitura; quando
+o release é antigo e não publica hash (`NA_character_`), L3 é preservado
+por respeito a mirrors legados.
+
+`cvm_cache_clear(what = "parquet")` para evict só L3 (scoped
+opcionalmente por `dataset`). `year` rejeitado nesse modo porque o
+layout L3 aninha year sob table.
+
+Validação end-to-end (Tarefa C) batendo CVM vs Mirror em 4 chamadas
+(cad/dfp/itr/fre); colunas em comum têm tipos idênticos. Mirror traz
+`year`/`report_type` adicionais (reattach Decisão 2). Pequenas
+diferenças de nrow em datasets yearly refletem o gap entre o último cron
+(terça, 04h BRT) e a chamada live na CVM — feature esperada do snapshot
+semanal, não bug.
+
+`actions/checkout@v4` -\> `@v6` em `etl-mirror.yaml` para alinhar com os
+outros 4 workflows do repo (lint/R-CMD-check/ pkgdown/test-coverage).
+Trivial, isola a deprecation warning de Node.js 20 (2026-06-02).
+
+Cobertura subiu de 92.98% para **93.70%** (gate 90%). Branches restantes
+em mirror duckdb (87.25%) e util-mirror-assets (83.71%) são guards
+defensivos (DuckDB connection failure, etc.) e error paths
+conservadores; alcançá-los exige mocks de baixo valor.
+
+Itens pendentes para Sessão 3.14:
 
 Validação pre-publish com `pointblank`.
-
-`source-mirror-duckdb.R` funcional (DuckDB HTTP range requests com
-filter pushdown por `year` + `companies`); stub atual aborta com
-`cvmdata_error_input`. Sessão 3.13.
 
 Vignette `cache-and-mirror.Rmd`. Sessão 3.14.
 
