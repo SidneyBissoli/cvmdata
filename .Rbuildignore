@@ -7,7 +7,7 @@
 ^schemas_proto$
 ^cvmdata_.*\.md$
 ^cvmdata_rodada.*\.md$
-^PROMPT_CLAUDE_CODE_.*\.md$
+^PROMPT_CLAUDE_.*\.md$
 ^VERIFICACAO_.*\.md$
 ^CLAUDE\.md$
 ^ROADMAP\.md$
