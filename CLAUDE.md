@@ -362,6 +362,7 @@ cvmdata/
 │       └── test-*.R               # ~17 arquivos, mock HTTP via httr2
 │                                  #   with_mocked_responses + httptest2
 ├── inst/
+│   ├── CITATION                   # citação canônica do pacote
 │   ├── etl/                       # ETL do mirror (rodado por etl-mirror.yaml)
 │   │   ├── 00-config.R            # constantes + helpers compartilhados
 │   │   ├── 01-fetch-cvm.R         # baixa ZIPs anuais do portal CVM
@@ -386,7 +387,10 @@ cvmdata/
 │                                  #   build-mirror-test-fixtures.R,
 │                                  #   build-vignette-data.R) com auditorias
 │                                  #   one-shot (run-capacity-audit.R,
-│                                  #   validate-mirror-end-to-end.R,
+│                                  #   validate-mirror-end-to-end.R +
+│                                  #   validate-mirror-end-to-end.rds lido
+│                                  #   pelo article cache-and-mirror.Rmd em
+│                                  #   knit time CRAN-safe,
 │                                  #   mirror-capacity-audit.md). Apenas os
 │                                  #   build scripts são regenerados em ciclo
 │                                  #   normal (vide §12.1).
@@ -722,8 +726,8 @@ Cada commit deve deixar o pacote **verde em `devtools::check()`**:
 - **Não reabrir decisões travadas** (26 da 2.5, 7 da 2.6, 3 da 3.0, 4
   da 3.0.2, mais a Sessão 02 sobre `cvm_fetch()` como API principal e
   o portal de dados abertos como caminho default vs RAD/ENET, e as
-  decisões pós-3.4 anotadas no `ROADMAP.md`). Se acha que precisa
-  rever, perguntar antes de agir.
+  decisões pós-3.4 registradas em `NEWS.md` + histórico de commits).
+  Se acha que precisa rever, perguntar antes de agir.
 - **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**. Usar
   YAMLs validados em `inst/extdata/schemas/` (ou `schemas_proto/` para
   protótipos ainda não promovidos) ou perguntar.
