@@ -1,23 +1,36 @@
-# Schema YAML loader. One YAML per (dataset, table) lives in
-# `inst/extdata/schemas/<dataset>/<table>.yaml`. Format documented in
-# naming doc v03 §7.2 with the `meta_status` refinement from Rodada
-# 3.0.2 §4.1.
+# Schema YAML loader. One YAML per (group, dataset, table) lives in
+# `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. Format
+# documented in naming doc v03 §7.2 with the `meta_status` refinement
+# from Rodada 3.0.2 §4.1. The `<group>` segment was introduced in
+# Sessao 05 of v0.1.0.9000.
 
 # Resolve and load the YAML for one table. Returns a `cvm_table_schema`
 # S3 list with validated invariants. Errors of class
-# `cvmdata_error_input` (table not found) or `cvmdata_error_internal`
-# (malformed YAML).
+# `cvmdata_error_input` (table not found), `cvmdata_error_input_ambiguous`
+# (dataset/table present in more than one group with no explicit
+# `group`), or `cvmdata_error_internal` (malformed YAML).
 #
 # @param dataset Short dataset id, e.g. "cad".
 # @param table Snake-case table name, e.g. "companhias".
+# @param group Optional CKAN group slug (e.g. "companhias"). When
+#   `NULL` (default) the function resolves by uniqueness across the
+#   installed schema tree; when set, it loads
+#   `<group>/<dataset>/<table>.yaml` directly.
 # @return A list with the schema fields, of class `cvm_table_schema`.
-load_schema <- function(dataset, table) {
-  rel <- file.path("extdata", "schemas", dataset, paste0(table, ".yaml"))
-  path <- system.file(rel, package = "cvmdata")
-  if (!nzchar(path)) {
+load_schema <- function(dataset, table, group = NULL) {
+  resolved_group <- resolve_schema_group(dataset, table, group)
+  rel <- file.path(
+    "extdata", "schemas", resolved_group, dataset, paste0(table, ".yaml")
+  )
+  path <- file.path(.schemas_root(), resolved_group, dataset,
+                    paste0(table, ".yaml"))
+  if (!file.exists(path)) {
     cvmdata_abort(
       c(
-        "Schema not found for dataset {.val {dataset}}, table {.val {table}}.",
+        paste(
+          "Schema not found for {.val {resolved_group}}/{.val {dataset}}/",
+          "{.val {table}}."
+        ),
         "i" = "Looked for {.path {rel}} under the package's installed files."
       ),
       class = "cvmdata_error_input"
@@ -26,6 +39,59 @@ load_schema <- function(dataset, table) {
   raw <- read_schema_yaml(path)
   validate_schema(raw, dataset, table)
   structure(raw, class = c("cvm_table_schema", "list"))
+}
+
+# Resolve the group for a (dataset, table) pair, honouring an explicit
+# `group` argument when supplied and falling back to uniqueness across
+# the installed schema tree otherwise.
+resolve_schema_group <- function(dataset, table, group) {
+  if (!is.null(group)) {
+    if (!is.character(group) || length(group) != 1L || !nzchar(group)) {
+      cvmdata_abort(
+        c("{.arg group} must be a single non-empty string or NULL."),
+        class = "cvmdata_error_input"
+      )
+    }
+    return(group)
+  }
+  candidates <- list_schema_candidates(dataset, table)
+  if (!nrow(candidates)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Schema not found for dataset {.val {dataset}},",
+          "table {.val {table}}."
+        ),
+        "i" = paste(
+          "Pass {.arg group} explicitly, or check available datasets",
+          "via {.fn cvm_datasets}."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (nrow(candidates) > 1L) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Dataset {.val {dataset}}, table {.val {table}} exists in",
+          "{nrow(candidates)} groups: {.val {candidates$group}}."
+        ),
+        "i" = "Pass {.arg group} explicitly to disambiguate."
+      ),
+      class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
+    )
+  }
+  candidates$group
+}
+
+# Enumerate the groups where `<dataset>/<table>.yaml` exists. Returns a
+# data frame with a `group` column (zero or more rows). Reads from the
+# memoized schema tree built by `schema_tree()`.
+list_schema_candidates <- function(dataset, table) {
+  tree <- schema_tree()
+  hit <- tree[tree$dataset == dataset & tree$table == table, , drop = FALSE]
+  data.frame(group = hit$group, stringsAsFactors = FALSE)
 }
 
 # Read a YAML schema file forcing UTF-8 regardless of the user's

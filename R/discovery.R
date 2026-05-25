@@ -2,7 +2,7 @@
 #'
 #' Returns the dataset identifiers (e.g. `"cad"`, `"dfp"`) currently
 #' covered. Discovered from the schemas installed under
-#' `inst/extdata/schemas/`.
+#' `inst/extdata/schemas/<group>/<dataset>/`.
 #'
 #' @return A character vector of dataset ids, sorted alphabetically.
 #'
@@ -11,11 +11,7 @@
 #' @family discovery
 #' @export
 cvm_datasets <- function() {
-  root <- system.file("extdata", "schemas", package = "cvmdata")
-  if (!nzchar(root)) {
-    return(character(0L))
-  }
-  sort(list.dirs(root, recursive = FALSE, full.names = FALSE))
+  sort(unique(schema_tree()$dataset))
 }
 
 #' List the tables published in a dataset
@@ -36,10 +32,9 @@ cvm_tables <- function(dataset) {
       class = "cvmdata_error_input"
     )
   }
-  dir_path <- system.file(
-    "extdata", "schemas", dataset, package = "cvmdata"
-  )
-  if (!nzchar(dir_path)) {
+  tree <- schema_tree()
+  hit <- tree[tree$dataset == dataset, , drop = FALSE]
+  if (!nrow(hit)) {
     cvmdata_abort(
       c(
         "Unknown dataset {.val {dataset}}.",
@@ -48,8 +43,7 @@ cvm_tables <- function(dataset) {
       class = "cvmdata_error_input"
     )
   }
-  files <- list.files(dir_path, pattern = "\\.yaml$", full.names = FALSE)
-  sort(sub("\\.yaml$", "", files))
+  sort(hit$table)
 }
 
 #' Look up the CVM-published dictionary for a table

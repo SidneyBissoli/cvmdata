@@ -337,10 +337,7 @@ cvm_cache_clear <- function(what = "all",
       cvmdata_abort(
         c(
           "Unknown dataset {.val {dataset}}.",
-          "i" = paste(
-            "Known datasets in v0.1.0.9000:",
-            "{.val {names(.dataset_group_map)}}."
-          )
+          "i" = "Known datasets: {.val {known_datasets()}}."
         ),
         class = "cvmdata_error_input"
       )
@@ -851,12 +848,12 @@ cache_migrate_v0_1_to_v0_2 <- function(cache_root = cvm_cache_path()) {
     if (!dir.exists(layer_root)) {
       next
     }
-    for (dataset in names(.dataset_group_map)) {
+    for (dataset in known_datasets()) {
       src <- file.path(layer_root, dataset)
       if (!dir.exists(src)) {
         next
       }
-      group <- .dataset_group_map[[dataset]]
+      group <- dataset_group(dataset)
       dest <- file.path(layer_root, group, dataset)
       out <- c(out, list(list(src = src, dest = dest)))
     }
