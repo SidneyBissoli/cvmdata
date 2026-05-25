@@ -129,7 +129,13 @@ Plano de execução por fases.
 - [x] `devtools::check_win_devel()` enviado.
 - [~] `devtools::check_mac_release()` — pendente (504 transitório,
   retentar).
-- [ ] Submissão rOpenSci (pre-submission inquiry).
+- [ ] Submissão rOpenSci (pre-submission inquiry) — **deferida**
+  até fechar a decisão arquitetural de "grupos" da CVM e
+  eventual rename de `cvm_fetch()`. Vide bloco "Decisão
+  arquitetural em aberto" no topo da §2 do `CLAUDE.md`. Draft
+  inicial preservado localmente em
+  `data-raw/rOpenSci-presubmission-draft.md` (não pushed; será
+  reescrito quando a arquitetura fechar).
 - [ ] Aceitação rOpenSci.
 - [ ] Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).
 
