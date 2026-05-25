@@ -1,5 +1,19 @@
 # cvmdata 0.1.0.9000 (in development)
 
+## Bug fixes
+
+* `cvm_fetch()` and `cad_fetch()` no longer fail with the cryptic
+  `cvmdata_error_internal` "Got archive=, file=" when the R session
+  runs under `LC_CTYPE = "C"`. The schema loader now reads the bundled
+  YAMLs forcing UTF-8 instead of relying on the active locale, so
+  multibyte characters in the schema comment headers (e.g.
+  "Demonstração", "Exercício") never cause `yaml::read_yaml()` to
+  return `NULL`. A regression test under `LC_CTYPE = "C"` was added.
+* The PDF version of the package manual now builds cleanly on the
+  macOS R builder with the default pdflatex `inputenc` setup; a stray
+  U+2264 ("less than or equal to") character in the roxygen docs of
+  `cvm_codelist()` has been replaced by ASCII.
+
 # cvmdata 0.1.0 (2026-05-24)
 
 First public release. Covers the four core CVM publicly-traded-company
