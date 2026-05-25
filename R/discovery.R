@@ -63,6 +63,11 @@ cvm_tables <- function(dataset) {
 #'
 #' @param dataset Short dataset id (e.g. `"dfp"`).
 #' @param table Table name within the dataset (e.g. `"bpa"`).
+#' @param group Optional CKAN group slug (e.g. `"companhias"`). When
+#'   `NULL` (default) the function resolves by uniqueness across the
+#'   embedded snapshot. From v0.4 onward, datasets may exist in more
+#'   than one group; in that case omitting `group` aborts with
+#'   `cvmdata_error_input_ambiguous`.
 #'
 #' @return A tibble with one row per column of the table, columns
 #'   `campo` (snake-case name matching [cvm_fetch()] output),
@@ -76,7 +81,7 @@ cvm_tables <- function(dataset) {
 #' @family discovery
 #' @seealso [cvm_tables()]
 #' @export
-cvm_dictionary <- function(dataset, table) {
+cvm_dictionary <- function(dataset, table, group = NULL) {
   if (!is.character(dataset) || length(dataset) != 1L ||
         !nzchar(dataset)) {
     cvmdata_abort(
@@ -87,6 +92,13 @@ cvm_dictionary <- function(dataset, table) {
   if (!is.character(table) || length(table) != 1L || !nzchar(table)) {
     cvmdata_abort(
       c("{.arg table} must be a single non-empty string."),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (!is.null(group) &&
+        (!is.character(group) || length(group) != 1L || !nzchar(group))) {
+    cvmdata_abort(
+      c("{.arg group} must be a single non-empty string or NULL."),
       class = "cvmdata_error_input"
     )
   }
@@ -110,24 +122,23 @@ cvm_dictionary <- function(dataset, table) {
     snapshot$dataset == dataset & snapshot$table == table, ,
     drop = FALSE
   ]
+  if (!is.null(group)) {
+    hit <- hit[hit$group == group, , drop = FALSE]
+  }
   if (!nrow(hit)) {
-    available_datasets <- cvm_datasets()
-    if (!dataset %in% available_datasets) {
-      cvmdata_abort(
-        c(
-          "Unknown dataset {.val {dataset}}.",
-          "i" = "Available: {.val {available_datasets}}."
-        ),
-        class = "cvmdata_error_input"
-      )
-    }
-    available_tables <- cvm_tables(dataset)
+    handle_dictionary_miss(dataset, table, group)
+  }
+  resolved_groups <- unique(hit$group)
+  if (is.null(group) && length(resolved_groups) > 1L) {
     cvmdata_abort(
       c(
-        "No dictionary entries for {.val {dataset}}/{.val {table}}.",
-        "i" = "Tables in {.val {dataset}}: {.val {available_tables}}."
+        paste(
+          "Dataset {.val {dataset}}, table {.val {table}} exists in",
+          "{length(resolved_groups)} groups: {.val {resolved_groups}}."
+        ),
+        "i" = "Pass {.arg group} explicitly to disambiguate."
       ),
-      class = "cvmdata_error_input"
+      class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
     )
   }
   out <- tibble::tibble(
@@ -146,6 +157,39 @@ cvm_dictionary <- function(dataset, table) {
   out
 }
 
+# Centralized abort path for `cvm_dictionary()` lookups that come back
+# empty. Picks the most informative message based on what is actually
+# unknown (group, dataset, or table).
+handle_dictionary_miss <- function(dataset, table, group) {
+  available_datasets <- cvm_datasets()
+  if (!dataset %in% available_datasets) {
+    cvmdata_abort(
+      c(
+        "Unknown dataset {.val {dataset}}.",
+        "i" = "Available: {.val {available_datasets}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (!is.null(group) && !group %in% known_groups()) {
+    cvmdata_abort(
+      c(
+        "Unknown group {.val {group}}.",
+        "i" = "Available: {.val {known_groups()}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  available_tables <- cvm_tables(dataset)
+  cvmdata_abort(
+    c(
+      "No dictionary entries for {.val {dataset}}/{.val {table}}.",
+      "i" = "Tables in {.val {dataset}}: {.val {available_tables}}."
+    ),
+    class = "cvmdata_error_input"
+  )
+}
+
 #' Look up the codelist for a categorical column
 #'
 #' Returns the set of categorical values observed for a single
@@ -162,6 +206,11 @@ cvm_dictionary <- function(dataset, table) {
 #' @param dataset Short dataset id (e.g. `"cad"`).
 #' @param table Table name within the dataset (e.g. `"companhias"`).
 #' @param column Snake-case column name (e.g. `"sit"`).
+#' @param group Optional CKAN group slug (e.g. `"companhias"`). When
+#'   `NULL` (default) the function resolves by uniqueness across the
+#'   embedded snapshot. From v0.4 onward, datasets may exist in more
+#'   than one group; in that case omitting `group` aborts with
+#'   `cvmdata_error_input_ambiguous`.
 #'
 #' @return A tibble with one row per categorical value, sorted
 #'   alphabetically. Column: `value` (character).
@@ -171,7 +220,7 @@ cvm_dictionary <- function(dataset, table) {
 #' @family discovery
 #' @seealso [cvm_dictionary()]
 #' @export
-cvm_codelist <- function(dataset, table, column) {
+cvm_codelist <- function(dataset, table, column, group = NULL) {
   for (arg_name in c("dataset", "table", "column")) {
     val <- get(arg_name)
     if (!is.character(val) || length(val) != 1L || !nzchar(val)) {
@@ -180,6 +229,13 @@ cvm_codelist <- function(dataset, table, column) {
         class = "cvmdata_error_input"
       )
     }
+  }
+  if (!is.null(group) &&
+        (!is.character(group) || length(group) != 1L || !nzchar(group))) {
+    cvmdata_abort(
+      c("{.arg group} must be a single non-empty string or NULL."),
+      class = "cvmdata_error_input"
+    )
   }
   snapshot_path <- system.file(
     "extdata", "cvm_codelists_snapshot.csv", package = "cvmdata"
@@ -203,7 +259,23 @@ cvm_codelist <- function(dataset, table, column) {
       snapshot$campo == column, ,
     drop = FALSE
   ]
+  if (!is.null(group)) {
+    hit <- hit[hit$group == group, , drop = FALSE]
+  }
   if (nrow(hit)) {
+    if (is.null(group) && length(unique(hit$group)) > 1L) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Codelist for {.val {dataset}}/{.val {table}}/{.val {column}}",
+            "exists in {length(unique(hit$group))} groups:",
+            "{.val {unique(hit$group)}}."
+          ),
+          "i" = "Pass {.arg group} explicitly to disambiguate."
+        ),
+        class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
+      )
+    }
     return(tibble::tibble(value = hit$value))
   }
   if (!dataset %in% cvm_datasets()) {
@@ -211,6 +283,15 @@ cvm_codelist <- function(dataset, table, column) {
       c(
         "Unknown dataset {.val {dataset}}.",
         "i" = "Available: {.val {cvm_datasets()}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  if (!is.null(group) && !group %in% known_groups()) {
+    cvmdata_abort(
+      c(
+        "Unknown group {.val {group}}.",
+        "i" = "Available: {.val {known_groups()}}."
       ),
       class = "cvmdata_error_input"
     )
@@ -224,10 +305,12 @@ cvm_codelist <- function(dataset, table, column) {
       class = "cvmdata_error_input"
     )
   }
-  dict <- cvm_dictionary(dataset, table)
-  available_codes <- sort(unique(snapshot$campo[
-    snapshot$dataset == dataset & snapshot$table == table
-  ]))
+  dict <- cvm_dictionary(dataset, table, group = group)
+  table_rows <- snapshot$dataset == dataset & snapshot$table == table
+  if (!is.null(group)) {
+    table_rows <- table_rows & snapshot$group == group
+  }
+  available_codes <- sort(unique(snapshot$campo[table_rows]))
   if (column %in% dict$campo) {
     cvmdata_abort(
       c(
@@ -271,6 +354,7 @@ cvm_codelist <- function(dataset, table, column) {
   df <- readr::read_csv(
     path,
     col_types = readr::cols(
+      group   = readr::col_character(),
       dataset = readr::col_character(),
       table   = readr::col_character(),
       campo   = readr::col_character(),
@@ -293,6 +377,7 @@ cvm_codelist <- function(dataset, table, column) {
   df <- readr::read_csv(
     path,
     col_types = readr::cols(
+      group          = readr::col_character(),
       dataset        = readr::col_character(),
       table          = readr::col_character(),
       campo          = readr::col_character(),
