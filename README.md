@@ -1,7 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file. -->
 
-**English** \| [Português](README.pt-BR.md)
+**English** \|
+[Português](https://github.com/SidneyBissoli/cvmdata/blob/main/README.pt-BR.md)
 
 # cvmdata
 
@@ -405,13 +406,15 @@ Bug reports and feature requests:
 
 ## Contributing
 
-Pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for
-the development setup, the quality gate run on every commit, and the
+Pull requests are welcome. See
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/cvmdata/blob/main/CONTRIBUTING.md)
+for the development setup, the quality gate run on every commit, and the
 schema-YAML format used when adding a new dataset.
 
 Please note that the cvmdata project is released with a [Contributor
-Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project,
-you agree to abide by its terms.
+Code of
+Conduct](https://github.com/SidneyBissoli/cvmdata/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
 
 ## License
 
