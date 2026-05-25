@@ -139,7 +139,7 @@ test_that("invalid temporal_partitioning is rejected", {
 
 # load_schema(group = ...) ----------------------------------------------
 
-test_that("load_schema('cad','companhias', group='companhias') loads directly", {
+test_that("load_schema loads with explicit group = 'companhias'", {
   schema <- load_schema("cad", "companhias", group = "companhias")
   expect_s3_class(schema, "cvm_table_schema")
   expect_identical(schema$dataset, "cad")
@@ -168,7 +168,7 @@ test_that("load_schema rejects malformed group arg", {
   )
 })
 
-test_that("load_schema aborts cvmdata_error_input_ambiguous on a fixture root", {
+test_that("load_schema aborts cvmdata_error_input_ambiguous", {
   fixture_root <- testthat::test_path("fixtures", "schemas-ambiguous")
   withr::local_options(cvmdata.schema_root = fixture_root)
   # The schema_tree cache is keyed by the resolved root path so the

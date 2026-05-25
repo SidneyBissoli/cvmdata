@@ -4,7 +4,7 @@
 \alias{cvm_codelist}
 \title{Look up the codelist for a categorical column}
 \usage{
-cvm_codelist(dataset, table, column)
+cvm_codelist(dataset, table, column, group = NULL)
 }
 \arguments{
 \item{dataset}{Short dataset id (e.g. \code{"cad"}).}
@@ -12,6 +12,12 @@ cvm_codelist(dataset, table, column)
 \item{table}{Table name within the dataset (e.g. \code{"companhias"}).}
 
 \item{column}{Snake-case column name (e.g. \code{"sit"}).}
+
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}). When
+\code{NULL} (default) the function resolves by uniqueness across the
+embedded snapshot. From v0.4 onward, datasets may exist in more
+than one group; in that case omitting \code{group} aborts with
+\code{cvmdata_error_input_ambiguous}.}
 }
 \value{
 A tibble with one row per categorical value, sorted

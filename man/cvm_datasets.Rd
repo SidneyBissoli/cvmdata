@@ -12,7 +12,7 @@ A character vector of dataset ids, sorted alphabetically.
 \description{
 Returns the dataset identifiers (e.g. \code{"cad"}, \code{"dfp"}) currently
 covered. Discovered from the schemas installed under
-\verb{inst/extdata/schemas/}.
+\verb{inst/extdata/schemas/<group>/<dataset>/}.
 }
 \examples{
 cvm_datasets()
