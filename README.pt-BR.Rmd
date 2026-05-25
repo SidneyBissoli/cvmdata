@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-[English](README.md) | **Português**
+[English](https://github.com/SidneyBissoli/cvmdata/blob/main/README.md) | **Português**
 
 # cvmdata
 
@@ -178,14 +178,14 @@ Reporte bugs e peça features em
 ## Como contribuir
 
 Pull requests são bem-vindas. Veja
-[CONTRIBUTING.md](CONTRIBUTING.md) (em inglês, por convenção
-rOpenSci) para o setup de desenvolvimento, o gate de qualidade
-rodado a cada commit, e o formato dos schemas YAML usados ao
-adicionar um novo dataset.
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/cvmdata/blob/main/CONTRIBUTING.md)
+(em inglês, por convenção rOpenSci) para o setup de desenvolvimento,
+o gate de qualidade rodado a cada commit, e o formato dos schemas
+YAML usados ao adicionar um novo dataset.
 
 O projeto adota o
-[Código de Conduta do Contribuidor](CODE_OF_CONDUCT.md) (em
-inglês). Ao contribuir, você concorda em respeitar seus termos.
+[Código de Conduta do Contribuidor](https://github.com/SidneyBissoli/cvmdata/blob/main/CODE_OF_CONDUCT.md)
+(em inglês). Ao contribuir, você concorda em respeitar seus termos.
 
 ## Licença
 
