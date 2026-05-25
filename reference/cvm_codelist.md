@@ -9,7 +9,7 @@ CSVs.
 ## Usage
 
 ``` r
-cvm_codelist(dataset, table, column)
+cvm_codelist(dataset, table, column, group = NULL)
 ```
 
 ## Arguments
@@ -25,6 +25,13 @@ cvm_codelist(dataset, table, column)
 - column:
 
   Snake-case column name (e.g. `"sit"`).
+
+- group:
+
+  Optional CKAN group slug (e.g. `"companhias"`). When `NULL` (default)
+  the function resolves by uniqueness across the embedded snapshot. From
+  v0.4 onward, datasets may exist in more than one group; in that case
+  omitting `group` aborts with `cvmdata_error_input_ambiguous`.
 
 ## Value
 

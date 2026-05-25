@@ -26,6 +26,39 @@
   `what = "all"` overrides the filter; otherwise the target path is
   composed as `<cache>/<what>/<group>/<dataset>/<year>/`, with each
   segment becoming optional from the right.
+- Schema YAML files moved from
+  `inst/extdata/schemas/<dataset>/<table>.yaml` to
+  `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. The internal
+  loader `load_schema()` gained an optional `group` argument; when
+  omitted (the v0.1.0.9000 path) it resolves by uniqueness across the
+  installed schema tree, so existing calls compile unchanged. The
+  constant `.dataset_group_map` shipped by the previous release as
+  technical debt has been removed – `dataset_group()`, `known_groups()`
+  and the new `known_datasets()` now walk the installed schema tree on
+  first call and memoize the result per R session.
+- `cvm_dictionary_snapshot.csv` and `cvm_codelists_snapshot.csv` gained
+  a `group` column as the first key column. Composite key changed from
+  `(dataset, table, ...)` to `(group, dataset, table, ...)`. The bundled
+  CSVs were regenerated against the live CVM portal; aside from the new
+  column, the dictionary snapshot is byte-identical to the previous
+  build and the codelists snapshot reflects organic drift in a handful
+  of FRE categorical columns.
+- [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+  and
+  [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
+  gained an optional `group` argument. When omitted, both functions
+  resolve by uniqueness across the embedded snapshot; from v0.4 onward,
+  datasets present in more than one group will abort with
+  `cvmdata_error_input_ambiguous` (a new condition class that inherits
+  from `cvmdata_error_input`).
+- New condition class `cvmdata_error_input_ambiguous` (inherits from
+  `cvmdata_error_input`, which in turn inherits from `cvmdata_error`).
+  Emitted by `load_schema()`, `dataset_group()`,
+  [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+  and
+  [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
+  when a `(dataset, table)` resolution returns more than one candidate
+  group and the caller did not supply `group` to disambiguate.
 
 ### Bug fixes
 

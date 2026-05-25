@@ -2,7 +2,7 @@
 
 Returns the dataset identifiers (e.g. `"cad"`, `"dfp"`) currently
 covered. Discovered from the schemas installed under
-`inst/extdata/schemas/`.
+`inst/extdata/schemas/<group>/<dataset>/`.
 
 ## Usage
 

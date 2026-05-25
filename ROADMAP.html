@@ -164,15 +164,19 @@
 <li><label><input type="checkbox" checked><code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> reporta coluna <code>group</code>.</label></li>
 <li><label><input type="checkbox" checked><code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> ganha argumento <code>group = NULL</code>.</label></li>
 <li><label><input type="checkbox" checked>Testes: cache vazio, cache antigo, cache misto, arquivo conflitante (<code>cvmdata_error_internal</code> + instrução de <code>cvm_cache_clear("all")</code> manual).</label></li>
+<li><label><input type="checkbox" checked><code>R/util-group-lookup.R</code> novo com lookup constante <code>.dataset_group_map</code> + funções internas <code>dataset_group()</code> e <code>known_groups()</code>. Tabela documentada como dívida técnica a ser substituída por lookup schema-driven na Sessão 05.</label></li>
+<li><label><input type="checkbox" checked>Entrada em <code>NEWS.md</code> sob “Internal” da <code>0.1.0.9000</code> documentando o novo layout, a migração automática, a coluna <code>group</code> em <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> e o argumento <code>group</code> em <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code>.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-05--schemas--dictionarycodelist-migration">Sessão 05 — Schemas + dictionary/codelist migration<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-05--schemas--dictionarycodelist-migration"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox"><code>git mv inst/extdata/schemas/{cad,dfp,itr,fre}/</code> → <code>inst/extdata/schemas/companhias/{cad,dfp,itr,fre}/</code>.</label></li>
-<li><label><input type="checkbox"><code>load_schema()</code> aceita <code>group</code> (opcional com unicidade).</label></li>
-<li><label><input type="checkbox"><code>cvm_dictionary_snapshot.csv</code> regenerado com <code>group</code> como primeira coluna; gerador em <code>data-raw/build-dictionary-snapshot.R</code> atualizado.</label></li>
-<li><label><input type="checkbox"><code>cvm_codelists_snapshot.csv</code> regenerado com <code>group</code> como primeira coluna; gerador em <code>data-raw/build-codelists-snapshot.R</code> atualizado.</label></li>
-<li><label><input type="checkbox"><code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code> aceitam <code>group</code>.</label></li>
-<li><label><input type="checkbox">Testes de regressão: snapshots batem com versão anterior módulo nova coluna.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked><code>git mv inst/extdata/schemas/{cad,dfp,itr,fre}/</code> → <code>inst/extdata/schemas/companhias/{cad,dfp,itr,fre}/</code>.</label></li>
+<li><label><input type="checkbox" checked><code>load_schema()</code> aceita <code>group</code> (opcional com unicidade; ambiguidade aborta com <code>cvmdata_error_input_ambiguous</code> listando os grupos onde <code>(dataset, table)</code> ocorre).</label></li>
+<li><label><input type="checkbox" checked><code>R/util-group-lookup.R</code> reescrito como lookup <strong>schema-driven</strong> (lendo <code>list.dirs(inst/extdata/schemas/)</code> com memoização por sessão), substituindo a tabela constante <code>.dataset_group_map</code> deixada como dívida técnica pela Sessão 04.</label></li>
+<li><label><input type="checkbox" checked>Nova classe de condição <code>cvmdata_error_input_ambiguous</code> (herda de <code>cvmdata_error_input</code>), introduzida em <code>load_schema()</code> e reutilizável por <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code> / <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code> / futuras funções de descoberta.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_dictionary_snapshot.csv</code> regenerado com <code>group</code> como primeira coluna; gerador em <code>data-raw/build-dictionary-snapshot.R</code> atualizado.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_codelists_snapshot.csv</code> regenerado com <code>group</code> como primeira coluna; gerador em <code>data-raw/build-codelists-snapshot.R</code> atualizado.</label></li>
+<li><label><input type="checkbox" checked><code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code> aceitam <code>group</code>.</label></li>
+<li><label><input type="checkbox" checked>Testes de regressão: snapshots batem com versão anterior módulo nova coluna.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-06--rename--deprecation-abrupta--argumentos-no-singular">Sessão 06 — Rename + deprecation abrupta + argumentos no singular<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-06--rename--deprecation-abrupta--argumentos-no-singular"></a></h3>
@@ -208,11 +212,7 @@
 <li><label><input type="checkbox">Testes de signature + dispatch + abort previsto para cada.</label></li>
 <li><label><input type="checkbox">Documentação roxygen completa, <code>@examples</code> marcados <code>@examplesIf FALSE</code>.</label></li>
 <li><label><input type="checkbox"><code>_pkgdown.yml</code> lista as 5 funções em Reference com nota de estado.</label></li>
-<li>
-<label><input type="checkbox">Classes de condição novas:</label>
-<ul><li><code>cvmdata_error_input_group</code></li>
-<li><code>cvmdata_error_input_ambiguous</code></li>
-</ul></li>
+<li><label><input type="checkbox">Classe de condição nova <code>cvmdata_error_input_group</code> (<code>cvmdata_error_input_ambiguous</code> já vem da Sessão 05).</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-08--discovery--cvm_groups--etl-release-rename">Sessão 08 — Discovery + cvm_groups() + ETL release rename<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-08--discovery--cvm_groups--etl-release-rename"></a></h3>

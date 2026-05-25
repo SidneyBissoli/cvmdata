@@ -65,7 +65,7 @@ offline from the CVM META resources by
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cvm_dictionary</span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cvm_dictionary</span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,6 +78,14 @@ offline from the CVM META resources by
 
 <dt id="arg-table">table<a class="anchor" aria-label="anchor" href="#arg-table"></a></dt>
 <dd><p>Table name within the dataset (e.g. <code>"bpa"</code>).</p></dd>
+
+
+<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dd><p>Optional CKAN group slug (e.g. <code>"companhias"</code>). When
+<code>NULL</code> (default) the function resolves by uniqueness across the
+embedded snapshot. From v0.4 onward, datasets may exist in more
+than one group; in that case omitting <code>group</code> aborts with
+<code>cvmdata_error_input_ambiguous</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

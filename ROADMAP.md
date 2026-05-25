@@ -257,12 +257,38 @@ Testes: cache vazio, cache antigo, cache misto, arquivo conflitante
 (`cvmdata_error_internal` + instrução de `cvm_cache_clear("all")`
 manual).
 
+`R/util-group-lookup.R` novo com lookup constante `.dataset_group_map` +
+funções internas `dataset_group()` e `known_groups()`. Tabela
+documentada como dívida técnica a ser substituída por lookup
+schema-driven na Sessão 05.
+
+Entrada em `NEWS.md` sob “Internal” da `0.1.0.9000` documentando o novo
+layout, a migração automática, a coluna `group` em
+[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+e o argumento `group` em
+[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md).
+
 ### Sessão 05 — Schemas + dictionary/codelist migration
 
 `git mv inst/extdata/schemas/{cad,dfp,itr,fre}/` →
 `inst/extdata/schemas/companhias/{cad,dfp,itr,fre}/`.
 
-`load_schema()` aceita `group` (opcional com unicidade).
+`load_schema()` aceita `group` (opcional com unicidade; ambiguidade
+aborta com `cvmdata_error_input_ambiguous` listando os grupos onde
+`(dataset, table)` ocorre).
+
+`R/util-group-lookup.R` reescrito como lookup **schema-driven** (lendo
+`list.dirs(inst/extdata/schemas/)` com memoização por sessão),
+substituindo a tabela constante `.dataset_group_map` deixada como dívida
+técnica pela Sessão 04.
+
+Nova classe de condição `cvmdata_error_input_ambiguous` (herda de
+`cvmdata_error_input`), introduzida em `load_schema()` e reutilizável
+por
+[`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+/
+[`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
+/ futuras funções de descoberta.
 
 `cvm_dictionary_snapshot.csv` regenerado com `group` como primeira
 coluna; gerador em `data-raw/build-dictionary-snapshot.R` atualizado.
@@ -327,10 +353,8 @@ Documentação roxygen completa, `@examples` marcados `@examplesIf FALSE`.
 
 `_pkgdown.yml` lista as 5 funções em Reference com nota de estado.
 
-Classes de condição novas:
-
-- `cvmdata_error_input_group`
-- `cvmdata_error_input_ambiguous`
+Classe de condição nova `cvmdata_error_input_group`
+(`cvmdata_error_input_ambiguous` já vem da Sessão 05).
 
 ### Sessão 08 — Discovery + cvm_groups() + ETL release rename
 

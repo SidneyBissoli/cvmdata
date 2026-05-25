@@ -62,7 +62,7 @@ from the CVM open-data CSVs.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cvm_codelist</span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, <span class="va">column</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cvm_codelist</span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, <span class="va">column</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -79,6 +79,14 @@ from the CVM open-data CSVs.</p>
 
 <dt id="arg-column">column<a class="anchor" aria-label="anchor" href="#arg-column"></a></dt>
 <dd><p>Snake-case column name (e.g. <code>"sit"</code>).</p></dd>
+
+
+<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dd><p>Optional CKAN group slug (e.g. <code>"companhias"</code>). When
+<code>NULL</code> (default) the function resolves by uniqueness across the
+embedded snapshot. From v0.4 onward, datasets may exist in more
+than one group; in that case omitting <code>group</code> aborts with
+<code>cvmdata_error_input_ambiguous</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

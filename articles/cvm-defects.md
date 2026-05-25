@@ -77,37 +77,9 @@ declares the transformation, and the package returns absolute reais with
 yaml::read_yaml(system.file(
   "extdata", "schemas", "dfp", "bpa.yaml", package = "cvmdata"
 ))$transformations
-#> [[1]]
-#> [[1]]$column
-#> [1] "vl_conta"
-#> 
-#> [[1]]$action
-#> [1] "multiply_by_scale"
-#> 
-#> [[1]]$scale_column
-#> [1] "escala_moeda"
-#> 
-#> [[1]]$note
-#> [1] "VL_CONTA vem na escala de ESCALA_MOEDA. Multiplicado por UNIDADE=1, MIL=1e3, MILHÃO=1e6 ou BILHÃO=1e9 para retornar em reais absolutos."
-#> 
-#> 
-#> [[2]]
-#> [[2]]$column
-#> [1] "escala_moeda"
-#> 
-#> [[2]]$action
-#> [1] "drop"
-#> 
-#> [[2]]$note
-#> [1] "Removida após ser internalizada em vl_conta."
-#> 
-#> 
-#> [[3]]
-#> [[3]]$action
-#> [1] "keep_latest_version"
-#> 
-#> [[3]]$note
-#> [1] "Mantém apenas o registro de maior VERSAO por (cnpj_cia, dt_refer)."
+#> Warning in file(file, "rt", encoding = fileEncoding): file("") only supports
+#> open = "w+" and open = "w+b": using the former
+#> NULL
 ```
 
 ``` r
@@ -117,7 +89,7 @@ bpa <- cvm_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 13:51:12.313201
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:29.269307
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -139,7 +111,7 @@ cvm_fetch("fre", "empregado_PCD",
           companies = "1023", years = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 13:51:15.59181
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:34.075032
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -169,12 +141,9 @@ returning:
 yaml::read_yaml(system.file(
   "extdata", "schemas", "fre", "auditor.yaml", package = "cvmdata"
 ))$transformations
-#> [[1]]
-#> [[1]]$action
-#> [1] "keep_latest_version"
-#> 
-#> [[1]]$note
-#> [1] "Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia)."
+#> Warning in file(file, "rt", encoding = fileEncoding): file("") only supports
+#> open = "w+" and open = "w+b": using the former
+#> NULL
 ```
 
 Result: at most one row per filing key in the returned tibble.

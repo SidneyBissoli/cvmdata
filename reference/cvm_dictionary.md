@@ -10,7 +10,7 @@ offline from the CVM META resources by
 ## Usage
 
 ``` r
-cvm_dictionary(dataset, table)
+cvm_dictionary(dataset, table, group = NULL)
 ```
 
 ## Arguments
@@ -22,6 +22,13 @@ cvm_dictionary(dataset, table)
 - table:
 
   Table name within the dataset (e.g. `"bpa"`).
+
+- group:
+
+  Optional CKAN group slug (e.g. `"companhias"`). When `NULL` (default)
+  the function resolves by uniqueness across the embedded snapshot. From
+  v0.4 onward, datasets may exist in more than one group; in that case
+  omitting `group` aborts with `cvmdata_error_input_ambiguous`.
 
 ## Value
 
