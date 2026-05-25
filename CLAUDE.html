@@ -319,6 +319,7 @@
 │       └── test-*.R               # ~17 arquivos, mock HTTP via httr2
 │                                  #   with_mocked_responses + httptest2
 ├── inst/
+│   ├── CITATION                   # citação canônica do pacote
 │   ├── etl/                       # ETL do mirror (rodado por etl-mirror.yaml)
 │   │   ├── 00-config.R            # constantes + helpers compartilhados
 │   │   ├── 01-fetch-cvm.R         # baixa ZIPs anuais do portal CVM
@@ -343,7 +344,10 @@
 │                                  #   build-mirror-test-fixtures.R,
 │                                  #   build-vignette-data.R) com auditorias
 │                                  #   one-shot (run-capacity-audit.R,
-│                                  #   validate-mirror-end-to-end.R,
+│                                  #   validate-mirror-end-to-end.R +
+│                                  #   validate-mirror-end-to-end.rds lido
+│                                  #   pelo article cache-and-mirror.Rmd em
+│                                  #   knit time CRAN-safe,
 │                                  #   mirror-capacity-audit.md). Apenas os
 │                                  #   build scripts são regenerados em ciclo
 │                                  #   normal (vide §12.1).
@@ -589,7 +593,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <li>
 <strong>Estado atual de execução vive em <code>ROADMAP.md</code></strong> — sessão por sessão, fase por fase. <code>CLAUDE.md</code> não duplica status; consulta o roadmap antes de assumir que algo está ou não entregue.</li>
 <li>
-<strong>Não reabrir decisões travadas</strong> (26 da 2.5, 7 da 2.6, 3 da 3.0, 4 da 3.0.2, mais a Sessão 02 sobre <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> como API principal e o portal de dados abertos como caminho default vs RAD/ENET, e as decisões pós-3.4 anotadas no <code>ROADMAP.md</code>). Se acha que precisa rever, perguntar antes de agir.</li>
+<strong>Não reabrir decisões travadas</strong> (26 da 2.5, 7 da 2.6, 3 da 3.0, 4 da 3.0.2, mais a Sessão 02 sobre <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> como API principal e o portal de dados abertos como caminho default vs RAD/ENET, e as decisões pós-3.4 registradas em <code>NEWS.md</code> + histórico de commits). Se acha que precisa rever, perguntar antes de agir.</li>
 <li>
 <strong>Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas</strong>. Usar YAMLs validados em <code>inst/extdata/schemas/</code> (ou <code>schemas_proto/</code> para protótipos ainda não promovidos) ou perguntar.</li>
 </ul><div class="section level3">
