@@ -62,14 +62,21 @@ mirror_workspace <- function() {
 
 # Schema lookup --------------------------------------------------------
 
-# Installed schemas live under inst/extdata/schemas/<dataset>/*.yaml.
-# This helper finds them whether the package is loaded via devtools or
-# installed normally.
+# Installed schemas live under
+# `inst/extdata/schemas/<group>/<dataset>/*.yaml` since Sessao 05. This
+# helper resolves the group via the package's internal `dataset_group()`
+# lookup and returns the absolute directory, whether the package is
+# loaded via devtools or installed normally.
 mirror_schema_dir <- function(dataset) {
-  path <- system.file("extdata", "schemas", dataset, package = "cvmdata")
+  group <- cvmdata:::dataset_group(dataset)
+  path <- system.file(
+    "extdata", "schemas", group, dataset, package = "cvmdata"
+  )
   if (!nzchar(path) || !dir.exists(path)) {
-    stop(sprintf("Schema directory not found for dataset '%s'", dataset),
-         call. = FALSE)
+    stop(sprintf(
+      "Schema directory not found for dataset '%s' in group '%s'",
+      dataset, group
+    ), call. = FALSE)
   }
   path
 }
