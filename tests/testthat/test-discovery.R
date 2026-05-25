@@ -166,6 +166,65 @@ test_that("cvm_codelist 'Unknown column' tolerates table with zero codes", {
   )
 })
 
+# cvm_dictionary(group = ...) -------------------------------------------
+
+test_that("cvm_dictionary accepts explicit group = 'companhias'", {
+  d <- cvm_dictionary("dfp", "bpa", group = "companhias")
+  expect_s3_class(d, "tbl_df")
+  expect_gt(nrow(d), 0L)
+  expect_named(
+    d,
+    c("campo", "campo_original", "descricao", "dominio", "tipo_dados",
+      "tamanho", "precisao", "scale")
+  )
+})
+
+test_that("cvm_dictionary with unknown group aborts cvmdata_error_input", {
+  expect_error(
+    cvm_dictionary("dfp", "bpa", group = "fundos-de-investimento"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_dictionary rejects malformed group arg", {
+  expect_error(
+    cvm_dictionary("dfp", "bpa", group = ""),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_dictionary("dfp", "bpa", group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
+})
+
+# cvm_codelist(group = ...) ---------------------------------------------
+
+test_that("cvm_codelist accepts explicit group = 'companhias'", {
+  cl <- cvm_codelist("cad", "companhias", "sit", group = "companhias")
+  expect_s3_class(cl, "tbl_df")
+  expect_named(cl, "value")
+  expect_gte(nrow(cl), 2L)
+})
+
+test_that("cvm_codelist with unknown group aborts cvmdata_error_input", {
+  expect_error(
+    cvm_codelist("cad", "companhias", "sit",
+                 group = "fundos-de-investimento"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_codelist rejects malformed group arg", {
+  expect_error(
+    cvm_codelist("cad", "companhias", "sit", group = ""),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_codelist("cad", "companhias", "sit", group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
+})
+
 # cvm_dataset_years() ----------------------------------------------------
 
 test_that("cvm_dataset_years returns NA for non-yearly dataset", {
