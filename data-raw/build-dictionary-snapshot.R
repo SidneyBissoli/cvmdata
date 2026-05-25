@@ -136,25 +136,33 @@ parse_meta_txt <- function(path) {
 # Returns list(rows = <main tibble>, inventory = <per-dataset stats>).
 build_dictionary_snapshot <- function() {
   schemas_root <- file.path("inst", "extdata", "schemas")
-  datasets <- sort(
+  groups <- sort(
     list.dirs(schemas_root, recursive = FALSE, full.names = FALSE)
   )
 
-  # Collect (dataset, table, meta_status, url, expected_field_names)
+  # Collect (group, dataset, table, meta_status, url,
+  # expected_field_names) by walking <group>/<dataset>/<table>.yaml.
   yamls <- list()
-  for (ds in datasets) {
-    yaml_files <- list.files(
-      file.path(schemas_root, ds), pattern = "\\.yaml$", full.names = TRUE
-    )
-    for (yp in yaml_files) {
-      y <- yaml::read_yaml(yp)
-      yamls[[length(yamls) + 1L]] <- list(
-        dataset = ds,
-        table = y$table,
-        meta_status = y$meta_status %||% "available",
-        cvm_dictionary_url = y$cvm_dictionary_url,
-        expected_field_names = y$expected_field_names
+  for (g in groups) {
+    datasets <- sort(list.dirs(
+      file.path(schemas_root, g), recursive = FALSE, full.names = FALSE
+    ))
+    for (ds in datasets) {
+      yaml_files <- list.files(
+        file.path(schemas_root, g, ds), pattern = "\\.yaml$",
+        full.names = TRUE
       )
+      for (yp in yaml_files) {
+        y <- yaml::read_yaml(yp)
+        yamls[[length(yamls) + 1L]] <- list(
+          group = g,
+          dataset = ds,
+          table = y$table,
+          meta_status = y$meta_status %||% "available",
+          cvm_dictionary_url = y$cvm_dictionary_url,
+          expected_field_names = y$expected_field_names
+        )
+      }
     }
   }
 
@@ -177,6 +185,7 @@ build_dictionary_snapshot <- function() {
         ))
       }
       all_rows[[length(all_rows) + 1L]] <- tibble::tibble(
+        group          = info$group,
         dataset        = info$dataset,
         table          = info$table,
         campo          = tolower(fields),
@@ -247,24 +256,34 @@ build_dictionary_snapshot <- function() {
 
     all_rows[[length(all_rows) + 1L]] <- entries |>
       dplyr::mutate(
+        group       = info$group,
         dataset     = info$dataset,
         table       = info$table,
         campo       = tolower(.data$campo_original),
         meta_status = "available"
       ) |>
       dplyr::select(
-        dataset, table, campo, campo_original, descricao, dominio,
+        group, dataset, table, campo, campo_original, descricao, dominio,
         tipo_dados, tamanho, precisao, scale, meta_status
       )
   }
 
   rows <- dplyr::bind_rows(all_rows)
 
-  # Inventory: per dataset, count META .txt entries actually present
-  # in the published source (ZIP archive or single .txt).
+  # Inventory: per (group, dataset), count META .txt entries actually
+  # present in the published source (ZIP archive or single .txt).
   inventory <- list()
-  for (ds in datasets) {
-    yamls_ds <- Filter(function(y) y$dataset == ds, yamls)
+  pairs <- unique(data.frame(
+    group   = vapply(yamls, `[[`, character(1L), "group"),
+    dataset = vapply(yamls, `[[`, character(1L), "dataset"),
+    stringsAsFactors = FALSE
+  ))
+  for (i in seq_len(nrow(pairs))) {
+    g <- pairs$group[i]
+    ds <- pairs$dataset[i]
+    yamls_ds <- Filter(function(y) {
+      identical(y$group, g) && identical(y$dataset, ds)
+    }, yamls)
     urls <- unique(unlist(lapply(yamls_ds, function(y) {
       y$cvm_dictionary_url
     })))
@@ -298,6 +317,7 @@ build_dictionary_snapshot <- function() {
       logical(1L)
     ))
     inventory[[length(inventory) + 1L]] <- tibble::tibble(
+      group = g,
       dataset = ds,
       n_meta_entries_no_zip = n_entries,
       n_tabelas_com_yaml = n_tables_yaml,

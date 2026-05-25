@@ -192,6 +192,7 @@ build_codelists_snapshot <- function() {
     values <- parse_enum_values(dict$dominio[i])
     if (!length(values)) next
     enum_rows[[length(enum_rows) + 1L]] <- tibble::tibble(
+      group   = dict$group[i],
       dataset = dict$dataset[i],
       table   = dict$table[i],
       campo   = dict$campo[i],
@@ -201,7 +202,7 @@ build_codelists_snapshot <- function() {
   }
   enum_df <- dplyr::bind_rows(enum_rows)
   cli::cli_alert_info(
-    "Enumerated columns: {.val {dplyr::n_distinct(paste(enum_df$dataset, enum_df$table, enum_df$campo))}}; ",
+    "Enumerated columns: {.val {dplyr::n_distinct(paste(enum_df$group, enum_df$dataset, enum_df$table, enum_df$campo))}}; ",
     "values: {.val {nrow(enum_df)}}."
   )
 
@@ -221,17 +222,17 @@ build_codelists_snapshot <- function() {
   excluded <- vapply(candidates$campo, is_excluded_column, logical(1L))
   candidates <- candidates[!excluded, , drop = FALSE]
   enum_keys <- if (!is.null(enum_df) && nrow(enum_df)) {
-    paste(enum_df$dataset, enum_df$table, enum_df$campo)
+    paste(enum_df$group, enum_df$dataset, enum_df$table, enum_df$campo)
   } else {
     character(0L)
   }
   candidates <- candidates[
-    !(paste(candidates$dataset, candidates$table, candidates$campo) %in%
-        enum_keys),
+    !(paste(candidates$group, candidates$dataset, candidates$table,
+            candidates$campo) %in% enum_keys),
     , drop = FALSE
   ]
   cli::cli_alert_info(
-    "Candidate (dataset,table,campo) for cardinality test: {.val {nrow(candidates)}}."
+    "Candidate (group,dataset,table,campo) for cardinality test: {.val {nrow(candidates)}}."
   )
 
   # Resolve latest year per dataset (only for yearly-partitioned ones).
@@ -250,19 +251,23 @@ build_codelists_snapshot <- function() {
     }
   }
 
-  # Group candidates by (dataset, table); fetch CSV once per group.
-  groups <- split(
+  # Group candidates by (group, dataset, table); fetch CSV once per
+  # bucket. `bucket_key` avoids the variable name `groups`, which would
+  # shadow the group-dimension concept.
+  buckets <- split(
     candidates,
-    paste(candidates$dataset, candidates$table, sep = "/")
+    paste(candidates$group, candidates$dataset, candidates$table,
+          sep = "/")
   )
 
   card_rows <- list()
-  for (gkey in names(groups)) {
-    g <- groups[[gkey]]
-    dataset <- g$dataset[1L]
-    table <- g$table[1L]
+  for (gkey in names(buckets)) {
+    b <- buckets[[gkey]]
+    grp <- b$group[1L]
+    dataset <- b$dataset[1L]
+    table <- b$table[1L]
     cli::cli_alert_info(
-      "Downloading {.val {dataset}}/{.val {table}}..."
+      "Downloading {.val {grp}}/{.val {dataset}}/{.val {table}}..."
     )
     csv_path <- tryCatch(
       quietly(resolve_csv_path(dataset, table, year_lookup)),
@@ -282,8 +287,8 @@ build_codelists_snapshot <- function() {
     schema <- load_schema(dataset, table)
     delim <- schema$delimiter %||% ";"
     enc <- schema$encoding %||% "ISO-8859-1"
-    for (i in seq_len(nrow(g))) {
-      col_lower <- g$campo[i]
+    for (i in seq_len(nrow(b))) {
+      col_lower <- b$campo[i]
       vals <- tryCatch(
         quietly(distinct_values(csv_path, enc, delim, col_lower)),
         error = function(e) {
@@ -297,6 +302,7 @@ build_codelists_snapshot <- function() {
       if (!length(vals)) next
       if (length(vals) > .MAX_CARDINALITY) next
       card_rows[[length(card_rows) + 1L]] <- tibble::tibble(
+        group   = grp,
         dataset = dataset,
         table   = table,
         campo   = col_lower,
@@ -307,15 +313,15 @@ build_codelists_snapshot <- function() {
   }
   card_df <- dplyr::bind_rows(card_rows)
   cli::cli_alert_info(
-    "Cardinality-promoted columns: {.val {dplyr::n_distinct(paste(card_df$dataset, card_df$table, card_df$campo))}}; ",
+    "Cardinality-promoted columns: {.val {dplyr::n_distinct(paste(card_df$group, card_df$dataset, card_df$table, card_df$campo))}}; ",
     "values: {.val {nrow(card_df)}}."
   )
 
   # --- Merge --------------------------------------------------------
   all_df <- dplyr::bind_rows(enum_df, card_df) |>
-    dplyr::distinct(dataset, table, campo, value, .keep_all = TRUE) |>
-    dplyr::arrange(dataset, table, campo, value) |>
-    dplyr::select(dataset, table, campo, value)
+    dplyr::distinct(group, dataset, table, campo, value, .keep_all = TRUE) |>
+    dplyr::arrange(group, dataset, table, campo, value) |>
+    dplyr::select(group, dataset, table, campo, value)
 
   list(
     rows = all_df,
@@ -334,9 +340,9 @@ df <- result$rows
 
 cli::cli_h1("Codelists snapshot summary")
 
-cli::cli_h2("Per-dataset inventory")
+cli::cli_h2("Per (group, dataset) inventory")
 per_ds <- df |>
-  dplyr::group_by(dataset) |>
+  dplyr::group_by(group, dataset) |>
   dplyr::summarise(
     n_tabelas_com_codelists = dplyr::n_distinct(table),
     n_colunas_codelist = dplyr::n_distinct(paste(table, campo)),
@@ -345,9 +351,9 @@ per_ds <- df |>
   )
 print(per_ds)
 
-cli::cli_h2("Top-5 (dataset, table, campo) by cardinality")
+cli::cli_h2("Top-5 (group, dataset, table, campo) by cardinality")
 top5 <- df |>
-  dplyr::group_by(dataset, table, campo) |>
+  dplyr::group_by(group, dataset, table, campo) |>
   dplyr::summarise(n_values = dplyr::n(), .groups = "drop") |>
   dplyr::arrange(dplyr::desc(n_values)) |>
   head(5L)
@@ -356,7 +362,7 @@ print(top5)
 cli::cli_h2("Totals")
 cli::cli_bullets(c(
   "*" = "Total rows: {nrow(df)}",
-  "*" = "Distinct (dataset, table, campo): {dplyr::n_distinct(paste(df$dataset, df$table, df$campo))}",
+  "*" = "Distinct (group, dataset, table, campo): {dplyr::n_distinct(paste(df$group, df$dataset, df$table, df$campo))}",
   "*" = "From dominio enumeration: {result$enum_n}",
   "*" = "From observed cardinality: {result$card_n}"
 ))
