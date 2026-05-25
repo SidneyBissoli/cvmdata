@@ -136,3 +136,24 @@ test_that("invalid temporal_partitioning is rejected", {
     class = "cvmdata_error_internal"
   )
 })
+
+test_that("load_schema reads UTF-8 comments under LC_CTYPE=C", {
+  # Regression for the bug where yaml::read_yaml(path) delegated to an
+  # internal readLines() whose encoding follows the active locale.
+  # Under LC_CTYPE="C", multibyte UTF-8 bytes in schema comments
+  # ("Demonstração", "Exercício") were rejected as invalid input and
+  # the file silently truncated, leaving validate_url_topology() to
+  # abort with "Got archive=, file=" — both URLs empty even though the
+  # YAML on disk declared cvm_archive_url_pattern. The fix in
+  # read_schema_yaml() opens file(encoding = "UTF-8") explicitly.
+  withr::local_locale(c(LC_CTYPE = "C"))
+  skip_if(
+    !identical(Sys.getlocale("LC_CTYPE"), "C"),
+    "LC_CTYPE=C not honoured on this platform"
+  )
+
+  schema <- load_schema("dfp", "dre")
+  expect_s3_class(schema, "cvm_table_schema")
+  expect_match(schema$cvm_archive_url_pattern, "^https://")
+  expect_named(schema$cvm_file_pattern_variants, c("ind", "con"))
+})
