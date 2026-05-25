@@ -1,7 +1,7 @@
 # cvmdata
 
 **English** \|
-[Português](https://sidneybissoli.github.io/cvmdata/README.pt-BR.md)
+[Português](https://github.com/SidneyBissoli/cvmdata/blob/main/README.pt-BR.md)
 
 `cvmdata` provides a tidy API to the open data published by the
 Brazilian Securities and Exchange Commission (CVM — Comissão de Valores
@@ -192,14 +192,14 @@ Bug reports and feature requests:
 ## Contributing
 
 Pull requests are welcome. See
-[CONTRIBUTING.md](https://sidneybissoli.github.io/cvmdata/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/cvmdata/blob/main/CONTRIBUTING.md)
 for the development setup, the quality gate run on every commit, and the
 schema-YAML format used when adding a new dataset.
 
 Please note that the cvmdata project is released with a [Contributor
 Code of
-Conduct](https://sidneybissoli.github.io/cvmdata/CODE_OF_CONDUCT.md). By
-contributing to this project, you agree to abide by its terms.
+Conduct](https://github.com/SidneyBissoli/cvmdata/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
 
 ## License
 

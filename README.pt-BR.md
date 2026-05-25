@@ -1,7 +1,7 @@
 # cvmdata
 
-[English](https://sidneybissoli.github.io/cvmdata/README.md) \|
-**Português**
+[English](https://github.com/SidneyBissoli/cvmdata/blob/main/README.md)
+\| **Português**
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -197,13 +197,13 @@ Reporte bugs e peça features em
 ## Como contribuir
 
 Pull requests são bem-vindas. Veja
-[CONTRIBUTING.md](https://sidneybissoli.github.io/cvmdata/CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/cvmdata/blob/main/CONTRIBUTING.md)
 (em inglês, por convenção rOpenSci) para o setup de desenvolvimento, o
 gate de qualidade rodado a cada commit, e o formato dos schemas YAML
 usados ao adicionar um novo dataset.
 
 O projeto adota o [Código de Conduta do
-Contribuidor](https://sidneybissoli.github.io/cvmdata/CODE_OF_CONDUCT.md)
+Contribuidor](https://github.com/SidneyBissoli/cvmdata/blob/main/CODE_OF_CONDUCT.md)
 (em inglês). Ao contribuir, você concorda em respeitar seus termos.
 
 ## Licença

@@ -248,5 +248,7 @@ Refinamentos da Rodada 3.0 ao naming doc.
 
 `cran-comments.md`.
 
-`schemas_proto/cad/companhias.yaml` — atualizar ou marcar como histórico
-congelado.
+`schemas_proto/` — apagados os três YAMLs órfãos (cad/companhias,
+fre/administrador_membro_conselho_fiscal, itr/bpa_con), todos superseded
+pelos homônimos em `inst/extdata/schemas/`. Diretório removido; será
+recriado pelo workflow §12.2 quando v0.2+ precisar de novo stage.
