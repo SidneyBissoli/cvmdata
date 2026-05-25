@@ -1,866 +1,866 @@
-dataset,table,campo,campo_original,descricao,dominio,tipo_dados,tamanho,precisao,scale,meta_status
-cad,companhias,auditor,AUDITOR,Nome do Auditor,Alfanumérico,varchar,100,,,available
-cad,companhias,bairro,BAIRRO,Bairro,Alfanumérico,varchar,100,,,available
-cad,companhias,bairro_resp,BAIRRO_RESP,Bairro do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,categ_reg,CATEG_REG,Categoria do registro,Alfanumérico,varchar,20,,,available
-cad,companhias,cd_cvm,CD_CVM,Código CVM,Numérico,numeric,,7,0,available
-cad,companhias,cep,CEP,CEP,Numérico,numeric,,8,0,available
-cad,companhias,cep_resp,CEP_RESP,CEP do responsável,Numérico,numeric,,8,0,available
-cad,companhias,cnpj_auditor,CNPJ_AUDITOR,CNPJ do Auditor,Alfanumérico,varchar,20,,,available
-cad,companhias,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-cad,companhias,compl,COMPL,Complemento de endereço,Alfanumérico,varchar,100,,,available
-cad,companhias,compl_resp,COMPL_RESP,Complemento de endereço do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,controle_acionario,CONTROLE_ACIONARIO,Controle Acionário,Alfanumérico,varchar,30,,,available
-cad,companhias,ddd_fax,DDD_FAX,Código de DDD (FAX),Numérico,varchar,4,,,available
-cad,companhias,ddd_fax_resp,DDD_FAX_RESP,Código de DDD (FAX) do responsável,Numérico,varchar,4,,,available
-cad,companhias,ddd_tel,DDD_TEL,Código de DDD (Telefone),Numérico,varchar,4,,,available
-cad,companhias,ddd_tel_resp,DDD_TEL_RESP,Código de DDD (Telefone) do responsável,Numérico,varchar,4,,,available
-cad,companhias,denom_comerc,DENOM_COMERC,Denominação Comercial,Alfanumérico,varchar,100,,,available
-cad,companhias,denom_social,DENOM_SOCIAL,Denominação Social,Alfanumérico,varchar,100,,,available
-cad,companhias,dt_cancel,DT_CANCEL,Data de cancelamento,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_const,DT_CONST,Data de constituição,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_ini_categ,DT_INI_CATEG,Data início da categoria do registro,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_ini_resp,DT_INI_RESP,Data início de atuação do responsável,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_ini_sit,DT_INI_SIT,Data início da situação,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_ini_sit_emissor,DT_INI_SIT_EMISSOR,Data início da situação do emissor,AAAA-MM-DD,date,10,,,available
-cad,companhias,dt_reg,DT_REG,Data de registro,AAAA-MM-DD,date,10,,,available
-cad,companhias,email,EMAIL,Endereço de e-mail,Alfanumérico,varchar,100,,,available
-cad,companhias,email_resp,EMAIL_RESP,Endereço de e-mail do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,fax,FAX,FAX,Numérico,numeric,,15,0,available
-cad,companhias,fax_resp,FAX_RESP,FAX do responsável,Numérico,numeric,,15,0,available
-cad,companhias,logradouro,LOGRADOURO,Logradouro,Alfanumérico,varchar,100,,,available
-cad,companhias,logradouro_resp,LOGRADOURO_RESP,Logradouro do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,motivo_cancel,MOTIVO_CANCEL,Motivo de cancelamento,Alfanumérico,varchar,80,,,available
-cad,companhias,mun,MUN,Nome do município,Alfanumérico,varchar,100,,,available
-cad,companhias,mun_resp,MUN_RESP,Nome do município do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,pais,PAIS,País,Alfanumérico,varchar,100,,,available
-cad,companhias,pais_resp,PAIS_RESP,País do responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,resp,RESP,Nome do Responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,setor_ativ,SETOR_ATIV,Setor de atividade,Alfanumérico,varchar,100,,,available
-cad,companhias,sit,SIT,Situação,Alfanumérico,varchar,40,,,available
-cad,companhias,sit_emissor,SIT_EMISSOR,Descrição da situação do emissor,Alfanumérico,char,80,,,available
-cad,companhias,tel,TEL,Telefone,Numérico,numeric,,15,0,available
-cad,companhias,tel_resp,TEL_RESP,Telefone do responsável,Numérico,numeric,,15,0,available
-cad,companhias,tp_ender,TP_ENDER,Tipo de endereço,Alfanumérico,char,30,,,available
-cad,companhias,tp_merc,TP_MERC,Tipo de mercado,Alfanumérico,varchar,50,,,available
-cad,companhias,tp_resp,TP_RESP,Tipo de responsável,Alfanumérico,varchar,100,,,available
-cad,companhias,uf,UF,Unidade da Federação,Alfanumérico,char,2,,,available
-cad,companhias,uf_resp,UF_RESP,Unidade da Federação do responsável,Alfanumérico,char,2,,,available
-dfp,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,bpa,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,bpa,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,bpa,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,bpa,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,bpa,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,bpa,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,bpa,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,bpa,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,bpa,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,bpa,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,bpa,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,bpp,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,bpp,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,bpp,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,bpp,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,bpp,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,bpp,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,bpp,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,bpp,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,bpp,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,bpp,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,bpp,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,bpp,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,bpp,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,bpp,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,composicao_capital,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,composicao_capital,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,composicao_capital,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,composicao_capital,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,composicao_capital,qt_acao_ordin_tesouro,QT_ACAO_ORDIN_TESOURO,,,bigint,,19,0,available
-dfp,composicao_capital,qt_acao_total_tesouro,QT_ACAO_TOTAL_TESOURO,,,bigint,,19,0,available
-dfp,composicao_capital,qt_acao_total_cap_integr,QT_ACAO_TOTAL_CAP_INTEGR,,,bigint,,19,0,available
-dfp,composicao_capital,qt_acao_pref_tesouro,QT_ACAO_PREF_TESOURO,,,bigint,,19,0,available
-dfp,composicao_capital,qt_acao_pref_cap_integr,QT_ACAO_PREF_CAP_INTEGR,,,bigint,,19,0,available
-dfp,composicao_capital,qt_acao_ordin_cap_integr,QT_ACAO_ORDIN_CAP_INTEGR,,,bigint,,19,0,available
-dfp,dfc_md,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dfc_md,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dfc_md,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dfc_md,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dfc_md,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dfc_md,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dfc_md,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dfc_md,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dfc_md,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dfc_md,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dfc_md,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dfc_md,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dfc_md,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dfc_md,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dfc_md,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,dfc_mi,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dfc_mi,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dfc_mi,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dfc_mi,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dfc_mi,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dfc_mi,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dfc_mi,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dfc_mi,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dfc_mi,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dfc_mi,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dfc_mi,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dfc_mi,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dfc_mi,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dfc_mi,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dfc_mi,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,dmpl,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dmpl,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dmpl,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dmpl,coluna_df,COLUNA_DF,Coluna da demonstração financeira,Alfanumérico,varchar,60,,,available
-dfp,dmpl,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dmpl,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dmpl,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dmpl,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dmpl,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dmpl,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dmpl,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dmpl,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dmpl,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dmpl,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dmpl,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dmpl,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,dra,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dra,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dra,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dra,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dra,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dra,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dra,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dra,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dra,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dra,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dra,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dra,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dra,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dra,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dra,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,dre,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dre,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dre,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dre,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dre,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dre,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dre,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dre,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dre,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dre,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dre,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dre,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dre,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dre,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dre,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,dva,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-dfp,dva,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,dva,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,dva,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,dva,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-dfp,dva,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dva,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-dfp,dva,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,dva,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-dfp,dva,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-dfp,dva,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-dfp,dva,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-dfp,dva,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-dfp,dva,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,dva,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-dfp,parecer,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,parecer,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,parecer,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,parecer,num_item_parecer_decl,NUM_ITEM_PARECER_DECL,Número da linha do texto do Parecer/Declaração,Numérico,smallint,,5,0,available
-dfp,parecer,tp_parecer_decl,TP_PARECER_DECL,Tipo do Parecer/Declaração,Alfanumérico,varchar,101,,,available
-dfp,parecer,tp_relat_aud,TP_RELAT_AUD,Tipo Relatório do Auditor Independente,Alfanumérico,varchar,19,,,available
-dfp,parecer,txt_parecer_decl,TXT_PARECER_DECL,Texto do Parecer/Declaração,Alfanumérico,varchar,8000,,,available
-dfp,parecer,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-dfp,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
-dfp,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-dfp,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-dfp,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-dfp,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
-dfp,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-dfp,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
-dfp,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
-dfp,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-fre,acao_entregue,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,acao_entregue,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,acao_entregue,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,acao_entregue,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,acao_entregue,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,acao_entregue,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,acao_entregue,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
-fre,acao_entregue,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,acao_entregue,valor_diferenca_aquisicao_mercado,Valor_Diferenca_Aquisicao_Mercado,,,numeric,,18,2,available
-fre,acao_entregue,preco_medio_ponderado_aquisicao,Preco_Medio_Ponderado_Aquisicao,,,numeric,,18,2,available
-fre,acao_entregue,preco_medio_ponderado_mercado,Preco_Medio_Ponderado_Mercado,,,numeric,,18,2,available
-fre,acao_entregue,quantidade_acoes,Quantidade_Acoes,,,int,,10,0,available
-fre,acao_entregue,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
-fre,acao_entregue,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
-fre,administrador_declaracao_genero,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,administrador_declaracao_genero,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,administrador_declaracao_genero,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,administrador_declaracao_genero,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,administrador_declaracao_genero,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
-fre,administrador_declaracao_genero,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,administrador_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,int,,10,0,available
-fre,administrador_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,int,,10,0,available
-fre,administrador_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,int,,10,0,available
-fre,administrador_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,int,,10,0,available
-fre,administrador_declaracao_genero,quantidade_outros,Quantidade_Outros,,,int,,10,0,available
-fre,administrador_declaracao_genero,nao_aplicavel,Nao_Aplicavel,,,varchar,1,,,available
-fre,administrador_declaracao_raca,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,administrador_declaracao_raca,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,administrador_declaracao_raca,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,administrador_declaracao_raca,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,administrador_declaracao_raca,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
-fre,administrador_declaracao_raca,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,administrador_declaracao_raca,quantidade_preto,Quantidade_Preto,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_branco,Quantidade_Branco,,,int,,10,0,available
-fre,administrador_declaracao_raca,quantidade_outros,Quantidade_Outros,,,int,,10,0,available
-fre,administrador_declaracao_raca,nao_aplicavel,Nao_Aplicavel,,,varchar,1,,,available
-fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,Cargo_Eletivo_Ocupado,Cargo eletivo ocupado,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,administrador_membro_conselho_fiscal,complemento_cargo_eletivo_ocupado,Complemento_Cargo_Eletivo_Ocupado,Cargo eletivo ocupado (Complemento),Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,cpf,CPF,Cadastro de Pessoas Físicas,Alfanumérico,varchar,20,,,available
-fre,administrador_membro_conselho_fiscal,data_eleicao,Data_Eleicao,Data da eleição,AAAA-MM-DD,date,10,,,available
-fre,administrador_membro_conselho_fiscal,data_nascimento,Data_Nascimento,Data de nascimento,AAAA-MM-DD,date,10,,,available
-fre,administrador_membro_conselho_fiscal,data_posse,Data_Posse,Data da posse,AAAA-MM-DD,date,10,,,available
-fre,administrador_membro_conselho_fiscal,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,administrador_membro_conselho_fiscal,eleito_controlador,Eleito_Controlador,Indica se foi eleito pelo controlador,S/N,varchar,1,,,available
-fre,administrador_membro_conselho_fiscal,experiencia_profissional,Experiencia_Profissional,Experiência profissional,Alfanumérico,varchar,8000,,,available
-fre,administrador_membro_conselho_fiscal,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,administrador_membro_conselho_fiscal,nome,Nome,Nome da Pessoa Física,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,numero_mandatos_consecutivos,Numero_Mandatos_Consecutivos,Número de mandatos consecutivos,Numérico,smallint,,5,0,available
-fre,administrador_membro_conselho_fiscal,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,outro_cargo_funcao,Outro_Cargo_Funcao,Outros cargos e funções exercidas,Alfanumérico,varchar,1000,,,available
-fre,administrador_membro_conselho_fiscal,percentual_participacao_reunioes,Percentual_Participacao_Reunioes,Percentual de participação nas reuniões,Numérico,numeric,,7,2,available
-fre,administrador_membro_conselho_fiscal,prazo_mandato,Prazo_Mandato,Prazo do mandato,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,profissao,Profissao,Profissão,Alfanumérico,varchar,100,,,available
-fre,administrador_membro_conselho_fiscal,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,administrador_membro_conselho_fiscal,data_inicio_primeiro_mandato,Data_Inicio_Primeiro_Mandato,,,date,10,,,available
-fre,administrador_PCD,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,administrador_PCD,data_referencia,Data_Referencia,,,,,,,missing
-fre,administrador_PCD,versao,Versao,,,,,,,missing
-fre,administrador_PCD,id_documento,ID_Documento,,,,,,,missing
-fre,administrador_PCD,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,administrador_PCD,orgao_administracao,Orgao_Administracao,,,,,,,missing
-fre,administrador_PCD,quantidade_pcd,Quantidade_PCD,,,,,,,missing
-fre,administrador_PCD,quantidade_nao_pcd,Quantidade_Nao_PCD,,,,,,,missing
-fre,administrador_PCD,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,administrador_PCD,nao_aplicavel,Nao_Aplicavel,,,,,,,missing
-fre,auditor,auditor,Auditor,Nome do Auditor,Alfanumérico,varchar,100,,,available
-fre,auditor,cnpj_auditor,CNPJ_Auditor,CNPJ do Auditor,Alfanumérico,char,14,,,available
-fre,auditor,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,auditor,codigo_cvm_auditor,Codigo_CVM_Auditor,Código CVM do auditor,Númerico,char,6,,,available
-fre,auditor,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,auditor,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,auditor,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,auditor,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,auditor,justificativa_substituicao,Justificativa_Substituicao,,,varchar,8000,,,available
-fre,auditor,servico_contratado,Servico_Contratado,,,varchar,8000,,,available
-fre,auditor,remuneracao_auditor,Remuneracao_Auditor,,,varchar,8000,,,available
-fre,auditor,tipo_origem_auditor,Tipo_Origem_Auditor,,,varchar,11,,,available
-fre,auditor,cpf_auditor,CPF_Auditor,,,char,14,,,available
-fre,auditor,data_inicio_prestacao_servico,Data_Inicio_Prestacao_Servico,,,date,10,,,available
-fre,auditor,data_fim_contratacao,Data_Fim_Contratacao,,,date,10,,,available
-fre,auditor,razao_apresentada,Razao_Apresentada,,,varchar,8000,,,available
-fre,auditor,id_auditor,ID_Auditor,,,int,,10,0,available
-fre,auditor,data_inicio_contratacao,Data_Inicio_Contratacao,,,date,10,,,available
-fre,capital_social,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,capital_social,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,capital_social,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,capital_social,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,capital_social,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,capital_social,data_autorizacao_aprovacao,Data_Autorizacao_Aprovacao,,,date,10,,,available
-fre,capital_social,prazo_integralizacao,Prazo_Integralizacao,,,varchar,30,,,available
-fre,capital_social,valor_capital,Valor_Capital,,,numeric,,18,2,available
-fre,capital_social,quantidade_acoes_ordinarias,Quantidade_Acoes_Ordinarias,,,numeric,,18,0,available
-fre,capital_social,quantidade_acoes_preferenciais,Quantidade_Acoes_Preferenciais,,,numeric,,18,0,available
-fre,capital_social,id_capital_social,ID_Capital_Social,,,int,,10,0,available
-fre,capital_social,tipo_capital,Tipo_Capital,,,varchar,100,,,available
-fre,capital_social,quantidade_total_acoes,Quantidade_Total_Acoes,,,numeric,,18,0,available
-fre,capital_social_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,capital_social_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,capital_social_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,capital_social_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,capital_social_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,capital_social_classe_acao,id_capital_social,ID_Capital_Social,,,int,,10,0,available
-fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Tipo_Classe_Acao_Preferencial,,,varchar,100,,,available
-fre,capital_social_classe_acao,quantidade_acoes,Quantidade_Acoes,,,numeric,,18,0,available
-fre,capital_social_titulo_conversivel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,capital_social_titulo_conversivel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,capital_social_titulo_conversivel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,capital_social_titulo_conversivel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,capital_social_titulo_conversivel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,capital_social_titulo_conversivel,condicoes_conversao,Condicoes_Conversao,,,varchar,8000,,,available
-fre,capital_social_titulo_conversivel,id_capital_social,ID_Capital_Social,,,int,,10,0,available
-fre,capital_social_titulo_conversivel,titulo_conversivel_acao,Titulo_Conversivel_Acao,,,varchar,100,,,available
-fre,distribuicao_capital,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,distribuicao_capital,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,distribuicao_capital,data_ultima_assembleia,Data_Ultima_Assembleia,Data da última assembléia geral de acionistas,AAAA-MM-DD,date,10,,,available
-fre,distribuicao_capital,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,distribuicao_capital,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,distribuicao_capital,percentual_acoes_ordinarias_circulacao,Percentual_Acoes_Ordinarias_Circulacao,Percentual de ações ordinárias em circulação,Numérico,numeric,,18,6,available
-fre,distribuicao_capital,percentual_acoes_preferenciais_circulacao,Percentual_Acoes_Preferenciais_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
-fre,distribuicao_capital,percentual_total_acoes_circulacao,Percentual_Total_Acoes_Circulacao,Percentual total de ações em circulação,Numérico,numeric,,18,6,available
-fre,distribuicao_capital,quantidade_acionistas_investidores_institucionais,Quantidade_Acionistas_Investidores_Institucionais,Quantidade de investidores institucionais,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,quantidade_acionistas_pf,Quantidade_Acionistas_PF,Quantidade de acionistas pessoas físicas,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,quantidade_acionistas_pj,Quantidade_Acionistas_PJ,Quantidade de acionistas pessoas jurídicas,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,quantidade_acoes_ordinarias_circulacao,Quantidade_Acoes_Ordinarias_Circulacao,Quantidade de ações ordinárias em circulação,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,quantidade_acoes_preferenciais_circulacao,Quantidade_Acoes_Preferenciais_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,quantidade_total_acoes_circulacao,Quantidade_Total_Acoes_Circulacao,Quantidade total de ações em circulação,Numérico,numeric,,18,0,available
-fre,distribuicao_capital,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Classe_Acoes_Preferenciais,Classe de ações preferenciais,Alfanumérico,varchar,100,,,available
-fre,distribuicao_capital_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,distribuicao_capital_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,distribuicao_capital_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,distribuicao_capital_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,distribuicao_capital_classe_acao,percentual_acoes_preferenciais_circulacao,Percentual_Acoes_Preferenciais_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
-fre,distribuicao_capital_classe_acao,quantidade_acoes_preferenciais_circulacao,Quantidade_Acoes_Preferenciais_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
-fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,Sigla_Classe_Acoes_Preferenciais,Classe de ações preferenciais (Sigla),Alfanumérico,varchar,20,,,available
-fre,distribuicao_capital_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,empregado_local_declaracao_genero,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_local_declaracao_genero,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_local_declaracao_genero,versao,Versao,,,,,,,missing
-fre,empregado_local_declaracao_genero,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_local_declaracao_genero,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_local_declaracao_genero,local,Local,,,,,,,missing
-fre,empregado_local_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,,,,,missing
-fre,empregado_local_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,,,,,missing
-fre,empregado_local_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,,,,,missing
-fre,empregado_local_declaracao_genero,quantidade_outros,Quantidade_Outros,,,,,,,missing
-fre,empregado_local_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,empregado_local_declaracao_raca,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_local_declaracao_raca,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_local_declaracao_raca,versao,Versao,,,,,,,missing
-fre,empregado_local_declaracao_raca,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_local_declaracao_raca,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_local_declaracao_raca,local,Local,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_branco,Quantidade_Branco,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_preto,Quantidade_Preto,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_outros,Quantidade_Outros,,,,,,,missing
-fre,empregado_local_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,empregado_local_faixa_etaria,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,empregado_local_faixa_etaria,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,empregado_local_faixa_etaria,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,empregado_local_faixa_etaria,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,empregado_local_faixa_etaria,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,empregado_local_faixa_etaria,local,Local,,,varchar,100,,,available
-fre,empregado_local_faixa_etaria,quantidade_ate30anos,Quantidade_Ate30Anos,,,int,,10,0,available
-fre,empregado_local_faixa_etaria,quantidade_acima50anos,Quantidade_Acima50Anos,,,int,,10,0,available
-fre,empregado_local_faixa_etaria,quantidade_30a50anos,Quantidade_30a50Anos,,,int,,10,0,available
-fre,empregado_PCD,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_PCD,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_PCD,versao,Versao,,,,,,,missing
-fre,empregado_PCD,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_PCD,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_PCD,codigo_posicao,Codigo_Posicao,,,,,,,missing
-fre,empregado_PCD,posicao,Posicao,,,,,,,missing
-fre,empregado_PCD,quantidade_pcd,Quantidade_PCD,,,,,,,missing
-fre,empregado_PCD,quantidade_nao_pcd,Quantidade_Nao_PCD,,,,,,,missing
-fre,empregado_PCD,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,versao,Versao,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,posicao,Posicao,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,quantidade_outros,Quantidade_Outros,,,,,,,missing
-fre,empregado_posicao_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,versao,Versao,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,posicao,Posicao,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_branco,Quantidade_Branco,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_preto,Quantidade_Preto,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_outros,Quantidade_Outros,,,,,,,missing
-fre,empregado_posicao_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,versao,Versao,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,posicao,Posicao,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,quantidade_ate30anos,Quantidade_Ate30Anos,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,quantidade_30a50anos,Quantidade_30a50Anos,,,,,,,missing
-fre,empregado_posicao_faixa_etaria,quantidade_acima50anos,Quantidade_Acima50Anos,,,,,,,missing
-fre,empregado_posicao_local,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
-fre,empregado_posicao_local,data_referencia,Data_Referencia,,,,,,,missing
-fre,empregado_posicao_local,versao,Versao,,,,,,,missing
-fre,empregado_posicao_local,id_documento,ID_Documento,,,,,,,missing
-fre,empregado_posicao_local,nome_companhia,Nome_Companhia,,,,,,,missing
-fre,empregado_posicao_local,posicao,Posicao,,,,,,,missing
-fre,empregado_posicao_local,quantidade_norte,Quantidade_Norte,,,,,,,missing
-fre,empregado_posicao_local,quantidade_nordeste,Quantidade_Nordeste,,,,,,,missing
-fre,empregado_posicao_local,quantidade_centro_oeste,Quantidade_Centro_Oeste,,,,,,,missing
-fre,empregado_posicao_local,quantidade_sudeste,Quantidade_Sudeste,,,,,,,missing
-fre,empregado_posicao_local,quantidade_sul,Quantidade_Sul,,,,,,,missing
-fre,empregado_posicao_local,quantidade_exterior,Quantidade_Exterior,,,,,,,missing
-fre,membro_comite,cargo_ocupado,Cargo_Ocupado,Cargo ocupado,Alfanumérico,varchar,100,,,available
-fre,membro_comite,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,membro_comite,cpf,CPF,Cadastro de Pessoas Físicas,Alfanumérico,varchar,20,,,available
-fre,membro_comite,data_eleicao,Data_Eleicao,Data da eleição,AAAA-MM-DD,date,10,,,available
-fre,membro_comite,data_nascimento,Data_Nascimento,Data de nascimento,AAAA-MM-DD,date,10,,,available
-fre,membro_comite,data_posse,Data_Posse,Data da posse,AAAA-MM-DD,date,10,,,available
-fre,membro_comite,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,membro_comite,descricao_outro_cargo_ocupado,Descricao_Outro_Cargo_Ocupado,Descrição de outros cargos ocupados,Alfanumérico,varchar,100,,,available
-fre,membro_comite,descricao_outros_comites,Descricao_Outros_Comites,Descrição de outros comitês,Alfanumérico,varchar,100,,,available
-fre,membro_comite,experiencia_profissional,Experiencia_Profissional,Experiência profissional,Alfanumérico,varchar,8000,,,available
-fre,membro_comite,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,membro_comite,nome,Nome,Nome da Pessoa Física,Alfanumérico,varchar,100,,,available
-fre,membro_comite,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,membro_comite,numero_mandatos_consecutivos,Numero_Mandatos_Consecutivos,Número de mandatos consecutivos,Numérico,smallint,,5,0,available
-fre,membro_comite,outro_cargo_funcao,Outro_Cargo_Funcao,Outros cargos e funções exercidas,Alfanumérico,varchar,1000,,,available
-fre,membro_comite,percentual_participacao_reunioes,Percentual_Participacao_Reunioes,Percentual de participação nas reuniões,Numérico,numeric,,7,2,available
-fre,membro_comite,prazo_mandato,Prazo_Mandato,Prazo do mandato,Alfanumérico,varchar,100,,,available
-fre,membro_comite,profissao,Profissao,Profissão,Alfanumérico,varchar,100,,,available
-fre,membro_comite,tipo_comite,Tipo_Comite,Tipo de comitê,Alfanumérico,varchar,100,,,available
-fre,membro_comite,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,membro_comite,data_inicio_primeiro_mandato,Data_Inicio_Primeiro_Mandato,,,date,10,,,available
-fre,mercado_estrangeiro,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,mercado_estrangeiro,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
-fre,mercado_estrangeiro,data_inicio_listagem,Data_Inicio_Listagem,Data de início de listagem,AAAA-MM-DD,date,10,,,available
-fre,mercado_estrangeiro,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,mercado_estrangeiro,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,mercado_estrangeiro,mercado,Mercado,Nome do Mercado,Alfanumérico,varchar,100,,,available
-fre,mercado_estrangeiro,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,mercado_estrangeiro,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
-fre,mercado_estrangeiro,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,mercado_estrangeiro,descricao_instituicao_custodiante,Descricao_Instituicao_Custodiante,,,varchar,600,,,available
-fre,mercado_estrangeiro,descricao_banco_depositario,Descricao_Banco_Depositario,,,varchar,600,,,available
-fre,mercado_estrangeiro,percentual,Percentual,,,numeric,,18,6,available
-fre,mercado_estrangeiro,administradora,Administradora,,,varchar,100,,,available
-fre,mercado_estrangeiro,pais_negociacao,Pais_Negociacao,,,varchar,100,,,available
-fre,mercado_estrangeiro,descricao_proporcao_certificado,Descricao_Proporcao_Certificado,,,varchar,600,,,available
-fre,mercado_estrangeiro,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
-fre,mercado_estrangeiro,descricao_segmento,Descricao_Segmento,,,varchar,600,,,available
-fre,outro_valor_mobiliario,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,outro_valor_mobiliario,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
-fre,outro_valor_mobiliario,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,outro_valor_mobiliario,data_vencimento,Data_Vencimento,Data de Vencimento,AAAA-MM-DD,date,10,,,available
-fre,outro_valor_mobiliario,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,outro_valor_mobiliario,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,outro_valor_mobiliario,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
-fre,outro_valor_mobiliario,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,outro_valor_mobiliario,condicao_alteracao_direitos,Condicao_Alteracao_Direitos,,,varchar,8000,,,available
-fre,outro_valor_mobiliario,caracteristicas_valores_mobiliarios_divida,Caracteristicas_Valores_Mobiliarios_Divida,,,varchar,8000,,,available
-fre,outro_valor_mobiliario,descricao_restricao_circulacao,Descricao_Restricao_Circulacao,,,varchar,8000,,,available
-fre,outro_valor_mobiliario,condicao_conversibilidade_efeito_capital_social,Condicao_Conversibilidade_Efeito_Capital_Social,,,varchar,8000,,,available
-fre,outro_valor_mobiliario,resgatavel,Resgatavel,,,varchar,3,,,available
-fre,outro_valor_mobiliario,quantidade_investidor_institucional,Quantidade_Investidor_Institucional,,,numeric,,18,0,available
-fre,outro_valor_mobiliario,conversibilidade,Conversibilidade,,,varchar,3,,,available
-fre,outro_valor_mobiliario,restricao_circulacao,Restricao_Circulacao,,,varchar,3,,,available
-fre,outro_valor_mobiliario,valor,Valor,,,numeric,,18,2,available
-fre,outro_valor_mobiliario,saldo_devedor,Saldo_Devedor,,,numeric,,18,2,available
-fre,outro_valor_mobiliario,quantidade_pessoa_fisica,Quantidade_Pessoa_Fisica,,,numeric,,18,0,available
-fre,outro_valor_mobiliario,quantidade_pessoa_juridica,Quantidade_Pessoa_Juridica,,,numeric,,18,0,available
-fre,outro_valor_mobiliario,quantidade,Quantidade,,,numeric,,18,0,available
-fre,outro_valor_mobiliario,hipotese_resgate_formula_calculo,Hipotese_Resgate_Formula_Calculo,,,varchar,8000,,,available
-fre,outro_valor_mobiliario,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
-fre,outro_valor_mobiliario,outras_caracteristicas_relevantes,Outras_Caracteristicas_Relevantes,,,varchar,8000,,,available
-fre,participacao_sociedade,cnpj,CNPJ,Cadastro Nacional de Pessoas Jurídicas,Alfanumérico,char,14,,,available
-fre,participacao_sociedade,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,participacao_sociedade,codigo_cvm,Codigo_CVM,Código CVM,Numérico,varchar,6,,,available
-fre,participacao_sociedade,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,participacao_sociedade,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,participacao_sociedade,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,participacao_sociedade,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,participacao_sociedade,data_valor_contabil,Data_Valor_Contabil,,,date,10,,,available
-fre,participacao_sociedade,data_valor_mercado,Data_Valor_Mercado,,,date,10,,,available
-fre,participacao_sociedade,valor_mercado,Valor_Mercado,,,numeric,,18,2,available
-fre,participacao_sociedade,tipo_sociedade,Tipo_Sociedade,,,varchar,100,,,available
-fre,participacao_sociedade,uf_sede,UF_Sede,,,varchar,20,,,available
-fre,participacao_sociedade,razao_aquisicao_manutencao,Razao_Aquisicao_Manutencao,,,varchar,1000,,,available
-fre,participacao_sociedade,valor_contabil,Valor_Contabil,,,numeric,,18,2,available
-fre,participacao_sociedade,descricao_atividades,Descricao_Atividades,,,varchar,1000,,,available
-fre,participacao_sociedade,razao_social,Razao_Social,,,varchar,100,,,available
-fre,participacao_sociedade,participacao_emissor,Participacao_Emissor,,,numeric,,24,8,available
-fre,participacao_sociedade,possui_registro_cvm,Possui_Registro_CVM,,,varchar,1,,,available
-fre,participacao_sociedade,municipio_sede,Municipio_Sede,,,varchar,100,,,available
-fre,participacao_sociedade,pais_sede,Pais_Sede,,,varchar,100,,,available
-fre,participacao_sociedade,id_sociedade,ID_Sociedade,,,int,,10,0,available
-fre,posicao_acionaria,acionista,Acionista,Nome do acionista,Alfanumérico,varchar,100,,,available
-fre,posicao_acionaria,acionista_controlador,Acionista_Controlador,Indica se acionista é controlador,S/N,varchar,1,,,available
-fre,posicao_acionaria,acionista_relacionado,Acionista_Relacionado,Nome do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,100,,,available
-fre,posicao_acionaria,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria,cpf_cnpj_acionista,CPF_CNPJ_Acionista,CPF/CNPJ do acionista,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria,cpf_cnpj_acionista_relacionado,CPF_CNPJ_Acionista_Relacionado,CPF/CNPJ do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria,cpf_cnpj_representante_legal,CPF_CNPJ_Representante_legal,CPF/CNPJ do representante legal,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria,data_composicao_capital_social,Data_Composicao_Capital_Social,Data de composição do capital social,AAAA-MM-DD,date,10,,,available
-fre,posicao_acionaria,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,posicao_acionaria,data_ultima_alteracao,Data_Ultima_Alteracao,Data da última alteração,AAAA-MM-DD,date,10,,,available
-fre,posicao_acionaria,id_acionista,ID_Acionista,Identificador único do registro de acionista,Numérico,int,,10,0,available
-fre,posicao_acionaria,id_acionista_relacionado,ID_Acionista_Relacionado,Identificador único do acionista relacionado na hierarquia de controle,Numérico,int,,10,0,available
-fre,posicao_acionaria,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,posicao_acionaria,nacionalidade,Nacionalidade,Nacionalidade,Alfanumérico,varchar,30,,,available
-fre,posicao_acionaria,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,posicao_acionaria,participante_acordo_acionistas,Participante_Acordo_Acionistas,Indica se acionista participa do acordo de acionistas,S/N,varchar,1,,,available
-fre,posicao_acionaria,percentual_acao_ordinaria_circulacao,Percentual_Acao_Ordinaria_Circulacao,Percentual de ações ordinárias em circulação,Numérico,numeric,,18,6,available
-fre,posicao_acionaria,percentual_acao_preferencial_circulacao,Percentual_Acao_Preferencial_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
-fre,posicao_acionaria,percentual_total_acoes_circulacao,Percentual_Total_Acoes_Circulacao,Percentual total de ações em circulação,Numérico,numeric,,18,6,available
-fre,posicao_acionaria,quantidade_acao_ordinaria_circulacao,Quantidade_Acao_Ordinaria_Circulacao,Quantidade de ações ordinárias em circulação,Numérico,numeric,,18,0,available
-fre,posicao_acionaria,quantidade_acao_preferencial_circulacao,Quantidade_Acao_Preferencial_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
-fre,posicao_acionaria,quantidade_total_acoes_circulacao,Quantidade_Total_Acoes_Circulacao,Quantidade total de ações em circulação,Numérico,numeric,,18,0,available
-fre,posicao_acionaria,representante_legal,Representante_Legal,Nome do representante legal,Alfanumérico,varchar,100,,,available
-fre,posicao_acionaria,residente_exterior,Residente_Exterior,Indica se o acionista é residente no exterior,S/N,varchar,1,,,available
-fre,posicao_acionaria,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria,tipo_pessoa_acionista,Tipo_Pessoa_Acionista,Tipo de pessoa do acionista,Alfanumérico,varchar,2,,,available
-fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,Tipo_Pessoa_Acionista_Relacionado,Tipo de pessoa do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,2,,,available
-fre,posicao_acionaria,tipo_pessoa_representante_legal,Tipo_Pessoa_Representante_Legal,Tipo de pessoa do representante legal,Alfanumérico,varchar,2,,,available
-fre,posicao_acionaria,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,posicao_acionaria_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,posicao_acionaria_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,posicao_acionaria_classe_acao,id_acionista,ID_Acionista,Identificador único do registro de acionista,Numérico,int,,10,0,available
-fre,posicao_acionaria_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,posicao_acionaria_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,posicao_acionaria_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,posicao_acionaria_classe_acao,percentual_acoes,Percentual_Acoes,,,numeric,,18,6,available
-fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Tipo_Classe_Acao_Preferencial,,,varchar,100,,,available
-fre,posicao_acionaria_classe_acao,quantidade_acoes,Quantidade_Acoes,,,numeric,,18,0,available
-fre,relacao_familiar,cargo_administrador,Cargo_Administrador,Cargo do administrador,Alfanumérico,varchar,1000,,,available
-fre,relacao_familiar,cargo_pessoa_relacionada,Cargo_Pessoa_Relacionada,Cargo da pessoa relacionada,Alfanumérico,varchar,1000,,,available
-fre,relacao_familiar,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,relacao_familiar,cnpj_emissor,CNPJ_Emissor,CNPJ do emissor,Alfanumérico,varchar,20,,,available
-fre,relacao_familiar,cnpj_emissor_pessoa_relacionada,CNPJ_Emissor_Pessoa_Relacionada,Nome do emissor (Pessoa Relacionada),Alfanumérico,varchar,20,,,available
-fre,relacao_familiar,cpf_administrador,CPF_Administrador,CPF do administrador,Alfanumérico,varchar,20,,,available
-fre,relacao_familiar,cpf_pessoa_relacionada,CPF_Pessoa_Relacionada,CPF da pessoa relacionada,Alfanumérico,varchar,20,,,available
-fre,relacao_familiar,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,relacao_familiar,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,relacao_familiar,nome_administrador,Nome_Administrador,Nome do administrador,Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,nome_emissor,Nome_Emissor,Nome do Emissor,Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,nome_emissor_pessoa_relacionada,Nome_Emissor_Pessoa_Relacionada,Nome do emissor (Pessoa Relacionada),Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,nome_pessoa_relacionada,Nome_Pessoa_Relacionada,Nome da pessoa relacionada,Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,observacao,Observacao,Observação,Alfanumérico,varchar,1000,,,available
-fre,relacao_familiar,tipo_parentesco,Tipo_Parentesco,Tipo de parentesco,Alfanumérico,varchar,100,,,available
-fre,relacao_familiar,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,relacao_subordinacao,cargo_administrador,Cargo_Administrador,Cargo do administrador,Alfanumérico,varchar,1000,,,available
-fre,relacao_subordinacao,cargo_pessoa_relacionada,Cargo_Pessoa_Relacionada,Cargo da pessoa relacionada,Alfanumérico,varchar,1000,,,available
-fre,relacao_subordinacao,categoria_pessoa_relacionada,Categoria_Pessoa_Relacionada,Tipo ou categoria da Pessoa Relacionada,Alfanumérico,varchar,100,,,available
-fre,relacao_subordinacao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,relacao_subordinacao,cpf_administrador,CPF_Administrador,CPF do administrador,Alfanumérico,varchar,20,,,available
-fre,relacao_subordinacao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,relacao_subordinacao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,relacao_subordinacao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,relacao_subordinacao,documento_pessoa_relacionada,Documento_Pessoa_Relacionada,CPF/CNPJ da Pessoa Relacionada,Alfanumérico,varchar,20,,,available
-fre,relacao_subordinacao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,relacao_subordinacao,nome_administrador,Nome_Administrador,Nome do administrador,Alfanumérico,varchar,100,,,available
-fre,relacao_subordinacao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,relacao_subordinacao,nome_pessoa_relacionada,Nome_Pessoa_Relacionada,Nome da pessoa relacionada,Alfanumérico,varchar,100,,,available
-fre,relacao_subordinacao,observacao,Observacao,Observação,Alfanumérico,varchar,1000,,,available
-fre,relacao_subordinacao,tipo_pessoa_relacionada,Tipo_Pessoa_Relacionada,Tipo de Pessoa Relacionada,PF/PJ,varchar,2,,,available
-fre,relacao_subordinacao,tipo_relacao,Tipo_Relacao,Tipo de Relação,Alfanumérico,varchar,100,,,available
-fre,relacao_subordinacao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,remuneracao_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,remuneracao_acao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_acao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,remuneracao_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,remuneracao_acao,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
-fre,remuneracao_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,remuneracao_acao,preco_medio_ponderado_opcoes_perdidas,Preco_Medio_Ponderado_Opcoes_Perdidas,,,numeric,,18,2,available
-fre,remuneracao_acao,diluicao_potencial,Diluicao_Potencial,,,numeric,,18,6,available
-fre,remuneracao_acao,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
-fre,remuneracao_acao,preco_medio_ponderado_opcoes_exercidas,Preco_Medio_Ponderado_Opcoes_Exercidas,,,numeric,,18,2,available
-fre,remuneracao_acao,preco_medio_ponderado_opcoes_em_aberto,Preco_Medio_Ponderado_Opcoes_Em_Aberto,,,numeric,,18,2,available
-fre,remuneracao_acao,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,remuneracao_maxima_minima_media,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_maxima_minima_media,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_maxima_minima_media,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_maxima_minima_media,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,remuneracao_maxima_minima_media,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,remuneracao_maxima_minima_media,numero_membros,Numero_Membros,Número de membros,Numérico,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,numero_membros_remunerados,Numero_Membros_Remunerados,Número de membros remunerados,Numérico,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,observacao,Observacao,Observação,Alfanumérico,varchar,8000,,,available
-fre,remuneracao_maxima_minima_media,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
-fre,remuneracao_maxima_minima_media,valor_maior_remuneracao,Valor_Maior_Remuneracao,Valor da maior remuneração individual,Numérico,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,valor_medio_remuneracao,Valor_Medio_Remuneracao,Valor médio de remuneração individual,Numérico,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,valor_menor_remuneracao,Valor_Menor_Remuneracao,Valor da menor remuneração individual,Numérico,numeric,,18,2,available
-fre,remuneracao_maxima_minima_media,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,remuneracao_total_orgao,baseada_acoes,Baseada_Acoes,Baseada em ações,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,beneficios_diretos_indiretos,Beneficios_Diretos_Indiretos,Benefícios diretos e indiretos,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,bonus,Bonus,Bônus,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,cessacao_cargo,Cessacao_Cargo,Cessação do cargo,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,remuneracao_total_orgao,comissoes,Comissoes,Comissões,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_total_orgao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_total_orgao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_total_orgao,descricao_outros_remuneracoes_fixas,Descricao_Outros_Remuneracoes_Fixas,Descrição de outras remunerações fixas,Alfanumérico,varchar,8000,,,available
-fre,remuneracao_total_orgao,descricao_outros_remuneracoes_variaveis,Descricao_Outros_Remuneracoes_Variaveis,Descrição de outras remunerações variáveis,Alfanumérico,varchar,8000,,,available
-fre,remuneracao_total_orgao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,remuneracao_total_orgao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,remuneracao_total_orgao,numero_membros,Numero_Membros,Número de membros,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,numero_membros_remunerados,Numero_Membros_Remunerados,Número de membros remunerados,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,observacao,Observacao,Observação,Alfanumérico,varchar,8000,,,available
-fre,remuneracao_total_orgao,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
-fre,remuneracao_total_orgao,outros_valores_fixos,Outros_Valores_Fixos,Outros valores fixos,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,outros_valores_variaveis,Outros_Valores_Variaveis,Outros valores variáveis,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,participacao_resultados,Participacao_Resultados,Participação de resultados,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,participacao_reunioes,Participacao_Reunioes,Participação em reuniões,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,participacoes_comites,Participacoes_Comites,Participações em comitês,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,pos_emprego,Pos_emprego,Pós-Emprego,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,salario,Salario,Salário,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,total_remuneracao,Total_Remuneracao,Total da remuneração,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,total_remuneracao_orgao,Total_Remuneracao_Orgao,Total da remuneração do órgão,Numérico,numeric,,18,2,available
-fre,remuneracao_total_orgao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,remuneracao_variavel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,remuneracao_variavel,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_variavel,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_variavel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,remuneracao_variavel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,remuneracao_variavel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,remuneracao_variavel,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
-fre,remuneracao_variavel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,remuneracao_variavel,participacao_valor_efetivo,Participacao_Valor_Efetivo,,,numeric,,18,2,available
-fre,remuneracao_variavel,bonus_valor_maximo,Bonus_Valor_Maximo,,,numeric,,18,2,available
-fre,remuneracao_variavel,bonus_valor_minimo,Bonus_Valor_Minimo,,,numeric,,18,2,available
-fre,remuneracao_variavel,participacao_valor_minimo,Participacao_Valor_Minimo,,,numeric,,18,2,available
-fre,remuneracao_variavel,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
-fre,remuneracao_variavel,bonus_valor_metas_atingidas,Bonus_Valor_Metas_Atingidas,,,numeric,,18,2,available
-fre,remuneracao_variavel,participacao_valor_metas_atingidas,Participacao_Valor_Metas_Atingidas,,,numeric,,18,2,available
-fre,remuneracao_variavel,participacao_valor_maximo,Participacao_Valor_Maximo,,,numeric,,18,2,available
-fre,remuneracao_variavel,bonus_valor_efetivo,Bonus_Valor_Efetivo,,,numeric,,18,2,available
-fre,remuneracao_variavel,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
-fre,responsavel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,responsavel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,responsavel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,responsavel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,responsavel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,responsavel,cargo_responsavel,Cargo_Responsavel,,,varchar,100,,,available
-fre,responsavel,nome_responsavel,Nome_Responsavel,,,varchar,100,,,available
-fre,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
-fre,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-fre,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-fre,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
-fre,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
-fre,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
-fre,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-fre,titular_valor_mobiliario,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,titular_valor_mobiliario,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,titular_valor_mobiliario,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,titular_valor_mobiliario,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,titular_valor_mobiliario,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
-fre,titular_valor_mobiliario,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,titular_valor_mobiliario,quantidade_investidor,Quantidade_Investidor,,,numeric,,18,0,available
-fre,titular_valor_mobiliario,quantidade_pessoa_fisica,Quantidade_Pessoa_Fisica,,,numeric,,18,0,available
-fre,titular_valor_mobiliario,quantidade_pessoa_juridica,Quantidade_Pessoa_Juridica,,,numeric,,18,0,available
-fre,titulo_exterior,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,titulo_exterior,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
-fre,titulo_exterior,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,titulo_exterior,data_vencimento,Data_Vencimento,Data de Vencimento,AAAA-MM-DD,date,10,,,available
-fre,titulo_exterior,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,titulo_exterior,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,titulo_exterior,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
-fre,titulo_exterior,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-fre,titulo_exterior,condicao_alteracao_direitos,Condicao_Alteracao_Direitos,,,varchar,8000,,,available
-fre,titulo_exterior,descricao_restricao_circulacao,Descricao_Restricao_Circulacao,,,varchar,8000,,,available
-fre,titulo_exterior,valor_nominal,Valor_Nominal,,,numeric,,18,2,available
-fre,titulo_exterior,possibilidade_resgate,Possibilidade_Resgate,,,varchar,1,,,available
-fre,titulo_exterior,conversibilidade,Conversibilidade,,,varchar,1,,,available
-fre,titulo_exterior,restricao_circulacao,Restricao_Circulacao,,,varchar,1,,,available
-fre,titulo_exterior,condicao_conversibilidade,Condicao_Conversibilidade,,,varchar,8000,,,available
-fre,titulo_exterior,saldo_devedor,Saldo_Devedor,,,numeric,,18,2,available
-fre,titulo_exterior,quantidade,Quantidade,,,bigint,,19,0,available
-fre,titulo_exterior,outras_caracteristicas,Outras_Caracteristicas,,,varchar,8000,,,available
-fre,titulo_exterior,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
-fre,titulo_exterior,hipotese_calculo_resgate,Hipotese_Calculo_Resgate,,,varchar,8000,,,available
-fre,titulo_exterior,caracteristicas_divida,Caracteristicas_Divida,,,varchar,8000,,,available
-fre,transacao_parte_relacionada,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-fre,transacao_parte_relacionada,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-fre,transacao_parte_relacionada,data_transacao,Data_Transacao,Data da transação,AAAA-MM-DD,date,10,,,available
-fre,transacao_parte_relacionada,documento_parte_relacionada,Documento_Parte_Relacionada,Documento da Parte Relacionada,Alfanumérico,varchar,20,,,available
-fre,transacao_parte_relacionada,duracao_transacao,Duracao_Transacao,Duração da transação,Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,emprestimo_divida,Emprestimo_Divida,Indica se a transação é empréstimo ou outro tipo de dívida,S/N,varchar,1,,,available
-fre,transacao_parte_relacionada,especificacao_posicao_contratual_emissor,Especificacao_Posicao_Contratual_Emissor,"Especificação quando a posição contratual do emissor for ""Outra""",Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,garantia_seguro,Garantia_Seguro,Garantias e seguros,Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
-fre,transacao_parte_relacionada,montante_envolvido,Montante_Envolvido,Montante envolvido,Numérico,numeric,,18,2,available
-fre,transacao_parte_relacionada,montante_interesse_parte_relacionada,Montante_Interesse_Parte_Relacionada,Montante correspondente ao interesse da parte relacionada no negócio,Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,natureza_razao_operacao,Natureza_Razao_Operacao,Natureza e razão para operação,Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
-fre,transacao_parte_relacionada,objeto_contrato,Objeto_Contrato,Objeto do contrato,Alfanumérico,varchar,1000,,,available
-fre,transacao_parte_relacionada,parte_relacionada,Parte_Relacionada,Parte Relacionada,Alfanumérico,varchar,100,,,available
-fre,transacao_parte_relacionada,posicao_contratual_emissor,Posicao_Contratual_Emissor,Indica se o emissor é credor ou devedor,Alfanumérico,varchar,7,,,available
-fre,transacao_parte_relacionada,relacao_emissor,Relacao_Emissor,Relação com o emissor,Alfanumérico,varchar,8000,,,available
-fre,transacao_parte_relacionada,rescisao,Rescisao,Rescisão,Alfanumérico,varchar,8000,,,available
-fre,transacao_parte_relacionada,saldo_existente,Saldo_Existente,Saldo existente,Alfanumérico,varchar,100,,,available
-fre,transacao_parte_relacionada,taxa_juros,Taxa_Juros,Taxa de juros,Numérico,numeric,,18,6,available
-fre,transacao_parte_relacionada,tipo_pessoa,Tipo_Pessoa,Tipo de pessoa,PF/PJ,varchar,2,,,available
-fre,transacao_parte_relacionada,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
-itr,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,bpa,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,bpa,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,bpa,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,bpa,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,bpa,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,bpa,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,bpa,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,bpa,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,bpa,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,bpa,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,bpa,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,bpp,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,bpp,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,bpp,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,bpp,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,bpp,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,bpp,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,bpp,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,bpp,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,bpp,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,bpp,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,bpp,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,bpp,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,bpp,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,bpp,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,composicao_capital,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,composicao_capital,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,composicao_capital,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,composicao_capital,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,composicao_capital,qt_acao_ordin_tesouro,QT_ACAO_ORDIN_TESOURO,,,bigint,,19,0,available
-itr,composicao_capital,qt_acao_total_tesouro,QT_ACAO_TOTAL_TESOURO,,,bigint,,19,0,available
-itr,composicao_capital,qt_acao_total_cap_integr,QT_ACAO_TOTAL_CAP_INTEGR,,,bigint,,19,0,available
-itr,composicao_capital,qt_acao_pref_tesouro,QT_ACAO_PREF_TESOURO,,,bigint,,19,0,available
-itr,composicao_capital,qt_acao_pref_cap_integr,QT_ACAO_PREF_CAP_INTEGR,,,bigint,,19,0,available
-itr,composicao_capital,qt_acao_ordin_cap_integr,QT_ACAO_ORDIN_CAP_INTEGR,,,bigint,,19,0,available
-itr,dfc_md,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dfc_md,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dfc_md,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dfc_md,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dfc_md,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dfc_md,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dfc_md,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dfc_md,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dfc_md,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dfc_md,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dfc_md,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dfc_md,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dfc_md,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dfc_md,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dfc_md,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,dfc_mi,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dfc_mi,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dfc_mi,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dfc_mi,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dfc_mi,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dfc_mi,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dfc_mi,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dfc_mi,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dfc_mi,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dfc_mi,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dfc_mi,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dfc_mi,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dfc_mi,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dfc_mi,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dfc_mi,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,dmpl,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dmpl,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dmpl,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dmpl,coluna_df,COLUNA_DF,Coluna da demonstração financeira,Alfanumérico,varchar,60,,,available
-itr,dmpl,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dmpl,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dmpl,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dmpl,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dmpl,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dmpl,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dmpl,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dmpl,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dmpl,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dmpl,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dmpl,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dmpl,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,dra,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dra,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dra,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dra,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dra,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dra,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dra,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dra,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dra,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dra,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dra,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dra,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dra,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dra,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dra,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,dre,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dre,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dre,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dre,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dre,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dre,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dre,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dre,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dre,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dre,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dre,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dre,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dre,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dre,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dre,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,dva,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
-itr,dva,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,dva,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,dva,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,dva,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
-itr,dva,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dva,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
-itr,dva,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,dva,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
-itr,dva,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
-itr,dva,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
-itr,dva,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
-itr,dva,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
-itr,dva,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,dva,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
-itr,parecer,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,parecer,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,parecer,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,parecer,num_item_parecer_decl,NUM_ITEM_PARECER_DECL,Número da linha do texto do Parecer/Declaração,Numérico,smallint,,5,0,available
-itr,parecer,tp_parecer_decl,TP_PARECER_DECL,Tipo do Parecer/Declaração,Alfanumérico,varchar,101,,,available
-itr,parecer,tp_relat_esp,TP_RELAT_ESP,Tipo Relatório da Revisão Especial,Alfanumérico,varchar,19,,,available
-itr,parecer,txt_parecer_decl,TXT_PARECER_DECL,Texto do Parecer/Declaração,Alfanumérico,varchar,8000,,,available
-itr,parecer,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
-itr,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
-itr,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
-itr,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
-itr,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
-itr,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
-itr,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
-itr,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
-itr,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
-itr,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+group,dataset,table,campo,campo_original,descricao,dominio,tipo_dados,tamanho,precisao,scale,meta_status
+companhias,cad,companhias,auditor,AUDITOR,Nome do Auditor,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,bairro,BAIRRO,Bairro,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,bairro_resp,BAIRRO_RESP,Bairro do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,categ_reg,CATEG_REG,Categoria do registro,Alfanumérico,varchar,20,,,available
+companhias,cad,companhias,cd_cvm,CD_CVM,Código CVM,Numérico,numeric,,7,0,available
+companhias,cad,companhias,cep,CEP,CEP,Numérico,numeric,,8,0,available
+companhias,cad,companhias,cep_resp,CEP_RESP,CEP do responsável,Numérico,numeric,,8,0,available
+companhias,cad,companhias,cnpj_auditor,CNPJ_AUDITOR,CNPJ do Auditor,Alfanumérico,varchar,20,,,available
+companhias,cad,companhias,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,cad,companhias,compl,COMPL,Complemento de endereço,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,compl_resp,COMPL_RESP,Complemento de endereço do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,controle_acionario,CONTROLE_ACIONARIO,Controle Acionário,Alfanumérico,varchar,30,,,available
+companhias,cad,companhias,ddd_fax,DDD_FAX,Código de DDD (FAX),Numérico,varchar,4,,,available
+companhias,cad,companhias,ddd_fax_resp,DDD_FAX_RESP,Código de DDD (FAX) do responsável,Numérico,varchar,4,,,available
+companhias,cad,companhias,ddd_tel,DDD_TEL,Código de DDD (Telefone),Numérico,varchar,4,,,available
+companhias,cad,companhias,ddd_tel_resp,DDD_TEL_RESP,Código de DDD (Telefone) do responsável,Numérico,varchar,4,,,available
+companhias,cad,companhias,denom_comerc,DENOM_COMERC,Denominação Comercial,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,denom_social,DENOM_SOCIAL,Denominação Social,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,dt_cancel,DT_CANCEL,Data de cancelamento,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_const,DT_CONST,Data de constituição,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_ini_categ,DT_INI_CATEG,Data início da categoria do registro,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_ini_resp,DT_INI_RESP,Data início de atuação do responsável,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_ini_sit,DT_INI_SIT,Data início da situação,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_ini_sit_emissor,DT_INI_SIT_EMISSOR,Data início da situação do emissor,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,dt_reg,DT_REG,Data de registro,AAAA-MM-DD,date,10,,,available
+companhias,cad,companhias,email,EMAIL,Endereço de e-mail,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,email_resp,EMAIL_RESP,Endereço de e-mail do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,fax,FAX,FAX,Numérico,numeric,,15,0,available
+companhias,cad,companhias,fax_resp,FAX_RESP,FAX do responsável,Numérico,numeric,,15,0,available
+companhias,cad,companhias,logradouro,LOGRADOURO,Logradouro,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,logradouro_resp,LOGRADOURO_RESP,Logradouro do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,motivo_cancel,MOTIVO_CANCEL,Motivo de cancelamento,Alfanumérico,varchar,80,,,available
+companhias,cad,companhias,mun,MUN,Nome do município,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,mun_resp,MUN_RESP,Nome do município do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,pais,PAIS,País,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,pais_resp,PAIS_RESP,País do responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,resp,RESP,Nome do Responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,setor_ativ,SETOR_ATIV,Setor de atividade,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,sit,SIT,Situação,Alfanumérico,varchar,40,,,available
+companhias,cad,companhias,sit_emissor,SIT_EMISSOR,Descrição da situação do emissor,Alfanumérico,char,80,,,available
+companhias,cad,companhias,tel,TEL,Telefone,Numérico,numeric,,15,0,available
+companhias,cad,companhias,tel_resp,TEL_RESP,Telefone do responsável,Numérico,numeric,,15,0,available
+companhias,cad,companhias,tp_ender,TP_ENDER,Tipo de endereço,Alfanumérico,char,30,,,available
+companhias,cad,companhias,tp_merc,TP_MERC,Tipo de mercado,Alfanumérico,varchar,50,,,available
+companhias,cad,companhias,tp_resp,TP_RESP,Tipo de responsável,Alfanumérico,varchar,100,,,available
+companhias,cad,companhias,uf,UF,Unidade da Federação,Alfanumérico,char,2,,,available
+companhias,cad,companhias,uf_resp,UF_RESP,Unidade da Federação do responsável,Alfanumérico,char,2,,,available
+companhias,dfp,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,bpa,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpa,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpa,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,bpa,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,bpa,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpa,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,bpa,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpa,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,bpa,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,bpa,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,bpa,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,bpp,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,bpp,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,bpp,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,bpp,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpp,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpp,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,bpp,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,bpp,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpp,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,bpp,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,bpp,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,bpp,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,bpp,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,bpp,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,composicao_capital,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,composicao_capital,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,composicao_capital,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,composicao_capital,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,composicao_capital,qt_acao_ordin_tesouro,QT_ACAO_ORDIN_TESOURO,,,bigint,,19,0,available
+companhias,dfp,composicao_capital,qt_acao_total_tesouro,QT_ACAO_TOTAL_TESOURO,,,bigint,,19,0,available
+companhias,dfp,composicao_capital,qt_acao_total_cap_integr,QT_ACAO_TOTAL_CAP_INTEGR,,,bigint,,19,0,available
+companhias,dfp,composicao_capital,qt_acao_pref_tesouro,QT_ACAO_PREF_TESOURO,,,bigint,,19,0,available
+companhias,dfp,composicao_capital,qt_acao_pref_cap_integr,QT_ACAO_PREF_CAP_INTEGR,,,bigint,,19,0,available
+companhias,dfp,composicao_capital,qt_acao_ordin_cap_integr,QT_ACAO_ORDIN_CAP_INTEGR,,,bigint,,19,0,available
+companhias,dfp,dfc_md,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dfc_md,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dfc_md,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dfc_md,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_md,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_md,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_md,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_md,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_md,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_md,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dfc_md,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_md,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dfc_md,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dfc_md,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dfc_md,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,dfc_mi,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dfc_mi,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dfc_mi,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dfc_mi,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_mi,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_mi,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_mi,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_mi,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dfc_mi,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_mi,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dfc_mi,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dfc_mi,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dfc_mi,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dfc_mi,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dfc_mi,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,dmpl,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dmpl,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dmpl,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dmpl,coluna_df,COLUNA_DF,Coluna da demonstração financeira,Alfanumérico,varchar,60,,,available
+companhias,dfp,dmpl,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dmpl,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dmpl,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dmpl,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dmpl,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dmpl,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dmpl,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dmpl,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dmpl,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dmpl,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dmpl,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dmpl,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,dra,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dra,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dra,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dra,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dra,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dra,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dra,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dra,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dra,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dra,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dra,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dra,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dra,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dra,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dra,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,dre,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dre,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dre,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dre,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dre,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dre,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dre,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dre,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dre,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dre,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dre,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dre,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dre,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dre,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dre,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,dva,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,dfp,dva,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,dva,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,dva,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,dva,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,dfp,dva,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dva,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dva,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,dva,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,dfp,dva,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,dfp,dva,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,dfp,dva,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,dfp,dva,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,dfp,dva,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,dva,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,dfp,parecer,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,parecer,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,parecer,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,parecer,num_item_parecer_decl,NUM_ITEM_PARECER_DECL,Número da linha do texto do Parecer/Declaração,Numérico,smallint,,5,0,available
+companhias,dfp,parecer,tp_parecer_decl,TP_PARECER_DECL,Tipo do Parecer/Declaração,Alfanumérico,varchar,101,,,available
+companhias,dfp,parecer,tp_relat_aud,TP_RELAT_AUD,Tipo Relatório do Auditor Independente,Alfanumérico,varchar,19,,,available
+companhias,dfp,parecer,txt_parecer_decl,TXT_PARECER_DECL,Texto do Parecer/Declaração,Alfanumérico,varchar,8000,,,available
+companhias,dfp,parecer,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,dfp,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
+companhias,dfp,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,dfp,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,dfp,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,dfp,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,dfp,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
+companhias,dfp,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
+companhias,dfp,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,acao_entregue,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,acao_entregue,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,acao_entregue,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,acao_entregue,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,acao_entregue,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,acao_entregue,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,acao_entregue,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
+companhias,fre,acao_entregue,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,acao_entregue,valor_diferenca_aquisicao_mercado,Valor_Diferenca_Aquisicao_Mercado,,,numeric,,18,2,available
+companhias,fre,acao_entregue,preco_medio_ponderado_aquisicao,Preco_Medio_Ponderado_Aquisicao,,,numeric,,18,2,available
+companhias,fre,acao_entregue,preco_medio_ponderado_mercado,Preco_Medio_Ponderado_Mercado,,,numeric,,18,2,available
+companhias,fre,acao_entregue,quantidade_acoes,Quantidade_Acoes,,,int,,10,0,available
+companhias,fre,acao_entregue,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
+companhias,fre,acao_entregue,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
+companhias,fre,administrador_declaracao_genero,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,administrador_declaracao_genero,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_declaracao_genero,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_declaracao_genero,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,administrador_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,quantidade_outros,Quantidade_Outros,,,int,,10,0,available
+companhias,fre,administrador_declaracao_genero,nao_aplicavel,Nao_Aplicavel,,,varchar,1,,,available
+companhias,fre,administrador_declaracao_raca,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,administrador_declaracao_raca,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_declaracao_raca,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_declaracao_raca,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_preto,Quantidade_Preto,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_branco,Quantidade_Branco,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,quantidade_outros,Quantidade_Outros,,,int,,10,0,available
+companhias,fre,administrador_declaracao_raca,nao_aplicavel,Nao_Aplicavel,,,varchar,1,,,available
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,Cargo_Eletivo_Ocupado,Cargo eletivo ocupado,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,administrador_membro_conselho_fiscal,complemento_cargo_eletivo_ocupado,Complemento_Cargo_Eletivo_Ocupado,Cargo eletivo ocupado (Complemento),Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,cpf,CPF,Cadastro de Pessoas Físicas,Alfanumérico,varchar,20,,,available
+companhias,fre,administrador_membro_conselho_fiscal,data_eleicao,Data_Eleicao,Data da eleição,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_membro_conselho_fiscal,data_nascimento,Data_Nascimento,Data de nascimento,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_membro_conselho_fiscal,data_posse,Data_Posse,Data da posse,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_membro_conselho_fiscal,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,administrador_membro_conselho_fiscal,eleito_controlador,Eleito_Controlador,Indica se foi eleito pelo controlador,S/N,varchar,1,,,available
+companhias,fre,administrador_membro_conselho_fiscal,experiencia_profissional,Experiencia_Profissional,Experiência profissional,Alfanumérico,varchar,8000,,,available
+companhias,fre,administrador_membro_conselho_fiscal,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,administrador_membro_conselho_fiscal,nome,Nome,Nome da Pessoa Física,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,numero_mandatos_consecutivos,Numero_Mandatos_Consecutivos,Número de mandatos consecutivos,Numérico,smallint,,5,0,available
+companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,outro_cargo_funcao,Outro_Cargo_Funcao,Outros cargos e funções exercidas,Alfanumérico,varchar,1000,,,available
+companhias,fre,administrador_membro_conselho_fiscal,percentual_participacao_reunioes,Percentual_Participacao_Reunioes,Percentual de participação nas reuniões,Numérico,numeric,,7,2,available
+companhias,fre,administrador_membro_conselho_fiscal,prazo_mandato,Prazo_Mandato,Prazo do mandato,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,profissao,Profissao,Profissão,Alfanumérico,varchar,100,,,available
+companhias,fre,administrador_membro_conselho_fiscal,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,administrador_membro_conselho_fiscal,data_inicio_primeiro_mandato,Data_Inicio_Primeiro_Mandato,,,date,10,,,available
+companhias,fre,administrador_PCD,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,administrador_PCD,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,administrador_PCD,versao,Versao,,,,,,,missing
+companhias,fre,administrador_PCD,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,administrador_PCD,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,administrador_PCD,orgao_administracao,Orgao_Administracao,,,,,,,missing
+companhias,fre,administrador_PCD,quantidade_pcd,Quantidade_PCD,,,,,,,missing
+companhias,fre,administrador_PCD,quantidade_nao_pcd,Quantidade_Nao_PCD,,,,,,,missing
+companhias,fre,administrador_PCD,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,administrador_PCD,nao_aplicavel,Nao_Aplicavel,,,,,,,missing
+companhias,fre,auditor,auditor,Auditor,Nome do Auditor,Alfanumérico,varchar,100,,,available
+companhias,fre,auditor,cnpj_auditor,CNPJ_Auditor,CNPJ do Auditor,Alfanumérico,char,14,,,available
+companhias,fre,auditor,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,auditor,codigo_cvm_auditor,Codigo_CVM_Auditor,Código CVM do auditor,Númerico,char,6,,,available
+companhias,fre,auditor,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,auditor,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,auditor,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,auditor,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,auditor,justificativa_substituicao,Justificativa_Substituicao,,,varchar,8000,,,available
+companhias,fre,auditor,servico_contratado,Servico_Contratado,,,varchar,8000,,,available
+companhias,fre,auditor,remuneracao_auditor,Remuneracao_Auditor,,,varchar,8000,,,available
+companhias,fre,auditor,tipo_origem_auditor,Tipo_Origem_Auditor,,,varchar,11,,,available
+companhias,fre,auditor,cpf_auditor,CPF_Auditor,,,char,14,,,available
+companhias,fre,auditor,data_inicio_prestacao_servico,Data_Inicio_Prestacao_Servico,,,date,10,,,available
+companhias,fre,auditor,data_fim_contratacao,Data_Fim_Contratacao,,,date,10,,,available
+companhias,fre,auditor,razao_apresentada,Razao_Apresentada,,,varchar,8000,,,available
+companhias,fre,auditor,id_auditor,ID_Auditor,,,int,,10,0,available
+companhias,fre,auditor,data_inicio_contratacao,Data_Inicio_Contratacao,,,date,10,,,available
+companhias,fre,capital_social,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,capital_social,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,capital_social,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,capital_social,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,capital_social,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,capital_social,data_autorizacao_aprovacao,Data_Autorizacao_Aprovacao,,,date,10,,,available
+companhias,fre,capital_social,prazo_integralizacao,Prazo_Integralizacao,,,varchar,30,,,available
+companhias,fre,capital_social,valor_capital,Valor_Capital,,,numeric,,18,2,available
+companhias,fre,capital_social,quantidade_acoes_ordinarias,Quantidade_Acoes_Ordinarias,,,numeric,,18,0,available
+companhias,fre,capital_social,quantidade_acoes_preferenciais,Quantidade_Acoes_Preferenciais,,,numeric,,18,0,available
+companhias,fre,capital_social,id_capital_social,ID_Capital_Social,,,int,,10,0,available
+companhias,fre,capital_social,tipo_capital,Tipo_Capital,,,varchar,100,,,available
+companhias,fre,capital_social,quantidade_total_acoes,Quantidade_Total_Acoes,,,numeric,,18,0,available
+companhias,fre,capital_social_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,capital_social_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,capital_social_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,capital_social_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,capital_social_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,capital_social_classe_acao,id_capital_social,ID_Capital_Social,,,int,,10,0,available
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Tipo_Classe_Acao_Preferencial,,,varchar,100,,,available
+companhias,fre,capital_social_classe_acao,quantidade_acoes,Quantidade_Acoes,,,numeric,,18,0,available
+companhias,fre,capital_social_titulo_conversivel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,capital_social_titulo_conversivel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,capital_social_titulo_conversivel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,capital_social_titulo_conversivel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,capital_social_titulo_conversivel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,capital_social_titulo_conversivel,condicoes_conversao,Condicoes_Conversao,,,varchar,8000,,,available
+companhias,fre,capital_social_titulo_conversivel,id_capital_social,ID_Capital_Social,,,int,,10,0,available
+companhias,fre,capital_social_titulo_conversivel,titulo_conversivel_acao,Titulo_Conversivel_Acao,,,varchar,100,,,available
+companhias,fre,distribuicao_capital,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,distribuicao_capital,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,distribuicao_capital,data_ultima_assembleia,Data_Ultima_Assembleia,Data da última assembléia geral de acionistas,AAAA-MM-DD,date,10,,,available
+companhias,fre,distribuicao_capital,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,distribuicao_capital,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,distribuicao_capital,percentual_acoes_ordinarias_circulacao,Percentual_Acoes_Ordinarias_Circulacao,Percentual de ações ordinárias em circulação,Numérico,numeric,,18,6,available
+companhias,fre,distribuicao_capital,percentual_acoes_preferenciais_circulacao,Percentual_Acoes_Preferenciais_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
+companhias,fre,distribuicao_capital,percentual_total_acoes_circulacao,Percentual_Total_Acoes_Circulacao,Percentual total de ações em circulação,Numérico,numeric,,18,6,available
+companhias,fre,distribuicao_capital,quantidade_acionistas_investidores_institucionais,Quantidade_Acionistas_Investidores_Institucionais,Quantidade de investidores institucionais,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,quantidade_acionistas_pf,Quantidade_Acionistas_PF,Quantidade de acionistas pessoas físicas,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,quantidade_acionistas_pj,Quantidade_Acionistas_PJ,Quantidade de acionistas pessoas jurídicas,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,quantidade_acoes_ordinarias_circulacao,Quantidade_Acoes_Ordinarias_Circulacao,Quantidade de ações ordinárias em circulação,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,quantidade_acoes_preferenciais_circulacao,Quantidade_Acoes_Preferenciais_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,quantidade_total_acoes_circulacao,Quantidade_Total_Acoes_Circulacao,Quantidade total de ações em circulação,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Classe_Acoes_Preferenciais,Classe de ações preferenciais,Alfanumérico,varchar,100,,,available
+companhias,fre,distribuicao_capital_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,distribuicao_capital_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,distribuicao_capital_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,distribuicao_capital_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,distribuicao_capital_classe_acao,percentual_acoes_preferenciais_circulacao,Percentual_Acoes_Preferenciais_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
+companhias,fre,distribuicao_capital_classe_acao,quantidade_acoes_preferenciais_circulacao,Quantidade_Acoes_Preferenciais_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,Sigla_Classe_Acoes_Preferenciais,Classe de ações preferenciais (Sigla),Alfanumérico,varchar,20,,,available
+companhias,fre,distribuicao_capital_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,empregado_local_declaracao_genero,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,versao,Versao,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,local,Local,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,quantidade_outros,Quantidade_Outros,,,,,,,missing
+companhias,fre,empregado_local_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,versao,Versao,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,local,Local,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_branco,Quantidade_Branco,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_preto,Quantidade_Preto,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_outros,Quantidade_Outros,,,,,,,missing
+companhias,fre,empregado_local_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,empregado_local_faixa_etaria,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,empregado_local_faixa_etaria,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,empregado_local_faixa_etaria,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,empregado_local_faixa_etaria,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,empregado_local_faixa_etaria,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,empregado_local_faixa_etaria,local,Local,,,varchar,100,,,available
+companhias,fre,empregado_local_faixa_etaria,quantidade_ate30anos,Quantidade_Ate30Anos,,,int,,10,0,available
+companhias,fre,empregado_local_faixa_etaria,quantidade_acima50anos,Quantidade_Acima50Anos,,,int,,10,0,available
+companhias,fre,empregado_local_faixa_etaria,quantidade_30a50anos,Quantidade_30a50Anos,,,int,,10,0,available
+companhias,fre,empregado_PCD,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_PCD,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_PCD,versao,Versao,,,,,,,missing
+companhias,fre,empregado_PCD,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_PCD,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_PCD,codigo_posicao,Codigo_Posicao,,,,,,,missing
+companhias,fre,empregado_PCD,posicao,Posicao,,,,,,,missing
+companhias,fre,empregado_PCD,quantidade_pcd,Quantidade_PCD,,,,,,,missing
+companhias,fre,empregado_PCD,quantidade_nao_pcd,Quantidade_Nao_PCD,,,,,,,missing
+companhias,fre,empregado_PCD,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,versao,Versao,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,posicao,Posicao,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,quantidade_feminino,Quantidade_Feminino,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,quantidade_masculino,Quantidade_Masculino,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,quantidade_nao_binario,Quantidade_Nao_Binario,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,quantidade_outros,Quantidade_Outros,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_genero,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,versao,Versao,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,posicao,Posicao,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_amarelo,Quantidade_Amarelo,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_branco,Quantidade_Branco,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_preto,Quantidade_Preto,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_pardo,Quantidade_Pardo,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_indigena,Quantidade_Indigena,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_outros,Quantidade_Outros,,,,,,,missing
+companhias,fre,empregado_posicao_declaracao_raca,quantidade_sem_resposta,Quantidade_Sem_Resposta,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,versao,Versao,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,posicao,Posicao,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,quantidade_ate30anos,Quantidade_Ate30Anos,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,quantidade_30a50anos,Quantidade_30a50Anos,,,,,,,missing
+companhias,fre,empregado_posicao_faixa_etaria,quantidade_acima50anos,Quantidade_Acima50Anos,,,,,,,missing
+companhias,fre,empregado_posicao_local,cnpj_companhia,CNPJ_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_local,data_referencia,Data_Referencia,,,,,,,missing
+companhias,fre,empregado_posicao_local,versao,Versao,,,,,,,missing
+companhias,fre,empregado_posicao_local,id_documento,ID_Documento,,,,,,,missing
+companhias,fre,empregado_posicao_local,nome_companhia,Nome_Companhia,,,,,,,missing
+companhias,fre,empregado_posicao_local,posicao,Posicao,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_norte,Quantidade_Norte,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_nordeste,Quantidade_Nordeste,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_centro_oeste,Quantidade_Centro_Oeste,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_sudeste,Quantidade_Sudeste,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_sul,Quantidade_Sul,,,,,,,missing
+companhias,fre,empregado_posicao_local,quantidade_exterior,Quantidade_Exterior,,,,,,,missing
+companhias,fre,membro_comite,cargo_ocupado,Cargo_Ocupado,Cargo ocupado,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,membro_comite,cpf,CPF,Cadastro de Pessoas Físicas,Alfanumérico,varchar,20,,,available
+companhias,fre,membro_comite,data_eleicao,Data_Eleicao,Data da eleição,AAAA-MM-DD,date,10,,,available
+companhias,fre,membro_comite,data_nascimento,Data_Nascimento,Data de nascimento,AAAA-MM-DD,date,10,,,available
+companhias,fre,membro_comite,data_posse,Data_Posse,Data da posse,AAAA-MM-DD,date,10,,,available
+companhias,fre,membro_comite,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Descricao_Outro_Cargo_Ocupado,Descrição de outros cargos ocupados,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,descricao_outros_comites,Descricao_Outros_Comites,Descrição de outros comitês,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,experiencia_profissional,Experiencia_Profissional,Experiência profissional,Alfanumérico,varchar,8000,,,available
+companhias,fre,membro_comite,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,membro_comite,nome,Nome,Nome da Pessoa Física,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,numero_mandatos_consecutivos,Numero_Mandatos_Consecutivos,Número de mandatos consecutivos,Numérico,smallint,,5,0,available
+companhias,fre,membro_comite,outro_cargo_funcao,Outro_Cargo_Funcao,Outros cargos e funções exercidas,Alfanumérico,varchar,1000,,,available
+companhias,fre,membro_comite,percentual_participacao_reunioes,Percentual_Participacao_Reunioes,Percentual de participação nas reuniões,Numérico,numeric,,7,2,available
+companhias,fre,membro_comite,prazo_mandato,Prazo_Mandato,Prazo do mandato,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,profissao,Profissao,Profissão,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,tipo_comite,Tipo_Comite,Tipo de comitê,Alfanumérico,varchar,100,,,available
+companhias,fre,membro_comite,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,membro_comite,data_inicio_primeiro_mandato,Data_Inicio_Primeiro_Mandato,,,date,10,,,available
+companhias,fre,mercado_estrangeiro,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,mercado_estrangeiro,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
+companhias,fre,mercado_estrangeiro,data_inicio_listagem,Data_Inicio_Listagem,Data de início de listagem,AAAA-MM-DD,date,10,,,available
+companhias,fre,mercado_estrangeiro,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,mercado_estrangeiro,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,mercado_estrangeiro,mercado,Mercado,Nome do Mercado,Alfanumérico,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,mercado_estrangeiro,descricao_instituicao_custodiante,Descricao_Instituicao_Custodiante,,,varchar,600,,,available
+companhias,fre,mercado_estrangeiro,descricao_banco_depositario,Descricao_Banco_Depositario,,,varchar,600,,,available
+companhias,fre,mercado_estrangeiro,percentual,Percentual,,,numeric,,18,6,available
+companhias,fre,mercado_estrangeiro,administradora,Administradora,,,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,pais_negociacao,Pais_Negociacao,,,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,descricao_proporcao_certificado,Descricao_Proporcao_Certificado,,,varchar,600,,,available
+companhias,fre,mercado_estrangeiro,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
+companhias,fre,mercado_estrangeiro,descricao_segmento,Descricao_Segmento,,,varchar,600,,,available
+companhias,fre,outro_valor_mobiliario,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,outro_valor_mobiliario,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
+companhias,fre,outro_valor_mobiliario,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,outro_valor_mobiliario,data_vencimento,Data_Vencimento,Data de Vencimento,AAAA-MM-DD,date,10,,,available
+companhias,fre,outro_valor_mobiliario,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,outro_valor_mobiliario,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
+companhias,fre,outro_valor_mobiliario,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,outro_valor_mobiliario,condicao_alteracao_direitos,Condicao_Alteracao_Direitos,,,varchar,8000,,,available
+companhias,fre,outro_valor_mobiliario,caracteristicas_valores_mobiliarios_divida,Caracteristicas_Valores_Mobiliarios_Divida,,,varchar,8000,,,available
+companhias,fre,outro_valor_mobiliario,descricao_restricao_circulacao,Descricao_Restricao_Circulacao,,,varchar,8000,,,available
+companhias,fre,outro_valor_mobiliario,condicao_conversibilidade_efeito_capital_social,Condicao_Conversibilidade_Efeito_Capital_Social,,,varchar,8000,,,available
+companhias,fre,outro_valor_mobiliario,resgatavel,Resgatavel,,,varchar,3,,,available
+companhias,fre,outro_valor_mobiliario,quantidade_investidor_institucional,Quantidade_Investidor_Institucional,,,numeric,,18,0,available
+companhias,fre,outro_valor_mobiliario,conversibilidade,Conversibilidade,,,varchar,3,,,available
+companhias,fre,outro_valor_mobiliario,restricao_circulacao,Restricao_Circulacao,,,varchar,3,,,available
+companhias,fre,outro_valor_mobiliario,valor,Valor,,,numeric,,18,2,available
+companhias,fre,outro_valor_mobiliario,saldo_devedor,Saldo_Devedor,,,numeric,,18,2,available
+companhias,fre,outro_valor_mobiliario,quantidade_pessoa_fisica,Quantidade_Pessoa_Fisica,,,numeric,,18,0,available
+companhias,fre,outro_valor_mobiliario,quantidade_pessoa_juridica,Quantidade_Pessoa_Juridica,,,numeric,,18,0,available
+companhias,fre,outro_valor_mobiliario,quantidade,Quantidade,,,numeric,,18,0,available
+companhias,fre,outro_valor_mobiliario,hipotese_resgate_formula_calculo,Hipotese_Resgate_Formula_Calculo,,,varchar,8000,,,available
+companhias,fre,outro_valor_mobiliario,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
+companhias,fre,outro_valor_mobiliario,outras_caracteristicas_relevantes,Outras_Caracteristicas_Relevantes,,,varchar,8000,,,available
+companhias,fre,participacao_sociedade,cnpj,CNPJ,Cadastro Nacional de Pessoas Jurídicas,Alfanumérico,char,14,,,available
+companhias,fre,participacao_sociedade,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,participacao_sociedade,codigo_cvm,Codigo_CVM,Código CVM,Numérico,varchar,6,,,available
+companhias,fre,participacao_sociedade,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,participacao_sociedade,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,participacao_sociedade,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,participacao_sociedade,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,participacao_sociedade,data_valor_contabil,Data_Valor_Contabil,,,date,10,,,available
+companhias,fre,participacao_sociedade,data_valor_mercado,Data_Valor_Mercado,,,date,10,,,available
+companhias,fre,participacao_sociedade,valor_mercado,Valor_Mercado,,,numeric,,18,2,available
+companhias,fre,participacao_sociedade,tipo_sociedade,Tipo_Sociedade,,,varchar,100,,,available
+companhias,fre,participacao_sociedade,uf_sede,UF_Sede,,,varchar,20,,,available
+companhias,fre,participacao_sociedade,razao_aquisicao_manutencao,Razao_Aquisicao_Manutencao,,,varchar,1000,,,available
+companhias,fre,participacao_sociedade,valor_contabil,Valor_Contabil,,,numeric,,18,2,available
+companhias,fre,participacao_sociedade,descricao_atividades,Descricao_Atividades,,,varchar,1000,,,available
+companhias,fre,participacao_sociedade,razao_social,Razao_Social,,,varchar,100,,,available
+companhias,fre,participacao_sociedade,participacao_emissor,Participacao_Emissor,,,numeric,,24,8,available
+companhias,fre,participacao_sociedade,possui_registro_cvm,Possui_Registro_CVM,,,varchar,1,,,available
+companhias,fre,participacao_sociedade,municipio_sede,Municipio_Sede,,,varchar,100,,,available
+companhias,fre,participacao_sociedade,pais_sede,Pais_Sede,,,varchar,100,,,available
+companhias,fre,participacao_sociedade,id_sociedade,ID_Sociedade,,,int,,10,0,available
+companhias,fre,posicao_acionaria,acionista,Acionista,Nome do acionista,Alfanumérico,varchar,100,,,available
+companhias,fre,posicao_acionaria,acionista_controlador,Acionista_Controlador,Indica se acionista é controlador,S/N,varchar,1,,,available
+companhias,fre,posicao_acionaria,acionista_relacionado,Acionista_Relacionado,Nome do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,100,,,available
+companhias,fre,posicao_acionaria,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria,cpf_cnpj_acionista,CPF_CNPJ_Acionista,CPF/CNPJ do acionista,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria,cpf_cnpj_acionista_relacionado,CPF_CNPJ_Acionista_Relacionado,CPF/CNPJ do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria,cpf_cnpj_representante_legal,CPF_CNPJ_Representante_legal,CPF/CNPJ do representante legal,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria,data_composicao_capital_social,Data_Composicao_Capital_Social,Data de composição do capital social,AAAA-MM-DD,date,10,,,available
+companhias,fre,posicao_acionaria,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,posicao_acionaria,data_ultima_alteracao,Data_Ultima_Alteracao,Data da última alteração,AAAA-MM-DD,date,10,,,available
+companhias,fre,posicao_acionaria,id_acionista,ID_Acionista,Identificador único do registro de acionista,Numérico,int,,10,0,available
+companhias,fre,posicao_acionaria,id_acionista_relacionado,ID_Acionista_Relacionado,Identificador único do acionista relacionado na hierarquia de controle,Numérico,int,,10,0,available
+companhias,fre,posicao_acionaria,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,posicao_acionaria,nacionalidade,Nacionalidade,Nacionalidade,Alfanumérico,varchar,30,,,available
+companhias,fre,posicao_acionaria,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,posicao_acionaria,participante_acordo_acionistas,Participante_Acordo_Acionistas,Indica se acionista participa do acordo de acionistas,S/N,varchar,1,,,available
+companhias,fre,posicao_acionaria,percentual_acao_ordinaria_circulacao,Percentual_Acao_Ordinaria_Circulacao,Percentual de ações ordinárias em circulação,Numérico,numeric,,18,6,available
+companhias,fre,posicao_acionaria,percentual_acao_preferencial_circulacao,Percentual_Acao_Preferencial_Circulacao,Percentual de ações preferenciais em circulação,Numérico,numeric,,18,6,available
+companhias,fre,posicao_acionaria,percentual_total_acoes_circulacao,Percentual_Total_Acoes_Circulacao,Percentual total de ações em circulação,Numérico,numeric,,18,6,available
+companhias,fre,posicao_acionaria,quantidade_acao_ordinaria_circulacao,Quantidade_Acao_Ordinaria_Circulacao,Quantidade de ações ordinárias em circulação,Numérico,numeric,,18,0,available
+companhias,fre,posicao_acionaria,quantidade_acao_preferencial_circulacao,Quantidade_Acao_Preferencial_Circulacao,Quantidade de ações preferenciais em circulação,Numérico,numeric,,18,0,available
+companhias,fre,posicao_acionaria,quantidade_total_acoes_circulacao,Quantidade_Total_Acoes_Circulacao,Quantidade total de ações em circulação,Numérico,numeric,,18,0,available
+companhias,fre,posicao_acionaria,representante_legal,Representante_Legal,Nome do representante legal,Alfanumérico,varchar,100,,,available
+companhias,fre,posicao_acionaria,residente_exterior,Residente_Exterior,Indica se o acionista é residente no exterior,S/N,varchar,1,,,available
+companhias,fre,posicao_acionaria,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista,Tipo_Pessoa_Acionista,Tipo de pessoa do acionista,Alfanumérico,varchar,2,,,available
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,Tipo_Pessoa_Acionista_Relacionado,Tipo de pessoa do acionista relacionado na hierarquia de controle,Alfanumérico,varchar,2,,,available
+companhias,fre,posicao_acionaria,tipo_pessoa_representante_legal,Tipo_Pessoa_Representante_Legal,Tipo de pessoa do representante legal,Alfanumérico,varchar,2,,,available
+companhias,fre,posicao_acionaria,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,posicao_acionaria_classe_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,posicao_acionaria_classe_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,posicao_acionaria_classe_acao,id_acionista,ID_Acionista,Identificador único do registro de acionista,Numérico,int,,10,0,available
+companhias,fre,posicao_acionaria_classe_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,posicao_acionaria_classe_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,posicao_acionaria_classe_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,posicao_acionaria_classe_acao,percentual_acoes,Percentual_Acoes,,,numeric,,18,6,available
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Tipo_Classe_Acao_Preferencial,,,varchar,100,,,available
+companhias,fre,posicao_acionaria_classe_acao,quantidade_acoes,Quantidade_Acoes,,,numeric,,18,0,available
+companhias,fre,relacao_familiar,cargo_administrador,Cargo_Administrador,Cargo do administrador,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_familiar,cargo_pessoa_relacionada,Cargo_Pessoa_Relacionada,Cargo da pessoa relacionada,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_familiar,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_familiar,cnpj_emissor,CNPJ_Emissor,CNPJ do emissor,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_familiar,cnpj_emissor_pessoa_relacionada,CNPJ_Emissor_Pessoa_Relacionada,Nome do emissor (Pessoa Relacionada),Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_familiar,cpf_administrador,CPF_Administrador,CPF do administrador,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_familiar,cpf_pessoa_relacionada,CPF_Pessoa_Relacionada,CPF da pessoa relacionada,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_familiar,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,relacao_familiar,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,relacao_familiar,nome_administrador,Nome_Administrador,Nome do administrador,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,nome_emissor,Nome_Emissor,Nome do Emissor,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,nome_emissor_pessoa_relacionada,Nome_Emissor_Pessoa_Relacionada,Nome do emissor (Pessoa Relacionada),Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,nome_pessoa_relacionada,Nome_Pessoa_Relacionada,Nome da pessoa relacionada,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,observacao,Observacao,Observação,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_familiar,tipo_parentesco,Tipo_Parentesco,Tipo de parentesco,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_familiar,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,relacao_subordinacao,cargo_administrador,Cargo_Administrador,Cargo do administrador,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_subordinacao,cargo_pessoa_relacionada,Cargo_Pessoa_Relacionada,Cargo da pessoa relacionada,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Categoria_Pessoa_Relacionada,Tipo ou categoria da Pessoa Relacionada,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_subordinacao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_subordinacao,cpf_administrador,CPF_Administrador,CPF do administrador,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_subordinacao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,relacao_subordinacao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,relacao_subordinacao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,relacao_subordinacao,documento_pessoa_relacionada,Documento_Pessoa_Relacionada,CPF/CNPJ da Pessoa Relacionada,Alfanumérico,varchar,20,,,available
+companhias,fre,relacao_subordinacao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,relacao_subordinacao,nome_administrador,Nome_Administrador,Nome do administrador,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_subordinacao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_subordinacao,nome_pessoa_relacionada,Nome_Pessoa_Relacionada,Nome da pessoa relacionada,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_subordinacao,observacao,Observacao,Observação,Alfanumérico,varchar,1000,,,available
+companhias,fre,relacao_subordinacao,tipo_pessoa_relacionada,Tipo_Pessoa_Relacionada,Tipo de Pessoa Relacionada,PF/PJ,varchar,2,,,available
+companhias,fre,relacao_subordinacao,tipo_relacao,Tipo_Relacao,Tipo de Relação,Alfanumérico,varchar,100,,,available
+companhias,fre,relacao_subordinacao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,remuneracao_acao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,remuneracao_acao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_acao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_acao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_acao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,remuneracao_acao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_acao,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
+companhias,fre,remuneracao_acao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,remuneracao_acao,preco_medio_ponderado_opcoes_perdidas,Preco_Medio_Ponderado_Opcoes_Perdidas,,,numeric,,18,2,available
+companhias,fre,remuneracao_acao,diluicao_potencial,Diluicao_Potencial,,,numeric,,18,6,available
+companhias,fre,remuneracao_acao,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
+companhias,fre,remuneracao_acao,preco_medio_ponderado_opcoes_exercidas,Preco_Medio_Ponderado_Opcoes_Exercidas,,,numeric,,18,2,available
+companhias,fre,remuneracao_acao,preco_medio_ponderado_opcoes_em_aberto,Preco_Medio_Ponderado_Opcoes_Em_Aberto,,,numeric,,18,2,available
+companhias,fre,remuneracao_acao,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,remuneracao_maxima_minima_media,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_maxima_minima_media,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_maxima_minima_media,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_maxima_minima_media,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,remuneracao_maxima_minima_media,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_maxima_minima_media,numero_membros,Numero_Membros,Número de membros,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,numero_membros_remunerados,Numero_Membros_Remunerados,Número de membros remunerados,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,observacao,Observacao,Observação,Alfanumérico,varchar,8000,,,available
+companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_maxima_minima_media,valor_maior_remuneracao,Valor_Maior_Remuneracao,Valor da maior remuneração individual,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,valor_medio_remuneracao,Valor_Medio_Remuneracao,Valor médio de remuneração individual,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,valor_menor_remuneracao,Valor_Menor_Remuneracao,Valor da menor remuneração individual,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_maxima_minima_media,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,remuneracao_total_orgao,baseada_acoes,Baseada_Acoes,Baseada em ações,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,beneficios_diretos_indiretos,Beneficios_Diretos_Indiretos,Benefícios diretos e indiretos,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,bonus,Bonus,Bônus,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,cessacao_cargo,Cessacao_Cargo,Cessação do cargo,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,remuneracao_total_orgao,comissoes,Comissoes,Comissões,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_total_orgao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_total_orgao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_total_orgao,descricao_outros_remuneracoes_fixas,Descricao_Outros_Remuneracoes_Fixas,Descrição de outras remunerações fixas,Alfanumérico,varchar,8000,,,available
+companhias,fre,remuneracao_total_orgao,descricao_outros_remuneracoes_variaveis,Descricao_Outros_Remuneracoes_Variaveis,Descrição de outras remunerações variáveis,Alfanumérico,varchar,8000,,,available
+companhias,fre,remuneracao_total_orgao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,remuneracao_total_orgao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_total_orgao,numero_membros,Numero_Membros,Número de membros,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,numero_membros_remunerados,Numero_Membros_Remunerados,Número de membros remunerados,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,observacao,Observacao,Observação,Alfanumérico,varchar,8000,,,available
+companhias,fre,remuneracao_total_orgao,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_total_orgao,outros_valores_fixos,Outros_Valores_Fixos,Outros valores fixos,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,outros_valores_variaveis,Outros_Valores_Variaveis,Outros valores variáveis,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,participacao_resultados,Participacao_Resultados,Participação de resultados,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,participacao_reunioes,Participacao_Reunioes,Participação em reuniões,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,participacoes_comites,Participacoes_Comites,Participações em comitês,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,pos_emprego,Pos_emprego,Pós-Emprego,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,salario,Salario,Salário,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,total_remuneracao,Total_Remuneracao,Total da remuneração,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,total_remuneracao_orgao,Total_Remuneracao_Orgao,Total da remuneração do órgão,Numérico,numeric,,18,2,available
+companhias,fre,remuneracao_total_orgao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,remuneracao_variavel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,remuneracao_variavel,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_variavel,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_variavel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,remuneracao_variavel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,remuneracao_variavel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,remuneracao_variavel,orgao_administracao,Orgao_Administracao,Órgão da administração,Alfanumérico,varchar,50,,,available
+companhias,fre,remuneracao_variavel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,remuneracao_variavel,participacao_valor_efetivo,Participacao_Valor_Efetivo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,bonus_valor_maximo,Bonus_Valor_Maximo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,bonus_valor_minimo,Bonus_Valor_Minimo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,participacao_valor_minimo,Participacao_Valor_Minimo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,quantidade_membros_remunerados,Quantidade_Membros_Remunerados,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,bonus_valor_metas_atingidas,Bonus_Valor_Metas_Atingidas,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,participacao_valor_metas_atingidas,Participacao_Valor_Metas_Atingidas,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,participacao_valor_maximo,Participacao_Valor_Maximo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,bonus_valor_efetivo,Bonus_Valor_Efetivo,,,numeric,,18,2,available
+companhias,fre,remuneracao_variavel,quantidade_total_membros,Quantidade_Total_Membros,,,numeric,,18,2,available
+companhias,fre,responsavel,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,responsavel,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,responsavel,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,responsavel,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,responsavel,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,responsavel,cargo_responsavel,Cargo_Responsavel,,,varchar,100,,,available
+companhias,fre,responsavel,nome_responsavel,Nome_Responsavel,,,varchar,100,,,available
+companhias,fre,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
+companhias,fre,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,fre,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
+companhias,fre,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,titular_valor_mobiliario,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,titular_valor_mobiliario,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,titular_valor_mobiliario,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,titular_valor_mobiliario,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
+companhias,fre,titular_valor_mobiliario,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,titular_valor_mobiliario,quantidade_investidor,Quantidade_Investidor,,,numeric,,18,0,available
+companhias,fre,titular_valor_mobiliario,quantidade_pessoa_fisica,Quantidade_Pessoa_Fisica,,,numeric,,18,0,available
+companhias,fre,titular_valor_mobiliario,quantidade_pessoa_juridica,Quantidade_Pessoa_Juridica,,,numeric,,18,0,available
+companhias,fre,titulo_exterior,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,titulo_exterior,data_emissao,Data_Emissao,Data de Emissão,AAAA-MM-DD,date,10,,,available
+companhias,fre,titulo_exterior,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,titulo_exterior,data_vencimento,Data_Vencimento,Data de Vencimento,AAAA-MM-DD,date,10,,,available
+companhias,fre,titulo_exterior,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,titulo_exterior,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,titulo_exterior,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
+companhias,fre,titulo_exterior,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fre,titulo_exterior,condicao_alteracao_direitos,Condicao_Alteracao_Direitos,,,varchar,8000,,,available
+companhias,fre,titulo_exterior,descricao_restricao_circulacao,Descricao_Restricao_Circulacao,,,varchar,8000,,,available
+companhias,fre,titulo_exterior,valor_nominal,Valor_Nominal,,,numeric,,18,2,available
+companhias,fre,titulo_exterior,possibilidade_resgate,Possibilidade_Resgate,,,varchar,1,,,available
+companhias,fre,titulo_exterior,conversibilidade,Conversibilidade,,,varchar,1,,,available
+companhias,fre,titulo_exterior,restricao_circulacao,Restricao_Circulacao,,,varchar,1,,,available
+companhias,fre,titulo_exterior,condicao_conversibilidade,Condicao_Conversibilidade,,,varchar,8000,,,available
+companhias,fre,titulo_exterior,saldo_devedor,Saldo_Devedor,,,numeric,,18,2,available
+companhias,fre,titulo_exterior,quantidade,Quantidade,,,bigint,,19,0,available
+companhias,fre,titulo_exterior,outras_caracteristicas,Outras_Caracteristicas,,,varchar,8000,,,available
+companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Identificacao_Valor_Mobiliario,,,varchar,100,,,available
+companhias,fre,titulo_exterior,hipotese_calculo_resgate,Hipotese_Calculo_Resgate,,,varchar,8000,,,available
+companhias,fre,titulo_exterior,caracteristicas_divida,Caracteristicas_Divida,,,varchar,8000,,,available
+companhias,fre,transacao_parte_relacionada,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fre,transacao_parte_relacionada,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fre,transacao_parte_relacionada,data_transacao,Data_Transacao,Data da transação,AAAA-MM-DD,date,10,,,available
+companhias,fre,transacao_parte_relacionada,documento_parte_relacionada,Documento_Parte_Relacionada,Documento da Parte Relacionada,Alfanumérico,varchar,20,,,available
+companhias,fre,transacao_parte_relacionada,duracao_transacao,Duracao_Transacao,Duração da transação,Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,emprestimo_divida,Emprestimo_Divida,Indica se a transação é empréstimo ou outro tipo de dívida,S/N,varchar,1,,,available
+companhias,fre,transacao_parte_relacionada,especificacao_posicao_contratual_emissor,Especificacao_Posicao_Contratual_Emissor,"Especificação quando a posição contratual do emissor for ""Outra""",Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,garantia_seguro,Garantia_Seguro,Garantias e seguros,Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fre,transacao_parte_relacionada,montante_envolvido,Montante_Envolvido,Montante envolvido,Numérico,numeric,,18,2,available
+companhias,fre,transacao_parte_relacionada,montante_interesse_parte_relacionada,Montante_Interesse_Parte_Relacionada,Montante correspondente ao interesse da parte relacionada no negócio,Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,natureza_razao_operacao,Natureza_Razao_Operacao,Natureza e razão para operação,Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,fre,transacao_parte_relacionada,objeto_contrato,Objeto_Contrato,Objeto do contrato,Alfanumérico,varchar,1000,,,available
+companhias,fre,transacao_parte_relacionada,parte_relacionada,Parte_Relacionada,Parte Relacionada,Alfanumérico,varchar,100,,,available
+companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Posicao_Contratual_Emissor,Indica se o emissor é credor ou devedor,Alfanumérico,varchar,7,,,available
+companhias,fre,transacao_parte_relacionada,relacao_emissor,Relacao_Emissor,Relação com o emissor,Alfanumérico,varchar,8000,,,available
+companhias,fre,transacao_parte_relacionada,rescisao,Rescisao,Rescisão,Alfanumérico,varchar,8000,,,available
+companhias,fre,transacao_parte_relacionada,saldo_existente,Saldo_Existente,Saldo existente,Alfanumérico,varchar,100,,,available
+companhias,fre,transacao_parte_relacionada,taxa_juros,Taxa_Juros,Taxa de juros,Numérico,numeric,,18,6,available
+companhias,fre,transacao_parte_relacionada,tipo_pessoa,Tipo_Pessoa,Tipo de pessoa,PF/PJ,varchar,2,,,available
+companhias,fre,transacao_parte_relacionada,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,bpa,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,bpa,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,bpa,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,bpa,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,bpa,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,bpa,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,bpa,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,bpa,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,bpa,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,bpa,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,bpa,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,bpp,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,bpp,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,bpp,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,bpp,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,bpp,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,bpp,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,bpp,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,bpp,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,bpp,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,bpp,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,bpp,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,bpp,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,bpp,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,bpp,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,composicao_capital,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,composicao_capital,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,composicao_capital,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,composicao_capital,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,composicao_capital,qt_acao_ordin_tesouro,QT_ACAO_ORDIN_TESOURO,,,bigint,,19,0,available
+companhias,itr,composicao_capital,qt_acao_total_tesouro,QT_ACAO_TOTAL_TESOURO,,,bigint,,19,0,available
+companhias,itr,composicao_capital,qt_acao_total_cap_integr,QT_ACAO_TOTAL_CAP_INTEGR,,,bigint,,19,0,available
+companhias,itr,composicao_capital,qt_acao_pref_tesouro,QT_ACAO_PREF_TESOURO,,,bigint,,19,0,available
+companhias,itr,composicao_capital,qt_acao_pref_cap_integr,QT_ACAO_PREF_CAP_INTEGR,,,bigint,,19,0,available
+companhias,itr,composicao_capital,qt_acao_ordin_cap_integr,QT_ACAO_ORDIN_CAP_INTEGR,,,bigint,,19,0,available
+companhias,itr,dfc_md,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dfc_md,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dfc_md,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dfc_md,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_md,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_md,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_md,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_md,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_md,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_md,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dfc_md,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_md,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dfc_md,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dfc_md,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dfc_md,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,dfc_mi,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dfc_mi,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dfc_mi,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dfc_mi,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_mi,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_mi,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_mi,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_mi,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dfc_mi,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_mi,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dfc_mi,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dfc_mi,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dfc_mi,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dfc_mi,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dfc_mi,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,dmpl,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dmpl,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dmpl,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dmpl,coluna_df,COLUNA_DF,Coluna da demonstração financeira,Alfanumérico,varchar,60,,,available
+companhias,itr,dmpl,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dmpl,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dmpl,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dmpl,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dmpl,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dmpl,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dmpl,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dmpl,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dmpl,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dmpl,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dmpl,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dmpl,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,dra,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dra,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dra,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dra,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dra,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dra,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dra,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dra,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dra,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dra,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dra,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dra,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dra,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dra,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dra,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,dre,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dre,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dre,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dre,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dre,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dre,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dre,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dre,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dre,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dre,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dre,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dre,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dre,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dre,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dre,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,dva,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
+companhias,itr,dva,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,dva,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,dva,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,dva,ds_conta,DS_CONTA,Descrição da conta,Alfanumérico,varchar,100,,,available
+companhias,itr,dva,dt_fim_exerc,DT_FIM_EXERC,Data fim do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dva,dt_ini_exerc,DT_INI_EXERC,Data início do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,itr,dva,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,dva,escala_moeda,ESCALA_MOEDA,Escala monetária,Alfanumérico,varchar,100,,,available
+companhias,itr,dva,grupo_dfp,GRUPO_DFP,Nome e nível de agregação da demonstração,Alfanumérico,varchar,206,,,available
+companhias,itr,dva,moeda,MOEDA,Moeda,Alfanumérico,varchar,100,,,available
+companhias,itr,dva,ordem_exerc,ORDEM_EXERC,Ordem do exercício social,Alfanumérico,varchar,9,,,available
+companhias,itr,dva,st_conta_fixa,ST_CONTA_FIXA,Indica se é conta fixa ou não,S/N,varchar,1,,,available
+companhias,itr,dva,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,dva,vl_conta,VL_CONTA,Valor da conta,Numérico,decimal,,29,10,available
+companhias,itr,parecer,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,parecer,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,parecer,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,parecer,num_item_parecer_decl,NUM_ITEM_PARECER_DECL,Número da linha do texto do Parecer/Declaração,Numérico,smallint,,5,0,available
+companhias,itr,parecer,tp_parecer_decl,TP_PARECER_DECL,Tipo do Parecer/Declaração,Alfanumérico,varchar,101,,,available
+companhias,itr,parecer,tp_relat_esp,TP_RELAT_ESP,Tipo Relatório da Revisão Especial,Alfanumérico,varchar,19,,,available
+companhias,itr,parecer,txt_parecer_decl,TXT_PARECER_DECL,Texto do Parecer/Declaração,Alfanumérico,varchar,8000,,,available
+companhias,itr,parecer,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,itr,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
+companhias,itr,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,itr,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,itr,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,itr,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,itr,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
+companhias,itr,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
+companhias,itr,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
