@@ -171,20 +171,38 @@ lint clean, cobertura ≥ 90%.
 - [x] Testes: cache vazio, cache antigo, cache misto, arquivo
   conflitante (`cvmdata_error_internal` + instrução de
   `cvm_cache_clear("all")` manual).
+- [x] `R/util-group-lookup.R` novo com lookup constante
+  `.dataset_group_map` + funções internas `dataset_group()` e
+  `known_groups()`. Tabela documentada como dívida técnica a ser
+  substituída por lookup schema-driven na Sessão 05.
+- [x] Entrada em `NEWS.md` sob "Internal" da `0.1.0.9000`
+  documentando o novo layout, a migração automática, a coluna
+  `group` em `cvm_cache_info()` e o argumento `group` em
+  `cvm_cache_clear()`.
 
 ### Sessão 05 — Schemas + dictionary/codelist migration
 
-- [ ] `git mv inst/extdata/schemas/{cad,dfp,itr,fre}/` →
+- [x] `git mv inst/extdata/schemas/{cad,dfp,itr,fre}/` →
   `inst/extdata/schemas/companhias/{cad,dfp,itr,fre}/`.
-- [ ] `load_schema()` aceita `group` (opcional com unicidade).
-- [ ] `cvm_dictionary_snapshot.csv` regenerado com `group` como
+- [x] `load_schema()` aceita `group` (opcional com unicidade;
+  ambiguidade aborta com `cvmdata_error_input_ambiguous` listando
+  os grupos onde `(dataset, table)` ocorre).
+- [x] `R/util-group-lookup.R` reescrito como lookup
+  **schema-driven** (lendo `list.dirs(inst/extdata/schemas/)` com
+  memoização por sessão), substituindo a tabela constante
+  `.dataset_group_map` deixada como dívida técnica pela Sessão 04.
+- [x] Nova classe de condição `cvmdata_error_input_ambiguous`
+  (herda de `cvmdata_error_input`), introduzida em `load_schema()`
+  e reutilizável por `cvm_dictionary()` / `cvm_codelist()` /
+  futuras funções de descoberta.
+- [x] `cvm_dictionary_snapshot.csv` regenerado com `group` como
   primeira coluna; gerador em `data-raw/build-dictionary-snapshot.R`
   atualizado.
-- [ ] `cvm_codelists_snapshot.csv` regenerado com `group` como
+- [x] `cvm_codelists_snapshot.csv` regenerado com `group` como
   primeira coluna; gerador em `data-raw/build-codelists-snapshot.R`
   atualizado.
-- [ ] `cvm_dictionary()`, `cvm_codelist()` aceitam `group`.
-- [ ] Testes de regressão: snapshots batem com versão anterior
+- [x] `cvm_dictionary()`, `cvm_codelist()` aceitam `group`.
+- [x] Testes de regressão: snapshots batem com versão anterior
   módulo nova coluna.
 
 ### Sessão 06 — Rename + deprecation abrupta + argumentos no singular
@@ -218,9 +236,8 @@ lint clean, cobertura ≥ 90%.
   `@examplesIf FALSE`.
 - [ ] `_pkgdown.yml` lista as 5 funções em Reference com nota
   de estado.
-- [ ] Classes de condição novas:
-  - `cvmdata_error_input_group`
-  - `cvmdata_error_input_ambiguous`
+- [ ] Classe de condição nova `cvmdata_error_input_group`
+  (`cvmdata_error_input_ambiguous` já vem da Sessão 05).
 
 ### Sessão 08 — Discovery + cvm_groups() + ETL release rename
 
