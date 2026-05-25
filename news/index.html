@@ -46,6 +46,14 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9000" id="cvmdata-0109000-in-development">cvmdata 0.1.0.9000 (in development)<a class="anchor" aria-label="anchor" href="#cvmdata-0109000-in-development"></a></h2>
 <div class="section level3">
+<h3 id="internal-0-1-0-9000">Internal<a class="anchor" aria-label="anchor" href="#internal-0-1-0-9000"></a></h3>
+<ul><li>Cache layout migrated from <code>&lt;cache&gt;/{raw,parquet}/&lt;dataset&gt;/</code> to <code>&lt;cache&gt;/{raw,parquet}/&lt;group&gt;/&lt;dataset&gt;/</code>. The <code>&lt;group&gt;</code> segment is the CVM CKAN group slug (<code>companhias</code> for the four v0.1 datasets); this clears the path for v0.2+ datasets that live under other groups (<code>fundos-de-investimento</code>, etc.) without colliding dataset slugs. A one-time internal helper (<code>cache_migrate_v0_1_to_v0_2()</code>, not exported) runs automatically on first invocation of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>, <code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> or <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> post-upgrade and relocates pre-existing artifacts; the helper is idempotent and writes an audit log under <code>tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds</code>.</li>
+<li>
+<code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> now exposes the <code>group</code> column as the first key, ahead of <code>dataset</code>.</li>
+<li>
+<code><a href="../reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> gained a <code>group</code> argument that scopes deletion to a CKAN group (e.g. <code>cvm_cache_clear(group = "companhias")</code>). Precedence: <code>what = "all"</code> overrides the filter; otherwise the target path is composed as <code>&lt;cache&gt;/&lt;what&gt;/&lt;group&gt;/&lt;dataset&gt;/&lt;year&gt;/</code>, with each segment becoming optional from the right.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
 <ul><li>
 <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> and <code><a href="../reference/cad_fetch.html">cad_fetch()</a></code> no longer fail with the cryptic <code>cvmdata_error_internal</code> “Got archive=, file=” when the R session runs under <code>LC_CTYPE = "C"</code>. The schema loader now reads the bundled YAMLs forcing UTF-8 instead of relying on the active locale, so multibyte characters in the schema comment headers (e.g. “Demonstração”, “Exercício”) never cause <code><a href="https://yaml.r-lib.org/reference/read_yaml.html" class="external-link">yaml::read_yaml()</a></code> to return <code>NULL</code>. A regression test under <code>LC_CTYPE = "C"</code> was added.</li>

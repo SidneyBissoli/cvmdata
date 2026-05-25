@@ -2,6 +2,31 @@
 
 ## cvmdata 0.1.0.9000 (in development)
 
+### Internal
+
+- Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to
+  `<cache>/{raw,parquet}/<group>/<dataset>/`. The `<group>` segment is
+  the CVM CKAN group slug (`companhias` for the four v0.1 datasets);
+  this clears the path for v0.2+ datasets that live under other groups
+  (`fundos-de-investimento`, etc.) without colliding dataset slugs. A
+  one-time internal helper (`cache_migrate_v0_1_to_v0_2()`, not
+  exported) runs automatically on first invocation of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+  [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+  or
+  [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+  post-upgrade and relocates pre-existing artifacts; the helper is
+  idempotent and writes an audit log under
+  `tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds`.
+- [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+  now exposes the `group` column as the first key, ahead of `dataset`.
+- [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+  gained a `group` argument that scopes deletion to a CKAN group
+  (e.g. `cvm_cache_clear(group = "companhias")`). Precedence:
+  `what = "all"` overrides the filter; otherwise the target path is
+  composed as `<cache>/<what>/<group>/<dataset>/<year>/`, with each
+  segment becoming optional from the right.
+
 ### Bug fixes
 
 - [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)

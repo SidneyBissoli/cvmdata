@@ -3,17 +3,19 @@
 entire cache tree (everything under cvm_cache_path());
 what = "raw" removes only the raw download area
 (&amp;lt;cache&amp;gt;/raw/); what = "parquet" removes only the L3 mirror
-cache (&amp;lt;cache&amp;gt;/parquet/). When dataset (and optionally year)
-is supplied, the scope is narrowed to the matching subtree under
-the chosen area; passing dataset without an explicit what
-defaults to "raw" for backwards compatibility.'><meta property="og:description" content='Deletes cached files selectively. what = "all" removes the
+cache (&amp;lt;cache&amp;gt;/parquet/). When group, dataset (and
+optionally year) are supplied, the scope is narrowed to the
+matching subtree under the chosen area; passing group or
+dataset without an explicit what defaults to "raw" for
+backwards compatibility.'><meta property="og:description" content='Deletes cached files selectively. what = "all" removes the
 entire cache tree (everything under cvm_cache_path());
 what = "raw" removes only the raw download area
 (&amp;lt;cache&amp;gt;/raw/); what = "parquet" removes only the L3 mirror
-cache (&amp;lt;cache&amp;gt;/parquet/). When dataset (and optionally year)
-is supplied, the scope is narrowed to the matching subtree under
-the chosen area; passing dataset without an explicit what
-defaults to "raw" for backwards compatibility.'></head><body>
+cache (&amp;lt;cache&amp;gt;/parquet/). When group, dataset (and
+optionally year) are supplied, the scope is narrowed to the
+matching subtree under the chosen area; passing group or
+dataset without an explicit what defaults to "raw" for
+backwards compatibility.'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -63,10 +65,11 @@ defaults to "raw" for backwards compatibility.'></head><body>
 entire cache tree (everything under <code><a href="cvm_cache_path.html">cvm_cache_path()</a></code>);
 <code>what = "raw"</code> removes only the raw download area
 (<code>&lt;cache&gt;/raw/</code>); <code>what = "parquet"</code> removes only the L3 mirror
-cache (<code>&lt;cache&gt;/parquet/</code>). When <code>dataset</code> (and optionally <code>year</code>)
-is supplied, the scope is narrowed to the matching subtree under
-the chosen area; passing <code>dataset</code> without an explicit <code>what</code>
-defaults to <code>"raw"</code> for backwards compatibility.</p>
+cache (<code>&lt;cache&gt;/parquet/</code>). When <code>group</code>, <code>dataset</code> (and
+optionally <code>year</code>) are supplied, the scope is narrowed to the
+matching subtree under the chosen area; passing <code>group</code> or
+<code>dataset</code> without an explicit <code>what</code> defaults to <code>"raw"</code> for
+backwards compatibility.</p>
     </div>
 
     <div class="section level2">
@@ -74,6 +77,7 @@ defaults to <code>"raw"</code> for backwards compatibility.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cvm_cache_clear</span><span class="op">(</span></span>
 <span>  what <span class="op">=</span> <span class="st">"all"</span>,</span>
 <span>  dataset <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  confirm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -90,7 +94,15 @@ defaults to <code>"raw"</code> for backwards compatibility.</p>
 
 <dt id="arg-dataset">dataset<a class="anchor" aria-label="anchor" href="#arg-dataset"></a></dt>
 <dd><p>Optional dataset id (e.g. <code>"dfp"</code>). Restricts
-deletion to the matching <code>&lt;cache&gt;/&lt;what&gt;/&lt;dataset&gt;/</code> subtree.</p></dd>
+deletion to the matching
+<code>&lt;cache&gt;/&lt;what&gt;/&lt;group&gt;/&lt;dataset&gt;/</code> subtree.</p></dd>
+
+
+<dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
+<dd><p>Optional CKAN group slug (e.g. <code>"companhias"</code>).
+Restricts deletion to the matching <code>&lt;cache&gt;/&lt;what&gt;/&lt;group&gt;/</code>
+subtree. When omitted but <code>dataset</code> is supplied, the group is
+inferred from the dataset lookup.</p></dd>
 
 
 <dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
@@ -110,7 +122,14 @@ before deleting. Default: <code><a href="https://rdrr.io/r/base/interactive.html
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>In interactive sessions the user is asked to confirm via
+    <p>Filter precedence: <code>what = "all"</code> wipes everything ignoring the
+other filters; otherwise the path is composed as
+<code>&lt;cache&gt;/&lt;what&gt;/&lt;group&gt;/&lt;dataset&gt;/&lt;year&gt;/</code>, with each level
+becoming optional from right to left. <code>year</code> requires <code>dataset</code>;
+<code>dataset</code> may be supplied without <code>group</code> (the group is inferred
+via the v0.1.0.9000 lookup table). <code>group</code> may be supplied alone
+to wipe a whole group at once.</p>
+<p>In interactive sessions the user is asked to confirm via
 <code><a href="https://rdrr.io/r/utils/askYesNo.html" class="external-link">utils::askYesNo()</a></code> before deletion. In batch sessions the
 default (<code>confirm = interactive()</code>) evaluates to <code>FALSE</code> and
 deletion proceeds silently — pass <code>confirm = TRUE</code> explicitly to
@@ -128,6 +147,7 @@ force a prompt.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="fu">cvm_cache_clear</span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"dfp"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">cvm_cache_clear</span><span class="op">(</span>group <span class="op">=</span> <span class="st">"companhias"</span>, what <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cvm_cache_clear</span><span class="op">(</span>what <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>

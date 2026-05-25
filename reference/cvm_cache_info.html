@@ -77,13 +77,14 @@ columns).</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with one row per cached file, sorted by
-<code>dataset</code> then <code>file</code>. Columns: <code>dataset</code> (character),
-<code>file</code> (basename), <code>path</code> (absolute), <code>size_bytes</code> (integer),
-<code>mtime</code> (POSIXct), <code>etag</code> (character; <code>NA</code> when absent),
-<code>last_modified</code> (character; <code>NA</code> when absent). The tibble has
-an attribute <code>total_size_bytes</code> (numeric scalar) with the
-total bytes counted toward the cache size limit. Returns a
-zero-row tibble with the same schema (and <code>total_size_bytes = 0</code>) when the cache is empty.</p>
+<code>group</code> then <code>dataset</code> then <code>file</code>. Columns: <code>group</code>
+(character), <code>dataset</code> (character), <code>file</code> (basename), <code>path</code>
+(absolute), <code>size_bytes</code> (integer), <code>mtime</code> (POSIXct), <code>etag</code>
+(character; <code>NA</code> when absent), <code>last_modified</code> (character;
+<code>NA</code> when absent). The tibble has an attribute
+<code>total_size_bytes</code> (numeric scalar) with the total bytes counted
+toward the cache size limit. Returns a zero-row tibble with the
+same schema (and <code>total_size_bytes = 0</code>) when the cache is empty.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -109,9 +110,9 @@ See <code><a href="cvm_cache_path.html">cvm_cache_path()</a></code> for the opti
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">cvm_cache_info</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 0 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 7 variables: dataset &lt;chr&gt;, file &lt;chr&gt;, path &lt;chr&gt;, size_bytes &lt;int&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   mtime &lt;dttm&gt;, etag &lt;chr&gt;, last_modified &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 0 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 8 variables: group &lt;chr&gt;, dataset &lt;chr&gt;, file &lt;chr&gt;, path &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   size_bytes &lt;int&gt;, mtime &lt;dttm&gt;, etag &lt;chr&gt;, last_modified &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

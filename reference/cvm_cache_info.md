@@ -15,13 +15,14 @@ cvm_cache_info()
 
 ## Value
 
-A tibble with one row per cached file, sorted by `dataset` then `file`.
-Columns: `dataset` (character), `file` (basename), `path` (absolute),
-`size_bytes` (integer), `mtime` (POSIXct), `etag` (character; `NA` when
-absent), `last_modified` (character; `NA` when absent). The tibble has
-an attribute `total_size_bytes` (numeric scalar) with the total bytes
-counted toward the cache size limit. Returns a zero-row tibble with the
-same schema (and `total_size_bytes = 0`) when the cache is empty.
+A tibble with one row per cached file, sorted by `group` then `dataset`
+then `file`. Columns: `group` (character), `dataset` (character), `file`
+(basename), `path` (absolute), `size_bytes` (integer), `mtime`
+(POSIXct), `etag` (character; `NA` when absent), `last_modified`
+(character; `NA` when absent). The tibble has an attribute
+`total_size_bytes` (numeric scalar) with the total bytes counted toward
+the cache size limit. Returns a zero-row tibble with the same schema
+(and `total_size_bytes = 0`) when the cache is empty.
 
 ## Details
 
@@ -49,7 +50,7 @@ Other cache:
 
 ``` r
 cvm_cache_info()
-#> # A tibble: 0 × 7
-#> # ℹ 7 variables: dataset <chr>, file <chr>, path <chr>, size_bytes <int>,
-#> #   mtime <dttm>, etag <chr>, last_modified <chr>
+#> # A tibble: 0 × 8
+#> # ℹ 8 variables: group <chr>, dataset <chr>, file <chr>, path <chr>,
+#> #   size_bytes <int>, mtime <dttm>, etag <chr>, last_modified <chr>
 ```
