@@ -112,7 +112,7 @@ sample_inventory <- function() {
 test_that("filter_mirror_assets returns single (table, year, variant)", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = 2024L, report_type = "ind"
+    inv, table = "bpa", year = 2024L, report_type = "ind"
   )
   expect_equal(nrow(out), 1L)
   expect_identical(out$year, 2024L)
@@ -123,16 +123,16 @@ test_that("filter_mirror_assets returns single (table, year, variant)", {
 test_that("filter_mirror_assets keeps multiple years", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = c(2023L, 2024L), report_type = "ind"
+    inv, table = "bpa", year = c(2023L, 2024L), report_type = "ind"
   )
   expect_equal(nrow(out), 2L)
   expect_setequal(out$year, c(2023L, 2024L))
 })
 
-test_that("filter_mirror_assets honours years = NULL", {
+test_that("filter_mirror_assets honours year = NULL", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = NULL, report_type = "ind"
+    inv, table = "bpa", year = NULL, report_type = "ind"
   )
   expect_equal(nrow(out), 2L)
 })
@@ -140,7 +140,7 @@ test_that("filter_mirror_assets honours years = NULL", {
 test_that("filter_mirror_assets honours report_type = NULL", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = 2024L, report_type = NULL
+    inv, table = "bpa", year = 2024L, report_type = NULL
   )
   # ind + con for 2024
   expect_equal(nrow(out), 2L)
@@ -150,7 +150,7 @@ test_that("filter_mirror_assets honours report_type = NULL", {
 test_that("filter_mirror_assets excludes hash sidecar implicitly", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "submissao", years = 2024L, report_type = NULL
+    inv, table = "submissao", year = 2024L, report_type = NULL
   )
   expect_equal(nrow(out), 1L)
   expect_identical(out$table, "submissao")
@@ -159,7 +159,7 @@ test_that("filter_mirror_assets excludes hash sidecar implicitly", {
 test_that("filter_mirror_assets returns 0 rows when no match", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = 1999L, report_type = "ind"
+    inv, table = "bpa", year = 1999L, report_type = "ind"
   )
   expect_equal(nrow(out), 0L)
 })
@@ -169,7 +169,7 @@ test_that("filter_mirror_assets handles empty inventory", {
     name = character(0L), url = character(0L), size_bytes = integer(0L)
   )
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", years = 2024L, report_type = "ind"
+    inv, table = "bpa", year = 2024L, report_type = "ind"
   )
   expect_equal(nrow(out), 0L)
   expect_true(all(c("table", "year", "report_type") %in% names(out)))

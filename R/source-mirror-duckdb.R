@@ -16,17 +16,18 @@
 # asset name (Decision 2 = Alt 1) so the resulting tibble is column-
 # equivalent to the `source = "cvm"` path.
 
-# Entry point invoked by `cvm_fetch_internal()` when source = "mirror".
-# Returns a tibble (already in the shape that the CVM-HTTP path would
-# return after `read_cvm_csv()` + `apply_schema_transformations()`),
-# leaving `filter_by_companies()` to the upstream orchestrator.
+# Entry point invoked by `issuer_fetch_internal()` when source =
+# "mirror". Returns a tibble (already in the shape that the CVM-HTTP
+# path would return after `read_cvm_csv()` +
+# `apply_schema_transformations()`), leaving `filter_by_issuer()` to
+# the upstream orchestrator.
 #
-# - `years` mirrors the public `years` argument: NULL means "latest
+# - `year` mirrors the public `year` argument: NULL means "latest
 #   year available in the mirror"; otherwise an integer vector.
 # - `report_type` is required for tables with `cvm_file_pattern_variants`
 #   and forbidden for the rest, with the same validation rules as the
-#   CVM-HTTP path (enforced one level up by `cvm_fetch_internal()`).
-source_mirror_duckdb_get <- function(schema, years = NULL,
+#   CVM-HTTP path (enforced one level up by `issuer_fetch_internal()`).
+source_mirror_duckdb_get <- function(schema, year = NULL,
                                      report_type = NULL, ...) {
   cache_migrate_v0_1_to_v0_2()
   dataset <- schema$dataset
@@ -35,16 +36,16 @@ source_mirror_duckdb_get <- function(schema, years = NULL,
   has_variants <- !is.null(schema$cvm_file_pattern_variants)
 
   validate_mirror_args(schema, partitioning, has_variants,
-                       years, report_type)
+                       year, report_type)
 
   inventory <- mirror_list_assets(dataset)
   mirror_l3_validate_hash(dataset, attr(inventory, "source_hash"))
   resolved_years <- resolve_mirror_years(
-    inventory, table, years, report_type, partitioning
+    inventory, table, year, report_type, partitioning
   )
   matches <- filter_mirror_assets(
     inventory, table = table,
-    years = resolved_years, report_type = report_type
+    year = resolved_years, report_type = report_type
   )
   if (!nrow(matches)) {
     cvmdata_abort(
@@ -55,7 +56,7 @@ source_mirror_duckdb_get <- function(schema, years = NULL,
         ),
         "i" = paste(
           "Searched release {.val {attr(inventory, 'release_tag')}}",
-          "for {.code years = {format_years(resolved_years)}}",
+          "for {.code year = {format_years(resolved_years)}}",
           "{.code report_type = {format_chr(report_type)}}."
         )
       ),
@@ -69,13 +70,13 @@ source_mirror_duckdb_get <- function(schema, years = NULL,
 # partition layout each table expects. Mirrors the contract enforced
 # by `source_cvm_http_get()` so error classes line up across backends.
 validate_mirror_args <- function(schema, partitioning, has_variants,
-                                 years, report_type) {
-  if (identical(partitioning, "none") && !is.null(years)) {
+                                 year, report_type) {
+  if (identical(partitioning, "none") && !is.null(year)) {
     cvmdata_abort(
       c(
         paste(
           "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
-          "yearly-partitioned; {.arg years} must be {.code NULL}."
+          "yearly-partitioned; {.arg year} must be {.code NULL}."
         )
       ),
       class = "cvmdata_error_input"
@@ -106,22 +107,22 @@ validate_mirror_args <- function(schema, partitioning, has_variants,
   invisible()
 }
 
-# Pick the year set to ask the mirror for. NULL years on a yearly
-# table fall back to the latest year present in the inventory (only
+# Pick the year set to ask the mirror for. NULL year on a yearly
+# table falls back to the latest year present in the inventory (only
 # considering the requested table + report_type subset). NA for
 # non-yearly tables. Aborts when the table is yearly but the
 # inventory has no rows for it.
-resolve_mirror_years <- function(inventory, table, years, report_type,
+resolve_mirror_years <- function(inventory, table, year, report_type,
                                  partitioning) {
   if (!identical(partitioning, "yearly")) {
     return(NULL)
   }
-  if (!is.null(years)) {
-    return(as.integer(years))
+  if (!is.null(year)) {
+    return(as.integer(year))
   }
   candidate <- filter_mirror_assets(
     inventory, table = table,
-    years = NULL, report_type = report_type
+    year = NULL, report_type = report_type
   )
   if (!nrow(candidate)) {
     cvmdata_abort(

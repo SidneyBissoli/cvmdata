@@ -1,7 +1,7 @@
 # Schema: itr / bpa
 # Balanço Patrimonial Ativo — ITR trimestral.
 # Variantes individual (`ind`) e consolidada (`con`), selecionadas pelo
-# argumento `report_type` em cvm_fetch(). META oficial cobre ambos.
+# argumento `report_type` em issuer_fetch(). META oficial cobre ambos.
 # Estruturalmente idêntico ao dfp/bpa (14 campos), difere apenas pela
 # periodicidade trimestral.
 
@@ -12,7 +12,7 @@ table: bpa
 cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/ITR/DADOS/itr_cia_aberta_{year}.zip"
 cvm_file_url_pattern: null
 
-# Variantes ind/con. cvm_fetch() escolhe um destes via report_type.
+# Variantes ind/con. issuer_fetch() escolhe um destes via report_type.
 cvm_file_pattern_variants:
   ind: "itr_cia_aberta_BPA_ind_{year}.csv"
   con: "itr_cia_aberta_BPA_con_{year}.csv"

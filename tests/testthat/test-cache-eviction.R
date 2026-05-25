@@ -331,9 +331,9 @@ test_that("download_with_etag triggers eviction after a real write", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch(
+    issuer_fetch(
       "dfp", "bpa",
-      report_type = "ind", years = 2024, source = "cvm"
+      report_type = "ind", year = 2024, source = "cvm"
     )
   )
   expect_s3_class(result, "cvm_tbl")

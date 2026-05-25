@@ -207,22 +207,22 @@ lint clean, cobertura ≥ 90%.
 
 ### Sessão 06 — Rename + deprecation abrupta + argumentos no singular
 
-- [ ] `R/api-cvm-fetch.R` → `R/api-issuer-fetch.R`.
-- [ ] `cvm_fetch_internal()` → `issuer_fetch_internal()`.
-- [ ] `cvm_fetch()` → `issuer_fetch()`.
-- [ ] Argumentos renomeados para singular:
+- [x] `R/api-cvm-fetch.R` → `R/api-issuer-fetch.R`.
+- [x] `cvm_fetch_internal()` → `issuer_fetch_internal()`.
+- [x] `cvm_fetch()` → `issuer_fetch()`.
+- [x] Argumentos renomeados para singular:
   - `companies` → `issuer`
   - `years` → `year`
-- [ ] `cvm_fetch()` removida sem wrapper.
-- [ ] `cad_fetch()` removida sem wrapper (`R/api-cad-fetch.R` apagado).
-- [ ] Todos os exemplos roxygen atualizados.
-- [ ] `vignettes/cvmdata.Rmd` e todos os articles atualizados
+- [x] `cvm_fetch()` removida sem wrapper.
+- [x] `cad_fetch()` removida sem wrapper (`R/api-cad-fetch.R` apagado).
+- [x] Todos os exemplos roxygen atualizados.
+- [x] `vignettes/cvmdata.Rmd` e todos os articles atualizados
   (`cvm-fetch.Rmd` → `issuer-fetch.Rmd`).
-- [ ] Todos os testes migrados (`grep -rl "cvm_fetch\|cad_fetch" tests/ R/`
+- [x] Todos os testes migrados (`grep -rl "cvm_fetch\|cad_fetch" tests/ R/`
   + sed).
-- [ ] `NEWS.md` com entrada `⚠️ breaking` documentando o caminho
+- [x] `NEWS.md` com entrada `⚠️ breaking` documentando o caminho
   de migração.
-- [ ] Testes cobrindo rename + arg singular aceitando vetor.
+- [x] Testes cobrindo rename + arg singular aceitando vetor.
 
 ### Sessão 07 — Esqueletos dos 4 fetchers restantes
 

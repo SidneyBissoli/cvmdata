@@ -74,7 +74,7 @@ dfp_fx <- function() test_path("fixtures", "mirror-dfp-bpa-ind-2024.parquet")
 
 # CAD (no partition) ------------------------------------------------------
 
-test_that("cvm_fetch CAD returns a cvm_tbl via mirror", {
+test_that("issuer_fetch CAD returns a cvm_tbl via mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -86,7 +86,7 @@ test_that("cvm_fetch CAD returns a cvm_tbl via mirror", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch("cad", "companhias", source = "mirror")
+    issuer_fetch("cad", "companhias", source = "mirror")
   )
   expect_s3_class(result, "cvm_tbl")
   expect_true(nrow(result) > 0L)
@@ -97,7 +97,7 @@ test_that("cvm_fetch CAD returns a cvm_tbl via mirror", {
 
 # DFP BPA ind 2024 (yearly + variant) -------------------------------------
 
-test_that("cvm_fetch DFP BPA ind 2024 returns rows via mirror", {
+test_that("issuer_fetch DFP BPA ind 2024 returns rows via mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -116,8 +116,8 @@ test_that("cvm_fetch DFP BPA ind 2024 returns rows via mirror", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind",
-              years = 2024L, source = "mirror")
+    issuer_fetch("dfp", "bpa", report_type = "ind",
+              year = 2024L, source = "mirror")
   )
   expect_s3_class(result, "cvm_tbl")
   expect_true(nrow(result) > 0L)
@@ -130,7 +130,7 @@ test_that("cvm_fetch DFP BPA ind 2024 returns rows via mirror", {
 
 # Filter by company (CD_CVM) ----------------------------------------------
 
-test_that("cvm_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
+test_that("issuer_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -143,8 +143,8 @@ test_that("cvm_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind",
-              years = 2024L, companies = "1023",  # BCO BRASIL
+    issuer_fetch("dfp", "bpa", report_type = "ind",
+              year = 2024L, issuer = "1023",  # BCO BRASIL
               source = "mirror")
   )
   expect_s3_class(result, "cvm_tbl")
@@ -155,7 +155,7 @@ test_that("cvm_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
 
 # Latest year resolution --------------------------------------------------
 
-test_that("cvm_fetch concatenates multiple years from mirror", {
+test_that("issuer_fetch concatenates multiple years from mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -173,14 +173,14 @@ test_that("cvm_fetch concatenates multiple years from mirror", {
   mock <- build_mock(entries)
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind",
-              years = c(2023L, 2024L), source = "mirror")
+    issuer_fetch("dfp", "bpa", report_type = "ind",
+              year = c(2023L, 2024L), source = "mirror")
   )
   expect_true(nrow(result) > 0L)
   expect_setequal(unique(result$year), c(2023L, 2024L))
 })
 
-test_that("cvm_fetch aborts when no asset matches with years=NULL", {
+test_that("issuer_fetch aborts when no asset matches with year =NULL", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -194,7 +194,7 @@ test_that("cvm_fetch aborts when no asset matches with years=NULL", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpp", report_type = "ind", source = "mirror")
+      issuer_fetch("dfp", "bpp", report_type = "ind", source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -219,8 +219,8 @@ test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpa", report_type = "ind",
-                years = 2024L, source = "mirror")
+      issuer_fetch("dfp", "bpa", report_type = "ind",
+                year = 2024L, source = "mirror")
     ),
     class = "cvmdata_error_http"
   )
@@ -264,18 +264,18 @@ test_that("mirror short-circuits when hash matches sidecar", {
   httr2::with_mocked_responses(
     mock,
     {
-      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
                 source = "mirror")
       cvmdata:::mirror_assets_cache_clear()
       # Second call: sidecar matches, L3 retained, no asset re-fetch.
-      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
                 source = "mirror")
     }
   )
   expect_equal(asset_calls, 1L)
 })
 
-test_that("cvm_fetch resolves years=NULL to latest mirror year", {
+test_that("issuer_fetch resolves year =NULL to latest mirror year", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
@@ -294,7 +294,7 @@ test_that("cvm_fetch resolves years=NULL to latest mirror year", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind", source = "mirror")
+    issuer_fetch("dfp", "bpa", report_type = "ind", source = "mirror")
   )
   expect_true(all(result$year == 2024L))
 })
@@ -315,8 +315,8 @@ test_that("mirror aborts when no asset matches (table absent)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpp", report_type = "ind",
-                years = 2024L, source = "mirror")
+      issuer_fetch("dfp", "bpp", report_type = "ind",
+                year = 2024L, source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -336,8 +336,8 @@ test_that("mirror aborts when no asset matches (year absent)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpa", report_type = "ind",
-                years = 1990L, source = "mirror")
+      issuer_fetch("dfp", "bpa", report_type = "ind",
+                year = 1990L, source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -355,7 +355,7 @@ test_that("mirror aborts when report_type missing for variant table", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpa", years = 2024L, source = "mirror")
+      issuer_fetch("dfp", "bpa", year = 2024L, source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -373,7 +373,7 @@ test_that("mirror aborts when report_type passed to non-variant table", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("cad", "companhias", report_type = "ind",
+      issuer_fetch("cad", "companhias", report_type = "ind",
                 source = "mirror")
     ),
     class = "cvmdata_error_input"
@@ -392,7 +392,7 @@ test_that("mirror aborts when years passed to non-yearly table", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("cad", "companhias", years = 2024L, source = "mirror")
+      issuer_fetch("cad", "companhias", year = 2024L, source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -412,8 +412,8 @@ test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvm_fetch("dfp", "bpa", report_type = "ind",
-                years = 2024L, source = "mirror")
+      issuer_fetch("dfp", "bpa", report_type = "ind",
+                year = 2024L, source = "mirror")
     ),
     class = "cvmdata_error_http"
   )
@@ -451,9 +451,9 @@ test_that("mirror reuses the L3 cache on a second call", {
   httr2::with_mocked_responses(
     mock,
     {
-      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
                 source = "mirror")
-      cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
                 source = "mirror")
     }
   )
@@ -503,8 +503,8 @@ test_that("L3 sidecar is created on first fetch with a known hash", {
   hash <- list(value = "abc-first")
   httr2::with_mocked_responses(
     make_hash_mock(entries, hash),
-    cvm_fetch("dfp", "bpa", report_type = "ind",
-              years = 2024L, source = "mirror")
+    issuer_fetch("dfp", "bpa", report_type = "ind",
+              year = 2024L, source = "mirror")
   )
   sidecar <- file.path(cache_root, "parquet", "companhias", "dfp",
                        "__source_hash.json")
@@ -550,7 +550,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
 
   httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
               source = "mirror")
   )
   expect_equal(asset_calls, 1L)
@@ -561,7 +561,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
   cvmdata:::mirror_assets_cache_clear()
   httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
               source = "mirror")
   )
   expect_equal(asset_calls, 2L)
@@ -590,7 +590,7 @@ test_that("L3 cache is left alone when current hash is NA", {
   mock <- build_mock(entries)  # no __source_hash.json asset
   httr2::with_mocked_responses(
     mock,
-    cvm_fetch("dfp", "bpa", report_type = "ind", years = 2024L,
+    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
               source = "mirror")
   )
   expect_identical(

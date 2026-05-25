@@ -15,8 +15,8 @@ The chosen source, invisibly.
 }
 \description{
 Configures the option \code{cvmdata.source}, which becomes the default
-for subsequent \code{\link[=cvm_fetch]{cvm_fetch()}} calls that do not pass \code{source}
-explicitly. The argument passed to \code{cvm_fetch()} always wins over
+for subsequent \code{\link[=issuer_fetch]{issuer_fetch()}} calls that do not pass \code{source}
+explicitly. The argument passed to \code{issuer_fetch()} always wins over
 the option.
 }
 \examples{

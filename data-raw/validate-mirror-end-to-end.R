@@ -28,7 +28,7 @@ cases <- list(
   list(
     label = "dfp/bpa ind 2024",
     args = list(dataset = "dfp", table = "bpa",
-                report_type = "ind", years = 2024L)
+                report_type = "ind", year = 2024L)
   ),
   list(
     label = "itr/dre con (latest)",
@@ -38,14 +38,14 @@ cases <- list(
   list(
     label = "fre/posicao_acionaria 2024 (PETROBRAS)",
     args = list(dataset = "fre", table = "posicao_acionaria",
-                years = 2024L, companies = "PETROBRAS")
+                year = 2024L, issuer = "PETROBRAS")
   )
 )
 
 run_case <- function(case, source) {
   args <- c(case$args, list(source = source))
   res <- tryCatch(
-    do.call(cvm_fetch, args),
+    do.call(issuer_fetch, args),
     error = function(e) {
       list(error = conditionMessage(e), class = class(e)[[1L]])
     }

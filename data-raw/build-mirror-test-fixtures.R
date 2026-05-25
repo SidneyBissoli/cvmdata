@@ -74,8 +74,8 @@ withr::with_options(
     cvmdata.cache_ttl_seconds = Inf
   ),
   {
-    bpa <- cvm_fetch("dfp", "bpa",
-                     report_type = "ind", years = 2024, source = "cvm")
+    bpa <- issuer_fetch("dfp", "bpa",
+                     report_type = "ind", year = 2024, source = "cvm")
   }
 )
 # Strip the cvm_tbl class + provenance attrs so the parquet body is a

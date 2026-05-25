@@ -1,7 +1,7 @@
 # Stage 2 — Convert CVM tables to parquet snappy.
 #
 # For each (table, year) pair of the requested dataset, fetches the
-# tibble via cvmdata::cvm_fetch() (warm cache from stage 01) and writes
+# tibble via cvmdata::issuer_fetch() (warm cache from stage 01) and writes
 # parquet snappy to the ETL workspace, partitioned Hive-style.
 #
 # Output layout:
@@ -65,9 +65,9 @@ write_one <- function(tbl, y, rtype) {
   years_arg <- if (is.na(y)) NULL else y
   rt_arg <- if (is.null(rtype)) NULL else rtype
   res <- tryCatch(
-    cvmdata::cvm_fetch(
+    cvmdata::issuer_fetch(
       dataset, tbl,
-      years = years_arg,
+      year = years_arg,
       report_type = rt_arg,
       source = "cvm"
     ),
@@ -96,7 +96,7 @@ write_one <- function(tbl, y, rtype) {
 }
 
 message(sprintf(
-  "[02-parquet] dataset=%s tables=[%s] years=[%s]",
+  "[02-parquet] dataset=%s tables=[%s] year =[%s]",
   dataset, paste(tables, collapse = ", "),
   paste(years_to_process, collapse = ", ")
 ))
