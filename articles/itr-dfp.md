@@ -47,14 +47,14 @@ balance sheet (`dfp/bpa`).
 
 ``` r
 
-bpa <- cvm_fetch(
+bpa <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = c("1023", "22470"),
-  years       = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 bpa
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:54.925427
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:20.666775
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 226 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -91,7 +91,7 @@ ativo_total <- bpa[
   c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
 ]
 ativo_total
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:54.925427
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:20.666775
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 2 × 4
 #>   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta
@@ -107,18 +107,18 @@ upstream year explicitly:
 
 ``` r
 
-bpa_history <- cvm_fetch(
+bpa_history <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2022:2024
+  issuer = "1023",
+  year = 2022:2024
 )
 ativo_history <- bpa_history[
   bpa_history$cd_conta == "1" & bpa_history$ordem_exerc == "ÚLTIMO",
   c("dt_fim_exerc", "vl_conta")
 ]
 ativo_history[order(ativo_history$dt_fim_exerc), ]
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:55.886269
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:21.661588
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 3 × 2
 #>   dt_fim_exerc      vl_conta
@@ -137,15 +137,15 @@ filter on CNPJ. The user-facing interface is identical:
 
 ``` r
 
-cap <- cvm_fetch(
+cap <- issuer_fetch(
   "dfp", "composicao_capital",
-  companies = c("1023", "22470"),
-  years     = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 #> ℹ Resolving CD_CVM 1023, 22470 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:56.295062
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:22.066238
 #> ℹ dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 2 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹
@@ -165,13 +165,13 @@ Cross-check against the underlying submissao header:
 
 ``` r
 
-sub <- cvm_fetch(
+sub <- issuer_fetch(
   "dfp", "submissao",
-  companies = c("1023", "22470"),
-  years     = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:56.762677
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:22.344307
 #> ℹ dataset: "dfp" | table: "submissao"
 #> # A tibble: 2 × 4
 #>   cd_cvm denom_cia           dt_refer   id_doc
@@ -187,8 +187,8 @@ breakdown then shows up in `dt_fim_exerc` and in the `ds_conta` /
 
 ## Where to read next
 
-- **cvm-fetch** — argument reference and the full `companies` / `years`
-  / `report_type` / `validate` / `on_error` semantics.
+- **issuer-fetch** — argument reference and the full `companies` /
+  `years` / `report_type` / `validate` / `on_error` semantics.
 - **fre** — reference form. Same package, different table semantics.
 - **cvm-defects** — known publication quirks behind the transformations
   applied here.

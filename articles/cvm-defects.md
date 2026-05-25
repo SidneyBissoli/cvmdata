@@ -44,15 +44,15 @@ library(cvmdata)
 ### \#5 — CD_CVM padding accepted in either form
 
 CAD ships CD_CVM unpadded, ITR/DFP pad to six digits.
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 normalizes both:
 
 ``` r
 
-a <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "1023",   years = 2024)
-b <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "001023", years = 2024)
+a <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "1023",   year = 2024)
+b <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "001023", year = 2024)
 identical(a[, !(names(a) %in% character(0))],
           b[, !(names(b) %in% character(0))])
 #> [1] FALSE
@@ -84,12 +84,12 @@ yaml::read_yaml(system.file(
 
 ``` r
 
-bpa <- cvm_fetch("dfp", "bpa", report_type = "ind",
-                 companies = "1023", years = 2024)
+bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
+                 issuer = "1023", year = 2024)
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:29.269307
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:51:59.111969
 #> ℹ dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -107,11 +107,11 @@ dictionary. The default `validate = "strict"` refuses to read them:
 
 ``` r
 
-cvm_fetch("fre", "empregado_PCD",
-          companies = "1023", years = 2024)
+issuer_fetch("fre", "empregado_PCD",
+          issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:34.075032
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:02.344108
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -150,8 +150,8 @@ Result: at most one row per filing key in the returned tibble.
 
 ``` r
 
-auditor <- cvm_fetch("fre", "auditor",
-                     companies = "1023", years = 2024)
+auditor <- issuer_fetch("fre", "auditor",
+                     issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 # One row per (cnpj_companhia, data_referencia):
@@ -170,8 +170,8 @@ applies the filter on CNPJ:
 
 ``` r
 
-auditor <- cvm_fetch("fre", "auditor",
-                     companies = "1023", years = 2024)
+auditor <- issuer_fetch("fre", "auditor",
+                     issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 "cd_cvm" %in% names(auditor)
@@ -193,12 +193,12 @@ For defects 1, 2, 3, 4, 6, 9, 10, and 12 the package’s behaviour is
 either purely preservational (1, 2, 3, 4, 6) or structurally declared in
 the schema (9, 10, 12). The inventory table above points at each YAML
 and at the relevant CLAUDE.md section; the package’s source under
-`R/transform-schema.R`, `R/util-csv-cvm.R` and `R/api-cvm-fetch.R` is
+`R/transform-schema.R`, `R/util-csv-cvm.R` and `R/api-issuer-fetch.R` is
 the canonical reference.
 
 ## Where to read next
 
-- **cvm-fetch** — argument reference; `validate` and `on_error`
+- **issuer-fetch** — argument reference; `validate` and `on_error`
   semantics in full.
 - **itr-dfp** — workflow with `multiply_by_scale` and
   `keep_latest_version` in action.

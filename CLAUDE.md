@@ -60,10 +60,9 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 
 > ### ⚠️ Decisão arquitetural em aberto (2026-05-24)
 >
-> [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-> está prematuramente nomeada. Hoje aceita só os 4 datasets de
-> **companhias abertas** (`cad`, `dfp`, `itr`, `fre`) e carrega
-> argumentos que só fazem sentido para esse grupo: `companies`
+> `cvm_fetch()` está prematuramente nomeada. Hoje aceita só os 4
+> datasets de **companhias abertas** (`cad`, `dfp`, `itr`, `fre`) e
+> carrega argumentos que só fazem sentido para esse grupo: `companies`
 > (CNPJ/CD_CVM/texto), `report_type` (`ind`/`con`), `years` (fundos
 > publicam mensal/trimestral, não anual). A CVM organiza dados em
 > **grupos** e há ~15 grupos adicionais previstos (ICVM 555, FIIs,
@@ -75,15 +74,11 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 > Três opções de design abertas, a discutir em sessão dedicada
 > (provavelmente em plan mode no Claude Desktop):
 >
-> - **A** Argumento `group=` em
->   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
->   (unificação total).
+> - **A** Argumento `group=` em `cvm_fetch()` (unificação total).
 > - **B** Funções por grupo: `cia_fetch()`, `fund_fetch()` etc.
 >   (proposta inicial — contratos de dado divergem demais).
-> - **C** Híbrida:
->   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
->   com dispatch interno por grupo inferido do dataset, `...`
->   permissivo.
+> - **C** Híbrida: `cvm_fetch()` com dispatch interno por grupo inferido
+>   do dataset, `...` permissivo.
 >
 > A janela para o rename sem custo social é agora: v0.1.0 foi tagueada
 > em 2026-05-24 e ainda não está no CRAN. Submissão rOpenSci no
@@ -93,20 +88,17 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 
 ### 2.1 Funções públicas
 
-Padrão `object_verb` (Dev Guide rOpenSci).
-**[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-é a API principal para obtenção de dados de qualquer dataset.** Aliases
-tipados por dataset *não* são exportados —
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-permanece apenas por ergonomia da Sessão 01 (CAD = caso simples sem ZIP,
-sem variantes), e internamente delega para
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
-**Decisão tomada em 2026-05-20** depois que comparação empírica entre
-dois caminhos de download mostrou que o portal de dados abertos
-(`dados.cvm.gov.br`) entrega TODOS os dados que o portal RAD/ENET por
-documento entrega, em formato tabular muito mais conveniente e 30× mais
-rápido (~0,93 s o ZIP anual inteiro contra ~30 s por documento
-individual). Vide `cvmdata_rodada3-1_*.md` e o histórico desta sessão.
+Padrão `object_verb` (Dev Guide rOpenSci). **`cvm_fetch()` é a API
+principal para obtenção de dados de qualquer dataset.** Aliases tipados
+por dataset *não* são exportados — `cad_fetch()` permanece apenas por
+ergonomia da Sessão 01 (CAD = caso simples sem ZIP, sem variantes), e
+internamente delega para `cvm_fetch()`. **Decisão tomada em 2026-05-20**
+depois que comparação empírica entre dois caminhos de download mostrou
+que o portal de dados abertos (`dados.cvm.gov.br`) entrega TODOS os
+dados que o portal RAD/ENET por documento entrega, em formato tabular
+muito mais conveniente e 30× mais rápido (~0,93 s o ZIP anual inteiro
+contra ~30 s por documento individual). Vide `cvmdata_rodada3-1_*.md` e
+o histórico desta sessão.
 
 ``` r
 
@@ -175,9 +167,8 @@ Domínio dos argumentos enumerados (validados via
   ~30× mais rápido. A “quebra de reprodutibilidade” do flip é
   controlável via `cvm_source_set("cvm")` e pelo atributo `source` que o
   tibble já carrega via `cvm_attach_metadata()`. A assinatura pública de
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  declara `source = NULL` para que o option seja consultado
-  dinamicamente — alinhamento com o padrão da família cache
+  `cvm_fetch()` declara `source = NULL` para que o option seja
+  consultado dinamicamente — alinhamento com o padrão da família cache
   ([`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
   ↔︎
   [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)).
@@ -199,10 +190,9 @@ Domínio dos argumentos enumerados (validados via
 Sobre exercícios contidos em cada CSV anual: o portal CVM publica em
 cada ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — i.e., o ano
 declarado e seu N-1. O antepenúltimo do ano N é o último do ano N-2.
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-não tenta reconstruir o antepenúltimo: retorna o conteúdo literal do CSV
-declarado em `years`. Usuários que queiram histórico mais longo pedem
-`years = (N-2):N` e empilham; a deduplicação por
+`cvm_fetch()` não tenta reconstruir o antepenúltimo: retorna o conteúdo
+literal do CSV declarado em `years`. Usuários que queiram histórico mais
+longo pedem `years = (N-2):N` e empilham; a deduplicação por
 `(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
 
 ### 2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)
@@ -590,7 +580,7 @@ CSV UTF-8, delimitador `,`. 10 colunas obrigatórias + 1 opcional:
 |----|----|----|
 | `dataset` | character | chave |
 | `table` | character | chave |
-| `campo` | character | chave; nome snake_case minúsculo (bate com [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)) |
+| `campo` | character | chave; nome snake_case minúsculo (bate com `cvm_fetch()`) |
 | `campo_original` | character | nome do campo como publicado no META CVM (preserva caps/mixed case) |
 | `descricao` | character | descrição oficial CVM |
 | `dominio` | character | domínio oficial CVM |
@@ -782,11 +772,10 @@ funcionando. Gate não-negociável.
   fase por fase. `CLAUDE.md` não duplica status; consulta o roadmap
   antes de assumir que algo está ou não entregue.
 - **Não reabrir decisões travadas** (26 da 2.5, 7 da 2.6, 3 da 3.0, 4 da
-  3.0.2, mais a Sessão 02 sobre
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  como API principal e o portal de dados abertos como caminho default vs
-  RAD/ENET, e as decisões pós-3.4 registradas em `NEWS.md` + histórico
-  de commits). Se acha que precisa rever, perguntar antes de agir.
+  3.0.2, mais a Sessão 02 sobre `cvm_fetch()` como API principal e o
+  portal de dados abertos como caminho default vs RAD/ENET, e as
+  decisões pós-3.4 registradas em `NEWS.md` + histórico de commits). Se
+  acha que precisa rever, perguntar antes de agir.
 - **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**.
   Usar YAMLs validados em `inst/extdata/schemas/` (ou `schemas_proto/`
   para protótipos ainda não promovidos) ou perguntar.

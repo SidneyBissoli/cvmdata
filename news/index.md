@@ -2,6 +2,49 @@
 
 ## cvmdata 0.1.0.9000 (in development)
 
+### ⚠️ Breaking changes
+
+- `cvm_fetch()` has been renamed
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  to reflect the contract of CVM’s company-issuer datasets (the v0.1
+  scope). The rename is mechanical:
+
+  ``` R
+  cvm_fetch(dataset, table, companies = ..., years = ..., ...)
+  ↓
+  issuer_fetch(dataset, table, issuer = ..., year = ..., ...)
+  ```
+
+  The arguments `companies` and `years` have been renamed to the
+  singular `issuer` and `year` for tidyverse-canonical naming. The
+  semantics are unchanged: `issuer` accepts a character vector of CNPJs
+  / CD_CVMs / free-text identifiers; `year` accepts an integer vector of
+  years and defaults to the latest available year when `NULL`. The
+  renamed arguments still accept vectors of any length.
+
+  `cvm_fetch()` is **removed without a deprecation wrapper**. Calls
+  using the old name will fail with
+  `could not find function "cvm_fetch"`. Likewise, passing the old
+  argument names will abort with `cvmdata_error_input` and a hint
+  suggesting the new names.
+
+  Rationale: cvmdata has zero CRAN distribution and zero external users
+  at v0.1.0; the breaking change is contained to a few collaborators who
+  can update their scripts in one pass. The alternative (a
+  soft-deprecated wrapper kept until v1.0) would carry maintenance cost
+  and confuse reviewers during the upcoming rOpenSci submission.
+
+- `cad_fetch()` has been removed without replacement. Use
+  `issuer_fetch("cad", "companhias")` instead — the call site is one
+  character longer and removes a thin alias that was only retained for
+  ergonomics during the Session 01 prototype.
+
+- Four further fetchers (`fund_fetch()`, `agent_fetch()`,
+  `offering_fetch()`, `event_fetch()`) will be exported as skeletons in
+  the following development cycle. v0.1.0.9000 itself only ships
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  as a functional fetcher.
+
 ### Internal
 
 - Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to
@@ -10,8 +53,7 @@
   this clears the path for v0.2+ datasets that live under other groups
   (`fundos-de-investimento`, etc.) without colliding dataset slugs. A
   one-time internal helper (`cache_migrate_v0_1_to_v0_2()`, not
-  exported) runs automatically on first invocation of
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+  exported) runs automatically on first invocation of `cvm_fetch()`,
   [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
   or
   [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
@@ -62,14 +104,12 @@
 
 ### Bug fixes
 
-- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  and
-  [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-  no longer fail with the cryptic `cvmdata_error_internal` “Got
-  archive=, file=” when the R session runs under `LC_CTYPE = "C"`. The
-  schema loader now reads the bundled YAMLs forcing UTF-8 instead of
-  relying on the active locale, so multibyte characters in the schema
-  comment headers (e.g. “Demonstração”, “Exercício”) never cause
+- `cvm_fetch()` and `cad_fetch()` no longer fail with the cryptic
+  `cvmdata_error_internal` “Got archive=, file=” when the R session runs
+  under `LC_CTYPE = "C"`. The schema loader now reads the bundled YAMLs
+  forcing UTF-8 instead of relying on the active locale, so multibyte
+  characters in the schema comment headers (e.g. “Demonstração”,
+  “Exercício”) never cause
   [`yaml::read_yaml()`](https://yaml.r-lib.org/reference/read_yaml.html)
   to return `NULL`. A regression test under `LC_CTYPE = "C"` was added.
 - The PDF version of the package manual now builds cleanly on the macOS
@@ -82,20 +122,18 @@
 
 First public release. Covers the four core CVM publicly-traded-company
 datasets — CAD (registry), DFP (annual statements), ITR (quarterly
-statements) and FRE (reference form) — with a tidy
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-API, year-partitioned mirror in GitHub Releases (refreshed weekly), and
-an HTTP-with-cache backend against `dados.cvm.gov.br` for byte-level
+statements) and FRE (reference form) — with a tidy `cvm_fetch()` API,
+year-partitioned mirror in GitHub Releases (refreshed weekly), and an
+HTTP-with-cache backend against `dados.cvm.gov.br` for byte-level
 freshness.
 
 ### Breaking changes
 
-- The default `source` of
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  is now `"mirror"` (parquet via DuckDB), not `"cvm"` (CVM Open Data
-  Portal). Scripts that need byte-level freshness from the regulator
-  should pass `source = "cvm"` explicitly or persist the choice with
-  `cvm_source_set("cvm")`. The `"cvm"` backend remains fully supported.
+- The default `source` of `cvm_fetch()` is now `"mirror"` (parquet via
+  DuckDB), not `"cvm"` (CVM Open Data Portal). Scripts that need
+  byte-level freshness from the regulator should pass `source = "cvm"`
+  explicitly or persist the choice with `cvm_source_set("cvm")`. The
+  `"cvm"` backend remains fully supported.
 
 ### ETL and mirror
 
@@ -121,9 +159,7 @@ freshness.
 ## cvmdata 0.0.0.9000
 
 - Initial scaffolding.
-- First implementation:
-  [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-  for the CAD registry.
+- First implementation: `cad_fetch()` for the CAD registry.
 - Exported utility:
   [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
   for stripping punctuation from CNPJ vectors.
@@ -169,8 +205,8 @@ freshness.
   reads `getOption("cvmdata.source", "cvm")`;
   [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
   validates the value against `c("cvm", "mirror")` and persists it.
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  now declares `source = NULL` and resolves the default via
+  `cvm_fetch()` now declares `source = NULL` and resolves the default
+  via
   [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md),
   so precedence is arg \> option \> built-in default. The built-in
   default is `"cvm"` in the v0.1 series and transitions to `"mirror"` in

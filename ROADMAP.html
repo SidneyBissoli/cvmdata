@@ -21,7 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
-    <li><a class="dropdown-item" href="articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
@@ -93,7 +93,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="fase-d--datasets-ponta-a-ponta">Fase D — Datasets ponta-a-ponta<a class="anchor" aria-label="anchor" href="#fase-d--datasets-ponta-a-ponta"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox" checked><code><a href="reference/cad_fetch.html">cad_fetch()</a></code> ponta-a-ponta.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked><code>cad_fetch()</code> ponta-a-ponta.</label></li>
 <li><label><input type="checkbox" checked><code>cvm_fetch(dataset, table, ...)</code> como API principal.</label></li>
 <li><label><input type="checkbox" checked>Pipeline ZIP-yearly em <code>source_cvm_http_get()</code>.</label></li>
 <li><label><input type="checkbox" checked><code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code> e <code>cvm_tables(dataset)</code>.</label></li>
@@ -112,7 +112,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="fase-e--polimento-e-cobertura">Fase E — Polimento e cobertura<a class="anchor" aria-label="anchor" href="#fase-e--polimento-e-cobertura"></a></h3>
-<ul><li>[-] <code>dfp_fetch()</code> / <code>itr_fetch()</code> / <code>fre_fetch()</code> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> cobre tudo.</li>
+<ul><li>[-] <code>dfp_fetch()</code> / <code>itr_fetch()</code> / <code>fre_fetch()</code> — <code>cvm_fetch()</code> cobre tudo.</li>
 <li><label><input type="checkbox" checked>Política do reader em três modos (<code>strict</code>/<code>warn</code>/<code>skip</code>) para tabelas com e sem META.</label></li>
 <li><label><input type="checkbox" checked><code>cvm_dictionary(dataset, table)</code>.</label></li>
 <li><label><input type="checkbox" checked><code>cvm_codelist(dataset, table, column)</code>.</label></li>
@@ -180,11 +180,11 @@
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-06--rename--deprecation-abrupta--argumentos-no-singular">Sessão 06 — Rename + deprecation abrupta + argumentos no singular<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-06--rename--deprecation-abrupta--argumentos-no-singular"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox"><code>R/api-cvm-fetch.R</code> → <code>R/api-issuer-fetch.R</code>.</label></li>
-<li><label><input type="checkbox"><code>cvm_fetch_internal()</code> → <code>issuer_fetch_internal()</code>.</label></li>
-<li><label><input type="checkbox"><code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> → <code>issuer_fetch()</code>.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked><code>R/api-cvm-fetch.R</code> → <code>R/api-issuer-fetch.R</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_fetch_internal()</code> → <code>issuer_fetch_internal()</code>.</label></li>
+<li><label><input type="checkbox" checked><code>cvm_fetch()</code> → <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>.</label></li>
 <li>
-<label><input type="checkbox">Argumentos renomeados para singular:</label>
+<label><input type="checkbox" checked>Argumentos renomeados para singular:</label>
 <ul><li>
 <code>companies</code> → <code>issuer</code>
 </li>
@@ -192,16 +192,16 @@
 <code>years</code> → <code>year</code>
 </li>
 </ul></li>
-<li><label><input type="checkbox"><code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> removida sem wrapper.</label></li>
-<li><label><input type="checkbox"><code><a href="reference/cad_fetch.html">cad_fetch()</a></code> removida sem wrapper (<code>R/api-cad-fetch.R</code> apagado).</label></li>
-<li><label><input type="checkbox">Todos os exemplos roxygen atualizados.</label></li>
-<li><label><input type="checkbox"><code>vignettes/cvmdata.Rmd</code> e todos os articles atualizados (<code>cvm-fetch.Rmd</code> → <code>issuer-fetch.Rmd</code>).</label></li>
+<li><label><input type="checkbox" checked><code>cvm_fetch()</code> removida sem wrapper.</label></li>
+<li><label><input type="checkbox" checked><code>cad_fetch()</code> removida sem wrapper (<code>R/api-cad-fetch.R</code> apagado).</label></li>
+<li><label><input type="checkbox" checked>Todos os exemplos roxygen atualizados.</label></li>
+<li><label><input type="checkbox" checked><code>vignettes/cvmdata.Rmd</code> e todos os articles atualizados (<code>cvm-fetch.Rmd</code> → <code>issuer-fetch.Rmd</code>).</label></li>
 <li>
-<label><input type="checkbox">Todos os testes migrados (<code>grep -rl "cvm_fetch\|cad_fetch" tests/ R/</code></label>
+<label><input type="checkbox" checked>Todos os testes migrados (<code>grep -rl "cvm_fetch\|cad_fetch" tests/ R/</code></label>
 <ul><li>sed).</li>
 </ul></li>
-<li><label><input type="checkbox"><code>NEWS.md</code> com entrada <code>⚠️ breaking</code> documentando o caminho de migração.</label></li>
-<li><label><input type="checkbox">Testes cobrindo rename + arg singular aceitando vetor.</label></li>
+<li><label><input type="checkbox" checked><code>NEWS.md</code> com entrada <code>⚠️ breaking</code> documentando o caminho de migração.</label></li>
+<li><label><input type="checkbox" checked>Testes cobrindo rename + arg singular aceitando vetor.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-07--esqueletos-dos-4-fetchers-restantes">Sessão 07 — Esqueletos dos 4 fetchers restantes<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-07--esqueletos-dos-4-fetchers-restantes"></a></h3>
@@ -237,16 +237,16 @@
 <p>Nomenclatura por <strong>grupo CKAN da CVM</strong> (18 grupos verificados em <a href="https://dados.cvm.gov.br/group/" class="external-link uri">https://dados.cvm.gov.br/group/</a>, 2026-05-25). Cada release incremental cobre um grupo ou subconjunto coerente; o fetcher correspondente já existe em skeleton desde v0.1.0.9000.</p>
 <div class="section level3">
 <h3 id="v02--companhias-parte-2">v0.2 — <code>companhias</code> (parte 2)<a class="anchor" aria-label="anchor" href="#v02--companhias-parte-2"></a></h3>
-<p>Cobertos por <code>issuer_fetch()</code> (skeleton já exportado, falta implementação dos datasets).</p>
+<p>Cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> (skeleton já exportado, falta implementação dos datasets).</p>
 <ul class="task-list"><li><label><input type="checkbox">Dataset <code>fca</code> (Formulário Cadastral).</label></li>
 <li><label><input type="checkbox">Dataset <code>vlmo</code> (Valores Mobiliários Negociados e Detidos).</label></li>
 <li><label><input type="checkbox">Dataset <code>cgvn</code> (Informe do Código de Governança).</label></li>
 <li><label><input type="checkbox">Dataset <code>ipe</code> (documentos periódicos e eventuais).</label></li>
-<li><label><input type="checkbox">Suporte a ticker B3 no argumento <code>issuer</code> de <code>issuer_fetch()</code>.</label></li>
+<li><label><input type="checkbox">Suporte a ticker B3 no argumento <code>issuer</code> de <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="v03--companhias-parte-3--perfis-não-default">v0.3 — <code>companhias</code> (parte 3) + perfis não-default<a class="anchor" aria-label="anchor" href="#v03--companhias-parte-3--perfis-n%C3%A3o-default"></a></h3>
-<p>Ainda cobertos por <code>issuer_fetch()</code>.</p>
+<p>Ainda cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>.</p>
 <ul class="task-list"><li><label><input type="checkbox">Programas de recompra de ações.</label></li>
 <li><label><input type="checkbox">ICBGC (Informe do Código Brasileiro de Governança).</label></li>
 <li><label><input type="checkbox">Cadastro de companhias estrangeiras.</label></li>

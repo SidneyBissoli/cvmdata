@@ -7,8 +7,8 @@
 
 ### Deep dives
 
-- [cvm_fetch(): the generic
-  API](https://sidneybissoli.github.io/cvmdata/articles/cvm-fetch.md):
+- [issuer_fetch(): the generic
+  API](https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.md):
 - [Quarterly and annual statements (ITR &
   DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
 - [Reference Form

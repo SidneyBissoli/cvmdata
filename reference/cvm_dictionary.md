@@ -34,7 +34,7 @@ cvm_dictionary(dataset, table, group = NULL)
 
 A tibble with one row per column of the table, columns `campo`
 (snake-case name matching
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 output), `campo_original` (field name as published by CVM in the META,
 preserving the original casing), `descricao`, `dominio`, `tipo_dados`,
 `tamanho`, `precisao`, `scale`.

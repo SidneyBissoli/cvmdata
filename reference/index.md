@@ -4,10 +4,8 @@
 
 Functions to retrieve any CVM open-data table covered by the package.
 
-- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  : Fetch a CVM open-data table
-- [`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-  : Fetch the CVM company registry (CAD)
+- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  : Fetch a CVM open-data table for an issuer dataset
 
 ## Cache
 
@@ -27,9 +25,9 @@ window for HTTP revalidation is configurable via the
 ## Source backend
 
 Configure which backend
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-queries (direct CVM portal or the Phase F parquet mirror, when
-available).
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+queries (direct CVM portal or the parquet mirror published in GitHub
+Releases).
 
 - [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
   : Get the active cvmdata source backend

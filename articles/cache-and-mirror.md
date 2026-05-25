@@ -1,7 +1,7 @@
 # Cache and mirror backend
 
 `cvmdata` ships two interchangeable backends behind
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 and a multi-layer disk cache that both backends share. This article
 walks through the contract, the pipeline that keeps the mirror fresh,
 and the workflows for switching between backends, inspecting the cache,
@@ -23,7 +23,7 @@ library(cvmdata)
 
 The active backend is selected at three precedence levels: an explicit
 `source = ...` argument to
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 wins over the option `cvmdata.source` (set via
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)),
 which in turn wins over the built-in default returned by
@@ -84,7 +84,7 @@ same script; documenting them here is the rOpenSci-auditable surface.
 ## Workflow 1 — Working with the mirror (default)
 
 From v0.1.0 the mirror is the default backend, so
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 routes every call through DuckDB without further configuration. The
 snippet below makes the choice explicit (helpful in scripts that may
 inherit a different session option) and exercises both the cold and warm
@@ -99,36 +99,36 @@ cvm_source_set("mirror")
 # First call: the mirror's release inventory is fetched once via the
 # GitHub REST API, parquet assets are downloaded into the L3 cache, and
 # DuckDB reads them from disk.
-bb_bpa_mirror <- cvm_fetch(
+bb_bpa_mirror <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2024
+  issuer = "1023",
+  year = 2024
 )
 
 # Second call: the L3 cache short-circuits the download; the API
 # inventory is reused from the session cache; only DuckDB runs.
-cvm_fetch(
+issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2024
+  issuer = "1023",
+  year = 2024
 )
 ```
 
 The argument `source = ...` to
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 always overrides the option, so a single call can fall back to the CVM
 portal without disturbing the session-wide setting:
 
 ``` r
 
 # Persisted setting is "mirror"; this one call still queries CVM live.
-cvm_fetch(
+issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2024,
+  issuer = "1023",
+  year = 2024,
   source      = "cvm"
 )
 ```
@@ -232,10 +232,9 @@ how much disk it freed.
 
 ## Where to read next
 
-- **cvm-fetch** — argument-level deep dive on
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
-  including `companies` / `years` / `report_type` / `validate` /
-  `on_error`.
+- **issuer-fetch** — argument-level deep dive on
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+  including `issuer` / `year` / `report_type` / `validate` / `on_error`.
 - **itr-dfp** — end-to-end workflows on annual and quarterly financial
   statements.
 - **cvm-defects** — known CVM publication quirks and how the package

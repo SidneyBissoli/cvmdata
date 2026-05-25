@@ -31,12 +31,10 @@ cvm_datasets()
 
 ## First call — the company registry
 
-The simplest entry point is
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md),
-a thin alias for `cvm_fetch("cad", "companhias")`. It returns the
-current snapshot of the open-company registry. The chunk below loads a
-small slice of a real call pre-computed for this vignette (the package
-itself hits the CVM portal on every invocation):
+The simplest entry point is `issuer_fetch("cad", "companhias")`. It
+returns the current snapshot of the open-company registry. The chunk
+below loads a small slice of a real call pre-computed for this vignette
+(the package itself hits the CVM portal on every invocation):
 
 ``` r
 
@@ -293,13 +291,12 @@ These attributes survive subsetting via standard tibble operations and
 are displayed at the top of the print output, so the dataset’s origin
 and freshness travel with the data.
 
-## The general API — `cvm_fetch()`
+## The general API — `issuer_fetch()`
 
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-is convenience. The single entry point for every dataset and every table
-is `cvm_fetch(dataset, table, ...)`. The example below shows what eight
-rows of BCO BRASIL’s individual balance sheet look like for 2024 — also
-pre-computed:
+`issuer_fetch(dataset, table, ...)` is the single entry point for every
+CVM issuer dataset and every table covered by the package. The example
+below shows what eight rows of BCO BRASIL’s individual balance sheet
+look like for 2024 — also pre-computed:
 
 ``` r
 
@@ -344,35 +341,36 @@ Two things are worth noting on the output:
 - `vl_conta` (account amount) is already in absolute Brazilian reais.
   CVM publishes a separate `ESCALA_MOEDA` field (`UNIDADE`, `MIL`,
   `MILHÃO`, `BILHÃO`);
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   multiplies `VL_CONTA` by the scale and drops the scale column. The
   “known defects” article walks through this transformation explicitly.
 - `dt_refer`, `dt_fim_exerc` and other dates arrive as proper R `Date`,
   even though CVM ships them as `YYYY-MM-DD` strings. The conversion is
   driven by the published dictionary (`tipo_dados = "date"`).
 
-## Selecting companies
+## Selecting issuers
 
-The `companies` argument accepts CNPJ (with or without punctuation),
-CD_CVM (with or without zero-padding), or a free-text search against
-`denom_cia`. Detection is automatic per element. In non-interactive
-sessions, ambiguous text matches abort with a list of candidates so
-batch scripts never silently take the wrong issuer.
+The `issuer` argument accepts CNPJ (with or without punctuation), CD_CVM
+(with or without zero-padding), or a free-text search against
+`denom_cia`. Detection is automatic per element, and the argument
+accepts a vector of any length. In non-interactive sessions, ambiguous
+text matches abort with a list of candidates so batch scripts never
+silently take the wrong issuer.
 
 ``` r
 
 # Three equivalent forms for one issuer:
-cvm_fetch("dfp", "bpa", report_type = "ind",
-          companies = "1023",                 years = 2024)
-cvm_fetch("dfp", "bpa", report_type = "ind",
-          companies = "00.000.000/0001-91",   years = 2024)
-cvm_fetch("dfp", "bpa", report_type = "ind",
-          companies = "BCO BRASIL S.A.",      years = 2024) # exact
+issuer_fetch("dfp", "bpa", report_type = "ind",
+          issuer = "1023",                 year = 2024)
+issuer_fetch("dfp", "bpa", report_type = "ind",
+          issuer = "00.000.000/0001-91",   year = 2024)
+issuer_fetch("dfp", "bpa", report_type = "ind",
+          issuer = "BCO BRASIL S.A.",      year = 2024) # exact
 ```
 
-The `cvm-fetch` article goes through CNPJ vs. CD_CVM vs. text in depth,
-including the CD_CVM-to-CNPJ lookup performed automatically for tables
-that lack a `cd_cvm` column (e.g. `composicao_capital`).
+The `issuer-fetch` article goes through CNPJ vs. CD_CVM vs. text in
+depth, including the CD_CVM-to-CNPJ lookup performed automatically for
+tables that lack a `cd_cvm` column (e.g. `composicao_capital`).
 
 ## Discovery
 
@@ -407,7 +405,7 @@ discovers the years available upstream for a yearly-partitioned dataset.
 
 ## Cache, source backend, and where to read next
 
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 caches downloaded artefacts under
 `tools::R_user_dir("cvmdata", "cache")` with HTTP revalidation gated by
 a 30-day TTL. Cached units are LRU-evicted once the cache exceeds the
@@ -426,9 +424,9 @@ remains fully supported and is selected per call or persisted via
 
 Further reading on the pkgdown site:
 
-- **cvm-fetch** — deep dive on
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
-  including `companies`/`years`/`report_type`/`on_error`/`validate`
+- **issuer-fetch** — deep dive on
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+  including `issuer`/`year`/`report_type`/`on_error`/`validate`
   semantics.
 - **itr-dfp** — quarterly and annual financial statements, with two
   end-to-end workflows.

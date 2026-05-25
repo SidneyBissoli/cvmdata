@@ -2,9 +2,9 @@
 
 Configures the option `cvmdata.source`, which becomes the default for
 subsequent
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 calls that do not pass `source` explicitly. The argument passed to
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
 always wins over the option.
 
 ## Usage

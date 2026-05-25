@@ -9,15 +9,14 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/ROADMAP.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.html</loc></url>
-<url><loc>https://sidneybissoli.github.io/cvmdata/articles/cvm-fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/cvmdata.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/fre.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/index.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/authors.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/news/index.html</loc></url>
-<url><loc>https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.html</loc></url>
@@ -28,11 +27,11 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.html</loc></url>
-<url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvmdata-package.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/index.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.html</loc></url>
 </urlset>
 

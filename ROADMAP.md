@@ -94,8 +94,7 @@ dicionário.
 
 ### Fase D — Datasets ponta-a-ponta
 
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-ponta-a-ponta.
+`cad_fetch()` ponta-a-ponta.
 
 `cvm_fetch(dataset, table, ...)` como API principal.
 
@@ -135,8 +134,7 @@ Semântica diferenciada para `on_error = "warn"`/`"silent"`.
 
 ### Fase E — Polimento e cobertura
 
-\[-\] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` —
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+\[-\] `dfp_fetch()` / `itr_fetch()` / `fre_fetch()` — `cvm_fetch()`
 cobre tudo.
 
 Política do reader em três modos (`strict`/`warn`/`skip`) para tabelas
@@ -309,19 +307,17 @@ coluna.
 
 `cvm_fetch_internal()` → `issuer_fetch_internal()`.
 
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-→ `issuer_fetch()`.
+`cvm_fetch()` →
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
 
 Argumentos renomeados para singular:
 
 - `companies` → `issuer`
 - `years` → `year`
 
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-removida sem wrapper.
+`cvm_fetch()` removida sem wrapper.
 
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
-removida sem wrapper (`R/api-cad-fetch.R` apagado).
+`cad_fetch()` removida sem wrapper (`R/api-cad-fetch.R` apagado).
 
 Todos os exemplos roxygen atualizados.
 
@@ -407,8 +403,9 @@ existe em skeleton desde v0.1.0.9000.
 
 ### v0.2 — `companhias` (parte 2)
 
-Cobertos por `issuer_fetch()` (skeleton já exportado, falta
-implementação dos datasets).
+Cobertos por
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+(skeleton já exportado, falta implementação dos datasets).
 
 Dataset `fca` (Formulário Cadastral).
 
@@ -418,11 +415,13 @@ Dataset `cgvn` (Informe do Código de Governança).
 
 Dataset `ipe` (documentos periódicos e eventuais).
 
-Suporte a ticker B3 no argumento `issuer` de `issuer_fetch()`.
+Suporte a ticker B3 no argumento `issuer` de
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
 
 ### v0.3 — `companhias` (parte 3) + perfis não-default
 
-Ainda cobertos por `issuer_fetch()`.
+Ainda cobertos por
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
 
 Programas de recompra de ações.
 

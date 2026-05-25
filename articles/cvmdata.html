@@ -36,7 +36,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
-    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/cache-and-mirror.html">Cache and mirror backend</a></li>
@@ -125,8 +125,8 @@ datasets:</p>
 <div class="section level2">
 <h2 id="first-call-the-company-registry">First call — the company registry<a class="anchor" aria-label="anchor" href="#first-call-the-company-registry"></a>
 </h2>
-<p>The simplest entry point is <code><a href="../reference/cad_fetch.html">cad_fetch()</a></code>, a thin alias
-for <code>cvm_fetch("cad", "companhias")</code>. It returns the current
+<p>The simplest entry point is
+<code>issuer_fetch("cad", "companhias")</code>. It returns the current
 snapshot of the open-company registry. The chunk below loads a small
 slice of a real call pre-computed for this vignette (the package itself
 hits the CVM portal on every invocation):</p>
@@ -379,13 +379,12 @@ and are displayed at the top of the print output, so the dataset’s
 origin and freshness travel with the data.</p>
 </div>
 <div class="section level2">
-<h2 id="the-general-api-cvm_fetch">The general API — <code>cvm_fetch()</code><a class="anchor" aria-label="anchor" href="#the-general-api-cvm_fetch"></a>
+<h2 id="the-general-api-issuer_fetch">The general API — <code>issuer_fetch()</code><a class="anchor" aria-label="anchor" href="#the-general-api-issuer_fetch"></a>
 </h2>
-<p><code><a href="../reference/cad_fetch.html">cad_fetch()</a></code> is convenience. The single entry point for
-every dataset and every table is
-<code>cvm_fetch(dataset, table, ...)</code>. The example below shows
-what eight rows of BCO BRASIL’s individual balance sheet look like for
-2024 — also pre-computed:</p>
+<p><code>issuer_fetch(dataset, table, ...)</code> is the single entry
+point for every CVM issuer dataset and every table covered by the
+package. The example below shows what eight rows of BCO BRASIL’s
+individual balance sheet look like for 2024 — also pre-computed:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bb_bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
 <span>  <span class="st">"extdata"</span>, <span class="st">"vignette-data"</span>, <span class="st">"dfp_bpa_bb_2024_sample.rds"</span>,</span>
@@ -427,7 +426,7 @@ what eight rows of BCO BRASIL’s individual balance sheet look like for
 <code>vl_conta</code> (account amount) is already in absolute
 Brazilian reais. CVM publishes a separate <code>ESCALA_MOEDA</code>
 field (<code>UNIDADE</code>, <code>MIL</code>, <code>MILHÃO</code>,
-<code>BILHÃO</code>); <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> multiplies
+<code>BILHÃO</code>); <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> multiplies
 <code>VL_CONTA</code> by the scale and drops the scale column. The
 “known defects” article walks through this transformation
 explicitly.</li>
@@ -439,23 +438,23 @@ published dictionary (<code>tipo_dados = "date"</code>).</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="selecting-companies">Selecting companies<a class="anchor" aria-label="anchor" href="#selecting-companies"></a>
+<h2 id="selecting-issuers">Selecting issuers<a class="anchor" aria-label="anchor" href="#selecting-issuers"></a>
 </h2>
-<p>The <code>companies</code> argument accepts CNPJ (with or without
+<p>The <code>issuer</code> argument accepts CNPJ (with or without
 punctuation), CD_CVM (with or without zero-padding), or a free-text
 search against <code>denom_cia</code>. Detection is automatic per
-element. In non-interactive sessions, ambiguous text matches abort with
-a list of candidates so batch scripts never silently take the wrong
-issuer.</p>
+element, and the argument accepts a vector of any length. In
+non-interactive sessions, ambiguous text matches abort with a list of
+candidates so batch scripts never silently take the wrong issuer.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Three equivalent forms for one issuer:</span></span>
-<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>          companies <span class="op">=</span> <span class="st">"1023"</span>,                 years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>          companies <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,   years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>          companies <span class="op">=</span> <span class="st">"BCO BRASIL S.A."</span>,      years <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span> <span class="co"># exact</span></span></code></pre></div>
-<p>The <code>cvm-fetch</code> article goes through CNPJ vs. CD_CVM
+<span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          issuer <span class="op">=</span> <span class="st">"1023"</span>,                 year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          issuer <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,   year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
+<span>          issuer <span class="op">=</span> <span class="st">"BCO BRASIL S.A."</span>,      year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span> <span class="co"># exact</span></span></code></pre></div>
+<p>The <code>issuer-fetch</code> article goes through CNPJ vs. CD_CVM
 vs. text in depth, including the CD_CVM-to-CNPJ lookup performed
 automatically for tables that lack a <code>cd_cvm</code> column
 (e.g. <code>composicao_capital</code>).</p>
@@ -493,7 +492,7 @@ upstream for a yearly-partitioned dataset.</p>
 <div class="section level2">
 <h2 id="cache-source-backend-and-where-to-read-next">Cache, source backend, and where to read next<a class="anchor" aria-label="anchor" href="#cache-source-backend-and-where-to-read-next"></a>
 </h2>
-<p><code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> caches downloaded artefacts under
+<p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> caches downloaded artefacts under
 <code>tools::R_user_dir("cvmdata", "cache")</code> with HTTP
 revalidation gated by a 30-day TTL. Cached units are LRU-evicted once
 the cache exceeds the configurable size limit
@@ -510,9 +509,9 @@ selected per call or persisted via
 <p>Further reading on the pkgdown site:</p>
 <ul>
 <li>
-<strong>cvm-fetch</strong> — deep dive on <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>,
-including
-<code>companies</code>/<code>years</code>/<code>report_type</code>/<code>on_error</code>/<code>validate</code>
+<strong>issuer-fetch</strong> — deep dive on
+<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>, including
+<code>issuer</code>/<code>year</code>/<code>report_type</code>/<code>on_error</code>/<code>validate</code>
 semantics.</li>
 <li>
 <strong>itr-dfp</strong> — quarterly and annual financial

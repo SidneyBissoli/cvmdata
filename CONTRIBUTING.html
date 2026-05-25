@@ -21,7 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
-    <li><a class="dropdown-item" href="articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
@@ -51,7 +51,7 @@
 <h2 id="reporting-issues">Reporting issues<a class="anchor" aria-label="anchor" href="#reporting-issues"></a></h2>
 <ul><li>Please file issues at <a href="https://github.com/SidneyBissoli/cvmdata/issues" class="external-link uri">https://github.com/SidneyBissoli/cvmdata/issues</a>.</li>
 <li>Before opening a new issue, search existing ones (open and closed) to avoid duplicates.</li>
-<li>For bug reports, include a minimal reproducible example using <a href="https://reprex.tidyverse.org/" class="external-link">reprex</a>. Mention the CVM dataset and table involved (e.g. <code>cvm_fetch("dfp", "bpa", report_type = "ind", ...)</code>), the value of <code>getOption("cvmdata.source")</code> and the output of <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>.</li>
+<li>For bug reports, include a minimal reproducible example using <a href="https://reprex.tidyverse.org/" class="external-link">reprex</a>. Mention the CVM dataset and table involved (e.g. <code>issuer_fetch("dfp", "bpa", report_type = "ind", ...)</code>), the value of <code>getOption("cvmdata.source")</code> and the output of <code><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo()</a></code>.</li>
 <li>For feature requests, describe the use case and how the proposed API would fit the existing surface. Cross-cutting design changes are best discussed in an issue before a PR.</li>
 </ul></div>
 <div class="section level2">
@@ -102,7 +102,7 @@
 </div>
 <div class="section level2">
 <h2 id="adding-or-modifying-a-schema-yaml">Adding or modifying a schema YAML<a class="anchor" aria-label="anchor" href="#adding-or-modifying-a-schema-yaml"></a></h2>
-<p>Each table is described by a YAML file under <code>inst/extdata/schemas/&lt;dataset&gt;/&lt;table&gt;.yaml</code>. The schema drives download, parsing, validation and transformation in <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>. Minimum required fields:</p>
+<p>Each table is described by a YAML file under <code>inst/extdata/schemas/&lt;dataset&gt;/&lt;table&gt;.yaml</code>. The schema drives download, parsing, validation and transformation in <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>. Minimum required fields:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">dataset</span><span class="kw">:</span><span class="at"> &lt;dataset&gt;</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">table</span><span class="kw">:</span><span class="at"> &lt;table&gt;</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>

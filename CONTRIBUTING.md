@@ -16,8 +16,8 @@ Conduct](https://sidneybissoli.github.io/cvmdata/CODE_OF_CONDUCT.md).
 - For bug reports, include a minimal reproducible example using
   [reprex](https://reprex.tidyverse.org/). Mention the CVM dataset and
   table involved
-  (e.g. `cvm_fetch("dfp", "bpa", report_type = "ind", ...)`), the value
-  of `getOption("cvmdata.source")` and the output of
+  (e.g. `issuer_fetch("dfp", "bpa", report_type = "ind", ...)`), the
+  value of `getOption("cvmdata.source")` and the output of
   [`sessionInfo()`](https://rdrr.io/r/utils/sessionInfo.html).
 - For feature requests, describe the use case and how the proposed API
   would fit the existing surface. Cross-cutting design changes are best
@@ -100,7 +100,7 @@ merge.
 Each table is described by a YAML file under
 `inst/extdata/schemas/<dataset>/<table>.yaml`. The schema drives
 download, parsing, validation and transformation in
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
 Minimum required fields:
 
 ``` yaml

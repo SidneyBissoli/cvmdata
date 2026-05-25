@@ -11,7 +11,7 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
 - FRE detail tables use a different header convention from CAD/ITR/DFP:
   `cnpj_companhia`, `data_referencia`, `nome_companhia` (no `cd_cvm`
   column in the detail rows).
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   smooths over this — CD_CVM filters resolve via the dataset’s
   `submissao` and the user-facing interface stays identical.
 - Eight tables in FRE ship **without published META** (CVM never
@@ -57,15 +57,15 @@ year 2024.
 
 ``` r
 
-auditor <- cvm_fetch(
+auditor <- issuer_fetch(
   "fre", "auditor",
-  companies = "1023",
-  years     = 2024
+  issuer = "1023",
+  year = 2024
 )
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:51.127687
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:08.240088
 #> ℹ dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -93,11 +93,11 @@ refuses to read it:
 
 ``` r
 
-cvm_fetch("fre", "empregado_PCD",
-          companies = "1023", years = 2024)
+issuer_fetch("fre", "empregado_PCD",
+          issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:51.492335
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:08.61402
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -112,16 +112,16 @@ and returns the tibble; with `validate = "skip"` it runs silently:
 
 ``` r
 
-pcd <- cvm_fetch(
+pcd <- issuer_fetch(
   "fre", "empregado_PCD",
-  companies = "1023",
-  years     = 2024,
+  issuer = "1023",
+  year = 2024,
   validate  = "warn"
 )
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:51.705111
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:08.816398
 #> ℹ dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -142,10 +142,10 @@ FRE filing.
 
 ``` r
 
-posicao <- cvm_fetch(
+posicao <- issuer_fetch(
   "fre", "posicao_acionaria",
-  companies = "1023",
-  years     = 2024
+  issuer = "1023",
+  year = 2024
 )
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "posicao_acionaria"
 #>   does not carry `cd_cvm`).
@@ -158,7 +158,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-05-25 15:22:52.269775
+#> ℹ source: "mirror" | fetched_at: 2026-05-25 23:52:09.195948
 #> ℹ dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
@@ -189,7 +189,8 @@ declared in each YAML guard against silent schema drift.
 
 ## Where to read next
 
-- **cvm-fetch** — `companies` / `years` / `validate` semantics in full.
+- **issuer-fetch** — `companies` / `years` / `validate` semantics in
+  full.
 - **itr-dfp** — financial statements; same package, different table
   semantics.
 - **cvm-defects** — why eight FRE tables lack META, plus the broader

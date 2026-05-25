@@ -36,7 +36,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
-    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/cache-and-mirror.html">Cache and mirror backend</a></li>
@@ -73,10 +73,11 @@
     
     
 <p><code>cvmdata</code> ships two interchangeable backends behind
-<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> and a multi-layer disk cache that both backends
-share. This article walks through the contract, the pipeline that keeps
-the mirror fresh, and the workflows for switching between backends,
-inspecting the cache, and tuning the TTL and eviction options.</p>
+<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> and a multi-layer disk cache that both
+backends share. This article walks through the contract, the pipeline
+that keeps the mirror fresh, and the workflows for switching between
+backends, inspecting the cache, and tuning the TTL and eviction
+options.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -113,10 +114,11 @@ you need the latest publication within the refresh window.</td>
 </tbody>
 </table>
 <p>The active backend is selected at three precedence levels: an
-explicit <code>source = ...</code> argument to <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>
-wins over the option <code>cvmdata.source</code> (set via
-<code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code>), which in turn wins over the built-in
-default returned by <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code>.</p>
+explicit <code>source = ...</code> argument to
+<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> wins over the option
+<code>cvmdata.source</code> (set via <code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code>),
+which in turn wins over the built-in default returned by
+<code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code>.</p>
 </div>
 <div class="section level3">
 <h3 id="cache-layers">Cache layers<a class="anchor" aria-label="anchor" href="#cache-layers"></a>
@@ -257,7 +259,7 @@ surface.</p>
 <h2 id="workflow-1-working-with-the-mirror-default">Workflow 1 — Working with the mirror (default)<a class="anchor" aria-label="anchor" href="#workflow-1-working-with-the-mirror-default"></a>
 </h2>
 <p>From v0.1.0 the mirror is the default backend, so
-<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> routes every call through DuckDB without
+<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> routes every call through DuckDB without
 further configuration. The snippet below makes the choice explicit
 (helpful in scripts that may inherit a different session option) and
 exercises both the cold and warm cache paths:</p>
@@ -269,31 +271,31 @@ exercises both the cold and warm cache paths:</p>
 <span><span class="co"># First call: the mirror's release inventory is fetched once via the</span></span>
 <span><span class="co"># GitHub REST API, parquet assets are downloaded into the L3 cache, and</span></span>
 <span><span class="co"># DuckDB reads them from disk.</span></span>
-<span><span class="va">bb_bpa_mirror</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span><span class="va">bb_bpa_mirror</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
 <span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>  companies   <span class="op">=</span> <span class="st">"1023"</span>,</span>
-<span>  years       <span class="op">=</span> <span class="fl">2024</span></span>
+<span>  issuer <span class="op">=</span> <span class="st">"1023"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Second call: the L3 cache short-circuits the download; the API</span></span>
 <span><span class="co"># inventory is reused from the session cache; only DuckDB runs.</span></span>
-<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
 <span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>  companies   <span class="op">=</span> <span class="st">"1023"</span>,</span>
-<span>  years       <span class="op">=</span> <span class="fl">2024</span></span>
+<span>  issuer <span class="op">=</span> <span class="st">"1023"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The argument <code>source = ...</code> to <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>
+<p>The argument <code>source = ...</code> to <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>
 always overrides the option, so a single call can fall back to the CVM
 portal without disturbing the session-wide setting:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Persisted setting is "mirror"; this one call still queries CVM live.</span></span>
-<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
 <span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>  companies   <span class="op">=</span> <span class="st">"1023"</span>,</span>
-<span>  years       <span class="op">=</span> <span class="fl">2024</span>,</span>
+<span>  issuer <span class="op">=</span> <span class="st">"1023"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
 <span>  source      <span class="op">=</span> <span class="st">"cvm"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -443,9 +445,9 @@ reports how many units were removed and how much disk it freed.</p>
 </h2>
 <ul>
 <li>
-<strong>cvm-fetch</strong> — argument-level deep dive on
-<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>, including <code>companies</code> /
-<code>years</code> / <code>report_type</code> / <code>validate</code> /
+<strong>issuer-fetch</strong> — argument-level deep dive on
+<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>, including <code>issuer</code> /
+<code>year</code> / <code>report_type</code> / <code>validate</code> /
 <code>on_error</code>.</li>
 <li>
 <strong>itr-dfp</strong> — end-to-end workflows on annual and

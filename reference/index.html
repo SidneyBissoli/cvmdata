@@ -21,7 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
-    <li><a class="dropdown-item" href="../articles/cvm-fetch.html">cvm_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/cache-and-mirror.html">Cache and mirror backend</a></li>
@@ -54,17 +54,10 @@
 
       <dl><dt>
 
-          <code><a href="cvm_fetch.html">cvm_fetch()</a></code>
+          <code><a href="issuer_fetch.html">issuer_fetch()</a></code>
 
         </dt>
-        <dd>Fetch a CVM open-data table</dd>
-
-        <dt>
-
-          <code><a href="cad_fetch.html">cad_fetch()</a></code>
-
-        </dt>
-        <dd>Fetch the CVM company registry (CAD)</dd>
+        <dd>Fetch a CVM open-data table for an issuer dataset</dd>
       </dl></div><div class="section level2">
       <h2 id="cache">Cache<a class="anchor" aria-label="anchor" href="#cache"></a></h2>
 
@@ -105,7 +98,7 @@
       </dl></div><div class="section level2">
       <h2 id="source-backend">Source backend<a class="anchor" aria-label="anchor" href="#source-backend"></a></h2>
 
-      <div class="section-desc"><p>Configure which backend <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> queries (direct CVM portal or the Phase F parquet mirror, when available).</p></div>
+      <div class="section-desc"><p>Configure which backend <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> queries (direct CVM portal or the parquet mirror published in GitHub Releases).</p></div>
 
       <dl></dl></div><div class="section level2">
 
