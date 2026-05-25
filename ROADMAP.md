@@ -209,7 +209,13 @@ enviado.
 [`devtools::check_mac_release()`](https://devtools.r-lib.org/reference/check_mac_release.html)
 — pendente (504 transitório, retentar).
 
-Submissão rOpenSci (pre-submission inquiry).
+Submissão rOpenSci (pre-submission inquiry) — **deferida** até fechar a
+decisão arquitetural de “grupos” da CVM e eventual rename de
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+Vide bloco “Decisão arquitetural em aberto” no topo da §2 do
+`CLAUDE.md`. Draft inicial preservado localmente em
+`data-raw/rOpenSci-presubmission-draft.md` (não pushed; será reescrito
+quando a arquitetura fechar).
 
 Aceitação rOpenSci.
 

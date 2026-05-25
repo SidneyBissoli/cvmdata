@@ -103,6 +103,18 @@
 <hr></div>
 <div class="section level2">
 <h2 id="id_2-naming-canônico-resumo-do-naming-doc-v03">2. Naming canônico (resumo do naming doc v03)<a class="anchor" aria-label="anchor" href="#id_2-naming-can%C3%B4nico-resumo-do-naming-doc-v03"></a></h2>
+<blockquote>
+<h3 id="warning-decisão-arquitetural-em-aberto-2026-05-24">⚠️ Decisão arquitetural em aberto (2026-05-24)</h3>
+<p><code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> está prematuramente nomeada. Hoje aceita só os 4 datasets de <strong>companhias abertas</strong> (<code>cad</code>, <code>dfp</code>, <code>itr</code>, <code>fre</code>) e carrega argumentos que só fazem sentido para esse grupo: <code>companies</code> (CNPJ/CD_CVM/texto), <code>report_type</code> (<code>ind</code>/<code>con</code>), <code>years</code> (fundos publicam mensal/trimestral, não anual). A CVM organiza dados em <strong>grupos</strong> e há ~15 grupos adicionais previstos (ICVM 555, FIIs, FIDCs, estruturados, securitizadoras, administradores de carteira, ofertas públicas, agentes autônomos, atividade sancionadora, atos declaratórios, auditores, consultores, coordenadores de ofertas, CEPAC, investidores não residentes, intermediários, crowdfunding).</p>
+<p>Três opções de design abertas, a discutir em sessão dedicada (provavelmente em plan mode no Claude Desktop):</p>
+<ul><li>
+<strong>A</strong> Argumento <code>group=</code> em <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> (unificação total).</li>
+<li>
+<strong>B</strong> Funções por grupo: <code>cia_fetch()</code>, <code>fund_fetch()</code> etc. (proposta inicial — contratos de dado divergem demais).</li>
+<li>
+<strong>C</strong> Híbrida: <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> com dispatch interno por grupo inferido do dataset, <code>...</code> permissivo.</li>
+</ul><p>A janela para o rename sem custo social é agora: v0.1.0 foi tagueada em 2026-05-24 e ainda não está no CRAN. Submissão rOpenSci no <code>ROADMAP.md</code> está deferida até a decisão fechar. Antes de mexer em <code>R/api-cvm-fetch.R</code> ou na assinatura pública, ler esse bloco e perguntar.</p>
+</blockquote>
 <div class="section level3">
 <h3 id="id_21-funções-públicas">2.1 Funções públicas<a class="anchor" aria-label="anchor" href="#id_21-fun%C3%A7%C3%B5es-p%C3%BAblicas"></a></h3>
 <p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). <strong><code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> é a API principal para obtenção de dados de qualquer dataset.</strong> Aliases tipados por dataset <em>não</em> são exportados — <code><a href="reference/cad_fetch.html">cad_fetch()</a></code> permanece apenas por ergonomia da Sessão 01 (CAD = caso simples sem ZIP, sem variantes), e internamente delega para <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>. <strong>Decisão tomada em 2026-05-20</strong> depois que comparação empírica entre dois caminhos de download mostrou que o portal de dados abertos (<code>dados.cvm.gov.br</code>) entrega TODOS os dados que o portal RAD/ENET por documento entrega, em formato tabular muito mais conveniente e 30× mais rápido (~0,93 s o ZIP anual inteiro contra ~30 s por documento individual). Vide <code>cvmdata_rodada3-1_*.md</code> e o histórico desta sessão.</p>

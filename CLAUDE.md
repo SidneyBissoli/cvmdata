@@ -58,6 +58,39 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 
 ## 2. Naming canônico (resumo do naming doc v03)
 
+> ### ⚠️ Decisão arquitetural em aberto (2026-05-24)
+>
+> [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+> está prematuramente nomeada. Hoje aceita só os 4 datasets de
+> **companhias abertas** (`cad`, `dfp`, `itr`, `fre`) e carrega
+> argumentos que só fazem sentido para esse grupo: `companies`
+> (CNPJ/CD_CVM/texto), `report_type` (`ind`/`con`), `years` (fundos
+> publicam mensal/trimestral, não anual). A CVM organiza dados em
+> **grupos** e há ~15 grupos adicionais previstos (ICVM 555, FIIs,
+> FIDCs, estruturados, securitizadoras, administradores de carteira,
+> ofertas públicas, agentes autônomos, atividade sancionadora, atos
+> declaratórios, auditores, consultores, coordenadores de ofertas,
+> CEPAC, investidores não residentes, intermediários, crowdfunding).
+>
+> Três opções de design abertas, a discutir em sessão dedicada
+> (provavelmente em plan mode no Claude Desktop):
+>
+> - **A** Argumento `group=` em
+>   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+>   (unificação total).
+> - **B** Funções por grupo: `cia_fetch()`, `fund_fetch()` etc.
+>   (proposta inicial — contratos de dado divergem demais).
+> - **C** Híbrida:
+>   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+>   com dispatch interno por grupo inferido do dataset, `...`
+>   permissivo.
+>
+> A janela para o rename sem custo social é agora: v0.1.0 foi tagueada
+> em 2026-05-24 e ainda não está no CRAN. Submissão rOpenSci no
+> `ROADMAP.md` está deferida até a decisão fechar. Antes de mexer em
+> `R/api-cvm-fetch.R` ou na assinatura pública, ler esse bloco e
+> perguntar.
+
 ### 2.1 Funções públicas
 
 Padrão `object_verb` (Dev Guide rOpenSci).
