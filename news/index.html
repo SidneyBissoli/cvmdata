@@ -45,6 +45,12 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0.9000" id="cvmdata-0109000-in-development">cvmdata 0.1.0.9000 (in development)<a class="anchor" aria-label="anchor" href="#cvmdata-0109000-in-development"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> and <code><a href="../reference/cad_fetch.html">cad_fetch()</a></code> no longer fail with the cryptic <code>cvmdata_error_internal</code> “Got archive=, file=” when the R session runs under <code>LC_CTYPE = "C"</code>. The schema loader now reads the bundled YAMLs forcing UTF-8 instead of relying on the active locale, so multibyte characters in the schema comment headers (e.g. “Demonstração”, “Exercício”) never cause <code><a href="https://yaml.r-lib.org/reference/read_yaml.html" class="external-link">yaml::read_yaml()</a></code> to return <code>NULL</code>. A regression test under <code>LC_CTYPE = "C"</code> was added.</li>
+<li>The PDF version of the package manual now builds cleanly on the macOS R builder with the default pdflatex <code>inputenc</code> setup; a stray U+2264 (“less than or equal to”) character in the roxygen docs of <code><a href="../reference/cvm_codelist.html">cvm_codelist()</a></code> has been replaced by ASCII.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="cvmdata-010-2026-05-24">cvmdata 0.1.0 (2026-05-24)<a class="anchor" aria-label="anchor" href="#cvmdata-010-2026-05-24"></a></h2>
