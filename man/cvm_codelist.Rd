@@ -27,8 +27,8 @@ from the CVM open-data CSVs.
 \details{
 Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
 columns whose dictionary \code{dominio} enumerates values (e.g. \code{S/N},
-\code{PF/PJ}), and \code{varchar} columns with \code{tamanho < 200} and ≤ 50
-distinct values observed in the latest available year.
+\code{PF/PJ}), and \code{varchar} columns with \code{tamanho < 200} and at most
+50 distinct values observed in the latest available year.
 }
 \examples{
 cvm_codelist("cad", "companhias", "sit")

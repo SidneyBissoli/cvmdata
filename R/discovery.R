@@ -162,8 +162,8 @@ cvm_dictionary <- function(dataset, table) {
 #'
 #' Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
 #' columns whose dictionary `dominio` enumerates values (e.g. `S/N`,
-#' `PF/PJ`), and `varchar` columns with `tamanho < 200` and ≤ 50
-#' distinct values observed in the latest available year.
+#' `PF/PJ`), and `varchar` columns with `tamanho < 200` and at most
+#' 50 distinct values observed in the latest available year.
 #'
 #' @param dataset Short dataset id (e.g. `"cad"`).
 #' @param table Table name within the dataset (e.g. `"companhias"`).
