@@ -22,7 +22,9 @@ local_cache_dir <- function(envir = parent.frame()) {
 # the absolute path of the ZIP.
 write_unit_yearly <- function(cache, dataset, year, size_bytes,
                               mtime = Sys.time()) {
-  d <- file.path(cache, "raw", dataset, as.character(year))
+  d <- file.path(
+    cache, "raw", "companhias", dataset, as.character(year)
+  )
   dir.create(d, recursive = TRUE, showWarnings = FALSE)
   zip <- file.path(d, sprintf("%s_cia_aberta_%d.zip", dataset, year))
   writeBin(raw(size_bytes), zip)
@@ -43,7 +45,7 @@ write_unit_yearly <- function(cache, dataset, year, size_bytes,
 # under <cache>/raw/<dataset>/.
 write_unit_none <- function(cache, dataset, name, size_bytes,
                             mtime = Sys.time()) {
-  d <- file.path(cache, "raw", dataset)
+  d <- file.path(cache, "raw", "companhias", dataset)
   dir.create(d, recursive = TRUE, showWarnings = FALSE)
   artifact <- file.path(d, name)
   writeBin(raw(size_bytes), artifact)
@@ -67,7 +69,7 @@ test_that("cache below 90% of limit triggers no eviction", {
   withr::local_options(cvmdata.cache_max_size_mb = 1L)  # 1 MiB
   write_unit_yearly(cache, "dfp", 2023, 500L * 1024L)   # 500 KiB
   expect_equal(cache_enforce_limit(), 0L)
-  expect_true(dir.exists(file.path(cache, "raw", "dfp", "2023")))
+  expect_true(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2023")))
 })
 
 # Above-90% triggers eviction down to <=80% ------------------------------
@@ -85,8 +87,8 @@ test_that("cache above 90% evicts oldest units until <=80% of limit", {
   expect_gt(removed, 0L)
   expect_lte(cache_current_size_bytes(), 0.8 * 1024 * 1024)
   # Oldest gone, newest preserved.
-  expect_false(dir.exists(file.path(cache, "raw", "dfp", "2020")))
-  expect_true(dir.exists(file.path(cache, "raw", "dfp", "2023")))
+  expect_false(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2020")))
+  expect_true(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2023")))
 })
 
 # Atomic unit: ZIP + sidecar + extracted CSV(s) removed together ----------
@@ -112,7 +114,7 @@ test_that("yearly eviction removes ZIP + sidecar + extracted CSV together", {
   expect_false(file.exists(zip_old))
   expect_false(file.exists(paste0(zip_old, ".etag.rds")))
   expect_false(file.exists(csv_old))
-  expect_false(dir.exists(file.path(cache, "raw", "dfp", "2020")))
+  expect_false(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2020")))
   expect_true(file.exists(zip_new))
 })
 
@@ -133,7 +135,7 @@ test_that("non-partitioned eviction removes artifact + sidecar together", {
   expect_false(file.exists(paste0(old_csv, ".etag.rds")))
   expect_true(file.exists(new_csv))
   # Parent directory survives because the newer unit still lives there.
-  expect_true(dir.exists(file.path(cache, "raw", "cad")))
+  expect_true(dir.exists(file.path(cache, "raw", "companhias", "cad")))
 })
 
 # Limit sentinels: 0 / negative / Inf disable eviction --------------------
@@ -146,8 +148,12 @@ test_that("limit = 0, negative, or Inf disables eviction", {
   for (val in list(0L, -1L, Inf)) {
     withr::local_options(cvmdata.cache_max_size_mb = val)
     expect_equal(cache_enforce_limit(), 0L)
-    expect_true(dir.exists(file.path(cache, "raw", "dfp", "2020")))
-    expect_true(dir.exists(file.path(cache, "raw", "dfp", "2024")))
+    expect_true(dir.exists(file.path(
+      cache, "raw", "companhias", "dfp", "2020"
+    )))
+    expect_true(dir.exists(file.path(
+      cache, "raw", "companhias", "dfp", "2024"
+    )))
   }
 })
 
@@ -161,7 +167,8 @@ test_that("malformed cvmdata.cache_max_size_mb falls back to 100 MB default", {
     # Default = 100 MiB; 1 KiB is well below 90% → no eviction.
     expect_equal(cache_enforce_limit(), 0L)
     expect_true(file.exists(
-      file.path(cache, "raw", "dfp", "2024", "dfp_cia_aberta_2024.zip")
+      file.path(cache, "raw", "companhias", "dfp", "2024",
+                "dfp_cia_aberta_2024.zip")
     ))
   }
 })
@@ -171,7 +178,7 @@ test_that("malformed cvmdata.cache_max_size_mb falls back to 100 MB default", {
 test_that("orphan sidecar is ignored in size accounting and not removed", {
   cache <- local_cache_dir()
   withr::local_options(cvmdata.cache_max_size_mb = 1L)
-  d <- file.path(cache, "raw", "dfp", "2020")
+  d <- file.path(cache, "raw", "companhias", "dfp", "2020")
   dir.create(d, recursive = TRUE)
   orphan <- file.path(d, "missing.zip.etag.rds")
   saveRDS(
@@ -202,7 +209,8 @@ test_that("cache_enforce_limit protects the just-written dest_path", {
 
   expect_true(file.exists(new_zip))
   expect_false(file.exists(
-    file.path(cache, "raw", "dfp", "2020", "dfp_cia_aberta_2020.zip")
+    file.path(cache, "raw", "companhias", "dfp", "2020",
+              "dfp_cia_aberta_2020.zip")
   ))
 })
 
@@ -331,9 +339,10 @@ test_that("download_with_etag triggers eviction after a real write", {
   expect_s3_class(result, "cvm_tbl")
   # The 2020 unit should be gone (oldest, evicted to make room).
   expect_false(file.exists(old_zip))
-  expect_false(dir.exists(file.path(cache, "raw", "dfp", "2020")))
+  expect_false(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2020")))
   # The just-downloaded 2024 ZIP must survive.
   expect_true(file.exists(
-    file.path(cache, "raw", "dfp", "2024", "dfp_cia_aberta_2024.zip")
+    file.path(cache, "raw", "companhias", "dfp", "2024",
+                "dfp_cia_aberta_2024.zip")
   ))
 })

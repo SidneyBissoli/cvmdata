@@ -28,6 +28,7 @@
 #   CVM-HTTP path (enforced one level up by `cvm_fetch_internal()`).
 source_mirror_duckdb_get <- function(schema, years = NULL,
                                      report_type = NULL, ...) {
+  cache_migrate_v0_1_to_v0_2()
   dataset <- schema$dataset
   table <- schema$table
   partitioning <- schema$temporal_partitioning %||% "none"
@@ -257,9 +258,13 @@ mirror_fetch_to_l3 <- function(url, dataset, table, year,
 
 # Compose the absolute path of an L3 cache slot. Hive-style ("year=Y",
 # "report_type=R") so a future migration to `arrow::open_dataset()`
-# can pick the tree up natively.
+# can pick the tree up natively. The `<group>` segment was introduced
+# in v0.1.0.9000; see `R/util-group-lookup.R`.
 mirror_l3_path <- function(dataset, table, year, report_type) {
-  parts <- c(cvm_cache_path(), "parquet", dataset, table)
+  parts <- c(
+    cvm_cache_path(), "parquet",
+    dataset_group(dataset), dataset, table
+  )
   if (!is.na(report_type) && nzchar(report_type)) {
     parts <- c(parts, sprintf("report_type=%s", report_type))
   }
@@ -297,7 +302,10 @@ mirror_l3_validate_hash <- function(dataset, current_hash) {
         !nzchar(current_hash)) {
     return(invisible())
   }
-  dataset_root <- file.path(cvm_cache_path(), "parquet", dataset)
+  dataset_root <- file.path(
+    cvm_cache_path(), "parquet",
+    dataset_group(dataset), dataset
+  )
   sidecar <- file.path(dataset_root, "__source_hash.json")
 
   if (file.exists(sidecar)) {

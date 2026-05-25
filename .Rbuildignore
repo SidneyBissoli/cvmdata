@@ -6,6 +6,7 @@
 ^archive$
 ^schemas_proto$
 ^cvmdata_.*\.md$
+^cvmdata_.*\.html$
 ^cvmdata_rodada.*\.md$
 ^PROMPT_CLAUDE_.*\.md$
 ^VERIFICACAO_.*\.md$

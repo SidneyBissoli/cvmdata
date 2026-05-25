@@ -7,6 +7,7 @@
 cvm_cache_clear(
   what = "all",
   dataset = NULL,
+  group = NULL,
   year = NULL,
   confirm = interactive()
 )
@@ -16,7 +17,13 @@ cvm_cache_clear(
 \code{"all"}.}
 
 \item{dataset}{Optional dataset id (e.g. \code{"dfp"}). Restricts
-deletion to the matching \verb{<cache>/<what>/<dataset>/} subtree.}
+deletion to the matching
+\verb{<cache>/<what>/<group>/<dataset>/} subtree.}
+
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}).
+Restricts deletion to the matching \verb{<cache>/<what>/<group>/}
+subtree. When omitted but \code{dataset} is supplied, the group is
+inferred from the dataset lookup.}
 
 \item{year}{Optional integer year. Requires \code{dataset} to be
 non-\code{NULL}. Restricts deletion to the matching \verb{year=<YYYY>/}
@@ -33,12 +40,21 @@ Deletes cached files selectively. \code{what = "all"} removes the
 entire cache tree (everything under \code{\link[=cvm_cache_path]{cvm_cache_path()}});
 \code{what = "raw"} removes only the raw download area
 (\verb{<cache>/raw/}); \code{what = "parquet"} removes only the L3 mirror
-cache (\verb{<cache>/parquet/}). When \code{dataset} (and optionally \code{year})
-is supplied, the scope is narrowed to the matching subtree under
-the chosen area; passing \code{dataset} without an explicit \code{what}
-defaults to \code{"raw"} for backwards compatibility.
+cache (\verb{<cache>/parquet/}). When \code{group}, \code{dataset} (and
+optionally \code{year}) are supplied, the scope is narrowed to the
+matching subtree under the chosen area; passing \code{group} or
+\code{dataset} without an explicit \code{what} defaults to \code{"raw"} for
+backwards compatibility.
 }
 \details{
+Filter precedence: \code{what = "all"} wipes everything ignoring the
+other filters; otherwise the path is composed as
+\verb{<cache>/<what>/<group>/<dataset>/<year>/}, with each level
+becoming optional from right to left. \code{year} requires \code{dataset};
+\code{dataset} may be supplied without \code{group} (the group is inferred
+via the v0.1.0.9000 lookup table). \code{group} may be supplied alone
+to wipe a whole group at once.
+
 In interactive sessions the user is asked to confirm via
 \code{\link[utils:askYesNo]{utils::askYesNo()}} before deletion. In batch sessions the
 default (\code{confirm = interactive()}) evaluates to \code{FALSE} and
@@ -48,6 +64,7 @@ force a prompt.
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 cvm_cache_clear(dataset = "dfp", year = 2024)
+cvm_cache_clear(group = "companhias", what = "raw")
 cvm_cache_clear(what = "raw")
 \dontshow{\}) # examplesIf}
 }
