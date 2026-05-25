@@ -137,6 +137,59 @@ test_that("invalid temporal_partitioning is rejected", {
   )
 })
 
+# load_schema(group = ...) ----------------------------------------------
+
+test_that("load_schema('cad','companhias', group='companhias') loads directly", {
+  schema <- load_schema("cad", "companhias", group = "companhias")
+  expect_s3_class(schema, "cvm_table_schema")
+  expect_identical(schema$dataset, "cad")
+  expect_identical(schema$table, "companhias")
+})
+
+test_that("load_schema with unknown explicit group aborts", {
+  expect_error(
+    load_schema("cad", "companhias", group = "fundos-de-investimento"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("load_schema rejects malformed group arg", {
+  expect_error(
+    load_schema("cad", "companhias", group = ""),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    load_schema("cad", "companhias", group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    load_schema("cad", "companhias", group = 42),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("load_schema aborts cvmdata_error_input_ambiguous on a fixture root", {
+  fixture_root <- testthat::test_path("fixtures", "schemas-ambiguous")
+  withr::local_options(cvmdata.schema_root = fixture_root)
+  # The schema_tree cache is keyed by the resolved root path so the
+  # fixture root gets a fresh entry; no need to clear globally.
+  err <- expect_error(
+    load_schema("fakedata", "faketable"),
+    class = "cvmdata_error_input_ambiguous"
+  )
+  # Ambiguity must also inherit from cvmdata_error_input.
+  expect_s3_class(err, "cvmdata_error_input")
+})
+
+test_that("load_schema with explicit group bypasses ambiguity", {
+  fixture_root <- testthat::test_path("fixtures", "schemas-ambiguous")
+  withr::local_options(cvmdata.schema_root = fixture_root)
+  schema <- load_schema("fakedata", "faketable", group = "g1")
+  expect_s3_class(schema, "cvm_table_schema")
+  expect_identical(schema$dataset, "fakedata")
+  expect_match(schema$cvm_file_url_pattern, "g1")
+})
+
 test_that("load_schema reads UTF-8 comments under LC_CTYPE=C", {
   # Regression for the bug where yaml::read_yaml(path) delegated to an
   # internal readLines() whose encoding follows the active locale.

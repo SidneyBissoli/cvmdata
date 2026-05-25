@@ -1,0 +1,14 @@
+dataset: fakedata
+table: faketable
+cvm_archive_url_pattern: ~
+cvm_file_url_pattern: https://example.invalid/g2/faketable.csv
+cvm_file_pattern: faketable.csv
+cvm_dictionary_url: ~
+meta_status: missing
+encoding: UTF-8
+delimiter: ","
+temporal_partitioning: none
+expected_field_count: 1
+expected_field_names:
+  - dummy
+transformations: []
