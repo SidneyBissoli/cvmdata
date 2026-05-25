@@ -82,41 +82,12 @@ cvm_tables <- function(dataset) {
 #' @seealso [cvm_tables()]
 #' @export
 cvm_dictionary <- function(dataset, table, group = NULL) {
-  if (!is.character(dataset) || length(dataset) != 1L ||
-        !nzchar(dataset)) {
-    cvmdata_abort(
-      c("{.arg dataset} must be a single non-empty string."),
-      class = "cvmdata_error_input"
-    )
-  }
-  if (!is.character(table) || length(table) != 1L || !nzchar(table)) {
-    cvmdata_abort(
-      c("{.arg table} must be a single non-empty string."),
-      class = "cvmdata_error_input"
-    )
-  }
-  if (!is.null(group) &&
-        (!is.character(group) || length(group) != 1L || !nzchar(group))) {
-    cvmdata_abort(
-      c("{.arg group} must be a single non-empty string or NULL."),
-      class = "cvmdata_error_input"
-    )
-  }
-  snapshot_path <- system.file(
-    "extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"
+  validate_string_arg(dataset, "dataset")
+  validate_string_arg(table, "table")
+  validate_optional_group_arg(group)
+  snapshot_path <- require_snapshot_path(
+    "cvm_dictionary_snapshot.csv", "build-dictionary-snapshot.R"
   )
-  if (!nzchar(snapshot_path)) {
-    cvmdata_abort(
-      c(
-        "Dictionary snapshot not found in {.pkg cvmdata}.",
-        "i" = paste(
-          "Expected {.path inst/extdata/cvm_dictionary_snapshot.csv};",
-          "regenerate via {.path data-raw/build-dictionary-snapshot.R}."
-        )
-      ),
-      class = "cvmdata_error_internal"
-    )
-  }
   snapshot <- .read_dictionary_snapshot(snapshot_path)
   hit <- snapshot[
     snapshot$dataset == dataset & snapshot$table == table, ,
@@ -128,19 +99,7 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
   if (!nrow(hit)) {
     handle_dictionary_miss(dataset, table, group)
   }
-  resolved_groups <- unique(hit$group)
-  if (is.null(group) && length(resolved_groups) > 1L) {
-    cvmdata_abort(
-      c(
-        paste(
-          "Dataset {.val {dataset}}, table {.val {table}} exists in",
-          "{length(resolved_groups)} groups: {.val {resolved_groups}}."
-        ),
-        "i" = "Pass {.arg group} explicitly to disambiguate."
-      ),
-      class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
-    )
-  }
+  abort_if_ambiguous(hit$group, dataset, table, group)
   out <- tibble::tibble(
     campo          = hit$campo,
     campo_original = hit$campo_original,
@@ -155,6 +114,69 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
     attr(out, "meta_status") <- "missing"
   }
   out
+}
+
+# Single-string arg validator shared by the discovery functions.
+validate_string_arg <- function(value, arg_name) {
+  if (!is.character(value) || length(value) != 1L || !nzchar(value)) {
+    cvmdata_abort(
+      c("{.arg {arg_name}} must be a single non-empty string."),
+      class = "cvmdata_error_input"
+    )
+  }
+}
+
+# Optional-group arg validator. Accepts NULL or a single non-empty
+# string; anything else aborts with `cvmdata_error_input`.
+validate_optional_group_arg <- function(group) {
+  if (is.null(group)) {
+    return(invisible(NULL))
+  }
+  if (!is.character(group) || length(group) != 1L || !nzchar(group)) {
+    cvmdata_abort(
+      c("{.arg group} must be a single non-empty string or NULL."),
+      class = "cvmdata_error_input"
+    )
+  }
+}
+
+# Resolve a bundled snapshot path under inst/extdata/, aborting with an
+# actionable instruction when the file is missing from the install.
+require_snapshot_path <- function(file, generator) {
+  path <- system.file("extdata", file, package = "cvmdata")
+  if (!nzchar(path)) {
+    cvmdata_abort(
+      c(
+        "Snapshot {.path {file}} not found in {.pkg cvmdata}.",
+        "i" = "Regenerate via {.path data-raw/{generator}}."
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
+  path
+}
+
+# When `requested_group` is NULL and `hit_groups` contains more than one
+# distinct slug, abort with `cvmdata_error_input_ambiguous`.
+abort_if_ambiguous <- function(hit_groups, dataset, table,
+                               requested_group) {
+  if (!is.null(requested_group)) {
+    return(invisible(NULL))
+  }
+  groups <- unique(hit_groups)
+  if (length(groups) <= 1L) {
+    return(invisible(NULL))
+  }
+  cvmdata_abort(
+    c(
+      paste(
+        "Dataset {.val {dataset}}, table {.val {table}} exists in",
+        "{length(groups)} groups: {.val {groups}}."
+      ),
+      "i" = "Pass {.arg group} explicitly to disambiguate."
+    ),
+    class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
+  )
 }
 
 # Centralized abort path for `cvm_dictionary()` lookups that come back
@@ -221,37 +243,13 @@ handle_dictionary_miss <- function(dataset, table, group) {
 #' @seealso [cvm_dictionary()]
 #' @export
 cvm_codelist <- function(dataset, table, column, group = NULL) {
-  for (arg_name in c("dataset", "table", "column")) {
-    val <- get(arg_name)
-    if (!is.character(val) || length(val) != 1L || !nzchar(val)) {
-      cvmdata_abort(
-        c("{.arg {arg_name}} must be a single non-empty string."),
-        class = "cvmdata_error_input"
-      )
-    }
-  }
-  if (!is.null(group) &&
-        (!is.character(group) || length(group) != 1L || !nzchar(group))) {
-    cvmdata_abort(
-      c("{.arg group} must be a single non-empty string or NULL."),
-      class = "cvmdata_error_input"
-    )
-  }
-  snapshot_path <- system.file(
-    "extdata", "cvm_codelists_snapshot.csv", package = "cvmdata"
+  validate_string_arg(dataset, "dataset")
+  validate_string_arg(table, "table")
+  validate_string_arg(column, "column")
+  validate_optional_group_arg(group)
+  snapshot_path <- require_snapshot_path(
+    "cvm_codelists_snapshot.csv", "build-codelists-snapshot.R"
   )
-  if (!nzchar(snapshot_path)) {
-    cvmdata_abort(
-      c(
-        "Codelists snapshot not found in {.pkg cvmdata}.",
-        "i" = paste(
-          "Expected {.path inst/extdata/cvm_codelists_snapshot.csv};",
-          "regenerate via {.path data-raw/build-codelists-snapshot.R}."
-        )
-      ),
-      class = "cvmdata_error_internal"
-    )
-  }
   snapshot <- .read_codelists_snapshot(snapshot_path)
   hit <- snapshot[
     snapshot$dataset == dataset &
@@ -263,21 +261,18 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
     hit <- hit[hit$group == group, , drop = FALSE]
   }
   if (nrow(hit)) {
-    if (is.null(group) && length(unique(hit$group)) > 1L) {
-      cvmdata_abort(
-        c(
-          paste(
-            "Codelist for {.val {dataset}}/{.val {table}}/{.val {column}}",
-            "exists in {length(unique(hit$group))} groups:",
-            "{.val {unique(hit$group)}}."
-          ),
-          "i" = "Pass {.arg group} explicitly to disambiguate."
-        ),
-        class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
-      )
-    }
+    abort_if_ambiguous(hit$group, dataset, table, group)
     return(tibble::tibble(value = hit$value))
   }
+  handle_codelist_miss(snapshot, dataset, table, column, group)
+}
+
+# Centralized abort cascade for codelist misses (column not found in
+# the snapshot). Picks the most informative message available -- in
+# order: unknown dataset, unknown group, unknown table, non-codelist
+# known column, unknown column.
+handle_codelist_miss <- function(snapshot, dataset, table, column,
+                                 group) {
   if (!dataset %in% cvm_datasets()) {
     cvmdata_abort(
       c(
@@ -311,6 +306,21 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
     table_rows <- table_rows & snapshot$group == group
   }
   available_codes <- sort(unique(snapshot$campo[table_rows]))
+  abort_known_or_unknown_column(
+    column, dataset, table, dict, available_codes
+  )
+}
+
+# Emit either "column is not a codelist" (when the column exists in the
+# dictionary) or "unknown column" (when it does not), with a tail that
+# lists the codelist columns available -- or notes their absence.
+abort_known_or_unknown_column <- function(column, dataset, table, dict,
+                                          available_codes) {
+  tail <- if (length(available_codes)) {
+    "Codelist columns: {.val {available_codes}}."
+  } else {
+    "No codelist columns in this table."
+  }
   if (column %in% dict$campo) {
     cvmdata_abort(
       c(
@@ -318,11 +328,7 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
           "Column {.val {column}} in {.val {dataset}}/{.val {table}}",
           "is not a codelist."
         ),
-        "i" = if (length(available_codes)) {
-          "Codelist columns: {.val {available_codes}}."
-        } else {
-          "No codelist columns in this table."
-        }
+        "i" = tail
       ),
       class = "cvmdata_error_input"
     )
@@ -333,11 +339,7 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
         "Unknown column {.val {column}} in",
         "{.val {dataset}}/{.val {table}}."
       ),
-      "i" = if (length(available_codes)) {
-        "Codelist columns: {.val {available_codes}}."
-      } else {
-        "No codelist columns in this table."
-      }
+      "i" = tail
     ),
     class = "cvmdata_error_input"
   )

@@ -4,12 +4,18 @@
 \alias{cvm_dictionary}
 \title{Look up the CVM-published dictionary for a table}
 \usage{
-cvm_dictionary(dataset, table)
+cvm_dictionary(dataset, table, group = NULL)
 }
 \arguments{
 \item{dataset}{Short dataset id (e.g. \code{"dfp"}).}
 
 \item{table}{Table name within the dataset (e.g. \code{"bpa"}).}
+
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}). When
+\code{NULL} (default) the function resolves by uniqueness across the
+embedded snapshot. From v0.4 onward, datasets may exist in more
+than one group; in that case omitting \code{group} aborts with
+\code{cvmdata_error_input_ambiguous}.}
 }
 \value{
 A tibble with one row per column of the table, columns
