@@ -506,7 +506,7 @@ test_that("L3 sidecar is created on first fetch with a known hash", {
     cvm_fetch("dfp", "bpa", report_type = "ind",
               years = 2024L, source = "mirror")
   )
-  sidecar <- file.path(cache_root, "parquet", "dfp",
+  sidecar <- file.path(cache_root, "parquet", "companhias", "dfp",
                        "__source_hash.json")
   expect_true(file.exists(sidecar))
   expect_identical(readLines(sidecar), "abc-first")
@@ -565,7 +565,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
               source = "mirror")
   )
   expect_equal(asset_calls, 2L)
-  sidecar <- file.path(cache_root, "parquet", "dfp",
+  sidecar <- file.path(cache_root, "parquet", "companhias", "dfp",
                        "__source_hash.json")
   expect_identical(readLines(sidecar), "v2")
 })
@@ -577,7 +577,9 @@ test_that("L3 cache is left alone when current hash is NA", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
-  dataset_root <- file.path(cache_root, "parquet", "dfp")
+  dataset_root <- file.path(
+    cache_root, "parquet", "companhias", "dfp"
+  )
   dir.create(dataset_root, recursive = TRUE)
   writeLines("legacy-hash", file.path(dataset_root, "__source_hash.json"))
 
@@ -603,11 +605,13 @@ test_that("cvm_cache_clear what = parquet drops the L3 tree only", {
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
   # Seed both layers.
-  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
   dir.create(raw_dir, recursive = TRUE)
   writeLines("a", file.path(raw_dir, "marker.txt"))
-  parquet_dir <- file.path(cache_root, "parquet", "dfp", "bpa",
-                           "report_type=ind", "year=2024")
+  parquet_dir <- file.path(
+    cache_root, "parquet", "companhias", "dfp", "bpa",
+    "report_type=ind", "year=2024"
+  )
   dir.create(parquet_dir, recursive = TRUE)
   writeLines("b", file.path(parquet_dir, "part-0.parquet"))
 
@@ -621,12 +625,22 @@ test_that("cvm_cache_clear what = parquet scoped by dataset", {
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
   for (ds in c("dfp", "itr")) {
-    dir.create(file.path(cache_root, "parquet", ds), recursive = TRUE)
-    writeLines(ds, file.path(cache_root, "parquet", ds, "x.txt"))
+    dir.create(
+      file.path(cache_root, "parquet", "companhias", ds),
+      recursive = TRUE
+    )
+    writeLines(
+      ds,
+      file.path(cache_root, "parquet", "companhias", ds, "x.txt")
+    )
   }
   cvm_cache_clear(what = "parquet", dataset = "dfp", confirm = FALSE)
-  expect_false(dir.exists(file.path(cache_root, "parquet", "dfp")))
-  expect_true(dir.exists(file.path(cache_root, "parquet", "itr")))
+  expect_false(dir.exists(
+    file.path(cache_root, "parquet", "companhias", "dfp")
+  ))
+  expect_true(dir.exists(
+    file.path(cache_root, "parquet", "companhias", "itr")
+  ))
 })
 
 test_that("cvm_cache_clear rejects year with what = parquet", {

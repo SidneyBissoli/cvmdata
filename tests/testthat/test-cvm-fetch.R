@@ -11,7 +11,7 @@ local_prepare_dfp_cache <- function(envir = parent.frame()) {
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "dfp_cia_aberta_2024.zip"),
@@ -689,7 +689,7 @@ local_prepare_itr_cache <- function(envir = parent.frame()) {
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "itr", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "itr", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "itr_cia_aberta_2024.zip"),
@@ -881,7 +881,7 @@ local_prepare_fre_cache <- function(envir = parent.frame()) {
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "fre", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "fre", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "fre_cia_aberta_2024.zip"),
@@ -908,7 +908,7 @@ local_fre_cache_bad_pcd <- function(modify_fn,
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "fre", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "fre", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
 
   stage <- withr::local_tempdir(.local_envir = envir)

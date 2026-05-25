@@ -16,7 +16,7 @@ local_dfp_cache_with_sidecar <- function(sidecar_meta = NULL,
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "dfp_cia_aberta_2024.zip"),
@@ -200,7 +200,8 @@ test_that("download_with_etag fetches via GET when cache is empty", {
   )
   expect_s3_class(result, "cvm_tbl")
   zip_path <- file.path(
-    cache_root, "raw", "dfp", "2024", "dfp_cia_aberta_2024.zip"
+    cache_root, "raw", "companhias", "dfp", "2024",
+    "dfp_cia_aberta_2024.zip"
   )
   expect_true(file.exists(zip_path))
   expect_equal(file.info(zip_path)$size, length(fixture_body))

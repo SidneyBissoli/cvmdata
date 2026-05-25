@@ -8,13 +8,14 @@ cvm_cache_info()
 }
 \value{
 A tibble with one row per cached file, sorted by
-\code{dataset} then \code{file}. Columns: \code{dataset} (character),
-\code{file} (basename), \code{path} (absolute), \code{size_bytes} (integer),
-\code{mtime} (POSIXct), \code{etag} (character; \code{NA} when absent),
-\code{last_modified} (character; \code{NA} when absent). The tibble has
-an attribute \code{total_size_bytes} (numeric scalar) with the
-total bytes counted toward the cache size limit. Returns a
-zero-row tibble with the same schema (and \code{total_size_bytes = 0}) when the cache is empty.
+\code{group} then \code{dataset} then \code{file}. Columns: \code{group}
+(character), \code{dataset} (character), \code{file} (basename), \code{path}
+(absolute), \code{size_bytes} (integer), \code{mtime} (POSIXct), \code{etag}
+(character; \code{NA} when absent), \code{last_modified} (character;
+\code{NA} when absent). The tibble has an attribute
+\code{total_size_bytes} (numeric scalar) with the total bytes counted
+toward the cache size limit. Returns a zero-row tibble with the
+same schema (and \code{total_size_bytes = 0}) when the cache is empty.
 }
 \description{
 Lists every artifact currently stored under

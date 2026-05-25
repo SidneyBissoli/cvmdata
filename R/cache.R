@@ -3,7 +3,11 @@
 # memory). All cache directories live under the path returned by
 # `cvm_cache_path()`; the raw HTTP artifacts (CSV directos for
 # non-partitioned datasets, ZIP + extracted CSVs for yearly datasets)
-# live under `<cache>/raw/<dataset>/[<year>/]`.
+# live under `<cache>/raw/<group>/<dataset>/[<year>/]`. The `<group>`
+# segment is the CVM CKAN group slug (`companhias` for the four v0.1
+# datasets); see `R/util-group-lookup.R`. A one-time migration
+# (`cache_migrate_v0_1_to_v0_2()`) relocates pre-v0.1.0.9000 caches
+# that lived directly under `<cache>/raw/<dataset>/`.
 
 #' Path to the cvmdata cache directory
 #'
@@ -136,21 +140,23 @@ cvm_cache_set_path <- function(path) {
 #' See [cvm_cache_path()] for the option's semantics.
 #'
 #' @return A tibble with one row per cached file, sorted by
-#'   `dataset` then `file`. Columns: `dataset` (character),
-#'   `file` (basename), `path` (absolute), `size_bytes` (integer),
-#'   `mtime` (POSIXct), `etag` (character; `NA` when absent),
-#'   `last_modified` (character; `NA` when absent). The tibble has
-#'   an attribute `total_size_bytes` (numeric scalar) with the
-#'   total bytes counted toward the cache size limit. Returns a
-#'   zero-row tibble with the same schema (and `total_size_bytes
-#'   = 0`) when the cache is empty.
+#'   `group` then `dataset` then `file`. Columns: `group`
+#'   (character), `dataset` (character), `file` (basename), `path`
+#'   (absolute), `size_bytes` (integer), `mtime` (POSIXct), `etag`
+#'   (character; `NA` when absent), `last_modified` (character;
+#'   `NA` when absent). The tibble has an attribute
+#'   `total_size_bytes` (numeric scalar) with the total bytes counted
+#'   toward the cache size limit. Returns a zero-row tibble with the
+#'   same schema (and `total_size_bytes = 0`) when the cache is empty.
 #'
 #' @examples
 #' cvm_cache_info()
 #' @family cache
 #' @export
 cvm_cache_info <- function() {
+  cache_migrate_v0_1_to_v0_2()
   schema <- tibble::tibble(
+    group         = character(0L),
     dataset       = character(0L),
     file          = character(0L),
     path          = character(0L),
@@ -172,8 +178,12 @@ cvm_cache_info <- function() {
     return(schema)
   }
   rel <- substring(artifacts, nchar(raw_root) + 2L)
+  segments <- strsplit(rel, "/", fixed = TRUE)
+  group <- vapply(segments, `[[`, character(1L), 1L)
   dataset <- vapply(
-    strsplit(rel, "/", fixed = TRUE), `[[`, character(1L), 1L
+    segments,
+    function(s) if (length(s) >= 2L) s[[2L]] else NA_character_,
+    character(1L)
   )
   file_basename <- basename(artifacts)
   size_bytes <- as.integer(file.size(artifacts))
@@ -194,6 +204,7 @@ cvm_cache_info <- function() {
     }
   }
   out <- tibble::tibble(
+    group         = group,
     dataset       = dataset,
     file          = file_basename,
     path          = artifacts,
@@ -202,7 +213,7 @@ cvm_cache_info <- function() {
     etag          = etag,
     last_modified = last_modified
   )
-  out <- out[order(out$dataset, out$file), , drop = FALSE]
+  out <- out[order(out$group, out$dataset, out$file), , drop = FALSE]
   attr(out, "total_size_bytes") <- cache_current_size_bytes()
   out
 }
@@ -213,10 +224,19 @@ cvm_cache_info <- function() {
 #' entire cache tree (everything under [cvm_cache_path()]);
 #' `what = "raw"` removes only the raw download area
 #' (`<cache>/raw/`); `what = "parquet"` removes only the L3 mirror
-#' cache (`<cache>/parquet/`). When `dataset` (and optionally `year`)
-#' is supplied, the scope is narrowed to the matching subtree under
-#' the chosen area; passing `dataset` without an explicit `what`
-#' defaults to `"raw"` for backwards compatibility.
+#' cache (`<cache>/parquet/`). When `group`, `dataset` (and
+#' optionally `year`) are supplied, the scope is narrowed to the
+#' matching subtree under the chosen area; passing `group` or
+#' `dataset` without an explicit `what` defaults to `"raw"` for
+#' backwards compatibility.
+#'
+#' Filter precedence: `what = "all"` wipes everything ignoring the
+#' other filters; otherwise the path is composed as
+#' `<cache>/<what>/<group>/<dataset>/<year>/`, with each level
+#' becoming optional from right to left. `year` requires `dataset`;
+#' `dataset` may be supplied without `group` (the group is inferred
+#' via the v0.1.0.9000 lookup table). `group` may be supplied alone
+#' to wipe a whole group at once.
 #'
 #' In interactive sessions the user is asked to confirm via
 #' [utils::askYesNo()] before deletion. In batch sessions the
@@ -227,7 +247,12 @@ cvm_cache_info <- function() {
 #' @param what One of `"all"`, `"raw"` or `"parquet"`. Default
 #'   `"all"`.
 #' @param dataset Optional dataset id (e.g. `"dfp"`). Restricts
-#'   deletion to the matching `<cache>/<what>/<dataset>/` subtree.
+#'   deletion to the matching
+#'   `<cache>/<what>/<group>/<dataset>/` subtree.
+#' @param group Optional CKAN group slug (e.g. `"companhias"`).
+#'   Restricts deletion to the matching `<cache>/<what>/<group>/`
+#'   subtree. When omitted but `dataset` is supplied, the group is
+#'   inferred from the dataset lookup.
 #' @param year Optional integer year. Requires `dataset` to be
 #'   non-`NULL`. Restricts deletion to the matching `year=<YYYY>/`
 #'   slot (raw) or `year=<YYYY>/` slot (parquet).
@@ -238,16 +263,21 @@ cvm_cache_info <- function() {
 #'
 #' @examplesIf interactive()
 #' cvm_cache_clear(dataset = "dfp", year = 2024)
+#' cvm_cache_clear(group = "companhias", what = "raw")
 #' cvm_cache_clear(what = "raw")
 #' @family cache
 #' @export
 cvm_cache_clear <- function(what = "all",
                             dataset = NULL,
+                            group = NULL,
                             year = NULL,
                             confirm = interactive()) {
-  args <- .validate_cache_clear_args(what, dataset, year, confirm)
+  cache_migrate_v0_1_to_v0_2()
+  args <- .validate_cache_clear_args(
+    what, dataset, group, year, confirm
+  )
   target <- .cache_clear_target(
-    cvm_cache_path(), args$what, args$dataset, args$year
+    cvm_cache_path(), args$what, args$group, args$dataset, args$year
   )
   if (!dir.exists(target)) {
     if (!is.null(args$dataset)) {
@@ -282,11 +312,13 @@ cvm_cache_clear <- function(what = "all",
   invisible(n_files)
 }
 
-# Validate the four arguments of cvm_cache_clear(); returns the
-# normalized (what, dataset, year, confirm) list. `what` is widened
-# to "raw" when a dataset filter is supplied without an explicit
-# parquet target.
-.validate_cache_clear_args <- function(what, dataset, year, confirm) {
+# Validate the five arguments of cvm_cache_clear(); returns the
+# normalized (what, group, dataset, year, confirm) list. `what` is
+# widened to "raw" when a group or dataset filter is supplied without
+# an explicit parquet target. `group` is inferred from `dataset` when
+# omitted; when both are supplied they must agree.
+.validate_cache_clear_args <- function(what, dataset, group, year,
+                                       confirm) {
   what <- rlang::arg_match0(what, c("all", "raw", "parquet"))
   if (!is.null(year) && is.null(dataset)) {
     cvmdata_abort(
@@ -295,7 +327,40 @@ cvm_cache_clear <- function(what = "all",
     )
   }
   .check_dataset_arg(dataset)
-  if (!is.null(dataset) && identical(what, "all")) {
+  group <- .check_group_arg(group)
+  if (!is.null(dataset)) {
+    inferred <- tryCatch(
+      dataset_group(dataset),
+      cvmdata_error_internal = function(e) NULL
+    )
+    if (is.null(inferred)) {
+      cvmdata_abort(
+        c(
+          "Unknown dataset {.val {dataset}}.",
+          "i" = paste(
+            "Known datasets in v0.1.0.9000:",
+            "{.val {names(.dataset_group_map)}}."
+          )
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    if (is.null(group)) {
+      group <- inferred
+    } else if (!identical(group, inferred)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Dataset {.val {dataset}} belongs to group",
+            "{.val {inferred}}, not {.val {group}}."
+          )
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+  }
+  if ((!is.null(group) || !is.null(dataset)) &&
+        identical(what, "all")) {
     what <- "raw"
   }
   year <- .check_year_arg(year)
@@ -308,8 +373,8 @@ cvm_cache_clear <- function(what = "all",
         ),
         "i" = paste(
           "The L3 parquet cache partitions year under each table",
-          "(`<dataset>/<table>/[report_type=R/]year=Y/`); pass",
-          "{.arg dataset} alone to evict the whole dataset, or",
+          "(`<group>/<dataset>/<table>/[report_type=R/]year=Y/`);",
+          "pass {.arg dataset} alone to evict the whole dataset, or",
           "{.code what = \"raw\"} for year-level eviction."
         )
       ),
@@ -317,7 +382,8 @@ cvm_cache_clear <- function(what = "all",
     )
   }
   .check_confirm_arg(confirm)
-  list(what = what, dataset = dataset, year = year, confirm = confirm)
+  list(what = what, group = group, dataset = dataset,
+       year = year, confirm = confirm)
 }
 
 .check_dataset_arg <- function(dataset) {
@@ -332,6 +398,25 @@ cvm_cache_clear <- function(what = "all",
     )
   }
   invisible()
+}
+
+# Group filter: optional character scalar. Accepts any non-empty
+# string (forward-compatible with v0.2+ groups that the package does
+# not yet ship datasets for); the caller can still wipe an unknown
+# group's slot — it simply resolves to a non-existent directory and
+# the no-op short-circuit returns 0.
+.check_group_arg <- function(group) {
+  if (is.null(group)) {
+    return(NULL)
+  }
+  if (!is.character(group) || length(group) != 1L ||
+        is.na(group) || !nzchar(group)) {
+    cvmdata_abort(
+      c("{.arg group} must be a single non-empty string."),
+      class = "cvmdata_error_input"
+    )
+  }
+  group
 }
 
 .check_year_arg <- function(year) {
@@ -360,18 +445,26 @@ cvm_cache_clear <- function(what = "all",
 
 # Compose the absolute path the cleanup should target. `year` only
 # applies to `what = "raw"` (the .validate step aborts otherwise).
-.cache_clear_target <- function(cache_root, what, dataset, year) {
+# Tree: <cache>/<what>/<group>/<dataset>/<year>/ — every level is
+# optional from the right; `what = "all"` short-circuits to the cache
+# root.
+.cache_clear_target <- function(cache_root, what, group, dataset, year) {
   if (identical(what, "all")) {
     return(cache_root)
   }
   base <- file.path(cache_root, what)
+  if (is.null(group)) {
+    return(base)
+  }
+  base <- file.path(base, group)
   if (is.null(dataset)) {
     return(base)
   }
+  base <- file.path(base, dataset)
   if (is.null(year)) {
-    return(file.path(base, dataset))
+    return(base)
   }
-  file.path(base, dataset, as.character(year))
+  file.path(base, as.character(year))
 }
 
 # Internal: ensure a directory exists. Used by the HTTP source backend
@@ -404,11 +497,18 @@ read_cache_max_size <- function() {
 # `*.etag.rds` sidecar). Two layouts are recognised:
 #
 #   - Yearly (DFP/ITR/FRE): the unit is the year directory
-#     `<cache>/raw/<dataset>/<YYYY>/`, which holds the ZIP, the
-#     sidecar, and any CSV(s) extracted via `unzip()`. mtime anchor
-#     is the upstream ZIP itself.
+#     `<cache>/raw/<group>/<dataset>/<YYYY>/`, which holds the ZIP,
+#     the sidecar, and any CSV(s) extracted via `unzip()`. mtime
+#     anchor is the upstream ZIP itself.
 #   - Non-partitioned (CAD): the unit is the pair
 #     `{anchor, anchor.etag.rds}`. mtime anchor is the artifact.
+#
+# The `<group>` segment is detected implicitly via the parent-dir
+# heuristic: `.cache_unit_key()` looks at the immediate parent's
+# basename and only treats it as a year directory when it matches
+# `^[0-9]{4}$`. Group slugs (`companhias`, ...) and dataset slugs
+# (`cad`, `dfp`, ...) never match that pattern, so the eviction
+# engine works unchanged across the v0.1 → v0.1.0.9000 layout shift.
 #
 # Orphan sidecars (sidecar without artifact) and orphan files
 # (artifact without sidecar) are ignored: they do not count toward
@@ -606,4 +706,212 @@ should_warn_eviction <- function() {
     }
   }
   invisible()
+}
+
+# Cache layout migration v0.1 -> v0.1.0.9000 -------------------------------
+#
+# v0.1.0 stored downloads under `<cache>/{raw,parquet}/<dataset>/...`.
+# v0.1.0.9000 nests them one level deeper to keep multi-group coverage
+# straight: `<cache>/{raw,parquet}/<group>/<dataset>/...`. This helper
+# detects a v0.1 layout (any of the v0.1 dataset directories sitting
+# directly under `raw/` or `parquet/`) and relocates the subtree under
+# the corresponding group slug.
+#
+# Contract:
+#   - Idempotent: a layout that is already v0.1.0.9000 is a no-op.
+#   - Transactional pre-flight: if any destination already exists,
+#     aborts with `cvmdata_error_internal` listing every conflicting
+#     path *before* moving any file. Partial v0.1 caches mixed with
+#     fresh v0.1.0.9000 writes therefore fail-fast — the user is
+#     instructed to run `cvm_cache_clear("all")` and re-download.
+#   - Audit log: every non-empty migration appends an entry to
+#     `tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds`.
+#     Each entry carries the timestamp, the cache root, and the list
+#     of subtrees moved.
+#   - Read-only filesystem: when the cache root exists but is not
+#     writeable (e.g. read-only mount), aborts with
+#     `cvmdata_error_internal` and no file moved.
+#
+# Not exported. Called from `source_cvm_http_get()`,
+# `source_mirror_duckdb_get()`, `cvm_cache_info()`, and
+# `cvm_cache_clear()`; the no-op fast path keeps the steady-state cost
+# of those entries to a couple of `file.exists()` calls.
+cache_migrate_v0_1_to_v0_2 <- function(cache_root = cvm_cache_path()) {
+  empty <- list(moved = character(0L), log_path = NA_character_,
+                ts = as.POSIXct(NA_character_, tz = "UTC"))
+  if (!.cache_migrate_root_usable(cache_root)) {
+    return(invisible(empty))
+  }
+  planned <- .cache_migrate_plan(cache_root)
+  if (!length(planned)) {
+    return(invisible(empty))
+  }
+  .cache_migrate_check_conflicts(planned)
+  .cache_migrate_check_writeable(cache_root)
+  moved <- .cache_migrate_execute(planned)
+  log_path <- cache_migrate_log_path()
+  ts <- Sys.time()
+  .cache_migrate_log_append(log_path, cache_root, moved, ts)
+  invisible(list(moved = moved, log_path = log_path, ts = ts))
+}
+
+# True iff `cache_root` is a valid, existing directory the migration
+# can examine. Anything else (NULL, NA, vector, non-existent path) is
+# a silent no-op — the migration is a side helper of the source layer,
+# not an API touchpoint.
+.cache_migrate_root_usable <- function(cache_root) {
+  is.character(cache_root) && length(cache_root) == 1L &&
+    !is.na(cache_root) && nzchar(cache_root) &&
+    dir.exists(cache_root)
+}
+
+# Transactional pre-flight: scan every planned move for a destination
+# that already exists. On conflict, abort *before* moving anything so
+# a partial mix of v0.1 and v0.1.0.9000 caches fails fast.
+.cache_migrate_check_conflicts <- function(planned) {
+  conflicts <- vapply(
+    planned, function(p) file.exists(p$dest), logical(1L)
+  )
+  if (!any(conflicts)) {
+    return(invisible())
+  }
+  cvmdata_abort(
+    c(
+      paste(
+        "Cannot migrate cache layout to v0.1.0.9000:",
+        "{sum(conflicts)} destination path{?s} already exist{?s/}."
+      ),
+      "i" = paste(
+        "Conflicting path{?s}:",
+        "{.path {vapply(planned[conflicts], `[[`, character(1L), 'dest')}}."
+      ),
+      "i" = paste(
+        "Run {.code cvm_cache_clear(\"all\")} and re-fetch to recover."
+      )
+    ),
+    class = "cvmdata_error_internal"
+  )
+}
+
+# Abort when the cache root is read-only. Probed by writing then
+# removing a temp file (see `.cache_root_writeable()`); this is the
+# only portable signal of writability we have on Windows.
+.cache_migrate_check_writeable <- function(cache_root) {
+  if (.cache_root_writeable(cache_root)) {
+    return(invisible())
+  }
+  cvmdata_abort(
+    c(
+      "Cache root {.path {cache_root}} is not writeable.",
+      "i" = paste(
+        "Cannot perform cache layout migration on a read-only mount.",
+        "Either grant write permissions or point",
+        "{.code cvm_cache_set_path()} at a writeable location."
+      )
+    ),
+    class = "cvmdata_error_internal"
+  )
+}
+
+# Perform every move; abort on the first failure (pre-flight already
+# ruled out same-name conflicts, so the remaining failure modes are
+# OS-level: permission, cross-device, ENOENT). Returns the list of
+# destination paths that succeeded.
+.cache_migrate_execute <- function(planned) {
+  moved <- character(0L)
+  for (p in planned) {
+    ensure_dir(dirname(p$dest))
+    ok <- file.rename(p$src, p$dest)
+    if (!isTRUE(ok)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Cache layout migration failed while moving",
+            "{.path {p$src}} to {.path {p$dest}}."
+          ),
+          "i" = paste(
+            "Run {.code cvm_cache_clear(\"all\")} and re-fetch to recover."
+          )
+        ),
+        class = "cvmdata_error_internal"
+      )
+    }
+    moved <- c(moved, p$dest)
+  }
+  moved
+}
+
+# Build the list of (src, dest) pairs that the migration should attempt
+# on `cache_root`. Returns an empty list when nothing matches the v0.1
+# layout (the steady-state fast path post-migration).
+.cache_migrate_plan <- function(cache_root) {
+  out <- list()
+  for (layer in c("raw", "parquet")) {
+    layer_root <- file.path(cache_root, layer)
+    if (!dir.exists(layer_root)) {
+      next
+    }
+    for (dataset in names(.dataset_group_map)) {
+      src <- file.path(layer_root, dataset)
+      if (!dir.exists(src)) {
+        next
+      }
+      group <- .dataset_group_map[[dataset]]
+      dest <- file.path(layer_root, group, dataset)
+      out <- c(out, list(list(src = src, dest = dest)))
+    }
+  }
+  out
+}
+
+# Probe writeability of an existing cache root without leaving a stray
+# file behind. Returns TRUE if a temp file can be created and removed.
+.cache_root_writeable <- function(cache_root) {
+  probe <- tempfile(tmpdir = cache_root, fileext = ".migrate-probe")
+  ok <- tryCatch(
+    {
+      created <- file.create(probe)
+      if (file.exists(probe)) {
+        unlink(probe, force = TRUE)
+      }
+      isTRUE(created)
+    },
+    warning = function(w) FALSE,
+    error = function(e) FALSE
+  )
+  ok
+}
+
+# Resolve the path of the audit log. Lives under
+# `tools::R_user_dir("cvmdata", "config")` (separate from the cache
+# directory so it survives `cvm_cache_clear("all")`).
+cache_migrate_log_path <- function() {
+  config_dir <- tools::R_user_dir("cvmdata", which = "config")
+  file.path(config_dir, "cache_migrate_log.rds")
+}
+
+# Append a single audit entry to the log. Creates the parent directory
+# and an empty log on first use; tolerates a corrupt log by starting
+# fresh (we would rather lose history than crash a migration over a
+# broken sidecar).
+.cache_migrate_log_append <- function(log_path, cache_root, moved, ts) {
+  ensure_dir(dirname(log_path))
+  prior <- list()
+  if (file.exists(log_path)) {
+    prior <- tryCatch(
+      {
+        x <- readRDS(log_path)
+        if (is.list(x)) x else list()
+      },
+      error = function(e) list()
+    )
+  }
+  entry <- list(
+    timestamp = ts,
+    cache_root = cache_root,
+    moved = moved,
+    package_version = as.character(utils::packageVersion("cvmdata"))
+  )
+  saveRDS(c(prior, list(entry)), log_path)
+  invisible(log_path)
 }

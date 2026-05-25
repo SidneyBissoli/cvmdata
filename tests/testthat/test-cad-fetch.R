@@ -12,7 +12,7 @@ local_prepare_cache <- function(envir = parent.frame()) {
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "cad")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "cad_sample.csv"),
@@ -236,7 +236,7 @@ test_that("source_cvm_http_get re-downloads when ETag changes", {
   skip_if_not_installed("httptest2")
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
-  raw_dir <- file.path(cache_root, "raw", "cad")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "cad_sample.csv"),

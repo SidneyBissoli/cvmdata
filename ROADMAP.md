@@ -130,26 +130,240 @@ Plano de execução por fases.
 - [~] `devtools::check_mac_release()` — pendente (504 transitório,
   retentar).
 - [ ] Submissão rOpenSci (pre-submission inquiry) — **deferida**
-  até fechar a decisão arquitetural de "grupos" da CVM e
-  eventual rename de `cvm_fetch()`. Vide bloco "Decisão
-  arquitetural em aberto" no topo da §2 do `CLAUDE.md`. Draft
-  inicial preservado localmente em
-  `data-raw/rOpenSci-presubmission-draft.md` (não pushed; será
-  reescrito quando a arquitetura fechar).
+  até o fim do ciclo `0.1.0.9000` (Sessões 04-08, vide próxima
+  seção). Decisão arquitetural de "grupos" da CVM fechou em
+  2026-05-25: 5 fetchers por contrato de dado
+  (`issuer_fetch`, `fund_fetch`, `agent_fetch`, `offering_fetch`,
+  `event_fetch`) cobrindo os 18 grupos CKAN. Documento canônico:
+  `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
+  Draft de pre-submission em
+  `data-raw/rOpenSci-presubmission-draft.md` (não pushed) será
+  reescrito após a Sessão 08.
 - [ ] Aceitação rOpenSci.
 - [ ] Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).
 
 ---
 
+## v0.1.0.9000 — migração arquitetural de grupos
+
+Ciclo de desenvolvimento entre v0.1.0 e v0.2.0. Implementa a
+decisão arquitetural de grupos fechada em 2026-05-25 (vide
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`).
+Reorganiza a API pública em 5 fetchers por contrato de dado,
+migra cache/schemas/snapshots/mirror para layout `<group>`-aware,
+e exporta skeletons dos 4 fetchers ainda não implementados.
+
+Ordem das sessões é estrita — cada uma assume o estado da
+anterior. Gate por sessão: `devtools::check() == 0E/0W/0N`,
+lint clean, cobertura ≥ 90%.
+
+### Sessão 04 — Cache layout migration
+
+- [x] Helper interno `cache_migrate_v0_1_to_v0_2()`
+  (não exportado, idempotente, com log em
+  `tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds`).
+- [x] `R/cache.R`, `R/source-cvm-http.R`,
+  `R/source-mirror-duckdb.R` operando sobre
+  `<cache>/raw/<group>/<dataset>/` e
+  `<cache>/parquet/<group>/<dataset>/<table>/...`.
+- [x] `cvm_cache_info()` reporta coluna `group`.
+- [x] `cvm_cache_clear()` ganha argumento `group = NULL`.
+- [x] Testes: cache vazio, cache antigo, cache misto, arquivo
+  conflitante (`cvmdata_error_internal` + instrução de
+  `cvm_cache_clear("all")` manual).
+
+### Sessão 05 — Schemas + dictionary/codelist migration
+
+- [ ] `git mv inst/extdata/schemas/{cad,dfp,itr,fre}/` →
+  `inst/extdata/schemas/companhias/{cad,dfp,itr,fre}/`.
+- [ ] `load_schema()` aceita `group` (opcional com unicidade).
+- [ ] `cvm_dictionary_snapshot.csv` regenerado com `group` como
+  primeira coluna; gerador em `data-raw/build-dictionary-snapshot.R`
+  atualizado.
+- [ ] `cvm_codelists_snapshot.csv` regenerado com `group` como
+  primeira coluna; gerador em `data-raw/build-codelists-snapshot.R`
+  atualizado.
+- [ ] `cvm_dictionary()`, `cvm_codelist()` aceitam `group`.
+- [ ] Testes de regressão: snapshots batem com versão anterior
+  módulo nova coluna.
+
+### Sessão 06 — Rename + deprecation abrupta + argumentos no singular
+
+- [ ] `R/api-cvm-fetch.R` → `R/api-issuer-fetch.R`.
+- [ ] `cvm_fetch_internal()` → `issuer_fetch_internal()`.
+- [ ] `cvm_fetch()` → `issuer_fetch()`.
+- [ ] Argumentos renomeados para singular:
+  - `companies` → `issuer`
+  - `years` → `year`
+- [ ] `cvm_fetch()` removida sem wrapper.
+- [ ] `cad_fetch()` removida sem wrapper (`R/api-cad-fetch.R` apagado).
+- [ ] Todos os exemplos roxygen atualizados.
+- [ ] `vignettes/cvmdata.Rmd` e todos os articles atualizados
+  (`cvm-fetch.Rmd` → `issuer-fetch.Rmd`).
+- [ ] Todos os testes migrados (`grep -rl "cvm_fetch\|cad_fetch" tests/ R/`
+  + sed).
+- [ ] `NEWS.md` com entrada `⚠️ breaking` documentando o caminho
+  de migração.
+- [ ] Testes cobrindo rename + arg singular aceitando vetor.
+
+### Sessão 07 — Esqueletos dos 4 fetchers restantes
+
+- [ ] `R/api-fund-fetch.R` com signature canônica + abort
+  `cvmdata_error_input_group`.
+- [ ] `R/api-agent-fetch.R` idem.
+- [ ] `R/api-offering-fetch.R` idem.
+- [ ] `R/api-event-fetch.R` idem.
+- [ ] Testes de signature + dispatch + abort previsto para cada.
+- [ ] Documentação roxygen completa, `@examples` marcados
+  `@examplesIf FALSE`.
+- [ ] `_pkgdown.yml` lista as 5 funções em Reference com nota
+  de estado.
+- [ ] Classes de condição novas:
+  - `cvmdata_error_input_group`
+  - `cvmdata_error_input_ambiguous`
+
+### Sessão 08 — Discovery + cvm_groups() + ETL release rename
+
+- [ ] `R/api-cvm-groups.R` com `cvm_groups()` lendo do snapshot
+  embarcado (tibble com `group`, `n_datasets`, `contract`).
+- [ ] Argumento `group` adicionado em `cvm_datasets()`,
+  `cvm_tables()`, `cvm_dictionary()`, `cvm_codelist()`,
+  `cvm_dataset_years()` (opcional com unicidade).
+- [ ] `etl-mirror.yaml` com matrix bidimensional `(group, dataset)`.
+- [ ] Scripts `inst/etl/0{1,2,2b,3}*.R` ganham CLI flag `--group`.
+- [ ] `inst/etl/03-publish.R` nomeia releases
+  `mirror-<group>-<dataset>-latest`.
+- [ ] **Rename in-place** dos 4 releases atuais via GitHub API
+  (`gh release edit` ou REST), com checkpoint após cada um;
+  rollback documentado em caso de falha parcial.
+- [ ] `vignettes/articles/cache-and-mirror.Rmd` atualizado.
+- [ ] `vignettes/articles/groups-overview.Rmd` novo (lista 18
+  grupos, mapeia para 5 contratos, exemplos por fetcher).
+- [ ] Atributo `group` adicionado em tibble retornado
+  (6 atributos: `source`, `fetched_at`, `group`, `dataset`,
+  `table`, `package_version`); `print.cvm_tbl()` exibe `group`.
+
+### Pós-Sessão 08 — pre-submission rOpenSci
+
+- [ ] Reescrever `data-raw/rOpenSci-presubmission-draft.md`
+  refletindo arquitetura final.
+- [ ] Submeter pre-submission inquiry ao rOpenSci.
+
+---
+
 ## v0.2+ (escopo futuro)
 
-- [ ] **v0.2**: `fca`, `vlmo`, `cgvn`, `ipe` (companhias parte 2).
-  - [ ] Suporte a ticker B3 no argumento `companies`.
-- [ ] **v0.3**: eventos societários + estrangeiras + incentivadas.
-- [ ] **v0.4**: ICVM 555 (fundos de investimento).
-- [ ] **v0.5**: FII (fundos imobiliários).
-- [ ] **v0.6**: FIDC + estruturados.
-- [ ] **v1.0**: estabilização + paper no The R Journal.
+Nomenclatura por **grupo CKAN da CVM** (18 grupos verificados em
+<https://dados.cvm.gov.br/group/>, 2026-05-25). Cada release
+incremental cobre um grupo ou subconjunto coerente; o fetcher
+correspondente já existe em skeleton desde v0.1.0.9000.
+
+### v0.2 — `companhias` (parte 2)
+
+Cobertos por `issuer_fetch()` (skeleton já exportado, falta
+implementação dos datasets).
+
+- [ ] Dataset `fca` (Formulário Cadastral).
+- [ ] Dataset `vlmo` (Valores Mobiliários Negociados e Detidos).
+- [ ] Dataset `cgvn` (Informe do Código de Governança).
+- [ ] Dataset `ipe` (documentos periódicos e eventuais).
+- [ ] Suporte a ticker B3 no argumento `issuer` de
+  `issuer_fetch()`.
+
+### v0.3 — `companhias` (parte 3) + perfis não-default
+
+Ainda cobertos por `issuer_fetch()`.
+
+- [ ] Programas de recompra de ações.
+- [ ] ICBGC (Informe do Código Brasileiro de Governança).
+- [ ] Cadastro de companhias estrangeiras.
+- [ ] Cadastro de companhias incentivadas.
+- [ ] Eventos societários remanescentes do grupo `companhias`.
+
+### v0.4 — `fundos-de-investimento` (22 datasets)
+
+Coberto por `fund_fetch()` (skeleton já exportado). Maior chunk
+de trabalho do projeto; provável quebra em v0.4.1 → v0.4.x
+conforme cada dataset entra.
+
+- [ ] Implementação completa de `fund_fetch()` (substitui o abort
+  do skeleton).
+- [ ] Argumento `fund` com detecção automática (CNPJ; texto livre
+  fica para v0.5+ se útil).
+- [ ] Argumento `date` (datas pontuais, default `NULL` → último
+  mês disponível).
+- [ ] Cadastro de fundos (`fi-cad` e variantes).
+- [ ] Informes diários, mensais, trimestrais.
+- [ ] Composição e Diversificação de Aplicações (CDA).
+- [ ] Balancetes mensais.
+- [ ] Balanços semestrais.
+- [ ] Lâminas (ICVM 555).
+- [ ] Formulários complementares.
+- [ ] FIDC: informe mensal + composição de carteira.
+- [ ] Tratamento de Resolução CVM 175 (Classe / Subclasse).
+- [ ] Identificadores novos no reader: `cnpj_fundo`,
+  `cnpj_administrador`.
+
+### v0.5 — `fundos-de-investimento-imobiliarios` (4 datasets)
+
+Coberto por `fund_fetch()`.
+
+- [ ] Informe mensal FII.
+- [ ] Informe trimestral FII.
+- [ ] Demais 2 datasets do grupo.
+
+### v0.6 — `fundos-estruturados` (10 datasets)
+
+Coberto por `fund_fetch()`. Inclui FAPI, FIIM, FIP, etc. FIDC
+aparece aqui também em alguns datasets — coordenar com v0.4 para
+não duplicar.
+
+- [ ] Balancetes de fundos estruturados.
+- [ ] Informes trimestrais e quadrimestrais FIP.
+- [ ] Medidas de fundos estruturados (PL + nº cotistas).
+- [ ] Demais datasets do grupo.
+
+### v0.7 — `agent_fetch()` full + `offering_fetch()` full
+
+Implementação completa dos skeletons exportados em v0.1.0.9000.
+
+Grupos cobertos por `agent_fetch()`:
+
+- [ ] `administradores` (Administradores de Carteira + FII).
+- [ ] `agentes-autonomos`.
+- [ ] `agentes-fiduciarios`.
+- [ ] `auditores`.
+- [ ] `consultores-de-valores-mobiliarios`.
+- [ ] `coordenadores-de-ofertas`.
+- [ ] `participantes-intermediarios`.
+- [ ] `investidores-nao-residentes`.
+- [ ] Argumento `agent` com detecção CPF/CNPJ/texto por dataset.
+- [ ] Argumento `as_of` (snapshot temporal).
+- [ ] `cpf_clean()` e `cpf_format()` exportadas como utilitários.
+
+Grupos cobertos por `offering_fetch()`:
+
+- [ ] `ofertas-publicas`.
+- [ ] `plataformas-de-crowdfunding` (Resolução CVM 88).
+- [ ] Argumento `offering` (`numero_oferta` string).
+- [ ] Argumento `date_range` (vetor `c(from, to)`).
+
+### v0.8 — `event_fetch()` full
+
+- [ ] `atividade-sancionadora` (processos sancionadores).
+- [ ] `atos-declaratorios` (deliberações da diretoria CVM).
+- [ ] Argumento `event` (ID de processo / ato).
+- [ ] Argumento `date_range`.
+
+### v1.0 — estabilização
+
+- [ ] Audit completo de cobertura: todos os 18 grupos e 76
+  datasets do portal mapeados.
+- [ ] Vignettes finais por contrato
+  (`issuer-fetch.Rmd`, `fund-fetch.Rmd`, `agent-fetch.Rmd`,
+  `offering-fetch.Rmd`, `event-fetch.Rmd`).
+- [ ] Paper no The R Journal.
+- [ ] Promoção do lifecycle de `experimental` para `stable`.
 
 ---
 

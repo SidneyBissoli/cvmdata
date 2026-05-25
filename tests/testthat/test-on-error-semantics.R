@@ -15,7 +15,7 @@ local_dfp_cache_2024_fresh <- function(envir = parent.frame()) {
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
     test_path("fixtures", "dfp_cia_aberta_2024.zip"),

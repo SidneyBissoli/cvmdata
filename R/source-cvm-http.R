@@ -6,10 +6,11 @@
 #    target table.
 #
 # Both paths cache the raw upstream artifact (CSV or ZIP) under
-# `<cache_root>/raw/<dataset>/...` with a sidecar `.etag.rds` for
-# ETag/Last-Modified comparison. Freshness is gated by a TTL window
-# (default 30 days, configurable via `options(cvmdata.cache_ttl_seconds)`):
-# within the TTL the HEAD/GET round-trip is skipped entirely.
+# `<cache_root>/raw/<group>/<dataset>/...` with a sidecar `.etag.rds`
+# for ETag/Last-Modified comparison. Freshness is gated by a TTL
+# window (default 30 days, configurable via
+# `options(cvmdata.cache_ttl_seconds)`): within the TTL the HEAD/GET
+# round-trip is skipped entirely.
 
 # Download (or serve from cache) the CSV referenced by a schema. Returns
 # the local path to the CSV ready to read.
@@ -21,6 +22,7 @@
 # @return Local filesystem path to the CSV.
 source_cvm_http_get <- function(schema, year = NULL,
                                 report_type = NULL, ...) {
+  cache_migrate_v0_1_to_v0_2()
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "none")) {
     return(get_simple_csv(schema, report_type))
@@ -73,7 +75,10 @@ get_simple_csv <- function(schema, report_type) {
       class = "cvmdata_error_internal"
     )
   }
-  cache_dir <- file.path(cvm_cache_path(), "raw", schema$dataset)
+  cache_dir <- file.path(
+    cvm_cache_path(), "raw",
+    dataset_group(schema$dataset), schema$dataset
+  )
   ensure_dir(cache_dir)
   csv_path <- file.path(cache_dir, basename(url))
   download_with_etag(url, csv_path)
@@ -87,8 +92,11 @@ get_yearly_csv <- function(schema, year, report_type) {
   csv_pattern <- resolve_file_pattern(schema, report_type)
   csv_name <- sub("\\{year\\}", year, csv_pattern, fixed = FALSE)
 
-  cache_dir <- file.path(cvm_cache_path(), "raw", schema$dataset,
-                         as.character(year))
+  cache_dir <- file.path(
+    cvm_cache_path(), "raw",
+    dataset_group(schema$dataset), schema$dataset,
+    as.character(year)
+  )
   ensure_dir(cache_dir)
   zip_path <- file.path(cache_dir, basename(archive_url))
   download_with_etag(archive_url, zip_path)
