@@ -22,7 +22,7 @@ up-front:
 * FRE detail tables use a different header convention from
   CAD/ITR/DFP: `cnpj_companhia`, `data_referencia`,
   `nome_companhia` (no `cd_cvm` column in the detail rows).
-  `cvm_fetch()` smooths over this — CD_CVM filters resolve via the
+  `issuer_fetch()` smooths over this — CD_CVM filters resolve via the
   dataset's `submissao` and the user-facing interface stays identical.
 * Eight tables in FRE ship **without published META** (CVM never
   released the dictionary file). The package declares them with
@@ -64,10 +64,10 @@ Deficiência*) employment counts for **BCO BRASIL S.A.** (CD_CVM
 ### The audit firm
 
 ```{r workflow-1-auditor}
-auditor <- cvm_fetch(
+auditor <- issuer_fetch(
   "fre", "auditor",
-  companies = "1023",
-  years     = 2024
+  issuer = "1023",
+  year = 2024
 )
 auditor
 ```
@@ -85,8 +85,8 @@ released a dictionary for. With the default `validate = "strict"`
 the package refuses to read it:
 
 ```{r workflow-1-pcd-strict, error = TRUE}
-cvm_fetch("fre", "empregado_PCD",
-          companies = "1023", years = 2024)
+issuer_fetch("fre", "empregado_PCD",
+          issuer = "1023", year = 2024)
 ```
 
 The reader expects the user to opt in by relaxing validation. With
@@ -94,10 +94,10 @@ The reader expects the user to opt in by relaxing validation. With
 and returns the tibble; with `validate = "skip"` it runs silently:
 
 ```{r workflow-1-pcd-warn, warning = TRUE}
-pcd <- cvm_fetch(
+pcd <- issuer_fetch(
   "fre", "empregado_PCD",
-  companies = "1023",
-  years     = 2024,
+  issuer = "1023",
+  year = 2024,
   validate  = "warn"
 )
 pcd
@@ -114,10 +114,10 @@ Goal: extract the top shareholders of BCO BRASIL recorded in the
 2024 FRE filing.
 
 ```{r workflow-2-posicao}
-posicao <- cvm_fetch(
+posicao <- issuer_fetch(
   "fre", "posicao_acionaria",
-  companies = "1023",
-  years     = 2024
+  issuer = "1023",
+  year = 2024
 )
 
 # Columns covering shareholder identity and stake:
@@ -149,7 +149,7 @@ silent schema drift.
 
 ## Where to read next
 
-* **cvm-fetch** — `companies` / `years` / `validate` semantics in
+* **issuer-fetch** — `companies` / `years` / `validate` semantics in
   full.
 * **itr-dfp** — financial statements; same package, different table
   semantics.

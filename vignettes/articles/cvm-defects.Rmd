@@ -53,14 +53,14 @@ library(cvmdata)
 
 ### #5 — CD_CVM padding accepted in either form
 
-CAD ships CD_CVM unpadded, ITR/DFP pad to six digits. `cvm_fetch()`
+CAD ships CD_CVM unpadded, ITR/DFP pad to six digits. `issuer_fetch()`
 normalizes both:
 
 ```{r ex5}
-a <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "1023",   years = 2024)
-b <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "001023", years = 2024)
+a <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "1023",   year = 2024)
+b <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "001023", year = 2024)
 identical(a[, !(names(a) %in% character(0))],
           b[, !(names(b) %in% character(0))])
 unique(a$cd_cvm)
@@ -85,8 +85,8 @@ yaml::read_yaml(system.file(
 ```
 
 ```{r ex7-data}
-bpa <- cvm_fetch("dfp", "bpa", report_type = "ind",
-                 companies = "1023", years = 2024)
+bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
+                 issuer = "1023", year = 2024)
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
@@ -100,8 +100,8 @@ The eight workforce-diversity tables in FRE (`empregado_PCD`,
 dictionary. The default `validate = "strict"` refuses to read them:
 
 ```{r ex8-strict, error = TRUE}
-cvm_fetch("fre", "empregado_PCD",
-          companies = "1023", years = 2024)
+issuer_fetch("fre", "empregado_PCD",
+          issuer = "1023", year = 2024)
 ```
 
 `validate = "warn"` returns the data and emits
@@ -128,8 +128,8 @@ yaml::read_yaml(system.file(
 Result: at most one row per filing key in the returned tibble.
 
 ```{r ex11-data}
-auditor <- cvm_fetch("fre", "auditor",
-                     companies = "1023", years = 2024)
+auditor <- issuer_fetch("fre", "auditor",
+                     issuer = "1023", year = 2024)
 # One row per (cnpj_companhia, data_referencia):
 nrow(unique(auditor[, c("cnpj_companhia", "data_referencia")])) ==
   nrow(auditor)
@@ -144,8 +144,8 @@ the same year, looks up CNPJ for each CD_CVM token in `companies`,
 and applies the filter on CNPJ:
 
 ```{r ex13}
-auditor <- cvm_fetch("fre", "auditor",
-                     companies = "1023", years = 2024)
+auditor <- issuer_fetch("fre", "auditor",
+                     issuer = "1023", year = 2024)
 "cd_cvm" %in% names(auditor)
 unique(auditor$cnpj_companhia)
 unique(auditor$nome_companhia)
@@ -163,11 +163,11 @@ either purely preservational (1, 2, 3, 4, 6) or structurally
 declared in the schema (9, 10, 12). The inventory table above
 points at each YAML and at the relevant CLAUDE.md section; the
 package's source under `R/transform-schema.R`, `R/util-csv-cvm.R`
-and `R/api-cvm-fetch.R` is the canonical reference.
+and `R/api-issuer-fetch.R` is the canonical reference.
 
 ## Where to read next
 
-* **cvm-fetch** — argument reference; `validate` and `on_error`
+* **issuer-fetch** — argument reference; `validate` and `on_error`
   semantics in full.
 * **itr-dfp** — workflow with `multiply_by_scale` and
   `keep_latest_version` in action.

@@ -15,7 +15,7 @@ By participating in this project you agree to abide by its
   avoid duplicates.
 - For bug reports, include a minimal reproducible example using
   [reprex](https://reprex.tidyverse.org/). Mention the CVM dataset and
-  table involved (e.g. `cvm_fetch("dfp", "bpa", report_type = "ind",
+  table involved (e.g. `issuer_fetch("dfp", "bpa", report_type = "ind",
   ...)`), the value of `getOption("cvmdata.source")` and the output of
   `sessionInfo()`.
 - For feature requests, describe the use case and how the proposed API
@@ -94,7 +94,7 @@ fix the regression before merge.
 
 Each table is described by a YAML file under
 `inst/extdata/schemas/<dataset>/<table>.yaml`. The schema drives
-download, parsing, validation and transformation in `cvm_fetch()`.
+download, parsing, validation and transformation in `issuer_fetch()`.
 Minimum required fields:
 
 ```yaml

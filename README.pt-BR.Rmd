@@ -44,7 +44,7 @@ unificado. Workflows comuns — "me dá o DFP da empresa X de 2018 a
 2024" — exigem download manual, tratamento de encoding, conversão de
 `VL_CONTA` por `ESCALA_MOEDA` e join contra uma `submissao` separada
 para traduzir CD_CVM em CNPJ. O `cvmdata` consolida tudo isso atrás de
-uma chamada `cvm_fetch(dataset, table, companies, years, ...)` e
+uma chamada `issuer_fetch(dataset, table, issuer, year, ...)` e
 embarca o dicionário oficial como snapshot, então os tipos de coluna
 vêm prontos.
 
@@ -60,7 +60,7 @@ adjacentes do problema:
   cadastro (CAD) estão fora do escopo.
 
 O `cvmdata` unifica CAD, ITR, DFP e FRE atrás de uma única
-`cvm_fetch()`, com filtros consistentes para companhias (CNPJ /
+`issuer_fetch()`, com filtros consistentes para companhias (CNPJ /
 CD_CVM / texto livre com expansão de abreviações), cache HTTP com
 revalidação por ETag/Last-Modified e janela TTL configurável, e o
 dicionário e as codelists da CVM embarcados como snapshots (tipos de
@@ -107,12 +107,12 @@ expansão de abreviações (`BANCO` casa `BCO`, `COMPANHIA` casa `CIA`,
 e assim por diante):
 
 ``` r
-bpa <- cvm_fetch(
+bpa <- issuer_fetch(
   dataset     = "dfp",
   table       = "bpa",
   report_type = "ind",
-  companies   = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  years       = 2022:2024
+  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
+  year = 2022:2024
 )
 ```
 
@@ -129,8 +129,10 @@ Referência e artigos em
 <https://sidneybissoli.github.io/cvmdata/>. A API exportada está
 agrupada em cinco famílias:
 
-- **Fetchers** — `cvm_fetch()`, `cad_fetch()` (alias mantido por
-  ergonomia).
+- **Fetchers** — `issuer_fetch()` (entry point único para todos os
+  datasets de emissor; quatro fetchers adicionais
+  (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`,
+  `event_fetch()`) chegam em v0.2+).
 - **Discovery** — `cvm_datasets()`, `cvm_tables()`, `cvm_dictionary()`,
   `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
@@ -144,7 +146,7 @@ agrupada em cinco famílias:
 
 Os dados vêm do Portal de Dados Abertos da CVM
 (<https://dados.cvm.gov.br/>). O backend ativo é selecionável via
-`cvm_source_set()` (ou pelo argumento `source` de `cvm_fetch()`):
+`cvm_source_set()` (ou pelo argumento `source` de `issuer_fetch()`):
 
 - `"mirror"` (default a partir da v0.1.0) — snapshots em parquet
   publicados em GitHub Releases e consultados via DuckDB com filter

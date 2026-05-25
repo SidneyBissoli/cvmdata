@@ -1,6 +1,6 @@
 # Stage 1 — Fetch raw CVM data into the ETL workspace.
 #
-# Calls cvmdata::cvm_fetch(source = "cvm") for each (table, year) of the
+# Calls cvmdata::issuer_fetch(source = "cvm") for each (table, year) of the
 # requested dataset. The package handles the HTTP transport, ETag-based
 # revalidation and schema validation; the only side effect this stage
 # needs is "warm cache populated" — the actual parquet conversion is
@@ -62,7 +62,7 @@ years_to_fetch <- if (identical(partitioning, "yearly")) {
 }
 
 message(sprintf(
-  "[01-fetch] dataset=%s tables=[%s] years=[%s] workspace=%s",
+  "[01-fetch] dataset=%s tables=[%s] year =[%s] workspace=%s",
   dataset,
   paste(tables, collapse = ", "),
   paste(years_to_fetch, collapse = ", "),
@@ -82,9 +82,9 @@ for (tbl in tables) {
         {
           years_arg <- if (is.na(y)) NULL else y
           rt_arg <- if (is.null(rt)) NULL else rt
-          cvmdata::cvm_fetch(
+          cvmdata::issuer_fetch(
             dataset, tbl,
-            years = years_arg,
+            year = years_arg,
             report_type = rt_arg,
             source = "cvm"
           )

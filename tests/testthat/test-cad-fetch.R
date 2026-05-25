@@ -1,5 +1,5 @@
-# End-to-end tests for cad_fetch(), mocking the HTTP layer with
-# httptest2 + a local fixture.
+# End-to-end tests for `issuer_fetch("cad", "companhias")`, mocking
+# the HTTP layer with httptest2 + a local fixture.
 
 # Setup -----------------------------------------------------------------
 
@@ -44,13 +44,13 @@ fresh_head_response <- function() {
 
 # Tests -----------------------------------------------------------------
 
-test_that("cad_fetch() returns a cvm_tbl with provenance attributes", {
+test_that("issuer_fetch returns a cvm_tbl with provenance attributes", {
   skip_if_not_installed("httptest2")
   local_prepare_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(source = "cvm")
+    issuer_fetch("cad", "companhias", source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -65,13 +65,13 @@ test_that("cad_fetch() returns a cvm_tbl with provenance attributes", {
   )
 })
 
-test_that("cad_fetch() returns identifier columns as character", {
+test_that("issuer_fetch returns identifier columns as character", {
   skip_if_not_installed("httptest2")
   local_prepare_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(source = "cvm")
+    issuer_fetch("cad", "companhias", source = "cvm")
   )
 
   expect_true("cnpj_cia" %in% names(result))
@@ -84,13 +84,13 @@ test_that("cad_fetch() returns identifier columns as character", {
   )))
 })
 
-test_that("cad_fetch() parses date columns as Date", {
+test_that("issuer_fetch parses date columns as Date", {
   skip_if_not_installed("httptest2")
   local_prepare_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(source = "cvm")
+    issuer_fetch("cad", "companhias", source = "cvm")
   )
 
   date_cols <- grep("^dt_", names(result), value = TRUE)
@@ -100,43 +100,43 @@ test_that("cad_fetch() parses date columns as Date", {
   }
 })
 
-test_that("cad_fetch() applies the snake_case column rename", {
+test_that("issuer_fetch applies the snake_case column rename", {
   skip_if_not_installed("httptest2")
   local_prepare_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(source = "cvm")
+    issuer_fetch("cad", "companhias", source = "cvm")
   )
 
   expect_true(all(names(result) == tolower(names(result))))
   expect_false(any(grepl("[A-Z]", names(result))))
 })
 
-test_that("cad_fetch() filters by cd_cvm in `companies`", {
+test_that("issuer_fetch filters by cd_cvm via the issuer arg", {
   skip_if_not_installed("httptest2")
   local_prepare_cache()
 
   full <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(source = "cvm")
+    issuer_fetch("cad", "companhias", source = "cvm")
   )
   pick <- full$cd_cvm[1L]
 
   filtered <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    cad_fetch(companies = pick, source = "cvm")
+    issuer_fetch("cad", "companhias", issuer = pick, source = "cvm")
   )
 
   expect_true(nrow(filtered) >= 1L)
   expect_true(all(filtered$cd_cvm == pick))
 })
 
-test_that("cad_fetch() rejects unsupported source values cleanly", {
+test_that("issuer_fetch rejects unsupported source values cleanly", {
   # "mirror" now ships (Sessao 3.13); only truly unsupported source
   # values abort. arg_match0() raises an `rlang_error`.
   expect_error(
-    cad_fetch(source = "bogus"),
+    issuer_fetch("cad", "companhias", source = "bogus"),
     class = "rlang_error"
   )
 })

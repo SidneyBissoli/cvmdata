@@ -44,7 +44,7 @@ mirror_release_tag <- function(dataset) {
 # plus an attribute `source_hash` carrying the value of the
 # `__source_hash.json` asset of the same release (or `NA_character_`
 # when the release has none). The result is cached per session so a
-# single `cvm_fetch()` call list-assets at most once per dataset.
+# single `issuer_fetch()` call list-assets at most once per dataset.
 #
 # Anonymous API access is enough for public repos (rate limit
 # 60 req/h, and the per-dataset call hits it once per session). When
@@ -303,15 +303,15 @@ parse_mirror_partition_segment <- function(seg, asset_name) {
   list(key = m[[2L]], value = m[[3L]])
 }
 
-# Filter an asset inventory by (table, years, report_type). Returns a
+# Filter an asset inventory by (table, year, report_type). Returns a
 # tibble subset of the input with the parsed `table`, `year`, and
 # `report_type` columns attached, ready for the DuckDB reader.
 #
-# - `years = NULL` keeps every year present in the inventory.
+# - `year = NULL` keeps every year present in the inventory.
 # - `report_type = NULL` keeps every variant (no filter); for tables
 #   that publish variants the caller is expected to pass either `"ind"`
 #   or `"con"`, otherwise the result mixes both.
-filter_mirror_assets <- function(assets, table, years = NULL,
+filter_mirror_assets <- function(assets, table, year = NULL,
                                  report_type = NULL) {
   if (!nrow(assets)) {
     return(annotate_mirror_assets(assets))
@@ -330,8 +330,8 @@ filter_mirror_assets <- function(assets, table, years = NULL,
   assets$year <- yr
 
   mask <- assets$table == table
-  if (!is.null(years)) {
-    mask <- mask & assets$year %in% as.integer(years)
+  if (!is.null(year)) {
+    mask <- mask & assets$year %in% as.integer(year)
   }
   if (!is.null(report_type)) {
     mask <- mask & assets$report_type == report_type

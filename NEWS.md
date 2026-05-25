@@ -1,5 +1,44 @@
 # cvmdata 0.1.0.9000 (in development)
 
+## ⚠️ Breaking changes
+
+* `cvm_fetch()` has been renamed `issuer_fetch()` to reflect the
+  contract of CVM's company-issuer datasets (the v0.1 scope). The
+  rename is mechanical:
+
+      cvm_fetch(dataset, table, companies = ..., years = ..., ...)
+      ↓
+      issuer_fetch(dataset, table, issuer = ..., year = ..., ...)
+
+  The arguments `companies` and `years` have been renamed to the
+  singular `issuer` and `year` for tidyverse-canonical naming. The
+  semantics are unchanged: `issuer` accepts a character vector of
+  CNPJs / CD_CVMs / free-text identifiers; `year` accepts an integer
+  vector of years and defaults to the latest available year when
+  `NULL`. The renamed arguments still accept vectors of any length.
+
+  `cvm_fetch()` is **removed without a deprecation wrapper**. Calls
+  using the old name will fail with `could not find function "cvm_fetch"`.
+  Likewise, passing the old argument names will abort with
+  `cvmdata_error_input` and a hint suggesting the new names.
+
+  Rationale: cvmdata has zero CRAN distribution and zero external
+  users at v0.1.0; the breaking change is contained to a few
+  collaborators who can update their scripts in one pass. The
+  alternative (a soft-deprecated wrapper kept until v1.0) would
+  carry maintenance cost and confuse reviewers during the upcoming
+  rOpenSci submission.
+
+* `cad_fetch()` has been removed without replacement. Use
+  `issuer_fetch("cad", "companhias")` instead — the call site is one
+  character longer and removes a thin alias that was only retained
+  for ergonomics during the Session 01 prototype.
+
+* Four further fetchers (`fund_fetch()`, `agent_fetch()`,
+  `offering_fetch()`, `event_fetch()`) will be exported as skeletons
+  in the following development cycle. v0.1.0.9000 itself only ships
+  `issuer_fetch()` as a functional fetcher.
+
 ## Internal
 
 * Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to

@@ -1,5 +1,5 @@
 ---
-title: "cvm_fetch(): the generic API"
+title: "issuer_fetch(): the generic API"
 ---
 
 ```{r, include = FALSE}
@@ -9,13 +9,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-`cvm_fetch(dataset, table, ...)` is the single entry point for every
-CVM dataset and every table covered by the package. `cad_fetch()` and
-any future dataset-specific helpers are thin wrappers around it.
+`issuer_fetch(dataset, table, ...)` is the single entry point for
+every CVM issuer dataset and every table covered by the package.
 
-This article walks through each argument, the company-detection
-logic, the years semantics, the `report_type` rule, the `validate` and
-`on_error` modes, and the cache/source plumbing.
+This article walks through each argument, the issuer-detection
+logic, the `year` semantics, the `report_type` rule, the `validate`
+and `on_error` modes, and the cache/source plumbing.
 
 ```{r setup}
 library(cvmdata)
@@ -24,11 +23,11 @@ library(cvmdata)
 ## Anatomy
 
 ```r
-cvm_fetch(
+issuer_fetch(
   dataset,
   table,
-  companies   = NULL,
-  years       = NULL,
+  issuer = NULL,
+  year = NULL,
   source      = NULL,
   report_type = NULL,
   on_error    = "abort",
@@ -44,11 +43,11 @@ are preserved in Portuguese as published by CVM; the API surface is
 in English.
 
 ```{r anatomy}
-bb_bpa <- cvm_fetch(
+bb_bpa <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2024
+  issuer = "1023",
+  year = 2024
 )
 bb_bpa
 
@@ -58,10 +57,10 @@ attr(bb_bpa, "dataset")
 attr(bb_bpa, "table")
 ```
 
-## Identifying companies
+## Identifying issuers
 
-`companies` accepts a character vector. Each element is classified
-**per element** by the pattern it matches:
+`issuer` accepts a character vector of any length. Each element is
+classified **per element** by the pattern it matches:
 
 | Pattern                              | Interpretation         | Match against              |
 |--------------------------------------|------------------------|----------------------------|
@@ -74,12 +73,12 @@ attr(bb_bpa, "table")
 
 ```{r identifiers}
 # Each call returns identical rows.
-a <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "1023",                years = 2024)
-b <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "001023",              years = 2024)
-c <- cvm_fetch("dfp", "bpa", report_type = "ind",
-               companies = "00.000.000/0001-91",  years = 2024)
+a <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "1023",                year = 2024)
+b <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "001023",              year = 2024)
+c <- issuer_fetch("dfp", "bpa", report_type = "ind",
+               issuer = "00.000.000/0001-91",  year = 2024)
 
 identical(nrow(a), nrow(b))
 identical(nrow(a), nrow(c))
@@ -94,8 +93,8 @@ match `denom_cia` with a word boundary.
 
 ```{r text-search}
 # A distinctive stem resolves cleanly to one issuer:
-magalu <- cvm_fetch("dfp", "bpa", report_type = "ind",
-                    companies = "MAGAZINE LUIZA", years = 2024)
+magalu <- issuer_fetch("dfp", "bpa", report_type = "ind",
+                    issuer = "MAGAZINE LUIZA", year = 2024)
 unique(magalu$denom_cia)
 ```
 
@@ -103,8 +102,8 @@ A non-unique stem aborts (in batch) with the list of candidates so
 scripts never silently grab the wrong issuer:
 
 ```{r text-ambiguous, error = TRUE}
-cvm_fetch("dfp", "bpa", report_type = "ind",
-          companies = "BCO BRASIL", years = 2024)
+issuer_fetch("dfp", "bpa", report_type = "ind",
+          issuer = "BCO BRASIL", year = 2024)
 ```
 
 In `interactive()` sessions an `utils::menu()` prompt appears
@@ -114,19 +113,20 @@ instead. Zero matches abort with the same error class.
 
 Some tables (e.g. `composicao_capital`, `parecer` in ITR/DFP) do not
 carry a `cd_cvm` column. When the user passes CD_CVM tokens against
-such a table, `cvm_fetch()` reads the dataset's `submissao` for the
+such a table, `issuer_fetch()` reads the dataset's `submissao` for the
 same year, looks up CNPJ for each CD_CVM and applies the filter on
 CNPJ. The interface is identical to the user:
 
 ```{r cd-cvm-lookup}
-cap <- cvm_fetch("dfp", "composicao_capital",
-                 companies = "1023", years = 2024)
+cap <- issuer_fetch("dfp", "composicao_capital",
+                 issuer = "1023", year = 2024)
 cap
 ```
 
 ## Selecting years
 
-`years` is an integer vector. `NULL` (default) fetches the **latest
+`year` is an integer vector of any length (singular naming follows
+tidyverse conventions). `NULL` (default) fetches the **latest
 available year**, discovered by HEAD-probing CVM's listing.
 
 ```{r years-discovery}
@@ -134,15 +134,15 @@ available year**, discovered by HEAD-probing CVM's listing.
 cvm_dataset_years("dfp")
 
 # Pass an explicit vector to back-fill history:
-history <- cvm_fetch("dfp", "bpa", report_type = "ind",
-                     companies = "1023", years = 2022:2024)
+history <- issuer_fetch("dfp", "bpa", report_type = "ind",
+                     issuer = "1023", year = 2022:2024)
 sort(unique(format(history$dt_refer, "%Y")))
 ```
 
 Each CSV publishes `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — the
 declared year and N − 1. The antepenultimate of year N is the last
-of year N − 2. `cvm_fetch()` does not synthesize the antepenultimate;
-ask for `years = (N - 2):N` if you need it.
+of year N − 2. `issuer_fetch()` does not synthesize the antepenultimate;
+ask for `year = (N - 2):N` if you need it.
 
 ```{r exercise-ordering}
 table(history$ordem_exerc)
@@ -150,13 +150,13 @@ table(history$ordem_exerc)
 
 ### Partial failure with `on_error`
 
-For multi-year calls (more than one element in `years`),
+For multi-year calls (more than one element in `year`),
 `on_error = "warn"` keeps surviving years and emits
 `cvmdata_warn_partial_failure` listing failures.
 `on_error = "silent"` does the same without the warning.
 `on_error = "abort"` (default) aborts at the first HTTP failure.
 Total failure (every year fails) always aborts regardless. Single-year
-calls, non-yearly tables (CAD) and the implicit `years = NULL`
+calls, non-yearly tables (CAD) and the implicit `year = NULL`
 fallback always abort on HTTP failure.
 
 Parse and schema-validation failures are governed by `validate`, not
@@ -169,15 +169,15 @@ variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
 `dfc_mi`, `dmpl`, `dva`). `report_type` is **required** for those:
 
 ```{r report-type-required, error = TRUE}
-cvm_fetch("dfp", "bpa", companies = "1023", years = 2024)
+issuer_fetch("dfp", "bpa", issuer = "1023", year = 2024)
 ```
 
 And **must be `NULL`** for tables without the distinction
 (`companhias`, `submissao`, `parecer`, `composicao_capital`):
 
 ```{r report-type-forbidden, error = TRUE}
-cvm_fetch("dfp", "composicao_capital",
-          companies = "1023", years = 2024,
+issuer_fetch("dfp", "composicao_capital",
+          issuer = "1023", year = 2024,
           report_type = "ind")
 ```
 

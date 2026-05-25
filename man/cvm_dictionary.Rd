@@ -19,7 +19,7 @@ than one group; in that case omitting \code{group} aborts with
 }
 \value{
 A tibble with one row per column of the table, columns
-\code{campo} (snake-case name matching \code{\link[=cvm_fetch]{cvm_fetch()}} output),
+\code{campo} (snake-case name matching \code{\link[=issuer_fetch]{issuer_fetch()}} output),
 \code{campo_original} (field name as published by CVM in the META,
 preserving the original casing), \code{descricao}, \code{dominio},
 \code{tipo_dados}, \code{tamanho}, \code{precisao}, \code{scale}.

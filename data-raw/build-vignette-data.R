@@ -49,18 +49,18 @@ out_dir <- file.path("inst", "extdata", "vignette-data")
 if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 
 cli::cli_h1("Fetching CAD registry (full snapshot)")
-cad_full <- cad_fetch()
+cad_full <- issuer_fetch("cad", "companhias")
 cli::cli_alert_info(
   "CAD: {nrow(cad_full)} rows, {ncol(cad_full)} cols"
 )
 cad_sample <- slice_cvm_tbl(cad_full, 15L)
 
 cli::cli_h1("Fetching DFP/BPA individual 2024 (BCO BRASIL, CD_CVM 1023)")
-bb_bpa <- cvm_fetch(
+bb_bpa <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2024L
+  issuer = "1023",
+  year = 2024L
 )
 cli::cli_alert_info(
   "DFP/BPA BB 2024: {nrow(bb_bpa)} rows, {ncol(bb_bpa)} cols"

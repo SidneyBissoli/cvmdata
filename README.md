@@ -39,7 +39,7 @@ table-specific schemas, and no unified data dictionary. Common workflows
 manual ZIP downloads, ISO-8859-1 handling, scale-by-`ESCALA_MOEDA`
 conversion, and joins against a separate `submissao` header to translate
 CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
-`cvm_fetch(dataset, table, companies, years, ...)` call and ships the
+`issuer_fetch(dataset, table, issuer, year, ...)` call and ships the
 official dictionary as an embedded snapshot, so column types are picked
 up automatically.
 
@@ -54,7 +54,7 @@ this problem:
   API (`get_dfp_data()`) covers the *annual* statements; ITR, FRE and
   the company registry (CAD) are out of scope.
 
-`cvmdata` unifies CAD, ITR, DFP and FRE behind a single `cvm_fetch()`
+`cvmdata` unifies CAD, ITR, DFP and FRE behind a single `issuer_fetch()`
 entry point, with consistent filtering semantics for companies (CNPJ /
 CD_CVM / free text with abbreviation expansion),
 ETag/Last-Modified-aware HTTP caching with a configurable TTL window,
@@ -334,12 +334,12 @@ CD_CVM, or free text — the latter with abbreviation expansion (`BANCO`
 matches `BCO`, `COMPANHIA` matches `CIA`, and so on):
 
 ``` r
-bpa <- cvm_fetch(
+bpa <- issuer_fetch(
   dataset     = "dfp",
   table       = "bpa",
   report_type = "ind",
-  companies   = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  years       = 2022:2024
+  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
+  year = 2022:2024
 )
 ```
 
@@ -357,8 +357,10 @@ cnpj_format("00000000000191")
 Reference and articles at <https://sidneybissoli.github.io/cvmdata/>.
 The exported API is grouped into five families:
 
-- **Fetchers** — `cvm_fetch()`, `cad_fetch()` (alias kept for
-  ergonomics).
+- **Fetchers** — `issuer_fetch()` (single entry point for every
+  issuer-class dataset; four more contract-specific fetchers
+  (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`)
+  arrive in v0.2+).
 - **Discovery** — `cvm_datasets()`, `cvm_tables()`, `cvm_dictionary()`,
   `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
@@ -375,7 +377,7 @@ The exported API is grouped into five families:
 
 Data is fetched from the official CVM Open Data Portal
 (<https://dados.cvm.gov.br/>). The active backend is selectable via
-`cvm_source_set()` (or the `source` argument of `cvm_fetch()`):
+`cvm_source_set()` (or the `source` argument of `issuer_fetch()`):
 
 - `"mirror"` (default from v0.1.0) — parquet snapshots in GitHub
   Releases queried via DuckDB with year-partition filter pushdown,

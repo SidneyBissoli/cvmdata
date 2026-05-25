@@ -1,4 +1,4 @@
-# Public source API. Controls which backend `cvm_fetch()` consults
+# Public source API. Controls which backend `issuer_fetch()` consults
 # to retrieve raw CVM data:
 #
 #   "mirror" — parquet snapshots in GitHub Releases, queried via
@@ -9,7 +9,7 @@
 #              required.
 #
 # The active source is stored in the option `cvmdata.source`.
-# `cvm_fetch()` resolves the default via `cvm_source_get()`, so
+# `issuer_fetch()` resolves the default via `cvm_source_get()`, so
 # `cvm_source_set("cvm")` flips the global default for subsequent
 # fetches; an explicit `source = ...` argument always wins.
 
@@ -38,8 +38,8 @@ cvm_source_get <- function() {
 #' Set the active cvmdata source backend
 #'
 #' Configures the option `cvmdata.source`, which becomes the default
-#' for subsequent [cvm_fetch()] calls that do not pass `source`
-#' explicitly. The argument passed to `cvm_fetch()` always wins over
+#' for subsequent [issuer_fetch()] calls that do not pass `source`
+#' explicitly. The argument passed to `issuer_fetch()` always wins over
 #' the option.
 #'
 #' @param source One of `"mirror"` (parquet via DuckDB; default from

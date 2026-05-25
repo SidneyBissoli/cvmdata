@@ -54,11 +54,11 @@ Goal: compare 2024 total assets for **BCO BRASIL S.A.** (CD_CVM
 individual balance sheet (`dfp/bpa`).
 
 ```{r workflow-1-fetch}
-bpa <- cvm_fetch(
+bpa <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = c("1023", "22470"),
-  years       = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 bpa
 ```
@@ -87,11 +87,11 @@ comparative previous year). To pick up an older comparative,
 request the matching upstream year explicitly:
 
 ```{r workflow-1-history}
-bpa_history <- cvm_fetch(
+bpa_history <- issuer_fetch(
   "dfp", "bpa",
   report_type = "ind",
-  companies   = "1023",
-  years       = 2022:2024
+  issuer = "1023",
+  year = 2022:2024
 )
 ativo_history <- bpa_history[
   bpa_history$cd_conta == "1" & bpa_history$ordem_exerc == "ÚLTIMO",
@@ -109,10 +109,10 @@ and applies the filter on CNPJ. The user-facing interface is
 identical:
 
 ```{r workflow-2-fetch}
-cap <- cvm_fetch(
+cap <- issuer_fetch(
   "dfp", "composicao_capital",
-  companies = c("1023", "22470"),
-  years     = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 cap
 ```
@@ -123,10 +123,10 @@ concept, not split into individual / consolidated.
 Cross-check against the underlying submissao header:
 
 ```{r workflow-2-header}
-sub <- cvm_fetch(
+sub <- issuer_fetch(
   "dfp", "submissao",
-  companies = c("1023", "22470"),
-  years     = 2024
+  issuer = c("1023", "22470"),
+  year = 2024
 )
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
 ```
@@ -139,7 +139,7 @@ the dictionary) are shared.
 
 ## Where to read next
 
-* **cvm-fetch** — argument reference and the full `companies` /
+* **issuer-fetch** — argument reference and the full `companies` /
   `years` / `report_type` / `validate` / `on_error` semantics.
 * **fre** — reference form. Same package, different table semantics.
 * **cvm-defects** — known publication quirks behind the
