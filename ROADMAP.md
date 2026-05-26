@@ -241,8 +241,8 @@ lint clean, cobertura ≥ 90%.
 
 ### Sessão 08 — Discovery + cvm_groups() + ETL release rename
 
-- [ ] `R/api-cvm-groups.R` com `cvm_groups()` lendo do snapshot
-  embarcado (tibble com `group`, `n_datasets`, `contract`).
+- [x] `R/api-cvm-groups.R` com `cvm_groups()` lendo da taxonomia
+  estática (tibble com `group`, `n_datasets`, `contract`).
 - [ ] Argumento `group` adicionado em `cvm_datasets()`,
   `cvm_tables()`, `cvm_dictionary()`, `cvm_codelist()`,
   `cvm_dataset_years()` (opcional com unicidade).
