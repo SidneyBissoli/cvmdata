@@ -4,10 +4,15 @@
 \alias{cvm_dataset_years}
 \title{Range of years available for a yearly-partitioned dataset}
 \usage{
-cvm_dataset_years(dataset, schema = NULL)
+cvm_dataset_years(dataset, group = NULL, schema = NULL)
 }
 \arguments{
 \item{dataset}{Short dataset id.}
+
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}). When
+\code{NULL} (default) resolved by uniqueness across the installed
+schema tree; when a dataset slug occurs in more than one group,
+omitting \code{group} aborts with \code{cvmdata_error_input_ambiguous}.}
 
 \item{schema}{Optional already-loaded schema (used internally by
 \code{\link[=issuer_fetch]{issuer_fetch()}} to avoid double-load). Users typically omit.}
@@ -28,6 +33,7 @@ yearly-partitioned (e.g. \code{cad}).
 \examples{
 \dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 cvm_dataset_years("dfp")
+cvm_dataset_years("dfp", group = "companhias")
 \dontshow{\}) # examplesIf}
 }
 \seealso{

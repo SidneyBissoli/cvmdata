@@ -243,9 +243,10 @@ lint clean, cobertura ≥ 90%.
 
 - [x] `R/api-cvm-groups.R` com `cvm_groups()` lendo da taxonomia
   estática (tibble com `group`, `n_datasets`, `contract`).
-- [ ] Argumento `group` adicionado em `cvm_datasets()`,
+- [x] Argumento `group` adicionado em `cvm_datasets()`,
   `cvm_tables()`, `cvm_dictionary()`, `cvm_codelist()`,
-  `cvm_dataset_years()` (opcional com unicidade).
+  `cvm_dataset_years()` (opcional com unicidade). Os dois últimos
+  já vinham da Sessão 05.
 - [ ] `etl-mirror.yaml` com matrix bidimensional `(group, dataset)`.
 - [ ] Scripts `inst/etl/0{1,2,2b,3}*.R` ganham CLI flag `--group`.
 - [ ] `inst/etl/03-publish.R` nomeia releases

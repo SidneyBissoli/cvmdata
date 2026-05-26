@@ -225,12 +225,97 @@ test_that("cvm_codelist rejects malformed group arg", {
   )
 })
 
+# cvm_datasets(group = ...) ---------------------------------------------
+
+test_that("cvm_datasets accepts explicit group = 'companhias'", {
+  ds <- cvm_datasets(group = "companhias")
+  expect_setequal(ds, c("cad", "dfp", "fre", "itr"))
+})
+
+test_that("cvm_datasets returns same set without group as with companhias", {
+  # v0.1.0.9000 only ships one group; with group = NULL or
+  # group = "companhias" the result is identical.
+  expect_setequal(
+    cvm_datasets(),
+    cvm_datasets(group = "companhias")
+  )
+})
+
+test_that("cvm_datasets with unknown group aborts cvmdata_error_input", {
+  expect_error(
+    cvm_datasets(group = "fundos-de-investimento"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_datasets rejects malformed group arg", {
+  expect_error(cvm_datasets(group = ""), class = "cvmdata_error_input")
+  expect_error(
+    cvm_datasets(group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
+})
+
+# cvm_tables(group = ...) -----------------------------------------------
+
+test_that("cvm_tables accepts explicit group = 'companhias'", {
+  expect_setequal(
+    cvm_tables("dfp", group = "companhias"),
+    cvm_tables("dfp")
+  )
+})
+
+test_that("cvm_tables aborts cvmdata_error_input for unknown group", {
+  expect_error(
+    cvm_tables("dfp", group = "fundos-de-investimento"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_tables aborts when dataset is unknown in the chosen group", {
+  # `cad` exists in companhias but not in (a hypothetical) other group.
+  # Currently the only installed group is companhias, so this exercise
+  # uses the unknown-group branch — see the previous test.
+  expect_error(
+    cvm_tables("not_a_real_dataset_xyz", group = "companhias"),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_tables rejects malformed group arg", {
+  expect_error(
+    cvm_tables("dfp", group = ""),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_tables("dfp", group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
+})
+
 # cvm_dataset_years() ----------------------------------------------------
 
 test_that("cvm_dataset_years returns NA for non-yearly dataset", {
   # CAD is temporal_partitioning: none. The discovery helper must
   # gracefully return NA_integer_, not abort.
   expect_identical(cvm_dataset_years("cad"), NA_integer_)
+})
+
+test_that("cvm_dataset_years accepts explicit group = 'companhias'", {
+  # CAD is non-yearly so the call short-circuits to NA before any HTTP
+  # is attempted — gives us a network-free way to exercise the new
+  # `group` argument end-to-end through `cvm_tables()` + `load_schema()`.
+  expect_identical(
+    cvm_dataset_years("cad", group = "companhias"),
+    NA_integer_
+  )
+})
+
+test_that("cvm_dataset_years rejects malformed group arg", {
+  expect_error(
+    cvm_dataset_years("dfp", group = c("a", "b")),
+    class = "cvmdata_error_input"
+  )
 })
 
 test_that("cvm_dataset_years aborts when archive_url_pattern is NULL", {
