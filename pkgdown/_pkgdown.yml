@@ -11,11 +11,12 @@ articles:
   - title: Deep dives
     navbar: Deep dives
     contents:
+      - matches("^articles/groups-overview$")
       - matches("^articles/issuer-fetch$")
       - matches("^articles/itr-dfp$")
       - matches("^articles/fre$")
       - matches("^articles/cache-and-mirror$")
-      - matches("^articles/cvm-defects$")
+      - matches("^articles/data-defects$")
 
 reference:
   - title: Fetchers
@@ -51,9 +52,15 @@ reference:
       - cvm_source_set
   - title: Discovery
     desc: >
-      Browse the datasets, tables, dictionaries and code lists carried
-      by the package.
+      Browse the CKAN groups, datasets, tables, dictionaries and
+      code lists carried by the package. `cvm_groups()` is the
+      entry point that lists every group covered by the project
+      roadmap (only `companhias` is functionally implemented in
+      v0.1.0.9000); the remaining functions accept an optional
+      `group` argument that disambiguates when a dataset slug occurs
+      in more than one group.
     contents:
+      - cvm_groups
       - cvm_datasets
       - cvm_tables
       - cvm_dictionary

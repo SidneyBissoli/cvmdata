@@ -118,6 +118,25 @@
   resolved group onto the schema list so downstream callers
   propagate it without re-running the schema-tree lookup.
 
+## Documentation
+
+* New article `vignettes/articles/groups-overview.Rmd` lists the 18
+  CKAN groups and maps each to one of the five fetcher contracts,
+  with a worked example per fetcher (only `issuer_fetch()` runs;
+  the four skeletons stay in `eval = FALSE` chunks until v0.4+).
+  Linked from the pkgdown Articles navbar.
+
+* Article `cvm-defects.Rmd` renamed to `data-defects.Rmd`. The
+  taxonomy of publication quirks covers any upstream source the
+  package will integrate (the universe widens beyond CVM proper
+  from v0.4+); the new name reflects that scope. URL on the pkgdown
+  site moves from `/articles/cvm-defects.html` to
+  `/articles/data-defects.html`. No content change.
+
+* `_pkgdown.yml`: `cvm_groups` listed first in the Discovery
+  reference; the section description now points users at it as the
+  entry to the group taxonomy.
+
 ## Internal
 
 * Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to

@@ -259,8 +259,14 @@ lint clean, cobertura ≥ 90%.
   rollback documentado em caso de falha parcial. Tarefa manual do
   mantenedor pós-Sessão 08 (não roda no CI).
 - [ ] `vignettes/articles/cache-and-mirror.Rmd` atualizado.
-- [ ] `vignettes/articles/groups-overview.Rmd` novo (lista 18
-  grupos, mapeia para 5 contratos, exemplos por fetcher).
+- [x] `vignettes/articles/groups-overview.Rmd` novo (lista 18
+  grupos, mapeia para 5 contratos, exemplos por fetcher;
+  `issuer_fetch()` real, 4 skeletons com `eval = FALSE`).
+- [x] `vignettes/articles/cvm-defects.Rmd` renomeado para
+  `data-defects.Rmd` (defeito não é só "do CVM"; cobre toda fonte
+  de dado a partir de v0.4+).
+- [x] `pkgdown/_pkgdown.yml` lista `cvm_groups` em Discovery e
+  inclui `groups-overview` + `data-defects` na navbar de articles.
 - [x] Atributo `group` adicionado em tibble retornado
   (6 atributos: `source`, `fetched_at`, `group`, `dataset`,
   `table`, `package_version`); `print.cvm_tbl()` exibe `group`.

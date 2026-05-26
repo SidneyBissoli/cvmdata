@@ -1,0 +1,154 @@
+---
+title: "Groups overview: the 18 CKAN groups and 5 fetcher contracts"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>"
+)
+```
+
+The CVM publishes its open data in **18 thematic groups** on the
+CKAN portal at `<https://dados.cvm.gov.br/group/>`. `cvmdata`
+collapses those 18 groups into **5 data-contract fetchers** based on
+the kind of identity key (issuer CNPJ, fund CNPJ, registered agent
+CPF/CNPJ, public-offering number, regulatory event ID), the
+temporal granularity (annual, quarterly, monthly, ad-hoc), and the
+typical use case. The full rationale is in
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`; this
+article is the navigation map.
+
+In v0.1.0.9000, only the `companhias` group is functionally
+implemented (via `issuer_fetch()`); the four remaining fetchers are
+exported as skeletons that abort with `cvmdata_error_input_group`
+when called, with a pointer back to the roadmap. They are documented
+now so the upcoming rOpenSci submission reviews the complete API
+surface ahead of incremental data implementation.
+
+```{r setup}
+library(cvmdata)
+```
+
+## The 18 groups
+
+```{r groups-table}
+cvm_groups()
+```
+
+The `n_datasets` column counts datasets published by CVM, not the
+count currently implemented in the package. The `contract` column
+names the fetcher that does (or will) cover the group.
+
+```{r groups-by-contract}
+g <- cvm_groups()
+split(g$group, g$contract)
+```
+
+## issuer_fetch() — fully implemented in v0.1
+
+Covers **issuers** of securities: companies (`companhias`),
+securitisation vehicles (`securitizadoras`), and CEPAC issuers
+(`emissores-de-cepac`). v0.1 ships the four `companhias` datasets:
+`cad`, `dfp`, `itr`, `fre`.
+
+The identity key is CNPJ + denomination (plus `CD_CVM` for
+companhias-style issuers). The temporal axis is annual (with
+quarterly via ITR) and the `report_type` argument selects
+individual/consolidated variants for accounting tables.
+
+```{r issuer-example, eval = FALSE}
+# Companies registry (no time partitioning, no report_type)
+issuers <- issuer_fetch("cad", "companhias")
+
+# DFP balance sheet, individual, latest year, one issuer
+bb <- issuer_fetch(
+  "dfp", "bpa",
+  issuer = "BCO BRASIL",
+  year = 2024,
+  report_type = "ind"
+)
+```
+
+`issuer_fetch()` is the only fetcher with a real implementation in
+v0.1.0.9000. The four below export the same shape as skeletons.
+
+## fund_fetch() — investment funds (v0.4–v0.6)
+
+Covers the three fund groups: `fundos-de-investimento` (ICVM 555,
+22 datasets), `fundos-de-investimento-imobiliarios` (FII, 4 datasets),
+and `fundos-estruturados` (FIP, FIDC, FAPI, 10 datasets). The
+identity key is the fund's CNPJ; the temporal axis is monthly or
+quarterly depending on the dataset. `date` is the singular for
+pointwise reference dates; `date_range` does not apply here.
+
+```{r fund-example, eval = FALSE}
+# Will abort in v0.1.0.9000 with cvmdata_error_input_group:
+# fund_fetch("fi-cad", "registro", fund = "00.000.000/0001-91")
+```
+
+## agent_fetch() — registered agents (v0.7)
+
+Covers the eight agent-registry groups: `administradores`,
+`agentes-autonomos`, `agentes-fiduciarios`, `auditores`,
+`consultores-de-valores-mobiliarios`, `coordenadores-de-ofertas`,
+`participantes-intermediarios`, and `investidores-nao-residentes`.
+Identity keys range from CPF (individual autonomous agents) through
+CNPJ (broker-dealers, audit firms) to dataset-specific registration
+numbers. `as_of` selects a snapshot date for cadastral views.
+
+```{r agent-example, eval = FALSE}
+# Will abort in v0.1.0.9000 with cvmdata_error_input_group:
+# agent_fetch("administradores", "registro", as_of = Sys.Date())
+```
+
+## offering_fetch() — public offerings (v0.7)
+
+Covers `ofertas-publicas` and `plataformas-de-crowdfunding` (Resolução
+CVM 88). The identity key is `numero_oferta`; `date_range` is the
+window operator (offerings cluster around events, ranges are the
+natural slice). Crowdfunding is treated as a public offering subtype
+because, under CVM 88, it is structurally an offering dispensed from
+registration and intermediated by a platform.
+
+```{r offering-example, eval = FALSE}
+# Will abort in v0.1.0.9000 with cvmdata_error_input_group:
+# offering_fetch(
+#   "ofertas-publicas", "ofertas",
+#   date_range = as.Date(c("2024-01-01", "2024-12-31"))
+# )
+```
+
+## event_fetch() — regulatory events (v0.8)
+
+Covers `atividade-sancionadora` (sanctioning proceedings) and
+`atos-declaratorios` (declaratory acts from the CVM directorate).
+Identity key is the process ID or act ID; `date_range` is the
+natural slice for audit / monitoring use cases.
+
+```{r event-example, eval = FALSE}
+# Will abort in v0.1.0.9000 with cvmdata_error_input_group:
+# event_fetch(
+#   "atividade-sancionadora", "processos",
+#   date_range = as.Date(c("2023-01-01", Sys.Date()))
+# )
+```
+
+## Discovery functions accept `group`
+
+When the same `(dataset, table)` pair lives in more than one group
+(a v0.4+ possibility once `fund` datasets enter), the discovery
+functions resolve by uniqueness when `group` is omitted, and abort
+with `cvmdata_error_input_ambiguous` when it cannot disambiguate.
+Pass `group` explicitly to skip the lookup:
+
+```{r discovery-with-group}
+cvm_datasets(group = "companhias")
+cvm_tables("dfp", group = "companhias")
+```
+
+The `group` argument is optional on `cvm_datasets()`, `cvm_tables()`,
+`cvm_dictionary()`, `cvm_codelist()`, and `cvm_dataset_years()`. The
+returned `cvm_tbl` from any fetcher also carries `group` as a
+provenance attribute (`attr(x, "group")`), and `print.cvm_tbl()`
+renders it in the header.
