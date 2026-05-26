@@ -20,10 +20,18 @@ articles:
 reference:
   - title: Fetchers
     desc: >
-      Functions to retrieve any CVM open-data table covered by the
-      package.
+      Five functions to retrieve any CVM open-data table covered by
+      the package. v0.1.0.9000 ships only `issuer_fetch()` as
+      functional; `fund_fetch()`, `agent_fetch()`,
+      `offering_fetch()` and `event_fetch()` are exported as
+      skeletons documenting the planned v0.4-v0.8 contracts
+      (calling them aborts with `cvmdata_error_input_group`).
     contents:
       - issuer_fetch
+      - fund_fetch
+      - agent_fetch
+      - offering_fetch
+      - event_fetch
   - title: Cache
     desc: >
       Inspect and manage the on-disk cache of downloaded artifacts.

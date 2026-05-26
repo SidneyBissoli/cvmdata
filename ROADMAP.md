@@ -226,17 +226,17 @@ lint clean, cobertura ≥ 90%.
 
 ### Sessão 07 — Esqueletos dos 4 fetchers restantes
 
-- [ ] `R/api-fund-fetch.R` com signature canônica + abort
+- [x] `R/api-fund-fetch.R` com signature canônica + abort
   `cvmdata_error_input_group`.
-- [ ] `R/api-agent-fetch.R` idem.
-- [ ] `R/api-offering-fetch.R` idem.
-- [ ] `R/api-event-fetch.R` idem.
-- [ ] Testes de signature + dispatch + abort previsto para cada.
-- [ ] Documentação roxygen completa, `@examples` marcados
+- [x] `R/api-agent-fetch.R` idem.
+- [x] `R/api-offering-fetch.R` idem.
+- [x] `R/api-event-fetch.R` idem.
+- [x] Testes de signature + dispatch + abort previsto para cada.
+- [x] Documentação roxygen completa, `@examples` marcados
   `@examplesIf FALSE`.
-- [ ] `_pkgdown.yml` lista as 5 funções em Reference com nota
+- [x] `_pkgdown.yml` lista as 5 funções em Reference com nota
   de estado.
-- [ ] Classe de condição nova `cvmdata_error_input_group`
+- [x] Classe de condição nova `cvmdata_error_input_group`
   (`cvmdata_error_input_ambiguous` já vem da Sessão 05).
 
 ### Sessão 08 — Discovery + cvm_groups() + ETL release rename

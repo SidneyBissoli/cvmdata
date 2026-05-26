@@ -39,6 +39,34 @@
   in the following development cycle. v0.1.0.9000 itself only ships
   `issuer_fetch()` as a functional fetcher.
 
+## New features
+
+* Four new fetchers exported with skeleton implementation:
+  `fund_fetch()` (fund datasets — `fundos-de-investimento`,
+  `fundos-de-investimento-imobiliarios`, `fundos-estruturados`,
+  full implementation arriving in v0.4-v0.6); `agent_fetch()`
+  (registered agents across the eight `administradores`,
+  `agentes-autonomos`, `agentes-fiduciarios`, `auditores`,
+  `consultores-de-valores-mobiliarios`,
+  `coordenadores-de-ofertas`, `participantes-intermediarios` and
+  `investidores-nao-residentes` groups, v0.7);
+  `offering_fetch()` (public offerings — `ofertas-publicas` and
+  `plataformas-de-crowdfunding`, v0.7); and `event_fetch()`
+  (sanctioning proceedings and declaratory acts —
+  `atividade-sancionadora` and `atos-declaratorios`, v0.8).
+  Calling any of these in v0.1.0.9000 aborts with the new
+  condition class `cvmdata_error_input_group` and a message
+  pointing to ROADMAP.md. Exporting skeletons now lets the
+  upcoming rOpenSci submission review the complete API surface
+  ahead of incremental data implementation.
+
+* New condition class `cvmdata_error_input_group` (inherits from
+  `cvmdata_error_input`, which in turn inherits from
+  `cvmdata_error`). Emitted by the four new skeleton fetchers
+  when called in v0.1.0.9000. Sibling of
+  `cvmdata_error_input_ambiguous` (introduced in the previous
+  development entry); neither subclass is a parent of the other.
+
 ## Internal
 
 * Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to
