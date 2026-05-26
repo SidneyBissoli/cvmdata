@@ -41,6 +41,16 @@
 
 ## New features
 
+* `cvm_groups()` lists the 18 CKAN groups published by the CVM Open
+  Data Portal, with the number of datasets each group carries and the
+  canonical `cvmdata` fetcher contract (`issuer`, `fund`, `agent`,
+  `offering` or `event`) that covers it. The table is static (verified
+  against `<https://dados.cvm.gov.br/group/>` on 2026-05-25) and serves
+  as the navigation entry point for the universe of CVM data; only the
+  `companhias` group is functionally implemented in v0.1.0.9000, but
+  the remaining 17 rows document the planned coverage exposed via the
+  four skeleton fetchers shipped in the previous development entry.
+
 * Four new fetchers exported with skeleton implementation:
   `fund_fetch()` (fund datasets — `fundos-de-investimento`,
   `fundos-de-investimento-imobiliarios`, `fundos-estruturados`,

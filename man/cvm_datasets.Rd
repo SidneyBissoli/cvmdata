@@ -22,6 +22,7 @@ Other discovery:
 \code{\link[=cvm_codelist]{cvm_codelist()}},
 \code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
 \code{\link[=cvm_dictionary]{cvm_dictionary()}},
+\code{\link[=cvm_groups]{cvm_groups()}},
 \code{\link[=cvm_tables]{cvm_tables()}}
 }
 \concept{discovery}
