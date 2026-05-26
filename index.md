@@ -130,8 +130,12 @@ The exported API is grouped into five families:
 - **Fetchers** —
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   (single entry point for every issuer-class dataset; four more
-  contract-specific fetchers (`fund_fetch()`, `agent_fetch()`,
-  `offering_fetch()`, `event_fetch()`) arrive in v0.2+).
+  contract-specific fetchers
+  ([`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
+  [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
+  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md),
+  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md))
+  arrive in v0.2+).
 - **Discovery** —
   [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
   [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md),

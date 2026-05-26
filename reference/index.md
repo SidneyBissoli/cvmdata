@@ -2,10 +2,28 @@
 
 ## Fetchers
 
-Functions to retrieve any CVM open-data table covered by the package.
+Five functions to retrieve any CVM open-data table covered by the
+package. v0.1.0.9000 ships only
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+as functional;
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
+[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
+[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+and
+[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
+are exported as skeletons documenting the planned v0.4-v0.8 contracts
+(calling them aborts with `cvmdata_error_input_group`).
 
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   : Fetch a CVM open-data table for an issuer dataset
+- [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
+  : Fetch a CVM open-data table for a fund dataset
+- [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md)
+  : Fetch a CVM open-data table for a registered-agent dataset
+- [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+  : Fetch a CVM open-data table for a public-offering dataset
+- [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
+  : Fetch a CVM open-data table for a regulatory-event dataset
 
 ## Cache
 

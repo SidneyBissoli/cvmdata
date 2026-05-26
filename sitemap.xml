@@ -17,6 +17,7 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/authors.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/news/index.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.html</loc></url>
@@ -31,7 +32,10 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvmdata-package.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/event_fetch.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.html</loc></url>
 </urlset>
 

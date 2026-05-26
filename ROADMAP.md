@@ -435,12 +435,14 @@ Eventos societários remanescentes do grupo `companhias`.
 
 ### v0.4 — `fundos-de-investimento` (22 datasets)
 
-Coberto por `fund_fetch()` (skeleton já exportado). Maior chunk de
-trabalho do projeto; provável quebra em v0.4.1 → v0.4.x conforme cada
-dataset entra.
+Coberto por
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
+(skeleton já exportado). Maior chunk de trabalho do projeto; provável
+quebra em v0.4.1 → v0.4.x conforme cada dataset entra.
 
-Implementação completa de `fund_fetch()` (substitui o abort do
-skeleton).
+Implementação completa de
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
+(substitui o abort do skeleton).
 
 Argumento `fund` com detecção automática (CNPJ; texto livre fica para
 v0.5+ se útil).
@@ -470,7 +472,8 @@ Identificadores novos no reader: `cnpj_fundo`, `cnpj_administrador`.
 
 ### v0.5 — `fundos-de-investimento-imobiliarios` (4 datasets)
 
-Coberto por `fund_fetch()`.
+Coberto por
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md).
 
 Informe mensal FII.
 
@@ -480,8 +483,10 @@ Demais 2 datasets do grupo.
 
 ### v0.6 — `fundos-estruturados` (10 datasets)
 
-Coberto por `fund_fetch()`. Inclui FAPI, FIIM, FIP, etc. FIDC aparece
-aqui também em alguns datasets — coordenar com v0.4 para não duplicar.
+Coberto por
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md).
+Inclui FAPI, FIIM, FIP, etc. FIDC aparece aqui também em alguns datasets
+— coordenar com v0.4 para não duplicar.
 
 Balancetes de fundos estruturados.
 
@@ -495,7 +500,8 @@ Demais datasets do grupo.
 
 Implementação completa dos skeletons exportados em v0.1.0.9000.
 
-Grupos cobertos por `agent_fetch()`:
+Grupos cobertos por
+[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md):
 
 `administradores` (Administradores de Carteira + FII).
 
@@ -519,7 +525,8 @@ Argumento `as_of` (snapshot temporal).
 
 `cpf_clean()` e `cpf_format()` exportadas como utilitários.
 
-Grupos cobertos por `offering_fetch()`:
+Grupos cobertos por
+[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md):
 
 `ofertas-publicas`.
 

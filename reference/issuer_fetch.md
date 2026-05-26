@@ -103,6 +103,14 @@ A tibble of class `cvm_tbl` carrying the five provenance attributes
 Column names, categorical values and free-text fields are preserved in
 Portuguese exactly as published by CVM (snake_case minúsculo).
 
+## See also
+
+Other fetchers:
+[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
+[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md),
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
+[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+
 ## Examples
 
 ``` r

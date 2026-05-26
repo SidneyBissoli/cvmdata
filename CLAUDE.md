@@ -75,8 +75,9 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 > (provavelmente em plan mode no Claude Desktop):
 >
 > - **A** Argumento `group=` em `cvm_fetch()` (unificação total).
-> - **B** Funções por grupo: `cia_fetch()`, `fund_fetch()` etc.
->   (proposta inicial — contratos de dado divergem demais).
+> - **B** Funções por grupo: `cia_fetch()`,
+>   [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
+>   etc. (proposta inicial — contratos de dado divergem demais).
 > - **C** Híbrida: `cvm_fetch()` com dispatch interno por grupo inferido
 >   do dataset, `...` permissivo.
 >

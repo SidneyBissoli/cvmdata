@@ -205,14 +205,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-07--esqueletos-dos-4-fetchers-restantes">Sessão 07 — Esqueletos dos 4 fetchers restantes<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-07--esqueletos-dos-4-fetchers-restantes"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox"><code>R/api-fund-fetch.R</code> com signature canônica + abort <code>cvmdata_error_input_group</code>.</label></li>
-<li><label><input type="checkbox"><code>R/api-agent-fetch.R</code> idem.</label></li>
-<li><label><input type="checkbox"><code>R/api-offering-fetch.R</code> idem.</label></li>
-<li><label><input type="checkbox"><code>R/api-event-fetch.R</code> idem.</label></li>
-<li><label><input type="checkbox">Testes de signature + dispatch + abort previsto para cada.</label></li>
-<li><label><input type="checkbox">Documentação roxygen completa, <code>@examples</code> marcados <code>@examplesIf FALSE</code>.</label></li>
-<li><label><input type="checkbox"><code>_pkgdown.yml</code> lista as 5 funções em Reference com nota de estado.</label></li>
-<li><label><input type="checkbox">Classe de condição nova <code>cvmdata_error_input_group</code> (<code>cvmdata_error_input_ambiguous</code> já vem da Sessão 05).</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked><code>R/api-fund-fetch.R</code> com signature canônica + abort <code>cvmdata_error_input_group</code>.</label></li>
+<li><label><input type="checkbox" checked><code>R/api-agent-fetch.R</code> idem.</label></li>
+<li><label><input type="checkbox" checked><code>R/api-offering-fetch.R</code> idem.</label></li>
+<li><label><input type="checkbox" checked><code>R/api-event-fetch.R</code> idem.</label></li>
+<li><label><input type="checkbox" checked>Testes de signature + dispatch + abort previsto para cada.</label></li>
+<li><label><input type="checkbox" checked>Documentação roxygen completa, <code>@examples</code> marcados <code>@examplesIf FALSE</code>.</label></li>
+<li><label><input type="checkbox" checked><code>_pkgdown.yml</code> lista as 5 funções em Reference com nota de estado.</label></li>
+<li><label><input type="checkbox" checked>Classe de condição nova <code>cvmdata_error_input_group</code> (<code>cvmdata_error_input_ambiguous</code> já vem da Sessão 05).</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-08--discovery--cvm_groups--etl-release-rename">Sessão 08 — Discovery + cvm_groups() + ETL release rename<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-08--discovery--cvm_groups--etl-release-rename"></a></h3>
@@ -255,8 +255,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="v04--fundos-de-investimento-22-datasets">v0.4 — <code>fundos-de-investimento</code> (22 datasets)<a class="anchor" aria-label="anchor" href="#v04--fundos-de-investimento-22-datasets"></a></h3>
-<p>Coberto por <code>fund_fetch()</code> (skeleton já exportado). Maior chunk de trabalho do projeto; provável quebra em v0.4.1 → v0.4.x conforme cada dataset entra.</p>
-<ul class="task-list"><li><label><input type="checkbox">Implementação completa de <code>fund_fetch()</code> (substitui o abort do skeleton).</label></li>
+<p>Coberto por <code><a href="reference/fund_fetch.html">fund_fetch()</a></code> (skeleton já exportado). Maior chunk de trabalho do projeto; provável quebra em v0.4.1 → v0.4.x conforme cada dataset entra.</p>
+<ul class="task-list"><li><label><input type="checkbox">Implementação completa de <code><a href="reference/fund_fetch.html">fund_fetch()</a></code> (substitui o abort do skeleton).</label></li>
 <li><label><input type="checkbox">Argumento <code>fund</code> com detecção automática (CNPJ; texto livre fica para v0.5+ se útil).</label></li>
 <li><label><input type="checkbox">Argumento <code>date</code> (datas pontuais, default <code>NULL</code> → último mês disponível).</label></li>
 <li><label><input type="checkbox">Cadastro de fundos (<code>fi-cad</code> e variantes).</label></li>
@@ -272,14 +272,14 @@
 </ul></div>
 <div class="section level3">
 <h3 id="v05--fundos-de-investimento-imobiliarios-4-datasets">v0.5 — <code>fundos-de-investimento-imobiliarios</code> (4 datasets)<a class="anchor" aria-label="anchor" href="#v05--fundos-de-investimento-imobiliarios-4-datasets"></a></h3>
-<p>Coberto por <code>fund_fetch()</code>.</p>
+<p>Coberto por <code><a href="reference/fund_fetch.html">fund_fetch()</a></code>.</p>
 <ul class="task-list"><li><label><input type="checkbox">Informe mensal FII.</label></li>
 <li><label><input type="checkbox">Informe trimestral FII.</label></li>
 <li><label><input type="checkbox">Demais 2 datasets do grupo.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="v06--fundos-estruturados-10-datasets">v0.6 — <code>fundos-estruturados</code> (10 datasets)<a class="anchor" aria-label="anchor" href="#v06--fundos-estruturados-10-datasets"></a></h3>
-<p>Coberto por <code>fund_fetch()</code>. Inclui FAPI, FIIM, FIP, etc. FIDC aparece aqui também em alguns datasets — coordenar com v0.4 para não duplicar.</p>
+<p>Coberto por <code><a href="reference/fund_fetch.html">fund_fetch()</a></code>. Inclui FAPI, FIIM, FIP, etc. FIDC aparece aqui também em alguns datasets — coordenar com v0.4 para não duplicar.</p>
 <ul class="task-list"><li><label><input type="checkbox">Balancetes de fundos estruturados.</label></li>
 <li><label><input type="checkbox">Informes trimestrais e quadrimestrais FIP.</label></li>
 <li><label><input type="checkbox">Medidas de fundos estruturados (PL + nº cotistas).</label></li>
@@ -288,7 +288,7 @@
 <div class="section level3">
 <h3 id="v07--agent_fetch-full--offering_fetch-full">v0.7 — <code>agent_fetch()</code> full + <code>offering_fetch()</code> full<a class="anchor" aria-label="anchor" href="#v07--agent_fetch-full--offering_fetch-full"></a></h3>
 <p>Implementação completa dos skeletons exportados em v0.1.0.9000.</p>
-<p>Grupos cobertos por <code>agent_fetch()</code>:</p>
+<p>Grupos cobertos por <code><a href="reference/agent_fetch.html">agent_fetch()</a></code>:</p>
 <ul class="task-list"><li><label><input type="checkbox"><code>administradores</code> (Administradores de Carteira + FII).</label></li>
 <li><label><input type="checkbox"><code>agentes-autonomos</code>.</label></li>
 <li><label><input type="checkbox"><code>agentes-fiduciarios</code>.</label></li>
@@ -300,7 +300,7 @@
 <li><label><input type="checkbox">Argumento <code>agent</code> com detecção CPF/CNPJ/texto por dataset.</label></li>
 <li><label><input type="checkbox">Argumento <code>as_of</code> (snapshot temporal).</label></li>
 <li><label><input type="checkbox"><code>cpf_clean()</code> e <code>cpf_format()</code> exportadas como utilitários.</label></li>
-</ul><p>Grupos cobertos por <code>offering_fetch()</code>:</p>
+</ul><p>Grupos cobertos por <code><a href="reference/offering_fetch.html">offering_fetch()</a></code>:</p>
 <ul class="task-list"><li><label><input type="checkbox"><code>ofertas-publicas</code>.</label></li>
 <li><label><input type="checkbox"><code>plataformas-de-crowdfunding</code> (Resolução CVM 88).</label></li>
 <li><label><input type="checkbox">Argumento <code>offering</code> (<code>numero_oferta</code> string).</label></li>

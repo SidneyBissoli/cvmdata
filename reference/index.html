@@ -45,7 +45,7 @@
     <div class="section level2">
       <h2 id="fetchers">Fetchers<a class="anchor" aria-label="anchor" href="#fetchers"></a></h2>
 
-      <div class="section-desc"><p>Functions to retrieve any CVM open-data table covered by the package.</p></div>
+      <div class="section-desc"><p>Five functions to retrieve any CVM open-data table covered by the package. v0.1.0.9000 ships only <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> as functional; <code><a href="../reference/fund_fetch.html">fund_fetch()</a></code>, <code><a href="../reference/agent_fetch.html">agent_fetch()</a></code>, <code><a href="../reference/offering_fetch.html">offering_fetch()</a></code> and <code><a href="../reference/event_fetch.html">event_fetch()</a></code> are exported as skeletons documenting the planned v0.4-v0.8 contracts (calling them aborts with <code>cvmdata_error_input_group</code>).</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -58,6 +58,34 @@
 
         </dt>
         <dd>Fetch a CVM open-data table for an issuer dataset</dd>
+
+        <dt>
+
+          <code><a href="fund_fetch.html">fund_fetch()</a></code>
+
+        </dt>
+        <dd>Fetch a CVM open-data table for a fund dataset</dd>
+
+        <dt>
+
+          <code><a href="agent_fetch.html">agent_fetch()</a></code>
+
+        </dt>
+        <dd>Fetch a CVM open-data table for a registered-agent dataset</dd>
+
+        <dt>
+
+          <code><a href="offering_fetch.html">offering_fetch()</a></code>
+
+        </dt>
+        <dd>Fetch a CVM open-data table for a public-offering dataset</dd>
+
+        <dt>
+
+          <code><a href="event_fetch.html">event_fetch()</a></code>
+
+        </dt>
+        <dd>Fetch a CVM open-data table for a regulatory-event dataset</dd>
       </dl></div><div class="section level2">
       <h2 id="cache">Cache<a class="anchor" aria-label="anchor" href="#cache"></a></h2>
 
