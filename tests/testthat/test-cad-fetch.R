@@ -56,6 +56,7 @@ test_that("issuer_fetch returns a cvm_tbl with provenance attributes", {
   expect_s3_class(result, "cvm_tbl")
   expect_s3_class(result, "tbl_df")
   expect_identical(attr(result, "source"), "cvm")
+  expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "cad")
   expect_identical(attr(result, "table"), "companhias")
   expect_s3_class(attr(result, "fetched_at"), "POSIXct")
@@ -306,6 +307,7 @@ test_that("print.cvm_tbl emits provenance lines", {
   )
   result <- cvm_attach_metadata(
     df, source = "portal",
+    group = "companhias",
     dataset = "cad", table = "companhias"
   )
   msg <- capture.output(
@@ -315,6 +317,7 @@ test_that("print.cvm_tbl emits provenance lines", {
   msg_text <- paste(msg, collapse = "\n")
   expect_match(msg_text, "source")
   expect_match(msg_text, "fetched_at")
+  expect_match(msg_text, "group")
   expect_match(msg_text, "dataset")
   expect_match(msg_text, "table")
 })

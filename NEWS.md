@@ -90,6 +90,16 @@
   `cvmdata_error_input_ambiguous` (introduced in the previous
   development entry); neither subclass is a parent of the other.
 
+* Returned tibbles (`cvm_tbl` class) now carry a `group` provenance
+  attribute, slotted between `fetched_at` and `dataset`. The total
+  number of attached attributes goes from five to six (`source`,
+  `fetched_at`, `group`, `dataset`, `table`, `package_version`).
+  `print.cvm_tbl()` renders `group` in the header alongside the
+  existing fields, so a snapshot taken at the REPL self-documents
+  which CKAN group the data came from. `load_schema()` stamps the
+  resolved group onto the schema list so downstream callers
+  propagate it without re-running the schema-tree lookup.
+
 ## Internal
 
 * Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to

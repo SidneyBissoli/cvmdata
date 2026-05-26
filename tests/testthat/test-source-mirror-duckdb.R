@@ -91,6 +91,7 @@ test_that("issuer_fetch CAD returns a cvm_tbl via mirror", {
   expect_s3_class(result, "cvm_tbl")
   expect_true(nrow(result) > 0L)
   expect_identical(attr(result, "source"), "mirror")
+  expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "cad")
   expect_identical(attr(result, "table"), "companhias")
 })

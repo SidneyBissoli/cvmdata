@@ -53,6 +53,7 @@ test_that("issuer_fetch DFP BPA ind tracer returns cvm_tbl", {
   expect_s3_class(result, "cvm_tbl")
   expect_s3_class(result, "tbl_df")
   expect_identical(attr(result, "source"), "cvm")
+  expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "dfp")
   expect_identical(attr(result, "table"), "bpa")
   expect_true(nrow(result) > 0L)

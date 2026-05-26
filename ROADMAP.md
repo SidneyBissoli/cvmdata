@@ -257,7 +257,7 @@ lint clean, cobertura ≥ 90%.
 - [ ] `vignettes/articles/cache-and-mirror.Rmd` atualizado.
 - [ ] `vignettes/articles/groups-overview.Rmd` novo (lista 18
   grupos, mapeia para 5 contratos, exemplos por fetcher).
-- [ ] Atributo `group` adicionado em tibble retornado
+- [x] Atributo `group` adicionado em tibble retornado
   (6 atributos: `source`, `fetched_at`, `group`, `dataset`,
   `table`, `package_version`); `print.cvm_tbl()` exibe `group`.
 
