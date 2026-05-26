@@ -2,48 +2,97 @@
 #'
 #' Returns the dataset identifiers (e.g. `"cad"`, `"dfp"`) currently
 #' covered. Discovered from the schemas installed under
-#' `inst/extdata/schemas/<group>/<dataset>/`.
+#' `inst/extdata/schemas/<group>/<dataset>/`. When `group` is supplied,
+#' restricts the result to datasets that live under that CKAN group;
+#' otherwise returns every installed dataset across every group.
+#'
+#' @param group Optional CKAN group slug (e.g. `"companhias"`). When
+#'   `NULL` (default) returns datasets from every group. Unknown values
+#'   abort with `cvmdata_error_input`.
 #'
 #' @return A character vector of dataset ids, sorted alphabetically.
 #'
 #' @examples
 #' cvm_datasets()
+#' cvm_datasets(group = "companhias")
 #' @family discovery
 #' @export
-cvm_datasets <- function() {
-  sort(unique(schema_tree()$dataset))
+cvm_datasets <- function(group = NULL) {
+  validate_optional_group_arg(group)
+  tree <- schema_tree()
+  if (!is.null(group)) {
+    if (!group %in% known_groups()) {
+      cvmdata_abort(
+        c(
+          "Unknown group {.val {group}}.",
+          "i" = "Available: {.val {known_groups()}}."
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    tree <- tree[tree$group == group, , drop = FALSE]
+  }
+  sort(unique(tree$dataset))
 }
 
 #' List the tables published in a dataset
 #'
 #' @param dataset Short dataset id (e.g. `"dfp"`).
+#' @param group Optional CKAN group slug (e.g. `"companhias"`). When
+#'   `NULL` (default), the function resolves the group by uniqueness
+#'   across the installed schema tree; when a dataset slug occurs in
+#'   more than one group (a v0.4+ possibility), omitting `group`
+#'   aborts with `cvmdata_error_input_ambiguous`.
 #'
 #' @return A character vector of table names, sorted alphabetically.
 #'
 #' @examples
 #' cvm_tables("dfp")
+#' cvm_tables("dfp", group = "companhias")
 #' @family discovery
 #' @export
-cvm_tables <- function(dataset) {
-  if (!is.character(dataset) || length(dataset) != 1L ||
-        !nzchar(dataset)) {
-    cvmdata_abort(
-      c("{.arg dataset} must be a single non-empty string."),
-      class = "cvmdata_error_input"
-    )
-  }
+cvm_tables <- function(dataset, group = NULL) {
+  validate_string_arg(dataset, "dataset")
+  validate_optional_group_arg(group)
   tree <- schema_tree()
   hit <- tree[tree$dataset == dataset, , drop = FALSE]
+  if (!is.null(group)) {
+    if (!group %in% known_groups()) {
+      cvmdata_abort(
+        c(
+          "Unknown group {.val {group}}.",
+          "i" = "Available: {.val {known_groups()}}."
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    hit <- hit[hit$group == group, , drop = FALSE]
+  }
   if (!nrow(hit)) {
     cvmdata_abort(
       c(
         "Unknown dataset {.val {dataset}}.",
-        "i" = "Available: {.val {cvm_datasets()}}."
+        "i" = "Available: {.val {cvm_datasets(group = group)}}."
       ),
       class = "cvmdata_error_input"
     )
   }
-  sort(hit$table)
+  if (is.null(group)) {
+    hit_groups <- unique(hit$group)
+    if (length(hit_groups) > 1L) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Dataset {.val {dataset}} exists in",
+            "{length(hit_groups)} groups: {.val {hit_groups}}."
+          ),
+          "i" = "Pass {.arg group} explicitly to disambiguate."
+        ),
+        class = c("cvmdata_error_input_ambiguous", "cvmdata_error_input")
+      )
+    }
+  }
+  sort(unique(hit$table))
 }
 
 #' Look up the CVM-published dictionary for a table
@@ -409,6 +458,10 @@ abort_known_or_unknown_column <- function(column, dataset, table, dict,
 #' yearly-partitioned (e.g. `cad`).
 #'
 #' @param dataset Short dataset id.
+#' @param group Optional CKAN group slug (e.g. `"companhias"`). When
+#'   `NULL` (default) resolved by uniqueness across the installed
+#'   schema tree; when a dataset slug occurs in more than one group,
+#'   omitting `group` aborts with `cvmdata_error_input_ambiguous`.
 #' @param schema Optional already-loaded schema (used internally by
 #'   [issuer_fetch()] to avoid double-load). Users typically omit.
 #'
@@ -416,18 +469,20 @@ abort_known_or_unknown_column <- function(column, dataset, table, dict,
 #'
 #' @examplesIf interactive()
 #' cvm_dataset_years("dfp")
+#' cvm_dataset_years("dfp", group = "companhias")
 #' @family discovery
 #' @export
-cvm_dataset_years <- function(dataset, schema = NULL) {
+cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
   if (is.null(schema)) {
-    tables <- cvm_tables(dataset)
+    validate_optional_group_arg(group)
+    tables <- cvm_tables(dataset, group = group)
     if (!length(tables)) {
       cvmdata_abort(
         c("No tables for dataset {.val {dataset}}."),
         class = "cvmdata_error_input"
       )
     }
-    schema <- load_schema(dataset, tables[1L])
+    schema <- load_schema(dataset, tables[1L], group = group)
   }
   partitioning <- schema$temporal_partitioning %||% "none"
   if (!identical(partitioning, "yearly")) {

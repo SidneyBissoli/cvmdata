@@ -51,6 +51,19 @@
   the remaining 17 rows document the planned coverage exposed via the
   four skeleton fetchers shipped in the previous development entry.
 
+* `cvm_datasets()`, `cvm_tables()` and `cvm_dataset_years()` gained an
+  optional `group` argument, completing the discovery surface started
+  in the previous entry (`cvm_dictionary()` and `cvm_codelist()`
+  already accepted it). When `group` is `NULL` (default) the functions
+  preserve their v0.1 behaviour: `cvm_datasets()` returns every
+  installed dataset across every group, `cvm_tables()` and
+  `cvm_dataset_years()` resolve the group by uniqueness across the
+  schema tree. When set, the functions restrict the result to that
+  group; unknown groups abort with `cvmdata_error_input`. From v0.4
+  onward, when datasets may collide between groups, calling
+  `cvm_tables("foo")` without `group` aborts with
+  `cvmdata_error_input_ambiguous`.
+
 * Four new fetchers exported with skeleton implementation:
   `fund_fetch()` (fund datasets — `fundos-de-investimento`,
   `fundos-de-investimento-imobiliarios`, `fundos-estruturados`,

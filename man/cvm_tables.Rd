@@ -4,10 +4,16 @@
 \alias{cvm_tables}
 \title{List the tables published in a dataset}
 \usage{
-cvm_tables(dataset)
+cvm_tables(dataset, group = NULL)
 }
 \arguments{
 \item{dataset}{Short dataset id (e.g. \code{"dfp"}).}
+
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}). When
+\code{NULL} (default), the function resolves the group by uniqueness
+across the installed schema tree; when a dataset slug occurs in
+more than one group (a v0.4+ possibility), omitting \code{group}
+aborts with \code{cvmdata_error_input_ambiguous}.}
 }
 \value{
 A character vector of table names, sorted alphabetically.
@@ -17,6 +23,7 @@ List the tables published in a dataset
 }
 \examples{
 cvm_tables("dfp")
+cvm_tables("dfp", group = "companhias")
 }
 \seealso{
 Other discovery:

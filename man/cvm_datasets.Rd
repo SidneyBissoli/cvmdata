@@ -4,7 +4,12 @@
 \alias{cvm_datasets}
 \title{List datasets covered by the package}
 \usage{
-cvm_datasets()
+cvm_datasets(group = NULL)
+}
+\arguments{
+\item{group}{Optional CKAN group slug (e.g. \code{"companhias"}). When
+\code{NULL} (default) returns datasets from every group. Unknown values
+abort with \code{cvmdata_error_input}.}
 }
 \value{
 A character vector of dataset ids, sorted alphabetically.
@@ -12,10 +17,13 @@ A character vector of dataset ids, sorted alphabetically.
 \description{
 Returns the dataset identifiers (e.g. \code{"cad"}, \code{"dfp"}) currently
 covered. Discovered from the schemas installed under
-\verb{inst/extdata/schemas/<group>/<dataset>/}.
+\verb{inst/extdata/schemas/<group>/<dataset>/}. When \code{group} is supplied,
+restricts the result to datasets that live under that CKAN group;
+otherwise returns every installed dataset across every group.
 }
 \examples{
 cvm_datasets()
+cvm_datasets(group = "companhias")
 }
 \seealso{
 Other discovery:
