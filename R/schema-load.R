@@ -38,6 +38,11 @@ load_schema <- function(dataset, table, group = NULL) {
   }
   raw <- read_schema_yaml(path)
   validate_schema(raw, dataset, table)
+  # Stamp the resolved group onto the schema so downstream callers
+  # (`issuer_fetch_internal()`, `cvm_attach_metadata()`) can propagate
+  # it without re-running the schema-tree lookup. Source YAMLs do not
+  # declare `group`; that segment lives in the directory layout.
+  raw$group <- resolved_group
   structure(raw, class = c("cvm_table_schema", "list"))
 }
 

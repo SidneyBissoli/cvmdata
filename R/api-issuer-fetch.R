@@ -142,6 +142,7 @@ issuer_fetch_internal <- function(dataset,
     return(cvm_attach_metadata(
       transformed,
       source  = source,
+      group   = schema$group,
       dataset = dataset,
       table   = table
     ))
@@ -174,6 +175,7 @@ issuer_fetch_internal <- function(dataset,
   cvm_attach_metadata(
     transformed,
     source  = source,
+    group   = schema$group,
     dataset = dataset,
     table   = table
   )
