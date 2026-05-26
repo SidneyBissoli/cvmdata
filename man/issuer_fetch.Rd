@@ -101,4 +101,11 @@ bb <- issuer_fetch("dfp", "bpa",
                    year = 2024)
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other fetchers:
+\code{\link[=agent_fetch]{agent_fetch()}},
+\code{\link[=event_fetch]{event_fetch()}},
+\code{\link[=fund_fetch]{fund_fetch()}},
+\code{\link[=offering_fetch]{offering_fetch()}}
+}
 \concept{fetchers}
