@@ -1,10 +1,11 @@
 # Stage 2b — Validate parquets pre-publish.
 #
 # Runs between 02-csv-to-parquet.R and 03-publish.R. For each parquet
-# the previous stage wrote under <workspace>/out/parquet/<dataset>/...,
-# applies a hybrid set of checks. Hard (structural) failures abort the
-# publish (exit 1); soft (content) failures emit a warning log and let
-# the publish proceed.
+# the previous stage wrote under
+# <workspace>/out/parquet/<group>/<dataset>/... (Sessao 08 of
+# v0.1.0.9000 added the `<group>` segment), applies a hybrid set of
+# checks. Hard (structural) failures abort the publish (exit 1); soft
+# (content) failures emit a warning log and let the publish proceed.
 #
 # Hard checks (abort on failure):
 #   * Parquet file exists where the schema implies it should
@@ -29,7 +30,8 @@
 #     exit 2 (no parquets found — usually means stage 02 did not run)
 #
 # Usage:
-#   Rscript inst/etl/02b-validate.R --dataset cad [--year 2024]
+#   Rscript inst/etl/02b-validate.R \
+#     --group companhias --dataset cad [--year 2024]
 
 # Locate 00-config.R across the three call modes this script supports:
 #   * `Rscript inst/etl/02b-validate.R` from the package root — cwd has
@@ -76,9 +78,12 @@ stopifnot(requireNamespace("yaml", quietly = TRUE))
 # --- workspace helpers -------------------------------------------------
 
 # Build the local parquet path mirroring 02-csv-to-parquet.R's layout.
-validate_parquet_path <- function(root, dataset, table, year,
+# `group` was added in Sessao 08 of v0.1.0.9000 so the validator looks
+# under the same `<group>/<dataset>/<table>/...` tree that stage 02
+# now writes.
+validate_parquet_path <- function(root, group, dataset, table, year,
                                   report_type) {
-  parts <- c(root, "out", "parquet", dataset, table)
+  parts <- c(root, "out", "parquet", group, dataset, table)
   if (!is.null(report_type)) {
     parts <- c(parts, sprintf("report_type=%s", report_type))
   }
@@ -268,7 +273,8 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints) {
 
 # Returns a tibble with one row per (table, year, report_type) tuple,
 # carrying the aggregated status and the full per-check detail.
-validate_dataset <- function(dataset, workspace, years_arg = NULL) {
+validate_dataset <- function(group, dataset, workspace,
+                             years_arg = NULL) {
   expected <- validate_expected_tuples(dataset, years_arg)
   if (!length(expected)) {
     return(tibble::tibble(
@@ -285,7 +291,7 @@ validate_dataset <- function(dataset, workspace, years_arg = NULL) {
   for (i in seq_along(expected)) {
     e <- expected[[i]]
     path <- validate_parquet_path(
-      workspace, dataset, e$table, e$year, e$report_type
+      workspace, group, dataset, e$table, e$year, e$report_type
     )
     label <- sprintf(
       "%s/%s%s%s", dataset, e$table,
@@ -377,10 +383,16 @@ validate_write_report <- function(results, dataset, out_dir) {
 if (!isTRUE(getOption("cvmdata.etl_testing")) &&
       length(commandArgs(trailingOnly = TRUE)) > 0L) {
   args <- commandArgs(trailingOnly = TRUE)
+  group <- NULL
   dataset <- NULL
   year <- NULL
   i <- 1L
   while (i <= length(args)) {
+    if (args[i] == "--group") {
+      group <- args[i + 1L]
+      i <- i + 2L
+      next
+    }
     if (args[i] == "--dataset") {
       dataset <- args[i + 1L]
       i <- i + 2L
@@ -393,13 +405,16 @@ if (!isTRUE(getOption("cvmdata.etl_testing")) &&
     }
     i <- i + 1L
   }
+  if (is.null(group)) {
+    stop("--group is required", call. = FALSE)
+  }
   if (is.null(dataset)) {
     stop("--dataset is required", call. = FALSE)
   }
-  if (!dataset %in% mirror_datasets_v0_1) {
+  if (!mirror_pair_valid(group, dataset)) {
     stop(sprintf(
-      "dataset '%s' not in mirror_datasets_v0_1 (%s)",
-      dataset, paste(mirror_datasets_v0_1, collapse = ", ")
+      "(%s, %s) not in mirror_datasets_v0_1",
+      group, dataset
     ), call. = FALSE)
   }
   workspace <- mirror_workspace()
@@ -408,10 +423,10 @@ if (!isTRUE(getOption("cvmdata.etl_testing")) &&
     cvmdata.source = "cvm"
   )
 
-  message(sprintf("[02b-validate] dataset=%s workspace=%s",
-                  dataset, workspace))
+  message(sprintf("[02b-validate] group=%s dataset=%s workspace=%s",
+                  group, dataset, workspace))
   results <- validate_dataset(
-    dataset, workspace,
+    group, dataset, workspace,
     years_arg = if (is.null(year)) NULL else year
   )
   if (!nrow(results)) {

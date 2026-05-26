@@ -30,32 +30,49 @@ mirror_assets_cache_clear <- function() {
   invisible()
 }
 
-# Tag of the moving "latest" release for a dataset (mirrors
-# `mirror_tag_latest()` from inst/etl/00-config.R).
-mirror_release_tag <- function(dataset) {
-  sprintf("mirror-%s-latest", dataset)
+# Tag of the moving "latest" release for a (group, dataset) pair
+# (mirrors `mirror_tag_latest()` from inst/etl/00-config.R). The
+# `<group>` segment was introduced in Sessao 08 of v0.1.0.9000; pre-
+# Sessao 08 releases (named `mirror-<dataset>-latest` without a group)
+# are not addressable by this consumer -- they must be renamed in
+# place on the producer side (see
+# `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` §4.3).
+mirror_release_tag <- function(group, dataset) {
+  sprintf("mirror-%s-%s-latest", group, dataset)
 }
 
-# List the parquet assets of the release `mirror-<dataset>-latest` via
-# the GitHub REST API. Returns a tibble with one row per asset:
+# Composite cache key for the `.mirror_assets_cache` env. We encode
+# `(group, dataset)` as a single string so the env stays usable as a
+# bare hash without switching to a 2-D structure. The `::` separator
+# is not a valid character in CKAN slugs (and dataset ids), so the
+# round-trip is unambiguous.
+.mirror_cache_key <- function(group, dataset) {
+  sprintf("%s::%s", group, dataset)
+}
+
+# List the parquet assets of the release `mirror-<group>-<dataset>-latest`
+# via the GitHub REST API. Returns a tibble with one row per asset:
 #   name        : asset filename (post-sanitisation; `=` -> `.`)
 #   url         : browser_download_url (resolves without auth)
 #   size_bytes  : asset size in bytes (integer)
 # plus an attribute `source_hash` carrying the value of the
 # `__source_hash.json` asset of the same release (or `NA_character_`
 # when the release has none). The result is cached per session so a
-# single `issuer_fetch()` call list-assets at most once per dataset.
+# single `issuer_fetch()` call list-assets at most once per
+# (group, dataset).
 #
 # Anonymous API access is enough for public repos (rate limit
-# 60 req/h, and the per-dataset call hits it once per session). When
-# `GITHUB_TOKEN` or `GITHUB_PAT` is set, the call attaches a Bearer
-# header to bump the limit to 5000 req/h — useful for CI runners.
-mirror_list_assets <- function(dataset, repo = .mirror_repo,
+# 60 req/h, and the per-(group, dataset) call hits it once per
+# session). When `GITHUB_TOKEN` or `GITHUB_PAT` is set, the call
+# attaches a Bearer header to bump the limit to 5000 req/h -- useful
+# for CI runners.
+mirror_list_assets <- function(group, dataset, repo = .mirror_repo,
                                refresh = FALSE) {
-  if (!isTRUE(refresh) && !is.null(.mirror_assets_cache[[dataset]])) {
-    return(.mirror_assets_cache[[dataset]])
+  key <- .mirror_cache_key(group, dataset)
+  if (!isTRUE(refresh) && !is.null(.mirror_assets_cache[[key]])) {
+    return(.mirror_assets_cache[[key]])
   }
-  tag <- mirror_release_tag(dataset)
+  tag <- mirror_release_tag(group, dataset)
   url <- sprintf("https://api.github.com/repos/%s/releases/tags/%s",
                  repo, tag)
   req <- httr2::request(url) |>
@@ -110,7 +127,7 @@ mirror_list_assets <- function(dataset, repo = .mirror_repo,
   parsed <- mirror_assets_to_tibble(assets)
   attr(parsed, "source_hash") <- mirror_extract_source_hash(assets)
   attr(parsed, "release_tag") <- tag
-  .mirror_assets_cache[[dataset]] <- parsed
+  .mirror_assets_cache[[key]] <- parsed
   parsed
 }
 

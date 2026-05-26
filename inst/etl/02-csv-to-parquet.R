@@ -4,24 +4,31 @@
 # tibble via cvmdata::issuer_fetch() (warm cache from stage 01) and writes
 # parquet snappy to the ETL workspace, partitioned Hive-style.
 #
-# Output layout:
-#   <workspace>/out/parquet/<dataset>/<table>/year=<YYYY>/part-0.parquet
+# Output layout (Sessao 08 of v0.1.0.9000 added `<group>`):
+#   <workspace>/out/parquet/<group>/<dataset>/<table>/year=<YYYY>/part-0.parquet
 #
 # Tables with individual/consolidated variants (DFP/ITR balance sheets,
 # income statements, etc.) get a second partition level:
 #   .../report_type=<ind|con>/year=<YYYY>/part-0.parquet
 #
 # Usage:
-#   Rscript inst/etl/02-csv-to-parquet.R --dataset dfp [--year 2024]
+#   Rscript inst/etl/02-csv-to-parquet.R \
+#     --group companhias --dataset dfp [--year 2024]
 
 source("inst/etl/00-config.R")
 stopifnot(requireNamespace("arrow", quietly = TRUE))
 
 args <- commandArgs(trailingOnly = TRUE)
+group <- NULL
 dataset <- NULL
 year <- NULL
 i <- 1L
 while (i <= length(args)) {
+  if (args[i] == "--group") {
+    group <- args[i + 1L]
+    i <- i + 2L
+    next
+  }
   if (args[i] == "--dataset") {
     dataset <- args[i + 1L]
     i <- i + 2L
@@ -34,11 +41,14 @@ while (i <= length(args)) {
   }
   i <- i + 1L
 }
+if (is.null(group)) {
+  stop("--group is required", call. = FALSE)
+}
 if (is.null(dataset)) {
   stop("--dataset is required", call. = FALSE)
 }
-if (!dataset %in% mirror_datasets_v0_1) {
-  stop(sprintf("dataset '%s' not in mirror_datasets_v0_1", dataset),
+if (!mirror_pair_valid(group, dataset)) {
+  stop(sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
        call. = FALSE)
 }
 
@@ -78,7 +88,7 @@ write_one <- function(tbl, y, rtype) {
   )
   if (is.null(res) || nrow(res) == 0L) return(invisible(FALSE))
 
-  parts <- c("parquet", dataset, tbl)
+  parts <- c("parquet", group, dataset, tbl)
   if (!is.null(rtype)) parts <- c(parts, sprintf("report_type=%s", rtype))
   if (!is.na(y)) parts <- c(parts, sprintf("year=%d", y))
   out_dir <- do.call(file.path, c(list(out_root), as.list(parts)))
@@ -96,8 +106,8 @@ write_one <- function(tbl, y, rtype) {
 }
 
 message(sprintf(
-  "[02-parquet] dataset=%s tables=[%s] year =[%s]",
-  dataset, paste(tables, collapse = ", "),
+  "[02-parquet] group=%s dataset=%s tables=[%s] year =[%s]",
+  group, dataset, paste(tables, collapse = ", "),
   paste(years_to_process, collapse = ", ")
 ))
 

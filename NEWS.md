@@ -90,6 +90,24 @@
   `cvmdata_error_input_ambiguous` (introduced in the previous
   development entry); neither subclass is a parent of the other.
 
+* Parquet mirror became `<group>`-aware end-to-end. The
+  GitHub-Releases producer (`inst/etl/0{1,2,2b,3}-*.R`) and the
+  workflow `.github/workflows/etl-mirror.yaml` now take `--group`
+  (matrix `(group, dataset)`), write to
+  `<workspace>/out/parquet/<group>/<dataset>/...`, and publish to the
+  moving release `mirror-<group>-<dataset>-latest`. The mirror
+  consumer (`R/util-mirror-assets.R`, `R/source-mirror-duckdb.R`)
+  reads the same naming convention; `mirror_release_tag()` and
+  `mirror_list_assets()` gained a leading `group` argument. The
+  session-scoped asset cache now keys on `(group, dataset)`.
+  Operational note: the four pre-Sessao-08 GitHub Releases
+  (`mirror-cad-latest`, ...) must be renamed in place via the GitHub
+  API to `mirror-companhias-<dataset>-latest` before consumers on
+  this code can read them; the rename is the operator's task and is
+  intentionally not automated. Until that rename happens,
+  `source = "mirror"` aborts with HTTP 404; users can fall back to
+  `cvm_source_set("cvm")`.
+
 * Returned tibbles (`cvm_tbl` class) now carry a `group` provenance
   attribute, slotted between `fetched_at` and `dataset`. The total
   number of attached attributes goes from five to six (`source`,

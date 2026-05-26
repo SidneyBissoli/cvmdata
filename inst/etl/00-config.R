@@ -1,33 +1,53 @@
 # ETL configuration for the GitHub Releases parquet mirror.
 #
-# Sourced by 01-fetch-cvm.R, 02-csv-to-parquet.R, and 03-publish.R.
-# Architectural decisions (Sessao 3.11):
+# Sourced by 01-fetch-cvm.R, 02-csv-to-parquet.R, 02b-validate.R, and
+# 03-publish.R. Architectural decisions (Sessao 3.11):
 #   - Storage: GitHub Releases on the cvmdata repo itself.
-#   - Scope: modular — one release per dataset.
-#   - Tags: moving "mirror-<dataset>-latest" + dated snapshots.
+#   - Scope: modular — one release per (group, dataset) pair.
+#   - Tags: moving "mirror-<group>-<dataset>-latest" + dated snapshots.
 #   - Format: parquet snappy with Hive-style "year=YYYY/" partitioning.
+#
+# Sessao 08 (v0.1.0.9000) introduced the `<group>` segment in release
+# tags and on-disk paths. The producer side ships group-aware code in
+# this commit; the four pre-Sessao-08 releases (`mirror-cad-latest`,
+# etc.) must be renamed in place via the GitHub API before consumers
+# on the new code can read them. Until that rename happens,
+# `source = "mirror"` is broken end-to-end; users can fall back to
+# `cvm_source_set("cvm")`.
 
 # Repo coordinates. Releases live in the same repo as the package.
 mirror_repo <- "SidneyBissoli/cvmdata"
 
-# Datasets eligible for the v0.1 mirror. The modular layout means
-# adding a dataset is a no-op for already-published datasets — append
-# the id here and the workflow can publish it on next dispatch.
-mirror_datasets_v0_1 <- c("cad", "dfp", "itr", "fre")
+# (group, dataset) pairs eligible for the v0.1 mirror. The modular
+# layout means adding a dataset is a no-op for already-published
+# entries — append the row here and the workflow can publish it on
+# next dispatch.
+mirror_datasets_v0_1 <- tibble::tibble(
+  group = rep("companhias", 4L),
+  dataset = c("cad", "dfp", "itr", "fre")
+)
+
+# True iff (group, dataset) is in the v0.1 publish matrix. CLI scripts
+# use this to validate user-supplied --group / --dataset combinations.
+mirror_pair_valid <- function(group, dataset) {
+  any(mirror_datasets_v0_1$group == group &
+        mirror_datasets_v0_1$dataset == dataset)
+}
 
 # Tag templates --------------------------------------------------------
 
 # Moving tag. Recreated on every ETL run; clients that follow
-# "<dataset>-latest" always pick up the freshest snapshot.
-mirror_tag_latest <- function(dataset) {
-  sprintf("mirror-%s-latest", dataset)
+# "<group>-<dataset>-latest" always pick up the freshest snapshot.
+mirror_tag_latest <- function(group, dataset) {
+  sprintf("mirror-%s-%s-latest", group, dataset)
 }
 
 # Immutable tag. Created on demand (release-pinning, vignette pinning,
 # paper reproducibility). Format keeps lexicographic order = temporal
 # order.
-mirror_tag_snapshot <- function(dataset, date = Sys.Date()) {
-  sprintf("mirror-%s-snapshot-%s", dataset, format(date, "%Y-%m-%d"))
+mirror_tag_snapshot <- function(group, dataset, date = Sys.Date()) {
+  sprintf("mirror-%s-%s-snapshot-%s",
+          group, dataset, format(date, "%Y-%m-%d"))
 }
 
 # Parquet layout -------------------------------------------------------
@@ -35,15 +55,17 @@ mirror_tag_snapshot <- function(dataset, date = Sys.Date()) {
 # Hive-style partition path. Year is optional for non-yearly datasets
 # (CAD), in which case the file lives directly under the table dir.
 # Layout consumed by arrow::open_dataset() and duckdb read_parquet().
-mirror_parquet_path <- function(root, dataset, table, year = NULL) {
-  if (is.null(year)) {
-    file.path(root, "parquet", dataset, table, "part-0.parquet")
-  } else {
-    file.path(
-      root, "parquet", dataset, table,
-      sprintf("year=%d", year), "part-0.parquet"
-    )
+# The `<group>` segment was introduced in Sessao 08 of v0.1.0.9000.
+mirror_parquet_path <- function(root, group, dataset, table,
+                                year = NULL, report_type = NULL) {
+  parts <- c(root, "parquet", group, dataset, table)
+  if (!is.null(report_type)) {
+    parts <- c(parts, sprintf("report_type=%s", report_type))
   }
+  if (!is.null(year)) {
+    parts <- c(parts, sprintf("year=%d", year))
+  }
+  do.call(file.path, c(as.list(parts), list("part-0.parquet")))
 }
 
 # Local workspace ------------------------------------------------------
