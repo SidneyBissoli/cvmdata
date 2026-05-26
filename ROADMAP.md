@@ -247,13 +247,17 @@ lint clean, cobertura ≥ 90%.
   `cvm_tables()`, `cvm_dictionary()`, `cvm_codelist()`,
   `cvm_dataset_years()` (opcional com unicidade). Os dois últimos
   já vinham da Sessão 05.
-- [ ] `etl-mirror.yaml` com matrix bidimensional `(group, dataset)`.
-- [ ] Scripts `inst/etl/0{1,2,2b,3}*.R` ganham CLI flag `--group`.
-- [ ] `inst/etl/03-publish.R` nomeia releases
+- [x] `etl-mirror.yaml` com matrix bidimensional `(group, dataset)`.
+- [x] Scripts `inst/etl/0{1,2,2b,3}*.R` ganham CLI flag `--group`.
+- [x] `inst/etl/03-publish.R` nomeia releases
   `mirror-<group>-<dataset>-latest`.
+- [x] Consumer side (`R/util-mirror-assets.R`,
+  `R/source-mirror-duckdb.R`) lê o novo formato; cache de inventário
+  passa a chavear por `(group, dataset)`.
 - [ ] **Rename in-place** dos 4 releases atuais via GitHub API
   (`gh release edit` ou REST), com checkpoint após cada um;
-  rollback documentado em caso de falha parcial.
+  rollback documentado em caso de falha parcial. Tarefa manual do
+  mantenedor pós-Sessão 08 (não roda no CI).
 - [ ] `vignettes/articles/cache-and-mirror.Rmd` atualizado.
 - [ ] `vignettes/articles/groups-overview.Rmd` novo (lista 18
   grupos, mapeia para 5 contratos, exemplos por fetcher).

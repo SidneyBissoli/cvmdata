@@ -38,7 +38,8 @@ source_mirror_duckdb_get <- function(schema, year = NULL,
   validate_mirror_args(schema, partitioning, has_variants,
                        year, report_type)
 
-  inventory <- mirror_list_assets(dataset)
+  group <- schema$group
+  inventory <- mirror_list_assets(group, dataset)
   mirror_l3_validate_hash(dataset, attr(inventory, "source_hash"))
   resolved_years <- resolve_mirror_years(
     inventory, table, year, report_type, partitioning

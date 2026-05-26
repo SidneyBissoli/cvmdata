@@ -7,7 +7,8 @@
 # stage 02.
 #
 # Usage:
-#   Rscript inst/etl/01-fetch-cvm.R --dataset dfp [--year 2024]
+#   Rscript inst/etl/01-fetch-cvm.R \
+#     --group companhias --dataset dfp [--year 2024]
 #
 # Without --year, fetches every year published by CVM for that dataset
 # (via cvmdata::cvm_dataset_years()). For non-yearly datasets (CAD),
@@ -17,10 +18,16 @@ source("inst/etl/00-config.R")
 
 # Minimal CLI parsing (workflow inputs only).
 args <- commandArgs(trailingOnly = TRUE)
+group <- NULL
 dataset <- NULL
 year <- NULL
 i <- 1L
 while (i <= length(args)) {
+  if (args[i] == "--group") {
+    group <- args[i + 1L]
+    i <- i + 2L
+    next
+  }
   if (args[i] == "--dataset") {
     dataset <- args[i + 1L]
     i <- i + 2L
@@ -33,13 +40,20 @@ while (i <= length(args)) {
   }
   i <- i + 1L
 }
+if (is.null(group)) {
+  stop("--group is required", call. = FALSE)
+}
 if (is.null(dataset)) {
   stop("--dataset is required", call. = FALSE)
 }
-if (!dataset %in% mirror_datasets_v0_1) {
+if (!mirror_pair_valid(group, dataset)) {
   stop(sprintf(
-    "dataset '%s' not in mirror_datasets_v0_1 (%s)",
-    dataset, paste(mirror_datasets_v0_1, collapse = ", ")
+    "(%s, %s) not in mirror_datasets_v0_1; valid pairs: %s",
+    group, dataset,
+    paste(sprintf("(%s, %s)",
+                  mirror_datasets_v0_1$group,
+                  mirror_datasets_v0_1$dataset),
+          collapse = ", ")
   ), call. = FALSE)
 }
 
@@ -62,8 +76,8 @@ years_to_fetch <- if (identical(partitioning, "yearly")) {
 }
 
 message(sprintf(
-  "[01-fetch] dataset=%s tables=[%s] year =[%s] workspace=%s",
-  dataset,
+  "[01-fetch] group=%s dataset=%s tables=[%s] year =[%s] workspace=%s",
+  group, dataset,
   paste(tables, collapse = ", "),
   paste(years_to_fetch, collapse = ", "),
   workspace

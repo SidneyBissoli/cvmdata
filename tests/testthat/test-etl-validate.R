@@ -32,13 +32,16 @@ cad_fx <- function() test_path("fixtures", "mirror-cad-companhias.parquet")
 test_that("validate_parquet_path builds Hive-style locations", {
   load_etl_validator()
   expect_identical(
-    validate_parquet_path("/tmp/w", "cad", "companhias", NA, NULL),
-    file.path("/tmp/w", "out", "parquet", "cad", "companhias",
-              "part-0.parquet")
+    validate_parquet_path("/tmp/w", "companhias", "cad", "companhias",
+                          NA, NULL),
+    file.path("/tmp/w", "out", "parquet",
+              "companhias", "cad", "companhias", "part-0.parquet")
   )
   expect_identical(
-    validate_parquet_path("/tmp/w", "dfp", "bpa", 2024L, "ind"),
-    file.path("/tmp/w", "out", "parquet", "dfp", "bpa",
+    validate_parquet_path("/tmp/w", "companhias", "dfp", "bpa",
+                          2024L, "ind"),
+    file.path("/tmp/w", "out", "parquet",
+              "companhias", "dfp", "bpa",
               "report_type=ind", "year=2024", "part-0.parquet")
   )
 })
@@ -111,11 +114,13 @@ test_that("validate_one_parquet flags soft fail on bad CNPJ format", {
 test_that("validate_dataset reports pass for a clean CAD workspace", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  dest_dir <- file.path(workspace, "out", "parquet", "cad", "companhias")
+  dest_dir <- file.path(
+    workspace, "out", "parquet", "companhias", "cad", "companhias"
+  )
   dir.create(dest_dir, recursive = TRUE)
   file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
 
-  results <- validate_dataset("cad", workspace)
+  results <- validate_dataset("companhias", "cad", workspace)
   expect_equal(nrow(results), 1L)
   expect_identical(results$status, "pass")
   expect_equal(results$hard_failed, 0L)
@@ -126,7 +131,7 @@ test_that("validate_dataset reports hard_fail for missing parquet", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
   # Note: nothing copied; validate_dataset expects companhias to be present.
-  results <- validate_dataset("cad", workspace)
+  results <- validate_dataset("companhias", "cad", workspace)
   expect_identical(results$status, "hard_fail")
   expect_true(results$hard_failed >= 1L)
 })
@@ -134,11 +139,13 @@ test_that("validate_dataset reports hard_fail for missing parquet", {
 test_that("validate_write_report writes a markdown summary", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  dest_dir <- file.path(workspace, "out", "parquet", "cad", "companhias")
+  dest_dir <- file.path(
+    workspace, "out", "parquet", "companhias", "cad", "companhias"
+  )
   dir.create(dest_dir, recursive = TRUE)
   file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
 
-  results <- validate_dataset("cad", workspace)
+  results <- validate_dataset("companhias", "cad", workspace)
   report_dir <- file.path(workspace, "out", "validation")
   out_path <- validate_write_report(results, "cad", report_dir)
   expect_true(file.exists(out_path))

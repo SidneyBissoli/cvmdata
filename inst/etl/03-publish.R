@@ -1,9 +1,11 @@
 # Stage 3 — Publish parquet outputs to GitHub Releases.
 #
-# Uploads every parquet under <workspace>/out/parquet/<dataset>/ as an
-# asset of the moving release "mirror-<dataset>-latest". Encodes the
-# Hive-style partition path in the asset name via "__" separators,
-# because GitHub Releases asset names are flat (no slashes allowed).
+# Uploads every parquet under
+# <workspace>/out/parquet/<group>/<dataset>/ as an asset of the moving
+# release "mirror-<group>-<dataset>-latest" (the `<group>` segment was
+# introduced in Sessao 08 of v0.1.0.9000). Encodes the Hive-style
+# partition path in the asset name via "__" separators, because GitHub
+# Releases asset names are flat (no slashes allowed).
 #
 # Example: parquet/dfp/bpa/report_type=ind/year=2024/part-0.parquet
 #       -> asset "bpa__report_type=ind__year=2024__part-0.parquet"
@@ -31,15 +33,21 @@
 # GitHub Actions via GITHUB_TOKEN; locally via `gh auth login`).
 #
 # Usage:
-#   Rscript inst/etl/03-publish.R --dataset cad
+#   Rscript inst/etl/03-publish.R --group companhias --dataset cad
 
 source("inst/etl/00-config.R")
 source("inst/etl/util-hash.R")
 
 args <- commandArgs(trailingOnly = TRUE)
+group <- NULL
 dataset <- NULL
 i <- 1L
 while (i <= length(args)) {
+  if (args[i] == "--group") {
+    group <- args[i + 1L]
+    i <- i + 2L
+    next
+  }
   if (args[i] == "--dataset") {
     dataset <- args[i + 1L]
     i <- i + 2L
@@ -47,11 +55,14 @@ while (i <= length(args)) {
   }
   i <- i + 1L
 }
+if (is.null(group)) {
+  stop("--group is required", call. = FALSE)
+}
 if (is.null(dataset)) {
   stop("--dataset is required", call. = FALSE)
 }
-if (!dataset %in% mirror_datasets_v0_1) {
-  stop(sprintf("dataset '%s' not in mirror_datasets_v0_1", dataset),
+if (!mirror_pair_valid(group, dataset)) {
+  stop(sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
        call. = FALSE)
 }
 
@@ -61,11 +72,12 @@ if (!nzchar(gh_bin)) {
 }
 
 workspace <- mirror_workspace()
-dataset_dir <- file.path(workspace, "out", "parquet", dataset)
+dataset_dir <- file.path(workspace, "out", "parquet", group, dataset)
 if (!dir.exists(dataset_dir)) {
-  stop(sprintf("no parquet output for dataset '%s' (expected at %s)",
-               dataset, dataset_dir),
-       call. = FALSE)
+  stop(sprintf(
+    "no parquet output for (%s, %s) (expected at %s)",
+    group, dataset, dataset_dir
+  ), call. = FALSE)
 }
 
 parquets <- list.files(
@@ -77,7 +89,7 @@ if (!length(parquets)) {
        call. = FALSE)
 }
 
-tag <- mirror_tag_latest(dataset)
+tag <- mirror_tag_latest(group, dataset)
 
 # Change detection ------------------------------------------------------
 # Compute current META hash and compare against the prior release asset.
@@ -90,8 +102,8 @@ short_hash <- function(h) {
 message("[03-publish] computing source META hash")
 source_hash <- compute_source_hash(dataset)
 message(sprintf(
-  "[03-publish] dataset=%s components=%d sha256=%s",
-  dataset, length(source_hash$components),
+  "[03-publish] group=%s dataset=%s components=%d sha256=%s",
+  group, dataset, length(source_hash$components),
   short_hash(source_hash$hash)
 ))
 
@@ -136,13 +148,13 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
 
 # Publish ---------------------------------------------------------------
 
-title <- sprintf("Mirror: %s (latest)", dataset)
+title <- sprintf("Mirror: %s/%s (latest)", group, dataset)
 notes <- sprintf(paste0(
-  "Auto-generated parquet mirror snapshot for dataset '%s'.\n",
+  "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
   "Updated: %s\n\n",
   "See https://sidneybissoli.github.io/cvmdata/articles/",
   "cache-and-mirror.html for client usage."
-), dataset, format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC"))
+), group, dataset, format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC"))
 
 # Recreate the release on every run so assets always reflect the
 # current parquet tree. `gh release delete` is idempotent under

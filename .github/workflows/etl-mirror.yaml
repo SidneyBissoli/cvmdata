@@ -4,26 +4,38 @@ name: ETL mirror
 #
 # Triggers:
 #   - schedule: weekly Tuesday 04:00 BRT (07:00 UTC). Runs the full v0.1
-#     dataset matrix in parallel.
+#     (group, dataset) matrix in parallel.
 #   - workflow_dispatch: manual trigger; leave `dataset` empty to expand
-#     to the full matrix (same path as the cron), or pick one dataset for
-#     a single-dataset run. `year` (optional) scopes to a single year for
-#     smoke testing.
+#     to the full matrix (same path as the cron), or pick one
+#     `(group, dataset)` pair for a single-pair run. `year` (optional)
+#     scopes to a single year for smoke testing.
 #
-# The matrix uses fail-fast: false so a single dataset failure does not
-# kill the rest of the week.
+# The matrix uses fail-fast: false so a single (group, dataset) failure
+# does not kill the rest of the week.
 #
 # 03-publish.R compares the SHA-256 of the CVM META files against the
 # `__source_hash.json` asset of the previous release and skips publishing
 # when nothing changed upstream.
+#
+# Sessao 08 (v0.1.0.9000): added the `<group>` segment to release tags
+# (`mirror-<group>-<dataset>-latest`) and to the local parquet layout
+# (`<workspace>/out/parquet/<group>/<dataset>/...`). All four scripts
+# now require both `--group` and `--dataset`.
 
 on:
   schedule:
     - cron: '0 7 * * 2'
   workflow_dispatch:
     inputs:
+      group:
+        description: CKAN group slug (leave empty for the full v0.1 matrix)
+        required: false
+        type: choice
+        options:
+          - ''
+          - companhias
       dataset:
-        description: Dataset id (leave empty for the full v0.1 matrix)
+        description: Dataset id (must be paired with `group`; leave empty for the full v0.1 matrix)
         required: false
         type: choice
         options:
@@ -46,9 +58,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Schedule triggers and "empty input" manual dispatches expand to
-        # the full v0.1 matrix; otherwise we run the single chosen dataset.
-        dataset: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('["cad","dfp","itr","fre"]') || fromJSON(format('["{0}"]', inputs.dataset)) }}
+        # Schedule triggers and "empty input" manual dispatches expand
+        # to the full v0.1 matrix; otherwise we run the single chosen
+        # (group, dataset) pair. The full matrix is encoded as a JSON
+        # array of {group, dataset} objects so GitHub's matrix engine
+        # iterates over both fields together.
+        include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # runner.* contexts are not allowed at job-level env, only inside
@@ -77,20 +92,25 @@ jobs:
         run: |
           if [ -n "${{ inputs.year }}" ]; then
             Rscript inst/etl/01-fetch-cvm.R \
+              --group ${{ matrix.group }} \
               --dataset ${{ matrix.dataset }} \
               --year ${{ inputs.year }}
           else
-            Rscript inst/etl/01-fetch-cvm.R --dataset ${{ matrix.dataset }}
+            Rscript inst/etl/01-fetch-cvm.R \
+              --group ${{ matrix.group }} \
+              --dataset ${{ matrix.dataset }}
           fi
 
       - name: Stage 02 — CSV to parquet
         run: |
           if [ -n "${{ inputs.year }}" ]; then
             Rscript inst/etl/02-csv-to-parquet.R \
+              --group ${{ matrix.group }} \
               --dataset ${{ matrix.dataset }} \
               --year ${{ inputs.year }}
           else
             Rscript inst/etl/02-csv-to-parquet.R \
+              --group ${{ matrix.group }} \
               --dataset ${{ matrix.dataset }}
           fi
 
@@ -102,10 +122,12 @@ jobs:
         run: |
           if [ -n "${{ inputs.year }}" ]; then
             Rscript inst/etl/02b-validate.R \
+              --group ${{ matrix.group }} \
               --dataset ${{ matrix.dataset }} \
               --year ${{ inputs.year }}
           else
             Rscript inst/etl/02b-validate.R \
+              --group ${{ matrix.group }} \
               --dataset ${{ matrix.dataset }}
           fi
 
@@ -113,9 +135,12 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: validation-${{ matrix.dataset }}
+          name: validation-${{ matrix.group }}-${{ matrix.dataset }}
           path: ${{ env.CVMDATA_ETL_WORKSPACE }}/out/validation/${{ matrix.dataset }}.md
           if-no-files-found: ignore
 
       - name: Stage 03 — publish to GitHub Releases
-        run: Rscript inst/etl/03-publish.R --dataset ${{ matrix.dataset }}
+        run: |
+          Rscript inst/etl/03-publish.R \
+            --group ${{ matrix.group }} \
+            --dataset ${{ matrix.dataset }}

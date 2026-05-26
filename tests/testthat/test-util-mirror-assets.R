@@ -217,11 +217,13 @@ test_that("mirror_list_assets parses a GitHub release JSON", {
   }
   out <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("dfp_test1", refresh = TRUE)
+    cvmdata:::mirror_list_assets("companhias", "dfp_test1", refresh = TRUE)
   )
   expect_s3_class(out, "tbl_df")
   expect_equal(nrow(out), 3L)
-  expect_identical(attr(out, "release_tag"), "mirror-dfp_test1-latest")
+  expect_identical(
+    attr(out, "release_tag"), "mirror-companhias-dfp_test1-latest"
+  )
 })
 
 test_that("mirror_list_assets caches per session", {
@@ -238,9 +240,10 @@ test_that("mirror_list_assets caches per session", {
   httr2::with_mocked_responses(
     mock,
     {
-      cvmdata:::mirror_list_assets("dfp_test2", refresh = TRUE)
-      cvmdata:::mirror_list_assets("dfp_test2")
-      cvmdata:::mirror_list_assets("dfp_test2")
+      cvmdata:::mirror_list_assets("companhias", "dfp_test2",
+                                   refresh = TRUE)
+      cvmdata:::mirror_list_assets("companhias", "dfp_test2")
+      cvmdata:::mirror_list_assets("companhias", "dfp_test2")
     }
   )
   # Only the first call (refresh = TRUE) hits the API. The release
@@ -256,7 +259,8 @@ test_that("mirror_list_assets aborts on HTTP 404", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvmdata:::mirror_list_assets("nope_dataset", refresh = TRUE)
+      cvmdata:::mirror_list_assets("companhias", "nope_dataset",
+                                   refresh = TRUE)
     ),
     class = "cvmdata_error_http"
   )
@@ -268,7 +272,8 @@ test_that("mirror_list_assets aborts on network failure", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvmdata:::mirror_list_assets("net_fail_dataset", refresh = TRUE)
+      cvmdata:::mirror_list_assets("companhias", "net_fail_dataset",
+                                   refresh = TRUE)
     ),
     class = "cvmdata_error_http"
   )
@@ -293,7 +298,8 @@ test_that("mirror_list_assets attaches source_hash attribute", {
   }
   out <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("dfp_test_hash", refresh = TRUE)
+    cvmdata:::mirror_list_assets("companhias", "dfp_test_hash",
+                                 refresh = TRUE)
   )
   expect_identical(attr(out, "source_hash"), "deadbeef")
 })
@@ -309,12 +315,15 @@ test_that("mirror_list_assets returns NA hash when sidecar absent", {
   }
   out <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("dfp_test_no_hash", refresh = TRUE)
+    cvmdata:::mirror_list_assets("companhias", "dfp_test_no_hash",
+                                 refresh = TRUE)
   )
   expect_true(is.na(attr(out, "source_hash")))
 })
 
 test_that("mirror_release_tag returns the canonical tag", {
-  expect_identical(cvmdata:::mirror_release_tag("dfp"),
-                   "mirror-dfp-latest")
+  expect_identical(
+    cvmdata:::mirror_release_tag("companhias", "dfp"),
+    "mirror-companhias-dfp-latest"
+  )
 })
