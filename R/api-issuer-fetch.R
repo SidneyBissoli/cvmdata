@@ -198,10 +198,13 @@ fetch_via_mirror <- function(schema, dataset, year, issuer,
     # it loads the submissao via `source_cvm_http_get()`. That keeps
     # the resolution self-consistent within v0.1; a future iteration
     # may route the submissao lookup through the mirror as well.
-    resolved_year <- if (!is.null(year)) year[[1L]] else
-      max(transformed$year %||% NA_integer_, na.rm = TRUE)
-    if (is.infinite(resolved_year) || is.na(resolved_year)) {
-      resolved_year <- NULL
+    resolved_year <- if (!is.null(year)) {
+      year[[1L]]
+    } else if ("year" %in% names(transformed) &&
+               any(!is.na(transformed$year))) {
+      max(transformed$year, na.rm = TRUE)
+    } else {
+      NULL
     }
     transformed <- filter_by_issuer(
       transformed, issuer, schema = schema, year = resolved_year
