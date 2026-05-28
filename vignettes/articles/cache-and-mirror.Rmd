@@ -25,7 +25,7 @@ library(cvmdata)
 
 | Backend    | What it queries                                  | When to prefer it                                                                 |
 |------------|--------------------------------------------------|----------------------------------------------------------------------------------|
-| `"mirror"` | Parquet snapshots in GitHub Releases, queried via DuckDB. | Default from v0.1.0. ~30× faster on yearly bundles; staleness bounded by the weekly refresh window vs. CVM live. |
+| `"mirror"` | Parquet snapshots in GitHub Releases named `mirror-<group>-<dataset>-latest`, queried via DuckDB. | Default from v0.1.0. ~30× faster on yearly bundles; staleness bounded by the weekly refresh window vs. CVM live. |
 | `"cvm"`    | The CVM Open Data Portal over HTTP (`dados.cvm.gov.br`). | Highest freshness — bytes are direct from the regulator. Opt in when you need the latest publication within the refresh window. |
 
 The active backend is selected at three precedence levels: an
@@ -37,9 +37,14 @@ the built-in default returned by `cvm_source_get()`.
 
 | Layer | Location                                                         | Content                                          | Invalidation        |
 |-------|------------------------------------------------------------------|--------------------------------------------------|---------------------|
-| L1    | `<cache>/raw/<dataset>/[<year>/]`                                | Raw CVM CSV (CAD) or yearly ZIPs (DFP/ITR/FRE) + extracted CSVs, with `*.etag.rds` sidecars. | HTTP HEAD with ETag / Last-Modified, throttled by `options(cvmdata.cache_ttl_seconds)` (default 30 days). |
-| L3    | `<cache>/parquet/<dataset>/<table>/[report_type=R/]year=Y/part-0.parquet` | Parquet downloaded from the mirror.            | Content-addressed via the `__source_hash.json` sidecar — the whole dataset tree is evicted when the upstream hash changes. |
+| L1    | `<cache>/raw/<group>/<dataset>/[<year>/]`                        | Raw CVM CSV (CAD) or yearly ZIPs (DFP/ITR/FRE) + extracted CSVs, with `*.etag.rds` sidecars. | HTTP HEAD with ETag / Last-Modified, throttled by `options(cvmdata.cache_ttl_seconds)` (default 30 days). |
+| L3    | `<cache>/parquet/<group>/<dataset>/<table>/[report_type=R/]year=Y/part-0.parquet` | Parquet downloaded from the mirror.            | Content-addressed via the `<cache>/parquet/<group>/<dataset>/__source_hash.json` sidecar — the whole dataset tree is evicted when the upstream hash changes. |
 | L4    | In-session memory.                                               | Planned for v0.2.                                | —                   |
+
+The `<group>` segment is the CKAN group slug returned by
+`cvm_groups()` (e.g. `"companhias"` for the four datasets shipped in
+v0.1.0). Caches written by `cvmdata` ≤ 0.0.x without the segment are
+migrated automatically the first time a 0.1.x session touches them.
 
 `cvm_cache_path()` returns the cache root; `cvm_cache_set_path()`
 relocates it; `cvm_cache_info()` lists every artifact with its size,
@@ -163,15 +168,25 @@ info
 attr(info, "total_size_bytes")
 ```
 
+The first column of `cvm_cache_info()` is `group`, mirroring the
+on-disk layout — useful when later releases bring datasets from
+multiple CKAN groups into the same cache.
+
 `cvm_cache_clear()` accepts a `what` argument scoping the eviction to
-L1 (`"raw"`), L3 (`"parquet"`), or both (`"all"`). The L3 mode evicts
-by dataset because the partition layout nests year under table:
+L1 (`"raw"`), L3 (`"parquet"`), or both (`"all"`), plus an optional
+`group` to restrict the eviction to a single CKAN group. The L3 mode
+evicts by dataset because the partition layout nests year under
+table:
 
 ```{r workflow-3-clear, eval = FALSE}
 # Drop the mirror's local parquet copy for DFP only.
 cvm_cache_clear(what = "parquet", dataset = "dfp", confirm = FALSE)
 
-# Reset everything (raw + parquet).
+# Drop every artifact belonging to the "companhias" CKAN group
+# (raw + parquet), leaving other groups intact.
+cvm_cache_clear(what = "all", group = "companhias", confirm = FALSE)
+
+# Reset everything (raw + parquet, all groups).
 cvm_cache_clear(what = "all", confirm = FALSE)
 ```
 
@@ -211,10 +226,13 @@ many units were removed and how much disk it freed.
 
 ## Where to read next
 
+* **groups-overview** — the 18 CKAN groups, the five contract
+  fetchers they map to, and which datasets each `cvmdata` release
+  unlocks.
 * **issuer-fetch** — argument-level deep dive on `issuer_fetch()`,
   including `issuer` / `year` / `report_type` / `validate` /
   `on_error`.
 * **itr-dfp** — end-to-end workflows on annual and quarterly
   financial statements.
-* **cvm-defects** — known CVM publication quirks and how the package
-  handles each one.
+* **data-defects** — known CVM publication quirks (and other source
+  defects, starting in v0.4+) and how the package handles each one.
