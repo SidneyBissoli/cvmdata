@@ -106,7 +106,7 @@
 <h2 id="id_2-naming-canônico">2. Naming canônico<a class="anchor" aria-label="anchor" href="#id_2-naming-can%C3%B4nico"></a></h2>
 <div class="section level3">
 <h3 id="id_21-funções-públicas">2.1 Funções públicas<a class="anchor" aria-label="anchor" href="#id_21-fun%C3%A7%C3%B5es-p%C3%BAblicas"></a></h3>
-<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. No ciclo atual, apenas <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional; os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code>. Skeletons foram exportados antes da implementação para que a review rOpenSci veja a superfície de API completa.</p>
+<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional e cobre v0.1–v0.3 (grupo <code>companhias</code>); os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code>, com implementação plena em v0.4–v0.8. Skeletons foram exportados antes da implementação para <strong>travar a superfície da API pública cedo</strong>, de modo que as releases v0.4+ estendam cobertura sem reformatar a API.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias")</span></span>
 <span><span class="co"># Cobre cad, dfp, itr, fre em v0.1; fca, vlmo, cgvn, ipe em v0.2+</span></span>
@@ -382,7 +382,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <h3 id="id_101-comandos-não-óbvios">10.1 Comandos não-óbvios<a class="anchor" aria-label="anchor" href="#id_101-comandos-n%C3%A3o-%C3%B3bvios"></a></h3>
 <p>Comandos triviais de pacote R (<code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code>, <code><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">devtools::test()</a></code>, <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code>, <code><a href="https://devtools.r-lib.org/reference/build_readme.html" class="external-link">devtools::build_readme()</a></code>, <code><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">devtools::install()</a></code>, <code><a href="https://devtools.r-lib.org/reference/build.html" class="external-link">devtools::build()</a></code>, <code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code>, <code><a href="http://covr.r-lib.org/reference/package_coverage.html" class="external-link">covr::package_coverage()</a></code>) não estão listados aqui — usar diretamente.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Um único teste por nome — desc parcial casa por regex</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"testthat::test_file('tests/testthat/test-cad-fetch.R', desc = 'returns a cvm_tbl')"</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"testthat::test_file('tests/testthat/test-issuer-fetch-cad.R', desc = 'returns a cvm_tbl')"</span></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># Regenerar README.pt-BR.md (build_readme() só cobre o canônico README.Rmd)</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"</span></span>
@@ -422,12 +422,14 @@ cvmdata_warn                           (pai genérico de warnings)
 <div class="section level2">
 <h2 id="id_11-objetivos-do-projeto">11. Objetivos do projeto<a class="anchor" aria-label="anchor" href="#id_11-objetivos-do-projeto"></a></h2>
 <ul><li>
-<strong>Objetivo intermediário</strong>: aceitação rOpenSci via review formal em <a href="https://github.com/ropensci/software-review" class="external-link uri">https://github.com/ropensci/software-review</a>. É o gate de qualidade que ancora todo o trabalho.</li>
+<strong>Gate de qualidade</strong>: rOpenSci via review formal em <a href="https://github.com/ropensci/software-review" class="external-link uri">https://github.com/ropensci/software-review</a>. Ancora todo o trabalho enquanto princípio de design — decisões que não passem o filtro “isso ajuda ou atrapalha a aceitação rOpenSci?” devem ser rejeitadas.</li>
 <li>
-<strong>Objetivo final</strong>: CRAN. rOpenSci submete em nome do mantenedor quando aceito.</li>
+<strong>Timing de submissão</strong> (decisão de 2026-05-28): a submissão ao rOpenSci ocorre <strong>ao fim do ciclo de desenvolvimento, após v1.0</strong>, com os 5 fetchers funcionais e os 18 grupos CKAN cobertos — não como etapa intermediária.</li>
 <li>
-<strong>Consequência</strong>: artigo no The R Journal sobre o pacote.</li>
-</ul><p>Decisões de design que não passem o filtro “isso ajuda ou atrapalha a aceitação rOpenSci?” devem ser rejeitadas.</p>
+<strong>CRAN</strong>: permanece <strong>acoplado ao aceite rOpenSci</strong>; rOpenSci submete em nome do mantenedor quando aceito.</li>
+<li>
+<strong>The R Journal</strong>: paper sobre o pacote, <strong>somente após o aceite rOpenSci</strong>.</li>
+</ul><p>Sequenciamento canônico em <code>ROADMAP.md</code>, seção “Fim do ciclo — submissão rOpenSci, CRAN e publicação”.</p>
 </div>
 </div>
 

@@ -129,14 +129,18 @@ The exported API is grouped into five families:
 
 - **Fetchers** —
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  (single entry point for every issuer-class dataset; four more
-  contract-specific fetchers
-  ([`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
+  is the single entry point for every issuer-class dataset. Four
+  contract-specific siblings —
+  [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
   [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md),
-  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md))
-  arrive in v0.2+).
+  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+  and
+  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
+  — are already exported as skeletons in v0.1.0.9000; calling them
+  aborts with `cvmdata_error_input_group`. Full implementation arrives
+  from v0.4 onward.
 - **Discovery** —
+  [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
   [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
   [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md),
   [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
@@ -174,8 +178,8 @@ Data is fetched from the official CVM Open Data Portal
   byte-level freshness against the regulator is required.
 
 Every returned tibble carries provenance attributes (`source`,
-`fetched_at`, `dataset`, `table`, `package_version`) so a downstream
-caller can audit which backend served the data.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`) so a
+downstream caller can audit which backend served the data.
 
 ## Related work
 
