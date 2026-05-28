@@ -127,8 +127,9 @@ Plano de execução por fases.
 - [x] Tag git `v0.1.0` + GitHub release.
 - [x] Reabrir ciclo de dev `0.1.0.9000`.
 - [x] `devtools::check_win_devel()` enviado.
-- [~] `devtools::check_mac_release()` — pendente (504 transitório,
-  retentar).
+- [x] `devtools::check_mac_release()` — PASS em
+  `aarch64-apple-darwin23` (macOS Tahoe 26.2, Apple M1) sob
+  R 4.6.0 patched, 0E/0W/0N.
 - [ ] Submissão rOpenSci (pre-submission inquiry) — **deferida**
   até o fim do ciclo `0.1.0.9000` (Sessões 04-08, vide próxima
   seção). Decisão arquitetural de "grupos" da CVM fechou em
