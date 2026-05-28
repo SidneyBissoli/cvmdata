@@ -191,12 +191,14 @@ Referência e artigos em
 <https://sidneybissoli.github.io/cvmdata/>. A API exportada está
 agrupada em cinco famílias:
 
-- **Fetchers** — `issuer_fetch()` (entry point único para todos os
-  datasets de emissor; quatro fetchers adicionais
-  (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`,
-  `event_fetch()`) chegam em v0.2+).
-- **Discovery** — `cvm_datasets()`, `cvm_tables()`, `cvm_dictionary()`,
-  `cvm_codelist()`, `cvm_dataset_years()`.
+- **Fetchers** — `issuer_fetch()` é o entry point único para todos os
+  datasets de emissor. Quatro fetchers irmãos por contrato —
+  `fund_fetch()`, `agent_fetch()`, `offering_fetch()` e
+  `event_fetch()` — já estão exportados como skeletons na v0.1.0.9000;
+  chamá-los aborta com `cvmdata_error_input_group`. Implementação
+  plena chega a partir da v0.4.
+- **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
+  `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
   `cvm_cache_info()`, `cvm_cache_clear()`. A janela de TTL para
   revalidação HTTP é configurável via
@@ -219,8 +221,9 @@ Os dados vêm do Portal de Dados Abertos da CVM
   regulador.
 
 Todo tibble retornado carrega atributos de proveniência (`source`,
-`fetched_at`, `dataset`, `table`, `package_version`), permitindo a
-qualquer consumidor auditar qual backend serviu os dados.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`),
+permitindo a qualquer consumidor auditar qual backend serviu os
+dados.
 
 ## Trabalhos relacionados
 

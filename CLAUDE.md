@@ -62,11 +62,12 @@ função (palavra técnica internacionalizada); a coluna paralela em
 
 Padrão `object_verb` (Dev Guide rOpenSci). API pública organizada em
 **5 fetchers por contrato de dado**, um por tipo de entidade regulada
-pela CVM. No ciclo atual, apenas `issuer_fetch()` é funcional; os
-outros 4 são skeletons exportados que abortam com
-`cvmdata_error_input_group`. Skeletons foram exportados antes da
-implementação para que a review rOpenSci veja a superfície de API
-completa.
+pela CVM. `issuer_fetch()` é funcional e cobre v0.1–v0.3 (grupo
+`companhias`); os outros 4 são skeletons exportados que abortam com
+`cvmdata_error_input_group`, com implementação plena em v0.4–v0.8.
+Skeletons foram exportados antes da implementação para **travar a
+superfície da API pública cedo**, de modo que as releases v0.4+
+estendam cobertura sem reformatar a API.
 
 ```r
 # Issuer datasets — companhias abertas (grupo CKAN "companhias")
@@ -448,7 +449,7 @@ não estão listados aqui — usar diretamente.
 
 ```powershell
 # Um único teste por nome — desc parcial casa por regex
-Rscript -e "testthat::test_file('tests/testthat/test-cad-fetch.R', desc = 'returns a cvm_tbl')"
+Rscript -e "testthat::test_file('tests/testthat/test-issuer-fetch-cad.R', desc = 'returns a cvm_tbl')"
 
 # Regenerar README.pt-BR.md (build_readme() só cobre o canônico README.Rmd)
 Rscript -e "knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"
@@ -503,12 +504,18 @@ o gerador for revisitado:
 
 ## 11. Objetivos do projeto
 
-- **Objetivo intermediário**: aceitação rOpenSci via review formal em
-  <https://github.com/ropensci/software-review>. É o gate de qualidade
-  que ancora todo o trabalho.
-- **Objetivo final**: CRAN. rOpenSci submete em nome do mantenedor
-  quando aceito.
-- **Consequência**: artigo no The R Journal sobre o pacote.
+- **Gate de qualidade**: rOpenSci via review formal em
+  <https://github.com/ropensci/software-review>. Ancora todo o trabalho
+  enquanto princípio de design — decisões que não passem o filtro
+  "isso ajuda ou atrapalha a aceitação rOpenSci?" devem ser rejeitadas.
+- **Timing de submissão** (decisão de 2026-05-28): a submissão ao
+  rOpenSci ocorre **ao fim do ciclo de desenvolvimento, após v1.0**,
+  com os 5 fetchers funcionais e os 18 grupos CKAN cobertos — não como
+  etapa intermediária.
+- **CRAN**: permanece **acoplado ao aceite rOpenSci**; rOpenSci submete
+  em nome do mantenedor quando aceito.
+- **The R Journal**: paper sobre o pacote, **somente após o aceite
+  rOpenSci**.
 
-Decisões de design que não passem o filtro "isso ajuda ou atrapalha a
-aceitação rOpenSci?" devem ser rejeitadas.
+Sequenciamento canônico em `ROADMAP.md`, seção "Fim do ciclo —
+submissão rOpenSci, CRAN e publicação".

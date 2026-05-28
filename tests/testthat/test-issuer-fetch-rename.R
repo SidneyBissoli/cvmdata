@@ -1,8 +1,8 @@
 # Regression tests for the Session 06 rename (cvm_fetch -> issuer_fetch,
 # cad_fetch removed, companies -> issuer, years -> year). The renamed
-# orchestration paths are covered by test-cvm-fetch.R and test-cad-
-# fetch.R; this file pins down the deprecation surface so that a future
-# refactor cannot silently restore the old names.
+# orchestration paths are covered by test-issuer-fetch-yearly.R and
+# test-issuer-fetch-cad.R; this file pins down the deprecation surface
+# so that a future refactor cannot silently restore the old names.
 
 # Setup -----------------------------------------------------------------
 
