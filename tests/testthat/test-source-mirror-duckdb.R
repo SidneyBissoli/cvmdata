@@ -96,6 +96,31 @@ test_that("issuer_fetch CAD returns a cvm_tbl via mirror", {
   expect_identical(attr(result, "table"), "companhias")
 })
 
+test_that("CAD via mirror with issuer filter does not warn on year reattach", {
+  # Non-yearly tables have no `year` column; the latest-year resolution
+  # branch in fetch_via_mirror() used to read `transformed$year %||% NA`
+  # and reduce it with max(), emitting "Unknown or uninitialised column:
+  # year" plus a -Inf warning. Guarded on column presence.
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(cvmdata.cache_dir = cache_root)
+
+  entries <- list(
+    list(name = "companhias__part-0.parquet", parquet = cad_fx())
+  )
+  mock <- build_mock(entries)
+
+  expect_no_warning(
+    result <- httr2::with_mocked_responses(
+      mock,
+      issuer_fetch("cad", "companhias", issuer = "08773135000100",
+                   source = "mirror")
+    )
+  )
+  expect_s3_class(result, "cvm_tbl")
+  expect_true(nrow(result) >= 1L)
+})
+
 # DFP BPA ind 2024 (yearly + variant) -------------------------------------
 
 test_that("issuer_fetch DFP BPA ind 2024 returns rows via mirror", {
