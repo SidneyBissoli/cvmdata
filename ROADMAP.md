@@ -254,7 +254,7 @@ lint clean, cobertura ≥ 90%.
 - [x] Consumer side (`R/util-mirror-assets.R`,
   `R/source-mirror-duckdb.R`) lê o novo formato; cache de inventário
   passa a chavear por `(group, dataset)`.
-- [ ] **Rename in-place** dos 4 releases atuais via GitHub API
+- [x] **Rename in-place** dos 4 releases atuais via GitHub API
   (`gh release edit` ou REST), com checkpoint após cada um;
   rollback documentado em caso de falha parcial. Tarefa manual do
   mantenedor pós-Sessão 08 (não roda no CI).
