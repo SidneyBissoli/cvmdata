@@ -357,12 +357,14 @@ cnpj_format("00000000000191")
 Reference and articles at <https://sidneybissoli.github.io/cvmdata/>.
 The exported API is grouped into five families:
 
-- **Fetchers** — `issuer_fetch()` (single entry point for every
-  issuer-class dataset; four more contract-specific fetchers
-  (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`)
-  arrive in v0.2+).
-- **Discovery** — `cvm_datasets()`, `cvm_tables()`, `cvm_dictionary()`,
-  `cvm_codelist()`, `cvm_dataset_years()`.
+- **Fetchers** — `issuer_fetch()` is the single entry point for every
+  issuer-class dataset. Four contract-specific siblings —
+  `fund_fetch()`, `agent_fetch()`, `offering_fetch()` and
+  `event_fetch()` — are already exported as skeletons in v0.1.0.9000;
+  calling them aborts with `cvmdata_error_input_group`. Full
+  implementation arrives from v0.4 onward.
+- **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
+  `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
   `cvm_cache_info()`, `cvm_cache_clear()`. The TTL window for HTTP
   revalidation is configurable via `options(cvmdata.cache_ttl_seconds)`
@@ -386,8 +388,8 @@ Data is fetched from the official CVM Open Data Portal
   byte-level freshness against the regulator is required.
 
 Every returned tibble carries provenance attributes (`source`,
-`fetched_at`, `dataset`, `table`, `package_version`) so a downstream
-caller can audit which backend served the data.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`) so a
+downstream caller can audit which backend served the data.
 
 ## Related work
 
