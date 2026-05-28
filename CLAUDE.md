@@ -729,14 +729,7 @@ arquivo, 100 GB por release). Encoding dos asset names:
 por `gsub("[/\\\\]", "__", rel)` em `03-publish.R`); o GitHub Releases
 sanitiza `=` → `.` no URL público, e o reader
 (`parse_mirror_asset_name()` em `R/util-mirror-assets.R`) tolera ambos
-os encodings. **Caveat operacional**: a transição Sessão 04 → Sessão 08
-mudou o nome dos releases de `mirror-<dataset>-latest` para
-`mirror-<group>-<dataset>-latest`. O código (producer + consumer) já lê
-o novo formato; o rename in-place dos 4 releases v0.1 existentes via
-`gh release edit` é tarefa manual do mantenedor pós-Sessão 08. Até esse
-rename rodar, `source = "mirror"` aborta com HTTP 404; fallback
-automático para `source = "cvm"` não está implementado, mas o usuário
-pode forçar via `cvm_source_set("cvm")`.
+os encodings.
 
 Limite default 100 MiB, configurável via
 `options(cvmdata.cache_max_size_mb = ...)` — imposto na Sessão 3.8.

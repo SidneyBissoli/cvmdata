@@ -223,7 +223,7 @@
 <li><label><input type="checkbox" checked>Scripts <code>inst/etl/0{1,2,2b,3}*.R</code> ganham CLI flag <code>--group</code>.</label></li>
 <li><label><input type="checkbox" checked><code>inst/etl/03-publish.R</code> nomeia releases <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code>.</label></li>
 <li><label><input type="checkbox" checked>Consumer side (<code>R/util-mirror-assets.R</code>, <code>R/source-mirror-duckdb.R</code>) lê o novo formato; cache de inventário passa a chavear por <code>(group, dataset)</code>.</label></li>
-<li><label><input type="checkbox"><strong>Rename in-place</strong> dos 4 releases atuais via GitHub API (<code>gh release edit</code> ou REST), com checkpoint após cada um; rollback documentado em caso de falha parcial. Tarefa manual do mantenedor pós-Sessão 08 (não roda no CI).</label></li>
+<li><label><input type="checkbox" checked><strong>Rename in-place</strong> dos 4 releases atuais via GitHub API (<code>gh release edit</code> ou REST), com checkpoint após cada um; rollback documentado em caso de falha parcial. Tarefa manual do mantenedor pós-Sessão 08 (não roda no CI).</label></li>
 <li><label><input type="checkbox"><code>vignettes/articles/cache-and-mirror.Rmd</code> atualizado.</label></li>
 <li><label><input type="checkbox" checked><code>vignettes/articles/groups-overview.Rmd</code> novo (lista 18 grupos, mapeia para 5 contratos, exemplos por fetcher; <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> real, 4 skeletons com <code>eval = FALSE</code>).</label></li>
 <li><label><input type="checkbox" checked><code>vignettes/articles/cvm-defects.Rmd</code> renomeado para <code>data-defects.Rmd</code> (defeito não é só “do CVM”; cobre toda fonte de dado a partir de v0.4+).</label></li>

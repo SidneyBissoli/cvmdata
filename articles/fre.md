@@ -73,7 +73,7 @@ auditor <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.117958
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 02:35:05.941063
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 18
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -105,7 +105,7 @@ issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.305681
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 02:35:06.141803
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 10
 #> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -129,7 +129,7 @@ pcd <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.456351
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 02:35:06.303455
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 10
 #> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -166,7 +166,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.778147
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 02:35:06.637213
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
