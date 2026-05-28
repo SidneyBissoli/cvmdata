@@ -73,6 +73,12 @@ memory/
 # the public repo or tarball
 cvmdata_rodada*.md
 
+# Locally rendered architecture decision docs — the canonical copies
+# live in data-raw/decisions/; renders dropped at the repo root are
+# local working copies.
+cvmdata_arquitetura_*.md
+cvmdata_arquitetura_*.html
+
 # Session and milestone prompts driving Claude work — local only.
 # Covers both CLI (PROMPT_CLAUDE_CODE_*.md) and Desktop chat
 # (PROMPT_CLAUDE_DESKTOP_*.md) flavors.
@@ -89,5 +95,8 @@ VERIFICACAO_SESSAO_*.md
 ROADMAP.html
 
 # Per-dataset smoke tests at the repo root — kept locally only.
-# .Rbuildignore already excludes them from the tarball.
+# .Rbuildignore already excludes them from the tarball. The .md/.html
+# patterns cover rendered runs (e.g. teste_usuario_final.md/html).
 teste_*.R
+teste_*.md
+teste_*.html
