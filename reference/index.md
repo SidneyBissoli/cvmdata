@@ -54,9 +54,16 @@ Releases).
 
 ## Discovery
 
-Browse the datasets, tables, dictionaries and code lists carried by the
-package.
+Browse the CKAN groups, datasets, tables, dictionaries and code lists
+carried by the package.
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+is the entry point that lists every group covered by the project roadmap
+(only `companhias` is functionally implemented in v0.1.0.9000); the
+remaining functions accept an optional `group` argument that
+disambiguates when a dataset slug occurs in more than one group.
 
+- [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+  : List the CVM CKAN groups
 - [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
   : List datasets covered by the package
 - [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)

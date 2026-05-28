@@ -44,7 +44,7 @@ companies <- readRDS(system.file(
 ))
 companies
 #> ℹ source: "cvm" | fetched_at: 2026-05-23 13:06:15.690987
-#> ℹ dataset: "cad" | table: "companhias"
+#> ℹ group: | dataset: "cad" | table: "companhias"
 #>              cnpj_cia                                         denom_social
 #> 1  08.773.135/0001-00            2W ECOBANK S.A. - EM RECUPERAÇÃO JUDICIAL
 #> 2  11.396.633/0001-87                          3A COMPANHIA SECURITIZADORA
@@ -306,7 +306,7 @@ bb_bpa <- readRDS(system.file(
 ))
 bb_bpa
 #> ℹ source: "cvm" | fetched_at: 2026-05-23 13:06:16.55788
-#> ℹ dataset: "dfp" | table: "bpa"
+#> ℹ group: | dataset: "dfp" | table: "bpa"
 #>             cnpj_cia   dt_refer versao       denom_cia cd_cvm
 #> 1 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023
 #> 2 00.000.000/0001-91 2024-12-31      1 BCO BRASIL S.A. 001023

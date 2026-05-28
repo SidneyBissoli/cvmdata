@@ -51,6 +51,39 @@
 
 ### New features
 
+- [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+  lists the 18 CKAN groups published by the CVM Open Data Portal, with
+  the number of datasets each group carries and the canonical `cvmdata`
+  fetcher contract (`issuer`, `fund`, `agent`, `offering` or `event`)
+  that covers it. The table is static (verified against
+  `<https://dados.cvm.gov.br/group/>` on 2026-05-25) and serves as the
+  navigation entry point for the universe of CVM data; only the
+  `companhias` group is functionally implemented in v0.1.0.9000, but the
+  remaining 17 rows document the planned coverage exposed via the four
+  skeleton fetchers shipped in the previous development entry.
+
+- [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+  [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+  and
+  [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  gained an optional `group` argument, completing the discovery surface
+  started in the previous entry
+  ([`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+  and
+  [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
+  already accepted it). When `group` is `NULL` (default) the functions
+  preserve their v0.1 behaviour:
+  [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
+  returns every installed dataset across every group,
+  [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+  and
+  [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  resolve the group by uniqueness across the schema tree. When set, the
+  functions restrict the result to that group; unknown groups abort with
+  `cvmdata_error_input`. From v0.4 onward, when datasets may collide
+  between groups, calling `cvm_tables("foo")` without `group` aborts
+  with `cvmdata_error_input_ambiguous`.
+
 - Four new fetchers exported with skeleton implementation:
   [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
   (fund datasets — `fundos-de-investimento`,
@@ -78,6 +111,53 @@
   Emitted by the four new skeleton fetchers when called in v0.1.0.9000.
   Sibling of `cvmdata_error_input_ambiguous` (introduced in the previous
   development entry); neither subclass is a parent of the other.
+
+- Parquet mirror became `<group>`-aware end-to-end. The GitHub-Releases
+  producer (`inst/etl/0{1,2,2b,3}-*.R`) and the workflow
+  `.github/workflows/etl-mirror.yaml` now take `--group` (matrix
+  `(group, dataset)`), write to
+  `<workspace>/out/parquet/<group>/<dataset>/...`, and publish to the
+  moving release `mirror-<group>-<dataset>-latest`. The mirror consumer
+  (`R/util-mirror-assets.R`, `R/source-mirror-duckdb.R`) reads the same
+  naming convention; `mirror_release_tag()` and `mirror_list_assets()`
+  gained a leading `group` argument. The session-scoped asset cache now
+  keys on `(group, dataset)`. Operational note: the four pre-Sessao-08
+  GitHub Releases (`mirror-cad-latest`, …) must be renamed in place via
+  the GitHub API to `mirror-companhias-<dataset>-latest` before
+  consumers on this code can read them; the rename is the operator’s
+  task and is intentionally not automated. Until that rename happens,
+  `source = "mirror"` aborts with HTTP 404; users can fall back to
+  `cvm_source_set("cvm")`.
+
+- Returned tibbles (`cvm_tbl` class) now carry a `group` provenance
+  attribute, slotted between `fetched_at` and `dataset`. The total
+  number of attached attributes goes from five to six (`source`,
+  `fetched_at`, `group`, `dataset`, `table`, `package_version`).
+  `print.cvm_tbl()` renders `group` in the header alongside the existing
+  fields, so a snapshot taken at the REPL self-documents which CKAN
+  group the data came from. `load_schema()` stamps the resolved group
+  onto the schema list so downstream callers propagate it without
+  re-running the schema-tree lookup.
+
+### Documentation
+
+- New article `vignettes/articles/groups-overview.Rmd` lists the 18 CKAN
+  groups and maps each to one of the five fetcher contracts, with a
+  worked example per fetcher (only
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  runs; the four skeletons stay in `eval = FALSE` chunks until v0.4+).
+  Linked from the pkgdown Articles navbar.
+
+- Article `cvm-defects.Rmd` renamed to `data-defects.Rmd`. The taxonomy
+  of publication quirks covers any upstream source the package will
+  integrate (the universe widens beyond CVM proper from v0.4+); the new
+  name reflects that scope. URL on the pkgdown site moves from
+  `/articles/cvm-defects.html` to `/articles/data-defects.html`. No
+  content change.
+
+- `_pkgdown.yml`: `cvm_groups` listed first in the Discovery reference;
+  the section description now points users at it as the entry to the
+  group taxonomy.
 
 ### Internal
 

@@ -36,11 +36,12 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
     <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/cache-and-mirror.html">Cache and mirror backend</a></li>
-    <li><a class="dropdown-item" href="../articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+    <li><a class="dropdown-item" href="../articles/data-defects.html">Known defects of the CVM publication</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -93,7 +94,15 @@ interface stays identical.</li>
 <code>validate = "warn"</code> or <code>"skip"</code> to read them.</li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pin the source to the live CVM portal for the article's live chunks.</span></span>
+<span><span class="co"># The default mirror backend (`cvm_source_get()`) depends on GitHub</span></span>
+<span><span class="co"># Releases named `mirror-&lt;group&gt;-&lt;dataset&gt;-latest`; until those are</span></span>
+<span><span class="co"># renamed in place from the pre-Sessao-08 format, the fallback to the</span></span>
+<span><span class="co"># CVM HTTP portal is the path that always works.</span></span>
+<span><span class="fu"><a href="../reference/cvm_source_set.html">cvm_source_set</a></span><span class="op">(</span><span class="st">"cvm"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Source backend set to <span style="color: #0000BB;">"cvm"</span>.</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="reference-36-tables-by-theme">Reference: 36 tables, by theme<a class="anchor" aria-label="anchor" href="#reference-36-tables-by-theme"></a>
 </h2>
@@ -205,19 +214,19 @@ Deficiência</em>) employment counts for <strong>BCO BRASIL S.A.</strong>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Resolving CD_CVM 1023 via <span style="color: #0000BB;">"fre"</span>/submissao for <span style="color: #0000BB;">2024</span> (table <span style="color: #0000BB;">"auditor"</span> does not</span></span>
 <span><span class="co">#&gt;   carry `cd_cvm`).</span></span>
 <span><span class="va">auditor</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-26 00:53:32.007616</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"auditor"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 19</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-28 01:38:26.117958</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"auditor"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 18</span></span></span>
 <span><span class="co">#&gt;   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     <span style="text-decoration: underline;">131</span>376</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     <span style="text-decoration: underline;">131</span>377</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 13 more variables: auditor &lt;chr&gt;, cpf_auditor &lt;chr&gt;, cnpj_auditor &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: auditor &lt;chr&gt;, cpf_auditor &lt;chr&gt;, cnpj_auditor &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   codigo_cvm_auditor &lt;chr&gt;, tipo_origem_auditor &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   data_inicio_contratacao &lt;date&gt;, data_fim_contratacao &lt;date&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   data_inicio_prestacao_servico &lt;date&gt;, servico_contratado &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   remuneracao_auditor &lt;chr&gt;, justificativa_substituicao &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   razao_apresentada &lt;chr&gt;, year &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   razao_apresentada &lt;chr&gt;</span></span></span></code></pre></div>
 <p>Notice the header columns: <code>cnpj_companhia</code>,
 <code>data_referencia</code>, <code>nome_companhia</code> (no
 <code>cd_cvm</code>). The package looked up CNPJ for CD_CVM
@@ -236,13 +245,13 @@ never released a dictionary for. With the default
 <span>          issuer <span class="op">=</span> <span class="st">"1023"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Resolving CD_CVM 1023 via <span style="color: #0000BB;">"fre"</span>/submissao for <span style="color: #0000BB;">2024</span> (table <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
 <span><span class="co">#&gt;   does not carry `cd_cvm`).</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-26 00:53:32.377526</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 11</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 variables: cnpj_companhia &lt;chr&gt;, data_referencia &lt;date&gt;, versao &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-28 01:38:26.305681</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 variables: cnpj_companhia &lt;chr&gt;, data_referencia &lt;date&gt;, versao &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   id_documento &lt;chr&gt;, nome_companhia &lt;chr&gt;, codigo_posicao &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   posicao &lt;chr&gt;, quantidade_pcd &lt;dbl&gt;, quantidade_nao_pcd &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quantidade_sem_resposta &lt;dbl&gt;, year &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   quantidade_sem_resposta &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>The reader expects the user to opt in by relaxing validation. With
 <code>validate = "warn"</code> the package emits
 <code>cvmdata_warn_meta_unavailable</code> and returns the tibble; with
@@ -257,13 +266,13 @@ never released a dictionary for. With the default
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Resolving CD_CVM 1023 via <span style="color: #0000BB;">"fre"</span>/submissao for <span style="color: #0000BB;">2024</span> (table <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
 <span><span class="co">#&gt;   does not carry `cd_cvm`).</span></span>
 <span><span class="va">pcd</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-26 00:53:32.59366</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 11</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 variables: cnpj_companhia &lt;chr&gt;, data_referencia &lt;date&gt;, versao &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-28 01:38:26.456351</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 10 variables: cnpj_companhia &lt;chr&gt;, data_referencia &lt;date&gt;, versao &lt;chr&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   id_documento &lt;chr&gt;, nome_companhia &lt;chr&gt;, codigo_posicao &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   posicao &lt;chr&gt;, quantidade_pcd &lt;dbl&gt;, quantidade_nao_pcd &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   quantidade_sem_resposta &lt;dbl&gt;, year &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   quantidade_sem_resposta &lt;dbl&gt;</span></span></span></code></pre></div>
 <p><code>cvm_dictionary("fre", "empregado_PCD")</code> returns the
 column list (from the YAML’s <code>expected_field_names</code>) with
 <code>NA</code> in every metadata column — by design, because the
@@ -292,8 +301,8 @@ FRE filing.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">posicao</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">posicao</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nome_companhia"</span>, <span class="st">"data_referencia"</span>, <span class="va">cols</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-26 00:53:33.153226</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"posicao_acionaria"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-28 01:38:26.778147</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"posicao_acionaria"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span></span>

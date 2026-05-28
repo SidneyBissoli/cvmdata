@@ -8,7 +8,7 @@ avoid repeated HTTP calls.
 ## Usage
 
 ``` r
-cvm_dataset_years(dataset, schema = NULL)
+cvm_dataset_years(dataset, group = NULL, schema = NULL)
 ```
 
 ## Arguments
@@ -16,6 +16,13 @@ cvm_dataset_years(dataset, schema = NULL)
 - dataset:
 
   Short dataset id.
+
+- group:
+
+  Optional CKAN group slug (e.g. `"companhias"`). When `NULL` (default)
+  resolved by uniqueness across the installed schema tree; when a
+  dataset slug occurs in more than one group, omitting `group` aborts
+  with `cvmdata_error_input_ambiguous`.
 
 - schema:
 
@@ -38,6 +45,7 @@ Other discovery:
 [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
 [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
 [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
 
 ## Examples
@@ -45,5 +53,6 @@ Other discovery:
 ``` r
 if (FALSE) { # interactive()
 cvm_dataset_years("dfp")
+cvm_dataset_years("dfp", group = "companhias")
 }
 ```

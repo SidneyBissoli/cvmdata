@@ -7,6 +7,8 @@
 
 ### Deep dives
 
+- [Groups overview: the 18 CKAN groups and 5 fetcher
+  contracts](https://sidneybissoli.github.io/cvmdata/articles/groups-overview.md):
 - [issuer_fetch(): the generic
   API](https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.md):
 - [Quarterly and annual statements (ITR &
@@ -16,4 +18,4 @@
 - [Cache and mirror
   backend](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.md):
 - [Known defects of the CVM
-  publication](https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.md):
+  publication](https://sidneybissoli.github.io/cvmdata/articles/data-defects.md):

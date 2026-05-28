@@ -8,9 +8,10 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/README.pt-BR.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/ROADMAP.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html</loc></url>
-<url><loc>https://sidneybissoli.github.io/cvmdata/articles/cvm-defects.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/cvmdata.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/articles/data-defects.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/fre.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/articles/groups-overview.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/index.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.html</loc></url>
@@ -28,6 +29,7 @@
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.html</loc></url>
+<url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.html</loc></url>
 <url><loc>https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.html</loc></url>

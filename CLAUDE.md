@@ -2,14 +2,17 @@
 
 Documento de referência para sessões do Claude Code no diretório
 `C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata`. Consolida o
-essencial de sete documentos canônicos da fase de planejamento (Rodadas
-1, 2, 2.5, 2.6, 3.0, 3.0.2, 3.1) para que sessões futuras não precisem
-reler tudo. Quando este `CLAUDE.md` divergir de um documento canônico,
-**prevalece o canônico** — em particular
-`cvmdata_rodada2-5_naming_unificado-v03.md` para naming,
-`cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para política do
-reader, e `cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md` para o
-estado pós-Sessão 01. Estado de execução por fase no `ROADMAP.md`.
+essencial dos documentos canônicos de planejamento (Rodadas 1 a 3.1 +
+decisão de grupos de 2026-05-25) para que sessões futuras não precisem
+reler tudo. Quando este `CLAUDE.md` divergir de um canônico, **prevalece
+o canônico** — em particular `cvmdata_rodada2-5_naming_unificado-v03.md`
+para naming de colunas e tabelas,
+`cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para a política do
+reader, e `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`
+para a arquitetura de 5 fetchers por contrato (decisão de 2026-05-25,
+implementada nas Sessões 04-08 do ciclo `0.1.0.9000`). Estado de
+execução por fase no `ROADMAP.md`; histórico de breaking changes em
+`NEWS.md`.
 
 Comunicação com Sidney é em **português brasileiro**. Tom direto,
 técnico, sem fluff, sem puxa-saquismo. Quando ele perguntar problemas,
@@ -56,78 +59,54 @@ chama-se `conjunto_dados` em PT. Mismatch deliberado.
 
 ------------------------------------------------------------------------
 
-## 2. Naming canônico (resumo do naming doc v03)
-
-> ### ⚠️ Decisão arquitetural em aberto (2026-05-24)
->
-> `cvm_fetch()` está prematuramente nomeada. Hoje aceita só os 4
-> datasets de **companhias abertas** (`cad`, `dfp`, `itr`, `fre`) e
-> carrega argumentos que só fazem sentido para esse grupo: `companies`
-> (CNPJ/CD_CVM/texto), `report_type` (`ind`/`con`), `years` (fundos
-> publicam mensal/trimestral, não anual). A CVM organiza dados em
-> **grupos** e há ~15 grupos adicionais previstos (ICVM 555, FIIs,
-> FIDCs, estruturados, securitizadoras, administradores de carteira,
-> ofertas públicas, agentes autônomos, atividade sancionadora, atos
-> declaratórios, auditores, consultores, coordenadores de ofertas,
-> CEPAC, investidores não residentes, intermediários, crowdfunding).
->
-> Três opções de design abertas, a discutir em sessão dedicada
-> (provavelmente em plan mode no Claude Desktop):
->
-> - **A** Argumento `group=` em `cvm_fetch()` (unificação total).
-> - **B** Funções por grupo: `cia_fetch()`,
->   [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
->   etc. (proposta inicial — contratos de dado divergem demais).
-> - **C** Híbrida: `cvm_fetch()` com dispatch interno por grupo inferido
->   do dataset, `...` permissivo.
->
-> A janela para o rename sem custo social é agora: v0.1.0 foi tagueada
-> em 2026-05-24 e ainda não está no CRAN. Submissão rOpenSci no
-> `ROADMAP.md` está deferida até a decisão fechar. Antes de mexer em
-> `R/api-cvm-fetch.R` ou na assinatura pública, ler esse bloco e
-> perguntar.
+## 2. Naming canônico (resumo do naming doc v03 + decisão de grupos 2026-05-25)
 
 ### 2.1 Funções públicas
 
-Padrão `object_verb` (Dev Guide rOpenSci). **`cvm_fetch()` é a API
-principal para obtenção de dados de qualquer dataset.** Aliases tipados
-por dataset *não* são exportados — `cad_fetch()` permanece apenas por
-ergonomia da Sessão 01 (CAD = caso simples sem ZIP, sem variantes), e
-internamente delega para `cvm_fetch()`. **Decisão tomada em 2026-05-20**
-depois que comparação empírica entre dois caminhos de download mostrou
-que o portal de dados abertos (`dados.cvm.gov.br`) entrega TODOS os
-dados que o portal RAD/ENET por documento entrega, em formato tabular
-muito mais conveniente e 30× mais rápido (~0,93 s o ZIP anual inteiro
-contra ~30 s por documento individual). Vide `cvmdata_rodada3-1_*.md` e
-o histórico desta sessão.
+Padrão `object_verb` (Dev Guide rOpenSci). API pública organizada em **5
+fetchers por contrato de dado**, um por tipo de entidade regulada pela
+CVM. Em v0.1.0.9000 apenas
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+é funcional; os outros 4 são skeletons exportados que abortam com
+`cvmdata_error_input_group` apontando para o roadmap (Sessões 04-08 do
+ciclo, implementação plena nas v0.2-v0.8). Skeletons foram exportados
+agora para que a submissão rOpenSci revise a superfície de API completa
+antes de a implementação chegar.
 
 ``` r
 
-# API principal — funciona para qualquer (dataset, table)
-cvm_fetch(dataset, table,
-          companies   = NULL,
-          years       = NULL,
-          source      = NULL,   # default resolvido via cvm_source_get()
-          report_type = NULL,
-          on_error    = "abort",
-          validate    = "strict",
-          ...)
+# Issuer datasets — companhias abertas (grupo CKAN "companhias")
+# Cobre cad, dfp, itr, fre em v0.1; fca, vlmo, cgvn, ipe em v0.2+
+issuer_fetch(dataset, table,
+             issuer      = NULL,      # CNPJ / CD_CVM / texto, vetor
+             year        = NULL,      # integer vector, NULL → último
+             source      = NULL,      # via cvm_source_get()
+             report_type = NULL,      # "ind" / "con" / NULL
+             on_error    = "abort",
+             validate    = "strict",
+             ...)
 
-# Alias mantido (Sessão 01) — internamente delega para cvm_fetch()
-cad_fetch(companies = NULL, ...)
+# Skeletons (abort com cvmdata_error_input_group em v0.1.0.9000)
+fund_fetch(dataset, table, fund = NULL, date = NULL, ...)        # v0.4-v0.6
+agent_fetch(dataset, table, agent = NULL, as_of = NULL, ...)     # v0.7
+offering_fetch(dataset, table, offering = NULL,
+               date_range = NULL, ...)                            # v0.7
+event_fetch(dataset, table, event = NULL, date_range = NULL, ...)  # v0.8
 
 # Descoberta
-cvm_datasets()                       # lista de datasets disponíveis
-cvm_tables(dataset)                  # tabelas de um dataset
-cvm_dictionary(dataset, table)       # dicionário oficial do snapshot
-cvm_codelist(dataset, table, column) # valores categóricos do snapshot
-cvm_dataset_years(dataset)           # range de anos com dados publicados
+cvm_groups()                                          # 18 grupos + contrato
+cvm_datasets(group = NULL)                            # datasets disponíveis
+cvm_tables(dataset, group = NULL)                     # tabelas de um dataset
+cvm_dictionary(dataset, table, group = NULL)          # dicionário do snapshot
+cvm_codelist(dataset, table, column, group = NULL)    # valores categóricos
+cvm_dataset_years(dataset, group = NULL)              # range de anos publicados
 
 # Cache
 cvm_cache_path()
 cvm_cache_set_path(path)
-cvm_cache_clear(what = c("all", "raw", "parquet"), dataset = NULL,
-                year = NULL, confirm = interactive())
+cvm_cache_clear(what = c("all", "raw", "parquet"),
+                group = NULL, dataset = NULL, year = NULL,
+                confirm = interactive())
 cvm_cache_info()
 
 # Source
@@ -136,29 +115,47 @@ cvm_source_set(source)
 
 # Utilidades
 cnpj_clean(x)                 # exportada na v0.1
-cnpj_format(x)                # inverso de cnpj_clean — formata 14 dígitos
+cnpj_format(x)                # inverso de cnpj_clean
 ```
+
+`cvm_fetch()` e `cad_fetch()` foram **removidas sem wrapper** na Sessão
+06 (2026-05-25). Substituições mecânicas:
+
+- `cvm_fetch(dataset, table, companies=, years=, ...)` →
+  `issuer_fetch(dataset, table, issuer=, year=, ...)`
+- `cad_fetch(companies=, ...)` →
+  `issuer_fetch("cad", "companhias", issuer=, ...)`
+
+Argumentos renomeados para o singular tidyverse (`companies` → `issuer`,
+`years` → `year`); semântica preservada (ainda aceitam vetor de qualquer
+comprimento). Calls antigas falham com
+`could not find function "cvm_fetch"`; passar argumento antigo aborta
+com `cvmdata_error_input` e dica do nome novo. Argumento `group` nas
+funções de descoberta resolve por unicidade quando omitido (`NULL`); a
+partir de v0.4, quando um slug de dataset puder ocorrer em mais de um
+grupo, omitir `group` aborta com `cvmdata_error_input_ambiguous`.
 
 Domínio dos argumentos enumerados (validados via
 [`rlang::arg_match0()`](https://rlang.r-lib.org/reference/arg_match.html)):
 
 - `source ∈ c("mirror", "cvm")`. **Default a partir de v0.1.0 =
-  `"mirror"`** (commit isolado do flip executado na sessão do marco,
-  marcado ⚠️ breaking em `NEWS.md`). Backend mirror lê parquets do
-  release `mirror-<dataset>-latest` via API GitHub (inventário cacheado
-  por sessão) + DuckDB local. Pipeline: filter pushdown manual por nome
-  de asset (years/report_type extraídos do encoding
+  `"mirror"`** (flip executado no marco v0.1.0). Backend mirror lê
+  parquets do release `mirror-<group>-<dataset>-latest` via API GitHub
+  (inventário cacheado por sessão, chaveado por `(group, dataset)`) +
+  DuckDB local. Pipeline: filter pushdown manual por nome de asset
+  (year/report_type extraídos do encoding
   `<table>__report_type=R__year=Y__part-0.parquet`, com a sanitização
   `=` → `.` aplicada pelo GitHub Releases) → download para L3 em
-  `<cache>/parquet/<dataset>/<table>/[report_type=R/] year=Y/part-0.parquet`
+  `<cache>/parquet/<group>/<dataset>/<table>/ [report_type=R/]year=Y/part-0.parquet`
   → DuckDB lê local → reattach de `year`/`report_type` como colunas
   regulares no tibble (Decisão 2 da 3.13 = Alt 1). Cache L3 é invalidado
-  por hash via sidecar `<cache>/parquet/<dataset>/__source_hash.json`,
-  confrontado contra o asset homônimo do release; quando o hash muda, o
-  L3 inteiro do dataset é evicted antes da próxima leitura. Backend
-  `"cvm"` (portal aberto via HTTP em `dados.cvm.gov.br`) permanece
-  totalmente suportado e selecionável por chamada (`source = "cvm"`) ou
-  via `cvm_source_set("cvm")` quando se precisa de frescor byte a byte
+  por hash via sidecar
+  `<cache>/parquet/<group>/<dataset>/__source_hash.json`, confrontado
+  contra o asset homônimo do release; quando o hash muda, o L3 inteiro
+  do dataset é evicted antes da próxima leitura. Backend `"cvm"` (portal
+  aberto via HTTP em `dados.cvm.gov.br`) permanece totalmente suportado
+  e selecionável por chamada (`source = "cvm"`) ou via
+  `cvm_source_set("cvm")` quando se precisa de frescor byte a byte
   contra o regulador. A precedência é: arg explícito \>
   `getOption("cvmdata.source")` \> built-in default. **Decisão tomada na
   Sessão 3.6** (2026-05-22): Alt 2 do trio
@@ -166,35 +163,36 @@ Domínio dos argumentos enumerados (validados via
   v0.1 antes do release deixaria o pacote inutilizável out-of-the-box;
   com mirror já depositado em GitHub Releases, default natural por ser
   ~30× mais rápido. A “quebra de reprodutibilidade” do flip é
-  controlável via `cvm_source_set("cvm")` e pelo atributo `source` que o
-  tibble já carrega via `cvm_attach_metadata()`. A assinatura pública de
-  `cvm_fetch()` declara `source = NULL` para que o option seja
-  consultado dinamicamente — alinhamento com o padrão da família cache
+  controlável via `cvm_source_set("cvm")` e pelos atributos `source` e
+  `group` que o tibble carrega via `cvm_attach_metadata()`. A assinatura
+  pública de
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  declara `source = NULL` para que o option seja consultado
+  dinamicamente — alinhamento com o padrão da família cache
   ([`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
   ↔︎
   [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
-- `report_type ∈ c("ind", "con")` ou `NULL`. **Obrigatório** para
-  tabelas que têm variantes individual/consolidada (`bpa`, `bpp`, `dre`,
-  `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`). **Erro** se passado a
-  tabelas que não têm essa distinção (`composicao_capital`, `submissao`,
-  `parecer`).
-- `years`: integer vector ou `NULL`. `NULL` (default) → **último ano
-  disponível**, descoberto por `HEAD` probing decrescente a partir do
-  ano corrente. Para histórico, passar integer vector explícito
-  (`years = 2012:2024`). O helper `cvm_dataset_years(dataset)` devolve o
-  range disponível para enumeração. **Sem sentinela `"all"`** —
-  argumento permanece com tipo único (integer), evita observação de
-  type-mixing em review rOpenSci/CRAN.
+- `report_type ∈ c("ind", "con")` ou `NULL` (só em
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)).
+  **Obrigatório** para tabelas com variantes individual/consolidada
+  (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`).
+  **Erro** se passado a tabelas sem essa distinção
+  (`composicao_capital`, `submissao`, `parecer`, `companhias`).
+- `year`: integer vector ou `NULL`. `NULL` (default) → **último ano
+  disponível**, descoberto por `HEAD` probing decrescente. Para
+  histórico, integer vector explícito (`year = 2012:2024`). Helper
+  `cvm_dataset_years(dataset)` devolve o range. **Sem sentinela
+  `"all"`** — tipo único, evita observação de type-mixing em review.
 
-Sobre exercícios contidos em cada CSV anual: o portal CVM publica em
-cada ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — i.e., o ano
-declarado e seu N-1. O antepenúltimo do ano N é o último do ano N-2.
-`cvm_fetch()` não tenta reconstruir o antepenúltimo: retorna o conteúdo
-literal do CSV declarado em `years`. Usuários que queiram histórico mais
-longo pedem `years = (N-2):N` e empilham; a deduplicação por
-`(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
+Sobre exercícios contidos em cada CSV anual: o portal publica em cada
+ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e seu
+N-1. O antepenúltimo de N é o último de N-2.
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+não reconstrói o antepenúltimo: retorna o conteúdo literal do CSV do
+`year` pedido. Para histórico mais longo, pedir `year = (N-2):N` e
+empilhar; dedup por `(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
 
 ### 2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)
 
@@ -237,7 +235,7 @@ Em tabelas ITR/DFP contábeis: `VL_CONTA` é multiplicada por
 retornada em reais absolutos. `escala_moeda` é removida do tibble;
 `moeda` mantida (constante `"REAL"` na v0.1).
 
-### 2.7 Seleção de companhias via `companies`
+### 2.7 Seleção de companhias via `issuer`
 
 Argumento único com **detecção automática de tipo**:
 
@@ -271,7 +269,7 @@ casem em `denom_cia` normalizada com **fronteira de palavra** (regex
 
 ``` r
 
-cvm_fetch("dfp", "bpa", companies = "banco brasil")
+issuer_fetch("dfp", "bpa", issuer = "banco brasil")
 # Tokens: "banco" + "brasil"
 # Expande: ("banco"|"bco") AND ("brasil")
 # Casa: "BCO BRASIL S.A." (cd_cvm 001023)
@@ -354,42 +352,49 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     ├── ROADMAP.md
     ├── R/                             # FLAT, sem subpastas
     │   ├── cvmdata-package.R          # _PACKAGE sentinel
-    │   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
-    │   │                              #   + filter_by_companies() + busca textual
-    │   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
+    │   ├── api-issuer-fetch.R         # issuer_fetch() (era cvm_fetch) +
+    │   │                              #   issuer_fetch_internal() +
+    │   │                              #   filter_by_issuer() + busca textual
+    │   ├── api-fund-fetch.R           # fund_fetch() — skeleton v0.1.0.9000
+    │   │                              #   (abort com cvmdata_error_input_group)
+    │   ├── api-agent-fetch.R          # agent_fetch() — skeleton v0.1.0.9000
+    │   ├── api-offering-fetch.R       # offering_fetch() — skeleton v0.1.0.9000
+    │   ├── api-event-fetch.R          # event_fetch() — skeleton v0.1.0.9000
+    │   ├── api-cvm-groups.R           # cvm_groups() — taxonomia estática dos
+    │   │                              #   18 grupos CKAN (Sessão 08)
     │   ├── cache.R                    # API pública de cache + engine de eviction:
     │   │                              #   cvm_cache_path(), cvm_cache_set_path(),
     │   │                              #   cvm_cache_info(), cvm_cache_clear();
-    │   │                              #   build_cache_units(), cache_enforce_limit()
-    │   ├── discovery.R                # cvm_datasets(), cvm_tables(),
-    │   │                              #   cvm_dictionary(), cvm_codelist(),
-    │   │                              #   cvm_dataset_years() (não segue prefixo
-    │   │                              #   por enquanto — exceção tolerada)
-    │   ├── schema-load.R              # load_schema() + validate_schema() +
-    │   │                              #   resolve_file_pattern()
-    │   ├── source.R                   # API pública de source:
-    │   │                              #   cvm_source_get(), cvm_source_set()
-    │   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
-    │   │                              #   ZIP-yearly) + download_with_etag()
-    │   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() funcional
-    │   │                              #   (Sessão 3.13): filter pushdown por
-    │   │                              #   nome de asset, download → L3, DuckDB
-    │   │                              #   read local, reattach year/report_type,
-    │   │                              #   hash-based eviction via sidecar
+    │   │                              #   build_cache_units(), cache_enforce_limit();
+    │   │                              #   cache_migrate_v0_1_to_v0_2() (Sessão 04)
+    │   ├── discovery.R                # cvm_datasets(group=), cvm_tables(group=),
+    │   │                              #   cvm_dictionary(group=), cvm_codelist(group=),
+    │   │                              #   cvm_dataset_years(group=)
+    │   ├── schema-load.R              # load_schema(dataset, table, group = NULL)
+    │   │                              #   com resolução por unicidade quando
+    │   │                              #   group omitido; stampa schema$group para
+    │   │                              #   downstream (Sessão 08)
+    │   ├── source.R                   # cvm_source_get(), cvm_source_set()
+    │   ├── source-cvm-http.R          # source_cvm_http_get() + download_with_etag()
+    │   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() funcional:
+    │   │                              #   filter pushdown por asset, download → L3,
+    │   │                              #   DuckDB local, reattach year/report_type
     │   ├── transform-schema.R         # apply_schema_transformations() genérico
     │   │                              #   (multiply_by_scale / drop /
-    │   │                              #   keep_latest_version) — substituiu
-    │   │                              #   transform-cad.R na Sessão 02
-    │   ├── util-attrs.R               # cvm_attach_metadata()
+    │   │                              #   keep_latest_version)
+    │   ├── util-attrs.R               # cvm_attach_metadata() — 6 atributos
     │   ├── util-cnpj.R                # cnpj_clean(), cnpj_format()
     │   ├── util-csv-cvm.R             # read_cvm_csv() + validate_field_count() +
     │   │                              #   validate_field_names() + emit_validation()
     │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
-    │   ├── util-mirror-assets.R       # mirror_list_assets() (inventário GitHub
-    │   │                              #   API cacheado por sessão) +
+    │   ├── util-group-lookup.R        # schema-driven dataset_group() /
+    │   │                              #   known_groups() / known_datasets()
+    │   │                              #   (Sessão 05; substituiu o lookup
+    │   │                              #   constante da Sessão 04)
+    │   ├── util-mirror-assets.R       # mirror_list_assets(group, dataset) +
     │   │                              #   parse_mirror_asset_name() (tolera = e .)
-    │   │                              #   + filter_mirror_assets() — Sessão 3.13
-    │   └── util-print-cvm-tbl.R       # print.cvm_tbl()
+    │   │                              #   + filter_mirror_assets()
+    │   └── util-print-cvm-tbl.R       # print.cvm_tbl() — exibe group no header
     ├── man/                           # auto-gerado
     ├── tests/
     │   ├── testthat.R
@@ -419,9 +424,9 @@ conceitual; arquivos reais usam **prefixos de hífen**.
     │   │   └── util-hash.R            # compute_source_hash(dataset) consumido por
     │   │                              #   03-publish.R (Sessão 3.12)
     │   └── extdata/
-    │       ├── schemas/<dataset>/<table>.yaml
-    │       ├── cvm_dictionary_snapshot.csv
-    │       ├── cvm_codelists_snapshot.csv
+    │       ├── schemas/<group>/<dataset>/<table>.yaml  # <group> seg, Sessão 05
+    │       ├── cvm_dictionary_snapshot.csv             # 1ª coluna = group
+    │       ├── cvm_codelists_snapshot.csv              # 1ª coluna = group
     │       └── vignette-data/         # dados pré-computados para vignettes
     ├── data-raw/                      # out of tarball; mistura build scripts
     │                                  #   (build-dictionary-snapshot.R,
@@ -452,14 +457,16 @@ Mapeamento agrupamento → prefixo: `api-`, `schema-`, `source-`,
 S3 minimalista. Classes internas:
 
 - `cvm_tbl` — subclasse de `tbl_df`. Todo tibble retornado por funções
-  públicas. Carrega 5 atributos em inglês (`source`, `fetched_at`,
-  `dataset`, `table`, `package_version`).
+  públicas. Carrega 6 atributos em inglês: `source`, `fetched_at`,
+  `group`, `dataset`, `table`, `package_version`.
 - `cvm_table_schema` — objeto interno descrevendo o schema lido do YAML.
+  Carrega `$group` stampado por `load_schema()` para que os callers
+  downstream propaguem sem re-lookup.
 - `cvm_source` — handle interno para dispatch HTTP / mirror / cache.
 
-`print.cvm_tbl()` é o único método print custom: exibe `source` e
-`fetched_at` antes do tibble normal, depois delega a
-[`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
+`print.cvm_tbl()` é o único método print custom: exibe `source`,
+`fetched_at`, `group`, `dataset` e `table` antes do tibble normal,
+depois delega a [`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
 
 ------------------------------------------------------------------------
 
@@ -467,6 +474,13 @@ S3 minimalista. Classes internas:
 
     cvmdata_error                          (pai genérico de erros)
     ├── cvmdata_error_input                (argumento inválido do usuário)
+    │   ├── cvmdata_error_input_ambiguous  (Sessão 05: (dataset, table)
+    │   │                                   ocorre em mais de um group;
+    │   │                                   passar group explícito)
+    │   └── cvmdata_error_input_group      (Sessão 07: fund/agent/offering/
+    │                                       event_fetch chamada antes da
+    │                                       implementação plena — aponta
+    │                                       para ROADMAP)
     ├── cvmdata_error_http                 (falha de rede / HTTP)
     ├── cvmdata_error_parse                (falha de parse ou validação)
     ├── cvmdata_error_meta_unavailable     (META oficial não publicado — strict)
@@ -499,7 +513,9 @@ automaticamente. Análogo `cvmdata_warn()` para warnings.
 
 ## 7. Schema dos YAMLs por tabela
 
-Localização: `inst/extdata/schemas/<dataset>/<table>.yaml`.
+Localização: `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`
+(Sessão 05; `<group>` é o slug CKAN, `"companhias"` para os 4 datasets
+de v0.1).
 
 ``` yaml
 dataset: <dataset>
@@ -575,13 +591,14 @@ profundidade).
 
 ### `cvm_dictionary_snapshot.csv`
 
-CSV UTF-8, delimitador `,`. 10 colunas obrigatórias + 1 opcional:
+CSV UTF-8, delimitador `,`. 11 colunas obrigatórias + 1 opcional:
 
 | Coluna | Tipo | Origem |
 |----|----|----|
+| `group` | character | chave; slug CKAN (`"companhias"` em v0.1) |
 | `dataset` | character | chave |
 | `table` | character | chave |
-| `campo` | character | chave; nome snake_case minúsculo (bate com `cvm_fetch()`) |
+| `campo` | character | chave; nome snake_case minúsculo (bate com [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)) |
 | `campo_original` | character | nome do campo como publicado no META CVM (preserva caps/mixed case) |
 | `descricao` | character | descrição oficial CVM |
 | `dominio` | character | domínio oficial CVM |
@@ -597,24 +614,26 @@ ausentes.
 
 ### `cvm_codelists_snapshot.csv`
 
-CSV UTF-8, delimitador `,`. 4 colunas (v0.1):
+CSV UTF-8, delimitador `,`. 5 colunas (v0.1):
 
 | Coluna | Tipo | Conteúdo |
 |----|----|----|
+| `group` | character | chave; slug CKAN (`"companhias"` em v0.1) |
 | `dataset` | character | chave |
 | `table` | character | chave |
 | `campo` | character | chave; snake_case minúsculo (mesma convenção de [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)) |
 | `value` | character | valor categórico em PT como vem da CVM |
 
-Chave composta `(dataset, table, campo, value)`. `first_seen_year`,
-`last_seen_year` e `frequency` deferidos para v0.2+ (decisão Sessão
-3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset
-(~30 s de geração); marcar `first_seen_year` com o único ano amostrado
-entrega informação enganosa (parece “categoria nova” quando é só “ano
-único na amostra”) e, quando v0.2 trouxer cobertura histórica, todos os
-valores cairão para 2010-2015 — exatamente o “ruído de diff Git” que
-motivou deferir as outras duas. Schema do CSV embarcado é estável dentro
-da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor interno.
+Chave composta `(group, dataset, table, campo, value)`.
+`first_seen_year`, `last_seen_year` e `frequency` deferidos para v0.2+
+(decisão Sessão 3.4). Razão: a v0.1 amostra apenas o último ano
+disponível por dataset (~30 s de geração); marcar `first_seen_year` com
+o único ano amostrado entrega informação enganosa (parece “categoria
+nova” quando é só “ano único na amostra”) e, quando v0.2 trouxer
+cobertura histórica, todos os valores cairão para 2010-2015 — exatamente
+o “ruído de diff Git” que motivou deferir as outras duas. Schema do CSV
+embarcado é estável dentro da v0.1; v0.2 pode adicionar a coluna sem
+quebra para o leitor interno.
 
 Critério de inclusão (Sessão 3.4):
 
@@ -644,14 +663,17 @@ Cache em `tools::R_user_dir("cvmdata", which = "cache")`.
 
 Níveis:
 
-- L1: ZIP raw da CVM (`<cache>/raw/<dataset>/[<year>/]`). Cobre CAD (CSV
-  direto) e DFP/ITR/FRE (ZIP yearly). Sidecar `*.etag.rds` carrega
-  ETag/Last-Modified/`fetched_at`.
+- L1: ZIP raw da CVM (`<cache>/raw/<group>/<dataset>/[<year>/]`). Cobre
+  CAD (CSV direto) e DFP/ITR/FRE (ZIP yearly). Sidecar `*.etag.rds`
+  carrega ETag/Last-Modified/`fetched_at`. Layout `<group>` segment
+  introduzido na Sessão 04; migração automática de caches v0.1.x via
+  `cache_migrate_v0_1_to_v0_2()` (interno, idempotente, log em
+  `tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds`).
 - L3: Parquet do mirror
-  (`<cache>/parquet/<dataset>/<table>/ [report_type=R/]year=Y/part-0.parquet`).
-  Sidecar `<cache>/parquet/<dataset>/__source_hash.json` armazena o
-  SHA-256 do release atual para invalidação. Ativado de fato na **Sessão
-  3.13**.
+  (`<cache>/parquet/<group>/<dataset>/<table>/ [report_type=R/]year=Y/part-0.parquet`).
+  Sidecar `<cache>/parquet/<group>/<dataset>/__source_hash.json`
+  armazena o SHA-256 do release atual para invalidação. Ativado de fato
+  na **Sessão 3.13**; `<group>` segment adicionado na Sessão 04.
 - L4: tibble em memória da sessão
   ([`cachem::cache_mem()`](https://cachem.r-lib.org/reference/cache_mem.html),
   50 MB — planejado, ainda não implementado em v0.1).
@@ -668,19 +690,22 @@ Invalidação:
   enquanto o sidecar existir; sidecar sem `fetched_at` parseável cai
   para HEAD para refrescar metadados.
 - **L3**: comparação de hash via sidecar
-  `<cache>/parquet/<dataset>/__source_hash.json` contra o asset
-  `__source_hash.json` do release `mirror-<dataset>-latest` (a API
-  GitHub é consultada em `mirror_list_assets()` no início de cada
-  `cvm_fetch(..., source = "mirror")`). Hash igual → no-op; hash
-  diferente → `unlink(<cache>/parquet/<dataset>/)` antes da próxima
-  leitura. Hash `NA` (release antigo sem o sidecar publicado) → L3
-  preservado por respeito a mirrors legados. Não há TTL no L3:
-  invalidação é exclusivamente content-addressed.
+  `<cache>/parquet/<group>/<dataset>/__source_hash.json` contra o asset
+  `__source_hash.json` do release `mirror-<group>-<dataset>-latest` (a
+  API GitHub é consultada em `mirror_list_assets(group, dataset)` no
+  início de cada `issuer_fetch(..., source = "mirror")`). Hash igual →
+  no-op; hash diferente → `unlink(<cache>/parquet/<group>/<dataset>/)`
+  antes da próxima leitura. Hash `NA` (release antigo sem o sidecar
+  publicado) → L3 preservado por respeito a mirrors legados. Não há TTL
+  no L3: invalidação é exclusivamente content-addressed.
 - [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
-  manual aceita `what ∈ c("all", "raw", "parquet")` (extensão da Sessão
-  3.13). `what = "parquet"` rejeita `year` porque o layout L3 aninha
-  year sob table — passar `dataset` sozinho evict o dataset inteiro;
-  para granularidade year-level, usar `what = "raw"`.
+  manual aceita `what ∈ c("all", "raw", "parquet")` + `group = NULL`
+  (Sessão 04) para scoping por CKAN group. Precedência: `what = "all"`
+  sobrepõe o filtro; senão o path alvo compõe
+  `<cache>/<what>/<group>/<dataset>/<year>/` com cada segmento opcional
+  da direita pra esquerda. `what = "parquet"` rejeita `year` porque o
+  layout L3 aninha year sob table — passar `dataset` sozinho evict o
+  dataset inteiro; para granularidade year-level, usar `what = "raw"`.
 
 Fallback hierárquico depende de `source`:
 
@@ -691,9 +716,10 @@ Fallback hierárquico depende de `source`:
   raw em disco) → CVM HTTP → erro.
 
 **Mirror parquet ativado em v0.1.** Workflow semanal (`etl-mirror.yaml`,
-cron `0 7 * * 2`) executa matrix paralela de 4 datasets
+cron `0 7 * * 2`) executa matrix bidimensional `(group, dataset)`
 (`fail-fast: false`); cada job roda `01-fetch-cvm.R` →
-`02-csv-to-parquet.R` → `03-publish.R`. O publish detecta mudança via
+`02-csv-to-parquet.R` → `02b-validate.R` → `03-publish.R`, todos com
+flags `--group` e `--dataset` (Sessão 08). O publish detecta mudança via
 hash SHA-256 das URLs de `cvm_dictionary_url` (`util-hash.R`, Sessão
 3.12) e skipa republish quando o hash bate o do release anterior. Volume
 estimado para companhias abertas (CAD + DFP + ITR + FRE em parquet
@@ -703,7 +729,14 @@ arquivo, 100 GB por release). Encoding dos asset names:
 por `gsub("[/\\\\]", "__", rel)` em `03-publish.R`); o GitHub Releases
 sanitiza `=` → `.` no URL público, e o reader
 (`parse_mirror_asset_name()` em `R/util-mirror-assets.R`) tolera ambos
-os encodings.
+os encodings. **Caveat operacional**: a transição Sessão 04 → Sessão 08
+mudou o nome dos releases de `mirror-<dataset>-latest` para
+`mirror-<group>-<dataset>-latest`. O código (producer + consumer) já lê
+o novo formato; o rename in-place dos 4 releases v0.1 existentes via
+`gh release edit` é tarefa manual do mantenedor pós-Sessão 08. Até esse
+rename rodar, `source = "mirror"` aborta com HTTP 404; fallback
+automático para `source = "cvm"` não está implementado, mas o usuário
+pode forçar via `cvm_source_set("cvm")`.
 
 Limite default 100 MiB, configurável via
 `options(cvmdata.cache_max_size_mb = ...)` — imposto na Sessão 3.8.
@@ -715,9 +748,10 @@ LRU eviction até cair para 80% do limite **ou** esgotar a lista de
 candidatos. A engine vive em `R/cache.R` (`read_cache_max_size()`,
 `build_cache_units()`, `cache_current_size_bytes()`,
 `cache_enforce_limit()`). Unidade de eviction: diretório do ano
-`<cache>/raw/<dataset>/<YYYY>/` para datasets yearly (DFP/ITR/FRE), par
-`{artifact, sidecar}` para não-particionados (CAD); âncora de ordenação
-é [`file.mtime()`](https://rdrr.io/r/base/file.info.html) do upstream
+`<cache>/raw/<group>/<dataset>/<YYYY>/` para datasets yearly
+(DFP/ITR/FRE), par `{artifact, sidecar}` para não-particionados (CAD);
+âncora de ordenação é
+[`file.mtime()`](https://rdrr.io/r/base/file.info.html) do upstream
 artifact (ZIP/CSV). Files órfãos (artifact sem sidecar, sidecar sem
 artifact) são ignorados na contabilidade —
 [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
@@ -731,7 +765,8 @@ cada rodada (`{N} unit(s)`, `{X} MiB` liberados, limite atual); default
 `options(cvmdata.cache_warn_evictions)` — batch silencia, REPL avisa.
 Atributo `total_size_bytes` em
 [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
-(Sessão 3.8) entrega a contagem corrente. CSVs extraídos via
+(Sessão 3.8) entrega a contagem corrente; coluna `group` adicionada como
+1ª chave na Sessão 04. CSVs extraídos via
 [`unzip()`](https://rdrr.io/r/utils/unzip.html) contam para o limite
 (mesma unidade do ZIP), mas o trigger só dispara em downloads reais —
 não em extrações; cache acima de 90% pós-`unzip` se auto-corrige no
@@ -816,7 +851,7 @@ Rscript -e "devtools::build_readme()"
 Rscript -e "knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"
 
 # Carregar o pacote sem instalar (smoke check rápido)
-Rscript -e "devtools::load_all(); print(cvm_fetch)"
+Rscript -e "devtools::load_all(); print(issuer_fetch)"
 
 # R CMD INSTALL local
 Rscript -e "devtools::install(quick = TRUE, upgrade = 'never')"
@@ -837,10 +872,11 @@ Rscript data-raw/build-vignette-data.R          # inst/extdata/vignette-data/*.r
 gh workflow run etl-mirror.yaml
 
 # ETL local (smoke) — rodar os scripts individualmente sem subir release
-Rscript inst/etl/01-fetch-cvm.R       --dataset cad
-Rscript inst/etl/02-csv-to-parquet.R  --dataset cad
-Rscript inst/etl/02b-validate.R       --dataset cad   # Sessão 3.14
-Rscript inst/etl/03-publish.R         --dataset cad
+# --group + --dataset obrigatórios a partir da Sessão 08
+Rscript inst/etl/01-fetch-cvm.R       --group companhias --dataset cad
+Rscript inst/etl/02-csv-to-parquet.R  --group companhias --dataset cad
+Rscript inst/etl/02b-validate.R       --group companhias --dataset cad
+Rscript inst/etl/03-publish.R         --group companhias --dataset cad
 ```
 
 Notas:
@@ -875,9 +911,11 @@ Notas:
 
 Diretório `schemas_proto/` na raiz (excluído da tarball via
 `.Rbuildignore`) é a área de stage para YAMLs de schema antes da
-promoção para `inst/extdata/schemas/<dataset>/<table>.yaml`. Workflow:
-escrever o YAML em `schemas_proto/<dataset>/<table>.yaml`, validar
-contra dados reais com `cvm_fetch(..., validate = "warn")`, ajustar
+promoção para `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`.
+Workflow: escrever o YAML em
+`schemas_proto/<group>/<dataset>/<table>.yaml`, validar contra dados
+reais com `issuer_fetch(..., validate = "warn")` (ou o fetcher
+correspondente ao grupo quando v0.4+), ajustar
 `expected_field_count`/`expected_field_names`/`transformations` até zero
 divergência, então mover para `inst/extdata/schemas/`. Conteúdo atual:
 rascunhos parciais (não confiar como fonte canônica até o homônimo

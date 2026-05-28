@@ -22,6 +22,14 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
 ``` r
 
 library(cvmdata)
+
+# Pin the source to the live CVM portal for the article's live chunks.
+# The default mirror backend (`cvm_source_get()`) depends on GitHub
+# Releases named `mirror-<group>-<dataset>-latest`; until those are
+# renamed in place from the pre-Sessao-08 format, the fallback to the
+# CVM HTTP portal is the path that always works.
+cvm_source_set("cvm")
+#> ✔ Source backend set to "cvm".
 ```
 
 ## Reference: 36 tables, by theme
@@ -65,19 +73,19 @@ auditor <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:32.007616
-#> ℹ dataset: "fre" | table: "auditor"
-#> # A tibble: 2 × 19
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.117958
+#> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
+#> # A tibble: 2 × 18
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
 #>   <chr>            <date>          <chr>  <chr>        <chr>               <dbl>
 #> 1 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     131376
 #> 2 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.…     131377
-#> # ℹ 13 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
+#> # ℹ 12 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
 #> #   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,
 #> #   data_inicio_contratacao <date>, data_fim_contratacao <date>,
 #> #   data_inicio_prestacao_servico <date>, servico_contratado <chr>,
 #> #   remuneracao_auditor <chr>, justificativa_substituicao <chr>,
-#> #   razao_apresentada <chr>, year <int>
+#> #   razao_apresentada <chr>
 ```
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
@@ -97,13 +105,13 @@ issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:32.377526
-#> ℹ dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 11
-#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.305681
+#> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
+#> # A tibble: 0 × 10
+#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <dbl>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>, year <int>
+#> #   quantidade_sem_resposta <dbl>
 ```
 
 The reader expects the user to opt in by relaxing validation. With
@@ -121,13 +129,13 @@ pcd <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:32.59366
-#> ℹ dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 11
-#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.456351
+#> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
+#> # A tibble: 0 × 10
+#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <dbl>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>, year <int>
+#> #   quantidade_sem_resposta <dbl>
 ```
 
 `cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
@@ -158,8 +166,8 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:33.153226
-#> ℹ dataset: "fre" | table: "posicao_acionaria"
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:26.778147
+#> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
 #>   <chr>           <date>          <chr>                       <chr>             

@@ -21,11 +21,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
-    <li><a class="dropdown-item" href="articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+    <li><a class="dropdown-item" href="articles/data-defects.html">Known defects of the CVM publication</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -45,7 +46,7 @@
 
 <div id="claudemd--contexto-persistente-do-pacote-cvmdata" class="section level1">
 
-<p>Documento de referência para sessões do Claude Code no diretório <code>C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata</code>. Consolida o essencial de sete documentos canônicos da fase de planejamento (Rodadas 1, 2, 2.5, 2.6, 3.0, 3.0.2, 3.1) para que sessões futuras não precisem reler tudo. Quando este <code>CLAUDE.md</code> divergir de um documento canônico, <strong>prevalece o canônico</strong> — em particular <code>cvmdata_rodada2-5_naming_unificado-v03.md</code> para naming, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code> para política do reader, e <code>cvmdata_rodada3-1_sessao_01_scaffolding_cad_fetch.md</code> para o estado pós-Sessão 01. Estado de execução por fase no <code>ROADMAP.md</code>.</p>
+<p>Documento de referência para sessões do Claude Code no diretório <code>C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata</code>. Consolida o essencial dos documentos canônicos de planejamento (Rodadas 1 a 3.1 + decisão de grupos de 2026-05-25) para que sessões futuras não precisem reler tudo. Quando este <code>CLAUDE.md</code> divergir de um canônico, <strong>prevalece o canônico</strong> — em particular <code>cvmdata_rodada2-5_naming_unificado-v03.md</code> para naming de colunas e tabelas, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code> para a política do reader, e <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code> para a arquitetura de 5 fetchers por contrato (decisão de 2026-05-25, implementada nas Sessões 04-08 do ciclo <code>0.1.0.9000</code>). Estado de execução por fase no <code>ROADMAP.md</code>; histórico de breaking changes em <code>NEWS.md</code>.</p>
 <p>Comunicação com Sidney é em <strong>português brasileiro</strong>. Tom direto, técnico, sem fluff, sem puxa-saquismo. Quando ele perguntar problemas, dizer diretamente; se não houver, dizer isso. Críticas construtivas bem-vindas. Em decisões arquiteturais relevantes não fechadas nos canônicos: apresentar 2-3 alternativas com prós/contras e recomendar uma.</p>
 <hr><div class="section level2">
 <h2 id="id_1-régua-de-idioma">1. Régua de idioma<a class="anchor" aria-label="anchor" href="#id_1-r%C3%A9gua-de-idioma"></a></h2>
@@ -102,48 +103,43 @@
 </tr></tbody></table><p>Caveat: a palavra <code>dataset</code> permanece em inglês como argumento de função (palavra técnica internacionalizada); a coluna paralela em <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code> chama-se <code>conjunto_dados</code> em PT. Mismatch deliberado.</p>
 <hr></div>
 <div class="section level2">
-<h2 id="id_2-naming-canônico-resumo-do-naming-doc-v03">2. Naming canônico (resumo do naming doc v03)<a class="anchor" aria-label="anchor" href="#id_2-naming-can%C3%B4nico-resumo-do-naming-doc-v03"></a></h2>
-<blockquote>
-<h3 id="warning-decisão-arquitetural-em-aberto-2026-05-24">⚠️ Decisão arquitetural em aberto (2026-05-24)</h3>
-<p><code>cvm_fetch()</code> está prematuramente nomeada. Hoje aceita só os 4 datasets de <strong>companhias abertas</strong> (<code>cad</code>, <code>dfp</code>, <code>itr</code>, <code>fre</code>) e carrega argumentos que só fazem sentido para esse grupo: <code>companies</code> (CNPJ/CD_CVM/texto), <code>report_type</code> (<code>ind</code>/<code>con</code>), <code>years</code> (fundos publicam mensal/trimestral, não anual). A CVM organiza dados em <strong>grupos</strong> e há ~15 grupos adicionais previstos (ICVM 555, FIIs, FIDCs, estruturados, securitizadoras, administradores de carteira, ofertas públicas, agentes autônomos, atividade sancionadora, atos declaratórios, auditores, consultores, coordenadores de ofertas, CEPAC, investidores não residentes, intermediários, crowdfunding).</p>
-<p>Três opções de design abertas, a discutir em sessão dedicada (provavelmente em plan mode no Claude Desktop):</p>
-<ul><li>
-<strong>A</strong> Argumento <code>group=</code> em <code>cvm_fetch()</code> (unificação total).</li>
-<li>
-<strong>B</strong> Funções por grupo: <code>cia_fetch()</code>, <code><a href="reference/fund_fetch.html">fund_fetch()</a></code> etc. (proposta inicial — contratos de dado divergem demais).</li>
-<li>
-<strong>C</strong> Híbrida: <code>cvm_fetch()</code> com dispatch interno por grupo inferido do dataset, <code>...</code> permissivo.</li>
-</ul><p>A janela para o rename sem custo social é agora: v0.1.0 foi tagueada em 2026-05-24 e ainda não está no CRAN. Submissão rOpenSci no <code>ROADMAP.md</code> está deferida até a decisão fechar. Antes de mexer em <code>R/api-cvm-fetch.R</code> ou na assinatura pública, ler esse bloco e perguntar.</p>
-</blockquote>
+<h2 id="id_2-naming-canônico-resumo-do-naming-doc-v03--decisão-de-grupos-2026-05-25">2. Naming canônico (resumo do naming doc v03 + decisão de grupos 2026-05-25)<a class="anchor" aria-label="anchor" href="#id_2-naming-can%C3%B4nico-resumo-do-naming-doc-v03--decis%C3%A3o-de-grupos-2026-05-25"></a></h2>
 <div class="section level3">
 <h3 id="id_21-funções-públicas">2.1 Funções públicas<a class="anchor" aria-label="anchor" href="#id_21-fun%C3%A7%C3%B5es-p%C3%BAblicas"></a></h3>
-<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). <strong><code>cvm_fetch()</code> é a API principal para obtenção de dados de qualquer dataset.</strong> Aliases tipados por dataset <em>não</em> são exportados — <code>cad_fetch()</code> permanece apenas por ergonomia da Sessão 01 (CAD = caso simples sem ZIP, sem variantes), e internamente delega para <code>cvm_fetch()</code>. <strong>Decisão tomada em 2026-05-20</strong> depois que comparação empírica entre dois caminhos de download mostrou que o portal de dados abertos (<code>dados.cvm.gov.br</code>) entrega TODOS os dados que o portal RAD/ENET por documento entrega, em formato tabular muito mais conveniente e 30× mais rápido (~0,93 s o ZIP anual inteiro contra ~30 s por documento individual). Vide <code>cvmdata_rodada3-1_*.md</code> e o histórico desta sessão.</p>
+<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. Em v0.1.0.9000 apenas <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional; os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code> apontando para o roadmap (Sessões 04-08 do ciclo, implementação plena nas v0.2-v0.8). Skeletons foram exportados agora para que a submissão rOpenSci revise a superfície de API completa antes de a implementação chegar.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># API principal — funciona para qualquer (dataset, table)</span></span>
-<span><span class="fu">cvm_fetch</span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
-<span>          companies   <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>          years       <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>          source      <span class="op">=</span> <span class="cn">NULL</span>,   <span class="co"># default resolvido via cvm_source_get()</span></span>
-<span>          report_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>          on_error    <span class="op">=</span> <span class="st">"abort"</span>,</span>
-<span>          validate    <span class="op">=</span> <span class="st">"strict"</span>,</span>
-<span>          <span class="va">...</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias")</span></span>
+<span><span class="co"># Cobre cad, dfp, itr, fre em v0.1; fca, vlmo, cgvn, ipe em v0.2+</span></span>
+<span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
+<span>             issuer      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># CNPJ / CD_CVM / texto, vetor</span></span>
+<span>             year        <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># integer vector, NULL → último</span></span>
+<span>             source      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># via cvm_source_get()</span></span>
+<span>             report_type <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># "ind" / "con" / NULL</span></span>
+<span>             on_error    <span class="op">=</span> <span class="st">"abort"</span>,</span>
+<span>             validate    <span class="op">=</span> <span class="st">"strict"</span>,</span>
+<span>             <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Alias mantido (Sessão 01) — internamente delega para cvm_fetch()</span></span>
-<span><span class="fu">cad_fetch</span><span class="op">(</span>companies <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="co"># Skeletons (abort com cvmdata_error_input_group em v0.1.0.9000)</span></span>
+<span><span class="fu"><a href="reference/fund_fetch.html">fund_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, fund <span class="op">=</span> <span class="cn">NULL</span>, date <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>        <span class="co"># v0.4-v0.6</span></span>
+<span><span class="fu"><a href="reference/agent_fetch.html">agent_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, agent <span class="op">=</span> <span class="cn">NULL</span>, as_of <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>     <span class="co"># v0.7</span></span>
+<span><span class="fu"><a href="reference/offering_fetch.html">offering_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, offering <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>               date_range <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>                            <span class="co"># v0.7</span></span>
+<span><span class="fu"><a href="reference/event_fetch.html">event_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, event <span class="op">=</span> <span class="cn">NULL</span>, date_range <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>  <span class="co"># v0.8</span></span>
 <span></span>
 <span><span class="co"># Descoberta</span></span>
-<span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># lista de datasets disponíveis</span></span>
-<span><span class="fu"><a href="reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="va">dataset</span><span class="op">)</span>                  <span class="co"># tabelas de um dataset</span></span>
-<span><span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span><span class="op">)</span>       <span class="co"># dicionário oficial do snapshot</span></span>
-<span><span class="fu"><a href="reference/cvm_codelist.html">cvm_codelist</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, <span class="va">column</span><span class="op">)</span> <span class="co"># valores categóricos do snapshot</span></span>
-<span><span class="fu"><a href="reference/cvm_dataset_years.html">cvm_dataset_years</a></span><span class="op">(</span><span class="va">dataset</span><span class="op">)</span>           <span class="co"># range de anos com dados publicados</span></span>
+<span><span class="fu"><a href="reference/cvm_groups.html">cvm_groups</a></span><span class="op">(</span><span class="op">)</span>                                          <span class="co"># 18 grupos + contrato</span></span>
+<span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span>group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>                            <span class="co"># datasets disponíveis</span></span>
+<span><span class="fu"><a href="reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="va">dataset</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>                     <span class="co"># tabelas de um dataset</span></span>
+<span><span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>          <span class="co"># dicionário do snapshot</span></span>
+<span><span class="fu"><a href="reference/cvm_codelist.html">cvm_codelist</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, <span class="va">column</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>    <span class="co"># valores categóricos</span></span>
+<span><span class="fu"><a href="reference/cvm_dataset_years.html">cvm_dataset_years</a></span><span class="op">(</span><span class="va">dataset</span>, group <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>              <span class="co"># range de anos publicados</span></span>
 <span></span>
 <span><span class="co"># Cache</span></span>
 <span><span class="fu"><a href="reference/cvm_cache_path.html">cvm_cache_path</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/cvm_cache_clear.html">cvm_cache_clear</a></span><span class="op">(</span>what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"raw"</span>, <span class="st">"parquet"</span><span class="op">)</span>, dataset <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>                year <span class="op">=</span> <span class="cn">NULL</span>, confirm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/cvm_cache_clear.html">cvm_cache_clear</a></span><span class="op">(</span>what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"all"</span>, <span class="st">"raw"</span>, <span class="st">"parquet"</span><span class="op">)</span>,</span>
+<span>                group <span class="op">=</span> <span class="cn">NULL</span>, dataset <span class="op">=</span> <span class="cn">NULL</span>, year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                confirm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/cvm_cache_info.html">cvm_cache_info</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Source</span></span>
@@ -152,19 +148,27 @@
 <span></span>
 <span><span class="co"># Utilidades</span></span>
 <span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                 <span class="co"># exportada na v0.1</span></span>
-<span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                <span class="co"># inverso de cnpj_clean — formata 14 dígitos</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>                <span class="co"># inverso de cnpj_clean</span></span></code></pre></div>
+<p><code>cvm_fetch()</code> e <code>cad_fetch()</code> foram <strong>removidas sem wrapper</strong> na Sessão 06 (2026-05-25). Substituições mecânicas:</p>
+<ul><li>
+<code>cvm_fetch(dataset, table, companies=, years=, ...)</code> → <code>issuer_fetch(dataset, table, issuer=, year=, ...)</code>
+</li>
+<li>
+<code>cad_fetch(companies=, ...)</code> → <code>issuer_fetch("cad", "companhias", issuer=, ...)</code>
+</li>
+</ul><p>Argumentos renomeados para o singular tidyverse (<code>companies</code> → <code>issuer</code>, <code>years</code> → <code>year</code>); semântica preservada (ainda aceitam vetor de qualquer comprimento). Calls antigas falham com <code>could not find function "cvm_fetch"</code>; passar argumento antigo aborta com <code>cvmdata_error_input</code> e dica do nome novo. Argumento <code>group</code> nas funções de descoberta resolve por unicidade quando omitido (<code>NULL</code>); a partir de v0.4, quando um slug de dataset puder ocorrer em mais de um grupo, omitir <code>group</code> aborta com <code>cvmdata_error_input_ambiguous</code>.</p>
 <p>Domínio dos argumentos enumerados (validados via <code><a href="https://rlang.r-lib.org/reference/arg_match.html" class="external-link">rlang::arg_match0()</a></code>):</p>
 <ul><li>
-<code>source ∈ c("mirror", "cvm")</code>. <strong>Default a partir de v0.1.0 = <code>"mirror"</code></strong> (commit isolado do flip executado na sessão do marco, marcado ⚠️ breaking em <code>NEWS.md</code>). Backend mirror lê parquets do release <code>mirror-&lt;dataset&gt;-latest</code> via API GitHub (inventário cacheado por sessão) + DuckDB local. Pipeline: filter pushdown manual por nome de asset (years/report_type extraídos do encoding <code>&lt;table&gt;__report_type=R__year=Y__part-0.parquet</code>, com a sanitização <code>=</code> → <code>.</code> aplicada pelo GitHub Releases) → download para L3 em <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/&lt;table&gt;/[report_type=R/] year=Y/part-0.parquet</code> → DuckDB lê local → reattach de <code>year</code>/<code>report_type</code> como colunas regulares no tibble (Decisão 2 da 3.13 = Alt 1). Cache L3 é invalidado por hash via sidecar <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/__source_hash.json</code>, confrontado contra o asset homônimo do release; quando o hash muda, o L3 inteiro do dataset é evicted antes da próxima leitura. Backend <code>"cvm"</code> (portal aberto via HTTP em <code>dados.cvm.gov.br</code>) permanece totalmente suportado e selecionável por chamada (<code>source = "cvm"</code>) ou via <code>cvm_source_set("cvm")</code> quando se precisa de frescor byte a byte contra o regulador. A precedência é: arg explícito &gt; <code>getOption("cvmdata.source")</code> &gt; built-in default. <strong>Decisão tomada na Sessão 3.6</strong> (2026-05-22): Alt 2 do trio default-mirror/default-cvm/auto-fallback — declarar default mirror em v0.1 antes do release deixaria o pacote inutilizável out-of-the-box; com mirror já depositado em GitHub Releases, default natural por ser ~30× mais rápido. A “quebra de reprodutibilidade” do flip é controlável via <code>cvm_source_set("cvm")</code> e pelo atributo <code>source</code> que o tibble já carrega via <code>cvm_attach_metadata()</code>. A assinatura pública de <code>cvm_fetch()</code> declara <code>source = NULL</code> para que o option seja consultado dinamicamente — alinhamento com o padrão da família cache (<code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code> ↔︎ <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>).</li>
+<code>source ∈ c("mirror", "cvm")</code>. <strong>Default a partir de v0.1.0 = <code>"mirror"</code></strong> (flip executado no marco v0.1.0). Backend mirror lê parquets do release <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code> via API GitHub (inventário cacheado por sessão, chaveado por <code>(group, dataset)</code>) + DuckDB local. Pipeline: filter pushdown manual por nome de asset (year/report_type extraídos do encoding <code>&lt;table&gt;__report_type=R__year=Y__part-0.parquet</code>, com a sanitização <code>=</code> → <code>.</code> aplicada pelo GitHub Releases) → download para L3 em <code>&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;/ [report_type=R/]year=Y/part-0.parquet</code> → DuckDB lê local → reattach de <code>year</code>/<code>report_type</code> como colunas regulares no tibble (Decisão 2 da 3.13 = Alt 1). Cache L3 é invalidado por hash via sidecar <code>&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/__source_hash.json</code>, confrontado contra o asset homônimo do release; quando o hash muda, o L3 inteiro do dataset é evicted antes da próxima leitura. Backend <code>"cvm"</code> (portal aberto via HTTP em <code>dados.cvm.gov.br</code>) permanece totalmente suportado e selecionável por chamada (<code>source = "cvm"</code>) ou via <code>cvm_source_set("cvm")</code> quando se precisa de frescor byte a byte contra o regulador. A precedência é: arg explícito &gt; <code>getOption("cvmdata.source")</code> &gt; built-in default. <strong>Decisão tomada na Sessão 3.6</strong> (2026-05-22): Alt 2 do trio default-mirror/default-cvm/auto-fallback — declarar default mirror em v0.1 antes do release deixaria o pacote inutilizável out-of-the-box; com mirror já depositado em GitHub Releases, default natural por ser ~30× mais rápido. A “quebra de reprodutibilidade” do flip é controlável via <code>cvm_source_set("cvm")</code> e pelos atributos <code>source</code> e <code>group</code> que o tibble carrega via <code>cvm_attach_metadata()</code>. A assinatura pública de <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> declara <code>source = NULL</code> para que o option seja consultado dinamicamente — alinhamento com o padrão da família cache (<code><a href="reference/cvm_cache_path.html">cvm_cache_path()</a></code> ↔︎ <code><a href="reference/cvm_cache_set_path.html">cvm_cache_set_path()</a></code>).</li>
 <li>
 <code>validate ∈ c("strict", "warn", "skip")</code>, default <code>"strict"</code>.</li>
 <li>
 <code>on_error ∈ c("abort", "warn", "silent")</code>, default <code>"abort"</code>.</li>
 <li>
-<code>report_type ∈ c("ind", "con")</code> ou <code>NULL</code>. <strong>Obrigatório</strong> para tabelas que têm variantes individual/consolidada (<code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dva</code>). <strong>Erro</strong> se passado a tabelas que não têm essa distinção (<code>composicao_capital</code>, <code>submissao</code>, <code>parecer</code>).</li>
+<code>report_type ∈ c("ind", "con")</code> ou <code>NULL</code> (só em <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>). <strong>Obrigatório</strong> para tabelas com variantes individual/consolidada (<code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dva</code>). <strong>Erro</strong> se passado a tabelas sem essa distinção (<code>composicao_capital</code>, <code>submissao</code>, <code>parecer</code>, <code>companhias</code>).</li>
 <li>
-<code>years</code>: integer vector ou <code>NULL</code>. <code>NULL</code> (default) → <strong>último ano disponível</strong>, descoberto por <code>HEAD</code> probing decrescente a partir do ano corrente. Para histórico, passar integer vector explícito (<code>years = 2012:2024</code>). O helper <code>cvm_dataset_years(dataset)</code> devolve o range disponível para enumeração. <strong>Sem sentinela <code>"all"</code></strong> — argumento permanece com tipo único (integer), evita observação de type-mixing em review rOpenSci/CRAN.</li>
-</ul><p>Sobre exercícios contidos em cada CSV anual: o portal CVM publica em cada ano apenas <code>ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}</code> — i.e., o ano declarado e seu N-1. O antepenúltimo do ano N é o último do ano N-2. <code>cvm_fetch()</code> não tenta reconstruir o antepenúltimo: retorna o conteúdo literal do CSV declarado em <code>years</code>. Usuários que queiram histórico mais longo pedem <code>years = (N-2):N</code> e empilham; a deduplicação por <code>(cd_cvm, cd_conta, dt_fim_exerc)</code> é trivial.</p>
+<code>year</code>: integer vector ou <code>NULL</code>. <code>NULL</code> (default) → <strong>último ano disponível</strong>, descoberto por <code>HEAD</code> probing decrescente. Para histórico, integer vector explícito (<code>year = 2012:2024</code>). Helper <code>cvm_dataset_years(dataset)</code> devolve o range. <strong>Sem sentinela <code>"all"</code></strong> — tipo único, evita observação de type-mixing em review.</li>
+</ul><p>Sobre exercícios contidos em cada CSV anual: o portal publica em cada ano apenas <code>ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}</code> — o ano declarado e seu N-1. O antepenúltimo de N é o último de N-2. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> não reconstrói o antepenúltimo: retorna o conteúdo literal do CSV do <code>year</code> pedido. Para histórico mais longo, pedir <code>year = (N-2):N</code> e empilhar; dedup por <code>(cd_cvm, cd_conta, dt_fim_exerc)</code> é trivial.</p>
 </div>
 <div class="section level3">
 <h3 id="id_22-colunas-chave-universais-cad--itr--dfp--fre-header">2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)<a class="anchor" aria-label="anchor" href="#id_22-colunas-chave-universais-cad--itr--dfp--fre-header"></a></h3>
@@ -212,8 +216,8 @@
 <p>Em tabelas ITR/DFP contábeis: <code>VL_CONTA</code> é multiplicada por <code>ESCALA_MOEDA</code> (<code>UNIDADE</code>=1, <code>MIL</code>=1e3, <code>MILHÃO</code>=1e6, <code>BILHÃO</code>=1e9) e retornada em reais absolutos. <code>escala_moeda</code> é removida do tibble; <code>moeda</code> mantida (constante <code>"REAL"</code> na v0.1).</p>
 </div>
 <div class="section level3">
-<h3 id="id_27-seleção-de-companhias-via-companies">2.7 Seleção de companhias via <code>companies</code>
-<a class="anchor" aria-label="anchor" href="#id_27-sele%C3%A7%C3%A3o-de-companhias-via-companies"></a></h3>
+<h3 id="id_27-seleção-de-companhias-via-issuer">2.7 Seleção de companhias via <code>issuer</code>
+<a class="anchor" aria-label="anchor" href="#id_27-sele%C3%A7%C3%A3o-de-companhias-via-issuer"></a></h3>
 <p>Argumento único com <strong>detecção automática de tipo</strong>:</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Padrão do input (após <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>)</th>
 <th>Interpretação</th>
@@ -236,7 +240,7 @@
 </tr></tbody></table><p><strong>Resolução CD_CVM → CNPJ via submissao</strong> (decisão hotfix pós-Sessão 03, 2026-05-21): quando o usuário passa CD_CVM contra uma tabela que não carrega <code>cd_cvm</code> (<code>composicao_capital</code>, <code>parecer</code> em DFP/ITR; e provavelmente várias FRE-detail no futuro), o pipeline lê a <code>submissao</code> do mesmo dataset/year (já no mesmo ZIP anual, custo extra mínimo) e faz lookup CD_CVM → CNPJ antes de aplicar o filtro. CD_CVMs ausentes na <code>submissao</code> daquele ano abortam com <code>cvmdata_error_input</code>. Caso o dataset não publique uma tabela <code>submissao</code> (não acontece para ITR/DFP/FRE; pode acontecer para datasets v0.2+), aborta com mensagem instruindo o uso de CNPJ ou texto. O caminho silencioso anterior (retornar tibble vazio sem aviso) foi removido. Para regressão zero: tabelas com <code>cd_cvm</code> nativo (<code>bpa</code>, <code>bpp</code>, etc.) continuam usando o filtro direto, sem o lookup adicional.</p>
 <p>Busca textual: tokeniza o input por espaços, normaliza (uppercase, sem acentos, sem pontuação), aplica <strong>mapa de abreviações</strong> conhecidas (<code>BANCO ↔︎ BCO</code>, <code>COMPANHIA ↔︎ CIA</code>, <code>S.A. ↔︎ S/A</code>, e outras a fechar quando enumerarmos <code>denom_cia</code> real), e exige que <strong>todos os tokens</strong> casem em <code>denom_cia</code> normalizada com <strong>fronteira de palavra</strong> (regex <code>\bTOKEN\b</code>). Exemplos:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">cvm_fetch</span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, companies <span class="op">=</span> <span class="st">"banco brasil"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, issuer <span class="op">=</span> <span class="st">"banco brasil"</span><span class="op">)</span></span>
 <span><span class="co"># Tokens: "banco" + "brasil"</span></span>
 <span><span class="co"># Expande: ("banco"|"bco") AND ("brasil")</span></span>
 <span><span class="co"># Casa: "BCO BRASIL S.A." (cd_cvm 001023)</span></span>
@@ -281,42 +285,49 @@
 ├── ROADMAP.md
 ├── R/                             # FLAT, sem subpastas
 │   ├── cvmdata-package.R          # _PACKAGE sentinel
-│   ├── api-cvm-fetch.R            # cvm_fetch() exportada + cvm_fetch_internal()
-│   │                              #   + filter_by_companies() + busca textual
-│   ├── api-cad-fetch.R            # cad_fetch() — alias trivial sobre cvm_fetch()
+│   ├── api-issuer-fetch.R         # issuer_fetch() (era cvm_fetch) +
+│   │                              #   issuer_fetch_internal() +
+│   │                              #   filter_by_issuer() + busca textual
+│   ├── api-fund-fetch.R           # fund_fetch() — skeleton v0.1.0.9000
+│   │                              #   (abort com cvmdata_error_input_group)
+│   ├── api-agent-fetch.R          # agent_fetch() — skeleton v0.1.0.9000
+│   ├── api-offering-fetch.R       # offering_fetch() — skeleton v0.1.0.9000
+│   ├── api-event-fetch.R          # event_fetch() — skeleton v0.1.0.9000
+│   ├── api-cvm-groups.R           # cvm_groups() — taxonomia estática dos
+│   │                              #   18 grupos CKAN (Sessão 08)
 │   ├── cache.R                    # API pública de cache + engine de eviction:
 │   │                              #   cvm_cache_path(), cvm_cache_set_path(),
 │   │                              #   cvm_cache_info(), cvm_cache_clear();
-│   │                              #   build_cache_units(), cache_enforce_limit()
-│   ├── discovery.R                # cvm_datasets(), cvm_tables(),
-│   │                              #   cvm_dictionary(), cvm_codelist(),
-│   │                              #   cvm_dataset_years() (não segue prefixo
-│   │                              #   por enquanto — exceção tolerada)
-│   ├── schema-load.R              # load_schema() + validate_schema() +
-│   │                              #   resolve_file_pattern()
-│   ├── source.R                   # API pública de source:
-│   │                              #   cvm_source_get(), cvm_source_set()
-│   ├── source-cvm-http.R          # source_cvm_http_get() (CSV direto +
-│   │                              #   ZIP-yearly) + download_with_etag()
-│   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() funcional
-│   │                              #   (Sessão 3.13): filter pushdown por
-│   │                              #   nome de asset, download → L3, DuckDB
-│   │                              #   read local, reattach year/report_type,
-│   │                              #   hash-based eviction via sidecar
+│   │                              #   build_cache_units(), cache_enforce_limit();
+│   │                              #   cache_migrate_v0_1_to_v0_2() (Sessão 04)
+│   ├── discovery.R                # cvm_datasets(group=), cvm_tables(group=),
+│   │                              #   cvm_dictionary(group=), cvm_codelist(group=),
+│   │                              #   cvm_dataset_years(group=)
+│   ├── schema-load.R              # load_schema(dataset, table, group = NULL)
+│   │                              #   com resolução por unicidade quando
+│   │                              #   group omitido; stampa schema$group para
+│   │                              #   downstream (Sessão 08)
+│   ├── source.R                   # cvm_source_get(), cvm_source_set()
+│   ├── source-cvm-http.R          # source_cvm_http_get() + download_with_etag()
+│   ├── source-mirror-duckdb.R     # source_mirror_duckdb_get() funcional:
+│   │                              #   filter pushdown por asset, download → L3,
+│   │                              #   DuckDB local, reattach year/report_type
 │   ├── transform-schema.R         # apply_schema_transformations() genérico
 │   │                              #   (multiply_by_scale / drop /
-│   │                              #   keep_latest_version) — substituiu
-│   │                              #   transform-cad.R na Sessão 02
-│   ├── util-attrs.R               # cvm_attach_metadata()
+│   │                              #   keep_latest_version)
+│   ├── util-attrs.R               # cvm_attach_metadata() — 6 atributos
 │   ├── util-cnpj.R                # cnpj_clean(), cnpj_format()
 │   ├── util-csv-cvm.R             # read_cvm_csv() + validate_field_count() +
 │   │                              #   validate_field_names() + emit_validation()
 │   ├── util-errors.R              # cvmdata_abort(), cvmdata_warn()
-│   ├── util-mirror-assets.R       # mirror_list_assets() (inventário GitHub
-│   │                              #   API cacheado por sessão) +
+│   ├── util-group-lookup.R        # schema-driven dataset_group() /
+│   │                              #   known_groups() / known_datasets()
+│   │                              #   (Sessão 05; substituiu o lookup
+│   │                              #   constante da Sessão 04)
+│   ├── util-mirror-assets.R       # mirror_list_assets(group, dataset) +
 │   │                              #   parse_mirror_asset_name() (tolera = e .)
-│   │                              #   + filter_mirror_assets() — Sessão 3.13
-│   └── util-print-cvm-tbl.R       # print.cvm_tbl()
+│   │                              #   + filter_mirror_assets()
+│   └── util-print-cvm-tbl.R       # print.cvm_tbl() — exibe group no header
 ├── man/                           # auto-gerado
 ├── tests/
 │   ├── testthat.R
@@ -346,9 +357,9 @@
 │   │   └── util-hash.R            # compute_source_hash(dataset) consumido por
 │   │                              #   03-publish.R (Sessão 3.12)
 │   └── extdata/
-│       ├── schemas/&lt;dataset&gt;/&lt;table&gt;.yaml
-│       ├── cvm_dictionary_snapshot.csv
-│       ├── cvm_codelists_snapshot.csv
+│       ├── schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml  # &lt;group&gt; seg, Sessão 05
+│       ├── cvm_dictionary_snapshot.csv             # 1ª coluna = group
+│       ├── cvm_codelists_snapshot.csv              # 1ª coluna = group
 │       └── vignette-data/         # dados pré-computados para vignettes
 ├── data-raw/                      # out of tarball; mistura build scripts
 │                                  #   (build-dictionary-snapshot.R,
@@ -374,17 +385,24 @@
 <h2 id="id_5-sistema-de-classes-s3">5. Sistema de classes S3<a class="anchor" aria-label="anchor" href="#id_5-sistema-de-classes-s3"></a></h2>
 <p>S3 minimalista. Classes internas:</p>
 <ul><li>
-<code>cvm_tbl</code> — subclasse de <code>tbl_df</code>. Todo tibble retornado por funções públicas. Carrega 5 atributos em inglês (<code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>).</li>
+<code>cvm_tbl</code> — subclasse de <code>tbl_df</code>. Todo tibble retornado por funções públicas. Carrega 6 atributos em inglês: <code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>.</li>
 <li>
-<code>cvm_table_schema</code> — objeto interno descrevendo o schema lido do YAML.</li>
+<code>cvm_table_schema</code> — objeto interno descrevendo o schema lido do YAML. Carrega <code>$group</code> stampado por <code>load_schema()</code> para que os callers downstream propaguem sem re-lookup.</li>
 <li>
 <code>cvm_source</code> — handle interno para dispatch HTTP / mirror / cache.</li>
-</ul><p><code>print.cvm_tbl()</code> é o único método print custom: exibe <code>source</code> e <code>fetched_at</code> antes do tibble normal, depois delega a <code><a href="https://rdrr.io/r/base/UseMethod.html" class="external-link">NextMethod()</a></code>.</p>
+</ul><p><code>print.cvm_tbl()</code> é o único método print custom: exibe <code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code> e <code>table</code> antes do tibble normal, depois delega a <code><a href="https://rdrr.io/r/base/UseMethod.html" class="external-link">NextMethod()</a></code>.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_6-hierarquia-de-classes-de-condição">6. Hierarquia de classes de condição<a class="anchor" aria-label="anchor" href="#id_6-hierarquia-de-classes-de-condi%C3%A7%C3%A3o"></a></h2>
 <pre><code>cvmdata_error                          (pai genérico de erros)
 ├── cvmdata_error_input                (argumento inválido do usuário)
+│   ├── cvmdata_error_input_ambiguous  (Sessão 05: (dataset, table)
+│   │                                   ocorre em mais de um group;
+│   │                                   passar group explícito)
+│   └── cvmdata_error_input_group      (Sessão 07: fund/agent/offering/
+│                                       event_fetch chamada antes da
+│                                       implementação plena — aponta
+│                                       para ROADMAP)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
 ├── cvmdata_error_parse                (falha de parse ou validação)
 ├── cvmdata_error_meta_unavailable     (META oficial não publicado — strict)
@@ -412,7 +430,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <hr></div>
 <div class="section level2">
 <h2 id="id_7-schema-dos-yamls-por-tabela">7. Schema dos YAMLs por tabela<a class="anchor" aria-label="anchor" href="#id_7-schema-dos-yamls-por-tabela"></a></h2>
-<p>Localização: <code>inst/extdata/schemas/&lt;dataset&gt;/&lt;table&gt;.yaml</code>.</p>
+<p>Localização: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (Sessão 05; <code>&lt;group&gt;</code> é o slug CKAN, <code>"companhias"</code> para os 4 datasets de v0.1).</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">dataset</span><span class="kw">:</span><span class="at"> &lt;dataset&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">table</span><span class="kw">:</span><span class="at"> &lt;table&gt;</span></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
@@ -481,11 +499,14 @@ cvmdata_warn                           (pai genérico de warnings)
 <a class="anchor" aria-label="anchor" href="#id_9-snapshots-embarcados-em-instextdata"></a></h2>
 <div class="section level3">
 <h3 id="cvm_dictionary_snapshotcsv"><code>cvm_dictionary_snapshot.csv</code><a class="anchor" aria-label="anchor" href="#cvm_dictionary_snapshotcsv"></a></h3>
-<p>CSV UTF-8, delimitador <code>,</code>. 10 colunas obrigatórias + 1 opcional:</p>
+<p>CSV UTF-8, delimitador <code>,</code>. 11 colunas obrigatórias + 1 opcional:</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Coluna</th>
 <th>Tipo</th>
 <th>Origem</th>
-</tr></thead><tbody><tr><td><code>dataset</code></td>
+</tr></thead><tbody><tr><td><code>group</code></td>
+<td>character</td>
+<td>chave; slug CKAN (<code>"companhias"</code> em v0.1)</td>
+</tr><tr><td><code>dataset</code></td>
 <td>character</td>
 <td>chave</td>
 </tr><tr><td><code>table</code></td>
@@ -493,7 +514,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <td>chave</td>
 </tr><tr><td><code>campo</code></td>
 <td>character</td>
-<td>chave; nome snake_case minúsculo (bate com <code>cvm_fetch()</code>)</td>
+<td>chave; nome snake_case minúsculo (bate com <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>)</td>
 </tr><tr><td><code>campo_original</code></td>
 <td>character</td>
 <td>nome do campo como publicado no META CVM (preserva caps/mixed case)</td>
@@ -524,11 +545,14 @@ cvmdata_warn                           (pai genérico de warnings)
 </div>
 <div class="section level3">
 <h3 id="cvm_codelists_snapshotcsv"><code>cvm_codelists_snapshot.csv</code><a class="anchor" aria-label="anchor" href="#cvm_codelists_snapshotcsv"></a></h3>
-<p>CSV UTF-8, delimitador <code>,</code>. 4 colunas (v0.1):</p>
+<p>CSV UTF-8, delimitador <code>,</code>. 5 colunas (v0.1):</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Coluna</th>
 <th>Tipo</th>
 <th>Conteúdo</th>
-</tr></thead><tbody><tr><td><code>dataset</code></td>
+</tr></thead><tbody><tr><td><code>group</code></td>
+<td>character</td>
+<td>chave; slug CKAN (<code>"companhias"</code> em v0.1)</td>
+</tr><tr><td><code>dataset</code></td>
 <td>character</td>
 <td>chave</td>
 </tr><tr><td><code>table</code></td>
@@ -540,7 +564,7 @@ cvmdata_warn                           (pai genérico de warnings)
 </tr><tr><td><code>value</code></td>
 <td>character</td>
 <td>valor categórico em PT como vem da CVM</td>
-</tr></tbody></table><p>Chave composta <code>(dataset, table, campo, value)</code>. <code>first_seen_year</code>, <code>last_seen_year</code> e <code>frequency</code> deferidos para v0.2+ (decisão Sessão 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset (~30 s de geração); marcar <code>first_seen_year</code> com o único ano amostrado entrega informação enganosa (parece “categoria nova” quando é só “ano único na amostra”) e, quando v0.2 trouxer cobertura histórica, todos os valores cairão para 2010-2015 — exatamente o “ruído de diff Git” que motivou deferir as outras duas. Schema do CSV embarcado é estável dentro da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor interno.</p>
+</tr></tbody></table><p>Chave composta <code>(group, dataset, table, campo, value)</code>. <code>first_seen_year</code>, <code>last_seen_year</code> e <code>frequency</code> deferidos para v0.2+ (decisão Sessão 3.4). Razão: a v0.1 amostra apenas o último ano disponível por dataset (~30 s de geração); marcar <code>first_seen_year</code> com o único ano amostrado entrega informação enganosa (parece “categoria nova” quando é só “ano único na amostra”) e, quando v0.2 trouxer cobertura histórica, todos os valores cairão para 2010-2015 — exatamente o “ruído de diff Git” que motivou deferir as outras duas. Schema do CSV embarcado é estável dentro da v0.1; v0.2 pode adicionar a coluna sem quebra para o leitor interno.</p>
 <p>Critério de inclusão (Sessão 3.4):</p>
 <ul><li>
 <strong>Pelo dicionário</strong>: colunas onde <code>dominio</code> enumera valores com separador <code>/</code> ou <code>|</code> (capta <code>S/N</code>, <code>PF/PJ</code>).</li>
@@ -564,24 +588,24 @@ cvmdata_warn                           (pai genérico de warnings)
 <h2 id="id_10-estratégia-de-cache">10. Estratégia de cache<a class="anchor" aria-label="anchor" href="#id_10-estrat%C3%A9gia-de-cache"></a></h2>
 <p>Cache em <code>tools::R_user_dir("cvmdata", which = "cache")</code>.</p>
 <p>Níveis:</p>
-<ul><li>L1: ZIP raw da CVM (<code>&lt;cache&gt;/raw/&lt;dataset&gt;/[&lt;year&gt;/]</code>). Cobre CAD (CSV direto) e DFP/ITR/FRE (ZIP yearly). Sidecar <code>*.etag.rds</code> carrega ETag/Last-Modified/<code>fetched_at</code>.</li>
-<li>L3: Parquet do mirror (<code>&lt;cache&gt;/parquet/&lt;dataset&gt;/&lt;table&gt;/ [report_type=R/]year=Y/part-0.parquet</code>). Sidecar <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/__source_hash.json</code> armazena o SHA-256 do release atual para invalidação. Ativado de fato na <strong>Sessão 3.13</strong>.</li>
+<ul><li>L1: ZIP raw da CVM (<code>&lt;cache&gt;/raw/&lt;group&gt;/&lt;dataset&gt;/[&lt;year&gt;/]</code>). Cobre CAD (CSV direto) e DFP/ITR/FRE (ZIP yearly). Sidecar <code>*.etag.rds</code> carrega ETag/Last-Modified/<code>fetched_at</code>. Layout <code>&lt;group&gt;</code> segment introduzido na Sessão 04; migração automática de caches v0.1.x via <code>cache_migrate_v0_1_to_v0_2()</code> (interno, idempotente, log em <code>tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds</code>).</li>
+<li>L3: Parquet do mirror (<code>&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;/ [report_type=R/]year=Y/part-0.parquet</code>). Sidecar <code>&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/__source_hash.json</code> armazena o SHA-256 do release atual para invalidação. Ativado de fato na <strong>Sessão 3.13</strong>; <code>&lt;group&gt;</code> segment adicionado na Sessão 04.</li>
 <li>L4: tibble em memória da sessão (<code><a href="https://cachem.r-lib.org/reference/cache_mem.html" class="external-link">cachem::cache_mem()</a></code>, 50 MB — planejado, ainda não implementado em v0.1).</li>
 </ul><p>L2 (CSV descompactado) <strong>não</strong> é usado.</p>
 <p>Invalidação:</p>
 <ul><li>
 <strong>L1</strong>: HEAD HTTP em <code>cvm_dictionary_url</code>/<code>cvm_file_url_pattern</code> antes de servir cache, comparando ETag/Last-Modified. TTL default 30 dias via <code>options(cvmdata.cache_ttl_seconds)</code> (imposto na Sessão 3.7). Dentro da janela, <code>download_with_etag()</code> retorna o <code>dest_path</code> sem HEAD nem GET. Valores especiais: <code>0</code> = sempre HEAD; <code>Inf</code> = nunca HEAD enquanto o sidecar existir; sidecar sem <code>fetched_at</code> parseável cai para HEAD para refrescar metadados.</li>
 <li>
-<strong>L3</strong>: comparação de hash via sidecar <code>&lt;cache&gt;/parquet/&lt;dataset&gt;/__source_hash.json</code> contra o asset <code>__source_hash.json</code> do release <code>mirror-&lt;dataset&gt;-latest</code> (a API GitHub é consultada em <code>mirror_list_assets()</code> no início de cada <code>cvm_fetch(..., source = "mirror")</code>). Hash igual → no-op; hash diferente → <code>unlink(&lt;cache&gt;/parquet/&lt;dataset&gt;/)</code> antes da próxima leitura. Hash <code>NA</code> (release antigo sem o sidecar publicado) → L3 preservado por respeito a mirrors legados. Não há TTL no L3: invalidação é exclusivamente content-addressed.</li>
+<strong>L3</strong>: comparação de hash via sidecar <code>&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/__source_hash.json</code> contra o asset <code>__source_hash.json</code> do release <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code> (a API GitHub é consultada em <code>mirror_list_assets(group, dataset)</code> no início de cada <code>issuer_fetch(..., source = "mirror")</code>). Hash igual → no-op; hash diferente → <code>unlink(&lt;cache&gt;/parquet/&lt;group&gt;/&lt;dataset&gt;/)</code> antes da próxima leitura. Hash <code>NA</code> (release antigo sem o sidecar publicado) → L3 preservado por respeito a mirrors legados. Não há TTL no L3: invalidação é exclusivamente content-addressed.</li>
 <li>
-<code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> manual aceita <code>what ∈ c("all", "raw", "parquet")</code> (extensão da Sessão 3.13). <code>what = "parquet"</code> rejeita <code>year</code> porque o layout L3 aninha year sob table — passar <code>dataset</code> sozinho evict o dataset inteiro; para granularidade year-level, usar <code>what = "raw"</code>.</li>
+<code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> manual aceita <code>what ∈ c("all", "raw", "parquet")</code> + <code>group = NULL</code> (Sessão 04) para scoping por CKAN group. Precedência: <code>what = "all"</code> sobrepõe o filtro; senão o path alvo compõe <code>&lt;cache&gt;/&lt;what&gt;/&lt;group&gt;/&lt;dataset&gt;/&lt;year&gt;/</code> com cada segmento opcional da direita pra esquerda. <code>what = "parquet"</code> rejeita <code>year</code> porque o layout L3 aninha year sob table — passar <code>dataset</code> sozinho evict o dataset inteiro; para granularidade year-level, usar <code>what = "raw"</code>.</li>
 </ul><p>Fallback hierárquico depende de <code>source</code>:</p>
 <ul><li>
 <code>source = "mirror"</code> (default pós-flip): L4 (planejado) → L3 (parquet local) → Mirror GitHub Releases (filter pushdown manual por nome de asset → download → DuckDB lê local) → erro.</li>
 <li>
 <code>source = "cvm"</code> (default em v0.1 pré-flip): L4 (planejado) → L1 (ZIP raw em disco) → CVM HTTP → erro.</li>
-</ul><p><strong>Mirror parquet ativado em v0.1.</strong> Workflow semanal (<code>etl-mirror.yaml</code>, cron <code>0 7 * * 2</code>) executa matrix paralela de 4 datasets (<code>fail-fast: false</code>); cada job roda <code>01-fetch-cvm.R</code> → <code>02-csv-to-parquet.R</code> → <code>03-publish.R</code>. O publish detecta mudança via hash SHA-256 das URLs de <code>cvm_dictionary_url</code> (<code>util-hash.R</code>, Sessão 3.12) e skipa republish quando o hash bate o do release anterior. Volume estimado para companhias abertas (CAD + DFP + ITR + FRE em parquet snappy) ≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo, 100 GB por release). Encoding dos asset names: <code>&lt;table&gt;__report_type=R__year=Y__part-0.parquet</code> (Hive-style achatado por <code>gsub("[/\\\\]", "__", rel)</code> em <code>03-publish.R</code>); o GitHub Releases sanitiza <code>=</code> → <code>.</code> no URL público, e o reader (<code>parse_mirror_asset_name()</code> em <code>R/util-mirror-assets.R</code>) tolera ambos os encodings.</p>
-<p>Limite default 100 MiB, configurável via <code>options(cvmdata.cache_max_size_mb = ...)</code> — imposto na Sessão 3.8. Quando a soma das <strong>unidades de cache</strong> ultrapassa 90% do limite, o próximo download (no fim do ramo de gravação real de <code>download_with_etag()</code>, depois do <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> do sidecar) dispara LRU eviction até cair para 80% do limite <strong>ou</strong> esgotar a lista de candidatos. A engine vive em <code>R/cache.R</code> (<code>read_cache_max_size()</code>, <code>build_cache_units()</code>, <code>cache_current_size_bytes()</code>, <code>cache_enforce_limit()</code>). Unidade de eviction: diretório do ano <code>&lt;cache&gt;/raw/&lt;dataset&gt;/&lt;YYYY&gt;/</code> para datasets yearly (DFP/ITR/FRE), par <code>{artifact, sidecar}</code> para não-particionados (CAD); âncora de ordenação é <code><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.mtime()</a></code> do upstream artifact (ZIP/CSV). Files órfãos (artifact sem sidecar, sidecar sem artifact) são ignorados na contabilidade — <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> segue sendo o caminho para limpá-los. O artefato recém-gravado é protegido contra self-eviction (parâmetro <code>protect</code> passado pelo trigger). Valores especiais: <code>0</code> ou negativo desligam a engine; <code>Inf</code> idem; tipo inválido cai para o default 100 MiB (defesa). Observabilidade: <code>cvmdata_warn_eviction</code> é emitida agregada ao fim de cada rodada (<code>{N} unit(s)</code>, <code>{X} MiB</code> liberados, limite atual); default <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> via <code>options(cvmdata.cache_warn_evictions)</code> — batch silencia, REPL avisa. Atributo <code>total_size_bytes</code> em <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> (Sessão 3.8) entrega a contagem corrente. CSVs extraídos via <code><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip()</a></code> contam para o limite (mesma unidade do ZIP), mas o trigger só dispara em downloads reais — não em extrações; cache acima de 90% pós-<code>unzip</code> se auto-corrige no próximo download.</p>
+</ul><p><strong>Mirror parquet ativado em v0.1.</strong> Workflow semanal (<code>etl-mirror.yaml</code>, cron <code>0 7 * * 2</code>) executa matrix bidimensional <code>(group, dataset)</code> (<code>fail-fast: false</code>); cada job roda <code>01-fetch-cvm.R</code> → <code>02-csv-to-parquet.R</code> → <code>02b-validate.R</code> → <code>03-publish.R</code>, todos com flags <code>--group</code> e <code>--dataset</code> (Sessão 08). O publish detecta mudança via hash SHA-256 das URLs de <code>cvm_dictionary_url</code> (<code>util-hash.R</code>, Sessão 3.12) e skipa republish quando o hash bate o do release anterior. Volume estimado para companhias abertas (CAD + DFP + ITR + FRE em parquet snappy) ≈ 3 GB, cabe folgado em GitHub Releases (limite 2 GB por arquivo, 100 GB por release). Encoding dos asset names: <code>&lt;table&gt;__report_type=R__year=Y__part-0.parquet</code> (Hive-style achatado por <code>gsub("[/\\\\]", "__", rel)</code> em <code>03-publish.R</code>); o GitHub Releases sanitiza <code>=</code> → <code>.</code> no URL público, e o reader (<code>parse_mirror_asset_name()</code> em <code>R/util-mirror-assets.R</code>) tolera ambos os encodings. <strong>Caveat operacional</strong>: a transição Sessão 04 → Sessão 08 mudou o nome dos releases de <code>mirror-&lt;dataset&gt;-latest</code> para <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code>. O código (producer + consumer) já lê o novo formato; o rename in-place dos 4 releases v0.1 existentes via <code>gh release edit</code> é tarefa manual do mantenedor pós-Sessão 08. Até esse rename rodar, <code>source = "mirror"</code> aborta com HTTP 404; fallback automático para <code>source = "cvm"</code> não está implementado, mas o usuário pode forçar via <code>cvm_source_set("cvm")</code>.</p>
+<p>Limite default 100 MiB, configurável via <code>options(cvmdata.cache_max_size_mb = ...)</code> — imposto na Sessão 3.8. Quando a soma das <strong>unidades de cache</strong> ultrapassa 90% do limite, o próximo download (no fim do ramo de gravação real de <code>download_with_etag()</code>, depois do <code><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS()</a></code> do sidecar) dispara LRU eviction até cair para 80% do limite <strong>ou</strong> esgotar a lista de candidatos. A engine vive em <code>R/cache.R</code> (<code>read_cache_max_size()</code>, <code>build_cache_units()</code>, <code>cache_current_size_bytes()</code>, <code>cache_enforce_limit()</code>). Unidade de eviction: diretório do ano <code>&lt;cache&gt;/raw/&lt;group&gt;/&lt;dataset&gt;/&lt;YYYY&gt;/</code> para datasets yearly (DFP/ITR/FRE), par <code>{artifact, sidecar}</code> para não-particionados (CAD); âncora de ordenação é <code><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.mtime()</a></code> do upstream artifact (ZIP/CSV). Files órfãos (artifact sem sidecar, sidecar sem artifact) são ignorados na contabilidade — <code><a href="reference/cvm_cache_clear.html">cvm_cache_clear()</a></code> segue sendo o caminho para limpá-los. O artefato recém-gravado é protegido contra self-eviction (parâmetro <code>protect</code> passado pelo trigger). Valores especiais: <code>0</code> ou negativo desligam a engine; <code>Inf</code> idem; tipo inválido cai para o default 100 MiB (defesa). Observabilidade: <code>cvmdata_warn_eviction</code> é emitida agregada ao fim de cada rodada (<code>{N} unit(s)</code>, <code>{X} MiB</code> liberados, limite atual); default <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> via <code>options(cvmdata.cache_warn_evictions)</code> — batch silencia, REPL avisa. Atributo <code>total_size_bytes</code> em <code><a href="reference/cvm_cache_info.html">cvm_cache_info()</a></code> (Sessão 3.8) entrega a contagem corrente; coluna <code>group</code> adicionada como 1ª chave na Sessão 04. CSVs extraídos via <code><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip()</a></code> contam para o limite (mesma unidade do ZIP), mas o trigger só dispara em downloads reais — não em extrações; cache acima de 90% pós-<code>unzip</code> se auto-corrige no próximo download.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_11-política-de-testes">11. Política de testes<a class="anchor" aria-label="anchor" href="#id_11-pol%C3%ADtica-de-testes"></a></h2>
@@ -640,7 +664,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"</span></span>
 <span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a></span>
 <span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co"># Carregar o pacote sem instalar (smoke check rápido)</span></span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::load_all(); print(cvm_fetch)"</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::load_all(); print(issuer_fetch)"</span></span>
 <span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a></span>
 <span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co"># R CMD INSTALL local</span></span>
 <span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>Rscript <span class="op">-</span>e <span class="st">"devtools::install(quick = TRUE, upgrade = 'never')"</span></span>
@@ -661,10 +685,11 @@ cvmdata_warn                           (pai genérico de warnings)
 <span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a>gh <span class="kw">workflow</span> run etl-mirror<span class="op">.</span><span class="fu">yaml</span></span>
 <span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a></span>
 <span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co"># ETL local (smoke) — rodar os scripts individualmente sem subir release</span></span>
-<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">01</span><span class="op">-</span>fetch-cvm<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad</span>
-<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">02</span><span class="op">-</span>csv-to-parquet<span class="op">.</span><span class="fu">R</span>  <span class="op">--</span>dataset cad</span>
-<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span>02b-validate<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>dataset cad   <span class="co"># Sessão 3.14</span></span>
-<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">03</span><span class="op">-</span>publish<span class="op">.</span><span class="fu">R</span>         <span class="op">--</span>dataset cad</span></code></pre></div>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co"># --group + --dataset obrigatórios a partir da Sessão 08</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">01</span><span class="op">-</span>fetch-cvm<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>group companhias <span class="op">--</span>dataset cad</span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">02</span><span class="op">-</span>csv-to-parquet<span class="op">.</span><span class="fu">R</span>  <span class="op">--</span>group companhias <span class="op">--</span>dataset cad</span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span>02b-validate<span class="op">.</span><span class="fu">R</span>       <span class="op">--</span>group companhias <span class="op">--</span>dataset cad</span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a>Rscript inst<span class="op">/</span>etl<span class="op">/</span><span class="dv">03</span><span class="op">-</span>publish<span class="op">.</span><span class="fu">R</span>         <span class="op">--</span>group companhias <span class="op">--</span>dataset cad</span></code></pre></div>
 <p>Notas:</p>
 <ul><li>
 <code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> executa <code>R CMD check</code> com <code>--as-cran</code>, roda a vignette <code>cvmdata.Rmd</code> (configurada <code>eval = interactive()</code> para não bater no portal CVM) e os testes. <strong>Zero errors, zero warnings, zero notes</strong> é o gate.</li>
@@ -678,7 +703,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <div class="section level3">
 <h3 id="id_122-stage-schemas_proto">12.2 Stage <code>schemas_proto/</code>
 <a class="anchor" aria-label="anchor" href="#id_122-stage-schemas_proto"></a></h3>
-<p>Diretório <code>schemas_proto/</code> na raiz (excluído da tarball via <code>.Rbuildignore</code>) é a área de stage para YAMLs de schema antes da promoção para <code>inst/extdata/schemas/&lt;dataset&gt;/&lt;table&gt;.yaml</code>. Workflow: escrever o YAML em <code>schemas_proto/&lt;dataset&gt;/&lt;table&gt;.yaml</code>, validar contra dados reais com <code>cvm_fetch(..., validate = "warn")</code>, ajustar <code>expected_field_count</code>/<code>expected_field_names</code>/<code>transformations</code> até zero divergência, então mover para <code>inst/extdata/schemas/</code>. Conteúdo atual: rascunhos parciais (não confiar como fonte canônica até o homônimo aparecer em <code>inst/extdata/schemas/</code>).</p>
+<p>Diretório <code>schemas_proto/</code> na raiz (excluído da tarball via <code>.Rbuildignore</code>) é a área de stage para YAMLs de schema antes da promoção para <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code>. Workflow: escrever o YAML em <code>schemas_proto/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code>, validar contra dados reais com <code>issuer_fetch(..., validate = "warn")</code> (ou o fetcher correspondente ao grupo quando v0.4+), ajustar <code>expected_field_count</code>/<code>expected_field_names</code>/<code>transformations</code> até zero divergência, então mover para <code>inst/extdata/schemas/</code>. Conteúdo atual: rascunhos parciais (não confiar como fonte canônica até o homônimo aparecer em <code>inst/extdata/schemas/</code>).</p>
 <hr></div>
 </div>
 <div class="section level2">

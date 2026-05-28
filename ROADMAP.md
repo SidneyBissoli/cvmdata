@@ -354,8 +354,10 @@ Classe de condição nova `cvmdata_error_input_group`
 
 ### Sessão 08 — Discovery + cvm_groups() + ETL release rename
 
-`R/api-cvm-groups.R` com `cvm_groups()` lendo do snapshot embarcado
-(tibble com `group`, `n_datasets`, `contract`).
+`R/api-cvm-groups.R` com
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+lendo da taxonomia estática (tibble com `group`, `n_datasets`,
+`contract`).
 
 Argumento `group` adicionado em
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
@@ -363,7 +365,7 @@ Argumento `group` adicionado em
 [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
 [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
 [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
-(opcional com unicidade).
+(opcional com unicidade). Os dois últimos já vinham da Sessão 05.
 
 `etl-mirror.yaml` com matrix bidimensional `(group, dataset)`.
 
@@ -372,14 +374,27 @@ Scripts `inst/etl/0{1,2,2b,3}*.R` ganham CLI flag `--group`.
 `inst/etl/03-publish.R` nomeia releases
 `mirror-<group>-<dataset>-latest`.
 
+Consumer side (`R/util-mirror-assets.R`, `R/source-mirror-duckdb.R`) lê
+o novo formato; cache de inventário passa a chavear por
+`(group, dataset)`.
+
 **Rename in-place** dos 4 releases atuais via GitHub API
 (`gh release edit` ou REST), com checkpoint após cada um; rollback
-documentado em caso de falha parcial.
+documentado em caso de falha parcial. Tarefa manual do mantenedor
+pós-Sessão 08 (não roda no CI).
 
 `vignettes/articles/cache-and-mirror.Rmd` atualizado.
 
 `vignettes/articles/groups-overview.Rmd` novo (lista 18 grupos, mapeia
-para 5 contratos, exemplos por fetcher).
+para 5 contratos, exemplos por fetcher;
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+real, 4 skeletons com `eval = FALSE`).
+
+`vignettes/articles/cvm-defects.Rmd` renomeado para `data-defects.Rmd`
+(defeito não é só “do CVM”; cobre toda fonte de dado a partir de v0.4+).
+
+`pkgdown/_pkgdown.yml` lista `cvm_groups` em Discovery e inclui
+`groups-overview` + `data-defects` na navbar de articles.
 
 Atributo `group` adicionado em tibble retornado (6 atributos: `source`,
 `fetched_at`, `group`, `dataset`, `table`, `package_version`);

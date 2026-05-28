@@ -21,11 +21,12 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
-    <li><a class="dropdown-item" href="articles/cvm-defects.html">Known defects of the CVM publication</a></li>
+    <li><a class="dropdown-item" href="articles/data-defects.html">Known defects of the CVM publication</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -216,15 +217,18 @@
 </ul></div>
 <div class="section level3">
 <h3 id="sessão-08--discovery--cvm_groups--etl-release-rename">Sessão 08 — Discovery + cvm_groups() + ETL release rename<a class="anchor" aria-label="anchor" href="#sess%C3%A3o-08--discovery--cvm_groups--etl-release-rename"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox"><code>R/api-cvm-groups.R</code> com <code>cvm_groups()</code> lendo do snapshot embarcado (tibble com <code>group</code>, <code>n_datasets</code>, <code>contract</code>).</label></li>
-<li><label><input type="checkbox">Argumento <code>group</code> adicionado em <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="reference/cvm_tables.html">cvm_tables()</a></code>, <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code>, <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> (opcional com unicidade).</label></li>
-<li><label><input type="checkbox"><code>etl-mirror.yaml</code> com matrix bidimensional <code>(group, dataset)</code>.</label></li>
-<li><label><input type="checkbox">Scripts <code>inst/etl/0{1,2,2b,3}*.R</code> ganham CLI flag <code>--group</code>.</label></li>
-<li><label><input type="checkbox"><code>inst/etl/03-publish.R</code> nomeia releases <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code>.</label></li>
-<li><label><input type="checkbox"><strong>Rename in-place</strong> dos 4 releases atuais via GitHub API (<code>gh release edit</code> ou REST), com checkpoint após cada um; rollback documentado em caso de falha parcial.</label></li>
+<ul class="task-list"><li><label><input type="checkbox" checked><code>R/api-cvm-groups.R</code> com <code><a href="reference/cvm_groups.html">cvm_groups()</a></code> lendo da taxonomia estática (tibble com <code>group</code>, <code>n_datasets</code>, <code>contract</code>).</label></li>
+<li><label><input type="checkbox" checked>Argumento <code>group</code> adicionado em <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="reference/cvm_tables.html">cvm_tables()</a></code>, <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code>, <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> (opcional com unicidade). Os dois últimos já vinham da Sessão 05.</label></li>
+<li><label><input type="checkbox" checked><code>etl-mirror.yaml</code> com matrix bidimensional <code>(group, dataset)</code>.</label></li>
+<li><label><input type="checkbox" checked>Scripts <code>inst/etl/0{1,2,2b,3}*.R</code> ganham CLI flag <code>--group</code>.</label></li>
+<li><label><input type="checkbox" checked><code>inst/etl/03-publish.R</code> nomeia releases <code>mirror-&lt;group&gt;-&lt;dataset&gt;-latest</code>.</label></li>
+<li><label><input type="checkbox" checked>Consumer side (<code>R/util-mirror-assets.R</code>, <code>R/source-mirror-duckdb.R</code>) lê o novo formato; cache de inventário passa a chavear por <code>(group, dataset)</code>.</label></li>
+<li><label><input type="checkbox"><strong>Rename in-place</strong> dos 4 releases atuais via GitHub API (<code>gh release edit</code> ou REST), com checkpoint após cada um; rollback documentado em caso de falha parcial. Tarefa manual do mantenedor pós-Sessão 08 (não roda no CI).</label></li>
 <li><label><input type="checkbox"><code>vignettes/articles/cache-and-mirror.Rmd</code> atualizado.</label></li>
-<li><label><input type="checkbox"><code>vignettes/articles/groups-overview.Rmd</code> novo (lista 18 grupos, mapeia para 5 contratos, exemplos por fetcher).</label></li>
-<li><label><input type="checkbox">Atributo <code>group</code> adicionado em tibble retornado (6 atributos: <code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>); <code>print.cvm_tbl()</code> exibe <code>group</code>.</label></li>
+<li><label><input type="checkbox" checked><code>vignettes/articles/groups-overview.Rmd</code> novo (lista 18 grupos, mapeia para 5 contratos, exemplos por fetcher; <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> real, 4 skeletons com <code>eval = FALSE</code>).</label></li>
+<li><label><input type="checkbox" checked><code>vignettes/articles/cvm-defects.Rmd</code> renomeado para <code>data-defects.Rmd</code> (defeito não é só “do CVM”; cobre toda fonte de dado a partir de v0.4+).</label></li>
+<li><label><input type="checkbox" checked><code>pkgdown/_pkgdown.yml</code> lista <code>cvm_groups</code> em Discovery e inclui <code>groups-overview</code> + <code>data-defects</code> na navbar de articles.</label></li>
+<li><label><input type="checkbox" checked>Atributo <code>group</code> adicionado em tibble retornado (6 atributos: <code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>); <code>print.cvm_tbl()</code> exibe <code>group</code>.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="pós-sessão-08--pre-submission-ropensci">Pós-Sessão 08 — pre-submission rOpenSci<a class="anchor" aria-label="anchor" href="#p%C3%B3s-sess%C3%A3o-08--pre-submission-ropensci"></a></h3>

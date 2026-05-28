@@ -10,6 +10,14 @@ the `year` semantics, the `report_type` rule, the `validate` and
 ``` r
 
 library(cvmdata)
+
+# Pin the source to the live CVM portal for the article's live chunks.
+# The default mirror backend (`cvm_source_get()`) depends on GitHub
+# Releases named `mirror-<group>-<dataset>-latest`; until those are
+# renamed in place from the pre-Sessao-08 format, the fallback to the
+# CVM HTTP portal is the path that always works.
+cvm_source_set("cvm")
+#> ✔ Source backend set to "cvm".
 ```
 
 ## Anatomy
@@ -44,9 +52,9 @@ bb_bpa <- issuer_fetch(
   year = 2024
 )
 bb_bpa
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:36.052171
-#> ℹ dataset: "dfp" | table: "bpa"
-#> # A tibble: 96 × 15
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:31.33395
+#> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
+#> # A tibble: 96 × 13
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
 #>    <chr>          <date>     <chr>  <chr>     <chr>  <chr>     <chr> <chr>      
 #>  1 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
@@ -60,12 +68,12 @@ bb_bpa
 #>  9 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
 #> 10 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     
 #> # ℹ 86 more rows
-#> # ℹ 7 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
-#> #   vl_conta <dbl>, st_conta_fixa <chr>, report_type <chr>, year <int>
+#> # ℹ 5 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
+#> #   vl_conta <dbl>, st_conta_fixa <chr>
 
 # Provenance:
 attr(bb_bpa, "source")
-#> [1] "mirror"
+#> [1] "cvm"
 attr(bb_bpa, "dataset")
 #> [1] "dfp"
 attr(bb_bpa, "table")
@@ -158,15 +166,15 @@ cap <- issuer_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "mirror" | fetched_at: 2026-05-26 00:53:41.366547
-#> ℹ dataset: "dfp" | table: "composicao_capital"
-#> # A tibble: 1 × 11
+#> ℹ source: "cvm" | fetched_at: 2026-05-28 01:38:34.129968
+#> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
+#> # A tibble: 1 × 10
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
 #>   <chr>              <date>     <chr>  <chr>                              <dbl>
 #> 1 00.000.000/0001-91 2024-12-31 1      BCO BRASIL S.A.               5730834040
-#> # ℹ 6 more variables: qt_acao_pref_cap_integr <dbl>,
+#> # ℹ 5 more variables: qt_acao_pref_cap_integr <dbl>,
 #> #   qt_acao_total_cap_integr <dbl>, qt_acao_ordin_tesouro <dbl>,
-#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>, year <int>
+#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>
 ```
 
 ## Selecting years
@@ -225,8 +233,10 @@ variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
 ``` r
 
 issuer_fetch("dfp", "bpa", issuer = "1023", year = 2024)
-#> Error in `validate_mirror_args()`:
+#> Error in `resolve_file_pattern()`:
 #> ! Table "dfp"/"bpa" requires `report_type` ("ind" or "con").
+#> ℹ Pass `report_type = "ind"` for individual or `report_type = "con"` for
+#>   consolidated.
 ```
 
 And **must be `NULL`** for tables without the distinction (`companhias`,
@@ -237,9 +247,10 @@ And **must be `NULL`** for tables without the distinction (`companhias`,
 issuer_fetch("dfp", "composicao_capital",
           issuer = "1023", year = 2024,
           report_type = "ind")
-#> Error in `validate_mirror_args()`:
-#> ! Table "dfp"/"composicao_capital" does not support `report_type`; pass
-#>   `NULL`.
+#> Error in `resolve_file_pattern()`:
+#> ! Table "dfp"/"composicao_capital" does not have "ind"/"con" variants;
+#>   `report_type` must be `NULL`.
+#> ✖ Got "ind".
 ```
 
 ## `validate`
@@ -269,15 +280,17 @@ units are LRU-evicted once total size exceeds the limit set by
 
 info <- cvm_cache_info()
 info
-#> # A tibble: 4 × 8
+#> # A tibble: 6 × 8
 #>   group   dataset file  path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>   <chr> <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 compan… dfp     dfp_… /hom…     182978 2026-05-26 00:53:41  NA   NA           
-#> 2 compan… dfp     dfp_… /hom…   13395083 2026-05-26 00:53:41 "\"6… Sun, 24 May …
-#> 3 compan… fre     fre_… /hom…    1085173 2026-05-26 00:53:25  NA   NA           
-#> 4 compan… fre     fre_… /hom…    8408826 2026-05-26 00:53:25 "\"6… Sun, 24 May …
+#> 1 compan… dfp     dfp_… /hom…   13447722 2026-05-28 01:38:36 "\"6… Sun, 24 May …
+#> 2 compan… dfp     dfp_… /hom…   13562016 2026-05-28 01:38:37 "\"6… Sun, 24 May …
+#> 3 compan… dfp     dfp_… /hom…   13395083 2026-05-28 01:38:38 "\"6… Sun, 24 May …
+#> 4 compan… dfp     dfp_… /hom…   19075356 2026-05-28 01:38:36  NA   NA           
+#> 5 compan… dfp     dfp_… /hom…   19571240 2026-05-28 01:38:37  NA   NA           
+#> 6 compan… dfp     dfp_… /hom…   18582919 2026-05-28 01:38:38  NA   NA
 attr(info, "total_size_bytes")
-#> [1] 23072432
+#> [1] 97634891
 ```
 
 `source` selects the backend: from v0.1.0 the default is `"mirror"`,
@@ -291,7 +304,7 @@ and changed at session scope by
 ``` r
 
 cvm_source_get()
-#> [1] "mirror"
+#> [1] "cvm"
 ```
 
 ## Where to read next

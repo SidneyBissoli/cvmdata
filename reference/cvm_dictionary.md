@@ -55,6 +55,7 @@ Other discovery:
 [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
 [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md),
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
 [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
 
 ## Examples
