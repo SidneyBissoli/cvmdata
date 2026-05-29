@@ -263,8 +263,18 @@ Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
 snapshots, fixtures e vignette data) com **auditorias one-shot**
-(`run-capacity-audit.R`, `validate-mirror-end-to-end.R`). Apenas os
-build scripts são regenerados em ciclo normal.
+(`run-capacity-audit.R`, `validate-mirror-end-to-end.R`) e
+**`data-raw/decisions/`**, onde vivem os canônicos referenciados no
+topo deste CLAUDE.md (`cvmdata_rodada2-5_naming_unificado-v03.md`,
+`cvmdata_rodada3-0-2_politica_reader_sem_meta.md`,
+`cvmdata_arquitetura_grupos_decisao_v2.md`, etc.). Apenas os build
+scripts são regenerados em ciclo normal; canônicos só mudam por
+decisão deliberada.
+
+Documentação narrativa em `vignettes/`: `cvmdata.Rmd` é o vignette
+canônico embarcado no tarball (overview do pacote); `vignettes/articles/`
+contém artigos longos publicados **apenas no site pkgdown**
+(`.Rbuildignored`), sem peso na tarball CRAN.
 
 ---
 
@@ -423,6 +433,12 @@ Cache real fica em `tools::R_user_dir("cvmdata", "cache")`. Em testes,
 
 Gate por commit: `devtools::check() == 0E/0W/0N` com `--as-cran`, lint
 clean, testes verdes, `pkgdown::build_site()` funcionando.
+
+CI em `.github/workflows/`: `R-CMD-check.yaml` (matrix release/devel +
+SO), `lint.yaml` (`lintr::lint_package()`), `test-coverage.yaml`
+(covr → Codecov), `pkgdown.yaml` (deploy do site), `etl-mirror.yaml`
+(cron `0 7 * * 2` + dispatch manual, ver §8). Os quatro primeiros
+travam por push/PR; o quinto é operacional.
 
 ---
 
