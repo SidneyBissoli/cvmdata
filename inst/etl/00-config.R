@@ -18,13 +18,16 @@
 # Repo coordinates. Releases live in the same repo as the package.
 mirror_repo <- "SidneyBissoli/cvmdata"
 
-# (group, dataset) pairs eligible for the v0.1 mirror. The modular
-# layout means adding a dataset is a no-op for already-published
-# entries — append the row here and the workflow can publish it on
-# next dispatch.
+# (group, dataset) pairs eligible for the mirror. The modular layout
+# means adding a dataset is a no-op for already-published entries —
+# append the row here and the workflow can publish it on next dispatch.
+# Named `_v0_1` for the original v0.1 four; v0.2 (Sessoes 10-13) added
+# cgvn, vlmo, fca and ipe to the `companhias` group — the etl-mirror
+# matrix was extended each session but this allowlist was not, so the
+# four v0.2 datasets only became publishable here in the v0.2.0 release.
 mirror_datasets_v0_1 <- tibble::tibble(
-  group = rep("companhias", 4L),
-  dataset = c("cad", "dfp", "itr", "fre")
+  group = rep("companhias", 8L),
+  dataset = c("cad", "dfp", "itr", "fre", "cgvn", "vlmo", "fca", "ipe")
 )
 
 # True iff (group, dataset) is in the v0.1 publish matrix. CLI scripts
