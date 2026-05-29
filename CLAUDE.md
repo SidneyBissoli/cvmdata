@@ -73,9 +73,8 @@ que as releases v0.4+ estendam cobertura sem reformatar a API.
 
 ``` r
 
-# Issuer datasets — companhias abertas (grupo CKAN "companhias")
-# v0.1: cad, dfp, itr, fre. 0.1.0.9000 (rumo a v0.2): + cgvn.
-# Pendentes em 0.1.0.9000: fca, vlmo, ipe (sessões 11-13).
+# Issuer datasets — companhias abertas (grupo CKAN "companhias").
+# Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.
 issuer_fetch(dataset, table,
              issuer      = NULL,      # CNPJ / CD_CVM / texto, vetor
              year        = NULL,      # integer vector, NULL → último
@@ -290,8 +289,8 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 
 Layout dos schemas:
 `inst/extdata/schemas/<group>/<dataset>/<table>.yaml` (`<group>` é o
-slug CKAN; `"companhias"` para os 4 datasets de v0.1 e `cgvn` adicionado
-no ciclo `0.1.0.9000`). Layout do ETL:
+slug CKAN; `"companhias"` na cobertura atual). Datasets cobertos vivem
+no `ROADMAP.md`. Layout do ETL:
 `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R`.
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para

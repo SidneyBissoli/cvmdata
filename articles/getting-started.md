@@ -77,9 +77,9 @@ group; the `groups-overview` article expands on the rationale.
 ``` r
 
 cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
+#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
 cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
+#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
 cvm_tables("dfp")
 #>  [1] "bpa"                "bpp"                "composicao_capital"
 #>  [4] "dfc_md"             "dfc_mi"             "dmpl"              
@@ -164,12 +164,12 @@ fund_fetch("fi-cad", "registro")
 #> ℹ See ROADMAP.md for the release plan.
 ```
 
-## Fetching data — a tour of the 6 issuer datasets
+## Fetching data — a tour of the 8 issuer datasets
 
-v0.1.0.9000 implements six datasets in the `companhias` group: `cad`,
-`dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo` (added toward v0.2). The
-examples below are marked `eval = FALSE` to keep the article fast; copy
-any of them into your R session as-is.
+v0.1.0.9000 implements eight datasets in the `companhias` group: `cad`,
+`dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca`, `ipe` (added
+toward v0.2). The examples below are marked `eval = FALSE` to keep the
+article fast; copy any of them into your R session as-is.
 
 ### `cad` — company registry
 
@@ -301,6 +301,86 @@ category, filter `tipo_cargo` on the returned tibble with `dplyr`.
 `consolidado` carries no `codigo_cvm`, so CD_CVM filtering resolves
 through `vlmo/submissao` automatically.
 
+### `fca` — registration form (10 tables)
+
+Added in v0.1.0.9000 toward v0.2 — the largest v0.2 surface. The `fca`
+(Formulário Cadastral) is the company’s standing registration record:
+ten tables headed by `submissao` (the classic 9-field header, identical
+to ITR/DFP/FRE) plus nine FRE-detail tables — `auditor`,
+`canal_divulgacao`, `departamento_acionistas`, `dri`, `endereco`,
+`escriturador`, `geral`, `pais_estrangeiro_negociacao` and
+`valor_mobiliario`.
+
+``` r
+
+# Current registration state, latest year
+geral <- issuer_fetch("fca", "geral", issuer = "BCO BRASIL")
+
+# Securities and their B3 trading tickers
+vm <- issuer_fetch("fca", "valor_mobiliario", year = 2024)
+
+# A ticker is itself a valid issuer (see "Selecting issuers" below)
+petr <- issuer_fetch("fca", "geral", issuer = "PETR4")
+```
+
+Because `submissao` is classic (`cnpj_cia` + `cd_cvm`) while the nine
+detail tables are FRE-detail (`cnpj_companhia`, no `cd_cvm`), filtering
+a detail by CD_CVM routes through `fca/submissao` and maps to the
+detail’s `cnpj_companhia` automatically.
+
+Two FCA specifics worth knowing. First, `fca/valor_mobiliario` is the
+source of the **B3 ticker lookup** — its `codigo_negociacao` column lets
+you pass a ticker (`"PETR4"`, `"BBDC11"`) as `issuer` to *any* dataset.
+Second, `fca/departamento_acionistas` is published with a valid 23-field
+header but **no data rows from 2024 onward** (it carried data through
+2023, then zeroed after a regulatory change); the call returns an empty
+tibble without error — use `fca/endereco` or `fca/dri` for
+shareholder-department contact details instead.
+
+#### `fca` vs `cad`
+
+Both describe the company itself, but they are different artifacts and
+should not be confused. `cad` is a single, time-less, unversioned
+snapshot of the *current* registry state. `fca` is a **versioned,
+yearly-partitioned history** of the registration form: one filing per
+company per year, with reapresentations resolved to the latest `versao`.
+There is no automatic dedup or join between the two. To relate them,
+join manually on the issuer CNPJ — `cad$cnpj_cia` against `fca`’s
+`cnpj_cia` (submissao) or `cnpj_companhia` (detail) — after normalising
+both with
+[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md).
+
+### `ipe` — manifest of periodic and eventual documents
+
+Added in v0.1.0.9000 toward v0.2. `ipe` (Informações Periódicas e
+Eventuais) is a **single-table manifest**: one row per document a
+company filed with the CVM — roughly 50,000 documents a year, across
+every category (Fato Relevante, Comunicado ao Mercado, Assembleia, …).
+It carries `codigo_cvm` natively, so CD_CVM and tickers filter directly.
+
+``` r
+
+# Everything Banco do Brasil filed in 2024
+docs <- issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024)
+
+# Slice the manifest by document class — a plain dplyr step
+library(dplyr)
+fatos <- docs |> filter(categoria == "Fato Relevante")
+```
+
+The manifest is **event-per-row**: it declares no `keep_latest_version`,
+so re-submissions and every `versao` of a document survive verbatim
+(filter on `categoria`/`versao` yourself if you want a subset). The
+`link_download` column is the URL of the original document on the CVM
+portal; cvmdata returns it as plain text and **does not download or OCR
+the PDF** — that is out of scope.
+
+`ipe` overlaps `vlmo` on one category: “Valores Mobiliários negociados e
+detidos (art. 11 …)” is the same event `vlmo` structures. Use `vlmo` for
+the **structured** insider movements and `ipe` to **discover and
+locate** the filed documents (and their PDFs) in any category. The
+`ipe-vlmo` article works the overlap through end to end.
+
 ## Selecting issuers
 
 The `issuer` argument accepts a vector of any length. Each element is
@@ -311,7 +391,13 @@ classified automatically:
 | `^[0-9]{14}$` | CNPJ without punctuation |
 | 14 digits with `.` `/` `-` separators | CNPJ with punctuation |
 | `^[0-9]{1,6}$` | CD_CVM (with or without zero padding) |
+| `^[A-Z]{4}[0-9]{1,2}[A-Z]?$` | B3 ticker (e.g. `PETR4`, `BBDC11`), resolved to CNPJ via `fca/valor_mobiliario` |
 | Otherwise | Free-text search against `denom_cia` |
+
+Tickers are checked after CNPJ and CD_CVM; the four-letter prefix means
+a numeric CD_CVM is never mistaken for a ticker. An unknown ticker
+aborts with `cvmdata_error_input` (tickers cover only exchange-listed
+securities — debentures and private placements have none).
 
 Text search normalises accents and casing, splits on word boundaries,
 and expands a small abbreviation map (`BCO ↔︎ BANCO`, `CIA ↔︎ COMPANHIA`,

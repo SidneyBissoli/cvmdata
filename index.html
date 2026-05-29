@@ -43,6 +43,7 @@
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
     <li><a class="dropdown-item" href="articles/data-defects.html">Known defects of the CVM publication</a></li>
   </ul>
@@ -98,7 +99,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"</span></span></code></pre></div>
 <p>The bundled dictionary surfaces the types and descriptions CVM publishes for every column:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span></span>

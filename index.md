@@ -69,7 +69,7 @@ snapshots):
 library(cvmdata)
 
 cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
+#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
 ```
 
 The bundled dictionary surfaces the types and descriptions CVM publishes

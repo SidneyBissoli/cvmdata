@@ -1,0 +1,77 @@
+# IPE and VLMO: the document index vs. the structured data
+
+``` r
+
+library(cvmdata)
+```
+
+Two `companhias` datasets describe the same regulatory event from
+opposite ends, and it is easy to reach for the wrong one. This article
+is about when to use **IPE** and when to use **VLMO**.
+
+## The two datasets
+
+**IPE** (*Informações Periódicas e Eventuais*) is a **manifest**: one
+row per document a company filed with the CVM — roughly 50,000 documents
+a year, spanning every category (Fato Relevante, Comunicado ao Mercado,
+Assembleia, and dozens more). Each row carries the document’s metadata
+plus a `link_download` URL pointing at the original PDF on the CVM
+portal. IPE *indexes* documents; it does not contain their structured
+contents.
+
+**VLMO** (*Valores Mobiliários Negociados e Detidos por insiders*, art.
+11 of CVM Resolution 44) is **structured data**: one row per security
+movement by an insider category, in `vlmo/consolidado` (quantity, unit
+price, volume, movement type, position). It is the machine-readable
+version of one specific filing.
+
+## Where they overlap
+
+IPE’s `categoria` column includes the value **“Valores Mobiliários
+negociados e detidos (art. 11 …)”** — the *same filing* VLMO structures.
+So the very document IPE points at with a `link_download` URL is the one
+VLMO has already parsed into rows and columns.
+
+``` r
+
+# IPE: the index entry for the art. 11 filing (a PDF link)
+idx <- issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024)
+art11 <- subset(
+  idx,
+  grepl("Valores Mobili", categoria, fixed = FALSE)
+)
+art11$link_download   # URL of the filed PDF on the CVM portal
+
+# VLMO: the structured movements from that same filing
+mov <- issuer_fetch("vlmo", "consolidado", issuer = "BBAS3",
+                    year = 2024)
+mov[, c("tipo_cargo", "data_movimentacao", "quantidade",
+        "preco_unitario", "volume")]
+```
+
+## Which one to use
+
+| You want… | Reach for |
+|----|----|
+| Structured insider positions and movements (quantities, prices) | **VLMO** (`vlmo/consolidado`) |
+| To discover or locate a filed document in *any* category | **IPE** |
+| The original PDF of a filing | **IPE** (`link_download`) |
+| To slice filings by document class (Fato Relevante, …) | **IPE** (`filter` on `categoria`) |
+
+The rule of thumb: **VLMO gives you the numbers; IPE gives you the
+document.** If your analysis needs the structured art.-11 movements, go
+straight to VLMO. If you need to enumerate, audit, or fetch the filings
+themselves — across any category, not just art. 11 — IPE is the index,
+and `link_download` is the door to the PDF.
+
+## Two things to keep in mind
+
+- **IPE is event-per-row and is not deduplicated.** Re-submissions and
+  every `versao` of a document are returned verbatim — that is by
+  design, because the manifest must reflect what was actually filed.
+  De-duplicate yourself if you want one row per document (e.g. keep the
+  highest `versao` per `protocolo_entrega`).
+
+- **cvmdata does not download or OCR the PDFs.** `link_download` is
+  returned as plain text. Fetching and parsing the document behind the
+  URL is out of scope for the package — IPE’s job ends at the index.

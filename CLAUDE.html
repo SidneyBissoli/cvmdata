@@ -26,6 +26,7 @@
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
+    <li><a class="dropdown-item" href="articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
     <li><a class="dropdown-item" href="articles/cache-and-mirror.html">Cache and mirror backend</a></li>
     <li><a class="dropdown-item" href="articles/data-defects.html">Known defects of the CVM publication</a></li>
   </ul></li>
@@ -109,9 +110,8 @@
 <h3 id="id_21-funções-públicas">2.1 Funções públicas<a class="anchor" aria-label="anchor" href="#id_21-fun%C3%A7%C3%B5es-p%C3%BAblicas"></a></h3>
 <p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional e cobre v0.1–v0.3 (grupo <code>companhias</code>); os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code>, com implementação plena em v0.4–v0.8. Skeletons foram exportados antes da implementação para <strong>travar a superfície da API pública cedo</strong>, de modo que as releases v0.4+ estendam cobertura sem reformatar a API.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias")</span></span>
-<span><span class="co"># v0.1: cad, dfp, itr, fre. 0.1.0.9000 (rumo a v0.2): + cgvn.</span></span>
-<span><span class="co"># Pendentes em 0.1.0.9000: fca, vlmo, ipe (sessões 11-13).</span></span>
+<code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias").</span></span>
+<span><span class="co"># Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.</span></span>
 <span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
 <span>             issuer      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># CNPJ / CD_CVM / texto, vetor</span></span>
 <span>             year        <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># integer vector, NULL → último</span></span>
@@ -273,7 +273,7 @@
 </tr><tr><td>(sem prefixo)</td>
 <td>API estável transversal: <code>cache.R</code>, <code>discovery.R</code>, <code>source.R</code>, <code>cvmdata-package.R</code>
 </td>
-</tr></tbody></table><p>Layout dos schemas: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (<code>&lt;group&gt;</code> é o slug CKAN; <code>"companhias"</code> para os 4 datasets de v0.1 e <code>cgvn</code> adicionado no ciclo <code>0.1.0.9000</code>). Layout do ETL: <code>inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R</code>.</p>
+</tr></tbody></table><p>Layout dos schemas: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (<code>&lt;group&gt;</code> é o slug CKAN; <code>"companhias"</code> na cobertura atual). Datasets cobertos vivem no <code>ROADMAP.md</code>. Layout do ETL: <code>inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R</code>.</p>
 <p><code>data-raw/</code> mistura <strong>build scripts</strong> regeneráveis (<code>build-*.R</code> para snapshots, fixtures e vignette data) com <strong>auditorias one-shot</strong> (<code>run-capacity-audit.R</code>, <code>validate-mirror-end-to-end.R</code>) e <strong><code>data-raw/decisions/</code></strong>. Os canônicos NÃO vivem todos no mesmo lugar: - <strong>Raiz do repo</strong>: <code>cvmdata_rodada2-5_naming_unificado-v03.md</code> (naming) e <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code> (reader), junto com os demais docs <code>cvmdata_rodada*.md</code> e os <code>PROMPT_CLAUDE_*.md</code> de sessão. - <strong><code>data-raw/decisions/</code></strong>: <code>cvmdata_arquitetura_grupos_decisao_v2.md</code> (arquitetura de grupos) + docs de planejamento v0.2 (<code>cvmdata_v0-2_*.md</code>).</p>
 <p>Apenas os build scripts são regenerados em ciclo normal; canônicos só mudam por decisão deliberada.</p>
 <p>Documentação narrativa em <code>vignettes/</code>: <code>cvmdata.Rmd</code> é o vignette canônico embarcado no tarball (overview do pacote); <code>vignettes/articles/</code> contém artigos longos publicados <strong>apenas no site pkgdown</strong> (<code>.Rbuildignored</code>), sem peso na tarball CRAN.</p>

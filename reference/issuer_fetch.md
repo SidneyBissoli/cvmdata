@@ -37,12 +37,14 @@ issuer_fetch(
 
   Optional character vector identifying issuers to include. Accepts CNPJ
   (with or without punctuation), CD_CVM (with or without zero-padding),
-  or free-text matched against `denom_cia`. Detection is automatic per
-  element. `NULL` (default) returns every issuer. Singular naming
-  follows tidyverse conventions; the argument still accepts vectors of
-  any length. When the target table does not carry a `cd_cvm` column
-  (e.g. `composicao_capital`, `parecer`), CD_CVM tokens are resolved to
-  CNPJ via the dataset's `submissao` table for the same year — the
+  a B3 trading ticker (e.g. `"PETR4"`, `"BBDC11"`), or free-text matched
+  against `denom_cia`. Detection is automatic per element; a ticker is
+  resolved to its issuer CNPJ via `fca/valor_mobiliario`. `NULL`
+  (default) returns every issuer. Singular naming follows tidyverse
+  conventions; the argument still accepts vectors of any length. When
+  the target table does not carry a `cd_cvm` column (e.g.
+  `composicao_capital`, `parecer`), CD_CVM tokens are resolved to CNPJ
+  via the dataset's `submissao` table for the same year — the
   user-facing interface is identical regardless of which table holds
   CD_CVM natively.
 

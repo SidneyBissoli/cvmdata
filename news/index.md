@@ -85,6 +85,60 @@
   codelist snapshots regenerated to include the new tables. Decision
   doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
+- New dataset `fca` (Formulario Cadastral) covered by
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+  the largest v0.2 surface with **10 tables**: `submissao` (9 fields,
+  classic convention identical to ITR/DFP/FRE — `cnpj_cia`, `dt_refer`,
+  `cd_cvm`) plus 9 FRE-detail tables (`cnpj_companhia` /
+  `data_referencia`): `auditor`, `canal_divulgacao`,
+  `departamento_acionistas`, `dri`, `endereco`, `escriturador`, `geral`,
+  `pais_estrangeiro_negociacao`, `valor_mobiliario`. The
+  classic-vs-detail split means CD_CVM filtering of a detail routes
+  through `fca/submissao` (which carries `cd_cvm` + `cnpj_cia`) and maps
+  to the detail’s `cnpj_companhia`. CKAN coverage 2021+.
+
+  Note: `fca/departamento_acionistas` is published with a valid 23-field
+  header but **zero data rows from 2024 onward** (it carried data
+  through 2023, then zeroed after a regulatory change). The reader
+  returns the empty tibble without aborting; use `fca/endereco` or
+  `fca/dri` for shareholder-department contact information.
+
+- **B3 ticker support in `issuer =`**. The `issuer` argument now
+  recognises B3 trading tickers (e.g. `"PETR4"`, `"BBDC11"`, `"ITSA4F"`)
+  alongside CNPJ, CD_CVM and free text. A ticker is resolved to its
+  issuer CNPJ via `fca/valor_mobiliario` (the `codigo_negociacao`
+  column), analogous to the existing CD_CVM → CNPJ resolution via
+  `submissao` — no external data source. Only active securities
+  (empty/future `data_fim_negociacao`) are matched; the lookup table is
+  cached per R session. Tickers cover only exchange-listed securities,
+  so an unknown ticker aborts with `cvmdata_error_input` rather than
+  failing silently. Embedded dictionary and codelist snapshots
+  regenerated to include the FCA tables. Decision doc:
+  `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
+- New dataset `ipe` (Informacoes Periodicas e Eventuais) covered by
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
+  A **single-table manifest** (`ipe`, 13 fields, ~50k documents/year) of
+  every periodic and eventual document a company filed with the CVM:
+  `cnpj_companhia`, `data_referencia`, `codigo_cvm`, `categoria`,
+  `tipo`, `especie`, `assunto`, `data_entrega`, `tipo_apresentacao`,
+  `protocolo_entrega`, `versao` and `link_download`. There is no
+  separate `submissao` table — the CSV *is* the manifest. `codigo_cvm`
+  is native, so CD_CVM filtering matches directly (no `submissao`
+  bridge). The manifest is **event-per-row**: like `vlmo/consolidado` it
+  declares **no `keep_latest_version`** transformation, so
+  re-submissions and every `versao` of a document are retained verbatim.
+  Slice by document class with a trivial
+  [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
+  on `categoria` on the returned tibble. `link_download` is returned as
+  a plain URL to the document on the CVM portal; **OCR and PDF download
+  are out of scope**. IPE overlaps VLMO on the “Valores Mobiliarios
+  negociados e detidos” category — IPE *indexes* the document, VLMO
+  carries the *structured* insider movements; see the `ipe-vlmo`
+  article. CKAN coverage 2021+. Embedded dictionary and codelist
+  snapshots regenerated to include the new table. Decision doc:
+  `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
 - [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
   lists the 18 CKAN groups published by the CVM Open Data Portal, with
   the number of datasets each group carries and the canonical `cvmdata`

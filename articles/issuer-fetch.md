@@ -52,7 +52,7 @@ bb_bpa <- issuer_fetch(
   year = 2024
 )
 bb_bpa
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 15:45:43.59858
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:03.447409
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 13
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -166,7 +166,7 @@ cap <- issuer_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 15:45:46.475423
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:06.275056
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 1 × 10
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
@@ -283,12 +283,12 @@ info
 #> # A tibble: 6 × 8
 #>   group   dataset file  path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>   <chr> <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 compan… dfp     dfp_… /hom…   13447722 2026-05-29 15:45:55 "\"6… Sun, 24 May …
-#> 2 compan… dfp     dfp_… /hom…   13562016 2026-05-29 15:46:02 "\"6… Sun, 24 May …
-#> 3 compan… dfp     dfp_… /hom…   13395083 2026-05-29 15:46:10 "\"6… Sun, 24 May …
-#> 4 compan… dfp     dfp_… /hom…   19075356 2026-05-29 15:45:55  NA   NA           
-#> 5 compan… dfp     dfp_… /hom…   19571240 2026-05-29 15:46:02  NA   NA           
-#> 6 compan… dfp     dfp_… /hom…   18582919 2026-05-29 15:46:10  NA   NA
+#> 1 compan… dfp     dfp_… /hom…   13447722 2026-05-29 18:51:08 "\"6… Sun, 24 May …
+#> 2 compan… dfp     dfp_… /hom…   13562016 2026-05-29 18:51:09 "\"6… Sun, 24 May …
+#> 3 compan… dfp     dfp_… /hom…   13395083 2026-05-29 18:51:10 "\"6… Sun, 24 May …
+#> 4 compan… dfp     dfp_… /hom…   19075356 2026-05-29 18:51:08  NA   NA           
+#> 5 compan… dfp     dfp_… /hom…   19571240 2026-05-29 18:51:09  NA   NA           
+#> 6 compan… dfp     dfp_… /hom…   18582919 2026-05-29 18:51:10  NA   NA
 attr(info, "total_size_bytes")
 #> [1] 97634893
 ```

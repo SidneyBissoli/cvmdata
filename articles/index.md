@@ -17,6 +17,8 @@
   DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
 - [Reference Form
   (FRE)](https://sidneybissoli.github.io/cvmdata/articles/fre.md):
+- [IPE and VLMO: the document index vs. the structured
+  data](https://sidneybissoli.github.io/cvmdata/articles/ipe-vlmo.md):
 - [Cache and mirror
   backend](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.md):
 - [Known defects of the CVM
