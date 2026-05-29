@@ -70,9 +70,8 @@ superfície da API pública cedo**, de modo que as releases v0.4+
 estendam cobertura sem reformatar a API.
 
 ```r
-# Issuer datasets — companhias abertas (grupo CKAN "companhias")
-# v0.1: cad, dfp, itr, fre. 0.1.0.9000 (rumo a v0.2): + cgvn.
-# Pendentes em 0.1.0.9000: fca, vlmo, ipe (sessões 11-13).
+# Issuer datasets — companhias abertas (grupo CKAN "companhias").
+# Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.
 issuer_fetch(dataset, table,
              issuer      = NULL,      # CNPJ / CD_CVM / texto, vetor
              year        = NULL,      # integer vector, NULL → último
