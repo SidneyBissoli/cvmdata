@@ -301,10 +301,14 @@ incrementalmente no ciclo `0.1.0.9000` rumo à v0.2.0).
 - [x] Bump `DESCRIPTION` para `0.2.0`.
 - [x] `NEWS.md`: seção `# cvmdata 0.2.0` consolidando os 4 datasets
   novos + ticker B3.
-- [ ] Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe
-  via `etl-mirror.yaml`).
-- [ ] Tag git `v0.2.0` + GitHub Release.
-- [ ] Reabrir ciclo de dev `0.2.0.9000`.
+- [x] Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe
+  via `etl-mirror.yaml`; IPE ~38 MB total, dentro do limite).
+- [x] Tag git `v0.2.0` + GitHub Release.
+- [x] Reabrir ciclo de dev `0.2.0.9000`.
+- [ ] Pendência operacional (fora do v0.2.0): `dfp/itr/fre` falham no
+  fetch de anos históricos de `composicao_capital` (lado-CVM, surgiu
+  entre 24 e 29/05); mirrors de 24/05 seguem servindo. Investigar em
+  sessão de ETL dedicada.
 
 ### v0.3 — `companhias` (parte 3) + perfis não-default
 
