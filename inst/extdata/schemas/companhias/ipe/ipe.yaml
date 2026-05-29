@@ -1,0 +1,50 @@
+# Schema: ipe / ipe
+# Informacoes Periodicas e Eventuais (IPE) — the manifest of every
+# periodic and eventual document a publicly-traded company filed with
+# the CVM. One row per filed document (~50k/year): metadata plus a
+# Link_Download pointing at the original PDF on the CVM portal. The CSV
+# *is* the manifest — there is no separate `submissao` table. OCR and
+# PDF download are out of scope: the package returns Link_Download as a
+# character URL and never fetches the PDF. FRE-detail-like convention
+# (cnpj_companhia / data_referencia / nome_companhia) with Codigo_CVM
+# native in the header (so CD_CVM filters match directly via
+# cdcvm_col(), without the submissao bridge). Empirical verification:
+# 2024 snapshot + META TXT (verificacao empirica v0.2 §2.4),
+# re-confirmed on disk 2026-05-29.
+
+dataset: ipe
+table: ipe
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/IPE/DADOS/ipe_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "ipe_cia_aberta_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+# Unlike FCA/VLMO/CGVN, the IPE META is a flat .txt (not a .zip), so the
+# URL carries no `#entry` fragment — split_url() returns zip = NA and
+# falls through to the direct .txt path (same as CAD). Confirmed on disk
+# 2026-05-29: the TXT parses as `Campo:` blocks for the 13 fields.
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/IPE/META/meta_ipe_cia_aberta.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+# CKAN serves 2021-current at the time of verification (2026-05-28);
+# older filings depend on the mirror.
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 13
+
+# Transformations ------------------------------------------------------
+# None. `ipe` is an event-per-row manifest: each filed document is one
+# row, and re-submissions / distinct VERSAO of the same document must
+# all survive. The table *does* carry versao, cnpj_companhia and
+# data_referencia, so declaring keep_latest_version by reflex would
+# wrongly collapse separate documents — do NOT declare it. Same decision
+# as vlmo/consolidado (v0.2 planning doc §3.1.2 and §3.3).
+transformations: []

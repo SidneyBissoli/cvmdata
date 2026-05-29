@@ -24,15 +24,21 @@
 #     - subset of FCA 2024 (all 10 tables) to BCO BRASIL + MAGAZINE
 #       LUIZA, repacked under 200 KB. Added in v0.2 Sessao 12.
 #       departamento_acionistas ships header-only (empty upstream).
+#   tests/testthat/fixtures/ipe_cia_aberta_2024.zip
+#     - subset of IPE 2024 (single-table manifest) to BCO BRASIL +
+#       MAGAZINE LUIZA, repacked under 200 KB. Added in v0.2 Sessao 13.
+#       Keeps every Categoria emitted by the pair (manifest is
+#       event-per-row, no dedup) for the category-filter test.
 #
 # Run with `Rscript data-raw/build-mirror-test-fixtures.R` from the
 # package root to (re)build everything, or pass one or more targets to
 # build a subset, e.g. `Rscript data-raw/build-mirror-test-fixtures.R
 # fca` to rebuild only the FCA fixture in isolation (the pattern used
 # from Sessao 11 onward to avoid disturbing already-committed
-# fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`. Idempotent —
-# overwrites any pre-existing fixtures it touches. The cgvn/vlmo/fca
-# raw-fixture steps require network access to the CVM portal.
+# fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`, `ipe`.
+# Idempotent — overwrites any pre-existing fixtures it touches. The
+# cgvn/vlmo/fca/ipe raw-fixture steps require network access to the CVM
+# portal.
 
 stopifnot(requireNamespace("devtools", quietly = TRUE))
 stopifnot(requireNamespace("DBI", quietly = TRUE))
@@ -44,7 +50,7 @@ devtools::load_all(quiet = TRUE)
 options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
 
 # Target selection: default to all; CLI args restrict to a subset.
-.all_targets <- c("parquet", "cgvn", "vlmo", "fca")
+.all_targets <- c("parquet", "cgvn", "vlmo", "fca", "ipe")
 .targets <- commandArgs(trailingOnly = TRUE)
 if (!length(.targets)) {
   .targets <- .all_targets
@@ -535,8 +541,145 @@ build_fca_raw_fixture <- function() {
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
+# --- IPE raw ZIP fixture (Sessao 13) ---------------------------------
+# Downloads the 2024 IPE yearly archive and subsets the single-table
+# manifest to BCO BRASIL + MAGAZINE LUIZA. The CSV carries
+# CNPJ_Companhia, so the subset filters on that column directly. IPE
+# also carries Codigo_CVM natively (CD_CVM filters match directly, no
+# submissao bridge), but CNPJ is used here to keep the fixture
+# self-contained. Every Categoria the pair emits is kept (manifest is
+# event-per-row, no dedup), giving the category-filter test plenty of
+# distinct values. The full BB/MGLU subset stays well under the 200 KB
+# cap, so no per-category trimming is needed.
+
+build_ipe_raw_fixture <- function() {
+  ipe_url <- paste0(
+    "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/IPE/DADOS/",
+    "ipe_cia_aberta_2024.zip"
+  )
+  out_zip <- "tests/testthat/fixtures/ipe_cia_aberta_2024.zip"
+  out_meta <- paste0(out_zip, ".meta.json")
+
+  # Companies kept in the subset (same pair used in CGVN/VLMO/FCA/DFP/
+  # ITR/FRE fixtures for cross-test coherence).
+  keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
+  keep_meta <- list(
+    list(cd_cvm = "001023", cnpj_companhia = "00.000.000/0001-91",
+         nome_companhia = "BANCO DO BRASIL S.A."),
+    list(cd_cvm = "022470", cnpj_companhia = "47.960.950/0001-21",
+         nome_companhia = "MAGAZINE LUIZA S.A.")
+  )
+
+  stage <- tempfile("ipe_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+
+  zip_local <- file.path(stage, "ipe_cia_aberta_2024.zip")
+  cat(sprintf("[ipe] Downloading %s\n", ipe_url))
+  resp <- httr2::req_perform(
+    httr2::req_timeout(httr2::request(ipe_url), 300L)
+  )
+  writeBin(httr2::resp_body_raw(resp), zip_local)
+
+  extract_dir <- file.path(stage, "extract")
+  dir.create(extract_dir)
+  utils::unzip(zip_local, exdir = extract_dir)
+
+  # Categoria sits at index 5; collected here to record which distinct
+  # categories the subset preserves in the .meta.json.
+  categories <- character(0L)
+
+  subset_csv <- function(name, cnpj_col) {
+    path <- file.path(extract_dir, name)
+    if (!file.exists(path)) {
+      stop(sprintf("Expected CSV not found in IPE ZIP: %s", name))
+    }
+    raw <- readBin(path, "raw", n = file.info(path)$size)
+    txt <- iconv(rawToChar(raw), from = "ISO-8859-1", to = "UTF-8")
+    lines <- strsplit(txt, "\r?\n", perl = TRUE)[[1L]]
+    header <- lines[1L]
+    cols <- strsplit(header, ";", fixed = TRUE)[[1L]]
+    idx <- which(tolower(cols) == cnpj_col)
+    cat_idx <- which(tolower(cols) == "categoria")
+    if (!length(idx)) {
+      stop(sprintf("CNPJ column %s not found in %s", cnpj_col, name))
+    }
+    body <- lines[-1L]
+    body <- body[nzchar(body)]
+    fields <- strsplit(body, ";", fixed = TRUE)
+    cnpjs <- vapply(fields, function(f) {
+      if (length(f) >= idx) f[idx] else NA_character_
+    }, character(1L))
+    keep_mask <- cnpjs %in% keep_cnpjs
+    kept_fields <- fields[keep_mask]
+    categories <<- unique(c(categories, vapply(kept_fields, function(f) {
+      if (length(f) >= cat_idx) f[cat_idx] else NA_character_
+    }, character(1L))))
+    kept <- c(header, body[keep_mask])
+    out <- file.path(extract_dir, paste0("subset_", name))
+    out_raw <- charToRaw(
+      iconv(paste(kept, collapse = "\r\n"),
+            from = "UTF-8", to = "ISO-8859-1")
+    )
+    writeBin(out_raw, out)
+    list(path = out, n_rows = sum(keep_mask))
+  }
+
+  ipe_info <- subset_csv("ipe_cia_aberta_2024.csv", "cnpj_companhia")
+
+  # Repack: only the filtered CSV (renamed back to canonical).
+  pack_dir <- file.path(stage, "pack")
+  dir.create(pack_dir)
+  file.copy(ipe_info$path,
+            file.path(pack_dir, "ipe_cia_aberta_2024.csv"),
+            overwrite = TRUE)
+
+  if (file.exists(out_zip)) file.remove(out_zip)
+  out_zip_abs <- file.path(
+    normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
+    basename(out_zip)
+  )
+  withr::with_dir(pack_dir, {
+    utils::zip(
+      zipfile = out_zip_abs,
+      files = list.files("."),
+      flags = "-q9X"
+    )
+  })
+
+  meta <- list(
+    source_url = ipe_url,
+    fetched_at = format(Sys.Date()),
+    companies_included = keep_meta,
+    files_included = "ipe_cia_aberta_2024.csv",
+    categories_included = sort(categories),
+    notes = paste(
+      "Subset filtered by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA).",
+      "ISO-8859-1 encoding preserved.",
+      "Built from the 2024 yearly archive (Sessao 13, v0.2).",
+      "IPE is an event-per-row manifest: NO keep_latest_version",
+      "transformation, so every filed document (and every VERSAO)",
+      "survives verbatim. Every Categoria the pair emits is kept for",
+      "the category-filter test. The overlap category 'Valores",
+      "Mobiliarios negociados e detidos (art. 11 ...)' is the same",
+      "event VLMO structures (see vignette ipe-vlmo)."
+    )
+  )
+  writeLines(
+    jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+    out_meta
+  )
+
+  cat(sprintf("[fixture] %s  %s bytes\n",
+              out_zip, format(file.info(out_zip)$size)))
+  cat(sprintf("[fixture] ipe subset: %d rows, %d distinct categories\n",
+              ipe_info$n_rows, length(categories)))
+  cat(sprintf("[fixture] %s\n", out_meta))
+}
+
 # --- dispatch --------------------------------------------------------
 if ("parquet" %in% .targets) build_parquet_fixtures()
 if ("cgvn" %in% .targets) build_cgvn_raw_fixture()
 if ("vlmo" %in% .targets) build_vlmo_raw_fixture()
 if ("fca" %in% .targets) build_fca_raw_fixture()
+if ("ipe" %in% .targets) build_ipe_raw_fixture()

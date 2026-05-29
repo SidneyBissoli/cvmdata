@@ -122,12 +122,12 @@ Calling a skeleton:
 fund_fetch("fi-cad", "registro")
 ```
 
-## Fetching data — a tour of the 7 issuer datasets
+## Fetching data — a tour of the 8 issuer datasets
 
-v0.1.0.9000 implements seven datasets in the `companhias` group:
-`cad`, `dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca` (added
-toward v0.2). The examples below are marked `eval = FALSE` to keep the
-article fast; copy any of them into your R session as-is.
+v0.1.0.9000 implements eight datasets in the `companhias` group:
+`cad`, `dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca`, `ipe`
+(added toward v0.2). The examples below are marked `eval = FALSE` to
+keep the article fast; copy any of them into your R session as-is.
 
 ### `cad` — company registry
 
@@ -298,6 +298,38 @@ company per year, with reapresentations resolved to the latest
 relate them, join manually on the issuer CNPJ — `cad$cnpj_cia` against
 `fca`'s `cnpj_cia` (submissao) or `cnpj_companhia` (detail) — after
 normalising both with `cnpj_clean()`.
+
+### `ipe` — manifest of periodic and eventual documents
+
+Added in v0.1.0.9000 toward v0.2. `ipe` (Informações Periódicas e
+Eventuais) is a **single-table manifest**: one row per document a
+company filed with the CVM — roughly 50,000 documents a year, across
+every category (Fato Relevante, Comunicado ao Mercado, Assembleia,
+…). It carries `codigo_cvm` natively, so CD_CVM and tickers filter
+directly.
+
+```{r ipe, eval = FALSE}
+# Everything Banco do Brasil filed in 2024
+docs <- issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024)
+
+# Slice the manifest by document class — a plain dplyr step
+library(dplyr)
+fatos <- docs |> filter(categoria == "Fato Relevante")
+```
+
+The manifest is **event-per-row**: it declares no
+`keep_latest_version`, so re-submissions and every `versao` of a
+document survive verbatim (filter on `categoria`/`versao` yourself if
+you want a subset). The `link_download` column is the URL of the
+original document on the CVM portal; cvmdata returns it as plain text
+and **does not download or OCR the PDF** — that is out of scope.
+
+`ipe` overlaps `vlmo` on one category: "Valores Mobiliários
+negociados e detidos (art. 11 ...)" is the same event `vlmo`
+structures. Use `vlmo` for the **structured** insider movements and
+`ipe` to **discover and locate** the filed documents (and their
+PDFs) in any category. The `ipe-vlmo` article works the overlap
+through end to end.
 
 ## Selecting issuers
 

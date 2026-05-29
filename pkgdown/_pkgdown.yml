@@ -16,6 +16,7 @@ articles:
       - matches("^articles/issuer-fetch$")
       - matches("^articles/itr-dfp$")
       - matches("^articles/fre$")
+      - matches("^articles/ipe-vlmo$")
       - matches("^articles/cache-and-mirror$")
       - matches("^articles/data-defects$")
 

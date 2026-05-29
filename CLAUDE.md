@@ -269,8 +269,8 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 | (sem prefixo) | API estável transversal: `cache.R`, `discovery.R`, `source.R`, `cvmdata-package.R` |
 
 Layout dos schemas: `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`
-(`<group>` é o slug CKAN; `"companhias"` para os 4 datasets de v0.1
-e `cgvn` adicionado no ciclo `0.1.0.9000`).
+(`<group>` é o slug CKAN; `"companhias"` na cobertura atual). Datasets
+cobertos vivem no `ROADMAP.md`.
 Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R`.
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para

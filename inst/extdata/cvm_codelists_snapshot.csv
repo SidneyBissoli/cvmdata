@@ -645,6 +645,35 @@ companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor
 companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PF
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PJ
+companhias,ipe,ipe,especie,Ata
+companhias,ipe,ipe,especie,Balanço Social
+companhias,ipe,ipe,especie,Boletim de voto a distância
+companhias,ipe,ipe,especie,Combinadas
+companhias,ipe,ipe,especie,Condensadas
+companhias,ipe,ipe,especie,"Declaração de Alienação de Participação Acionária Relevante - Art.12, §4º, da Instrução CVM nº358/02"
+companhias,ipe,ipe,especie,Declaração de Aquisição de Participação Acionária Relevante - Art.12 da Instrução CVM nº358/02
+companhias,ipe,ipe,especie,Demonstrações Financeiras em Padrões Internacionais
+companhias,ipe,ipe,especie,Edital de Convocação
+companhias,ipe,ipe,especie,Especialmente preparadas para Registro Inicial
+companhias,ipe,ipe,especie,Instrução de voto
+companhias,ipe,ipe,especie,Manual para participação
+companhias,ipe,ipe,especie,Mapa Final de Votação Resumido
+companhias,ipe,ipe,especie,Mapa Sintético dos votos enviados diretamente à Companhia
+companhias,ipe,ipe,especie,Mapa consolidado de voto a distância
+companhias,ipe,ipe,especie,Mapa do Depositário Central
+companhias,ipe,ipe,especie,Mapa do Escriturador
+companhias,ipe,ipe,especie,Mapa final de votação detalhado
+companhias,ipe,ipe,especie,Material referente a pedidos públicos de procuração
+companhias,ipe,ipe,especie,Proposta da Administração
+companhias,ipe,ipe,especie,Prospecto Definitivo
+companhias,ipe,ipe,especie,Prospecto Preliminar
+companhias,ipe,ipe,especie,"Protocolo e Justificação de Incorporação, Fusão ou Cisão"
+companhias,ipe,ipe,especie,Pró-forma
+companhias,ipe,ipe,especie,Regulatórias
+companhias,ipe,ipe,especie,Sumário das Decisões
+companhias,ipe,ipe,tipo_apresentacao,AP - Apresentação
+companhias,ipe,ipe,tipo_apresentacao,RC - Reapresentação por Exigência
+companhias,ipe,ipe,tipo_apresentacao,RE - Reapresentação Espontânea
 companhias,itr,bpa,escala_moeda,MIL
 companhias,itr,bpa,escala_moeda,UNIDADE
 companhias,itr,bpa,moeda,REAL
