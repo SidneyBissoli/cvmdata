@@ -6,6 +6,7 @@
 
 skip_if_not_installed("arrow")
 skip_if_not_installed("pointblank")
+skip_if_not_installed("jsonlite")
 
 # Source the helpers from the ETL script. The script uses paths
 # relative to the package root (`source("inst/etl/00-config.R")`), so
@@ -107,6 +108,80 @@ test_that("validate_one_parquet flags soft fail on bad CNPJ format", {
   # Soft checks catch the bad cnpj and the non-digit cd_cvm.
   soft_fail <- result[result$severity == "soft" & result$status == "fail", ]
   expect_true(nrow(soft_fail) >= 2L)
+})
+
+# --- empty-upstream manifest (legitimately 0-row years) ----------------
+
+test_that("validate_tuple_key collapses NA/NULL year and report_type", {
+  load_etl_validator()
+  expect_identical(
+    validate_tuple_key("departamento_acionistas", 2024L, NULL),
+    "departamento_acionistas|2024|"
+  )
+  expect_identical(
+    validate_tuple_key("bpa", 2024L, "ind"),
+    "bpa|2024|ind"
+  )
+  expect_identical(
+    validate_tuple_key("companhias", NA, NA),
+    "companhias||"
+  )
+})
+
+test_that("validate_empty_set returns character(0) without a manifest", {
+  load_etl_validator()
+  expect_identical(
+    validate_empty_set("fca", withr::local_tempdir()),
+    character(0L)
+  )
+})
+
+test_that("validate_empty_set parses the stage-02 manifest", {
+  load_etl_validator()
+  workspace <- withr::local_tempdir()
+  empty_dir <- file.path(workspace, "out", "empty")
+  dir.create(empty_dir, recursive = TRUE)
+  jsonlite::write_json(
+    data.frame(
+      table = "departamento_acionistas",
+      year = 2024L,
+      report_type = NA_character_,
+      stringsAsFactors = FALSE
+    ),
+    file.path(empty_dir, "fca.json"),
+    auto_unbox = TRUE, na = "null"
+  )
+  keys <- validate_empty_set("fca", workspace)
+  expect_true(
+    validate_tuple_key("departamento_acionistas", 2024L, NULL) %in% keys
+  )
+})
+
+test_that("validate_one_parquet passes a missing parquet when empty upstream", {
+  load_etl_validator()
+  hints <- validate_schema_hints("fca", "departamento_acionistas")
+  result <- validate_one_parquet(
+    "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
+    hints, upstream_empty = TRUE
+  )
+  expect_equal(nrow(result), 1L)
+  expect_identical(result$check, "upstream_empty")
+  expect_identical(result$severity, "soft")
+  expect_identical(result$status, "pass")
+})
+
+test_that("missing parquet stays a hard fail when not empty upstream", {
+  # Same missing path, upstream_empty = FALSE (the default) — the
+  # pre-existing contract must be preserved.
+  load_etl_validator()
+  hints <- validate_schema_hints("fca", "departamento_acionistas")
+  result <- validate_one_parquet(
+    "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
+    hints
+  )
+  expect_identical(result$check, "parquet_exists")
+  expect_identical(result$severity, "hard")
+  expect_identical(result$status, "fail")
 })
 
 # --- validate_dataset end-to-end ---------------------------------------
