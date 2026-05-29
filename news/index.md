@@ -31,8 +31,9 @@
   Rationale: cvmdata has zero CRAN distribution and zero external users
   at v0.1.0; the breaking change is contained to a few collaborators who
   can update their scripts in one pass. The alternative (a
-  soft-deprecated wrapper kept until v1.0) would carry maintenance cost
-  and confuse reviewers during the upcoming rOpenSci submission.
+  soft-deprecated wrapper kept until v1.0) would carry the maintenance
+  cost of a redundant code path through the entire v0.x cycle, with no
+  external users to protect.
 
 - `cad_fetch()` has been removed without replacement. Use
   `issuer_fetch("cad", "companhias")` instead — the call site is one
@@ -103,8 +104,9 @@
   `atividade-sancionadora` and `atos-declaratorios`, v0.8). Calling any
   of these in v0.1.0.9000 aborts with the new condition class
   `cvmdata_error_input_group` and a message pointing to ROADMAP.md.
-  Exporting skeletons now lets the upcoming rOpenSci submission review
-  the complete API surface ahead of incremental data implementation.
+  Exporting the skeletons now locks the complete public API surface
+  ahead of incremental data implementation, so later releases (v0.4+)
+  extend coverage without reshaping the API.
 
 - New condition class `cvmdata_error_input_group` (inherits from
   `cvmdata_error_input`, which in turn inherits from `cvmdata_error`).

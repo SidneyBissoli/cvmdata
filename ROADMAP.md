@@ -205,20 +205,15 @@ enviado.
 
 [`devtools::check_mac_release()`](https://devtools.r-lib.org/reference/check_mac_release.html)
 — PASS em `aarch64-apple-darwin23` (macOS Tahoe 26.2, Apple M1) sob R
-4.6.0 patched, 0E/0W/0N.
-
-Submissão rOpenSci (pre-submission inquiry) — **deferida** até o fim do
-ciclo `0.1.0.9000` (Sessões 04-08, vide próxima seção). Decisão
-arquitetural de “grupos” da CVM fechou em 2026-05-25: 5 fetchers por
-contrato de dado (`issuer_fetch`, `fund_fetch`, `agent_fetch`,
-`offering_fetch`, `event_fetch`) cobrindo os 18 grupos CKAN. Documento
-canônico: `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
-Draft de pre-submission em `data-raw/rOpenSci-presubmission-draft.md`
-(não pushed) será reescrito após a Sessão 08.
-
-Aceitação rOpenSci.
-
-Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).
+4.6.0 patched, 0E/0W/0N. \> **Submissão rOpenSci, aceite e submissão
+CRAN foram realocadas para o \> fim do ciclo de desenvolvimento** (após
+v1.0). Decisão de Sidney \> (2026-05-28): a submissão ao rOpenSci só
+ocorre depois de todo o \> escopo planejado estar implementado e o
+pacote estabilizado. Ver a \> seção final “Fim do ciclo — submissão
+rOpenSci, CRAN e publicação”. \> A decisão arquitetural de “grupos” (5
+fetchers por contrato cobrindo \> os 18 grupos CKAN) está consolidada no
+documento canônico \>
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
 
 ------------------------------------------------------------------------
 
@@ -400,12 +395,12 @@ Atributo `group` adicionado em tibble retornado (6 atributos: `source`,
 `fetched_at`, `group`, `dataset`, `table`, `package_version`);
 `print.cvm_tbl()` exibe `group`.
 
-### Pós-Sessão 08 — pre-submission rOpenSci
+### Pós-Sessão 08 — estado pós-migração arquitetural
 
-Reescrever `data-raw/rOpenSci-presubmission-draft.md` refletindo
-arquitetura final.
-
-Submeter pre-submission inquiry ao rOpenSci.
+Migração de grupos concluída (Sessões 04-08). A pre-submission ao
+rOpenSci **não** ocorre aqui: foi movida para o fim do ciclo de
+desenvolvimento (ver seção final “Fim do ciclo — submissão rOpenSci,
+CRAN e publicação”).
 
 ------------------------------------------------------------------------
 
@@ -563,15 +558,78 @@ Argumento `date_range`.
 
 ### v1.0 — estabilização
 
+Fecha o desenvolvimento de features. Pré-requisito para o gate de
+submissão (seção final).
+
+Implementação real dos 5 fetchers concluída (v0.4-v0.8 entregues;
+[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
+[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
+[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+e
+[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
+saem de skeleton para funcionais).
+
 Audit completo de cobertura: todos os 18 grupos e 76 datasets do portal
 mapeados.
 
 Vignettes finais por contrato (`issuer-fetch.Rmd`, `fund-fetch.Rmd`,
 `agent-fetch.Rmd`, `offering-fetch.Rmd`, `event-fetch.Rmd`).
 
-Paper no The R Journal.
-
 Promoção do lifecycle de `experimental` para `stable`.
+
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+0E/0W/0N nos três runners; cobertura ≥ 90%; lint clean.
+
+------------------------------------------------------------------------
+
+## Fim do ciclo — submissão rOpenSci, CRAN e publicação
+
+Gate movido para o **fim do desenvolvimento**, após v1.0. Decisão de
+Sidney (2026-05-28): a submissão ao rOpenSci só ocorre depois de todo o
+escopo planejado estar implementado e o pacote estabilizado. Substitui o
+plano anterior, que previa a pre-submission logo após a Sessão 08.
+
+Consequência: neste plano a entrada no CRAN está acoplada ao aceite do
+rOpenSci, logo o pacote permanece **fora do CRAN durante todo o
+desenvolvimento v0.2-v0.8**. Distribuição até lá é via GitHub
+(`pak::pak("SidneyBissoli/cvmdata")`).
+
+### Pré-requisitos (gate)
+
+v1.0 fechada (ver seção acima): 5 fetchers funcionais, 18 grupos e 76
+datasets cobertos, lifecycle `stable`.
+
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)
+0E/0W/0N nos três runners; cobertura ≥ 90%; lint clean.
+
+pkgdown completo e publicado.
+
+### Submissão rOpenSci
+
+Reescrever `data-raw/rOpenSci-presubmission-draft.md` refletindo a
+arquitetura final e a cobertura completa (5 fetchers, 18 grupos, 76
+datasets).
+
+Submeter pre-submission inquiry ao rOpenSci.
+
+Submissão formal ao rOpenSci software peer review.
+
+Endereçar feedback dos reviewers.
+
+Aceitação rOpenSci.
+
+### Submissão CRAN (após aceite rOpenSci)
+
+`cran-comments.md` revisado para v1.0.
+
+Submissão ao CRAN.
+
+Aceitação no CRAN.
+
+### Publicação acadêmica (após aceite rOpenSci)
+
+Paper no The R Journal. **Dependência explícita**: somente após o aceite
+pelo rOpenSci (decisão de Sidney, 2026-05-28).
 
 ------------------------------------------------------------------------
 

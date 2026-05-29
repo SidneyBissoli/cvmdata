@@ -148,10 +148,7 @@
 <li><label><input type="checkbox" checked>Tag git <code>v0.1.0</code> + GitHub release.</label></li>
 <li><label><input type="checkbox" checked>Reabrir ciclo de dev <code>0.1.0.9000</code>.</label></li>
 <li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check_win.html" class="external-link">devtools::check_win_devel()</a></code> enviado.</label></li>
-<li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check_mac_release.html" class="external-link">devtools::check_mac_release()</a></code> — PASS em <code>aarch64-apple-darwin23</code> (macOS Tahoe 26.2, Apple M1) sob R 4.6.0 patched, 0E/0W/0N.</label></li>
-<li><label><input type="checkbox">Submissão rOpenSci (pre-submission inquiry) — <strong>deferida</strong> até o fim do ciclo <code>0.1.0.9000</code> (Sessões 04-08, vide próxima seção). Decisão arquitetural de “grupos” da CVM fechou em 2026-05-25: 5 fetchers por contrato de dado (<code>issuer_fetch</code>, <code>fund_fetch</code>, <code>agent_fetch</code>, <code>offering_fetch</code>, <code>event_fetch</code>) cobrindo os 18 grupos CKAN. Documento canônico: <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code>. Draft de pre-submission em <code>data-raw/rOpenSci-presubmission-draft.md</code> (não pushed) será reescrito após a Sessão 08.</label></li>
-<li><label><input type="checkbox">Aceitação rOpenSci.</label></li>
-<li><label><input type="checkbox">Submissão CRAN (feita pelo rOpenSci em nome do mantenedor).</label></li>
+<li><label><input type="checkbox" checked><code><a href="https://devtools.r-lib.org/reference/check_mac_release.html" class="external-link">devtools::check_mac_release()</a></code> — PASS em <code>aarch64-apple-darwin23</code> (macOS Tahoe 26.2, Apple M1) sob R 4.6.0 patched, 0E/0W/0N. &gt; <strong>Submissão rOpenSci, aceite e submissão CRAN foram realocadas para o &gt; fim do ciclo de desenvolvimento</strong> (após v1.0). Decisão de Sidney &gt; (2026-05-28): a submissão ao rOpenSci só ocorre depois de todo o &gt; escopo planejado estar implementado e o pacote estabilizado. Ver a &gt; seção final “Fim do ciclo — submissão rOpenSci, CRAN e publicação”. &gt; A decisão arquitetural de “grupos” (5 fetchers por contrato cobrindo &gt; os 18 grupos CKAN) está consolidada no documento canônico &gt; <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code>.</label></li>
 </ul><hr></div>
 </div>
 <div class="section level2">
@@ -231,10 +228,9 @@
 <li><label><input type="checkbox" checked>Atributo <code>group</code> adicionado em tibble retornado (6 atributos: <code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>); <code>print.cvm_tbl()</code> exibe <code>group</code>.</label></li>
 </ul></div>
 <div class="section level3">
-<h3 id="pós-sessão-08--pre-submission-ropensci">Pós-Sessão 08 — pre-submission rOpenSci<a class="anchor" aria-label="anchor" href="#p%C3%B3s-sess%C3%A3o-08--pre-submission-ropensci"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox">Reescrever <code>data-raw/rOpenSci-presubmission-draft.md</code> refletindo arquitetura final.</label></li>
-<li><label><input type="checkbox">Submeter pre-submission inquiry ao rOpenSci.</label></li>
-</ul><hr></div>
+<h3 id="pós-sessão-08--estado-pós-migração-arquitetural">Pós-Sessão 08 — estado pós-migração arquitetural<a class="anchor" aria-label="anchor" href="#p%C3%B3s-sess%C3%A3o-08--estado-p%C3%B3s-migra%C3%A7%C3%A3o-arquitetural"></a></h3>
+<p>Migração de grupos concluída (Sessões 04-08). A pre-submission ao rOpenSci <strong>não</strong> ocorre aqui: foi movida para o fim do ciclo de desenvolvimento (ver seção final “Fim do ciclo — submissão rOpenSci, CRAN e publicação”).</p>
+<hr></div>
 </div>
 <div class="section level2">
 <h2 id="v02-escopo-futuro">v0.2+ (escopo futuro)<a class="anchor" aria-label="anchor" href="#v02-escopo-futuro"></a></h2>
@@ -319,10 +315,41 @@
 </ul></div>
 <div class="section level3">
 <h3 id="v10--estabilização">v1.0 — estabilização<a class="anchor" aria-label="anchor" href="#v10--estabiliza%C3%A7%C3%A3o"></a></h3>
-<ul class="task-list"><li><label><input type="checkbox">Audit completo de cobertura: todos os 18 grupos e 76 datasets do portal mapeados.</label></li>
+<p>Fecha o desenvolvimento de features. Pré-requisito para o gate de submissão (seção final).</p>
+<ul class="task-list"><li><label><input type="checkbox">Implementação real dos 5 fetchers concluída (v0.4-v0.8 entregues; <code><a href="reference/fund_fetch.html">fund_fetch()</a></code>, <code><a href="reference/agent_fetch.html">agent_fetch()</a></code>, <code><a href="reference/offering_fetch.html">offering_fetch()</a></code> e <code><a href="reference/event_fetch.html">event_fetch()</a></code> saem de skeleton para funcionais).</label></li>
+<li><label><input type="checkbox">Audit completo de cobertura: todos os 18 grupos e 76 datasets do portal mapeados.</label></li>
 <li><label><input type="checkbox">Vignettes finais por contrato (<code>issuer-fetch.Rmd</code>, <code>fund-fetch.Rmd</code>, <code>agent-fetch.Rmd</code>, <code>offering-fetch.Rmd</code>, <code>event-fetch.Rmd</code>).</label></li>
-<li><label><input type="checkbox">Paper no The R Journal.</label></li>
 <li><label><input type="checkbox">Promoção do lifecycle de <code>experimental</code> para <code>stable</code>.</label></li>
+<li><label><input type="checkbox"><code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> 0E/0W/0N nos três runners; cobertura ≥ 90%; lint clean.</label></li>
+</ul><hr></div>
+</div>
+<div class="section level2">
+<h2 id="fim-do-ciclo--submissão-ropensci-cran-e-publicação">Fim do ciclo — submissão rOpenSci, CRAN e publicação<a class="anchor" aria-label="anchor" href="#fim-do-ciclo--submiss%C3%A3o-ropensci-cran-e-publica%C3%A7%C3%A3o"></a></h2>
+<p>Gate movido para o <strong>fim do desenvolvimento</strong>, após v1.0. Decisão de Sidney (2026-05-28): a submissão ao rOpenSci só ocorre depois de todo o escopo planejado estar implementado e o pacote estabilizado. Substitui o plano anterior, que previa a pre-submission logo após a Sessão 08.</p>
+<p>Consequência: neste plano a entrada no CRAN está acoplada ao aceite do rOpenSci, logo o pacote permanece <strong>fora do CRAN durante todo o desenvolvimento v0.2-v0.8</strong>. Distribuição até lá é via GitHub (<code>pak::pak("SidneyBissoli/cvmdata")</code>).</p>
+<div class="section level3">
+<h3 id="pré-requisitos-gate">Pré-requisitos (gate)<a class="anchor" aria-label="anchor" href="#pr%C3%A9-requisitos-gate"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox">v1.0 fechada (ver seção acima): 5 fetchers funcionais, 18 grupos e 76 datasets cobertos, lifecycle <code>stable</code>.</label></li>
+<li><label><input type="checkbox"><code><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">devtools::check()</a></code> 0E/0W/0N nos três runners; cobertura ≥ 90%; lint clean.</label></li>
+<li><label><input type="checkbox">pkgdown completo e publicado.</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="submissão-ropensci">Submissão rOpenSci<a class="anchor" aria-label="anchor" href="#submiss%C3%A3o-ropensci"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox">Reescrever <code>data-raw/rOpenSci-presubmission-draft.md</code> refletindo a arquitetura final e a cobertura completa (5 fetchers, 18 grupos, 76 datasets).</label></li>
+<li><label><input type="checkbox">Submeter pre-submission inquiry ao rOpenSci.</label></li>
+<li><label><input type="checkbox">Submissão formal ao rOpenSci software peer review.</label></li>
+<li><label><input type="checkbox">Endereçar feedback dos reviewers.</label></li>
+<li><label><input type="checkbox">Aceitação rOpenSci.</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="submissão-cran-após-aceite-ropensci">Submissão CRAN (após aceite rOpenSci)<a class="anchor" aria-label="anchor" href="#submiss%C3%A3o-cran-ap%C3%B3s-aceite-ropensci"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox"><code>cran-comments.md</code> revisado para v1.0.</label></li>
+<li><label><input type="checkbox">Submissão ao CRAN.</label></li>
+<li><label><input type="checkbox">Aceitação no CRAN.</label></li>
+</ul></div>
+<div class="section level3">
+<h3 id="publicação-acadêmica-após-aceite-ropensci">Publicação acadêmica (após aceite rOpenSci)<a class="anchor" aria-label="anchor" href="#publica%C3%A7%C3%A3o-acad%C3%AAmica-ap%C3%B3s-aceite-ropensci"></a></h3>
+<ul class="task-list"><li><label><input type="checkbox">Paper no The R Journal. <strong>Dependência explícita</strong>: somente após o aceite pelo rOpenSci (decisão de Sidney, 2026-05-28).</label></li>
 </ul><hr></div>
 </div>
 <div class="section level2">
