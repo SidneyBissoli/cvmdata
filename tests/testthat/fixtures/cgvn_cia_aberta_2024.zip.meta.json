@@ -1,0 +1,18 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/DADOS/cgvn_cia_aberta_2024.zip",
+  "fetched_at": "2026-05-28",
+  "companies_included": [
+    {
+      "cd_cvm": "001023",
+      "cnpj_companhia": "00.000.000/0001-91",
+      "nome_empresarial": "BCO BRASIL S.A."
+    },
+    {
+      "cd_cvm": "022470",
+      "cnpj_companhia": "47.960.950/0001-21",
+      "nome_empresarial": "MAGAZINE LUIZA S.A."
+    }
+  ],
+  "files_included": ["cgvn_cia_aberta_2024.csv", "cgvn_cia_aberta_praticas_2024.csv"],
+  "notes": "Subset filtered by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA). ISO-8859-1 encoding preserved. Built from the 2024 yearly archive (Sessao 10, v0.2). praticas keeps all 54 ID_Item rows per company per filing, covering the 4 valid Pratica_Adotada categories (Sim, Nao, Parcialmente, Nao se Aplica)."
+}

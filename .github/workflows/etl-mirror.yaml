@@ -35,7 +35,7 @@ on:
           - ''
           - companhias
       dataset:
-        description: Dataset id (must be paired with `group`; leave empty for the full v0.1 matrix)
+        description: Dataset id (must be paired with `group`; leave empty for the full matrix)
         required: false
         type: choice
         options:
@@ -44,6 +44,7 @@ on:
           - dfp
           - itr
           - fre
+          - cgvn
       year:
         description: Year (optional, default = all published)
         required: false
@@ -59,11 +60,11 @@ jobs:
       fail-fast: false
       matrix:
         # Schedule triggers and "empty input" manual dispatches expand
-        # to the full v0.1 matrix; otherwise we run the single chosen
-        # (group, dataset) pair. The full matrix is encoded as a JSON
+        # to the full (group, dataset) matrix; otherwise we run the
+        # single chosen pair. The full matrix is encoded as a JSON
         # array of {group, dataset} objects so GitHub's matrix engine
         # iterates over both fields together.
-        include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
+        include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"},{"group":"companhias","dataset":"cgvn"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # runner.* contexts are not allowed at job-level env, only inside

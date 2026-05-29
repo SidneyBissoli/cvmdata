@@ -36,6 +36,51 @@ companhias,cad,companhias,tp_merc,BALCÃO NÃO ORGANIZADO
 companhias,cad,companhias,tp_merc,BALCÃO ORGANIZADO
 companhias,cad,companhias,tp_merc,BOLSA
 companhias,cad,companhias,tp_resp,DIRETOR DE RELAÇÕES COM INVESTIDORES
+companhias,cgvn,praticas,capitulo,Acionistas
+companhias,cgvn,praticas,capitulo,Conselho de Administração
+companhias,cgvn,praticas,capitulo,Diretoria
+companhias,cgvn,praticas,capitulo,Ética e Conflito de Interesses
+companhias,cgvn,praticas,capitulo,Órgãos de Fiscalização e Controle
+companhias,cgvn,praticas,pratica_adotada,Não
+companhias,cgvn,praticas,pratica_adotada,Não se Aplica
+companhias,cgvn,praticas,pratica_adotada,Parcialmente
+companhias,cgvn,praticas,pratica_adotada,Sim
+companhias,cgvn,praticas,principio,Acordos de Acionistas
+companhias,cgvn,praticas,principio,Assembleia Geral
+companhias,cgvn,praticas,principio,Atribuições
+companhias,cgvn,praticas,principio,Auditoria Independente
+companhias,cgvn,praticas,principio,Auditoria Interna
+companhias,cgvn,praticas,principio,Avaliação do Conselho e dos Conselheiros
+companhias,cgvn,praticas,principio,Avaliação do Diretor-Presidente e da Diretoria
+companhias,cgvn,praticas,principio,Comitê de Auditoria
+companhias,cgvn,praticas,principio,Composição do Conselho de Administração
+companhias,cgvn,praticas,principio,Conflito de Interesses
+companhias,cgvn,praticas,principio,Conselho Fiscal
+companhias,cgvn,praticas,principio,Código de Conduta e Canal de Denúncias
+companhias,cgvn,praticas,principio,Estrutura Acionária
+companhias,cgvn,praticas,principio,"Gerenciamento de Riscos, Controles Internos e Integridade/Conformidade (Compliance)"
+companhias,cgvn,praticas,principio,Indicação dos Diretores
+companhias,cgvn,praticas,principio,Integração de Novos Conselheiros
+companhias,cgvn,praticas,principio,Manifestação da Administração nas OPAs
+companhias,cgvn,praticas,principio,Medidas de Defesa
+companhias,cgvn,praticas,principio,Mudança de Controle
+companhias,cgvn,praticas,principio,Planejamento da Sucessão
+companhias,cgvn,praticas,principio,Política de Destinação de Resultados
+companhias,cgvn,praticas,principio,Política de Negociação de Valores Mobiliários
+companhias,cgvn,praticas,principio,Política sobre Contribuições e Doações
+companhias,cgvn,praticas,principio,Presidente do Conselho
+companhias,cgvn,praticas,principio,Regimento Interno do Conselho de Administração
+companhias,cgvn,praticas,principio,Remuneração da Diretoria
+companhias,cgvn,praticas,principio,Remuneração dos Conselheiros de Administração
+companhias,cgvn,praticas,principio,Reuniões do Conselho de Administração
+companhias,cgvn,praticas,principio,Sociedades de Economia Mista
+companhias,cgvn,praticas,principio,Transações com Partes Relacionadas
+companhias,cgvn,submissao,categoria,Código de Governança
+companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152086
+companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152549
+companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152593
+companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152596
+companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152598
 companhias,dfp,bpa,escala_moeda,MIL
 companhias,dfp,bpa,moeda,REAL
 companhias,dfp,bpa,ordem_exerc,PENÚLTIMO

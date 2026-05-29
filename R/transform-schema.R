@@ -138,6 +138,11 @@ tx_drop <- function(df, tx, schema) {
 # use (cnpj_cia, dt_refer); FRE-detail uses
 # (cnpj_companhia, data_referencia) per CLAUDE.md §2.2. When the triple
 # is absent (e.g., CAD has none of them) this is a no-op.
+#
+# Tables whose conceptual identity needs a third axis (e.g.
+# `cgvn/praticas`, one row per ID_Item per filing) declare additional
+# key columns in the YAML via `keys: [col1, ...]`; those compose with
+# the implicit (cnpj, date) pair. Missing extras abort the run.
 tx_keep_latest_version <- function(df, tx, schema) {
   if (!"versao" %in% names(df)) {
     return(df)
@@ -151,9 +156,30 @@ tx_keep_latest_version <- function(df, tx, schema) {
   if (is.null(cnpj_c) || is.null(date_c)) {
     return(df)
   }
+  extras <- tx$keys
+  if (!is.null(extras)) {
+    missing <- setdiff(extras, names(df))
+    if (length(missing)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Transformation {.code keep_latest_version} for",
+            "{.val {schema$dataset}}/{.val {schema$table}} declares",
+            "extra {.field keys} not present in the tibble."
+          ),
+          "x" = "Missing: {.val {missing}}."
+        ),
+        class = "cvmdata_error_internal"
+      )
+    }
+  }
   # Coerce versao to integer-like for stable ordering.
   ver <- suppressWarnings(as.integer(df$versao))
-  key <- paste(df[[cnpj_c]], format(df[[date_c]]), sep = "|")
+  key_cols <- c(cnpj_c, date_c, extras)
+  key_parts <- lapply(key_cols, function(col) {
+    if (inherits(df[[col]], "Date")) format(df[[col]]) else df[[col]]
+  })
+  key <- do.call(paste, c(key_parts, list(sep = "|")))
   # Build a logical mask: TRUE where this row's versao == max versao
   # within its key.
   max_ver <- ave(ver, key, FUN = function(v) max(v, na.rm = TRUE))

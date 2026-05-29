@@ -11,20 +11,45 @@
 # or CSV headers added since the last snapshot build) fall back to
 # the heuristic `^dt_` / `^data_` match.
 
-# Names matching these patterns (case-insensitive) are forced to
-# character. Sourced from naming doc v03 §11.2.
-.identifier_patterns <- c(
-  "^cnpj($|_)",
-  "^cd_cvm$",
-  "^codigo_cvm($|_)",
-  "^cep$",
-  "^tel($|_)",
-  "^ddd($|_)",
-  "^cpf($|_)",
-  "^id_doc$",
-  "^id_documento$",
-  "^versao$"
+# Identifier classification: prefix-based regex + exact-match for the
+# few columns without a natural prefix. Both lists operate on lowered
+# names. Sourced from naming doc v03 §11.2 and extended for v0.2
+# (codes from FCA detail tables: `codigo_cvm_auditor`, `cpf_*`,
+# `ddi_*`, `id_item`, `caixa_postal`, `protocolo_entrega`,
+# `codigo_negociacao` ticker).
+.identifier_prefixes <- c(
+  "^cnpj",
+  "^cpf",
+  "^codigo_",
+  "^cd_cvm",
+  "^cep",
+  "^ddi_",
+  "^ddd_",
+  "^id_",
+  "^protocolo"
 )
+.identifier_exact <- c("caixa_postal", "tel", "versao")
+
+# Classify CSV column names as identifiers (forced to character).
+# `csv_names` may be in any case; matching is on tolower(.) against the
+# prefix regexes and the exact-match list. Returns a logical vector
+# aligned with `csv_names`.
+identifier_columns <- function(csv_names) {
+  csv_lower <- tolower(csv_names)
+  by_prefix <- vapply(
+    csv_lower,
+    function(nm) {
+      any(vapply(
+        .identifier_prefixes,
+        function(p) grepl(p, nm, perl = TRUE),
+        logical(1L)
+      ))
+    },
+    logical(1L)
+  )
+  by_exact <- csv_lower %in% .identifier_exact
+  unname(by_prefix | by_exact)
+}
 
 # Resolve dictionary coverage for the schema's (dataset, table).
 # Returns NULL when no canonical info is available (schema lacks
@@ -61,17 +86,7 @@ resolve_dict_columns <- function(schema) {
 # readr guess the rest.
 build_col_types <- function(csv_names, schema = NULL) {
   csv_lower <- tolower(csv_names)
-  is_identifier <- vapply(
-    csv_lower,
-    function(nm) {
-      any(vapply(
-        .identifier_patterns,
-        function(p) grepl(p, nm, perl = TRUE),
-        logical(1L)
-      ))
-    },
-    logical(1L)
-  )
+  is_identifier <- identifier_columns(csv_names)
 
   dict_info <- resolve_dict_columns(schema)
   is_date <- vapply(

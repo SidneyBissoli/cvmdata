@@ -46,6 +46,29 @@ companhias,cad,companhias,tp_merc,TP_MERC,Tipo de mercado,Alfanumérico,varchar,
 companhias,cad,companhias,tp_resp,TP_RESP,Tipo de responsável,Alfanumérico,varchar,100,,,available
 companhias,cad,companhias,uf,UF,Unidade da Federação,Alfanumérico,char,2,,,available
 companhias,cad,companhias,uf_resp,UF_RESP,Unidade da Federação do responsável,Alfanumérico,char,2,,,available
+companhias,cgvn,praticas,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,cgvn,praticas,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,cgvn,praticas,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,cgvn,praticas,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,cgvn,praticas,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,cgvn,praticas,id_item,ID_Item,,,varchar,8,,,available
+companhias,cgvn,praticas,pratica_recomendada,Pratica_Recomendada,,,varchar,2000,,,available
+companhias,cgvn,praticas,pratica_adotada,Pratica_Adotada,,,varchar,20,,,available
+companhias,cgvn,praticas,capitulo,Capitulo,,,varchar,80,,,available
+companhias,cgvn,praticas,principio,Principio,,,varchar,100,,,available
+companhias,cgvn,praticas,explicacao,Explicacao,,,varchar,6000,,,available
+companhias,cgvn,submissao,categoria,Categoria,Categoria,Alfanumérico,varchar,20,,,available
+companhias,cgvn,submissao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,cgvn,submissao,codigo_cvm,Codigo_CVM,Código CVM,Numérico,char,6,,,available
+companhias,cgvn,submissao,data_entrega,Data_Entrega,Data de entrega/recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,cgvn,submissao,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,cgvn,submissao,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available
+companhias,cgvn,submissao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,cgvn,submissao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,cgvn,submissao,link_download,Link_Download,Endereço para download do documento,Alfanumérico,varchar,121,,,available
+companhias,cgvn,submissao,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,cgvn,submissao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,cgvn,submissao,motivo_reapresentacao,Motivo_Reapresentacao,,,varchar,255,,,available
 companhias,dfp,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
 companhias,dfp,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
 companhias,dfp,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available

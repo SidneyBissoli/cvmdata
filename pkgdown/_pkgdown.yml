@@ -11,6 +11,7 @@ articles:
   - title: Deep dives
     navbar: Deep dives
     contents:
+      - matches("^articles/getting-started$")
       - matches("^articles/groups-overview$")
       - matches("^articles/issuer-fetch$")
       - matches("^articles/itr-dfp$")

@@ -48,23 +48,33 @@ suppressPackageStartupMessages({
   "Alfanumérico", "Numérico", "Númerico", "AAAA-MM-DD"
 )
 # Free-text / identifier columns to exclude from cardinality promotion.
-# Mirrors R/util-csv-cvm.R `.identifier_patterns` (cnpj, cd_cvm,
-# codigo_cvm, cep, tel, ddd, cpf, id_doc, id_documento, versao) and
-# adds prefixes for accounting codes (`cd_*`), proper names (`nome_*`,
-# `denom_*`), descriptions (`ds_*`), and address-related text
-# (`email*`, `logradouro*`, `compl*`, `bairro*`, `mun*`,
-# `municipio_*`).
+# Mirrors the reader's identifier classification in R/util-csv-cvm.R
+# (`.identifier_prefixes` + `.identifier_exact`) and adds purely
+# textual prefixes (proper names, descriptions, addresses) that the
+# reader does NOT force to character but that are also not codelists.
+# Kept in sync with the reader by manual review when either side
+# changes — they are correlated but not identical (the reader cares
+# about preserving leading zeros; this list cares about excluding
+# free-text and high-universe codes from codelist promotion).
 .EXCLUDE_PATTERNS <- c(
-  "^cnpj($|_)",
+  # Reader-aligned identifier prefixes (v0.2: broadened from
+  # `^codigo_cvm` to `^codigo_`, from `^id_doc`/`^id_documento` to
+  # `^id_`, plus new `^ddi_` and `^protocolo`).
+  "^cnpj",
+  "^cpf",
+  "^codigo_",
   "^cd_",
-  "^codigo_cvm($|_)",
-  "^cep$",
-  "^tel($|_)",
-  "^ddd($|_)",
-  "^cpf($|_)",
-  "^id_doc$",
-  "^id_documento$",
+  "^cep",
+  "^ddi_",
+  "^ddd_",
+  "^id_",
+  "^protocolo",
+  # Reader-aligned identifier exact-match.
   "^versao$",
+  "^tel$",
+  "^caixa_postal$",
+  # Free-text prefixes the reader doesn't touch but that are not
+  # codelists either.
   "^nome_",
   "^denom_",
   "^ds_",
