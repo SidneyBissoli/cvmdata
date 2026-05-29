@@ -97,7 +97,7 @@ bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 20:43:22.202027
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 21:02:44.162689
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -119,7 +119,7 @@ issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 20:43:23.372612
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 21:02:45.426526
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 10
 #> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
