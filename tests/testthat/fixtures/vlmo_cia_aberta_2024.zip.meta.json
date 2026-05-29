@@ -1,0 +1,18 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/DADOS/vlmo_cia_aberta_2024.zip",
+  "fetched_at": "2026-05-29",
+  "companies_included": [
+    {
+      "cd_cvm": "001023",
+      "cnpj_companhia": "00.000.000/0001-91",
+      "nome_companhia": "BCO BRASIL S.A."
+    },
+    {
+      "cd_cvm": "022470",
+      "cnpj_companhia": "47.960.950/0001-21",
+      "nome_companhia": "MAGAZINE LUIZA S.A."
+    }
+  ],
+  "files_included": ["vlmo_cia_aberta_2024.csv", "vlmo_cia_aberta_con_2024.csv"],
+  "notes": "Subset filtered by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA). ISO-8859-1 encoding preserved. Built from the 2024 yearly archive (Sessao 11, v0.2). con is event-per-row: NO keep_latest_version transformation, so multiple VERSAO rows per (cnpj, data_ref) survive verbatim."
+}

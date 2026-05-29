@@ -887,3 +887,32 @@ companhias,itr,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA
 companhias,itr,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
 companhias,itr,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
 companhias,itr,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,vlmo,consolidado,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,vlmo,consolidado,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,vlmo,consolidado,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,vlmo,consolidado,preco_unitario,Preco_Unitario,Preço Unitário,Numérico,decimal,,38,10,available
+companhias,vlmo,consolidado,tipo_ativo,Tipo_Ativo,Tipo de Ativo (Valor Mobiliário),Alfanumérico,varchar,150,,,available
+companhias,vlmo,consolidado,versao,Versao,Versão do documento,Numérico,int,,10,0,available
+companhias,vlmo,consolidado,descricao_movimentacao,Descricao_Movimentacao,,,varchar,100,,,available
+companhias,vlmo,consolidado,intermediario,Intermediario,,,varchar,60,,,available
+companhias,vlmo,consolidado,tipo_cargo,Tipo_Cargo,,,varchar,50,,,available
+companhias,vlmo,consolidado,empresa,Empresa,,,varchar,100,,,available
+companhias,vlmo,consolidado,data_movimentacao,Data_Movimentacao,,,date,10,,,available
+companhias,vlmo,consolidado,tipo_movimentacao,Tipo_Movimentacao,,,varchar,150,,,available
+companhias,vlmo,consolidado,quantidade,Quantidade,,,bigint,,19,0,available
+companhias,vlmo,consolidado,caracteristica_valor_mobiliario,Caracteristica_Valor_Mobiliario,,,varchar,50,,,available
+companhias,vlmo,consolidado,volume,Volume,,,decimal,,38,10,available
+companhias,vlmo,consolidado,tipo_empresa,Tipo_Empresa,,,varchar,12,,,available
+companhias,vlmo,consolidado,tipo_operacao,Tipo_Operacao,,,varchar,7,,,available
+companhias,vlmo,submissao,categoria,Categoria,Categoria,Alfanumérico,varchar,100,,,available
+companhias,vlmo,submissao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,vlmo,submissao,codigo_cvm,Codigo_CVM,Código CVM,Numérico,varchar,6,,,available
+companhias,vlmo,submissao,data_entrega,Data_Entrega,Data de entrega/recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,vlmo,submissao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,vlmo,submissao,link_download,Link_Download,Endereço para download do documento,Alfanumérico,varchar,168,,,available
+companhias,vlmo,submissao,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,vlmo,submissao,protocolo_entrega,Protocolo_Entrega,Protocolo de Entrega,Alfanumérico,char,30,,,available
+companhias,vlmo,submissao,tipo,Tipo,Tipo,Alfanumérico,varchar,100,,,available
+companhias,vlmo,submissao,tipo_apresentacao,Tipo_Apresentacao,Tipo de Apresentação,Alfanumérico,varchar,33,,,available
+companhias,vlmo,submissao,versao,Versao,Versão do documento,Numérico,int,,10,0,available
+companhias,vlmo,submissao,motivo_reapresentacao,Motivo_Reapresentacao,,,varchar,500,,,available

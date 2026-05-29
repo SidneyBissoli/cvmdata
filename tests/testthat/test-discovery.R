@@ -2,7 +2,7 @@
 
 test_that("cvm_datasets returns every covered dataset", {
   ds <- cvm_datasets()
-  expect_setequal(ds, c("cad", "cgvn", "dfp", "fre", "itr"))
+  expect_setequal(ds, c("cad", "cgvn", "dfp", "fre", "itr", "vlmo"))
 })
 
 test_that("cvm_tables('fre') returns 36 tables", {
@@ -229,7 +229,7 @@ test_that("cvm_codelist rejects malformed group arg", {
 
 test_that("cvm_datasets accepts explicit group = 'companhias'", {
   ds <- cvm_datasets(group = "companhias")
-  expect_setequal(ds, c("cad", "cgvn", "dfp", "fre", "itr"))
+  expect_setequal(ds, c("cad", "cgvn", "dfp", "fre", "itr", "vlmo"))
 })
 
 test_that("cvm_datasets returns same set without group as with companhias", {
