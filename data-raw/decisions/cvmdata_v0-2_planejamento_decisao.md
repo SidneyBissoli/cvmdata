@@ -22,7 +22,7 @@ arquitetural; sem fetcher novo.**
 **Decisões fechadas pela rodada:**
 
 | § | Tema | Decisão |
-|---|---|---|
+|:-:|:-:|---|
 | 3.1 | Schemas | 15 tabelas no total (FCA 10 + VLMO 2 + CGVN 2 + IPE 1). Convenção de header herdada da v0.1 (`fca/submissao` clássica; demais FRE-detail-like). |
 | 3.2 | IPE manifesto | Tabela única `ipe/ipe`, sem `submissao` separado. Sem download de PDFs. Sem dedup-por-versao. |
 | 3.3 | VLMO identidade | Insiders opacos por design CVM (só categoria). `issuer` filtra companhia emissora. Sem novo identificador de pessoa física. |
@@ -529,9 +529,9 @@ da Sessão 13).
 
 ---
 
-## 7. Decisões fechadas e pendências para Sidney
+## 7. Decisões fechadas
 
-### Decisões fechadas nesta rodada
+### Decisões principais da rodada
 
 1. 15 novas tabelas em 4 datasets (FCA 10, VLMO 2, CGVN 2, IPE 1).
 2. `first_year: 2021` para todos os 4 (janela do portal CVM hoje).
@@ -549,14 +549,28 @@ da Sessão 13).
 9. ETL mirror matrix passa de 4 para 8 entradas.
 10. Fixtures pequenas e reais por dataset (~200 KB cada).
 
-### Pendências pequenas para Sidney decidir antes de Sessão 10
+### Pendências ergonômicas fechadas em 2026-05-28
 
-| Pendência | Default proposto se nada disser | Pode ser revisitada depois? |
-|---|---|---|
-| **Refator da lista de identifiers do reader**: ir para `^cnpj`/`^cpf`/`^codigo_`/etc. como prefixos + lista de exact-match (`caixa_postal`), ou só estender a lista atual ad-hoc? | Refator (mais limpo, sem regressão se bem testado) | Sim, na Sessão 12 |
-| **Vignette nova `ipe-vlmo.Rmd`**: criar dedicada ou só nota dentro da vignette geral? | Vignette dedicada (sobreposição merece) | Sim, decidir na Sessão 13 |
-| **Detecção de ticker**: implementar na Sessão 12 (junto com FCA) ou em sessão separada pós-13? | Sessão 12 (junto, código fica coeso) | Sim |
-| **Cobertura pré-2021 (mirror)**: tentar capturar 2020 e 2019 do portal antes que sejam removidos? | Pular (CVM retira janela móvel, esforço perdido) | Sim, qualquer release futura pode incluir |
+Pequenas decisões de processo confirmadas após a redação inicial,
+todas com Sidney optando pelo default proposto:
+
+11. **Refator da lista de identifiers do reader na Sessão 10**:
+    `R/util-csv-cvm.R` passa a aplicar regra **prefix-based**
+    (`^cnpj`, `^cpf`, `^codigo_`, `^cd_`, `^ddi_`, `^ddd_`, `^id_`,
+    `^protocolo`) + lista de **exact-match** para os esquisitos
+    (`caixa_postal`, `tel`). Cobre v0.1 sem regressão e absorve os
+    identifiers novos da v0.2 sem código adicional.
+12. **Vignette dedicada `ipe-vlmo.Rmd`** (Sessão 13): a sobreposição
+    IPE × VLMO ganha capítulo próprio no pkgdown, não nota dentro da
+    vignette geral.
+13. **Detecção de ticker na Sessão 12** (junto com FCA): o
+    `resolve_ticker_via_fca()` e o detector regex de ticker no
+    dispatcher do `issuer` entram no mesmo passe que cria os schemas
+    FCA. Sem sessão extra pós-13.
+14. **Cobertura pré-2021 não será resgatada**: o robô ETL semanal
+    captura 2021+ no primeiro publish pós-v0.2 (próxima retirada da
+    janela CVM é em 2027 — tempo de sobra). Sem rodada manual extra,
+    sem dependência de archive.org / fonte externa.
 
 ### Pendências fora do escopo desta rodada (para registro)
 
@@ -568,10 +582,14 @@ da Sessão 13).
 
 ---
 
-## 8. Sequência de aprovação esperada
+## 8. Sequência de implementação
 
-1. Sidney revisa este documento + `cvmdata_v0-2_fase1_verificacao_empirica.md`.
-2. Decide as 4 pendências de §7.
-3. Sessão 10 (CGVN) deriva prompt Claude Code com base neste doc.
-4. Sessões 11-13 seguem em sequência, gate por sessão.
-5. Após Sessão 13: release v0.2.0.
+Todas as decisões fechadas. Implementação encadeada por:
+
+1. Sessão 10 (CGVN) — prompt em `PROMPT_CLAUDE_CODE_sessao_10_cgvn.md`.
+2. Sessão 11 (VLMO) — prompt derivado deste doc após Sessão 10
+   aterrissar.
+3. Sessão 12 (FCA + ticker B3) — idem.
+4. Sessão 13 (IPE + vignette `ipe-vlmo.Rmd`) — idem.
+5. Pós-Sessão 13: release v0.2.0 (bump DESCRIPTION, tag, mirror
+   publish final, NEWS consolidado).
