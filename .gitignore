@@ -79,6 +79,11 @@ cvmdata_rodada*.md
 cvmdata_arquitetura_*.md
 cvmdata_arquitetura_*.html
 
+# Locally rendered per-version planning docs (e.g.
+# cvmdata_v0-2_planejamento_decisao.html). Only the .html renders are
+# ignored — the .md canonicals in data-raw/decisions/ stay tracked.
+cvmdata_v*_*.html
+
 # Session and milestone prompts driving Claude work — local only.
 # Covers both CLI (PROMPT_CLAUDE_CODE_*.md) and Desktop chat
 # (PROMPT_CLAUDE_DESKTOP_*.md) flavors.
