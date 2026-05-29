@@ -1,0 +1,18 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_2024.zip",
+  "fetched_at": "2026-05-29",
+  "companies_included": [
+    {
+      "cd_cvm": "001023",
+      "cnpj": "00.000.000/0001-91",
+      "denom": "BCO BRASIL S.A."
+    },
+    {
+      "cd_cvm": "022470",
+      "cnpj": "47.960.950/0001-21",
+      "denom": "MAGAZINE LUIZA S.A."
+    }
+  ],
+  "files_included": ["fca_cia_aberta_2024.csv", "fca_cia_aberta_auditor_2024.csv", "fca_cia_aberta_canal_divulgacao_2024.csv", "fca_cia_aberta_departamento_acionistas_2024.csv", "fca_cia_aberta_dri_2024.csv", "fca_cia_aberta_endereco_2024.csv", "fca_cia_aberta_escriturador_2024.csv", "fca_cia_aberta_geral_2024.csv", "fca_cia_aberta_pais_estrangeiro_negociacao_2024.csv", "fca_cia_aberta_valor_mobiliario_2024.csv"],
+  "notes": "Subset filtered by CNPJ (BCO BRASIL + MAGAZINE LUIZA). ISO-8859-1 encoding preserved. Built from the 2024 yearly archive (Sessao 12, v0.2). All 10 tables included. submissao filtered on CNPJ_CIA (classic); the 9 detail tables on CNPJ_Companhia (FRE-detail). departamento_acionistas ships header-only (empty upstream from 2024), exercising the reader's nrow == 0L tolerance. valor_mobiliario carries the BB/MGLU B3 tickers for the ticker lookup."
+}

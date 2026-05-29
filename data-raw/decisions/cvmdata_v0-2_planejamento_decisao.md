@@ -490,24 +490,50 @@ da Sessão 13).
 - [x] Gate verde (`devtools::check()` 0E/0W/0N, lint clean,
   cobertura ≥ 90%).
 
-### Sessão 12 — FCA
-- Escrever os 10 YAMLs FCA.
-- Estender `R/util-csv-cvm.R` com identifiers novos (§3.1.5).
-- **Implementar `resolve_ticker_via_fca()`** + detector regex de
-  ticker no dispatcher do `issuer` em `R/api-issuer-fetch.R`.
-- Fixture `fca_cia_aberta_2024.zip` com as 10 tabelas, incluindo a
-  vazia.
-- Testes:
-  - tracer end-to-end de várias FCA tables
-  - lookup CD_CVM → CNPJ via `fca/submissao` (clássico, 9 campos —
-    reutiliza caminho do ITR/DFP)
-  - **lookup ticker → CNPJ via `fca/valor_mobiliario`** (caminho novo)
-  - `departamento_acionistas` retorna `nrow == 0L` sem aborto
-  - codelists novas
-- Estender matrix etl-mirror.
-- Regenerar snapshots.
-- `NEWS.md`.
-- Gate.
+### Sessão 12 — FCA — **concluída**
+- [x] Escrever os 10 YAMLs FCA em
+  `inst/extdata/schemas/companhias/fca/` (`submissao` clássico de 9
+  campos + 9 detail FRE-detail). META zip confirmado em disco:
+  `fca_cia_aberta.zip` (NÃO prefixado com `meta_`), com entries
+  internas `meta_fca_cia_aberta[_<table>].txt`. `expected_field_count`
+  por tabela validado contra o CSV 2024 real (validate = "warn", zero
+  divergência).
+- [x] **Item §3.1.5 (estender `R/util-csv-cvm.R` com identifiers
+  novos) NÃO foi necessário**: o refator prefix-based + exact-match da
+  Sessão 10 já cobre todos os identifiers da FCA
+  (`codigo_cvm_auditor`, `codigo_negociacao`, `cnpj_escriturador`,
+  `cpf_responsavel_tecnico`, `caixa_postal`, etc.) sem mudança de
+  código. O item do canônico foi redigido antes do refator da S10.
+- [x] **Implementar `resolve_ticker_via_fca()` + `ticker_lookup_table()`
+  + `is_active_ticker()`** e o detector regex de ticker
+  (`^[A-Z]{4}[0-9]{1,2}[A-Z]?$`) em `classify_issuer_tokens()`
+  (`R/api-issuer-fetch.R`). Detecção após CNPJ/CD_CVM; cache por
+  sessão keyed por ano; ticker inexistente aborta
+  `cvmdata_error_input`. Filtra apenas tickers ativos
+  (`data_fim_negociacao` nulo/futuro). Alternativa (b) da §3.7 — sem
+  fonte externa.
+- [x] Fixture `fca_cia_aberta_2024.zip` (~5 KB, BB+MGLU subset) com as
+  10 tabelas, incluindo `departamento_acionistas` só-header e os
+  tickers BBAS3/MGLU3 em `valor_mobiliario`; `.meta.json`.
+  `build_fca_raw_fixture()` em `data-raw/build-mirror-test-fixtures.R`
+  (com selector de target por CLI para gerar só a FCA em isolamento).
+- [x] Testes (`test-issuer-fetch-fca.R`): tracer multi-tabela
+  (submissao clássico + detail FRE-detail), filtro por CNPJ, lookup
+  CD_CVM → CNPJ via `fca/submissao` (ponte clássico → FRE-detail,
+  padded + unpadded), lookup ticker → CNPJ (case-insensitive) +
+  abort de ticker inexistente, roteamento de tokens
+  (ticker/CD_CVM/CNPJ/texto particionam o input),
+  `departamento_acionistas` `nrow == 0L` sem aborto nos 3 modos
+  validate, `report_type` aborta, discovery (10 tabelas),
+  `cvm_dataset_years` mockado, dictionary 9/18/23 linhas.
+- [x] Estender `etl-mirror.yaml` matrix com `(companhias, fca)` +
+  choice list.
+- [x] Regenerar `cvm_dictionary_snapshot.csv` (+176 linhas) e
+  `cvm_codelists_snapshot.csv` (+218 linhas) — diff só adiciona FCA.
+- [x] `NEWS.md`: entrada sob v0.1.0.9000 (New features) — dataset FCA
+  + ticker B3 + nota de `departamento_acionistas` vazia.
+- [x] Gate verde (`devtools::check()` 0E/0W/0N, lint clean,
+  cobertura ≥ 90%).
 
 ### Sessão 13 — IPE
 - Escrever schema `ipe/ipe.yaml`.

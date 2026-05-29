@@ -73,6 +73,37 @@
   codelist snapshots regenerated to include the new tables. Decision
   doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
+* New dataset `fca` (Formulario Cadastral) covered by `issuer_fetch()`,
+  the largest v0.2 surface with **10 tables**: `submissao` (9 fields,
+  classic convention identical to ITR/DFP/FRE — `cnpj_cia`, `dt_refer`,
+  `cd_cvm`) plus 9 FRE-detail tables (`cnpj_companhia` /
+  `data_referencia`): `auditor`, `canal_divulgacao`,
+  `departamento_acionistas`, `dri`, `endereco`, `escriturador`,
+  `geral`, `pais_estrangeiro_negociacao`, `valor_mobiliario`. The
+  classic-vs-detail split means CD_CVM filtering of a detail routes
+  through `fca/submissao` (which carries `cd_cvm` + `cnpj_cia`) and maps
+  to the detail's `cnpj_companhia`. CKAN coverage 2021+.
+
+  Note: `fca/departamento_acionistas` is published with a valid
+  23-field header but **zero data rows from 2024 onward** (it carried
+  data through 2023, then zeroed after a regulatory change). The reader
+  returns the empty tibble without aborting; use `fca/endereco` or
+  `fca/dri` for shareholder-department contact information.
+
+* **B3 ticker support in `issuer = `**. The `issuer` argument now
+  recognises B3 trading tickers (e.g. `"PETR4"`, `"BBDC11"`,
+  `"ITSA4F"`) alongside CNPJ, CD_CVM and free text. A ticker is
+  resolved to its issuer CNPJ via `fca/valor_mobiliario` (the
+  `codigo_negociacao` column), analogous to the existing CD_CVM →
+  CNPJ resolution via `submissao` — no external data source. Only
+  active securities (empty/future `data_fim_negociacao`) are matched;
+  the lookup table is cached per R session. Tickers cover only
+  exchange-listed securities, so an unknown ticker aborts with
+  `cvmdata_error_input` rather than failing silently. Embedded
+  dictionary and codelist snapshots regenerated to include the FCA
+  tables. Decision doc:
+  `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
 * `cvm_groups()` lists the 18 CKAN groups published by the CVM Open
   Data Portal, with the number of datasets each group carries and the
   canonical `cvmdata` fetcher contract (`issuer`, `fund`, `agent`,

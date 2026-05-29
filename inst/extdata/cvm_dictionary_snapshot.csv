@@ -215,6 +215,182 @@ companhias,dfp,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA
 companhias,dfp,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
 companhias,dfp,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
 companhias,dfp,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,auditor,auditor,Auditor,Nome do Auditor,Alfanumérico,varchar,100,,,available
+companhias,fca,auditor,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,auditor,codigo_cvm_auditor,Codigo_CVM_Auditor,Código CVM do auditor,Númerico,char,6,,,available
+companhias,fca,auditor,cpf_cnpj_auditor,CPF_CNPJ_Auditor,CPF/CNPJ do auditor,Alfanumérico,varchar,20,,,available
+companhias,fca,auditor,cpf_responsavel_tecnico,CPF_Responsavel_Tecnico,CPF do responsável técnico,Alfanumérico,varchar,20,,,available
+companhias,fca,auditor,data_fim_atuacao_auditor,Data_Fim_Atuacao_Auditor,Data fim de atuação do auditor,AAAA-MM-DD,date,10,,,available
+companhias,fca,auditor,data_fim_atuacao_responsavel_tecnico,Data_Fim_Atuacao_Responsavel_Tecnico,Data fim de atuação do responsável técnico,AAAA-MM-DD,date,10,,,available
+companhias,fca,auditor,data_inicio_atuacao_auditor,Data_Inicio_Atuacao_Auditor,Data de início de atuação do auditor,AAAA-MM-DD,date,10,,,available
+companhias,fca,auditor,data_inicio_atuacao_responsavel_tecnico,Data_Inicio_Atuacao_Responsavel_Tecnico,Data de início de atuação do responsável técnico,AAAA-MM-DD,date,10,,,available
+companhias,fca,auditor,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,auditor,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,auditor,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,auditor,origem_auditor,Origem_Auditor,Nacionalidade do auditor,Alfanumérico,varchar,11,,,available
+companhias,fca,auditor,responsavel_tecnico,Responsavel_Tecnico,Responsável técnico,Alfanumérico,varchar,100,,,available
+companhias,fca,auditor,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,canal_divulgacao,canal_divulgacao,Canal_Divulgacao,Canal de Divulgação,Alfanumérico,varchar,100,,,available
+companhias,fca,canal_divulgacao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,canal_divulgacao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,canal_divulgacao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,canal_divulgacao,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,canal_divulgacao,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fca,canal_divulgacao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,departamento_acionistas,bairro,Bairro,Bairro,Alfanumérico,varchar,20,,,available
+companhias,fca,departamento_acionistas,cep,CEP,CEP,Numérico,char,8,,,available
+companhias,fca,departamento_acionistas,cidade,Cidade,Cidade,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,departamento_acionistas,complemento,Complemento,Complemento,Alfanumérico,varchar,20,,,available
+companhias,fca,departamento_acionistas,contato,Contato,Contato,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,data_fim_contato,Data_Fim_Contato,Data fim do contato,AAAA-MM-DD,date,10,,,available
+companhias,fca,departamento_acionistas,data_inicio_contato,Data_Inicio_Contato,Data de início do contato,AAAA-MM-DD,date,10,,,available
+companhias,fca,departamento_acionistas,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,departamento_acionistas,ddd_fax,DDD_Fax,Código de DDD (FAX),Numérico,char,4,,,available
+companhias,fca,departamento_acionistas,ddd_telefone,DDD_Telefone,Código de DDD (Telefone),Numérico,char,4,,,available
+companhias,fca,departamento_acionistas,ddi_fax,DDI_Fax,DDI fax,Numérico,char,4,,,available
+companhias,fca,departamento_acionistas,ddi_telefone,DDI_Telefone,Código de DDI (Telefone),Numérico,char,4,,,available
+companhias,fca,departamento_acionistas,email,Email,Endereço de e-mail,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,fax,Fax,FAX,Numérico,char,10,,,available
+companhias,fca,departamento_acionistas,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,departamento_acionistas,logradouro,Logradouro,Logradouro,Alfanumérico,varchar,60,,,available
+companhias,fca,departamento_acionistas,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,pais,Pais,País,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fca,departamento_acionistas,telefone,Telefone,Telefone,Alfanumérico,char,10,,,available
+companhias,fca,departamento_acionistas,tipo_endereco,Tipo_Endereco,Tipo de endereço,Alfanumérico,varchar,100,,,available
+companhias,fca,departamento_acionistas,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,dri,bairro,Bairro,Bairro,Alfanumérico,varchar,20,,,available
+companhias,fca,dri,cep,CEP,CEP,Numérico,char,8,,,available
+companhias,fca,dri,cidade,Cidade,Cidade,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,dri,complemento,Complemento,Complemento,Alfanumérico,varchar,20,,,available
+companhias,fca,dri,cpf_responsavel,CPF_Responsavel,CPF do responsável,Alfanumérico,varchar,20,,,available
+companhias,fca,dri,data_fim_atuacao,Data_Fim_Atuacao,Data fim de atuação,AAAA-MM-DD,date,10,,,available
+companhias,fca,dri,data_inicio_atuacao,Data_Inicio_Atuacao,Data de início de atuação,AAAA-MM-DD,date,10,,,available
+companhias,fca,dri,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,dri,ddd_fax,DDD_Fax,Código de DDD (FAX),Numérico,char,4,,,available
+companhias,fca,dri,ddd_telefone,DDD_Telefone,Código de DDD (Telefone),Numérico,char,4,,,available
+companhias,fca,dri,ddi_fax,DDI_Fax,DDI fax,Numérico,char,4,,,available
+companhias,fca,dri,ddi_telefone,DDI_Telefone,Código de DDI (Telefone),Numérico,char,4,,,available
+companhias,fca,dri,email,Email,Endereço de e-mail,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,fax,Fax,FAX,Numérico,char,10,,,available
+companhias,fca,dri,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,dri,logradouro,Logradouro,Logradouro,Alfanumérico,varchar,60,,,available
+companhias,fca,dri,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,pais,Pais,País,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,responsavel,Responsavel,Responsável,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fca,dri,telefone,Telefone,Telefone,Alfanumérico,char,10,,,available
+companhias,fca,dri,tipo_endereco,Tipo_Endereco,Tipo de endereço,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,tipo_responsavel,Tipo_Responsavel,Tipo de responsável,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,uf,UF,Unidade da Federação,Alfanumérico,varchar,100,,,available
+companhias,fca,dri,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,endereco,bairro,Bairro,Bairro,Alfanumérico,varchar,20,,,available
+companhias,fca,endereco,caixa_postal,Caixa_Postal,Caixa Postal,Alfanumérico,char,20,,,available
+companhias,fca,endereco,cep,CEP,CEP,Numérico,char,8,,,available
+companhias,fca,endereco,cidade,Cidade,Cidade,Alfanumérico,varchar,100,,,available
+companhias,fca,endereco,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,endereco,complemento,Complemento,Complemento,Alfanumérico,varchar,20,,,available
+companhias,fca,endereco,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,endereco,ddd_fax,DDD_Fax,Código de DDD (FAX),Numérico,char,4,,,available
+companhias,fca,endereco,ddd_telefone,DDD_Telefone,Código de DDD (Telefone),Numérico,char,4,,,available
+companhias,fca,endereco,ddi_fax,DDI_Fax,DDI fax,Numérico,char,4,,,available
+companhias,fca,endereco,ddi_telefone,DDI_Telefone,Código de DDI (Telefone),Numérico,char,4,,,available
+companhias,fca,endereco,email,Email,Endereço de e-mail,Alfanumérico,varchar,100,,,available
+companhias,fca,endereco,fax,Fax,FAX,Numérico,char,10,,,available
+companhias,fca,endereco,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,endereco,logradouro,Logradouro,Logradouro,Alfanumérico,varchar,60,,,available
+companhias,fca,endereco,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,endereco,pais,Pais,País,Alfanumérico,varchar,100,,,available
+companhias,fca,endereco,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fca,endereco,telefone,Telefone,Telefone,Alfanumérico,char,10,,,available
+companhias,fca,endereco,tipo_endereco,Tipo_Endereco,Tipo de endereço,Alfanumérico,varchar,100,,,available
+companhias,fca,endereco,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,escriturador,bairro,Bairro,Bairro,Alfanumérico,varchar,20,,,available
+companhias,fca,escriturador,cep,CEP,CEP,Numérico,char,8,,,available
+companhias,fca,escriturador,cidade,Cidade,Cidade,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,escriturador,cnpj_escriturador,CNPJ_Escriturador,CNPJ do Escriturador,Numérico,varchar,20,,,available
+companhias,fca,escriturador,complemento,Complemento,Complemento,Alfanumérico,varchar,20,,,available
+companhias,fca,escriturador,data_fim_atuacao,Data_Fim_Atuacao,Data fim de atuação,AAAA-MM-DD,date,10,,,available
+companhias,fca,escriturador,data_inicio_atuacao,Data_Inicio_Atuacao,Data de início de atuação,AAAA-MM-DD,date,10,,,available
+companhias,fca,escriturador,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,escriturador,ddd_fax,DDD_Fax,Código de DDD (FAX),Numérico,char,4,,,available
+companhias,fca,escriturador,ddd_telefone,DDD_Telefone,Código de DDD (Telefone),Numérico,char,4,,,available
+companhias,fca,escriturador,ddi_fax,DDI_Fax,DDI fax,Numérico,char,4,,,available
+companhias,fca,escriturador,ddi_telefone,DDI_Telefone,Código de DDI (Telefone),Numérico,char,4,,,available
+companhias,fca,escriturador,email,Email,Endereço de e-mail,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,escriturador,Escriturador,Escriturador,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,fax,Fax,FAX,Numérico,char,10,,,available
+companhias,fca,escriturador,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,escriturador,logradouro,Logradouro,Logradouro,Alfanumérico,varchar,60,,,available
+companhias,fca,escriturador,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,pais,Pais,País,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,sigla_uf,Sigla_UF,Sigla da Unidade da Federação,Alfanumérico,varchar,20,,,available
+companhias,fca,escriturador,telefone,Telefone,Telefone,Alfanumérico,char,10,,,available
+companhias,fca,escriturador,tipo_endereco,Tipo_Endereco,Tipo de endereço,Alfanumérico,varchar,100,,,available
+companhias,fca,escriturador,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,geral,categoria_registro_cvm,Categoria_Registro_CVM,Categoria do registro na CVM,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,geral,codigo_cvm,Codigo_CVM,Código CVM,Numérico,char,6,,,available
+companhias,fca,geral,data_alteracao_exercicio_social,Data_Alteracao_Exercicio_Social,Data de alteração do exercício social,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_categoria_registro_cvm,Data_Categoria_Registro_CVM,Data da categoria do registro na CVM,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_constituicao,Data_Constituicao,Data da constituição,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_especie_controle_acionario,Data_Especie_Controle_Acionario,Data da espécie do controle acionário,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_nome_empresarial,Data_Nome_Empresarial,Data do nome empresarial,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_registro_cvm,Data_Registro_CVM,Data de registro na CVM,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_situacao_emissor,Data_Situacao_Emissor,Data da situação do emissor,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,data_situacao_registro_cvm,Data_Situacao_Registro_CVM,Data da situação do registro na CVM,AAAA-MM-DD,date,10,,,available
+companhias,fca,geral,descricao_atividade,Descricao_Atividade,Descrição da atividade,Alfanumérico,varchar,200,,,available
+companhias,fca,geral,dia_encerramento_exercicio_social,Dia_Encerramento_Exercicio_Social,Dia de encerramento do exercício social,Numérico,smallint,,5,0,available
+companhias,fca,geral,especie_controle_acionario,Especie_Controle_Acionario,Espécie de controle acionário,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,geral,mes_encerramento_exercicio_social,Mes_Encerramento_Exercicio_Social,Mês de encerramento do exercício social,Numérico,smallint,,5,0,available
+companhias,fca,geral,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,nome_empresarial_anterior,Nome_Empresarial_Anterior,Nome anterior da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,pagina_web,Pagina_Web,Página Web,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Pais_Custodia_Valores_Mobiliarios,Pais de custódia dos valores mobiliários,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,pais_origem,Pais_Origem,País de origem,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,setor_atividade,Setor_Atividade,Setor de Atividade,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,situacao_emissor,Situacao_Emissor,Situação do emissor,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,situacao_registro_cvm,Situacao_Registro_CVM,Situação do registro na CVM,Alfanumérico,varchar,100,,,available
+companhias,fca,geral,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,pais_estrangeiro_negociacao,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,pais_estrangeiro_negociacao,data_admissao_negociacao,Data_Admissao_Negociacao,Data de admissão para negociação,AAAA-MM-DD,date,10,,,available
+companhias,fca,pais_estrangeiro_negociacao,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,pais_estrangeiro_negociacao,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,pais_estrangeiro_negociacao,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,pais_estrangeiro_negociacao,pais,Pais,País,Alfanumérico,varchar,100,,,available
+companhias,fca,pais_estrangeiro_negociacao,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,submissao,categ_doc,CATEG_DOC,Categoria do documento,Alfanumérico,varchar,20,,,available
+companhias,fca,submissao,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
+companhias,fca,submissao,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,submissao,denom_cia,DENOM_CIA,Nome empresarial da companhia,Alfanumérico,varchar,100,,,available
+companhias,fca,submissao,dt_receb,DT_RECEB,Data da recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
+companhias,fca,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Classe_Acao_Preferencial,Classe de ação preferencial,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,fca,valor_mobiliario,codigo_negociacao,Codigo_Negociacao,Código de negociação (ticker),Alfanumérico,varchar,12,,,available
+companhias,fca,valor_mobiliario,composicao_bdr_unit,Composicao_BDR_Unit,Composição de BDR Unit,Alfanumérico,varchar,120,,,available
+companhias,fca,valor_mobiliario,data_fim_listagem,Data_Fim_Listagem,Data fim de listagem,AAAA-MM-DD,date,10,,,available
+companhias,fca,valor_mobiliario,data_fim_negociacao,Data_Fim_Negociacao,Data fim da negociação,AAAA-MM-DD,date,10,,,available
+companhias,fca,valor_mobiliario,data_inicio_listagem,Data_Inicio_Listagem,Data de início de listagem,AAAA-MM-DD,date,10,,,available
+companhias,fca,valor_mobiliario,data_inicio_negociacao,Data_Inicio_Negociacao,Data de início da negociação,AAAA-MM-DD,date,10,,,available
+companhias,fca,valor_mobiliario,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,fca,valor_mobiliario,entidade_administradora,Entidade_Administradora,Entidade administradora,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,id_documento,ID_Documento,Identificador do documento,Numérico,int,,10,0,available
+companhias,fca,valor_mobiliario,mercado,Mercado,Nome do Mercado,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,nome_empresarial,Nome_Empresarial,Nome da empresa,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,segmento,Segmento,Segmento,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,Sigla_Classe_Acao_Preferencial,Sigla da classe de ação preferencial,Alfanumérico,varchar,20,,,available
+companhias,fca,valor_mobiliario,sigla_entidade_administradora,Sigla_Entidade_Administradora,Sigla da entidade administradora,Alfanumérico,varchar,20,,,available
+companhias,fca,valor_mobiliario,valor_mobiliario,Valor_Mobiliario,Valor mobiliário,Alfanumérico,varchar,100,,,available
+companhias,fca,valor_mobiliario,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
 companhias,fre,acao_entregue,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
 companhias,fre,acao_entregue,data_fim_exercicio_social,Data_Fim_Exercicio_Social,Data fim do Exercício Social,AAAA-MM-DD,date,10,,,available
 companhias,fre,acao_entregue,data_inicio_exercicio_social,Data_Inicio_Exercicio_Social,Data de início do Exercício Social,AAAA-MM-DD,date,10,,,available

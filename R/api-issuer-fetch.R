@@ -16,10 +16,12 @@
 #'   selects the variant.
 #' @param issuer Optional character vector identifying issuers to
 #'   include. Accepts CNPJ (with or without punctuation), CD_CVM (with
-#'   or without zero-padding), or free-text matched against
-#'   `denom_cia`. Detection is automatic per element. `NULL` (default)
-#'   returns every issuer. Singular naming follows tidyverse
-#'   conventions; the argument still accepts vectors of any length.
+#'   or without zero-padding), a B3 trading ticker (e.g. `"PETR4"`,
+#'   `"BBDC11"`), or free-text matched against `denom_cia`. Detection
+#'   is automatic per element; a ticker is resolved to its issuer CNPJ
+#'   via `fca/valor_mobiliario`. `NULL` (default) returns every issuer.
+#'   Singular naming follows tidyverse conventions; the argument still
+#'   accepts vectors of any length.
 #'   When the target table does not carry a `cd_cvm` column (e.g.
 #'   `composicao_capital`, `parecer`), CD_CVM tokens are resolved to
 #'   CNPJ via the dataset's `submissao` table for the same year — the
@@ -360,19 +362,26 @@ fetch_explicit_years <- function(schema, year, issuer, report_type,
 }
 
 # Classify each token in `issuer` as CNPJ (14 digits), CD_CVM
-# (1-6 digits), or free-text. Returns a list with parallel logical
-# masks and the cleaned digits-only form (used for CNPJ matching).
+# (1-6 digits), B3 ticker (4 letters + 1-2 digits + optional suffix
+# letter, e.g. PETR4, BBDC11, ITSA4F), or free-text. Returns a list
+# with parallel logical masks and the cleaned digits-only form (used
+# for CNPJ matching). Ticker detection runs after CNPJ and CD_CVM; the
+# four-letter prefix means it never collides with the pure-digit
+# CD_CVM pattern (CLAUDE.md §2.7, v0.2 decision §3.7).
 classify_issuer_tokens <- function(issuer_chr) {
   digits_only <- gsub("[^0-9]", "", issuer_chr)
   is_cnpj <- nchar(digits_only) == 14L &
     nchar(issuer_chr) >= 14L
   is_cdcvm <- !is_cnpj &
     grepl("^[0-9]{1,6}$", issuer_chr)
-  is_text <- !is_cnpj & !is_cdcvm
+  is_ticker <- !is_cnpj & !is_cdcvm &
+    grepl("^[A-Z]{4}[0-9]{1,2}[A-Z]?$", toupper(issuer_chr))
+  is_text <- !is_cnpj & !is_cdcvm & !is_ticker
   list(
     digits_only = digits_only,
     is_cnpj = is_cnpj,
     is_cdcvm = is_cdcvm,
+    is_ticker = is_ticker,
     is_text = is_text
   )
 }
@@ -488,6 +497,19 @@ filter_by_issuer <- function(df, issuer,
                              schema = NULL, year = NULL) {
   issuer_chr <- as.character(issuer)
   cls <- classify_issuer_tokens(issuer_chr)
+
+  # Resolve B3 ticker tokens to issuer CNPJs via fca/valor_mobiliario.
+  # A ticker maps to exactly one company; the resolved CNPJs are then
+  # matched like any other CNPJ token. Independent of the target table
+  # (the lookup always lives in fca), so this fires for every dataset.
+  if (any(cls$is_ticker)) {
+    lookup_year <- if (!is.null(year)) as.integer(year)[[1L]] else NULL
+    resolved_cnpjs <- resolve_ticker_via_fca(
+      issuer_chr[cls$is_ticker], year = lookup_year
+    )
+    issuer_chr <- c(issuer_chr[!cls$is_ticker], resolved_cnpjs)
+    cls <- classify_issuer_tokens(issuer_chr)
+  }
 
   if (any(cls$is_cdcvm) && is.null(cdcvm_col(df)) &&
       !is.null(schema) && !is.null(year)) {
@@ -738,4 +760,121 @@ expand_abbreviations <- function(token) {
     PART        = c("PARTICIPACOES", "PART")
   )
   alt[[token]] %||% token
+}
+
+# Ticker -> CNPJ lookup ------------------------------------------------
+#
+# B3 trading tickers (Codigo_Negociacao) are declared by issuers in the
+# Formulario Cadastral; fca/valor_mobiliario is the canonical source.
+# The resolver loads that table for the latest available year, keeps
+# only active securities, and maps each requested ticker to its issuer
+# CNPJ — analogous to the CD_CVM -> CNPJ lookup via submissao
+# (resolve_cd_cvm_via_submissao()). Decision §3.7 of the v0.2 planning
+# doc (alternative b: derive from a field already present in CVM data,
+# no external dependency).
+
+# Session cache for the ticker lookup table (mirrors the mirror
+# inventory cache). One entry, keyed by the literal "fca_valor_mobiliario".
+.ticker_lookup_cache <- new.env(parent = emptyenv())
+
+# Reset the session cache. Test helper; never called from production
+# code paths.
+ticker_lookup_cache_clear <- function() {
+  rm(list = ls(.ticker_lookup_cache), envir = .ticker_lookup_cache)
+  invisible()
+}
+
+# Resolve B3 tickers to issuer CNPJs. Aborts with cvmdata_error_input
+# when a ticker is absent from fca/valor_mobiliario (no silent fail —
+# tickers cover only exchange-listed securities; debentures / private
+# placements legitimately have none). Returns the unique set of
+# resolved CNPJs across all requested tickers.
+resolve_ticker_via_fca <- function(tickers, year = NULL, source = "cvm") {
+  lut <- ticker_lookup_table(year = year)
+  year <- attr(lut, "year")
+  tickers_up <- toupper(trimws(tickers))
+  resolved <- character(0L)
+  for (tk in tickers_up) {
+    cnpjs <- unique(lut$cnpj_companhia[lut$ticker == tk])
+    cnpjs <- cnpjs[!is.na(cnpjs) & nzchar(cnpjs)]
+    if (!length(cnpjs)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Ticker {.val {tk}} not found in",
+            "{.val fca}/{.val valor_mobiliario} for {.val {year}}."
+          ),
+          "i" = paste(
+            "Check the spelling, or pass {.arg issuer} as CNPJ or",
+            "CD_CVM. Tickers cover only exchange-listed securities."
+          )
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    resolved <- c(resolved, cnpjs)
+  }
+  unique(resolved)
+}
+
+# Build (and session-cache) the ticker -> CNPJ table from
+# fca/valor_mobiliario. When `year` is NULL the latest available fca
+# year is discovered via cvm_dataset_years(); callers that already know
+# the request year pass it through to skip the discovery round-trip.
+# Keeps only active tickers (is_active_ticker()). Always routes through
+# the CVM HTTP path for self-consistency with
+# resolve_cd_cvm_via_submissao(); a future iteration may wire the mirror
+# path in. Returns a data frame with `ticker` and `cnpj_companhia`
+# columns and a `year` attribute. Cached per resolved year.
+ticker_lookup_table <- function(year = NULL) {
+  schema <- load_schema("fca", "valor_mobiliario")
+  if (is.null(year)) {
+    year <- max(cvm_dataset_years("fca", schema = schema))
+  }
+  year <- as.integer(year)
+  cache_key <- paste0("fca_valor_mobiliario_", year)
+  cached <- .ticker_lookup_cache[[cache_key]]
+  if (!is.null(cached)) {
+    return(cached)
+  }
+  path <- source_cvm_http_get(schema, year = year, report_type = NULL)
+  raw <- read_cvm_csv(path, schema, validate = "skip")
+  df <- apply_schema_transformations(raw, schema)
+  cnpj_c <- cnpj_col(df)
+  if (is.null(cnpj_c) || !"codigo_negociacao" %in% names(df)) {
+    cvmdata_abort(
+      c(paste(
+        "{.val fca}/{.val valor_mobiliario} lacks the columns needed",
+        "for ticker resolution ({.code codigo_negociacao} +",
+        "{.code cnpj_companhia})."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  active <- is_active_ticker(df)
+  lut <- data.frame(
+    ticker = toupper(trimws(df$codigo_negociacao[active])),
+    cnpj_companhia = df[[cnpj_c]][active],
+    stringsAsFactors = FALSE
+  )
+  lut <- lut[!is.na(lut$ticker) & nzchar(lut$ticker), , drop = FALSE]
+  attr(lut, "year") <- year
+  .ticker_lookup_cache[[cache_key]] <- lut
+  lut
+}
+
+# A security is active when Data_Fim_Negociacao is unset (NA / empty)
+# or in the future. When the column is absent (older schema variant),
+# treat every row as active. Returns a logical vector aligned with df.
+is_active_ticker <- function(df) {
+  col <- "data_fim_negociacao"
+  if (!col %in% names(df)) {
+    return(rep(TRUE, nrow(df)))
+  }
+  fim <- df[[col]]
+  if (inherits(fim, "Date")) {
+    is.na(fim) | fim > Sys.Date()
+  } else {
+    is.na(fim) | !nzchar(trimws(as.character(fim)))
+  }
 }

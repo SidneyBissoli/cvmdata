@@ -1,0 +1,44 @@
+# Schema: fca / valor_mobiliario
+# Valores mobiliarios emitidos pela companhia e seus codigos de
+# negociacao (ticker B3) declarados no Formulario Cadastral. Convencao
+# FRE-detail (cnpj_companhia / data_referencia / nome_empresarial).
+#
+# This is the source table for the B3 ticker -> CNPJ lookup
+# (resolve_ticker_via_fca() in R/api-issuer-fetch.R): column
+# Codigo_Negociacao holds the literal ticker (PETR4, VALE3, BBAS3...),
+# forced to character via the ^codigo_ identifier prefix. Multiple rows
+# per company (one per series/class: ON, PN, units, BDR). Active vs.
+# extinct tickers are distinguished by Data_Fim_Negociacao (NA / future
+# = still trading). Empirical verification: 2024 snapshot, 408 CNPJs
+# with at least one ticker (verificacao empirica v0.2 §2.1 e §12.4).
+
+dataset: fca
+table: valor_mobiliario
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fca_cia_aberta_valor_mobiliario_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/META/fca_cia_aberta.zip#meta_fca_cia_aberta_valor_mobiliario.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 18
+
+# Transformations ------------------------------------------------------
+# keep_latest_version keeps every security of the latest VERSAO per
+# (cnpj_companhia, data_referencia): all rows share the same max VERSAO,
+# so distinct series survive while older refilings are dropped.
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantem apenas a maior VERSAO por (cnpj_companhia, data_referencia).

@@ -20,10 +20,19 @@
 #   tests/testthat/fixtures/vlmo_cia_aberta_2024.zip
 #     - subset of VLMO 2024 (submissao + con) to BCO BRASIL +
 #       MAGAZINE LUIZA, repacked under 200 KB. Added in v0.2 Sessao 11.
+#   tests/testthat/fixtures/fca_cia_aberta_2024.zip
+#     - subset of FCA 2024 (all 10 tables) to BCO BRASIL + MAGAZINE
+#       LUIZA, repacked under 200 KB. Added in v0.2 Sessao 12.
+#       departamento_acionistas ships header-only (empty upstream).
 #
 # Run with `Rscript data-raw/build-mirror-test-fixtures.R` from the
-# package root. Idempotent — overwrites any pre-existing fixtures.
-# CGVN/VLMO raw-fixture steps require network access to the CVM portal.
+# package root to (re)build everything, or pass one or more targets to
+# build a subset, e.g. `Rscript data-raw/build-mirror-test-fixtures.R
+# fca` to rebuild only the FCA fixture in isolation (the pattern used
+# from Sessao 11 onward to avoid disturbing already-committed
+# fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`. Idempotent —
+# overwrites any pre-existing fixtures it touches. The cgvn/vlmo/fca
+# raw-fixture steps require network access to the CVM portal.
 
 stopifnot(requireNamespace("devtools", quietly = TRUE))
 stopifnot(requireNamespace("DBI", quietly = TRUE))
@@ -33,6 +42,19 @@ stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 
 devtools::load_all(quiet = TRUE)
 options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
+
+# Target selection: default to all; CLI args restrict to a subset.
+.all_targets <- c("parquet", "cgvn", "vlmo", "fca")
+.targets <- commandArgs(trailingOnly = TRUE)
+if (!length(.targets)) {
+  .targets <- .all_targets
+}
+unknown_targets <- setdiff(.targets, .all_targets)
+if (length(unknown_targets)) {
+  stop(sprintf("Unknown fixture target(s): %s. Valid: %s",
+               paste(unknown_targets, collapse = ", "),
+               paste(.all_targets, collapse = ", ")))
+}
 
 write_parquet_via_duckdb <- function(df, path) {
   con <- DBI::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
@@ -47,6 +69,8 @@ write_parquet_via_duckdb <- function(df, path) {
   )
   invisible(path)
 }
+
+build_parquet_fixtures <- function() {
 
 # CAD ---------------------------------------------------------------------
 
@@ -107,6 +131,9 @@ bpa_out <- "tests/testthat/fixtures/mirror-dfp-bpa-ind-2024.parquet"
 write_parquet_via_duckdb(bpa, bpa_out)
 cat(sprintf("[fixture] %s  %d rows, %s bytes\n",
             bpa_out, nrow(bpa), format(file.info(bpa_out)$size)))
+
+invisible(NULL)
+}
 
 # CGVN raw ZIP fixture (Sessao 10) ----------------------------------------
 # Downloads the real 2024 ZIP from the CVM portal, filters submissao +
@@ -368,5 +395,148 @@ build_vlmo_raw_fixture <- function() {
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
-build_cgvn_raw_fixture()
-build_vlmo_raw_fixture()
+# --- FCA raw ZIP fixture (Sessao 12) ---------------------------------
+# Downloads the 2024 FCA yearly archive and subsets all 10 tables to
+# BCO BRASIL + MAGAZINE LUIZA. The submissao CSV uses the classic
+# CNPJ_CIA column; the 9 detail CSVs use CNPJ_Companhia, so each is
+# filtered on the column it carries. departamento_acionistas is empty
+# upstream from 2024 on, so its subset is header-only — exactly the
+# case the reader must tolerate (nrow == 0L without aborting).
+# valor_mobiliario keeps the BB/MGLU rows, which carry the B3 tickers
+# (BBAS3, MGLU3, ...) that exercise resolve_ticker_via_fca().
+
+build_fca_raw_fixture <- function() {
+  fca_url <- paste0(
+    "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/",
+    "fca_cia_aberta_2024.zip"
+  )
+  out_zip <- "tests/testthat/fixtures/fca_cia_aberta_2024.zip"
+  out_meta <- paste0(out_zip, ".meta.json")
+
+  keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
+  keep_meta <- list(
+    list(cd_cvm = "001023", cnpj = "00.000.000/0001-91",
+         denom = "BCO BRASIL S.A."),
+    list(cd_cvm = "022470", cnpj = "47.960.950/0001-21",
+         denom = "MAGAZINE LUIZA S.A.")
+  )
+
+  # (CSV file in the ZIP, CNPJ column used to subset). The first is the
+  # classic submissao (CNPJ_CIA); the rest are FRE-detail (CNPJ_Companhia).
+  tables <- list(
+    c("fca_cia_aberta_2024.csv", "cnpj_cia"),
+    c("fca_cia_aberta_auditor_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_canal_divulgacao_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_departamento_acionistas_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_dri_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_endereco_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_escriturador_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_geral_2024.csv", "cnpj_companhia"),
+    c("fca_cia_aberta_pais_estrangeiro_negociacao_2024.csv",
+      "cnpj_companhia"),
+    c("fca_cia_aberta_valor_mobiliario_2024.csv", "cnpj_companhia")
+  )
+
+  stage <- tempfile("fca_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+
+  zip_local <- file.path(stage, "fca_cia_aberta_2024.zip")
+  cat(sprintf("[fca] Downloading %s\n", fca_url))
+  resp <- httr2::req_perform(
+    httr2::req_timeout(httr2::request(fca_url), 300L)
+  )
+  writeBin(httr2::resp_body_raw(resp), zip_local)
+
+  extract_dir <- file.path(stage, "extract")
+  dir.create(extract_dir)
+  utils::unzip(zip_local, exdir = extract_dir)
+
+  subset_csv <- function(name, cnpj_col) {
+    path <- file.path(extract_dir, name)
+    if (!file.exists(path)) {
+      stop(sprintf("Expected CSV not found in FCA ZIP: %s", name))
+    }
+    raw <- readBin(path, "raw", n = file.info(path)$size)
+    txt <- iconv(rawToChar(raw), from = "ISO-8859-1", to = "UTF-8")
+    lines <- strsplit(txt, "\r?\n", perl = TRUE)[[1L]]
+    header <- lines[1L]
+    cols <- strsplit(header, ";", fixed = TRUE)[[1L]]
+    idx <- which(tolower(cols) == cnpj_col)
+    if (!length(idx)) {
+      stop(sprintf("CNPJ column %s not found in %s", cnpj_col, name))
+    }
+    body <- lines[-1L]
+    body <- body[nzchar(body)]
+    fields <- strsplit(body, ";", fixed = TRUE)
+    cnpjs <- vapply(fields, function(f) {
+      if (length(f) >= idx) f[idx] else NA_character_
+    }, character(1L))
+    keep_mask <- cnpjs %in% keep_cnpjs
+    kept <- c(header, body[keep_mask])
+    out <- file.path(extract_dir, paste0("subset_", name))
+    out_raw <- charToRaw(
+      iconv(paste(kept, collapse = "\r\n"),
+            from = "UTF-8", to = "ISO-8859-1")
+    )
+    writeBin(out_raw, out)
+    list(path = out, n_rows = sum(keep_mask))
+  }
+
+  pack_dir <- file.path(stage, "pack")
+  dir.create(pack_dir)
+  row_counts <- integer(0L)
+  for (t in tables) {
+    info <- subset_csv(t[[1L]], t[[2L]])
+    file.copy(info$path, file.path(pack_dir, t[[1L]]), overwrite = TRUE)
+    row_counts[[t[[1L]]]] <- info$n_rows
+  }
+
+  if (file.exists(out_zip)) file.remove(out_zip)
+  out_zip_abs <- file.path(
+    normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
+    basename(out_zip)
+  )
+  withr::with_dir(pack_dir, {
+    utils::zip(
+      zipfile = out_zip_abs,
+      files = list.files("."),
+      flags = "-q9X"
+    )
+  })
+
+  meta <- list(
+    source_url = fca_url,
+    fetched_at = format(Sys.Date()),
+    companies_included = keep_meta,
+    files_included = vapply(tables, `[[`, character(1L), 1L),
+    notes = paste(
+      "Subset filtered by CNPJ (BCO BRASIL + MAGAZINE LUIZA).",
+      "ISO-8859-1 encoding preserved.",
+      "Built from the 2024 yearly archive (Sessao 12, v0.2).",
+      "All 10 tables included. submissao filtered on CNPJ_CIA (classic);",
+      "the 9 detail tables on CNPJ_Companhia (FRE-detail).",
+      "departamento_acionistas ships header-only (empty upstream from",
+      "2024), exercising the reader's nrow == 0L tolerance.",
+      "valor_mobiliario carries the BB/MGLU B3 tickers for the ticker",
+      "lookup."
+    )
+  )
+  writeLines(
+    jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+    out_meta
+  )
+
+  cat(sprintf("[fixture] %s  %s bytes\n",
+              out_zip, format(file.info(out_zip)$size)))
+  for (nm in names(row_counts)) {
+    cat(sprintf("[fixture]   %-52s %d rows\n", nm, row_counts[[nm]]))
+  }
+  cat(sprintf("[fixture] %s\n", out_meta))
+}
+
+# --- dispatch --------------------------------------------------------
+if ("parquet" %in% .targets) build_parquet_fixtures()
+if ("cgvn" %in% .targets) build_cgvn_raw_fixture()
+if ("vlmo" %in% .targets) build_vlmo_raw_fixture()
+if ("fca" %in% .targets) build_fca_raw_fixture()
