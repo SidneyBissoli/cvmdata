@@ -917,6 +917,19 @@ companhias,fre,transacao_parte_relacionada,saldo_existente,Saldo_Existente,Saldo
 companhias,fre,transacao_parte_relacionada,taxa_juros,Taxa_Juros,Taxa de juros,Numérico,numeric,,18,6,available
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,Tipo_Pessoa,Tipo de pessoa,PF/PJ,varchar,2,,,available
 companhias,fre,transacao_parte_relacionada,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
+companhias,ipe,ipe,assunto,Assunto,Assunto,Alfanumérico,nvarchar,-1,,,available
+companhias,ipe,ipe,categoria,Categoria,Categoria,Alfanumérico,varchar,100,,,available
+companhias,ipe,ipe,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
+companhias,ipe,ipe,codigo_cvm,Codigo_CVM,Código CVM,Numérico,varchar,6,,,available
+companhias,ipe,ipe,data_entrega,Data_Entrega,Data de entrega/recebimento do documento,AAAA-MM-DD,date,10,,,available
+companhias,ipe,ipe,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
+companhias,ipe,ipe,especie,Especie,Espécie,Alfanumérico,varchar,100,,,available
+companhias,ipe,ipe,link_download,Link_Download,Endereço para download do documento,Alfanumérico,varchar,168,,,available
+companhias,ipe,ipe,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,ipe,ipe,protocolo_entrega,Protocolo_Entrega,Protocolo de Entrega,Alfanumérico,char,30,,,available
+companhias,ipe,ipe,tipo,Tipo,Tipo,Alfanumérico,varchar,100,,,available
+companhias,ipe,ipe,tipo_apresentacao,Tipo_Apresentacao,Tipo de Apresentação,Alfanumérico,varchar,33,,,available
+companhias,ipe,ipe,versao,Versao,Versão do documento,Numérico,smallint,,5,0,available
 companhias,itr,bpa,cd_conta,CD_CONTA,Código da conta,Numérico,varchar,18,,,available
 companhias,itr,bpa,cd_cvm,CD_CVM,Código CVM,Numérico,char,6,,,available
 companhias,itr,bpa,cnpj_cia,CNPJ_CIA,CNPJ da companhia,Alfanumérico,varchar,20,,,available

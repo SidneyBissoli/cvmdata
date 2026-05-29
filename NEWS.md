@@ -104,6 +104,28 @@
   tables. Decision doc:
   `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
+* New dataset `ipe` (Informacoes Periodicas e Eventuais) covered by
+  `issuer_fetch()`. A **single-table manifest** (`ipe`, 13 fields,
+  ~50k documents/year) of every periodic and eventual document a
+  company filed with the CVM: `cnpj_companhia`, `data_referencia`,
+  `codigo_cvm`, `categoria`, `tipo`, `especie`, `assunto`,
+  `data_entrega`, `tipo_apresentacao`, `protocolo_entrega`, `versao`
+  and `link_download`. There is no separate `submissao` table — the
+  CSV *is* the manifest. `codigo_cvm` is native, so CD_CVM filtering
+  matches directly (no `submissao` bridge). The manifest is
+  **event-per-row**: like `vlmo/consolidado` it declares **no
+  `keep_latest_version`** transformation, so re-submissions and every
+  `versao` of a document are retained verbatim. Slice by document
+  class with a trivial `dplyr::filter()` on `categoria` on the
+  returned tibble. `link_download` is returned as a plain URL to the
+  document on the CVM portal; **OCR and PDF download are out of
+  scope**. IPE overlaps VLMO on the "Valores Mobiliarios negociados e
+  detidos" category — IPE *indexes* the document, VLMO carries the
+  *structured* insider movements; see the `ipe-vlmo` article. CKAN
+  coverage 2021+. Embedded dictionary and codelist snapshots
+  regenerated to include the new table. Decision doc:
+  `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
 * `cvm_groups()` lists the 18 CKAN groups published by the CVM Open
   Data Portal, with the number of datasets each group carries and the
   canonical `cvmdata` fetcher contract (`issuer`, `fund`, `agent`,

@@ -535,21 +535,45 @@ da Sessão 13).
 - [x] Gate verde (`devtools::check()` 0E/0W/0N, lint clean,
   cobertura ≥ 90%).
 
-### Sessão 13 — IPE
-- Escrever schema `ipe/ipe.yaml`.
-- Fixture `ipe_cia_aberta_2024.zip` com diversidade de `Categoria`.
-- Testes:
-  - tracer end-to-end de manifesto
-  - filtro por categoria (`Categoria == "Fato Relevante"` etc.)
-  - lookup CD_CVM → CNPJ funciona (IPE tem `Codigo_CVM` nativo)
-  - **sem dedup automático**: testar que duas versões do mesmo
-    documento na fonte sobrevivem no retorno
-- Estender matrix etl-mirror.
-- Regenerar snapshots.
-- Vignette nova: `vignettes/articles/ipe-vlmo.Rmd` documentando a
-  sobreposição IPE × VLMO + recomendação ao usuário.
-- `NEWS.md`.
-- Gate.
+### Sessão 13 — IPE — **concluída**
+- [x] Escrever schema `ipe/ipe.yaml` (tabela única, 13 campos,
+  FRE-detail-like com `Codigo_CVM` nativo, `transformations: []`).
+  META confirmado em disco: `meta_ipe_cia_aberta.txt` **TXT plano**
+  (sem `#entry`, ao contrário de FCA/VLMO/CGVN), parseia em blocos
+  `Campo:`. `expected_field_count: 13` validado contra o CSV 2024 real
+  (header bate exatamente).
+- [x] **Item de refator do reader NÃO foi necessário**: o prefix-based
+  + exact-match da Sessão 10 já cobre `codigo_cvm` (`^codigo_`) e
+  `protocolo_entrega` (`^protocolo`) sem mudança de código.
+- [x] Fixture `ipe_cia_aberta_2024.zip` (~15 KB, BB+MGLU subset, 330
+  linhas, 27 categorias distintas), bem abaixo do cap de 200 KB;
+  `.meta.json` registra as categorias incluídas.
+  `build_ipe_raw_fixture()` em `data-raw/build-mirror-test-fixtures.R`
+  (com `ipe` no selector de target por CLI).
+- [x] Testes (`test-issuer-fetch-ipe.R`): tracer end-to-end de
+  manifesto (13 campos, tipos), filtro por CNPJ, slice por `categoria`
+  no tibble retornado, lookup CD_CVM **direto** padded+unpadded (IPE
+  tem `codigo_cvm` nativo) + asserção de que **não** passa por
+  submissao, **sem dedup automático** (df sintético de 3 versões
+  sobrevive; contraste com schema que dedupa), ticker B3 → CNPJ via
+  `fca/valor_mobiliario` (fixture FCA + IPE encenadas), `report_type`
+  aborta, discovery (1 tabela), `cvm_dataset_years` mockado, dictionary
+  13 linhas.
+- [x] Estender `etl-mirror.yaml` matrix com `(companhias, ipe)` +
+  choice list.
+- [x] Regenerar `cvm_dictionary_snapshot.csv` (+13 linhas) e
+  `cvm_codelists_snapshot.csv` (+29 linhas: `especie` 26 +
+  `tipo_apresentacao` 3; `categoria`/`tipo` ficam de fora por > 50
+  distintos no ano cheio; `assunto` é texto livre) — diff só adiciona
+  IPE.
+- [x] `NEWS.md`: entrada sob v0.1.0.9000 (New features) — dataset IPE
+  (manifesto evento-por-linha, `codigo_cvm` nativo, sem dedup, OCR fora
+  de escopo).
+- [x] Vignette nova `vignettes/articles/ipe-vlmo.Rmd` + entrada no
+  `_pkgdown.yml`; `getting-started.Rmd` (8 datasets + bloco IPE);
+  `groups-overview.Rmd`; READMEs regenerados.
+- [x] Gate verde (`devtools::check()` 0E/0W/0N, lint clean,
+  cobertura ≥ 90%).
 
 ### Pós-Sessão 13 — release v0.2.0
 - Auditoria final do mirror (primeiro publish dos 4 datasets novos).

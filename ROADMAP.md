@@ -292,7 +292,7 @@ incrementalmente no ciclo `0.1.0.9000` rumo à v0.2.0).
 - [x] Dataset `fca` (Formulário Cadastral).
 - [x] Dataset `vlmo` (Valores Mobiliários Negociados e Detidos).
 - [x] Dataset `cgvn` (Informe do Código de Governança Corporativa).
-- [ ] Dataset `ipe` (documentos periódicos e eventuais).
+- [x] Dataset `ipe` (documentos periódicos e eventuais).
 - [x] Suporte a ticker B3 no argumento `issuer` de
   `issuer_fetch()`.
 
