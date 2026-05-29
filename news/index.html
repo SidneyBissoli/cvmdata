@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,9 +47,9 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0.9000" id="cvmdata-0109000-in-development">cvmdata 0.1.0.9000 (in development)<a class="anchor" aria-label="anchor" href="#cvmdata-0109000-in-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="cvmdata-020-2026-05-29">cvmdata 0.2.0 (2026-05-29)<a class="anchor" aria-label="anchor" href="#cvmdata-020-2026-05-29"></a></h2>
 <div class="section level3">
-<h3 id="warning-breaking-changes-0-1-0-9000">⚠️ Breaking changes<a class="anchor" aria-label="anchor" href="#warning-breaking-changes-0-1-0-9000"></a></h3>
+<h3 id="warning-breaking-changes-0-2-0">⚠️ Breaking changes<a class="anchor" aria-label="anchor" href="#warning-breaking-changes-0-2-0"></a></h3>
 <ul><li>
 <p><code>cvm_fetch()</code> has been renamed <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> to reflect the contract of CVM’s company-issuer datasets (the v0.1 scope). The rename is mechanical:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">cvm_fetch</span>(dataset, table, <span class="at">companies =</span> ..., <span class="at">years =</span> ..., ...)</span>
@@ -63,7 +63,7 @@
 <li><p>Four further fetchers (<code><a href="../reference/fund_fetch.html">fund_fetch()</a></code>, <code><a href="../reference/agent_fetch.html">agent_fetch()</a></code>, <code><a href="../reference/offering_fetch.html">offering_fetch()</a></code>, <code><a href="../reference/event_fetch.html">event_fetch()</a></code>) will be exported as skeletons in the following development cycle. v0.1.0.9000 itself only ships <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> as a functional fetcher.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="new-features-0-1-0-9000">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0-9000"></a></h3>
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
 <ul><li><p>New dataset <code>cgvn</code> (Codigo Brasileiro de Governanca Corporativa) covered by <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>. Two tables: <code>submissao</code> (12 fields, one row per ICBGC informe filed by a company per fiscal year) and <code>praticas</code> (11 fields, “pratique ou explique” detail with 54 recommended practices per filing — <code>id_item</code>, <code>capitulo</code>, <code>principio</code>, <code>pratica_recomendada</code>, <code>pratica_adotada</code> ∈ {Sim, Nao, Parcialmente, Nao se Aplica}, <code>explicacao</code>). CKAN coverage 2021+. <code>praticas</code> does not carry <code>codigo_cvm</code>; CD_CVM filtering routes through <code>cgvn/submissao</code> automatically. Embedded dictionary and codelist snapshots regenerated to include the new tables. Decision doc: <code>data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md</code>.</p></li>
 <li><p>New dataset <code>vlmo</code> (Valores Mobiliarios Negociados e Detidos por insiders, art. 11 of CVM Resolution 44) covered by <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>. Two tables: <code>submissao</code> (12 fields, one row per filing) and <code>consolidado</code> (17 fields, one row per security movement). Unlike the other detail tables, <code>consolidado</code> carries <strong>no <code>keep_latest_version</code></strong> transformation: it is event-per-row, so every <code>versao</code> is retained verbatim (deduping by version would collapse distinct movements). Insider identity is <strong>opaque by design of the CVM</strong> — the detail has no CPF; only the category <code>tipo_cargo</code> and, for corporate insiders, a name in <code>empresa</code> plus <code>tipo_empresa</code>. The <code>issuer</code> argument therefore filters the <strong>issuing company</strong>, not the individual insider; a per-category filter is a trivial <code>dplyr</code> step on the returned tibble. <code>consolidado</code> does not carry <code>codigo_cvm</code>; CD_CVM filtering routes through <code>vlmo/submissao</code> automatically. The package table is named <code>consolidado</code> (not <code>con</code>, the CVM file token) because <code>con</code> is a reserved device name on Windows. Embedded dictionary and codelist snapshots regenerated to include the new tables. Decision doc: <code>data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md</code>.</p></li>
 <li>
@@ -80,13 +80,13 @@
 <li><p>Returned tibbles (<code>cvm_tbl</code> class) now carry a <code>group</code> provenance attribute, slotted between <code>fetched_at</code> and <code>dataset</code>. The total number of attached attributes goes from five to six (<code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>). <code>print.cvm_tbl()</code> renders <code>group</code> in the header alongside the existing fields, so a snapshot taken at the REPL self-documents which CKAN group the data came from. <code>load_schema()</code> stamps the resolved group onto the schema list so downstream callers propagate it without re-running the schema-tree lookup.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="documentation-0-1-0-9000">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-1-0-9000"></a></h3>
+<h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>
 <ul><li><p>New article <code>vignettes/articles/groups-overview.Rmd</code> lists the 18 CKAN groups and maps each to one of the five fetcher contracts, with a worked example per fetcher (only <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> runs; the four skeletons stay in <code>eval = FALSE</code> chunks until v0.4+). Linked from the pkgdown Articles navbar.</p></li>
 <li><p>Article <code>cvm-defects.Rmd</code> renamed to <code>data-defects.Rmd</code>. The taxonomy of publication quirks covers any upstream source the package will integrate (the universe widens beyond CVM proper from v0.4+); the new name reflects that scope. URL on the pkgdown site moves from <code>/articles/cvm-defects.html</code> to <code>/articles/data-defects.html</code>. No content change.</p></li>
 <li><p><code>_pkgdown.yml</code>: <code>cvm_groups</code> listed first in the Discovery reference; the section description now points users at it as the entry to the group taxonomy.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="internal-0-1-0-9000">Internal<a class="anchor" aria-label="anchor" href="#internal-0-1-0-9000"></a></h3>
+<h3 id="internal-0-2-0">Internal<a class="anchor" aria-label="anchor" href="#internal-0-2-0"></a></h3>
 <ul><li><p>Reader identifier classification refactored from an ad-hoc regex list (<code>R/util-csv-cvm.R:.identifier_patterns</code>) to a prefix-based helper (<code>identifier_columns()</code>) with two lists: <code>.identifier_prefixes</code> (<code>^cnpj</code>, <code>^cpf</code>, <code>^codigo_</code>, <code>^cd_cvm</code>, <code>^cep</code>, <code>^ddi_</code>, <code>^ddd_</code>, <code>^id_</code>, <code>^protocolo</code>) and <code>.identifier_exact</code> (<code>caixa_postal</code>, <code>tel</code>, <code>versao</code>). Covers v0.1 without regression and absorbs the v0.2 identifier columns (<code>codigo_cvm_auditor</code>, <code>cnpj_escriturador</code>, <code>cpf_responsavel</code>, <code>id_item</code>, <code>ddi_telefone</code>, <code>protocolo_entrega</code>, <code>codigo_negociacao</code>) without per-dataset additions.</p></li>
 <li><p><code>tx_keep_latest_version()</code> (transform-schema) now accepts an extra <code>keys: [...]</code> field in the YAML transformation declaration. Used by <code>cgvn/praticas</code> to dedup on <code>(cnpj_companhia, data_referencia, id_item)</code> so the 54 distinct practices per filing all survive.</p></li>
 <li><p>New internal helper <code>cdcvm_col(df)</code> resolves the CVM-code column to either <code>cd_cvm</code> (CAD/ITR/DFP/FRE submissao) or <code>codigo_cvm</code> (CGVN/VLMO/IPE submissao). Applied by <code>match_by_cd_cvm()</code> and <code>resolve_cd_cvm_via_submissao()</code> so the CD_CVM lookup path works for both naming conventions.</p></li>
@@ -100,7 +100,7 @@
 <li><p>New condition class <code>cvmdata_error_input_ambiguous</code> (inherits from <code>cvmdata_error_input</code>, which in turn inherits from <code>cvmdata_error</code>). Emitted by <code>load_schema()</code>, <code>dataset_group()</code>, <code><a href="../reference/cvm_dictionary.html">cvm_dictionary()</a></code> and <code><a href="../reference/cvm_codelist.html">cvm_codelist()</a></code> when a <code>(dataset, table)</code> resolution returns more than one candidate group and the caller did not supply <code>group</code> to disambiguate.</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-0-1-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-1-0-9000"></a></h3>
+<h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
 <ul><li>
 <code>cvm_fetch()</code> and <code>cad_fetch()</code> no longer fail with the cryptic <code>cvmdata_error_internal</code> “Got archive=, file=” when the R session runs under <code>LC_CTYPE = "C"</code>. The schema loader now reads the bundled YAMLs forcing UTF-8 instead of relying on the active locale, so multibyte characters in the schema comment headers (e.g. “Demonstração”, “Exercício”) never cause <code><a href="https://yaml.r-lib.org/reference/read_yaml.html" class="external-link">yaml::read_yaml()</a></code> to return <code>NULL</code>. A regression test under <code>LC_CTYPE = "C"</code> was added.</li>
 <li>The PDF version of the package manual now builds cleanly on the macOS R builder with the default pdflatex <code>inputenc</code> setup; a stray U+2264 (“less than or equal to”) character in the roxygen docs of <code><a href="../reference/cvm_codelist.html">cvm_codelist()</a></code> has been replaced by ASCII.</li>

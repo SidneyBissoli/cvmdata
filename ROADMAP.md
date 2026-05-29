@@ -429,6 +429,20 @@ Dataset `ipe` (documentos periódicos e eventuais).
 Suporte a ticker B3 no argumento `issuer` de
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
 
+### Marco — release v0.2.0
+
+Bump `DESCRIPTION` para `0.2.0`.
+
+`NEWS.md`: seção `# cvmdata 0.2.0` consolidando os 4 datasets novos +
+ticker B3.
+
+Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe via
+`etl-mirror.yaml`).
+
+Tag git `v0.2.0` + GitHub Release.
+
+Reabrir ciclo de dev `0.2.0.9000`.
+
 ### v0.3 — `companhias` (parte 3) + perfis não-default
 
 Ainda cobertos por

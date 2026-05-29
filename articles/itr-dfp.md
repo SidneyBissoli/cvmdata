@@ -62,7 +62,7 @@ bpa <- issuer_fetch(
   year = 2024
 )
 bpa
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:13.93122
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:56:38.55598
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 226 × 13
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -99,7 +99,7 @@ ativo_total <- bpa[
   c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
 ]
 ativo_total
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:13.93122
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:56:38.55598
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 2 × 4
 #>   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta
@@ -126,7 +126,7 @@ ativo_history <- bpa_history[
   c("dt_fim_exerc", "vl_conta")
 ]
 ativo_history[order(ativo_history$dt_fim_exerc), ]
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:15.26212
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:56:40.05008
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 3 × 2
 #>   dt_fim_exerc      vl_conta
@@ -153,7 +153,7 @@ cap <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023, 22470 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:15.415869
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:56:40.215368
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 2 × 10
 #>   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹
@@ -179,7 +179,7 @@ sub <- issuer_fetch(
   year = 2024
 )
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
-#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:51:15.548157
+#> ℹ source: "cvm" | fetched_at: 2026-05-29 18:56:40.35354
 #> ℹ group: "companhias" | dataset: "dfp" | table: "submissao"
 #> # A tibble: 2 × 4
 #>   cd_cvm denom_cia           dt_refer   id_doc
