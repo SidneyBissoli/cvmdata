@@ -271,7 +271,8 @@
 <td>API estável transversal: <code>cache.R</code>, <code>discovery.R</code>, <code>source.R</code>, <code>cvmdata-package.R</code>
 </td>
 </tr></tbody></table><p>Layout dos schemas: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (<code>&lt;group&gt;</code> é o slug CKAN; <code>"companhias"</code> para os 4 datasets de v0.1). Layout do ETL: <code>inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R</code>.</p>
-<p><code>data-raw/</code> mistura <strong>build scripts</strong> regeneráveis (<code>build-*.R</code> para snapshots, fixtures e vignette data) com <strong>auditorias one-shot</strong> (<code>run-capacity-audit.R</code>, <code>validate-mirror-end-to-end.R</code>). Apenas os build scripts são regenerados em ciclo normal.</p>
+<p><code>data-raw/</code> mistura <strong>build scripts</strong> regeneráveis (<code>build-*.R</code> para snapshots, fixtures e vignette data) com <strong>auditorias one-shot</strong> (<code>run-capacity-audit.R</code>, <code>validate-mirror-end-to-end.R</code>) e <strong><code>data-raw/decisions/</code></strong>, onde vivem os canônicos referenciados no topo deste CLAUDE.md (<code>cvmdata_rodada2-5_naming_unificado-v03.md</code>, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code>, <code>cvmdata_arquitetura_grupos_decisao_v2.md</code>, etc.). Apenas os build scripts são regenerados em ciclo normal; canônicos só mudam por decisão deliberada.</p>
+<p>Documentação narrativa em <code>vignettes/</code>: <code>cvmdata.Rmd</code> é o vignette canônico embarcado no tarball (overview do pacote); <code>vignettes/articles/</code> contém artigos longos publicados <strong>apenas no site pkgdown</strong> (<code>.Rbuildignored</code>), sem peso na tarball CRAN.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_5-sistema-de-classes-s3">5. Sistema de classes S3<a class="anchor" aria-label="anchor" href="#id_5-sistema-de-classes-s3"></a></h2>
@@ -368,6 +369,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <strong>Cobertura alvo 90%</strong>.</li>
 </ul><p>Cache real fica em <code>tools::R_user_dir("cvmdata", "cache")</code>. Em testes, é redirecionado para tempdir via <code>options(cvmdata.cache_dir = ...)</code>.</p>
 <p>Gate por commit: <code>devtools::check() == 0E/0W/0N</code> com <code>--as-cran</code>, lint clean, testes verdes, <code><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">pkgdown::build_site()</a></code> funcionando.</p>
+<p>CI em <code>.github/workflows/</code>: <code>R-CMD-check.yaml</code> (matrix release/devel + SO), <code>lint.yaml</code> (<code><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lintr::lint_package()</a></code>), <code>test-coverage.yaml</code> (covr → Codecov), <code>pkgdown.yaml</code> (deploy do site), <code>etl-mirror.yaml</code> (cron <code>0 7 * * 2</code> + dispatch manual, ver §8). Os quatro primeiros travam por push/PR; o quinto é operacional.</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_10-workflow-de-desenvolvimento">10. Workflow de desenvolvimento<a class="anchor" aria-label="anchor" href="#id_10-workflow-de-desenvolvimento"></a></h2>
