@@ -1,4 +1,4 @@
-# cvmdata 0.1.0.9000 (in development)
+# cvmdata 0.2.0 (2026-05-29)
 
 ## ⚠️ Breaking changes
 
