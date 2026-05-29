@@ -414,22 +414,37 @@ name_col <- function(df) {
   NULL
 }
 
+# Detect which CVM-code column the tibble uses, analogous to
+# cnpj_col(). Most schemas use `cd_cvm` (CAD/ITR/DFP/FRE submissao); v0.2
+# CGVN/VLMO/IPE expose the equivalent code under the literal CVM name
+# `codigo_cvm`. Returns NULL when neither is present.
+cdcvm_col <- function(df) {
+  if ("cd_cvm" %in% names(df)) {
+    return("cd_cvm")
+  }
+  if ("codigo_cvm" %in% names(df)) {
+    return("codigo_cvm")
+  }
+  NULL
+}
+
 match_by_cd_cvm <- function(df, issuer_chr, mask) {
-  if (!any(mask) || !"cd_cvm" %in% names(df)) {
+  col <- cdcvm_col(df)
+  if (!any(mask) || is.null(col)) {
     return(rep(FALSE, nrow(df)))
   }
   targets <- issuer_chr[mask]
   # `%06s` pads with spaces, not zeros — must use formatC with a
   # decimal format to get "9512" -> "009512".
   df_padded <- formatC(
-    suppressWarnings(as.integer(df$cd_cvm)),
+    suppressWarnings(as.integer(df[[col]])),
     width = 6, flag = "0", format = "d"
   )
   targets_padded <- formatC(
     as.integer(targets),
     width = 6, flag = "0", format = "d"
   )
-  df$cd_cvm %in% targets | df_padded %in% targets_padded
+  df[[col]] %in% targets | df_padded %in% targets_padded
 }
 
 match_by_text <- function(df, issuer_chr, mask) {
@@ -474,7 +489,7 @@ filter_by_issuer <- function(df, issuer,
   issuer_chr <- as.character(issuer)
   cls <- classify_issuer_tokens(issuer_chr)
 
-  if (any(cls$is_cdcvm) && !("cd_cvm" %in% names(df)) &&
+  if (any(cls$is_cdcvm) && is.null(cdcvm_col(df)) &&
       !is.null(schema) && !is.null(year)) {
     resolved <- resolve_cd_cvm_via_submissao(
       issuer_chr[cls$is_cdcvm], schema, year
@@ -532,8 +547,26 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
   )
   sub_df <- read_cvm_csv(path, sub_schema, validate = "skip")
 
+  # CGVN/VLMO/IPE submissao publish the CVM code as `codigo_cvm` and
+  # the issuer CNPJ as `cnpj_companhia`; CAD/ITR/DFP/FRE submissao use
+  # `cd_cvm` and `cnpj_cia`. Generalize the column lookup.
+  sub_cd_col <- cdcvm_col(sub_df)
+  sub_cnpj_col <- cnpj_col(sub_df)
+  if (is.null(sub_cd_col) || is.null(sub_cnpj_col)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Submissao of {.val {dataset}} lacks the columns needed to",
+          "resolve CD_CVM tokens (expected one of {.code cd_cvm} /",
+          "{.code codigo_cvm} and {.code cnpj_cia} /",
+          "{.code cnpj_companhia})."
+        )
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
   sub_cd_padded <- formatC(
-    suppressWarnings(as.integer(sub_df$cd_cvm)),
+    suppressWarnings(as.integer(sub_df[[sub_cd_col]])),
     width = 6, flag = "0", format = "d"
   )
   targets_padded <- formatC(
@@ -543,7 +576,7 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
 
   resolved <- vapply(targets_padded, function(tp) {
     idx <- which(sub_cd_padded == tp)[1L]
-    if (is.na(idx)) NA_character_ else sub_df$cnpj_cia[idx]
+    if (is.na(idx)) NA_character_ else sub_df[[sub_cnpj_col]][idx]
   }, character(1L), USE.NAMES = FALSE)
 
   missing_mask <- is.na(resolved)

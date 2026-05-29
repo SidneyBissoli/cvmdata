@@ -444,18 +444,25 @@ lint clean, cobertura ≥ 90%. Cada uma deixa o pacote pronto para
 release intermediário se necessário (mas só releva v0.2.0 ao final
 da Sessão 13).
 
-### Sessão 10 — CGVN
-- Escrever `inst/extdata/schemas/companhias/cgvn/{submissao,praticas}.yaml`.
-- Baixar e armazenar fixture `cgvn_cia_aberta_2024.zip` em
-  `tests/testthat/fixtures/`.
-- Testes: tracer end-to-end (`issuer_fetch("cgvn", "praticas",
-  issuer="001023", year=2024)`), codelists (`cvm_codelist`), dedup
-  `keep_latest_version` por `(cnpj_companhia, data_referencia, id_item)`.
-- Estender `etl-mirror.yaml` matrix com `(companhias, cgvn)`.
-- Regenerar `cvm_dictionary_snapshot.csv` e
+### Sessão 10 — CGVN — **concluída**
+- [x] Escrever `inst/extdata/schemas/companhias/cgvn/{submissao,praticas}.yaml`.
+- [x] Baixar e armazenar fixture `cgvn_cia_aberta_2024.zip` em
+  `tests/testthat/fixtures/` (38 KB, BB+MGLU subset, 4 categorias de
+  `Pratica_Adotada`).
+- [x] Testes: tracer end-to-end, codelists (`cvm_codelist`), dedup
+  `keep_latest_version` por `(cnpj_companhia, data_referencia, id_item)`,
+  lookup CD_CVM via submissao (CGVN/submissao tem `codigo_cvm` e
+  `cnpj_companhia`, não `cd_cvm` / `cnpj_cia`; helper `cdcvm_col()`
+  generalizado), `identifier_columns()` unit tests.
+- [x] Estender `etl-mirror.yaml` matrix com `(companhias, cgvn)`.
+- [x] Regenerar `cvm_dictionary_snapshot.csv` e
   `cvm_codelists_snapshot.csv` para incluir CGVN.
-- `NEWS.md`: entrada sob v0.1.0.9000 documentando o novo dataset.
-- Gate.
+- [x] `NEWS.md`: entrada sob v0.1.0.9000 (New features + Internal:
+  refator do reader para prefix-based + exact-match;
+  `tx_keep_latest_version` aceita `keys:`; `cdcvm_col()` helper).
+- [x] Gate: `devtools::check() --as-cran` 0E/0W/0N (58.7s);
+  lint clean; testes 819 PASS / 0 FAIL / 1 SKIP (Windows);
+  cobertura 92.79%.
 
 ### Sessão 11 — VLMO
 - Escrever schemas VLMO.

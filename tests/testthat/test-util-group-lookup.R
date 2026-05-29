@@ -41,8 +41,10 @@ test_that("known_groups() returns the deduplicated group slugs", {
   expect_identical(known_groups(), "companhias")
 })
 
-test_that("known_datasets() lists the v0.1 datasets", {
-  expect_setequal(known_datasets(), c("cad", "dfp", "fre", "itr"))
+test_that("known_datasets() lists every covered dataset", {
+  expect_setequal(
+    known_datasets(), c("cad", "cgvn", "dfp", "fre", "itr")
+  )
 })
 
 test_that("dataset_group() aborts ambiguous when dataset is in 2 groups", {

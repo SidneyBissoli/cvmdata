@@ -1,0 +1,37 @@
+# Schema: cgvn / praticas
+# Detalhe "pratique ou explique" do ICBGC: uma linha por pratica
+# recomendada (54 praticas distintas, identificadas por ID_Item) por
+# documento submetido. Convencao FRE-detail.
+# Empirical verification: 2024 snapshot (verificacao empirica v0.2
+# §2.3 e §12.3).
+
+dataset: cgvn
+table: praticas
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/DADOS/cgvn_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "cgvn_cia_aberta_praticas_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/META/meta_cgvn_cia_aberta.zip#meta_cgvn_cia_aberta_praticas.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 11
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    keys: [id_item]
+    note: >-
+      Mantem apenas a maior VERSAO por
+      (cnpj_companhia, data_referencia, id_item). Sem id_item na chave,
+      o dedup colapsaria as 54 praticas distintas do informe.

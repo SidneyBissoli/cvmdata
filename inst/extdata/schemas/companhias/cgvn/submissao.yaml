@@ -1,0 +1,35 @@
+# Schema: cgvn / submissao
+# Cabecalho do Informe sobre o Codigo Brasileiro de Governanca
+# Corporativa (ICBGC). Uma linha por documento submetido — identifica
+# a companhia e o exercicio social referenciado pelo informe.
+# Convencao FRE-detail (cnpj_companhia / data_referencia / nome_*).
+# Empirical verification: 2024 snapshot (verificacao empirica v0.2 §2.3).
+
+dataset: cgvn
+table: submissao
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/DADOS/cgvn_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "cgvn_cia_aberta_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/CGVN/META/meta_cgvn_cia_aberta.zip#meta_cgvn_cia_aberta.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+# CKAN serves 2021-current at the time of verification (2026-05-28);
+# older filings depend on the mirror.
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 12
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia).
