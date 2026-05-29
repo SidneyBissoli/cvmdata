@@ -54,6 +54,25 @@
   tables. Decision doc:
   `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
+* New dataset `vlmo` (Valores Mobiliarios Negociados e Detidos por
+  insiders, art. 11 of CVM Resolution 44) covered by `issuer_fetch()`.
+  Two tables: `submissao` (12 fields, one row per filing) and
+  `consolidado` (17 fields, one row per security movement). Unlike the
+  other detail tables, `consolidado` carries **no
+  `keep_latest_version`** transformation: it is event-per-row, so every
+  `versao` is retained verbatim (deduping by version would collapse
+  distinct movements). Insider identity is **opaque by design of the
+  CVM** — the detail has no CPF; only the category `tipo_cargo` and, for
+  corporate insiders, a name in `empresa` plus `tipo_empresa`. The
+  `issuer` argument therefore filters the **issuing company**, not the
+  individual insider; a per-category filter is a trivial `dplyr` step on
+  the returned tibble. `consolidado` does not carry `codigo_cvm`; CD_CVM
+  filtering routes through `vlmo/submissao` automatically. The package
+  table is named `consolidado` (not `con`, the CVM file token) because
+  `con` is a reserved device name on Windows. Embedded dictionary and
+  codelist snapshots regenerated to include the new tables. Decision
+  doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
 * `cvm_groups()` lists the 18 CKAN groups published by the CVM Open
   Data Portal, with the number of datasets each group carries and the
   canonical `cvmdata` fetcher contract (`issuer`, `fund`, `agent`,

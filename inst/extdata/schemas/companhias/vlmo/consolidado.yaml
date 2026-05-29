@@ -1,0 +1,42 @@
+# Schema: vlmo / consolidado
+# Detalhe consolidado do VLMO: uma linha por movimentacao de valor
+# mobiliario por insider, agregada por categoria (Tipo_Cargo). NAO traz
+# Codigo_CVM — o filtro por CD_CVM resolve via vlmo/submissao
+# (cdcvm_col() + resolve_cd_cvm_via_submissao()). Identidade individual
+# do insider e opaca por design da CVM (sem CPF; quando o insider e PJ,
+# so o nome em Empresa + Tipo_Empresa). Convencao FRE-detail-like sem
+# Codigo_CVM. Empirical verification: 2024 snapshot (verificacao
+# empirica v0.2 §2.2 e §12.2).
+#
+# Table name note: the CVM CSV is named "...con..." (consolidado), but
+# "con" is a reserved device name on Windows/OneDrive, so the package
+# table is named `consolidado`. The cvm_file_pattern below still points
+# at the real CVM file `vlmo_cia_aberta_con_{year}.csv`.
+
+dataset: vlmo
+table: consolidado
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/DADOS/vlmo_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "vlmo_cia_aberta_con_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/META/meta_vlmo_cia_aberta.zip#meta_vlmo_cia_aberta_con.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 17
+
+# Transformations ------------------------------------------------------
+# None. `consolidado` is an event-per-row table: each VERSAO can carry
+# distinct movements, so deduping by version would collapse separate
+# events. Decided in the v0.2 planning doc §3.1.2 and §3.3.
+transformations: []

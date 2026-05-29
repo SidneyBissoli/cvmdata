@@ -290,7 +290,7 @@ Cobertos por `issuer_fetch()` (já funcional; novos datasets aterrissam
 incrementalmente no ciclo `0.1.0.9000` rumo à v0.2.0).
 
 - [ ] Dataset `fca` (Formulário Cadastral).
-- [ ] Dataset `vlmo` (Valores Mobiliários Negociados e Detidos).
+- [x] Dataset `vlmo` (Valores Mobiliários Negociados e Detidos).
 - [x] Dataset `cgvn` (Informe do Código de Governança Corporativa).
 - [ ] Dataset `ipe` (documentos periódicos e eventuais).
 - [ ] Suporte a ticker B3 no argumento `issuer` de

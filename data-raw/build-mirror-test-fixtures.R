@@ -17,10 +17,13 @@
 #       v0.2 Sessao 10 introduced the dataset; pre-existing raw ZIPs
 #       (dfp/itr/fre) were committed manually before this script
 #       existed.
+#   tests/testthat/fixtures/vlmo_cia_aberta_2024.zip
+#     - subset of VLMO 2024 (submissao + con) to BCO BRASIL +
+#       MAGAZINE LUIZA, repacked under 200 KB. Added in v0.2 Sessao 11.
 #
 # Run with `Rscript data-raw/build-mirror-test-fixtures.R` from the
 # package root. Idempotent — overwrites any pre-existing fixtures.
-# CGVN raw-fixture step requires network access to the CVM portal.
+# CGVN/VLMO raw-fixture steps require network access to the CVM portal.
 
 stopifnot(requireNamespace("devtools", quietly = TRUE))
 stopifnot(requireNamespace("DBI", quietly = TRUE))
@@ -238,4 +241,132 @@ build_cgvn_raw_fixture <- function() {
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
+# --- VLMO raw ZIP fixture --------------------------------------------
+# Downloads the 2024 VLMO yearly archive, filters submissao + con to
+# BCO BRASIL + MAGAZINE LUIZA, repacks as a small fixture. Both CSVs
+# carry CNPJ_Companhia, so the subset filters on that column directly.
+# con does not carry Codigo_CVM (CD_CVM lookup would go through the
+# submissao path in real use); filtering on CNPJ keeps the fixture
+# self-contained. The "no dedup by version" semantics are exercised by
+# a synthetic in-test data frame, not by this fixture.
+
+build_vlmo_raw_fixture <- function() {
+  vlmo_url <- paste0(
+    "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/DADOS/",
+    "vlmo_cia_aberta_2024.zip"
+  )
+  out_zip <- "tests/testthat/fixtures/vlmo_cia_aberta_2024.zip"
+  out_meta <- paste0(out_zip, ".meta.json")
+
+  # Companies kept in the subset (same pair used in CGVN/DFP/ITR/FRE
+  # fixtures for cross-test coherence).
+  keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
+  keep_meta <- list(
+    list(cd_cvm = "001023", cnpj_companhia = "00.000.000/0001-91",
+         nome_companhia = "BCO BRASIL S.A."),
+    list(cd_cvm = "022470", cnpj_companhia = "47.960.950/0001-21",
+         nome_companhia = "MAGAZINE LUIZA S.A.")
+  )
+
+  stage <- tempfile("vlmo_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+
+  zip_local <- file.path(stage, "vlmo_cia_aberta_2024.zip")
+  cat(sprintf("[vlmo] Downloading %s\n", vlmo_url))
+  resp <- httr2::req_perform(
+    httr2::req_timeout(httr2::request(vlmo_url), 300L)
+  )
+  writeBin(httr2::resp_body_raw(resp), zip_local)
+
+  extract_dir <- file.path(stage, "extract")
+  dir.create(extract_dir)
+  utils::unzip(zip_local, exdir = extract_dir)
+
+  subset_csv <- function(name, cnpj_col) {
+    path <- file.path(extract_dir, name)
+    if (!file.exists(path)) {
+      stop(sprintf("Expected CSV not found in VLMO ZIP: %s", name))
+    }
+    raw <- readBin(path, "raw", n = file.info(path)$size)
+    txt <- iconv(rawToChar(raw), from = "ISO-8859-1", to = "UTF-8")
+    lines <- strsplit(txt, "\r?\n", perl = TRUE)[[1L]]
+    header <- lines[1L]
+    cols <- strsplit(header, ";", fixed = TRUE)[[1L]]
+    idx <- which(tolower(cols) == cnpj_col)
+    if (!length(idx)) {
+      stop(sprintf("CNPJ column %s not found in %s", cnpj_col, name))
+    }
+    body <- lines[-1L]
+    body <- body[nzchar(body)]
+    fields <- strsplit(body, ";", fixed = TRUE)
+    cnpjs <- vapply(fields, function(f) {
+      if (length(f) >= idx) f[idx] else NA_character_
+    }, character(1L))
+    keep_mask <- cnpjs %in% keep_cnpjs
+    kept <- c(header, body[keep_mask])
+    out <- file.path(extract_dir, paste0("subset_", name))
+    out_raw <- charToRaw(
+      iconv(paste(kept, collapse = "\r\n"),
+            from = "UTF-8", to = "ISO-8859-1")
+    )
+    writeBin(out_raw, out)
+    list(path = out, n_rows = sum(keep_mask))
+  }
+
+  sub_info <- subset_csv("vlmo_cia_aberta_2024.csv", "cnpj_companhia")
+  con_info <- subset_csv("vlmo_cia_aberta_con_2024.csv", "cnpj_companhia")
+
+  # Repack: only the two filtered CSVs (renamed back to canonical).
+  pack_dir <- file.path(stage, "pack")
+  dir.create(pack_dir)
+  file.copy(sub_info$path,
+            file.path(pack_dir, "vlmo_cia_aberta_2024.csv"),
+            overwrite = TRUE)
+  file.copy(con_info$path,
+            file.path(pack_dir, "vlmo_cia_aberta_con_2024.csv"),
+            overwrite = TRUE)
+
+  if (file.exists(out_zip)) file.remove(out_zip)
+  out_zip_abs <- file.path(
+    normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
+    basename(out_zip)
+  )
+  withr::with_dir(pack_dir, {
+    utils::zip(
+      zipfile = out_zip_abs,
+      files = list.files("."),
+      flags = "-q9X"
+    )
+  })
+
+  meta <- list(
+    source_url = vlmo_url,
+    fetched_at = format(Sys.Date()),
+    companies_included = keep_meta,
+    files_included = c(
+      "vlmo_cia_aberta_2024.csv",
+      "vlmo_cia_aberta_con_2024.csv"
+    ),
+    notes = paste(
+      "Subset filtered by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA).",
+      "ISO-8859-1 encoding preserved.",
+      "Built from the 2024 yearly archive (Sessao 11, v0.2).",
+      "con is event-per-row: NO keep_latest_version transformation,",
+      "so multiple VERSAO rows per (cnpj, data_ref) survive verbatim."
+    )
+  )
+  writeLines(
+    jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+    out_meta
+  )
+
+  cat(sprintf("[fixture] %s  %s bytes\n",
+              out_zip, format(file.info(out_zip)$size)))
+  cat(sprintf("[fixture] submissao subset: %d rows; con: %d rows\n",
+              sub_info$n_rows, con_info$n_rows))
+  cat(sprintf("[fixture] %s\n", out_meta))
+}
+
 build_cgvn_raw_fixture()
+build_vlmo_raw_fixture()

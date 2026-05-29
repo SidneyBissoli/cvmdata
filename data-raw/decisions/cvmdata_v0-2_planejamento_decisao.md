@@ -94,7 +94,7 @@ Encoding: `ISO-8859-1`. Delimitador: `;`.
 | YAML | n_campos | `temporal_partitioning` | `first_year` | `meta_status` | Convenção | Transformações |
 |---|---|---|---|---|---|---|
 | `submissao.yaml` | 12 | yearly | 2021 | available | FRE-detail (`Codigo_CVM`, `Categoria`, `Tipo`, …) | `keep_latest_version` por `(cnpj_companhia, data_referencia)` |
-| `con.yaml` | 17 | yearly | 2021 | available | FRE-detail-like sem `Codigo_CVM` | **Sem `keep_latest_version`** — é tabela evento-por-linha; manter versões |
+| `consolidado.yaml` (era `con`; ver Sessão 11) | 17 | yearly | 2021 | available | FRE-detail-like sem `Codigo_CVM` | **Sem `keep_latest_version`** — é tabela evento-por-linha; manter versões |
 
 URL pattern:
 `.../DOC/VLMO/DADOS/vlmo_cia_aberta_{year}.zip`.
@@ -414,8 +414,9 @@ companhias/fca/
 
 ```
 companhias/vlmo/
-├── submissao.yaml  (12 fields, FRE-detail-like with Codigo_CVM, keep_latest_version)
-└── con.yaml        (17 fields, FRE-detail-like without Codigo_CVM, no dedup)
+├── submissao.yaml    (12 fields, FRE-detail-like with Codigo_CVM, keep_latest_version)
+└── consolidado.yaml  (17 fields, FRE-detail-like without Codigo_CVM, no dedup;
+                       renamed from `con` — reserved device name on Windows)
 ```
 
 ### CGVN
@@ -464,18 +465,30 @@ da Sessão 13).
   lint clean; testes 819 PASS / 0 FAIL / 1 SKIP (Windows);
   cobertura 92.79%.
 
-### Sessão 11 — VLMO
-- Escrever schemas VLMO.
-- Fixture `vlmo_cia_aberta_2024.zip` com subset; cobertura inclui
-  múltiplas movimentações por insider+companhia para testar a
-  ausência de dedup por versão.
-- Testes: tracer end-to-end de `vlmo/con`, codelists, **lookup
-  CD_CVM → CNPJ via `vlmo/submissao`** (pois `con` não tem
-  `Codigo_CVM`) — reutiliza infraestrutura da Sessão 03 do v0.1.
-- Estender matrix etl-mirror.
-- Regenerar snapshots.
-- `NEWS.md`.
-- Gate.
+### Sessão 11 — VLMO — **concluída**
+- [x] Escrever `inst/extdata/schemas/companhias/vlmo/{submissao,consolidado}.yaml`.
+  **Rename `con` → `consolidado`**: a tabela detail NÃO pode chamar-se
+  `con` porque `con.yaml` colide com o nome de dispositivo reservado
+  `CON` do Windows (recusado pelo OneDrive). O nome de tabela é decisão
+  do pacote (a CVM só nomeia o arquivo, não a tabela), então a régua "se
+  vem da CVM, fica como na CVM" não é violada. O `cvm_file_pattern`
+  continua apontando para o CSV real `vlmo_cia_aberta_con_{year}.csv`.
+- [x] Fixture `vlmo_cia_aberta_2024.zip` (~5 KB, BB+MGLU subset) +
+  `.meta.json`; `build_vlmo_raw_fixture()` em
+  `data-raw/build-mirror-test-fixtures.R` (modelo `build_cgvn`).
+- [x] Testes (`test-issuer-fetch-vlmo.R`): tracer end-to-end de
+  `submissao` + `consolidado`, filtro por CNPJ, lookup CD_CVM → CNPJ via
+  `vlmo/submissao` (padded + unpadded; `consolidado` não tem
+  `codigo_cvm`), ausência de `keep_latest_version` em `consolidado`
+  (data frame sintético interno), discovery, codelist `tipo_cargo` (5
+  categorias), dictionary 12/17 linhas, `report_type` aborta.
+- [x] Estender `etl-mirror.yaml` matrix com `(companhias, vlmo)` +
+  choice list.
+- [x] Regenerar `cvm_dictionary_snapshot.csv` (+29 linhas) e
+  `cvm_codelists_snapshot.csv` (+56 linhas) — diff só adiciona VLMO.
+- [x] `NEWS.md`: entrada sob v0.1.0.9000 (New features).
+- [x] Gate verde (`devtools::check()` 0E/0W/0N, lint clean,
+  cobertura ≥ 90%).
 
 ### Sessão 12 — FCA
 - Escrever os 10 YAMLs FCA.

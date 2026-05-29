@@ -500,3 +500,59 @@ companhias,itr,parecer,tp_relat_esp,Com Ressalva
 companhias,itr,parecer,tp_relat_esp,Negativa de Opinião
 companhias,itr,parecer,tp_relat_esp,Sem Ressalva
 companhias,itr,submissao,categ_doc,ITR
+companhias,vlmo,consolidado,tipo_ativo,Ações
+companhias,vlmo,consolidado,tipo_ativo,BDR Patrocinados
+companhias,vlmo,consolidado,tipo_ativo,Bônus de Subscrição
+companhias,vlmo,consolidado,tipo_ativo,Debêntures
+companhias,vlmo,consolidado,tipo_ativo,Derivativos
+companhias,vlmo,consolidado,tipo_ativo,Opção de Compra
+companhias,vlmo,consolidado,tipo_ativo,Opção de Venda
+companhias,vlmo,consolidado,tipo_ativo,Opções de Plano de Remuneração
+companhias,vlmo,consolidado,tipo_ativo,Outros
+companhias,vlmo,consolidado,tipo_ativo,Recibo de Subscrição
+companhias,vlmo,consolidado,tipo_ativo,Units
+companhias,vlmo,consolidado,tipo_cargo,Conselho Fiscal ou Vinculado
+companhias,vlmo,consolidado,tipo_cargo,Conselho de Administração ou Vinculado
+companhias,vlmo,consolidado,tipo_cargo,Controlador ou Vinculado
+companhias,vlmo,consolidado,tipo_cargo,Diretor ou Vinculado
+companhias,vlmo,consolidado,tipo_cargo,Órgão Estatutário ou Vinculado
+companhias,vlmo,consolidado,tipo_empresa,Companhia
+companhias,vlmo,consolidado,tipo_empresa,Controlada
+companhias,vlmo,consolidado,tipo_empresa,Controladora
+companhias,vlmo,consolidado,tipo_movimentacao,Ações de exercício de bônus de subscrição
+companhias,vlmo,consolidado,tipo_movimentacao,Ações de plano de remuneração
+companhias,vlmo,consolidado,tipo_movimentacao,Ações decorrentes de exercício de opção de compra
+companhias,vlmo,consolidado,tipo_movimentacao,Ações resultantes de conversão de debêntures
+companhias,vlmo,consolidado,tipo_movimentacao,Bônus de subscrição exercido
+companhias,vlmo,consolidado,tipo_movimentacao,Compra
+companhias,vlmo,consolidado,tipo_movimentacao,Compra à termo
+companhias,vlmo,consolidado,tipo_movimentacao,Compra à vista
+companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (locador)
+companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (tomador)
+companhias,vlmo,consolidado,tipo_movimentacao,Desdobramento/bonificação
+companhias,vlmo,consolidado,tipo_movimentacao,Desligamento/saída
+companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (locador)
+companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (tomador)
+companhias,vlmo,consolidado,tipo_movimentacao,Doação (doador)
+companhias,vlmo,consolidado,tipo_movimentacao,Doação (donatário)
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício de opção de Plano de Remuneração
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de compra
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de venda
+companhias,vlmo,consolidado,tipo_movimentacao,Grupamento
+companhias,vlmo,consolidado,tipo_movimentacao,Homologação de subscrição
+companhias,vlmo,consolidado,tipo_movimentacao,Outras Entradas
+companhias,vlmo,consolidado,tipo_movimentacao,Outras Saídas
+companhias,vlmo,consolidado,tipo_movimentacao,Posse
+companhias,vlmo,consolidado,tipo_movimentacao,Recebimento de opção de Plano de Remuneração
+companhias,vlmo,consolidado,tipo_movimentacao,Saldo Inicial
+companhias,vlmo,consolidado,tipo_movimentacao,Subscrição
+companhias,vlmo,consolidado,tipo_movimentacao,Units de plano de remuneração
+companhias,vlmo,consolidado,tipo_movimentacao,Venda
+companhias,vlmo,consolidado,tipo_movimentacao,Venda à termo
+companhias,vlmo,consolidado,tipo_movimentacao,Venda à vista
+companhias,vlmo,consolidado,tipo_operacao,Crédito
+companhias,vlmo,consolidado,tipo_operacao,Débito
+companhias,vlmo,submissao,categoria,Valores Mobiliários negociados e detidos (art. 11 da Instr. CVM nº 358)
+companhias,vlmo,submissao,tipo,Posição Consolidada
+companhias,vlmo,submissao,tipo_apresentacao,AP - Apresentação
+companhias,vlmo,submissao,tipo_apresentacao,RE - Reapresentação Espontânea

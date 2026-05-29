@@ -1,0 +1,36 @@
+# Schema: vlmo / submissao
+# Cabecalho do formulario de Valores Mobiliarios Negociados e Detidos
+# (VLMO, art. 11 da Res. CVM 44). Uma linha por documento submetido —
+# identifica a companhia emissora e o exercicio referenciado pelo
+# formulario. Convencao FRE-detail-like (cnpj_companhia /
+# data_referencia / nome_companhia) com Codigo_CVM no header.
+# Empirical verification: 2024 snapshot (verificacao empirica v0.2 §2.2).
+
+dataset: vlmo
+table: submissao
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/DADOS/vlmo_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "vlmo_cia_aberta_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/VLMO/META/meta_vlmo_cia_aberta.zip#meta_vlmo_cia_aberta.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+# CKAN serves 2021-current at the time of verification (2026-05-28);
+# older filings depend on the mirror.
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 12
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia).
