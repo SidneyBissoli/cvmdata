@@ -17,6 +17,7 @@
 
 source("inst/etl/00-config.R")
 stopifnot(requireNamespace("arrow", quietly = TRUE))
+stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 
 args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
@@ -71,6 +72,11 @@ years_to_process <- if (identical(partitioning, "yearly")) {
 out_root <- file.path(workspace, "out")
 dir.create(out_root, recursive = TRUE, showWarnings = FALSE)
 
+# Returns "ok" (parquet written), "empty" (0 rows upstream — a legitimate
+# state for tables the CVM publishes header-only in some years, e.g.
+# fca/departamento_acionistas from 2024 on) or "fail" (fetch aborted).
+# The caller records "empty" tuples in a manifest so stage 02b can tell
+# a legitimately-absent parquet from a genuinely missing one.
 write_one <- function(tbl, y, rtype) {
   years_arg <- if (is.na(y)) NULL else y
   rt_arg <- if (is.null(rtype)) NULL else rtype
@@ -86,7 +92,8 @@ write_one <- function(tbl, y, rtype) {
       NULL
     }
   )
-  if (is.null(res) || nrow(res) == 0L) return(invisible(FALSE))
+  if (is.null(res)) return("fail")
+  if (nrow(res) == 0L) return("empty")
 
   parts <- c("parquet", group, dataset, tbl)
   if (!is.null(rtype)) parts <- c(parts, sprintf("report_type=%s", rtype))
@@ -102,7 +109,28 @@ write_one <- function(tbl, y, rtype) {
     format(nrow(res), big.mark = ","),
     file.info(out_path)$size / 1024
   ))
-  invisible(TRUE)
+  "ok"
+}
+
+# Log the tuple being processed, then convert it. Split out of the main
+# loop to keep that loop's cyclomatic complexity within the lint budget.
+log_and_write <- function(tbl, y, rt) {
+  label <- if (is.null(rt)) tbl else sprintf("%s/%s", tbl, rt)
+  message(sprintf(
+    "  -> %s/%s/%s", dataset, label,
+    if (is.na(y)) "static" else as.character(y)
+  ))
+  write_one(tbl, y, rt)
+}
+
+# One row of the empty manifest for a (table, year, report_type) tuple.
+empty_tuple_row <- function(tbl, y, rt) {
+  data.frame(
+    table = tbl,
+    year = if (is.na(y)) NA_integer_ else as.integer(y),
+    report_type = if (is.null(rt)) NA_character_ else rt,
+    stringsAsFactors = FALSE
+  )
 }
 
 message(sprintf(
@@ -112,22 +140,51 @@ message(sprintf(
 ))
 
 n_ok <- 0L
+n_empty <- 0L
 n_fail <- 0L
+empty_tuples <- list()
 for (tbl in tables) {
   for (y in years_to_process) {
     for (rt in mirror_variants_for(tbl)) {
-      label <- if (is.null(rt)) tbl else sprintf("%s/%s", tbl, rt)
-      message(sprintf(
-        "  -> %s/%s/%s", dataset, label,
-        if (is.na(y)) "static" else as.character(y)
-      ))
-      ok <- write_one(tbl, y, rt)
-      if (isTRUE(ok)) n_ok <- n_ok + 1L else n_fail <- n_fail + 1L
+      st <- log_and_write(tbl, y, rt)
+      if (identical(st, "ok")) {
+        n_ok <- n_ok + 1L
+      } else if (identical(st, "empty")) {
+        n_empty <- n_empty + 1L
+        empty_tuples[[length(empty_tuples) + 1L]] <-
+          empty_tuple_row(tbl, y, rt)
+      } else {
+        n_fail <- n_fail + 1L
+      }
     }
   }
 }
+
+# Empty manifest: the (table, year, report_type) tuples that were empty
+# upstream. Stage 02b reads it to treat a legitimately-absent parquet as
+# a pass instead of a hard "missing file" failure. Written outside the
+# `parquet/` tree so 03-publish does not upload it as a release asset.
+empty_dir <- file.path(out_root, "empty")
+dir.create(empty_dir, recursive = TRUE, showWarnings = FALSE)
+empty_manifest <- if (length(empty_tuples)) {
+  do.call(rbind, empty_tuples)
+} else {
+  data.frame(
+    table = character(0L),
+    year = integer(0L),
+    report_type = character(0L),
+    stringsAsFactors = FALSE
+  )
+}
+jsonlite::write_json(
+  empty_manifest,
+  file.path(empty_dir, sprintf("%s.json", dataset)),
+  auto_unbox = TRUE, pretty = TRUE, na = "null"
+)
+
 message(sprintf(
-  "[02-parquet] done. %d ok / %d failed", n_ok, n_fail
+  "[02-parquet] done. %d ok / %d empty / %d failed",
+  n_ok, n_empty, n_fail
 ))
 if (n_fail > 0L && n_ok == 0L) {
   quit(status = 1L)

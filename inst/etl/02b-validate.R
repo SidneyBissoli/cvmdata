@@ -66,6 +66,7 @@ source(.validate_locate_config())
 stopifnot(requireNamespace("arrow", quietly = TRUE))
 stopifnot(requireNamespace("pointblank", quietly = TRUE))
 stopifnot(requireNamespace("yaml", quietly = TRUE))
+stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 
 # CNPJ as published by CVM: XX.XXX.XXX/XXXX-XX. Applies to cnpj_cia
 # and cnpj_companhia in every dataset. Reader leaves the value as-is.
@@ -91,6 +92,49 @@ validate_parquet_path <- function(root, group, dataset, table, year,
     parts <- c(parts, sprintf("year=%d", as.integer(year)))
   }
   do.call(file.path, as.list(c(parts, "part-0.parquet")))
+}
+
+# Canonical key for a (table, year, report_type) tuple. Shared by the
+# expected-tuple loop and the empty-manifest set so membership tests
+# line up. NA/NULL year (non-yearly) and report_type collapse to "".
+validate_tuple_key <- function(table, year, report_type) {
+  sprintf(
+    "%s|%s|%s",
+    table,
+    if (is.null(year) || is.na(year)) "" else as.integer(year),
+    if (is.null(report_type) || is.na(report_type)) "" else report_type
+  )
+}
+
+# Set of tuple keys that stage 02 reported as empty upstream (0 rows) in
+# `<workspace>/out/empty/<dataset>.json`. A missing parquet for such a
+# tuple is legitimate (e.g. fca/departamento_acionistas from 2024 on),
+# not a hard failure. Returns character(0) when the manifest is absent
+# (older runs, or stage 02 not run) — in which case a missing parquet
+# stays a hard failure, preserving the pre-existing contract.
+validate_empty_set <- function(dataset, workspace) {
+  path <- file.path(
+    workspace, "out", "empty", sprintf("%s.json", dataset)
+  )
+  if (!file.exists(path)) {
+    return(character(0L))
+  }
+  manifest <- tryCatch(
+    jsonlite::read_json(path, simplifyVector = TRUE),
+    error = function(e) NULL
+  )
+  if (is.null(manifest) || !length(manifest) || !NROW(manifest)) {
+    return(character(0L))
+  }
+  vapply(
+    seq_len(nrow(manifest)),
+    function(i) {
+      validate_tuple_key(
+        manifest$table[i], manifest$year[i], manifest$report_type[i]
+      )
+    },
+    character(1L)
+  )
 }
 
 # Returns the list of (table, year, report_type) tuples the previous
@@ -221,8 +265,21 @@ validate_run_pointblank <- function(tbl, hints, table) {
 # The synthetic checks (existence, readable, n_rows > 0) always come
 # first and short-circuit: if any of them fails, the column-level
 # checks are skipped to keep the report cause-and-effect.
-validate_one_parquet <- function(parquet_path, dataset, table, hints) {
+validate_one_parquet <- function(parquet_path, dataset, table, hints,
+                                  upstream_empty = FALSE) {
   if (!file.exists(parquet_path)) {
+    if (isTRUE(upstream_empty)) {
+      # Legitimately empty upstream: no parquet is expected. Record a
+      # soft, passing row so the tuple shows in the report without
+      # tripping the hard-fail gate.
+      return(tibble::tibble(
+        check = "upstream_empty",
+        severity = "soft",
+        status = "pass",
+        n = 0L, n_failed = 0L,
+        note = "0 rows upstream; no parquet expected"
+      ))
+    }
     return(tibble::tibble(
       check = "parquet_exists",
       severity = "hard",
@@ -276,6 +333,7 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints) {
 validate_dataset <- function(group, dataset, workspace,
                              years_arg = NULL) {
   expected <- validate_expected_tuples(dataset, years_arg)
+  empty_set <- validate_empty_set(dataset, workspace)
   if (!length(expected)) {
     return(tibble::tibble(
       table = character(0L),
@@ -299,7 +357,12 @@ validate_dataset <- function(group, dataset, workspace,
       if (!is.na(e$year)) sprintf("/%d", e$year) else ""
     )
     hints <- validate_schema_hints(dataset, e$table)
-    details <- validate_one_parquet(path, dataset, e$table, hints)
+    upstream_empty <- validate_tuple_key(
+      e$table, e$year, e$report_type
+    ) %in% empty_set
+    details <- validate_one_parquet(
+      path, dataset, e$table, hints, upstream_empty
+    )
     hard_failed <- sum(details$status == "fail" &
                          details$severity == "hard")
     soft_failed <- sum(details$status == "fail" &
