@@ -297,12 +297,16 @@ no ciclo `0.1.0.9000`). Layout do ETL:
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
 snapshots, fixtures e vignette data) com **auditorias one-shot**
 (`run-capacity-audit.R`, `validate-mirror-end-to-end.R`) e
-**`data-raw/decisions/`**, onde vivem os canônicos referenciados no topo
-deste CLAUDE.md (`cvmdata_rodada2-5_naming_unificado-v03.md`,
-`cvmdata_rodada3-0-2_politica_reader_sem_meta.md`,
-`cvmdata_arquitetura_grupos_decisao_v2.md`, etc.). Apenas os build
-scripts são regenerados em ciclo normal; canônicos só mudam por decisão
-deliberada.
+**`data-raw/decisions/`**. Os canônicos NÃO vivem todos no mesmo
+lugar: - **Raiz do repo**: `cvmdata_rodada2-5_naming_unificado-v03.md`
+(naming) e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` (reader),
+junto com os demais docs `cvmdata_rodada*.md` e os `PROMPT_CLAUDE_*.md`
+de sessão. - **`data-raw/decisions/`**:
+`cvmdata_arquitetura_grupos_decisao_v2.md` (arquitetura de grupos) +
+docs de planejamento v0.2 (`cvmdata_v0-2_*.md`).
+
+Apenas os build scripts são regenerados em ciclo normal; canônicos só
+mudam por decisão deliberada.
 
 Documentação narrativa em `vignettes/`: `cvmdata.Rmd` é o vignette
 canônico embarcado no tarball (overview do pacote);
