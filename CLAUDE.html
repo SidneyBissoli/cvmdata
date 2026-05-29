@@ -21,6 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/getting-started.html">Getting started with cvmdata</a></li>
     <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
@@ -109,7 +110,8 @@
 <p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional e cobre v0.1–v0.3 (grupo <code>companhias</code>); os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code>, com implementação plena em v0.4–v0.8. Skeletons foram exportados antes da implementação para <strong>travar a superfície da API pública cedo</strong>, de modo que as releases v0.4+ estendam cobertura sem reformatar a API.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias")</span></span>
-<span><span class="co"># Cobre cad, dfp, itr, fre em v0.1; fca, vlmo, cgvn, ipe em v0.2+</span></span>
+<span><span class="co"># v0.1: cad, dfp, itr, fre. 0.1.0.9000 (rumo a v0.2): + cgvn.</span></span>
+<span><span class="co"># Pendentes em 0.1.0.9000: fca, vlmo, ipe (sessões 11-13).</span></span>
 <span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
 <span>             issuer      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># CNPJ / CD_CVM / texto, vetor</span></span>
 <span>             year        <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># integer vector, NULL → último</span></span>
@@ -191,6 +193,7 @@
 <td>VERSAO</td>
 <td>Identificador → character</td>
 </tr></tbody></table><p>FRE-detail usa convenção diferente: <code>cnpj_companhia</code>, <code>data_referencia</code>, <code>nome_companhia</code>, <code>versao</code>, <code>id_documento</code>. <strong>Sem <code>cd_cvm</code></strong>. Preservação estrita; joins exigem mapeamento explícito do usuário.</p>
+<p>CGVN/VLMO/IPE seguem uma terceira convenção (FRE-detail-like): mesma <code>cnpj_companhia</code> / <code>data_referencia</code>, mas a coluna CVM-code se chama <code>codigo_cvm</code> (não <code>cd_cvm</code>). O resolver <code>match_by_cd_cvm()</code> aceita qualquer das duas via helper interno <code>cdcvm_col(df)</code>; semântica idêntica.</p>
 </div>
 <div class="section level3">
 <h3 id="id_23-submissão-header-de-itrdfpfre">2.3 Submissão (header de ITR/DFP/FRE)<a class="anchor" aria-label="anchor" href="#id_23-submiss%C3%A3o-header-de-itrdfpfre"></a></h3>
@@ -198,7 +201,7 @@
 </div>
 <div class="section level3">
 <h3 id="id_24-regra-dos-identificadores--character">2.4 Regra dos identificadores → character<a class="anchor" aria-label="anchor" href="#id_24-regra-dos-identificadores--character"></a></h3>
-<p>Campos identificadores (CNPJ, CD_CVM, CEP, telefones, CPF, ID_Documento) são forçados a <strong>character</strong> mesmo quando o META declara <code>numeric</code>. O META da CVM declara mal — CEPs perdem zero à esquerda, CD_CVM tem padding heterogêneo entre datasets, etc. Lista canônica no reader: <code>c("cnpj_cia", "cd_cvm", "cep", "tel", "ddd_*", "cpf", "id_documento", "cnpj_companhia")</code>.</p>
+<p>Campos identificadores (CNPJ, CD_CVM, CEP, telefones, CPF, ID_*, DDI/DDD, protocolos, ticker B3) são forçados a <strong>character</strong> mesmo quando o META declara <code>numeric</code>. O META da CVM declara mal — CEPs perdem zero à esquerda, CD_CVM tem padding heterogêneo entre datasets, ID_Item da CGVN é <code>N.N.N</code>, etc. Implementação em <code>R/util-csv-cvm.R::identifier_columns()</code>: classificação por <strong>prefixos regex</strong> (<code>^cnpj</code>, <code>^cpf</code>, <code>^codigo_</code>, <code>^cd_cvm</code>, <code>^cep</code>, <code>^ddi_</code>, <code>^ddd_</code>, <code>^id_</code>, <code>^protocolo</code>) <strong>+ exact-match</strong> para os esquisitos (<code>caixa_postal</code>, <code>tel</code>, <code>versao</code>). Refator de v0.2 — Sessão 10 — substituiu a lista monolítica de regex <code>.identifier_patterns</code> por duas listas planas + um helper testável.</p>
 </div>
 <div class="section level3">
 <h3 id="id_25-datas">2.5 Datas<a class="anchor" aria-label="anchor" href="#id_25-datas"></a></h3>
@@ -270,7 +273,7 @@
 </tr><tr><td>(sem prefixo)</td>
 <td>API estável transversal: <code>cache.R</code>, <code>discovery.R</code>, <code>source.R</code>, <code>cvmdata-package.R</code>
 </td>
-</tr></tbody></table><p>Layout dos schemas: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (<code>&lt;group&gt;</code> é o slug CKAN; <code>"companhias"</code> para os 4 datasets de v0.1). Layout do ETL: <code>inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R</code>.</p>
+</tr></tbody></table><p>Layout dos schemas: <code>inst/extdata/schemas/&lt;group&gt;/&lt;dataset&gt;/&lt;table&gt;.yaml</code> (<code>&lt;group&gt;</code> é o slug CKAN; <code>"companhias"</code> para os 4 datasets de v0.1 e <code>cgvn</code> adicionado no ciclo <code>0.1.0.9000</code>). Layout do ETL: <code>inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R</code>.</p>
 <p><code>data-raw/</code> mistura <strong>build scripts</strong> regeneráveis (<code>build-*.R</code> para snapshots, fixtures e vignette data) com <strong>auditorias one-shot</strong> (<code>run-capacity-audit.R</code>, <code>validate-mirror-end-to-end.R</code>) e <strong><code>data-raw/decisions/</code></strong>, onde vivem os canônicos referenciados no topo deste CLAUDE.md (<code>cvmdata_rodada2-5_naming_unificado-v03.md</code>, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code>, <code>cvmdata_arquitetura_grupos_decisao_v2.md</code>, etc.). Apenas os build scripts são regenerados em ciclo normal; canônicos só mudam por decisão deliberada.</p>
 <p>Documentação narrativa em <code>vignettes/</code>: <code>cvmdata.Rmd</code> é o vignette canônico embarcado no tarball (overview do pacote); <code>vignettes/articles/</code> contém artigos longos publicados <strong>apenas no site pkgdown</strong> (<code>.Rbuildignored</code>), sem peso na tarball CRAN.</p>
 <hr></div>
@@ -333,7 +336,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <td>Pula validação (silencioso)</td>
 </tr></tbody></table><p>Mensagens em inglês, via <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code> / <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_warn()</a></code>. Símbolo <code>x</code> para erro, <code>!</code> para warning, <code>i</code> para info. Sob <code>meta_status: missing</code> em modo <code>"warn"</code>, o reader valida <code>expected_field_names</code> do YAML contra o cabeçalho do CSV (defesa em profundidade).</p>
 <p>8 tabelas FRE têm <code>meta_status: missing</code> (sem META oficial CVM): <code>administrador_PCD</code>, <code>empregado_PCD</code>, <code>empregado_local_declaracao_genero</code>, <code>empregado_local_declaracao_raca</code>, <code>empregado_posicao_declaracao_genero</code>, <code>empregado_posicao_declaracao_raca</code>, <code>empregado_posicao_faixa_etaria</code>, <code>empregado_posicao_local</code>.</p>
-<p>Schema do YAML por tabela: campos canônicos (<code>dataset</code>, <code>table</code>, <code>cvm_archive_url_pattern</code> xor <code>cvm_file_url_pattern</code>, <code>cvm_file_pattern</code>, <code>cvm_dictionary_url</code>, <code>meta_status</code>, <code>encoding</code>, <code>delimiter</code>, <code>temporal_partitioning ∈ {none, yearly}</code>, <code>first_year</code>, <code>expected_field_count</code>, <code>expected_field_names</code>, <code>transformations</code>). Domínio de <code>action</code> em <code>transformations</code>: <code>multiply_by_scale</code> (requer <code>scale_column:</code>), <code>drop</code>, <code>keep_latest_version</code>. Detalhes no naming doc v03 e no loader (<code>R/schema-load.R</code>).</p>
+<p>Schema do YAML por tabela: campos canônicos (<code>dataset</code>, <code>table</code>, <code>cvm_archive_url_pattern</code> xor <code>cvm_file_url_pattern</code>, <code>cvm_file_pattern</code>, <code>cvm_dictionary_url</code>, <code>meta_status</code>, <code>encoding</code>, <code>delimiter</code>, <code>temporal_partitioning ∈ {none, yearly}</code>, <code>first_year</code>, <code>expected_field_count</code>, <code>expected_field_names</code>, <code>transformations</code>). Domínio de <code>action</code> em <code>transformations</code>: <code>multiply_by_scale</code> (requer <code>scale_column:</code>), <code>drop</code>, <code>keep_latest_version</code> (aceita <code>keys: [...]</code> opcional para compor chaves extras com a dupla implícita <code>(cnpj, data)</code> — usado em <code>cgvn/praticas</code> com <code>keys: [id_item]</code>). Detalhes no naming doc v03 e no loader (<code>R/schema-load.R</code>).</p>
 <hr></div>
 <div class="section level2">
 <h2 id="id_8-cache">8. Cache<a class="anchor" aria-label="anchor" href="#id_8-cache"></a></h2>
@@ -362,7 +365,7 @@ cvmdata_warn                           (pai genérico de warnings)
 <li>
 <strong>Mocks HTTP</strong> via <code>httptest2</code> (e em alguns casos <code><a href="https://httr2.r-lib.org/reference/with_mocked_responses.html" class="external-link">httr2::with_mocked_responses()</a></code>).</li>
 <li>
-<strong>Fixtures pequenos e reais</strong> em <code>tests/testthat/fixtures/</code>: cada fixture com <code>*.meta.json</code> registrando origem. Inclui <code>cad_sample.csv</code>, ZIPs <code>dfp/itr/fre cia_aberta_2024.zip</code> e parquets <code>mirror-*.parquet</code> gerados por <code>data-raw/build-mirror-test-fixtures.R</code>.</li>
+<strong>Fixtures pequenos e reais</strong> em <code>tests/testthat/fixtures/</code>: cada fixture com <code>*.meta.json</code> registrando origem. Inclui <code>cad_sample.csv</code>, ZIPs <code>{dfp,itr,fre,cgvn}_cia_aberta_2024.zip</code> e parquets <code>mirror-*.parquet</code> gerados por <code>data-raw/build-mirror-test-fixtures.R</code> (raw ZIPs do CGVN+ via <code>build_cgvn_raw_fixture()</code> no mesmo script; CAD/DFP/ITR/FRE foram commitados manualmente antes de o script existir).</li>
 <li>
 <strong>Snapshot tests</strong> para mensagens de erro, atributos serializados, estrutura de output (<code><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">dplyr::glimpse()</a></code> snapshotado).</li>
 <li>

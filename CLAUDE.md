@@ -74,7 +74,8 @@ que as releases v0.4+ estendam cobertura sem reformatar a API.
 ``` r
 
 # Issuer datasets — companhias abertas (grupo CKAN "companhias")
-# Cobre cad, dfp, itr, fre em v0.1; fca, vlmo, cgvn, ipe em v0.2+
+# v0.1: cad, dfp, itr, fre. 0.1.0.9000 (rumo a v0.2): + cgvn.
+# Pendentes em 0.1.0.9000: fca, vlmo, ipe (sessões 11-13).
 issuer_fetch(dataset, table,
              issuer      = NULL,      # CNPJ / CD_CVM / texto, vetor
              year        = NULL,      # integer vector, NULL → último
@@ -171,6 +172,12 @@ FRE-detail usa convenção diferente: `cnpj_companhia`, `data_referencia`,
 `nome_companhia`, `versao`, `id_documento`. **Sem `cd_cvm`**.
 Preservação estrita; joins exigem mapeamento explícito do usuário.
 
+CGVN/VLMO/IPE seguem uma terceira convenção (FRE-detail-like): mesma
+`cnpj_companhia` / `data_referencia`, mas a coluna CVM-code se chama
+`codigo_cvm` (não `cd_cvm`). O resolver `match_by_cd_cvm()` aceita
+qualquer das duas via helper interno `cdcvm_col(df)`; semântica
+idêntica.
+
 ### 2.3 Submissão (header de ITR/DFP/FRE)
 
 Tabela de cabeçalho dos três datasets chama-se `submissao`. 9 campos:
@@ -179,11 +186,17 @@ Tabela de cabeçalho dos três datasets chama-se `submissao`. 9 campos:
 
 ### 2.4 Regra dos identificadores → character
 
-Campos identificadores (CNPJ, CD_CVM, CEP, telefones, CPF, ID_Documento)
-são forçados a **character** mesmo quando o META declara `numeric`. O
-META da CVM declara mal — CEPs perdem zero à esquerda, CD_CVM tem
-padding heterogêneo entre datasets, etc. Lista canônica no reader:
-`c("cnpj_cia", "cd_cvm", "cep", "tel", "ddd_*", "cpf", "id_documento", "cnpj_companhia")`.
+Campos identificadores (CNPJ, CD_CVM, CEP, telefones, CPF, ID\_\*,
+DDI/DDD, protocolos, ticker B3) são forçados a **character** mesmo
+quando o META declara `numeric`. O META da CVM declara mal — CEPs perdem
+zero à esquerda, CD_CVM tem padding heterogêneo entre datasets, ID_Item
+da CGVN é `N.N.N`, etc. Implementação em
+`R/util-csv-cvm.R::identifier_columns()`: classificação por **prefixos
+regex** (`^cnpj`, `^cpf`, `^codigo_`, `^cd_cvm`, `^cep`, `^ddi_`,
+`^ddd_`, `^id_`, `^protocolo`) **+ exact-match** para os esquisitos
+(`caixa_postal`, `tel`, `versao`). Refator de v0.2 — Sessão 10 —
+substituiu a lista monolítica de regex `.identifier_patterns` por duas
+listas planas + um helper testável.
 
 ### 2.5 Datas
 
@@ -277,7 +290,8 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 
 Layout dos schemas:
 `inst/extdata/schemas/<group>/<dataset>/<table>.yaml` (`<group>` é o
-slug CKAN; `"companhias"` para os 4 datasets de v0.1). Layout do ETL:
+slug CKAN; `"companhias"` para os 4 datasets de v0.1 e `cgvn` adicionado
+no ciclo `0.1.0.9000`). Layout do ETL:
 `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R`.
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
@@ -377,8 +391,10 @@ Schema do YAML por tabela: campos canônicos (`dataset`, `table`,
 `delimiter`, `temporal_partitioning ∈ {none, yearly}`, `first_year`,
 `expected_field_count`, `expected_field_names`, `transformations`).
 Domínio de `action` em `transformations`: `multiply_by_scale` (requer
-`scale_column:`), `drop`, `keep_latest_version`. Detalhes no naming doc
-v03 e no loader (`R/schema-load.R`).
+`scale_column:`), `drop`, `keep_latest_version` (aceita `keys: [...]`
+opcional para compor chaves extras com a dupla implícita `(cnpj, data)`
+— usado em `cgvn/praticas` com `keys: [id_item]`). Detalhes no naming
+doc v03 e no loader (`R/schema-load.R`).
 
 ------------------------------------------------------------------------
 
@@ -444,8 +460,11 @@ GitHub Releases sanitiza `=` → `.` no URL público;
   [`httr2::with_mocked_responses()`](https://httr2.r-lib.org/reference/with_mocked_responses.html)).
 - **Fixtures pequenos e reais** em `tests/testthat/fixtures/`: cada
   fixture com `*.meta.json` registrando origem. Inclui `cad_sample.csv`,
-  ZIPs `dfp/itr/fre cia_aberta_2024.zip` e parquets `mirror-*.parquet`
-  gerados por `data-raw/build-mirror-test-fixtures.R`.
+  ZIPs `{dfp,itr,fre,cgvn}_cia_aberta_2024.zip` e parquets
+  `mirror-*.parquet` gerados por `data-raw/build-mirror-test-fixtures.R`
+  (raw ZIPs do CGVN+ via `build_cgvn_raw_fixture()` no mesmo script;
+  CAD/DFP/ITR/FRE foram commitados manualmente antes de o script
+  existir).
 - **Snapshot tests** para mensagens de erro, atributos serializados,
   estrutura de output
   ([`dplyr::glimpse()`](https://pillar.r-lib.org/reference/glimpse.html)

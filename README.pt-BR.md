@@ -74,7 +74,7 @@ embarcados):
 library(cvmdata)
 
 cvm_datasets()
-#> [1] "cad" "dfp" "fre" "itr"
+#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"
 ```
 
 O dicionário embarcado expõe os tipos e descrições que a CVM publica

@@ -21,6 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
+    <li><a class="dropdown-item" href="articles/getting-started.html">Getting started with cvmdata</a></li>
     <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
     <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
@@ -237,18 +238,17 @@
 <p>Nomenclatura por <strong>grupo CKAN da CVM</strong> (18 grupos verificados em <a href="https://dados.cvm.gov.br/group/" class="external-link uri">https://dados.cvm.gov.br/group/</a>, 2026-05-25). Cada release incremental cobre um grupo ou subconjunto coerente; o fetcher correspondente já existe em skeleton desde v0.1.0.9000.</p>
 <div class="section level3">
 <h3 id="v02--companhias-parte-2">v0.2 — <code>companhias</code> (parte 2)<a class="anchor" aria-label="anchor" href="#v02--companhias-parte-2"></a></h3>
-<p>Cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> (skeleton já exportado, falta implementação dos datasets).</p>
+<p>Cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> (já funcional; novos datasets aterrissam incrementalmente no ciclo <code>0.1.0.9000</code> rumo à v0.2.0).</p>
 <ul class="task-list"><li><label><input type="checkbox">Dataset <code>fca</code> (Formulário Cadastral).</label></li>
 <li><label><input type="checkbox">Dataset <code>vlmo</code> (Valores Mobiliários Negociados e Detidos).</label></li>
-<li><label><input type="checkbox">Dataset <code>cgvn</code> (Informe do Código de Governança).</label></li>
+<li><label><input type="checkbox" checked>Dataset <code>cgvn</code> (Informe do Código de Governança Corporativa).</label></li>
 <li><label><input type="checkbox">Dataset <code>ipe</code> (documentos periódicos e eventuais).</label></li>
 <li><label><input type="checkbox">Suporte a ticker B3 no argumento <code>issuer</code> de <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="v03--companhias-parte-3--perfis-não-default">v0.3 — <code>companhias</code> (parte 3) + perfis não-default<a class="anchor" aria-label="anchor" href="#v03--companhias-parte-3--perfis-n%C3%A3o-default"></a></h3>
-<p>Ainda cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>.</p>
+<p>Ainda cobertos por <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>. (ICBGC saiu desta lista — é o mesmo dataset que <code>cgvn</code> em v0.2.)</p>
 <ul class="task-list"><li><label><input type="checkbox">Programas de recompra de ações.</label></li>
-<li><label><input type="checkbox">ICBGC (Informe do Código Brasileiro de Governança).</label></li>
 <li><label><input type="checkbox">Cadastro de companhias estrangeiras.</label></li>
 <li><label><input type="checkbox">Cadastro de companhias incentivadas.</label></li>
 <li><label><input type="checkbox">Eventos societários remanescentes do grupo <code>companhias</code>.</label></li>

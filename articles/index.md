@@ -7,6 +7,8 @@
 
 ### Deep dives
 
+- [Getting started with
+  cvmdata](https://sidneybissoli.github.io/cvmdata/articles/getting-started.md):
 - [Groups overview: the 18 CKAN groups and 5 fetcher
   contracts](https://sidneybissoli.github.io/cvmdata/articles/groups-overview.md):
 - [issuer_fetch(): the generic

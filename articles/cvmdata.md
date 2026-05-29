@@ -26,7 +26,7 @@ datasets:
 
 library(cvmdata)
 cvm_datasets()
-#> [1] "cad" "dfp" "fre" "itr"
+#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"
 ```
 
 ## First call — the company registry

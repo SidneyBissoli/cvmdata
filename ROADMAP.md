@@ -415,13 +415,14 @@ existe em skeleton desde v0.1.0.9000.
 
 Cobertos por
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-(skeleton já exportado, falta implementação dos datasets).
+(já funcional; novos datasets aterrissam incrementalmente no ciclo
+`0.1.0.9000` rumo à v0.2.0).
 
 Dataset `fca` (Formulário Cadastral).
 
 Dataset `vlmo` (Valores Mobiliários Negociados e Detidos).
 
-Dataset `cgvn` (Informe do Código de Governança).
+Dataset `cgvn` (Informe do Código de Governança Corporativa).
 
 Dataset `ipe` (documentos periódicos e eventuais).
 
@@ -432,10 +433,9 @@ Suporte a ticker B3 no argumento `issuer` de
 
 Ainda cobertos por
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
+(ICBGC saiu desta lista — é o mesmo dataset que `cgvn` em v0.2.)
 
 Programas de recompra de ações.
-
-ICBGC (Informe do Código Brasileiro de Governança).
 
 Cadastro de companhias estrangeiras.
 

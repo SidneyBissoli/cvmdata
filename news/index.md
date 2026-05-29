@@ -52,6 +52,19 @@
 
 ### New features
 
+- New dataset `cgvn` (Codigo Brasileiro de Governanca Corporativa)
+  covered by
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
+  Two tables: `submissao` (12 fields, one row per ICBGC informe filed by
+  a company per fiscal year) and `praticas` (11 fields, “pratique ou
+  explique” detail with 54 recommended practices per filing — `id_item`,
+  `capitulo`, `principio`, `pratica_recomendada`, `pratica_adotada` ∈
+  {Sim, Nao, Parcialmente, Nao se Aplica}, `explicacao`). CKAN coverage
+  2021+. `praticas` does not carry `codigo_cvm`; CD_CVM filtering routes
+  through `cgvn/submissao` automatically. Embedded dictionary and
+  codelist snapshots regenerated to include the new tables. Decision
+  doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+
 - [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
   lists the 18 CKAN groups published by the CVM Open Data Portal, with
   the number of datasets each group carries and the canonical `cvmdata`
@@ -163,6 +176,35 @@
 
 ### Internal
 
+- Reader identifier classification refactored from an ad-hoc regex list
+  (`R/util-csv-cvm.R:.identifier_patterns`) to a prefix-based helper
+  (`identifier_columns()`) with two lists: `.identifier_prefixes`
+  (`^cnpj`, `^cpf`, `^codigo_`, `^cd_cvm`, `^cep`, `^ddi_`, `^ddd_`,
+  `^id_`, `^protocolo`) and `.identifier_exact` (`caixa_postal`, `tel`,
+  `versao`). Covers v0.1 without regression and absorbs the v0.2
+  identifier columns (`codigo_cvm_auditor`, `cnpj_escriturador`,
+  `cpf_responsavel`, `id_item`, `ddi_telefone`, `protocolo_entrega`,
+  `codigo_negociacao`) without per-dataset additions.
+
+- `tx_keep_latest_version()` (transform-schema) now accepts an extra
+  `keys: [...]` field in the YAML transformation declaration. Used by
+  `cgvn/praticas` to dedup on
+  `(cnpj_companhia, data_referencia, id_item)` so the 54 distinct
+  practices per filing all survive.
+
+- New internal helper `cdcvm_col(df)` resolves the CVM-code column to
+  either `cd_cvm` (CAD/ITR/DFP/FRE submissao) or `codigo_cvm`
+  (CGVN/VLMO/IPE submissao). Applied by `match_by_cd_cvm()` and
+  `resolve_cd_cvm_via_submissao()` so the CD_CVM lookup path works for
+  both naming conventions.
+
+- Codelist builder (`data-raw/build-codelists-snapshot.R`) exclude
+  pattern list re-aligned with the reader’s identifier rules (broader
+  `^codigo_` and `^id_` instead of the v0.1 narrow exact matches; added
+  `^ddi_` and `^protocolo`). Mirrors the reader refactor so new
+  identifier-shaped columns in v0.2 datasets are not falsely promoted to
+  codelists.
+
 - Cache layout migrated from `<cache>/{raw,parquet}/<dataset>/` to
   `<cache>/{raw,parquet}/<group>/<dataset>/`. The `<group>` segment is
   the CVM CKAN group slug (`companhias` for the four v0.1 datasets);
@@ -176,14 +218,17 @@
   post-upgrade and relocates pre-existing artifacts; the helper is
   idempotent and writes an audit log under
   `tools::R_user_dir("cvmdata", "config")/cache_migrate_log.rds`.
+
 - [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
   now exposes the `group` column as the first key, ahead of `dataset`.
+
 - [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
   gained a `group` argument that scopes deletion to a CKAN group
   (e.g. `cvm_cache_clear(group = "companhias")`). Precedence:
   `what = "all"` overrides the filter; otherwise the target path is
   composed as `<cache>/<what>/<group>/<dataset>/<year>/`, with each
   segment becoming optional from the right.
+
 - Schema YAML files moved from
   `inst/extdata/schemas/<dataset>/<table>.yaml` to
   `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. The internal
@@ -194,6 +239,7 @@
   technical debt has been removed – `dataset_group()`, `known_groups()`
   and the new `known_datasets()` now walk the installed schema tree on
   first call and memoize the result per R session.
+
 - `cvm_dictionary_snapshot.csv` and `cvm_codelists_snapshot.csv` gained
   a `group` column as the first key column. Composite key changed from
   `(dataset, table, ...)` to `(group, dataset, table, ...)`. The bundled
@@ -201,6 +247,7 @@
   column, the dictionary snapshot is byte-identical to the previous
   build and the codelists snapshot reflects organic drift in a handful
   of FRE categorical columns.
+
 - [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
   and
   [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
@@ -209,6 +256,7 @@
   datasets present in more than one group will abort with
   `cvmdata_error_input_ambiguous` (a new condition class that inherits
   from `cvmdata_error_input`).
+
 - New condition class `cvmdata_error_input_ambiguous` (inherits from
   `cvmdata_error_input`, which in turn inherits from `cvmdata_error`).
   Emitted by `load_schema()`, `dataset_group()`,
