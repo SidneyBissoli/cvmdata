@@ -155,9 +155,9 @@ the group.</p>
 (<code>emissores-de-cepac</code>). v0.1 shipped the four core
 <code>companhias</code> datasets: <code>cad</code>, <code>dfp</code>,
 <code>itr</code>, <code>fre</code>. v0.1.0.9000 added <code>cgvn</code>
-(Brazilian Corporate Governance Code informe) toward v0.2;
-<code>fca</code>, <code>vlmo</code> and <code>ipe</code> land in
-subsequent v0.1.0.9000 sessions.</p>
+(Brazilian Corporate Governance Code informe) and <code>vlmo</code>
+(securities traded and held by insiders) toward v0.2; <code>fca</code>
+and <code>ipe</code> land in subsequent v0.1.0.9000 sessions.</p>
 <p>The identity key is CNPJ + denomination (plus <code>CD_CVM</code> for
 companhias-style issuers). The temporal axis is annual (with quarterly
 via ITR) and the <code>report_type</code> argument selects
@@ -251,7 +251,7 @@ it cannot disambiguate. Pass <code>group</code> explicitly to skip the
 lookup:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span>group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"</span></span>
+<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span>, group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
 <span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>

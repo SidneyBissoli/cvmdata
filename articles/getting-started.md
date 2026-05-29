@@ -77,9 +77,9 @@ group; the `groups-overview` article expands on the rationale.
 ``` r
 
 cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"
+#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
 cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"
+#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
 cvm_tables("dfp")
 #>  [1] "bpa"                "bpp"                "composicao_capital"
 #>  [4] "dfc_md"             "dfc_mi"             "dmpl"              
@@ -164,12 +164,12 @@ fund_fetch("fi-cad", "registro")
 #> ℹ See ROADMAP.md for the release plan.
 ```
 
-## Fetching data — a tour of the 5 issuer datasets
+## Fetching data — a tour of the 6 issuer datasets
 
-v0.1.0.9000 implements five datasets in the `companhias` group: `cad`,
-`dfp`, `itr`, `fre` (v0.1) and `cgvn` (added toward v0.2). The examples
-below are marked `eval = FALSE` to keep the article fast; copy any of
-them into your R session as-is.
+v0.1.0.9000 implements six datasets in the `companhias` group: `cad`,
+`dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo` (added toward v0.2). The
+examples below are marked `eval = FALSE` to keep the article fast; copy
+any of them into your R session as-is.
 
 ### `cad` — company registry
 
@@ -269,6 +269,37 @@ CGVN follows a third naming convention (`codigo_cvm` instead of `cd_cvm`
 in the submissao table). The CD_CVM resolver detects the column
 automatically, so `issuer = "1023"` works against any of the three
 conventions.
+
+### `vlmo` — securities traded and held by insiders
+
+Added in v0.1.0.9000 toward v0.2. Two tables: `submissao` (one row per
+filing) and `consolidado` (one row per security movement). The package
+table is named `consolidado` — the CVM file token is `con`, a reserved
+device name on Windows.
+
+``` r
+
+movements <- issuer_fetch(
+  "vlmo", "consolidado",
+  issuer = "BCO BRASIL",
+  year = 2024
+)
+# Columns include: cnpj_companhia, data_referencia, versao,
+# tipo_empresa, empresa, tipo_cargo, tipo_movimentacao,
+# tipo_operacao, tipo_ativo, data_movimentacao, quantidade,
+# preco_unitario, volume.
+```
+
+Two things set `vlmo/consolidado` apart. First, it is **event-per-row**:
+unlike every other detail table, it declares no `keep_latest_version`,
+so each `versao` is kept verbatim (collapsing by version would merge
+distinct movements). Second, insider identity is **opaque by design of
+the CVM** — there is no CPF in the detail, only the category
+`tipo_cargo` and, for corporate insiders, a name in `empresa`. The
+`issuer` argument filters the issuing company; to slice by insider
+category, filter `tipo_cargo` on the returned tibble with `dplyr`.
+`consolidado` carries no `codigo_cvm`, so CD_CVM filtering resolves
+through `vlmo/submissao` automatically.
 
 ## Selecting issuers
 

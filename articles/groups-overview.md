@@ -86,8 +86,9 @@ Covers **issuers** of securities: companies (`companhias`),
 securitisation vehicles (`securitizadoras`), and CEPAC issuers
 (`emissores-de-cepac`). v0.1 shipped the four core `companhias`
 datasets: `cad`, `dfp`, `itr`, `fre`. v0.1.0.9000 added `cgvn`
-(Brazilian Corporate Governance Code informe) toward v0.2; `fca`, `vlmo`
-and `ipe` land in subsequent v0.1.0.9000 sessions.
+(Brazilian Corporate Governance Code informe) and `vlmo` (securities
+traded and held by insiders) toward v0.2; `fca` and `ipe` land in
+subsequent v0.1.0.9000 sessions.
 
 The identity key is CNPJ + denomination (plus `CD_CVM` for
 companhias-style issuers). The temporal axis is annual (with quarterly
@@ -188,7 +189,7 @@ resolve by uniqueness when `group` is omitted, and abort with
 ``` r
 
 cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"
+#> [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"
 cvm_tables("dfp", group = "companhias")
 #>  [1] "bpa"                "bpp"                "composicao_capital"
 #>  [4] "dfc_md"             "dfc_mi"             "dmpl"              

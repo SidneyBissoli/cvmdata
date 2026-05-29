@@ -146,9 +146,9 @@ on the rationale.</p>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"</span></span>
+<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span>group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"</span></span>
+<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fre"  "itr"  "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
 <span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>
@@ -265,13 +265,13 @@ incremental data implementation.</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> See <span style="color: #0000BB;">ROADMAP.md</span> for the release plan.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="fetching-data-a-tour-of-the-5-issuer-datasets">Fetching data — a tour of the 5 issuer datasets<a class="anchor" aria-label="anchor" href="#fetching-data-a-tour-of-the-5-issuer-datasets"></a>
+<h2 id="fetching-data-a-tour-of-the-6-issuer-datasets">Fetching data — a tour of the 6 issuer datasets<a class="anchor" aria-label="anchor" href="#fetching-data-a-tour-of-the-6-issuer-datasets"></a>
 </h2>
-<p>v0.1.0.9000 implements five datasets in the <code>companhias</code>
+<p>v0.1.0.9000 implements six datasets in the <code>companhias</code>
 group: <code>cad</code>, <code>dfp</code>, <code>itr</code>,
-<code>fre</code> (v0.1) and <code>cgvn</code> (added toward v0.2). The
-examples below are marked <code>eval = FALSE</code> to keep the article
-fast; copy any of them into your R session as-is.</p>
+<code>fre</code> (v0.1) and <code>cgvn</code>, <code>vlmo</code> (added
+toward v0.2). The examples below are marked <code>eval = FALSE</code> to
+keep the article fast; copy any of them into your R session as-is.</p>
 <div class="section level3">
 <h3 id="cad-company-registry">
 <code>cad</code> — company registry<a class="anchor" aria-label="anchor" href="#cad-company-registry"></a>
@@ -373,6 +373,38 @@ resolver detects the column automatically, so
 <code>issuer = "1023"</code> works against any of the three
 conventions.</p>
 </div>
+<div class="section level3">
+<h3 id="vlmo-securities-traded-and-held-by-insiders">
+<code>vlmo</code> — securities traded and held by insiders<a class="anchor" aria-label="anchor" href="#vlmo-securities-traded-and-held-by-insiders"></a>
+</h3>
+<p>Added in v0.1.0.9000 toward v0.2. Two tables: <code>submissao</code>
+(one row per filing) and <code>consolidado</code> (one row per security
+movement). The package table is named <code>consolidado</code> — the CVM
+file token is <code>con</code>, a reserved device name on Windows.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">movements</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
+<span>  <span class="st">"vlmo"</span>, <span class="st">"consolidado"</span>,</span>
+<span>  issuer <span class="op">=</span> <span class="st">"BCO BRASIL"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># Columns include: cnpj_companhia, data_referencia, versao,</span></span>
+<span><span class="co"># tipo_empresa, empresa, tipo_cargo, tipo_movimentacao,</span></span>
+<span><span class="co"># tipo_operacao, tipo_ativo, data_movimentacao, quantidade,</span></span>
+<span><span class="co"># preco_unitario, volume.</span></span></code></pre></div>
+<p>Two things set <code>vlmo/consolidado</code> apart. First, it is
+<strong>event-per-row</strong>: unlike every other detail table, it
+declares no <code>keep_latest_version</code>, so each
+<code>versao</code> is kept verbatim (collapsing by version would merge
+distinct movements). Second, insider identity is <strong>opaque by
+design of the CVM</strong> — there is no CPF in the detail, only the
+category <code>tipo_cargo</code> and, for corporate insiders, a name in
+<code>empresa</code>. The <code>issuer</code> argument filters the
+issuing company; to slice by insider category, filter
+<code>tipo_cargo</code> on the returned tibble with <code>dplyr</code>.
+<code>consolidado</code> carries no <code>codigo_cvm</code>, so CD_CVM
+filtering resolves through <code>vlmo/submissao</code>
+automatically.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="selecting-issuers">Selecting issuers<a class="anchor" aria-label="anchor" href="#selecting-issuers"></a>
@@ -414,7 +446,7 @@ and expands a small abbreviation map (<code>BCO ↔︎ BANCO</code>,
 <code>CIA ↔︎ COMPANHIA</code>, <code>IND ↔︎ INDUSTRIA</code>,
 <code>PART ↔︎ PARTICIPACOES</code>). All tokens of the query must match
 (AND semantics):</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>             issuer <span class="op">=</span> <span class="st">"banco brasil"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span>  <span class="co"># matches BCO BRASIL S.A.</span></span></code></pre></div>
 <p>Multiple hits in interactive R sessions open a
@@ -423,7 +455,7 @@ they abort with <code>cvmdata_error_input</code> listing the candidates
 — so batch jobs never silently pick the wrong issuer. Zero matches also
 abort.</p>
 <p>You can mix kinds in a single call:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>             issuer <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"001023"</span>, <span class="st">"47.960.950/0001-21"</span>, <span class="st">"ITAU UNIBANCO"</span><span class="op">)</span>,</span>
 <span>             year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span></code></pre></div>
@@ -441,7 +473,7 @@ walks down up to three years and emits a
 returned.</p>
 <p>An explicit vector fetches each year and binds the result. For
 historical reach, just pass a longer vector:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"dre"</span>,</span>
 <span>                     report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>                     issuer <span class="op">=</span> <span class="st">"BCO BRASIL"</span>,</span>
@@ -458,7 +490,7 @@ vector and deduplicating downstream.</p>
 <p>Every tibble returned by an <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> family call
 is of class <code>cvm_tbl</code> and carries six provenance
 attributes:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"source"</span><span class="op">)</span>           <span class="co">#  "mirror" or "cvm"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"fetched_at"</span><span class="op">)</span>       <span class="co">#  POSIXct, set at download time</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"group"</span><span class="op">)</span>            <span class="co">#  CKAN group slug, e.g. "companhias"</span></span>
@@ -475,7 +507,7 @@ the REPL is self-describing.</p>
 <p>The cache lives under
 <code>tools::R_user_dir("cvmdata", "cache")</code> by default. Two
 functions inspect and reset it:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_cache_path.html">cvm_cache_path</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cvm_cache_info.html">cvm_cache_info</a></span><span class="op">(</span><span class="op">)</span>                <span class="co"># current size + unit breakdown</span></span>
 <span><span class="fu"><a href="../reference/cvm_cache_clear.html">cvm_cache_clear</a></span><span class="op">(</span><span class="op">)</span>               <span class="co"># interactive prompt by default</span></span></code></pre></div>
@@ -507,7 +539,7 @@ cadence and equivalence guarantees in detail.</p>
 <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a>
 </h2>
 <p>Two CNPJ helpers, deliberately small:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="../reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
@@ -591,7 +623,7 @@ fail.</td>
 </table>
 <p>Catch them with <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> or
 <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers()</a></code> keyed on the class string, e.g.:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>               issuer <span class="op">=</span> <span class="st">"001023"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span>,</span>
