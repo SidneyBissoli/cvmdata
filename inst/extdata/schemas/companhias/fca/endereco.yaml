@@ -1,0 +1,34 @@
+# Schema: fca / endereco
+# Enderecos da companhia (sede, correspondencia) declarados no
+# Formulario Cadastral. Convencao FRE-detail (cnpj_companhia /
+# data_referencia / nome_empresarial). Traz Caixa_Postal (forcado a
+# character via exact-match no reader). Empirical verification: 2024
+# snapshot (verificacao empirica v0.2 §2.1).
+
+dataset: fca
+table: endereco
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fca_cia_aberta_endereco_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/META/fca_cia_aberta.zip#meta_fca_cia_aberta_endereco.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 21
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantem apenas a maior VERSAO por (cnpj_companhia, data_referencia).

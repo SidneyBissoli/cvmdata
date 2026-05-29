@@ -140,6 +140,224 @@ companhias,dfp,parecer,tp_parecer_decl,Relatório do Auditor Independente
 companhias,dfp,parecer,tp_relat_aud,Sem Ressalva
 companhias,dfp,submissao,categ_doc,DFP
 companhias,dfp,submissao,link_doc,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=156875
+companhias,fca,auditor,origem_auditor,Nacional
+companhias,fca,canal_divulgacao,sigla_uf,BA
+companhias,fca,canal_divulgacao,sigla_uf,BR
+companhias,fca,canal_divulgacao,sigla_uf,CE
+companhias,fca,canal_divulgacao,sigla_uf,DF
+companhias,fca,canal_divulgacao,sigla_uf,ES
+companhias,fca,canal_divulgacao,sigla_uf,GO
+companhias,fca,canal_divulgacao,sigla_uf,MA
+companhias,fca,canal_divulgacao,sigla_uf,MG
+companhias,fca,canal_divulgacao,sigla_uf,MS
+companhias,fca,canal_divulgacao,sigla_uf,MT
+companhias,fca,canal_divulgacao,sigla_uf,PA
+companhias,fca,canal_divulgacao,sigla_uf,PE
+companhias,fca,canal_divulgacao,sigla_uf,PI
+companhias,fca,canal_divulgacao,sigla_uf,PR
+companhias,fca,canal_divulgacao,sigla_uf,RJ
+companhias,fca,canal_divulgacao,sigla_uf,RN
+companhias,fca,canal_divulgacao,sigla_uf,RS
+companhias,fca,canal_divulgacao,sigla_uf,SC
+companhias,fca,canal_divulgacao,sigla_uf,SE
+companhias,fca,canal_divulgacao,sigla_uf,SP
+companhias,fca,canal_divulgacao,sigla_uf,TO
+companhias,fca,dri,pais,Brasil
+companhias,fca,dri,sigla_uf,BA
+companhias,fca,dri,sigla_uf,CE
+companhias,fca,dri,sigla_uf,DF
+companhias,fca,dri,sigla_uf,ES
+companhias,fca,dri,sigla_uf,GO
+companhias,fca,dri,sigla_uf,MG
+companhias,fca,dri,sigla_uf,MT
+companhias,fca,dri,sigla_uf,PA
+companhias,fca,dri,sigla_uf,PE
+companhias,fca,dri,sigla_uf,PR
+companhias,fca,dri,sigla_uf,RJ
+companhias,fca,dri,sigla_uf,RS
+companhias,fca,dri,sigla_uf,SC
+companhias,fca,dri,sigla_uf,SE
+companhias,fca,dri,sigla_uf,SP
+companhias,fca,dri,tipo_responsavel,Administrador Especial Temporário
+companhias,fca,dri,tipo_responsavel,Administrador Judicial
+companhias,fca,dri,tipo_responsavel,Diretor de Relações com Investidores
+companhias,fca,dri,tipo_responsavel,Liquidante
+companhias,fca,dri,tipo_responsavel,Representante Legal (para emissores estrangeiros)
+companhias,fca,dri,uf,Bahia
+companhias,fca,dri,uf,Ceará
+companhias,fca,dri,uf,Distrito Federal
+companhias,fca,dri,uf,Espírito Santo
+companhias,fca,dri,uf,Goiás
+companhias,fca,dri,uf,Mato Grosso
+companhias,fca,dri,uf,Minas Gerais
+companhias,fca,dri,uf,Paraná
+companhias,fca,dri,uf,Pará
+companhias,fca,dri,uf,Pernambuco
+companhias,fca,dri,uf,Rio Grande do Sul
+companhias,fca,dri,uf,Rio de Janeiro
+companhias,fca,dri,uf,Santa Catarina
+companhias,fca,dri,uf,Sergipe
+companhias,fca,dri,uf,São Paulo
+companhias,fca,endereco,pais,Bermudas
+companhias,fca,endereco,pais,Brasil
+companhias,fca,endereco,pais,Holanda
+companhias,fca,endereco,sigla_uf,BA
+companhias,fca,endereco,sigla_uf,CE
+companhias,fca,endereco,sigla_uf,DF
+companhias,fca,endereco,sigla_uf,ES
+companhias,fca,endereco,sigla_uf,GO
+companhias,fca,endereco,sigla_uf,MA
+companhias,fca,endereco,sigla_uf,MG
+companhias,fca,endereco,sigla_uf,MS
+companhias,fca,endereco,sigla_uf,MT
+companhias,fca,endereco,sigla_uf,PA
+companhias,fca,endereco,sigla_uf,PE
+companhias,fca,endereco,sigla_uf,PI
+companhias,fca,endereco,sigla_uf,PR
+companhias,fca,endereco,sigla_uf,RJ
+companhias,fca,endereco,sigla_uf,RN
+companhias,fca,endereco,sigla_uf,RS
+companhias,fca,endereco,sigla_uf,SC
+companhias,fca,endereco,sigla_uf,SE
+companhias,fca,endereco,sigla_uf,SP
+companhias,fca,endereco,sigla_uf,TO
+companhias,fca,endereco,tipo_endereco,Endereço da Sede
+companhias,fca,endereco,tipo_endereco,Endereço no Exterior
+companhias,fca,endereco,tipo_endereco,Endereço para Correspondência
+companhias,fca,escriturador,cidade,Belo Horizonte
+companhias,fca,escriturador,cidade,Fortaleza
+companhias,fca,escriturador,cidade,Osasco
+companhias,fca,escriturador,cidade,Rio de Janeiro
+companhias,fca,escriturador,cidade,SAO PAULO
+companhias,fca,escriturador,cidade,São Paulo
+companhias,fca,escriturador,pais,Antígua e Barbuda
+companhias,fca,escriturador,pais,Brasil
+companhias,fca,escriturador,sigla_uf,CE
+companhias,fca,escriturador,sigla_uf,MG
+companhias,fca,escriturador,sigla_uf,RJ
+companhias,fca,escriturador,sigla_uf,SP
+companhias,fca,geral,categoria_registro_cvm,Categoria A
+companhias,fca,geral,categoria_registro_cvm,Categoria B
+companhias,fca,geral,especie_controle_acionario,Estatal
+companhias,fca,geral,especie_controle_acionario,Estatal Holding
+companhias,fca,geral,especie_controle_acionario,Estrangeiro
+companhias,fca,geral,especie_controle_acionario,Estrangeiro Holding
+companhias,fca,geral,especie_controle_acionario,Privado
+companhias,fca,geral,especie_controle_acionario,Privado Holding
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Bermudas
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Brasil
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Estados Unidos
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Samoa Ocidental
+companhias,fca,geral,pais_origem,Bermudas
+companhias,fca,geral,pais_origem,Brasil
+companhias,fca,geral,pais_origem,Holanda
+companhias,fca,geral,setor_atividade,"Agricultura (Açúcar, Álcool e Cana)"
+companhias,fca,geral,setor_atividade,Alimentos
+companhias,fca,geral,setor_atividade,Arrendamento Mercantil
+companhias,fca,geral,setor_atividade,Bancos
+companhias,fca,geral,setor_atividade,Bolsas de Valores/Mercadorias e Futuros
+companhias,fca,geral,setor_atividade,Brinquedos e Lazer
+companhias,fca,geral,setor_atividade,Comunicação e Informática
+companhias,fca,geral,setor_atividade,Comércio (Atacado e Varejo)
+companhias,fca,geral,setor_atividade,"Construção Civil, Mat. Constr. e Decoração"
+companhias,fca,geral,setor_atividade,Educação
+companhias,fca,geral,setor_atividade,Embalagens
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Agricultura (Açúcar, Álcool e Cana)"
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Alimentos
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Bancos
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Brinquedos e Lazer
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comunicação e Informática
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comércio (Atacado e Varejo)
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração"
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Crédito Imobiliário
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Educação
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Energia Elétrica
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Extração Mineral
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Intermediação Financeira
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Metalurgia e Siderurgia
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Máqs., Equip., Veíc. e Peças"
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Petróleo e Gás
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Saneamento, Serv. Água e Gás"
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Sem Setor Principal
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Serviços Transporte e Logística
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Telecomunicações
+companhias,fca,geral,setor_atividade,Energia Elétrica
+companhias,fca,geral,setor_atividade,Extração Mineral
+companhias,fca,geral,setor_atividade,Farmacêutico e Higiene
+companhias,fca,geral,setor_atividade,Hospedagem e Turismo
+companhias,fca,geral,setor_atividade,Intermediação Financeira
+companhias,fca,geral,setor_atividade,Metalurgia e Siderurgia
+companhias,fca,geral,setor_atividade,"Máquinas, Equipamentos, Veículos e Peças"
+companhias,fca,geral,setor_atividade,Papel e Celulose
+companhias,fca,geral,setor_atividade,Petroquímicos e Borracha
+companhias,fca,geral,setor_atividade,Petróleo e Gás
+companhias,fca,geral,setor_atividade,"Saneamento, Serv. Água e Gás"
+companhias,fca,geral,setor_atividade,Securitização de Recebíveis
+companhias,fca,geral,setor_atividade,Seguradoras e Corretoras
+companhias,fca,geral,setor_atividade,Serviços Transporte e Logística
+companhias,fca,geral,setor_atividade,Serviços médicos
+companhias,fca,geral,setor_atividade,Telecomunicações
+companhias,fca,geral,setor_atividade,Têxtil e Vestuário
+companhias,fca,geral,situacao_emissor,Em Falência
+companhias,fca,geral,situacao_emissor,Em Liquidação Extrajudicial
+companhias,fca,geral,situacao_emissor,Em Recuperação Extrajudicial
+companhias,fca,geral,situacao_emissor,Em Recuperação Judicial ou Equivalente
+companhias,fca,geral,situacao_emissor,Fase Operacional
+companhias,fca,geral,situacao_emissor,Fase Pré-Operacional
+companhias,fca,geral,situacao_emissor,Paralisada
+companhias,fca,geral,situacao_registro_cvm,Ativo
+companhias,fca,geral,situacao_registro_cvm,Cancelado
+companhias,fca,geral,situacao_registro_cvm,Suspenso
+companhias,fca,pais_estrangeiro_negociacao,pais,Brasil
+companhias,fca,pais_estrangeiro_negociacao,pais,Espanha
+companhias,fca,pais_estrangeiro_negociacao,pais,Estados Unidos
+companhias,fca,pais_estrangeiro_negociacao,pais,Holanda
+companhias,fca,pais_estrangeiro_negociacao,pais,Luxemburgo
+companhias,fca,submissao,categ_doc,FCA
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Ordinária Classe A
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe A
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe B
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe C
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe R
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe U
+companhias,fca,valor_mobiliario,composicao_bdr_unit,"0,555556"
+companhias,fca,valor_mobiliario,composicao_bdr_unit,04 Ações Ordinárias
+companhias,fca,valor_mobiliario,composicao_bdr_unit,"1 (um)  Bônus de Subscrição para cada 3 (três) novas Ações subscritas, totalizando a emissão de até  83.333.333"
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 KLBN3 + 4 KLBN4
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 1 PN
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON E 2 PN
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 2PNs
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 4 PN
+companhias,fca,valor_mobiliario,composicao_bdr_unit,2 ações preferenciais e 1 ação ordinária
+companhias,fca,valor_mobiliario,entidade_administradora,"B3 S.A. - Brasil, Bolsa, Balcão."
+companhias,fca,valor_mobiliario,mercado,Balcão Não-Organizado
+companhias,fca,valor_mobiliario,mercado,Balcão Organizado
+companhias,fca,valor_mobiliario,mercado,Bolsa
+companhias,fca,valor_mobiliario,segmento,Bovespa Mais
+companhias,fca,valor_mobiliario,segmento,Básico
+companhias,fca,valor_mobiliario,segmento,Novo Mercado
+companhias,fca,valor_mobiliario,segmento,Nível 1 de Governança Corporativa
+companhias,fca,valor_mobiliario,segmento,Nível 2 de Governança Corporativa
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,ONA
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNA
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNB
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNC
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNR
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNU
+companhias,fca,valor_mobiliario,sigla_entidade_administradora,B3
+companhias,fca,valor_mobiliario,valor_mobiliario,Ações Ordinárias
+companhias,fca,valor_mobiliario,valor_mobiliario,Ações Preferenciais
+companhias,fca,valor_mobiliario,valor_mobiliario,Bônus de Subscrição
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários
+companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures
+companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures Conversíveis
+companhias,fca,valor_mobiliario,valor_mobiliario,Letras Financeiras
+companhias,fca,valor_mobiliario,valor_mobiliario,Nota Comercial
+companhias,fca,valor_mobiliario,valor_mobiliario,Units
+companhias,fca,valor_mobiliario,valor_mobiliario,Valor Mobiliário Não Registrado
 companhias,fre,acao_entregue,orgao_administracao,Conselho Fiscal
 companhias,fre,acao_entregue,orgao_administracao,Conselho de Administração
 companhias,fre,acao_entregue,orgao_administracao,Diretoria Estatutária

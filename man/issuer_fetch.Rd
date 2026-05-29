@@ -26,10 +26,12 @@ selects the variant.}
 
 \item{issuer}{Optional character vector identifying issuers to
 include. Accepts CNPJ (with or without punctuation), CD_CVM (with
-or without zero-padding), or free-text matched against
-\code{denom_cia}. Detection is automatic per element. \code{NULL} (default)
-returns every issuer. Singular naming follows tidyverse
-conventions; the argument still accepts vectors of any length.
+or without zero-padding), a B3 trading ticker (e.g. \code{"PETR4"},
+\code{"BBDC11"}), or free-text matched against \code{denom_cia}. Detection
+is automatic per element; a ticker is resolved to its issuer CNPJ
+via \code{fca/valor_mobiliario}. \code{NULL} (default) returns every issuer.
+Singular naming follows tidyverse conventions; the argument still
+accepts vectors of any length.
 When the target table does not carry a \code{cd_cvm} column (e.g.
 \code{composicao_capital}, \code{parecer}), CD_CVM tokens are resolved to
 CNPJ via the dataset's \code{submissao} table for the same year — the

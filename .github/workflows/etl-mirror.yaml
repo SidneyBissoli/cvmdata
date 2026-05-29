@@ -46,6 +46,7 @@ on:
           - fre
           - cgvn
           - vlmo
+          - fca
       year:
         description: Year (optional, default = all published)
         required: false
@@ -65,7 +66,7 @@ jobs:
         # single chosen pair. The full matrix is encoded as a JSON
         # array of {group, dataset} objects so GitHub's matrix engine
         # iterates over both fields together.
-        include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"},{"group":"companhias","dataset":"cgvn"},{"group":"companhias","dataset":"vlmo"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
+        include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"},{"group":"companhias","dataset":"cgvn"},{"group":"companhias","dataset":"vlmo"},{"group":"companhias","dataset":"fca"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # runner.* contexts are not allowed at job-level env, only inside

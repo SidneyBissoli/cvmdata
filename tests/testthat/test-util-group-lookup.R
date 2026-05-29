@@ -43,7 +43,8 @@ test_that("known_groups() returns the deduplicated group slugs", {
 
 test_that("known_datasets() lists every covered dataset", {
   expect_setequal(
-    known_datasets(), c("cad", "cgvn", "dfp", "fre", "itr", "vlmo")
+    known_datasets(),
+    c("cad", "cgvn", "dfp", "fca", "fre", "itr", "vlmo")
   )
 })
 

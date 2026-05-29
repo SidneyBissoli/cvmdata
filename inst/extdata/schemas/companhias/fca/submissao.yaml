@@ -1,0 +1,40 @@
+# Schema: fca / submissao
+# Cabecalho do Formulario Cadastral (FCA) — uma linha por documento
+# submetido. Identifica a companhia e o documento (LINK_DOC). Convencao
+# CLASSICA (CNPJ_CIA / DT_REFER / CD_CVM), identica ao submissao de
+# ITR/DFP/FRE; reaproveita o transformer canonico e o lookup CD_CVM ->
+# CNPJ via submissao. Empirical verification: 2024 snapshot (verificacao
+# empirica v0.2 §2.1).
+
+dataset: fca
+table: submissao
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fca_cia_aberta_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+# META zip is named fca_cia_aberta.zip (NOT meta_-prefixed); the entries
+# inside it ARE meta_fca_cia_aberta[_<table>].txt. Confirmed on disk.
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/META/fca_cia_aberta.zip#meta_fca_cia_aberta.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+# CKAN serves 2021-current at the time of verification (2026-05-28);
+# older filings depend on the mirror.
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 9
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantem apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).
+      Reapresentacoes ficam acessiveis via year explicito + dedup manual.

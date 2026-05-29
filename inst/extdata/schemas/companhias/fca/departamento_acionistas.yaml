@@ -1,0 +1,44 @@
+# Schema: fca / departamento_acionistas
+# Dados de contato do departamento de acionistas declarados no
+# Formulario Cadastral. Convencao FRE-detail (cnpj_companhia /
+# data_referencia / nome_empresarial).
+#
+# IMPORTANT: this table is published with a valid 23-field header but
+# ZERO data rows from 2024 onward (it carried 546 rows in 2023, then
+# zeroed). Reflects a regulatory change — the "Departamento de
+# Acionistas" section of the FCA annex was consolidated elsewhere
+# (likely `endereco` / `dri`). The reader must tolerate a header-only
+# CSV without aborting (nrow == 0L is valid). Empirical verification:
+# 2024 snapshot + 2023/2025 cross-check (verificacao empirica v0.2
+# §2.1 e §12.1).
+
+dataset: fca
+table: departamento_acionistas
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/DADOS/fca_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fca_cia_aberta_departamento_acionistas_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FCA/META/fca_cia_aberta.zip#meta_fca_cia_aberta_departamento_acionistas.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2021
+
+# Field count (validation aid) -----------------------------------------
+# 23 fields are declared by the META and present in the CSV header even
+# in years where the table carries no data rows.
+expected_field_count: 23
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: >-
+      Mantem apenas a maior VERSAO por (cnpj_companhia, data_referencia).
+      No-op em anos onde a tabela vem vazia (so cabecalho).
