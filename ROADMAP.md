@@ -437,11 +437,16 @@ Bump `DESCRIPTION` para `0.2.0`.
 ticker B3.
 
 Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe via
-`etl-mirror.yaml`).
+`etl-mirror.yaml`; IPE ~38 MB total, dentro do limite).
 
 Tag git `v0.2.0` + GitHub Release.
 
 Reabrir ciclo de dev `0.2.0.9000`.
+
+Pendência operacional (fora do v0.2.0): `dfp/itr/fre` falham no fetch de
+anos históricos de `composicao_capital` (lado-CVM, surgiu entre 24 e
+29/05); mirrors de 24/05 seguem servindo. Investigar em sessão de ETL
+dedicada.
 
 ### v0.3 — `companhias` (parte 3) + perfis não-default
 

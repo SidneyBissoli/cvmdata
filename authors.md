@@ -8,15 +8,15 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/SidneyBissoli/cvmdata/blob/v0.2.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/SidneyBissoli/cvmdata/blob/main/inst/CITATION)
 
 Bissoli S (2026). *cvmdata: Tidy Access to Brazilian CVM Open Data*. R
-package version 0.2.0, <https://sidneybissoli.github.io/cvmdata/>.
+package version 0.2.0.9000, <https://sidneybissoli.github.io/cvmdata/>.
 
     @Manual{,
       title = {{cvmdata}: Tidy Access to Brazilian CVM Open Data},
       author = {Sidney da Silva Pereira Bissoli},
       year = {2026},
-      note = {R package version 0.2.0},
+      note = {R package version 0.2.0.9000},
       url = {https://sidneybissoli.github.io/cvmdata/},
     }

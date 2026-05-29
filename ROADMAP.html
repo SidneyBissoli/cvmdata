@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>ROADMAP — cvmdata</h1>
-      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/v0.2.0/ROADMAP.md" class="external-link"><code>ROADMAP.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/main/ROADMAP.md" class="external-link"><code>ROADMAP.md</code></a></small>
     </div>
 
 <div id="roadmap--cvmdata" class="section level1">
@@ -250,9 +250,10 @@
 <h3 id="marco--release-v020">Marco — release v0.2.0<a class="anchor" aria-label="anchor" href="#marco--release-v020"></a></h3>
 <ul class="task-list"><li><label><input type="checkbox" checked>Bump <code>DESCRIPTION</code> para <code>0.2.0</code>.</label></li>
 <li><label><input type="checkbox" checked><code>NEWS.md</code>: seção <code># cvmdata 0.2.0</code> consolidando os 4 datasets novos + ticker B3.</label></li>
-<li><label><input type="checkbox">Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe via <code>etl-mirror.yaml</code>).</label></li>
-<li><label><input type="checkbox">Tag git <code>v0.2.0</code> + GitHub Release.</label></li>
-<li><label><input type="checkbox">Reabrir ciclo de dev <code>0.2.0.9000</code>.</label></li>
+<li><label><input type="checkbox" checked>Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe via <code>etl-mirror.yaml</code>; IPE ~38 MB total, dentro do limite).</label></li>
+<li><label><input type="checkbox" checked>Tag git <code>v0.2.0</code> + GitHub Release.</label></li>
+<li><label><input type="checkbox" checked>Reabrir ciclo de dev <code>0.2.0.9000</code>.</label></li>
+<li><label><input type="checkbox">Pendência operacional (fora do v0.2.0): <code>dfp/itr/fre</code> falham no fetch de anos históricos de <code>composicao_capital</code> (lado-CVM, surgiu entre 24 e 29/05); mirrors de 24/05 seguem servindo. Investigar em sessão de ETL dedicada.</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="v03--companhias-parte-3--perfis-não-default">v0.3 — <code>companhias</code> (parte 3) + perfis não-default<a class="anchor" aria-label="anchor" href="#v03--companhias-parte-3--perfis-n%C3%A3o-default"></a></h3>
