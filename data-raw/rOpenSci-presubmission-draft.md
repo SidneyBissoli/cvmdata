@@ -1,5 +1,21 @@
 # rOpenSci pre-submission inquiry — draft
 
+> **Status (2026-05-28): rascunho desatualizado — NÃO usar/postar como
+> está.** Este texto é da época do v0.1.0 e descreve a API antiga, com
+> `cvm_fetch()` unificado como entry point. A arquitetura mudou desde
+> então: passou a 5 fetchers por contrato de dado (`issuer_fetch()`,
+> `fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`),
+> com `cvm_fetch()` e `cad_fetch()` removidos sem wrapper. Ver `NEWS.md`
+> e `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
+>
+> Por decisão de timing de 2026-05-28, a submissão ao rOpenSci foi
+> adiada para o **fim do ciclo de desenvolvimento** (após v1.0, com os
+> 5 fetchers funcionais e os 18 grupos cobertos). Este draft será
+> **reescrito do zero** nessa ocasião, refletindo a cobertura completa
+> (18 grupos, 76 datasets). A entrada no CRAN permanece acoplada ao
+> aceite rOpenSci. Sequenciamento canônico: `ROADMAP.md`, seção "Fim do
+> ciclo — submissão rOpenSci, CRAN e publicação".
+
 Draft for the issue to be opened at
 <https://github.com/ropensci/software-review/issues/new/choose>
 (template "Pre-Submission Inquiry"). Not posted yet — review,

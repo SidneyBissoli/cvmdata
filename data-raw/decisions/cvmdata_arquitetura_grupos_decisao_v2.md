@@ -16,6 +16,20 @@
   fecha em **5 fetchers** com argumentos no singular, deprecation
   abrupta, mirror rename in-place, cache migration automática,
   skeletons na v0.1.0.9000. Sem pendências residuais.
+- **v3 (adendo de timing, 2026-05-28)**: submissão rOpenSci, entrada
+  no CRAN e paper no The R Journal movidos para o **fim do ciclo de
+  desenvolvimento** (após v1.0), não mais para logo após a Sessão 08.
+  Nenhuma decisão arquitetural muda. Ver adendo abaixo.
+
+> **Adendo de timing (2026-05-28).** A submissão ao rOpenSci foi adiada
+> para o **fim do ciclo de desenvolvimento** — após v1.0, com os 5
+> fetchers funcionais e os 18 grupos cobertos — a pedido de Sidney. A
+> entrada no CRAN permanece **acoplada** ao aceite rOpenSci e ocorre
+> depois dele. O paper no The R Journal vem **somente após o aceite
+> rOpenSci**. As menções a "submissão após Sessão 08" no corpo deste
+> documento (§5.6, §6) e o cronograma da §8 foram revisados para esse
+> sequenciamento. Fonte canônica do sequenciamento: `ROADMAP.md`, seção
+> "Fim do ciclo — submissão rOpenSci, CRAN e publicação".
 
 ---
 
@@ -596,7 +610,9 @@ Estado pós-Sessão 08:
 - `cvm_fetch()` e `cad_fetch()` removidos.
 - pkgdown atualizado.
 
-Pronto para submissão rOpenSci.
+Pronto para retomar o desenvolvimento de features (v0.2+). A submissão
+rOpenSci foi adiada para o fim do ciclo (após v1.0) — ver adendo de
+timing no topo deste documento.
 
 ---
 
@@ -651,9 +667,11 @@ two source functions, two utility functions. Full reference at
 [Cobertura, CI, mirror parquet, lint, etc.]
 ```
 
-**Submissão**: após Sessão 08. Antes disso, reviewer leria com
-`cvm_fetch()` em circulação e gastaria review budget perguntando por
-que API foi planejada com escopo amplo. Esperar 5 sessões compensa.
+**Submissão**: adiada para o **fim do ciclo de desenvolvimento** (após
+v1.0), conforme a revisão de timing de 2026-05-28 (ver adendo no topo).
+O draft é reescrito do zero quando o escopo completo (18 grupos, 76
+datasets) estiver implementado e o pacote estabilizado. A entrada no
+CRAN ocorre após o aceite rOpenSci.
 
 ---
 
@@ -767,17 +785,18 @@ R/
 2026-07  Sessão 06 (rename + deprecation + singular args)
 2026-07  Sessão 07 (4 skeletons)
 2026-08  Sessão 08 (discovery + cvm_groups + ETL rename in-place)
-2026-08  Pre-submission inquiry rOpenSci
-2026-09  rOpenSci review (4-12 semanas típico)
-2026-11  Aceitação rOpenSci (otimista)
-2026-12  Submissão CRAN
-2027-Q1  v0.2.0 (companhias parte 2)
-2027-Q2  v0.3.0 (companhias parte 3 — estrangeiras + incentivadas)
-2027-Q3  v0.4.0 (fundos-de-investimento, 22 datasets — gargalo)
+2026-Q4  v0.2.0 (companhias parte 2)
+2027-Q1  v0.3.0 (companhias parte 3 — estrangeiras + incentivadas)
+2027-Q2  v0.4.0 (fundos-de-investimento, 22 datasets — gargalo)
 2027-Q4  v0.5.0 (FII)
 2028-Q1  v0.6.0 (fundos estruturados)
-2028-Q2  v0.7.0 (agent_fetch + offering_fetch + event_fetch full)
-2028-Q3  v1.0.0 (estabilização + The R Journal)
+2028-Q2  v0.7.0 (agent_fetch + offering_fetch full)
+2028-Q3  v0.8.0 (event_fetch full)
+2028-Q4  v1.0.0 (estabilização: 5 fetchers funcionais, lifecycle stable)
+após v1.0    Pre-submission inquiry + submissão formal rOpenSci
+após review  Aceitação rOpenSci
+após aceite  Submissão CRAN (acoplada ao aceite rOpenSci)
+após aceite  Paper no The R Journal
 ```
 
 Caminho crítico: v0.4.0 (22 datasets de fundos). Pode quebrar em
@@ -899,8 +918,11 @@ Tudo abaixo está fechado pós-rodada 3:
   (cache → schemas/snapshots → rename → skeletons → discovery+ETL).
   Estimativa 22-30 h total.
 
-- **Quando**: 2026-06 a 2026-08. Submissão rOpenSci em 2026-08.
-  CRAN previsto Q4 2026.
+- **Quando**: Sessões 04-08 em 2026-06 a 2026-08; depois,
+  desenvolvimento de features (v0.2-v0.8) e estabilização (v1.0).
+  Submissão rOpenSci **somente após v1.0**; CRAN após o aceite
+  rOpenSci; paper no The R Journal após o aceite (revisão de timing
+  2026-05-28 — ver adendo no topo).
 
 - **Pendências**: **nenhuma.** Documento serve como input direto
   para a próxima sessão Claude Code (Sessão 04, cache migration).
