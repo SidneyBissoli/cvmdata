@@ -2,6 +2,26 @@
 
 ## cvmdata 0.2.0.9000 (in development)
 
+### Bug fixes
+
+- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  on the current, not-yet-filed year of an annual financial table
+  (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026) no longer aborts
+  with “non-numeric argument to binary operator”. The CVM publishes a
+  header-only CSV for such years; the `multiply_by_scale` transform now
+  no-ops on a 0-row table and returns a clean empty tibble.
+
+- ETL parquet mirror: the pipeline tolerates `(table, year)` pairs that
+  legitimately produce no parquet, so a single absent year no longer
+  fails the whole dataset publish. Stage 02 records each skipped tuple
+  with a reason — `empty` (0 rows upstream) or `absent` (the detail
+  table’s CSV is not in that year’s ZIP because CVM only began
+  publishing it later, e.g. `dfp`/`itr` `composicao_capital` before
+  2020, or several `fre` tables in early years) — and stage 02b treats a
+  missing parquet for such a tuple as a soft pass instead of a hard
+  failure. A parquet that is missing without a recorded reason still
+  hard-fails. Fixes the red `dfp`/`itr`/`fre` mirror jobs.
+
 ## cvmdata 0.2.0 (2026-05-29)
 
 ### ⚠️ Breaking changes
