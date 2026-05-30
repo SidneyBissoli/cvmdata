@@ -40,6 +40,30 @@ test_that("tx_multiply_by_scale aborts when columns absent from tibble", {
   )
 })
 
+test_that("tx_multiply_by_scale no-ops on a 0-row tibble", {
+  # CVM publishes header-only CSVs for the current, not-yet-filed year
+  # of annual financial tables. readr then guesses a non-numeric type
+  # for vl_conta, and `vl_conta * factors` used to abort with
+  # "non-numeric argument to binary operator". An empty table has
+  # nothing to scale: the transform must return it unchanged.
+  schema <- list(dataset = "dfp", table = "dfc_md")
+  tx <- list(
+    action = "multiply_by_scale",
+    column = "vl_conta",
+    scale_column = "escala_moeda"
+  )
+  # vl_conta typed as character (the worst case readr produces) to prove
+  # the guard fires before the arithmetic, not because of luck with types.
+  empty <- data.frame(
+    vl_conta = character(0L),
+    escala_moeda = character(0L),
+    stringsAsFactors = FALSE
+  )
+  out <- cvmdata:::tx_multiply_by_scale(empty, tx, schema)
+  expect_identical(nrow(out), 0L)
+  expect_true(all(c("vl_conta", "escala_moeda") %in% names(out)))
+})
+
 test_that("tx_drop aborts when column key is missing", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(a = 1:3, b = 4:6)

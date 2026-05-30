@@ -106,27 +106,33 @@ validate_tuple_key <- function(table, year, report_type) {
   )
 }
 
-# Set of tuple keys that stage 02 reported as empty upstream (0 rows) in
-# `<workspace>/out/empty/<dataset>.json`. A missing parquet for such a
-# tuple is legitimate (e.g. fca/departamento_acionistas from 2024 on),
-# not a hard failure. Returns character(0) when the manifest is absent
-# (older runs, or stage 02 not run) — in which case a missing parquet
-# stays a hard failure, preserving the pre-existing contract.
-validate_empty_set <- function(dataset, workspace) {
+# Map of tuple key -> skip reason from the stage-02 manifest at
+# `<workspace>/out/skip/<dataset>.json`. A tuple is recorded there when
+# stage 02 produced no parquet for a benign reason: "empty" (0 rows
+# upstream, e.g. fca/departamento_acionistas from 2024 on, or the
+# current not-yet-filed year of an annual table) or "absent" (the CSV is
+# not in the yearly ZIP because the detail table did not exist that year,
+# e.g. dfp/itr composicao_capital before 2020). A missing parquet for
+# such a tuple is legitimate, not a hard failure. Returns an empty named
+# character vector when the manifest is absent (older runs, or stage 02
+# not run) — in which case a missing parquet stays a hard failure,
+# preserving the pre-existing contract.
+validate_skip_set <- function(dataset, workspace) {
   path <- file.path(
-    workspace, "out", "empty", sprintf("%s.json", dataset)
+    workspace, "out", "skip", sprintf("%s.json", dataset)
   )
+  empty <- stats::setNames(character(0L), character(0L))
   if (!file.exists(path)) {
-    return(character(0L))
+    return(empty)
   }
   manifest <- tryCatch(
     jsonlite::read_json(path, simplifyVector = TRUE),
     error = function(e) NULL
   )
   if (is.null(manifest) || !length(manifest) || !NROW(manifest)) {
-    return(character(0L))
+    return(empty)
   }
-  vapply(
+  keys <- vapply(
     seq_len(nrow(manifest)),
     function(i) {
       validate_tuple_key(
@@ -135,6 +141,7 @@ validate_empty_set <- function(dataset, workspace) {
     },
     character(1L)
   )
+  stats::setNames(as.character(manifest$reason), keys)
 }
 
 # Returns the list of (table, year, report_type) tuples the previous
@@ -266,18 +273,24 @@ validate_run_pointblank <- function(tbl, hints, table) {
 # first and short-circuit: if any of them fails, the column-level
 # checks are skipped to keep the report cause-and-effect.
 validate_one_parquet <- function(parquet_path, dataset, table, hints,
-                                  upstream_empty = FALSE) {
+                                  skip_reason = NULL) {
   if (!file.exists(parquet_path)) {
-    if (isTRUE(upstream_empty)) {
-      # Legitimately empty upstream: no parquet is expected. Record a
-      # soft, passing row so the tuple shows in the report without
-      # tripping the hard-fail gate.
+    if (!is.null(skip_reason)) {
+      # Legitimately produced no parquet (see validate_skip_set): record
+      # a soft, passing row so the tuple shows in the report with its
+      # reason without tripping the hard-fail gate.
+      note <- switch(
+        skip_reason,
+        empty = "0 rows upstream; no parquet expected",
+        absent = "CSV not in the yearly ZIP (table absent that year)",
+        sprintf("skipped upstream (%s)", skip_reason)
+      )
       return(tibble::tibble(
-        check = "upstream_empty",
+        check = sprintf("upstream_%s", skip_reason),
         severity = "soft",
         status = "pass",
         n = 0L, n_failed = 0L,
-        note = "0 rows upstream; no parquet expected"
+        note = note
       ))
     }
     return(tibble::tibble(
@@ -333,7 +346,7 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints,
 validate_dataset <- function(group, dataset, workspace,
                              years_arg = NULL) {
   expected <- validate_expected_tuples(dataset, years_arg)
-  empty_set <- validate_empty_set(dataset, workspace)
+  skip_set <- validate_skip_set(dataset, workspace)
   if (!length(expected)) {
     return(tibble::tibble(
       table = character(0L),
@@ -357,11 +370,10 @@ validate_dataset <- function(group, dataset, workspace,
       if (!is.na(e$year)) sprintf("/%d", e$year) else ""
     )
     hints <- validate_schema_hints(dataset, e$table)
-    upstream_empty <- validate_tuple_key(
-      e$table, e$year, e$report_type
-    ) %in% empty_set
+    key <- validate_tuple_key(e$table, e$year, e$report_type)
+    skip_reason <- if (key %in% names(skip_set)) skip_set[[key]] else NULL
     details <- validate_one_parquet(
-      path, dataset, e$table, hints, upstream_empty
+      path, dataset, e$table, hints, skip_reason
     )
     hard_failed <- sum(details$status == "fail" &
                          details$severity == "hard")
