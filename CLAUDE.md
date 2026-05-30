@@ -325,6 +325,9 @@ cvmdata_error                          (pai genérico de erros)
 │                                       — aponta para ROADMAP)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
 ├── cvmdata_error_parse                (falha de parse ou validação)
+│   └── cvmdata_error_zip_member_missing (CSV da tabela-detalhe ausente
+│                                       no ZIP anual — tabela não existia
+│                                       naquele ano; ETL trata como skip)
 ├── cvmdata_error_meta_unavailable     (META oficial não publicado — strict)
 └── cvmdata_error_internal             (qualquer outro)
 

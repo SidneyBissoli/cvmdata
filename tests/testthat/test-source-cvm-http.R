@@ -179,6 +179,35 @@ test_that("download_with_etag aborts (cvmdata_error_http) on GET failure", {
   )
 })
 
+# Absent CSV inside the ZIP raises the dedicated subclass -----------------
+
+test_that("yearly fetch raises cvmdata_error_zip_member_missing for absent CSV", {
+  # The dfp fixture ZIP carries bpa/composicao_capital/parecer/... but
+  # not bpp. Requesting bpp/ind must abort with the dedicated subclass
+  # (still a cvmdata_error_parse) so the ETL can classify it as a benign
+  # "table absent that year" skip by class rather than message text.
+  local_dfp_cache_with_sidecar(
+    sidecar_meta = list(
+      etag = "\"E\"", last_modified = NULL,
+      fetched_at = "2020-01-01T00:00:00.000Z"
+    )
+  )
+  mock <- function(req) {
+    httr2::response(status_code = 200L, headers = list("ETag" = "\"E\""))
+  }
+  err <- tryCatch(
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch("dfp", "bpp",
+                   report_type = "ind", year = 2024, source = "cvm")
+    ),
+    error = function(e) e
+  )
+  expect_s3_class(err, "cvmdata_error_zip_member_missing")
+  # Backward compatible: still a parse error for existing handlers.
+  expect_s3_class(err, "cvmdata_error_parse")
+})
+
 # Cold-start (no cache, no sidecar) goes straight to GET ------------------
 
 test_that("download_with_etag fetches via GET when cache is empty", {
