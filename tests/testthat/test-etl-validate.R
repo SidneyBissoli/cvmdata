@@ -128,51 +128,52 @@ test_that("validate_tuple_key collapses NA/NULL year and report_type", {
   )
 })
 
-test_that("validate_empty_set returns character(0) without a manifest", {
+test_that("validate_skip_set returns empty without a manifest", {
   load_etl_validator()
-  expect_identical(
-    validate_empty_set("fca", withr::local_tempdir()),
-    character(0L)
-  )
+  expect_length(validate_skip_set("fca", withr::local_tempdir()), 0L)
 })
 
-test_that("validate_empty_set parses the stage-02 manifest", {
+test_that("validate_skip_set parses the stage-02 manifest with reasons", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  empty_dir <- file.path(workspace, "out", "empty")
-  dir.create(empty_dir, recursive = TRUE)
+  skip_dir <- file.path(workspace, "out", "skip")
+  dir.create(skip_dir, recursive = TRUE)
   jsonlite::write_json(
     data.frame(
-      table = "departamento_acionistas",
-      year = 2024L,
-      report_type = NA_character_,
+      table = c("departamento_acionistas", "composicao_capital"),
+      year = c(2024L, 2015L),
+      report_type = c(NA_character_, NA_character_),
+      reason = c("empty", "absent"),
       stringsAsFactors = FALSE
     ),
-    file.path(empty_dir, "fca.json"),
+    file.path(skip_dir, "fca.json"),
     auto_unbox = TRUE, na = "null"
   )
-  keys <- validate_empty_set("fca", workspace)
-  expect_true(
-    validate_tuple_key("departamento_acionistas", 2024L, NULL) %in% keys
-  )
+  skip <- validate_skip_set("fca", workspace)
+  k_empty <- validate_tuple_key("departamento_acionistas", 2024L, NULL)
+  k_absent <- validate_tuple_key("composicao_capital", 2015L, NULL)
+  expect_identical(skip[[k_empty]], "empty")
+  expect_identical(skip[[k_absent]], "absent")
 })
 
-test_that("validate_one_parquet passes a missing parquet when empty upstream", {
+test_that("missing parquet is a soft pass when skipped (empty / absent)", {
   load_etl_validator()
   hints <- validate_schema_hints("fca", "departamento_acionistas")
-  result <- validate_one_parquet(
-    "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
-    hints, upstream_empty = TRUE
-  )
-  expect_equal(nrow(result), 1L)
-  expect_identical(result$check, "upstream_empty")
-  expect_identical(result$severity, "soft")
-  expect_identical(result$status, "pass")
+  for (reason in c("empty", "absent")) {
+    result <- validate_one_parquet(
+      "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
+      hints, skip_reason = reason
+    )
+    expect_equal(nrow(result), 1L)
+    expect_identical(result$check, sprintf("upstream_%s", reason))
+    expect_identical(result$severity, "soft")
+    expect_identical(result$status, "pass")
+  }
 })
 
-test_that("missing parquet stays a hard fail when not empty upstream", {
-  # Same missing path, upstream_empty = FALSE (the default) — the
-  # pre-existing contract must be preserved.
+test_that("missing parquet stays a hard fail when not skipped", {
+  # Same missing path, skip_reason = NULL (the default) — the
+  # pre-existing contract for genuinely absent files must be preserved.
   load_etl_validator()
   hints <- validate_schema_hints("fca", "departamento_acionistas")
   result <- validate_one_parquet(

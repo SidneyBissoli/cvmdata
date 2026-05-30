@@ -72,11 +72,22 @@ years_to_process <- if (identical(partitioning, "yearly")) {
 out_root <- file.path(workspace, "out")
 dir.create(out_root, recursive = TRUE, showWarnings = FALSE)
 
-# Returns "ok" (parquet written), "empty" (0 rows upstream — a legitimate
-# state for tables the CVM publishes header-only in some years, e.g.
-# fca/departamento_acionistas from 2024 on) or "fail" (fetch aborted).
-# The caller records "empty" tuples in a manifest so stage 02b can tell
-# a legitimately-absent parquet from a genuinely missing one.
+# Classify the outcome of fetching + writing one (table, year, rtype):
+#   "ok"     — parquet written.
+#   "empty"  — 0 rows upstream: a legitimate state for tables the CVM
+#              publishes header-only in some years (e.g.
+#              fca/departamento_acionistas from 2024 on, or the current
+#              not-yet-filed year of an annual financial table).
+#   "absent" — the table's CSV is not inside the dataset's yearly ZIP:
+#              the CVM only started publishing that detail table in a
+#              later year (e.g. dfp/itr composicao_capital before 2020;
+#              several fre tables in early years). The ETL iterates every
+#              dataset-year for every table, so years before a table
+#              existed land here.
+#   "fail"   — any other fetch/convert error (a genuine problem).
+# "empty" and "absent" are recorded in the skip manifest so stage 02b
+# treats the absent parquet as a soft pass rather than a hard failure;
+# "fail" is not recorded, so a genuinely missing parquet still hard-fails.
 write_one <- function(tbl, y, rtype) {
   years_arg <- if (is.na(y)) NULL else y
   rt_arg <- if (is.null(rtype)) NULL else rtype
@@ -87,12 +98,15 @@ write_one <- function(tbl, y, rtype) {
       report_type = rt_arg,
       source = "cvm"
     ),
-    error = function(e) {
-      message("  ABORT ", conditionMessage(e))
-      NULL
-    }
+    error = function(e) e
   )
-  if (is.null(res)) return("fail")
+  if (inherits(res, "condition")) {
+    message("  ABORT ", conditionMessage(res))
+    if (grepl("not found inside ZIP", conditionMessage(res), fixed = TRUE)) {
+      return("absent")
+    }
+    return("fail")
+  }
   if (nrow(res) == 0L) return("empty")
 
   parts <- c("parquet", group, dataset, tbl)
@@ -123,12 +137,14 @@ log_and_write <- function(tbl, y, rt) {
   write_one(tbl, y, rt)
 }
 
-# One row of the empty manifest for a (table, year, report_type) tuple.
-empty_tuple_row <- function(tbl, y, rt) {
+# One row of the skip manifest for a (table, year, report_type) tuple
+# that produced no parquet, tagged with why ("empty" or "absent").
+skip_tuple_row <- function(tbl, y, rt, reason) {
   data.frame(
     table = tbl,
     year = if (is.na(y)) NA_integer_ else as.integer(y),
     report_type = if (is.null(rt)) NA_character_ else rt,
+    reason = reason,
     stringsAsFactors = FALSE
   )
 }
@@ -139,52 +155,57 @@ message(sprintf(
   paste(years_to_process, collapse = ", ")
 ))
 
-n_ok <- 0L
-n_empty <- 0L
-n_fail <- 0L
-empty_tuples <- list()
+# Process every tuple, collecting its outcome; tally and build the skip
+# manifest afterwards so the loop itself stays simple (lint budget).
+outcomes <- list()
 for (tbl in tables) {
   for (y in years_to_process) {
     for (rt in mirror_variants_for(tbl)) {
-      st <- log_and_write(tbl, y, rt)
-      if (identical(st, "ok")) {
-        n_ok <- n_ok + 1L
-      } else if (identical(st, "empty")) {
-        n_empty <- n_empty + 1L
-        empty_tuples[[length(empty_tuples) + 1L]] <-
-          empty_tuple_row(tbl, y, rt)
-      } else {
-        n_fail <- n_fail + 1L
-      }
+      outcomes[[length(outcomes) + 1L]] <- list(
+        tbl = tbl, y = y, rt = rt, st = log_and_write(tbl, y, rt)
+      )
     }
   }
 }
 
-# Empty manifest: the (table, year, report_type) tuples that were empty
-# upstream. Stage 02b reads it to treat a legitimately-absent parquet as
-# a pass instead of a hard "missing file" failure. Written outside the
+st_vec <- vapply(outcomes, function(o) o$st, character(1L))
+n_ok <- sum(st_vec == "ok")
+n_empty <- sum(st_vec == "empty")
+n_absent <- sum(st_vec == "absent")
+n_fail <- sum(st_vec == "fail")
+skip_tuples <- lapply(
+  outcomes[st_vec %in% c("empty", "absent")],
+  function(o) skip_tuple_row(o$tbl, o$y, o$rt, o$st)
+)
+
+# Skip manifest: the (table, year, report_type) tuples that produced no
+# parquet for a benign reason ("empty" = 0 rows upstream; "absent" = the
+# CSV is not in the yearly ZIP because the table did not exist that year
+# yet). Stage 02b reads it to treat the missing parquet as a soft pass
+# rather than a hard "missing file" failure. Written outside the
 # `parquet/` tree so 03-publish does not upload it as a release asset.
-empty_dir <- file.path(out_root, "empty")
-dir.create(empty_dir, recursive = TRUE, showWarnings = FALSE)
-empty_manifest <- if (length(empty_tuples)) {
-  do.call(rbind, empty_tuples)
+skip_dir <- file.path(out_root, "skip")
+dir.create(skip_dir, recursive = TRUE, showWarnings = FALSE)
+skip_manifest <- if (length(skip_tuples)) {
+  do.call(rbind, skip_tuples)
 } else {
   data.frame(
     table = character(0L),
     year = integer(0L),
     report_type = character(0L),
+    reason = character(0L),
     stringsAsFactors = FALSE
   )
 }
 jsonlite::write_json(
-  empty_manifest,
-  file.path(empty_dir, sprintf("%s.json", dataset)),
+  skip_manifest,
+  file.path(skip_dir, sprintf("%s.json", dataset)),
   auto_unbox = TRUE, pretty = TRUE, na = "null"
 )
 
 message(sprintf(
-  "[02-parquet] done. %d ok / %d empty / %d failed",
-  n_ok, n_empty, n_fail
+  "[02-parquet] done. %d ok / %d empty / %d absent / %d failed",
+  n_ok, n_empty, n_absent, n_fail
 ))
 if (n_fail > 0L && n_ok == 0L) {
   quit(status = 1L)

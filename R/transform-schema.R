@@ -84,6 +84,15 @@ tx_multiply_by_scale <- function(df, tx, schema) {
       class = "cvmdata_error_parse"
     )
   }
+  # Nothing to scale in an empty table. CVM publishes header-only CSVs
+  # for the current, not-yet-filed year of annual financial tables
+  # (e.g. dfp/dfc_md in the year before the filing window). With zero
+  # rows, readr guesses a non-numeric type for `col`, and `col * factors`
+  # would abort with "non-numeric argument to binary operator". Return
+  # the empty tibble unchanged so callers get a clean 0-row result.
+  if (nrow(df) == 0L) {
+    return(df)
+  }
   factors <- scale_factor(df[[scale_col]])
   df[[col]] <- df[[col]] * factors
   df
