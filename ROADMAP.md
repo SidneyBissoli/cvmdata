@@ -443,10 +443,15 @@ Tag git `v0.2.0` + GitHub Release.
 
 Reabrir ciclo de dev `0.2.0.9000`.
 
-Pendência operacional (fora do v0.2.0): `dfp/itr/fre` falham no fetch de
-anos históricos de `composicao_capital` (lado-CVM, surgiu entre 24 e
-29/05); mirrors de 24/05 seguem servindo. Investigar em sessão de ETL
-dedicada.
+Robustez do ETL para anos de início escalonados das tabelas:
+`dfp/itr/fre` falhavam no 02b porque tabelas-detalhe não existem nos
+ZIPs antigos (`composicao_capital` \< 2020; várias do `fre`) e o ano
+corrente header-only quebrava o `multiply_by_scale`. **Não era
+lado-CVM** — os dados eram idênticos ao último run verde; o gatilho foi
+a adição do Stage 02b. Resolvido: transform no-op em 0 linhas +
+classificação `absent`/`empty` por classe de condição
+(`cvmdata_error_zip_member_missing`) no manifesto skip. Os 8 datasets
+publicam verdes (commits pós-`a9d1923`).
 
 ### v0.3 — `companhias` (parte 3) + perfis não-default
 

@@ -253,7 +253,7 @@
 <li><label><input type="checkbox" checked>Auditoria final do mirror (primeiro publish de cgvn/vlmo/fca/ipe via <code>etl-mirror.yaml</code>; IPE ~38 MB total, dentro do limite).</label></li>
 <li><label><input type="checkbox" checked>Tag git <code>v0.2.0</code> + GitHub Release.</label></li>
 <li><label><input type="checkbox" checked>Reabrir ciclo de dev <code>0.2.0.9000</code>.</label></li>
-<li><label><input type="checkbox">Pendência operacional (fora do v0.2.0): <code>dfp/itr/fre</code> falham no fetch de anos históricos de <code>composicao_capital</code> (lado-CVM, surgiu entre 24 e 29/05); mirrors de 24/05 seguem servindo. Investigar em sessão de ETL dedicada.</label></li>
+<li><label><input type="checkbox" checked>Robustez do ETL para anos de início escalonados das tabelas: <code>dfp/itr/fre</code> falhavam no 02b porque tabelas-detalhe não existem nos ZIPs antigos (<code>composicao_capital</code> &lt; 2020; várias do <code>fre</code>) e o ano corrente header-only quebrava o <code>multiply_by_scale</code>. <strong>Não era lado-CVM</strong> — os dados eram idênticos ao último run verde; o gatilho foi a adição do Stage 02b. Resolvido: transform no-op em 0 linhas + classificação <code>absent</code>/<code>empty</code> por classe de condição (<code>cvmdata_error_zip_member_missing</code>) no manifesto skip. Os 8 datasets publicam verdes (commits pós-<code>a9d1923</code>).</label></li>
 </ul></div>
 <div class="section level3">
 <h3 id="v03--companhias-parte-3--perfis-não-default">v0.3 — <code>companhias</code> (parte 3) + perfis não-default<a class="anchor" aria-label="anchor" href="#v03--companhias-parte-3--perfis-n%C3%A3o-default"></a></h3>
