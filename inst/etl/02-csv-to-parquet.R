@@ -102,7 +102,11 @@ write_one <- function(tbl, y, rtype) {
   )
   if (inherits(res, "condition")) {
     message("  ABORT ", conditionMessage(res))
-    if (grepl("not found inside ZIP", conditionMessage(res), fixed = TRUE)) {
+    # Detect "CSV not in the yearly ZIP" by condition class, not by the
+    # rendered message: cli wraps long messages, so a substring match on
+    # conditionMessage() is unreliable (it splits "not found inside ZIP"
+    # across a newline for long table names).
+    if (inherits(res, "cvmdata_error_zip_member_missing")) {
       return("absent")
     }
     return("fail")

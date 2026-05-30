@@ -104,7 +104,14 @@ get_yearly_csv <- function(schema, year, report_type) {
   csv_path <- file.path(cache_dir, csv_name)
   if (!file.exists(csv_path) ||
         file.mtime(csv_path) < file.mtime(zip_path)) {
-    unzip(zip_path, files = csv_name, exdir = cache_dir, overwrite = TRUE)
+    # base `unzip()` warns "requested file not found in the zip file"
+    # when `csv_name` is absent; that is redundant with the clearer
+    # cvmdata_error_zip_member_missing raised just below, so suppress
+    # the noisy base warning and let the file.exists check drive the
+    # error path.
+    suppressWarnings(
+      unzip(zip_path, files = csv_name, exdir = cache_dir, overwrite = TRUE)
+    )
   }
   if (!file.exists(csv_path)) {
     cvmdata_abort(
@@ -119,7 +126,11 @@ get_yearly_csv <- function(schema, year, report_type) {
           "layout changed."
         )
       ),
-      class = "cvmdata_error_parse"
+      # Dedicated subclass (still a `cvmdata_error_parse`) so consumers
+      # can detect "this detail table's CSV is not in the yearly ZIP"
+      # structurally, without matching the rendered message — the ETL
+      # mirror treats it as a benign "table absent that year" skip.
+      class = c("cvmdata_error_zip_member_missing", "cvmdata_error_parse")
     )
   }
   csv_path
