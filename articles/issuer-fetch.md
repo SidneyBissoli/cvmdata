@@ -52,7 +52,7 @@ bb_bpa <- issuer_fetch(
   year = 2024
 )
 bb_bpa
-#> ℹ source: "cvm" | fetched_at: 2026-05-30 13:46:09.431758
+#> ℹ source: "cvm" | fetched_at: 2026-06-02 02:09:00.393459
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 13
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -166,7 +166,7 @@ cap <- issuer_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-05-30 13:46:12.255224
+#> ℹ source: "cvm" | fetched_at: 2026-06-02 02:09:03.227428
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 1 × 10
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
@@ -283,14 +283,14 @@ info
 #> # A tibble: 6 × 8
 #>   group   dataset file  path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>   <chr> <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 compan… dfp     dfp_… /hom…   13447722 2026-05-30 13:46:16 "\"6… Sun, 24 May …
-#> 2 compan… dfp     dfp_… /hom…   13562016 2026-05-30 13:46:17 "\"6… Sun, 24 May …
-#> 3 compan… dfp     dfp_… /hom…   13395083 2026-05-30 13:46:19 "\"6… Sun, 24 May …
-#> 4 compan… dfp     dfp_… /hom…   19075356 2026-05-30 13:46:16  NA   NA           
-#> 5 compan… dfp     dfp_… /hom…   19571240 2026-05-30 13:46:17  NA   NA           
-#> 6 compan… dfp     dfp_… /hom…   18582919 2026-05-30 13:46:19  NA   NA
+#> 1 compan… dfp     dfp_… /hom…   13447206 2026-06-02 02:09:07 "\"6… Sun, 31 May …
+#> 2 compan… dfp     dfp_… /hom…   13561111 2026-06-02 02:09:08 "\"6… Sun, 31 May …
+#> 3 compan… dfp     dfp_… /hom…   13394178 2026-06-02 02:09:10 "\"6… Sun, 31 May …
+#> 4 compan… dfp     dfp_… /hom…   19070848 2026-06-02 02:09:07  NA   NA           
+#> 5 compan… dfp     dfp_… /hom…   19565680 2026-06-02 02:09:08  NA   NA           
+#> 6 compan… dfp     dfp_… /hom…   18578403 2026-06-02 02:09:10  NA   NA
 attr(info, "total_size_bytes")
-#> [1] 97634892
+#> [1] 97617977
 ```
 
 `source` selects the backend: from v0.1.0 the default is `"mirror"`,

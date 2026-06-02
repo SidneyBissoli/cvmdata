@@ -5,6 +5,19 @@
 ### Bug fixes
 
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  with a free-text `issuer` and `year = NULL` no longer aborts with “No
+  issuers match …” when the company is simply absent from the latest
+  probed year (e.g. a header-only current year, or an issuer that has
+  not yet filed). Text matching now participates in the descending year
+  fallback like CNPJ and CD_CVM matching do, walking down to an earlier
+  year that holds the filer; a genuine typo still aborts with the
+  spelling hint on the last candidate year. The same applies to an
+  explicit multi-year request (e.g. `year = 2012:2024`): a text issuer
+  absent from some of the requested years now contributes no rows for
+  those years instead of aborting the whole span, and the spelling error
+  is raised once only if no requested year matched.
+
+- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   on the current, not-yet-filed year of an annual financial table
   (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026) no longer aborts
   with “non-numeric argument to binary operator”. The CVM publishes a
