@@ -62,8 +62,9 @@ função (palavra técnica internacionalizada); a coluna paralela em
 
 Padrão `object_verb` (Dev Guide rOpenSci). API pública organizada em
 **5 fetchers por contrato de dado**, um por tipo de entidade regulada
-pela CVM. `issuer_fetch()` é funcional e cobre v0.1–v0.3 (grupo
-`companhias`); os outros 4 são skeletons exportados que abortam com
+pela CVM. `issuer_fetch()` é funcional e cobre v0.1–v0.2 (grupo
+`companhias`); v0.3 em diante estende a cobertura. Os outros 4 são
+skeletons exportados que abortam com
 `cvmdata_error_input_group`, com implementação plena em v0.4–v0.8.
 Skeletons foram exportados antes da implementação para **travar a
 superfície da API pública cedo**, de modo que as releases v0.4+
