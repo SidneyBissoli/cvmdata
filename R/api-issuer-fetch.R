@@ -316,16 +316,24 @@ fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
 fetch_explicit_years <- function(schema, year, issuer, report_type,
                                  validate, on_error) {
   year <- as.integer(year)
+  # A free-text issuer absent from one requested year must not abort the
+  # whole span — it may be present in another. Filter each year
+  # non-strict; if nothing matched across the entire span the "verify the
+  # spelling" error surfaces once at the end (mirrors the year = NULL
+  # fallback). CNPJ / CD_CVM misses stay silent-empty, as before.
   if (identical(on_error, "abort")) {
     parts <- lapply(year, function(yr) {
-      fetch_one_year(schema, yr, issuer, report_type, validate)
+      fetch_one_year(schema, yr, issuer, report_type, validate,
+                     strict_text = FALSE)
     })
-    return(do.call(rbind, parts))
+    out <- do.call(rbind, parts)
+    abort_if_text_issuer_unmatched(out, issuer)
+    return(out)
   }
   attempts <- lapply(year, function(yr) {
     tryCatch(
       list(year = yr, ok = TRUE, value = fetch_one_year(
-        schema, yr, issuer, report_type, validate
+        schema, yr, issuer, report_type, validate, strict_text = FALSE
       )),
       cvmdata_error_http = function(e) {
         list(year = yr, ok = FALSE, error = e)
@@ -366,7 +374,45 @@ fetch_explicit_years <- function(schema, year, issuer, report_type,
       class = "cvmdata_warn_partial_failure"
     )
   }
-  do.call(rbind, successes)
+  out <- do.call(rbind, successes)
+  abort_if_text_issuer_unmatched(out, issuer)
+  out
+}
+
+# Return the free-text tokens of `issuer` (excludes CNPJ, CD_CVM and B3
+# ticker tokens, which fail loudly on their own resolution paths).
+text_issuer_terms <- function(issuer) {
+  if (is.null(issuer)) {
+    return(character(0L))
+  }
+  issuer_chr <- as.character(issuer)
+  cls <- classify_issuer_tokens(issuer_chr)
+  issuer_chr[cls$is_text]
+}
+
+# Across-the-span counterpart to match_by_text()'s per-year abort: when a
+# free-text issuer matched nothing in any requested year the assembled
+# tibble is empty, so raise the same "verify the spelling" error once
+# (naming doc 2.7). A CNPJ / CD_CVM miss is not text and stays
+# silent-empty, matching match_by_cnpj() / match_by_cd_cvm().
+abort_if_text_issuer_unmatched <- function(out, issuer) {
+  if (nrow(out) > 0L) {
+    return(invisible(NULL))
+  }
+  text_terms <- text_issuer_terms(issuer)
+  if (!length(text_terms)) {
+    return(invisible(NULL))
+  }
+  cvmdata_abort(
+    c(
+      "No issuers match {.val {text_terms}}.",
+      "i" = paste(
+        "Verify the spelling, or pass {.arg issuer} as CD_CVM",
+        "or CNPJ."
+      )
+    ),
+    class = "cvmdata_error_input"
+  )
 }
 
 # Classify each token in `issuer` as CNPJ (14 digits), CD_CVM

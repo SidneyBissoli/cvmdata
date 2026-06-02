@@ -8,7 +8,11 @@
   issuer that has not yet filed). Text matching now participates in the
   descending year fallback like CNPJ and CD_CVM matching do, walking
   down to an earlier year that holds the filer; a genuine typo still
-  aborts with the spelling hint on the last candidate year.
+  aborts with the spelling hint on the last candidate year. The same
+  applies to an explicit multi-year request (e.g. `year = 2012:2024`): a
+  text issuer absent from some of the requested years now contributes no
+  rows for those years instead of aborting the whole span, and the
+  spelling error is raised once only if no requested year matched.
 
 * `issuer_fetch()` on the current, not-yet-filed year of an annual
   financial table (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026)

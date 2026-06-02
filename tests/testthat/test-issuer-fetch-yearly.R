@@ -389,6 +389,66 @@ test_that("fetch_yearly_partitioned with explicit years skips discovery", {
   expect_equal(nrow(out), 2L)
 })
 
+test_that("explicit years tolerate text issuer absent from some years", {
+  # Regression: a text issuer absent from one requested year aborted the
+  # whole span (match_by_text strict). Now every explicit year is probed
+  # non-strict and the result is the union across years.
+  schema <- load_schema("dfp", "bpa")
+  seen_strict <- logical(0)
+  testthat::local_mocked_bindings(
+    fetch_one_year = function(schema, year, issuer, report_type,
+                              validate, strict_text = TRUE, ...) {
+      seen_strict[[length(seen_strict) + 1L]] <<- strict_text
+      if (year == 2024L) {
+        data.frame(cd_cvm = "009512", year = year, stringsAsFactors = FALSE)
+      } else {
+        data.frame(cd_cvm = character(0), year = integer(0),
+                   stringsAsFactors = FALSE)
+      }
+    }
+  )
+  out <- cvmdata:::fetch_explicit_years(
+    schema, year = c(2012L, 2024L), issuer = "PETROBRAS",
+    report_type = "ind", validate = "skip", on_error = "abort"
+  )
+  expect_true(all(!seen_strict))   # every explicit year probed non-strict
+  expect_equal(nrow(out), 1L)
+})
+
+test_that("explicit years abort when text issuer matches no year", {
+  schema <- load_schema("dfp", "bpa")
+  testthat::local_mocked_bindings(
+    fetch_one_year = function(schema, year, issuer, report_type,
+                              validate, strict_text = TRUE, ...) {
+      data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
+    }
+  )
+  expect_error(
+    cvmdata:::fetch_explicit_years(
+      schema, year = c(2012L, 2024L), issuer = "NOPE_TYPO",
+      report_type = "ind", validate = "skip", on_error = "abort"
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("explicit years stay silent-empty when CNPJ matches no year", {
+  # CNPJ / CD_CVM misses must not borrow the text abort: an unmatched
+  # CNPJ across all years returns an empty tibble, as before.
+  schema <- load_schema("dfp", "bpa")
+  testthat::local_mocked_bindings(
+    fetch_one_year = function(schema, year, issuer, report_type,
+                              validate, strict_text = TRUE, ...) {
+      data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
+    }
+  )
+  out <- cvmdata:::fetch_explicit_years(
+    schema, year = c(2012L, 2024L), issuer = "00000000000191",
+    report_type = "ind", validate = "skip", on_error = "abort"
+  )
+  expect_equal(nrow(out), 0L)
+})
+
 # Schema validation --------------------------------------------------
 
 test_that("issuer_fetch DFP requires report_type for tables with variants", {
