@@ -269,7 +269,7 @@ test_that("load_schema accepts the 10 FCA YAMLs", {
     s <- load_schema("fca", tb)
     expect_s3_class(s, "cvm_table_schema")
     expect_identical(s$temporal_partitioning, "yearly")
-    expect_equal(s$first_year, 2016)
+    expect_equal(s$first_year, 2010)
     expect_equal(s$expected_field_count, unname(expected[[tb]]))
   }
   # submissao keeps the classic file pattern (no detail infix).

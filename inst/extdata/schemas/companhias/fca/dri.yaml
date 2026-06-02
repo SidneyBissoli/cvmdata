@@ -22,7 +22,7 @@ delimiter: ";"
 
 # Temporal coverage -----------------------------------------------------
 temporal_partitioning: yearly
-first_year: 2016
+first_year: 2010
 
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 26
