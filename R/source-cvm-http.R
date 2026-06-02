@@ -155,7 +155,12 @@ download_with_etag <- function(url, dest_path) {
   fresh <- FALSE
   if (file.exists(dest_path) && !is.null(cached_meta)) {
     head_resp <- tryCatch(
-      httr2::req_perform(httr2::req_method(httr2::request(url), "HEAD")),
+      httr2::req_perform(
+        httr2::req_retry(
+          httr2::req_method(httr2::request(url), "HEAD"),
+          max_tries = 3L, retry_on_failure = TRUE
+        )
+      ),
       error = function(e) {
         cvmdata_abort(
           c(
@@ -177,7 +182,12 @@ download_with_etag <- function(url, dest_path) {
 
   if (!fresh) {
     download_resp <- tryCatch(
-      httr2::req_perform(httr2::request(url)),
+      httr2::req_perform(
+        httr2::req_retry(
+          httr2::request(url),
+          max_tries = 3L, retry_on_failure = TRUE
+        )
+      ),
       error = function(e) {
         cvmdata_abort(
           c(

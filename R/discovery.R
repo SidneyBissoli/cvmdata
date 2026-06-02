@@ -531,7 +531,13 @@ get_years_from_listing <- function(dir_url, basename_regex) {
   }
   resp <- tryCatch(
     httr2::req_perform(
-      httr2::req_timeout(httr2::request(dir_url), 60L)
+      # Retry transient failures (the CVM portal intermittently times out
+      # on its directory index); retry_on_failure covers curl-level
+      # timeouts, not just transient HTTP statuses.
+      httr2::req_retry(
+        httr2::req_timeout(httr2::request(dir_url), 60L),
+        max_tries = 3L, retry_on_failure = TRUE
+      )
     ),
     error = function(e) {
       cvmdata_abort(
