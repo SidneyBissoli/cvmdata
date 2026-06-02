@@ -312,6 +312,59 @@ test_that("fetch_yearly_partitioned gives up after .latest_year_max_tries", {
   expect_equal(nrow(out), 0L)
 })
 
+test_that("match_by_text aborts on no match only when strict", {
+  df <- data.frame(
+    denom_cia = "PETROLEO BRASILEIRO S.A. - PETROBRAS",
+    stringsAsFactors = FALSE
+  )
+  # strict (default, §2.7): a genuine miss aborts with the spelling hint.
+  expect_error(
+    cvmdata:::match_by_text(df, "VALE", TRUE, strict = TRUE),
+    class = "cvmdata_error_input"
+  )
+  # non-strict: a miss degrades to an all-FALSE mask (like CNPJ/CD_CVM),
+  # so the year = NULL fallback can walk down to an earlier year.
+  res <- cvmdata:::match_by_text(df, "VALE", TRUE, strict = FALSE)
+  expect_false(any(res))
+  # a real hit still matches regardless of strict.
+  expect_true(any(cvmdata:::match_by_text(df, "PETROBRAS", TRUE,
+                                          strict = FALSE)))
+})
+
+test_that("year = NULL fallback tolerates text issuer absent from top year", {
+  # Regression: match_by_text() aborted inside the first fallback
+  # iteration, so a text issuer absent from a header-only / not-yet-filed
+  # top year never reached the earlier year that holds it. CNPJ/CD_CVM
+  # worked (all-FALSE mask), text did not. Now the loop probes every
+  # candidate but the last with strict = FALSE.
+  schema <- load_schema("dfp", "bpa")
+  seen <- list()
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, schema = NULL) {
+      c(2024L, 2025L, 2026L)
+    },
+    fetch_one_year = function(schema, year, issuer, report_type,
+                              validate, strict_text = TRUE, ...) {
+      seen[[length(seen) + 1L]] <<- list(year = year, strict = strict_text)
+      if (year == 2026L) {
+        data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
+      } else {
+        data.frame(cd_cvm = "009512", stringsAsFactors = FALSE)
+      }
+    }
+  )
+  expect_warning(
+    out <- cvmdata:::fetch_yearly_partitioned(
+      schema, "dfp", year = NULL, issuer = "PETROBRAS",
+      report_type = "ind", validate = "skip"
+    ),
+    class = "cvmdata_warn_year_fallback"
+  )
+  expect_identical(seen[[1L]]$year, 2026L)
+  expect_false(seen[[1L]]$strict)   # top year probed non-strict
+  expect_equal(nrow(out), 1L)
+})
+
 test_that("fetch_yearly_partitioned with explicit years skips discovery", {
   schema <- load_schema("dfp", "bpa")
   discovery_called <- 0L

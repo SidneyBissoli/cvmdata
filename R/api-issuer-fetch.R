@@ -218,7 +218,7 @@ fetch_via_mirror <- function(schema, dataset, year, issuer,
 # Fetch + transform + filter for a single year (or a non-yearly
 # table, when year is NULL). Returns the post-filter tibble.
 fetch_one_year <- function(schema, year, issuer, report_type,
-                           validate) {
+                           validate, strict_text = TRUE) {
   path <- source_cvm_http_get(
     schema, year = year, report_type = report_type
   )
@@ -226,7 +226,8 @@ fetch_one_year <- function(schema, year, issuer, report_type,
   transformed <- apply_schema_transformations(raw, schema)
   if (!is.null(issuer)) {
     transformed <- filter_by_issuer(
-      transformed, issuer, schema = schema, year = year
+      transformed, issuer, schema = schema, year = year,
+      strict_text = strict_text
     )
   }
   transformed
@@ -267,10 +268,17 @@ fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
 
   tried <- integer(0L)
   out <- NULL
-  for (yr in candidates) {
+  for (i in seq_along(candidates)) {
+    yr <- candidates[[i]]
     tried <- c(tried, yr)
+    # Relax text matching for every candidate but the last: a text
+    # issuer absent from a header-only or not-yet-filed top year must
+    # not abort the loop before it reaches an earlier year that has the
+    # filer. The final candidate keeps strict matching so a genuine
+    # typo still surfaces the "verify the spelling" error (§2.7).
     out <- fetch_one_year(
-      schema, yr, issuer, report_type, validate
+      schema, yr, issuer, report_type, validate,
+      strict_text = i == length(candidates)
     )
     if (nrow(out) > 0L) {
       if (length(tried) > 1L) {
@@ -456,7 +464,14 @@ match_by_cd_cvm <- function(df, issuer_chr, mask) {
   df[[col]] %in% targets | df_padded %in% targets_padded
 }
 
-match_by_text <- function(df, issuer_chr, mask) {
+# `strict` governs the zero-match behaviour. With TRUE (default, and the
+# spec of CLAUDE.md §2.7) a term that matches nothing aborts with a
+# "verify the spelling" hint. The `year = NULL` fallback loop passes
+# FALSE for every candidate year but the last, so a term that is simply
+# absent from a header-only or not-yet-filed top year degrades to an
+# all-FALSE mask (like match_by_cnpj/match_by_cd_cvm) and lets the loop
+# walk down to an earlier year instead of crashing.
+match_by_text <- function(df, issuer_chr, mask, strict = TRUE) {
   if (!any(mask)) {
     return(rep(FALSE, nrow(df)))
   }
@@ -468,6 +483,9 @@ match_by_text <- function(df, issuer_chr, mask) {
   for (term in issuer_chr[mask]) {
     hits <- search_issuers_textual(df[[ncol_name]], term)
     if (!any(hits)) {
+      if (!strict) {
+        next
+      }
       cvmdata_abort(
         c(
           "No issuers match {.val {term}}.",
@@ -494,7 +512,8 @@ match_by_text <- function(df, issuer_chr, mask) {
 # same dataset/year. Requires `schema` and `year` to be passed by the
 # caller; without them the CD_CVM tokens silently fail to match.
 filter_by_issuer <- function(df, issuer,
-                             schema = NULL, year = NULL) {
+                             schema = NULL, year = NULL,
+                             strict_text = TRUE) {
   issuer_chr <- as.character(issuer)
   cls <- classify_issuer_tokens(issuer_chr)
 
@@ -522,7 +541,7 @@ filter_by_issuer <- function(df, issuer,
 
   match_vec <- match_by_cnpj(df, cls$digits_only, cls$is_cnpj) |
     match_by_cd_cvm(df, issuer_chr, cls$is_cdcvm) |
-    match_by_text(df, issuer_chr, cls$is_text)
+    match_by_text(df, issuer_chr, cls$is_text, strict = strict_text)
 
   df[match_vec, , drop = FALSE]
 }
