@@ -14,6 +14,16 @@
   rows for those years instead of aborting the whole span, and the
   spelling error is raised once only if no requested year matched.
 
+* `issuer_fetch()` with explicit years that precede a dataset's first
+  published year (e.g. `year = 2005:2024` for `dfp`, which starts in
+  2010) no longer fails with a raw HTTP 404. The years before
+  `first_year` are dropped before any request, with an informational
+  message listing them, and the remaining years are fetched normally.
+  When every requested year is too early the call aborts with a clear
+  `cvmdata_error_input` instead of a network error. This applies to both
+  the `"mirror"` and `"cvm"` backends; genuine 404s on years that do
+  exist remain governed by `on_error`.
+
 * `issuer_fetch()` on the current, not-yet-filed year of an annual
   financial table (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026)
   no longer aborts with "non-numeric argument to binary operator". The

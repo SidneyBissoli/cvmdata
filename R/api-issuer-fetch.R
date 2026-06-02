@@ -137,6 +137,16 @@ issuer_fetch_internal <- function(dataset,
 
   schema <- load_schema(dataset, table)
 
+  # Drop explicitly-requested years before the dataset's first published
+  # year, for both backends, so a "year before the dataset existed"
+  # request is a clean user-input concern rather than a backend HTTP 404
+  # (source = "cvm") or a silent empty read (source = "mirror"). Genuine
+  # network 404s on years that do exist stay governed by `on_error`.
+  if (!is.null(year) &&
+        identical(schema$temporal_partitioning %||% "none", "yearly")) {
+    year <- clamp_years_to_first(year, schema)
+  }
+
   if (identical(source, "mirror")) {
     transformed <- fetch_via_mirror(
       schema, dataset, year, issuer, report_type
@@ -302,6 +312,45 @@ fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
     }
   }
   out
+}
+
+# Drop requested years that precede the dataset's first published year
+# (schema$first_year, guaranteed a valid integer for yearly tables by
+# load_schema()). Emits an informational message listing the dropped
+# years and returns the survivors as an integer vector. Aborts with
+# cvmdata_error_input when every requested year is too early — there is
+# nothing left to fetch. Keeps "year before the dataset existed" distinct
+# from genuine HTTP 404s, which remain governed by `on_error`.
+clamp_years_to_first <- function(year, schema) {
+  year <- as.integer(year)
+  first_year <- as.integer(schema$first_year)
+  too_early <- year < first_year
+  if (!any(too_early)) {
+    return(year)
+  }
+  kept <- year[!too_early]
+  dropped <- sort(unique(year[too_early]))
+  if (!length(kept)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "No requested year exists for",
+          "{.val {schema$dataset}}/{.val {schema$table}}."
+        ),
+        "x" = "Requested: {.val {sort(unique(year))}}.",
+        "i" = "This table starts at {.val {first_year}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  cli::cli_inform(c(
+    "i" = paste(
+      "{.val {schema$dataset}}/{.val {schema$table}} starts at",
+      "{.val {first_year}}; ignoring {length(dropped)} earlier",
+      "year{?s}: {.val {dropped}}."
+    )
+  ))
+  kept
 }
 
 # Explicit-year branch of fetch_yearly_partitioned. Honors `on_error`

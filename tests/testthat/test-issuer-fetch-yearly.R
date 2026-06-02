@@ -432,6 +432,62 @@ test_that("explicit years abort when text issuer matches no year", {
   )
 })
 
+test_that("clamp_years_to_first drops early years and keeps the rest", {
+  schema <- load_schema("dfp", "bpa")   # first_year = 2010
+  expect_message(
+    res <- cvmdata:::clamp_years_to_first(c(2008L, 2010L, 2011L), schema),
+    regexp = "starts at"
+  )
+  expect_identical(res, c(2010L, 2011L))
+})
+
+test_that("clamp_years_to_first is a silent no-op when all years valid", {
+  schema <- load_schema("dfp", "bpa")
+  expect_silent(res <- cvmdata:::clamp_years_to_first(2010:2012, schema))
+  expect_identical(res, 2010:2012)
+})
+
+test_that("clamp_years_to_first aborts when every year precedes first_year", {
+  schema <- load_schema("dfp", "bpa")
+  expect_error(
+    cvmdata:::clamp_years_to_first(2005:2009, schema),
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("issuer_fetch_internal clamps explicit years below first_year", {
+  called_years <- integer(0L)
+  testthat::local_mocked_bindings(
+    fetch_one_year = function(schema, year, issuer, report_type,
+                              validate, strict_text = TRUE, ...) {
+      called_years[[length(called_years) + 1L]] <<- year
+      data.frame(cd_cvm = "009512", stringsAsFactors = FALSE)
+    }
+  )
+  expect_message(
+    out <- cvmdata:::issuer_fetch_internal(
+      "dfp", "bpa", issuer = "PETROBRAS", year = 2008:2012,
+      source = "cvm", report_type = "con", validate = "skip"
+    ),
+    regexp = "starts at"
+  )
+  # 2008 and 2009 dropped before HTTP; only 2010-2012 fetched.
+  expect_identical(sort(unique(called_years)), 2010:2012)
+})
+
+test_that("issuer_fetch_internal aborts when all explicit years too early", {
+  testthat::local_mocked_bindings(
+    fetch_one_year = function(...) stop("must not fetch a clamped year")
+  )
+  expect_error(
+    cvmdata:::issuer_fetch_internal(
+      "dfp", "bpa", issuer = "PETROBRAS", year = 2005:2009,
+      source = "cvm", report_type = "con", validate = "skip"
+    ),
+    class = "cvmdata_error_input"
+  )
+})
+
 test_that("explicit years stay silent-empty when CNPJ matches no year", {
   # CNPJ / CD_CVM misses must not borrow the text abort: an unmatched
   # CNPJ across all years returns an empty tibble, as before.
