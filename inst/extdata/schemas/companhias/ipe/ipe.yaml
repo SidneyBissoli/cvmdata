@@ -32,11 +32,13 @@ encoding: ISO-8859-1
 delimiter: ";"
 
 # Temporal coverage -----------------------------------------------------
-# CKAN serves 2016-current (verified 2026-06-01 via data-raw/audit-first-year*.R;
-# the 2016 CSV header already matches the current field count).
-# The earlier 2021 floor under-reported coverage.
+# first_year = earliest year the CVM directory listing serves
+# (min(cvm_dataset_years()), verified 2026-06-02; the 2003 CSV header
+# already matches the current field count). The clamp in issuer_fetch()
+# and the ETL's expected-year enumeration both key off it, so it must
+# equal the listing minimum.
 temporal_partitioning: yearly
-first_year: 2016
+first_year: 2003
 
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 13

@@ -4,12 +4,17 @@
 
 * Corrected the declared `first_year` for the v0.2 datasets, which had
   been set to 2021 — the year they were first verified — rather than the
-  year the CVM portal first serves them. `fca` and `ipe` now reach back
-  to 2016 and `cgvn` and `vlmo` to 2018. The CSV headers in those earlier
-  years already match the current schema, so the data reads cleanly under
-  strict validation. Without this fix the new year-clamp (below) would
-  have rejected those years as "before the dataset existed". Verified by
-  the new audit scripts in `data-raw/audit-first-year*.R`.
+  earliest year the CVM directory listing actually serves. `first_year`
+  now equals `min(cvm_dataset_years())` for every yearly table: `fca`
+  reaches back to 2010, `ipe` to 2003, and `cgvn` and `vlmo` to 2018. The
+  CSV headers in those earlier years already match the current schema, so
+  the data reads cleanly under strict validation. This invariant matters
+  because `first_year` is now load-bearing: both the year-clamp (below)
+  and the ETL's expected-year enumeration key off it, so a value above
+  the listing minimum makes the clamp reject — and the mirror ETL hard-
+  fail on — years the portal genuinely publishes. The new
+  `data-raw/audit-first-year.R` checks the invariant against the live
+  portal.
 
 ## Bug fixes
 
