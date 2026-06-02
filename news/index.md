@@ -20,6 +20,16 @@
 
 ### Bug fixes
 
+- CVM portal requests now retry transient failures.
+  [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  (directory listing) and the `source = "cvm"` HEAD/GET downloads wrap
+  their `httr2` calls in
+  `req_retry(max_tries = 3, retry_on_failure = TRUE)`, so an
+  intermittent portal timeout — which the open-data portal produces
+  sporadically — no longer aborts the call (or the mirror ETL) on the
+  first attempt. Matches the retry already used on the GitHub Releases
+  mirror path.
+
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   with a free-text `issuer` and `year = NULL` no longer aborts with “No
   issuers match …” when the company is simply absent from the latest
