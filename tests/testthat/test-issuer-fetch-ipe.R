@@ -236,7 +236,7 @@ test_that("load_schema accepts the IPE YAML", {
   s <- load_schema("ipe", "ipe")
   expect_s3_class(s, "cvm_table_schema")
   expect_identical(s$temporal_partitioning, "yearly")
-  expect_equal(s$first_year, 2021)
+  expect_equal(s$first_year, 2016)
   expect_equal(s$expected_field_count, 13)
   expect_identical(s$cvm_file_pattern, "ipe_cia_aberta_{year}.csv")
   # Flat .txt META (no zip): the URL has no `#entry` fragment.
