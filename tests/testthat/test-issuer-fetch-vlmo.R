@@ -183,7 +183,7 @@ test_that("load_schema accepts VLMO YAMLs", {
   sub <- load_schema("vlmo", "submissao")
   expect_s3_class(sub, "cvm_table_schema")
   expect_identical(sub$temporal_partitioning, "yearly")
-  expect_equal(sub$first_year, 2021)
+  expect_equal(sub$first_year, 2018)
   expect_equal(sub$expected_field_count, 12)
   expect_identical(sub$cvm_file_pattern, "vlmo_cia_aberta_{year}.csv")
   expect_true(any(vapply(

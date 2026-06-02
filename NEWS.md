@@ -1,5 +1,16 @@
 # cvmdata 0.2.0.9000 (in development)
 
+## Data coverage
+
+* Corrected the declared `first_year` for the v0.2 datasets, which had
+  been set to 2021 — the year they were first verified — rather than the
+  year the CVM portal first serves them. `fca` and `ipe` now reach back
+  to 2016 and `cgvn` and `vlmo` to 2018. The CSV headers in those earlier
+  years already match the current schema, so the data reads cleanly under
+  strict validation. Without this fix the new year-clamp (below) would
+  have rejected those years as "before the dataset existed". Verified by
+  the new audit scripts in `data-raw/audit-first-year*.R`.
+
 ## Bug fixes
 
 * `issuer_fetch()` with a free-text `issuer` and `year = NULL` no longer

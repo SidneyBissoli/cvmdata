@@ -32,10 +32,11 @@ encoding: ISO-8859-1
 delimiter: ";"
 
 # Temporal coverage -----------------------------------------------------
-# CKAN serves 2021-current at the time of verification (2026-05-28);
-# older filings depend on the mirror.
+# CKAN serves 2016-current (verified 2026-06-01 via data-raw/audit-first-year*.R;
+# the 2016 CSV header already matches the current field count).
+# The earlier 2021 floor under-reported coverage.
 temporal_partitioning: yearly
-first_year: 2021
+first_year: 2016
 
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 13
