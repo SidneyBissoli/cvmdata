@@ -215,7 +215,7 @@ returns enumerated categorical values.</p>
 <span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">bpa</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 02:31:20.649937</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 14:31:12.543662</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 226 × 13</span></span></span>
 <span><span class="co">#&gt;    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc</span></span>
@@ -252,7 +252,7 @@ duplicated rows.</li>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cnpj_cia"</span>, <span class="st">"denom_cia"</span>, <span class="st">"dt_fim_exerc"</span>, <span class="st">"vl_conta"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span><span class="va">ativo_total</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 02:31:20.649937</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 14:31:12.543662</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta</span></span>
@@ -275,7 +275,7 @@ older comparative, request the matching upstream year explicitly:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dt_fim_exerc"</span>, <span class="st">"vl_conta"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span><span class="va">ativo_history</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">ativo_history</span><span class="op">$</span><span class="va">dt_fim_exerc</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 02:31:21.947867</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 14:31:13.827968</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
 <span><span class="co">#&gt;   dt_fim_exerc      vl_conta</span></span>
@@ -302,7 +302,7 @@ The user-facing interface is identical:</p>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Resolving CD_CVM 1023, 22470 via <span style="color: #0000BB;">"dfp"</span>/submissao for <span style="color: #0000BB;">2024</span> (table</span></span>
 <span><span class="co">#&gt;   <span style="color: #0000BB;">"composicao_capital"</span> does not carry `cd_cvm`).</span></span>
 <span><span class="va">cap</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 02:31:22.099423</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 14:31:13.985776</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"composicao_capital"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 10</span></span></span>
 <span><span class="co">#&gt;   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹</span></span>
@@ -324,7 +324,7 @@ individual / consolidated.</p>
 <span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sub</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cd_cvm"</span>, <span class="st">"denom_cia"</span>, <span class="st">"dt_refer"</span>, <span class="st">"id_doc"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 02:31:22.226934</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-06-02 14:31:14.123062</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"submissao"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   cd_cvm denom_cia           dt_refer   id_doc</span></span>
