@@ -506,7 +506,34 @@ cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
   zip_basename_glob <- sub("\\{year\\}", "[0-9]{4}",
                            basename(pattern_url))
 
-  years <- get_years_from_listing(dir_url, zip_basename_glob)
+  years <- tryCatch(
+    get_years_from_listing(dir_url, zip_basename_glob),
+    cvmdata_error_http = function(e) {
+      # The directory index is the single hard dependency of year
+      # discovery, and the CVM portal times it out intermittently
+      # (notably from non-Brazilian IPs, e.g. CI runners). Rather than
+      # abort, fall back to the declared coverage range: first_year —
+      # verified to equal the listing minimum — through the current
+      # year. Downstream callers walk per-year and tolerate years that
+      # turn out not to exist, so a slightly wide range is harmless.
+      fy <- as.integer(schema$first_year)
+      cy <- current_year()
+      cvmdata_warn(
+        c(
+          paste(
+            "CVM directory listing unreachable for {.val {dataset}};",
+            "using the declared range {.val {fy}}:{.val {cy}} instead."
+          ),
+          "i" = paste(
+            "The portal index timed out; re-run for the exact",
+            "published set once it recovers."
+          )
+        ),
+        class = "cvmdata_warn_year_listing_fallback"
+      )
+      fy:cy
+    }
+  )
   if (!length(years)) {
     cvmdata_abort(
       c(
@@ -519,6 +546,12 @@ cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
     )
   }
   sort(years)
+}
+
+# Current civil year as an integer. Wrapped in a function so tests can
+# stub it via local_mocked_bindings without touching the system clock.
+current_year <- function() {
+  as.integer(format(Sys.Date(), "%Y"))
 }
 
 # Year-listing cache. Keyed by directory URL.

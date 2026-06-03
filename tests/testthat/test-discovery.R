@@ -338,20 +338,21 @@ test_that("cvm_dataset_years aborts when archive_url_pattern is NULL", {
   )
 })
 
-test_that("cvm_dataset_years aborts on HTTP failure for directory listing", {
-  # Bypass the year-listing cache so the mock is exercised.
+test_that("cvm_dataset_years falls back to declared range when listing down", {
+  # An unreachable directory index must not abort: year discovery falls
+  # back to the declared coverage range (first_year .. current year) and
+  # warns, so the mirror ETL and direct users survive a portal timeout.
   rlang::env_unbind(
     cvmdata:::.year_listing_cache,
     nms = rlang::env_names(cvmdata:::.year_listing_cache)
   )
+  testthat::local_mocked_bindings(current_year = function() 2026L)
   mock <- function(req) stop("simulated DNS error")
-  expect_error(
-    httr2::with_mocked_responses(
-      mock,
-      cvm_dataset_years("dfp")
-    ),
-    class = "cvmdata_error_http"
+  expect_warning(
+    yrs <- httr2::with_mocked_responses(mock, cvm_dataset_years("dfp")),
+    class = "cvmdata_warn_year_listing_fallback"
   )
+  expect_identical(yrs, 2010:2026)   # dfp first_year = 2010
 })
 
 test_that("cvm_dataset_years aborts when the listing has no year matches", {

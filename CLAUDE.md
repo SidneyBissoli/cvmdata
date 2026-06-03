@@ -341,6 +341,9 @@ cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_partial_failure       (batch yearly: alguns anos falharam
 │                                       HTTP sob on_error = "warn"; demais
 │                                       sobreviventes empilhados e retornados)
+├── cvmdata_warn_year_listing_fallback (cvm_dataset_years: índice de
+│                                       diretório da CVM inalcançável após
+│                                       retries; caiu para first_year:ano_atual)
 └── cvmdata_warn_eviction              (LRU eviction removeu unidades do
                                         cache local para honrar
                                         options(cvmdata.cache_max_size_mb))
