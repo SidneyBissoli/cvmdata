@@ -19,15 +19,13 @@ get a mini-example below; the others are single-paragraph references.
 ``` r
 
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
-#> ✔ Source backend set to "cvm".
 ```
+
+Live chunks below use the default mirror backend (GitHub Releases +
+DuckDB): the docs build must not depend on the CVM portal being up — a
+portal timeout took the site down on 2026-06-03. The mirror releases
+follow the current `mirror-<group>-<dataset>-latest` naming since
+2026-06-09, so the old live-portal pin is gone.
 
 ## Inventory
 
@@ -59,8 +57,24 @@ normalizes both:
 
 a <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "1023",   year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 b <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "001023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 identical(a[, !(names(a) %in% character(0))],
           b[, !(names(b) %in% character(0))])
 #> [1] FALSE
@@ -94,10 +108,18 @@ yaml::read_yaml(system.file(
 
 bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
                  issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:05.860597
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 13:59:49.654194
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -117,15 +139,23 @@ dictionary. The default `validate = "strict"` refuses to read them:
 
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:07.61033
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 13:59:52.865882
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 10
-#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> # A tibble: 0 × 11
+#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>
+#> #   quantidade_sem_resposta <dbl>, year <int>
 ```
 
 `validate = "warn"` returns the data and emits
@@ -160,6 +190,14 @@ Result: at most one row per filing key in the returned tibble.
 
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 # One row per (cnpj_companhia, data_referencia):
@@ -180,6 +218,14 @@ applies the filter on CNPJ:
 
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp1epSsy/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 "cd_cvm" %in% names(auditor)

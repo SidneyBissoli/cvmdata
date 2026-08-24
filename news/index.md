@@ -30,6 +30,17 @@
   first attempt. Matches the retry already used on the GitHub Releases
   mirror path.
 
+- [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  no longer hard-fails when the CVM directory index is unreachable.
+  After the retries above are exhausted it falls back to the declared
+  coverage range — `first_year` (now verified to equal the listing
+  minimum) through the current year — and warns with class
+  `cvmdata_warn_year_listing_fallback`, instead of aborting. This
+  removes the directory listing as a single point of failure for the
+  mirror ETL, which from foreign CI IPs occasionally cannot reach the
+  index even though the per-year archives download fine. A reachable
+  index that genuinely lists no archives still aborts.
+
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   with a free-text `issuer` and `year = NULL` no longer aborts with “No
   issuers match …” when the company is simply absent from the latest

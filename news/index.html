@@ -55,6 +55,7 @@
 <div class="section level3">
 <h3 id="bug-fixes-0-2-0-9000">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0-9000"></a></h3>
 <ul><li><p>CVM portal requests now retry transient failures. <code><a href="../reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> (directory listing) and the <code>source = "cvm"</code> HEAD/GET downloads wrap their <code>httr2</code> calls in <code>req_retry(max_tries = 3, retry_on_failure = TRUE)</code>, so an intermittent portal timeout — which the open-data portal produces sporadically — no longer aborts the call (or the mirror ETL) on the first attempt. Matches the retry already used on the GitHub Releases mirror path.</p></li>
+<li><p><code><a href="../reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> no longer hard-fails when the CVM directory index is unreachable. After the retries above are exhausted it falls back to the declared coverage range — <code>first_year</code> (now verified to equal the listing minimum) through the current year — and warns with class <code>cvmdata_warn_year_listing_fallback</code>, instead of aborting. This removes the directory listing as a single point of failure for the mirror ETL, which from foreign CI IPs occasionally cannot reach the index even though the per-year archives download fine. A reachable index that genuinely lists no archives still aborts.</p></li>
 <li><p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> with a free-text <code>issuer</code> and <code>year = NULL</code> no longer aborts with “No issuers match …” when the company is simply absent from the latest probed year (e.g. a header-only current year, or an issuer that has not yet filed). Text matching now participates in the descending year fallback like CNPJ and CD_CVM matching do, walking down to an earlier year that holds the filer; a genuine typo still aborts with the spelling hint on the last candidate year. The same applies to an explicit multi-year request (e.g. <code>year = 2012:2024</code>): a text issuer absent from some of the requested years now contributes no rows for those years instead of aborting the whole span, and the spelling error is raised once only if no requested year matched.</p></li>
 <li>
 <p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> with explicit years that precede a dataset’s first published year (e.g. <code>year = 2005:2024</code> for <code>dfp</code>, which starts in</p>
@@ -165,7 +166,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

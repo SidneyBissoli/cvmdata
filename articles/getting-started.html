@@ -80,14 +80,11 @@
 read top-to-bottom in one sitting: by the end you will know what the
 package covers, the five fetchers it exports, how to filter and discover
 data, what the two backends do, how the cache behaves, and which error
-classes are worth catching in your own code. Live chunks pin
-<code>source = "cvm"</code> (the CVM Open Data Portal) so the examples
-work without the mirror release index; the mirror backend is documented
-in its own article.</p>
+classes are worth catching in your own code. Live chunks use the default
+mirror backend (GitHub Releases + DuckDB); the CVM Open Data Portal
+backend is documented alongside the mirror in its own article.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/cvm_source_set.html">cvm_source_set</a></span><span class="op">(</span><span class="st">"cvm"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Source backend set to <span style="color: #0000BB;">"cvm"</span>.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-30-second-pitch">The 30-second pitch<a class="anchor" aria-label="anchor" href="#the-30-second-pitch"></a>
 </h2>
@@ -772,7 +769,7 @@ and how <code>cvmdata</code> handles each one.</li>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

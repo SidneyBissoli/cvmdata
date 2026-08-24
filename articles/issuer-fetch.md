@@ -10,14 +10,6 @@ the `year` semantics, the `report_type` rule, the `validate` and
 ``` r
 
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
-#> ✔ Source backend set to "cvm".
 ```
 
 ## Anatomy
@@ -51,10 +43,18 @@ bb_bpa <- issuer_fetch(
   issuer = "1023",
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 bb_bpa
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:20.025206
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:11.053133
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
-#> # A tibble: 96 × 13
+#> # A tibble: 96 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
 #>    <chr>          <date>     <chr>  <chr>     <chr>  <chr>     <chr> <chr>      
 #>  1 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
@@ -68,12 +68,12 @@ bb_bpa
 #>  9 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
 #> 10 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     
 #> # ℹ 86 more rows
-#> # ℹ 5 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
-#> #   vl_conta <dbl>, st_conta_fixa <chr>
+#> # ℹ 7 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
+#> #   vl_conta <dbl>, st_conta_fixa <chr>, report_type <chr>, year <int>
 
 # Provenance:
 attr(bb_bpa, "source")
-#> [1] "cvm"
+#> [1] "mirror"
 attr(bb_bpa, "dataset")
 #> [1] "dfp"
 attr(bb_bpa, "table")
@@ -99,10 +99,34 @@ classified **per element** by the pattern it matches:
 # Each call returns identical rows.
 a <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "1023",                year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 b <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "001023",              year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 c <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "00.000.000/0001-91",  year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 
 identical(nrow(a), nrow(b))
 #> [1] TRUE
@@ -122,6 +146,14 @@ match `denom_cia` with a word boundary.
 # A distinctive stem resolves cleanly to one issuer:
 magalu <- issuer_fetch("dfp", "bpa", report_type = "ind",
                     issuer = "MAGAZINE LUIZA", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 unique(magalu$denom_cia)
 #> [1] "MAGAZINE LUIZA S.A."
 ```
@@ -133,6 +165,14 @@ scripts never silently grab the wrong issuer:
 
 issuer_fetch("dfp", "bpa", report_type = "ind",
           issuer = "BCO BRASIL", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Error in `abort_on_multiple_matches()`:
 #> ! Multiple issuers match "BCO BRASIL".
 #> ℹ Pass `issuer` as CD_CVM or CNPJ to disambiguate, or run interactively to pick
@@ -163,18 +203,26 @@ to the user:
 
 cap <- issuer_fetch("dfp", "composicao_capital",
                  issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:22.770647
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:33.038397
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
-#> # A tibble: 1 × 10
+#> # A tibble: 1 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
 #>   <chr>              <date>     <chr>  <chr>                              <dbl>
 #> 1 00.000.000/0001-91 2024-12-31 1      BCO BRASIL S.A.               5730834040
-#> # ℹ 5 more variables: qt_acao_pref_cap_integr <dbl>,
+#> # ℹ 6 more variables: qt_acao_pref_cap_integr <dbl>,
 #> #   qt_acao_total_cap_integr <dbl>, qt_acao_ordin_tesouro <dbl>,
-#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>
+#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>, year <int>
 ```
 
 ## Selecting years
@@ -193,6 +241,14 @@ cvm_dataset_years("dfp")
 # Pass an explicit vector to back-fill history:
 history <- issuer_fetch("dfp", "bpa", report_type = "ind",
                      issuer = "1023", year = 2022:2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpSbjyaN/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 sort(unique(format(history$dt_refer, "%Y")))
 #> [1] "2022" "2023" "2024"
 ```
@@ -233,10 +289,8 @@ variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
 ``` r
 
 issuer_fetch("dfp", "bpa", issuer = "1023", year = 2024)
-#> Error in `resolve_file_pattern()`:
+#> Error in `validate_mirror_args()`:
 #> ! Table "dfp"/"bpa" requires `report_type` ("ind" or "con").
-#> ℹ Pass `report_type = "ind"` for individual or `report_type = "con"` for
-#>   consolidated.
 ```
 
 And **must be `NULL`** for tables without the distinction (`companhias`,
@@ -247,10 +301,9 @@ And **must be `NULL`** for tables without the distinction (`companhias`,
 issuer_fetch("dfp", "composicao_capital",
           issuer = "1023", year = 2024,
           report_type = "ind")
-#> Error in `resolve_file_pattern()`:
-#> ! Table "dfp"/"composicao_capital" does not have "ind"/"con" variants;
-#>   `report_type` must be `NULL`.
-#> ✖ Got "ind".
+#> Error in `validate_mirror_args()`:
+#> ! Table "dfp"/"composicao_capital" does not support `report_type`; pass
+#>   `NULL`.
 ```
 
 ## `validate`
@@ -280,17 +333,15 @@ units are LRU-evicted once total size exceeds the limit set by
 
 info <- cvm_cache_info()
 info
-#> # A tibble: 6 × 8
+#> # A tibble: 4 × 8
 #>   group   dataset file  path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>   <chr> <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 compan… dfp     dfp_… /hom…   13447206 2026-06-02 15:48:26 "\"6… Sun, 31 May …
-#> 2 compan… dfp     dfp_… /hom…   13561111 2026-06-02 15:48:28 "\"6… Sun, 31 May …
-#> 3 compan… dfp     dfp_… /hom…   13394178 2026-06-02 15:48:29 "\"6… Sun, 31 May …
-#> 4 compan… dfp     dfp_… /hom…   19070848 2026-06-02 15:48:26  NA   NA           
-#> 5 compan… dfp     dfp_… /hom…   19565680 2026-06-02 15:48:28  NA   NA           
-#> 6 compan… dfp     dfp_… /hom…   18578403 2026-06-02 15:48:29  NA   NA
+#> 1 compan… dfp     dfp_… /hom…     183082 2026-08-24 14:00:32  NA   NA           
+#> 2 compan… dfp     dfp_… /hom…   13396366 2026-08-24 14:00:32 "\"6… Sun, 23 Aug …
+#> 3 compan… fre     fre_… /hom…    1086133 2026-08-24 13:59:52  NA   NA           
+#> 4 compan… fre     fre_… /hom…    8409717 2026-08-24 13:59:52 "\"6… Sun, 23 Aug …
 attr(info, "total_size_bytes")
-#> [1] 97617977
+#> [1] 23075669
 ```
 
 `source` selects the backend: from v0.1.0 the default is `"mirror"`,
@@ -304,7 +355,7 @@ and changed at session scope by
 ``` r
 
 cvm_source_get()
-#> [1] "cvm"
+#> [1] "mirror"
 ```
 
 ## Where to read next

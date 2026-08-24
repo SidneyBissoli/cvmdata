@@ -22,14 +22,6 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
 ``` r
 
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
-#> ✔ Source backend set to "cvm".
 ```
 
 ## Reference: 36 tables, by theme
@@ -70,22 +62,30 @@ auditor <- issuer_fetch(
   issuer = "1023",
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpglFeqX/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:10.230453
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:00.125314
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
-#> # A tibble: 2 × 18
+#> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
 #>   <chr>            <date>          <chr>  <chr>        <chr>          <chr>     
 #> 1 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131376    
 #> 2 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131377    
-#> # ℹ 12 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
+#> # ℹ 13 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
 #> #   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,
 #> #   data_inicio_contratacao <date>, data_fim_contratacao <date>,
 #> #   data_inicio_prestacao_servico <date>, servico_contratado <chr>,
 #> #   remuneracao_auditor <chr>, justificativa_substituicao <chr>,
-#> #   razao_apresentada <chr>
+#> #   razao_apresentada <chr>, year <int>
 ```
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
@@ -103,15 +103,23 @@ refuses to read it:
 
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpglFeqX/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:10.42383
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:00.524291
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 10
-#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> # A tibble: 0 × 11
+#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>
+#> #   quantidade_sem_resposta <dbl>, year <int>
 ```
 
 The reader expects the user to opt in by relaxing validation. With
@@ -126,16 +134,24 @@ pcd <- issuer_fetch(
   year = 2024,
   validate  = "warn"
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpglFeqX/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:10.583844
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:00.743446
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 10
-#> # ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
+#> # A tibble: 0 × 11
+#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
 #> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,
 #> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>
+#> #   quantidade_sem_resposta <dbl>, year <int>
 ```
 
 `cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
@@ -155,6 +171,14 @@ posicao <- issuer_fetch(
   issuer = "1023",
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpglFeqX/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "posicao_acionaria"
 #>   does not carry `cd_cvm`).
 
@@ -166,7 +190,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:10.919409
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:01.181785
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista

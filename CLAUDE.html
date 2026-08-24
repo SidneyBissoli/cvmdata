@@ -315,6 +315,9 @@ cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_partial_failure       (batch yearly: alguns anos falharam
 │                                       HTTP sob on_error = "warn"; demais
 │                                       sobreviventes empilhados e retornados)
+├── cvmdata_warn_year_listing_fallback (cvm_dataset_years: índice de
+│                                       diretório da CVM inalcançável após
+│                                       retries; caiu para first_year:ano_atual)
 └── cvmdata_warn_eviction              (LRU eviction removeu unidades do
                                         cache local para honrar
                                         options(cvmdata.cache_max_size_mb))</code></pre>
@@ -451,7 +454,7 @@ cvmdata_warn                           (pai genérico de warnings)
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

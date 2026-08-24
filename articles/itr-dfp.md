@@ -16,14 +16,6 @@ through `report_type`.
 ``` r
 
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
-#> ✔ Source backend set to "cvm".
 ```
 
 ## Reference: tables available
@@ -61,10 +53,18 @@ bpa <- issuer_fetch(
   issuer = c("1023", "22470"),
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpVAc2Ao/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 bpa
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:32.525146
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:37.821694
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
-#> # A tibble: 226 × 13
+#> # A tibble: 226 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
 #>    <chr>          <date>     <chr>  <chr>     <chr>  <chr>     <chr> <chr>      
 #>  1 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
@@ -78,8 +78,8 @@ bpa
 #>  9 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  
 #> 10 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     
 #> # ℹ 216 more rows
-#> # ℹ 5 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
-#> #   vl_conta <dbl>, st_conta_fixa <chr>
+#> # ℹ 7 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,
+#> #   vl_conta <dbl>, st_conta_fixa <chr>, report_type <chr>, year <int>
 ```
 
 The tibble carries provenance attributes and the package has already:
@@ -99,7 +99,7 @@ ativo_total <- bpa[
   c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
 ]
 ativo_total
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:32.525146
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:37.821694
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 2 × 4
 #>   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta
@@ -121,12 +121,20 @@ bpa_history <- issuer_fetch(
   issuer = "1023",
   year = 2022:2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpVAc2Ao/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 ativo_history <- bpa_history[
   bpa_history$cd_conta == "1" & bpa_history$ordem_exerc == "ÚLTIMO",
   c("dt_fim_exerc", "vl_conta")
 ]
 ativo_history[order(ativo_history$dt_fim_exerc), ]
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:33.818752
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:38.886169
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 3 × 2
 #>   dt_fim_exerc      vl_conta
@@ -150,20 +158,28 @@ cap <- issuer_fetch(
   issuer = c("1023", "22470"),
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpVAc2Ao/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023, 22470 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:33.979788
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:39.311418
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
-#> # A tibble: 2 × 10
+#> # A tibble: 2 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹
 #>   <chr>              <date>     <chr>  <chr>                               <dbl>
 #> 1 00.000.000/0001-91 2024-12-31 1      BCO BRASIL S.A.                5730834040
 #> 2 47.960.950/0001-21 2024-12-31 1      MAGAZINE LUIZA S.…              738995248
 #> # ℹ abbreviated name: ¹​qt_acao_ordin_cap_integr
-#> # ℹ 5 more variables: qt_acao_pref_cap_integr <dbl>,
+#> # ℹ 6 more variables: qt_acao_pref_cap_integr <dbl>,
 #> #   qt_acao_total_cap_integr <dbl>, qt_acao_ordin_tesouro <dbl>,
-#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>
+#> #   qt_acao_pref_tesouro <dbl>, qt_acao_total_tesouro <dbl>, year <int>
 ```
 
 Note: no `report_type` argument — `composicao_capital` is a single
@@ -178,8 +194,16 @@ sub <- issuer_fetch(
   issuer = c("1023", "22470"),
   year = 2024
 )
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpVAc2Ao/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
-#> ℹ source: "cvm" | fetched_at: 2026-06-02 15:48:34.118369
+#> ℹ source: "mirror" | fetched_at: 2026-08-24 14:00:39.645543
 #> ℹ group: "companhias" | dataset: "dfp" | table: "submissao"
 #> # A tibble: 2 × 4
 #>   cd_cvm denom_cia           dt_refer   id_doc
