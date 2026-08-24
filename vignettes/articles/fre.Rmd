@@ -31,13 +31,6 @@ up-front:
 
 ```{r setup}
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
 ```
 
 ## Reference: 36 tables, by theme

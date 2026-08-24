@@ -29,14 +29,13 @@ single-paragraph references.
 
 ```{r setup}
 library(cvmdata)
-
-# Pin the source to the live CVM portal for the article's live chunks.
-# The default mirror backend (`cvm_source_get()`) depends on GitHub
-# Releases named `mirror-<group>-<dataset>-latest`; until those are
-# renamed in place from the pre-Sessao-08 format, the fallback to the
-# CVM HTTP portal is the path that always works.
-cvm_source_set("cvm")
 ```
+
+Live chunks below use the default mirror backend (GitHub Releases +
+DuckDB): the docs build must not depend on the CVM portal being up —
+a portal timeout took the site down on 2026-06-03. The mirror releases
+follow the current `mirror-<group>-<dataset>-latest` naming since
+2026-06-09, so the old live-portal pin is gone.
 
 ## Inventory
 

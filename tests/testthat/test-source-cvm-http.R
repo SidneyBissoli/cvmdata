@@ -181,7 +181,7 @@ test_that("download_with_etag aborts (cvmdata_error_http) on GET failure", {
 
 # Absent CSV inside the ZIP raises the dedicated subclass -----------------
 
-test_that("yearly fetch raises cvmdata_error_zip_member_missing for absent CSV", {
+test_that("absent CSV in the ZIP raises cvmdata_error_zip_member_missing", {
   # The dfp fixture ZIP carries bpa/composicao_capital/parecer/... but
   # not bpp. Requesting bpp/ind must abort with the dedicated subclass
   # (still a cvmdata_error_parse) so the ETL can classify it as a benign
