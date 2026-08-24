@@ -14,14 +14,12 @@ as of v0.1.0.9000 (toward v0.2). It is meant to be read top-to-bottom
 in one sitting: by the end you will know what the package covers, the
 five fetchers it exports, how to filter and discover data, what the
 two backends do, how the cache behaves, and which error classes are
-worth catching in your own code. Live chunks pin
-`source = "cvm"` (the CVM Open Data Portal) so the examples work
-without the mirror release index; the mirror backend is documented in
-its own article.
+worth catching in your own code. Live chunks use the default mirror
+backend (GitHub Releases + DuckDB); the CVM Open Data Portal backend
+is documented alongside the mirror in its own article.
 
 ```{r setup}
 library(cvmdata)
-cvm_source_set("cvm")
 ```
 
 ## The 30-second pitch
