@@ -105,3 +105,7 @@ ROADMAP.html
 teste_*.R
 teste_*.md
 teste_*.html
+
+# roadmap: documento de planejamento privado, nao vai para repo publico
+# (o passado ja publicado nao e apagado por esta regra — ver commit)
+ROADMAP.md
