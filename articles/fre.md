@@ -63,7 +63,7 @@ auditor <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpcGGyQK/duckdb
+#> ℹ /tmp/RtmpGJVX2b/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -73,7 +73,7 @@ auditor <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:45.327061
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:15:05.929998
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -104,7 +104,7 @@ refuses to read it:
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpcGGyQK/duckdb
+#> ℹ /tmp/RtmpGJVX2b/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -113,7 +113,7 @@ issuer_fetch("fre", "empregado_PCD",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:45.714757
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:15:06.307492
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -135,7 +135,7 @@ pcd <- issuer_fetch(
   validate  = "warn"
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpcGGyQK/duckdb
+#> ℹ /tmp/RtmpGJVX2b/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -145,7 +145,7 @@ pcd <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:45.907475
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:15:06.536428
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -172,7 +172,7 @@ posicao <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpcGGyQK/duckdb
+#> ℹ /tmp/RtmpGJVX2b/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -190,7 +190,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:46.527312
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:15:06.973046
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista

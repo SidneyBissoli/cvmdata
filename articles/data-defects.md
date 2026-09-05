@@ -58,7 +58,7 @@ normalizes both:
 a <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "1023",   year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -68,7 +68,7 @@ a <- issuer_fetch("dfp", "bpa", report_type = "ind",
 b <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "001023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -109,7 +109,7 @@ yaml::read_yaml(system.file(
 bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
                  issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -119,7 +119,7 @@ bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:37.027554
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:14:58.660489
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -140,7 +140,7 @@ dictionary. The default `validate = "strict"` refuses to read them:
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -149,7 +149,7 @@ issuer_fetch("fre", "empregado_PCD",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-09-05 22:41:41.285079
+#> ℹ source: "mirror" | fetched_at: 2026-09-05 23:15:01.975854
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -191,7 +191,7 @@ Result: at most one row per filing key in the returned tibble.
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -219,7 +219,7 @@ applies the filter on CNPJ:
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp5pSHC0/duckdb
+#> ℹ /tmp/RtmpY1xBoz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
