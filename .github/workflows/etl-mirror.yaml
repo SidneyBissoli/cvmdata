@@ -137,7 +137,7 @@ jobs:
 
       - name: Upload validation report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation-${{ matrix.group }}-${{ matrix.dataset }}
           path: ${{ env.CVMDATA_ETL_WORKSPACE }}/out/validation/${{ matrix.dataset }}.md
