@@ -136,6 +136,22 @@ get_yearly_csv <- function(schema, year, report_type) {
   csv_path
 }
 
+# Classes for an aborted CVM request. A transport failure (DNS, TCP
+# connect, TLS, read timeout) earns the extra `..._transport` subclass:
+# it means "the portal did not answer", which is a different fact from
+# an HTTP 404 ("this file is not published"). The mirror ETL needs the
+# distinction to stop early when the whole portal is unreachable from
+# the runner instead of walking hundreds of (table, year) pairs that
+# cannot possibly succeed. `httr2_failure` is httr2's own class for a
+# request that never produced a response.
+http_error_classes <- function(e) {
+  if (inherits(e, "httr2_failure")) {
+    c("cvmdata_error_http_transport", "cvmdata_error_http")
+  } else {
+    "cvmdata_error_http"
+  }
+}
+
 # Download a URL into `dest_path`, honoring ETag/Last-Modified for
 # freshness. Writes a sidecar `.etag.rds` with cache headers. Skips the
 # HEAD/GET round-trip when the cached artifact is within its TTL window
@@ -167,7 +183,7 @@ download_with_etag <- function(url, dest_path) {
             "HTTP HEAD failed for {.url {url}}.",
             "x" = "{conditionMessage(e)}"
           ),
-          class = "cvmdata_error_http"
+          class = http_error_classes(e)
         )
       }
     )
@@ -194,7 +210,7 @@ download_with_etag <- function(url, dest_path) {
             "HTTP GET failed for {.url {url}}.",
             "x" = "{conditionMessage(e)}"
           ),
-          class = "cvmdata_error_http"
+          class = http_error_classes(e)
         )
       }
     )

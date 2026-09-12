@@ -18,6 +18,29 @@
 
 ## Bug fixes
 
+* The mirror ETL no longer burns a whole runner on a portal that is not
+  answering it. Of the 14 scheduled mirror runs between 2026-06-09 and
+  2026-09-08, 8 went red, every one of them in stage 01 and on a
+  different `(group, dataset)` each week, while the sibling jobs on
+  other runners downloaded normally; the 2026-09-08 `fre` job logged
+  `0 ok / 612 failed`, all of them 10 s TCP connect timeouts, after
+  5 h 51 min — minutes short of GitHub's 6 h job ceiling. Probing the
+  portal from eight runners in parallel on 2026-09-11 showed it
+  answering in ~0,15 s over IPv4 from every one, each on a different
+  Azure egress IP, so these episodes are the portal dropping some
+  egress addresses for a while rather than anything wrong with the URLs
+  the ETL builds. Three changes follow from that: a transport failure
+  (DNS, TCP connect, TLS, read timeout) now carries the
+  `cvmdata_error_http_transport` subclass, which an HTTP status such as
+  404 does not, so "the portal did not answer" is distinguishable from
+  "this file is not published"; stage 01 trips a circuit breaker after
+  8 consecutive transport failures with nothing yet fetched, exiting 3
+  in about 5 min instead of walking hundreds of pairs that cannot
+  succeed; and the job carries a 120 min ceiling for the partial
+  outage, where interleaved successes would keep resetting the breaker.
+  A new `ETL mirror retry` workflow then re-runs only the failed jobs,
+  each landing on a fresh egress IP, up to 3 attempts.
+
 * CVM portal requests now retry transient failures. `cvm_dataset_years()`
   (directory listing) and the `source = "cvm"` HEAD/GET downloads wrap
   their `httr2` calls in `req_retry(max_tries = 3, retry_on_failure =
