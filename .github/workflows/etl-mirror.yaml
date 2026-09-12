@@ -59,6 +59,14 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Wall-clock ceiling. On 2026-09-08 the `fre` job stayed alive for
+    # 5 h 51 min attempting 612 downloads against a portal that was not
+    # answering that runner — minutes short of GitHub's own 6 h limit.
+    # Stage 01's circuit breaker cuts a TOTAL outage in ~5 min; this
+    # ceiling covers the PARTIAL one, where interleaved successes reset
+    # the breaker's counter and the job could still drag for hours. Real
+    # successes take at most ~45 min.
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:

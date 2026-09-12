@@ -179,6 +179,47 @@ test_that("download_with_etag aborts (cvmdata_error_http) on GET failure", {
   )
 })
 
+# Transport failure vs HTTP status ----------------------------------------
+
+# The mirror ETL stops early when the portal is unreachable, and keeps
+# walking (table, year) pairs when a single file is simply not published.
+# The two cases therefore have to be distinguishable from the condition
+# alone: `httr2_failure` (no response at all) earns the extra
+# `cvmdata_error_http_transport` subclass, an HTTP status does not.
+
+test_that("a transport failure is classed cvmdata_error_http_transport", {
+  local_dfp_cache_with_sidecar()
+  mock <- function(req) {
+    rlang::abort(
+      "Failed to perform HTTP request.",
+      class = c("httr2_failure", "httr2_error")
+    )
+  }
+  expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch("dfp", "bpa",
+                   report_type = "ind", year = 2024, source = "cvm")
+    ),
+    class = "cvmdata_error_http_transport"
+  )
+})
+
+test_that("an HTTP status failure is NOT classed as transport", {
+  local_dfp_cache_with_sidecar()
+  mock <- function(req) httr2::response(404L)
+  err <- tryCatch(
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch("dfp", "bpa",
+                   report_type = "ind", year = 2024, source = "cvm")
+    ),
+    error = function(e) e
+  )
+  expect_s3_class(err, "cvmdata_error_http")
+  expect_false(inherits(err, "cvmdata_error_http_transport"))
+})
+
 # Absent CSV inside the ZIP raises the dedicated subclass -----------------
 
 test_that("absent CSV in the ZIP raises cvmdata_error_zip_member_missing", {

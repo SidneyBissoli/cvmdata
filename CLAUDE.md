@@ -325,6 +325,11 @@ cvmdata_error                          (pai genérico de erros)
 │                                       chamada antes da implementação plena
 │                                       — aponta para ROADMAP)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
+│   └── cvmdata_error_http_transport   (o portal não respondeu: DNS,
+│                                       connect TCP, TLS, timeout de
+│                                       leitura — distinto de um status
+│                                       HTTP como 404; o ETL usa a
+│                                       distinção no disjuntor do stage 01)
 ├── cvmdata_error_parse                (falha de parse ou validação)
 │   └── cvmdata_error_zip_member_missing (CSV da tabela-detalhe ausente
 │                                       no ZIP anual — tabela não existia
