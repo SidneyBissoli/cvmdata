@@ -343,6 +343,11 @@ depois delega a [`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
     │                                       chamada antes da implementação plena
     │                                       — aponta para ROADMAP)
     ├── cvmdata_error_http                 (falha de rede / HTTP)
+    │   └── cvmdata_error_http_transport   (o portal não respondeu: DNS,
+    │                                       connect TCP, TLS, timeout de
+    │                                       leitura — distinto de um status
+    │                                       HTTP como 404; o ETL usa a
+    │                                       distinção no disjuntor do stage 01)
     ├── cvmdata_error_parse                (falha de parse ou validação)
     │   └── cvmdata_error_zip_member_missing (CSV da tabela-detalhe ausente
     │                                       no ZIP anual — tabela não existia
@@ -514,13 +519,9 @@ quatro primeiros travam por push/PR; o quinto é operacional.
 
 ### 10.1 Comandos não-óbvios
 
-Comandos triviais de pacote R
-([`devtools::check()`](https://devtools.r-lib.org/reference/check.html),
-[`devtools::test()`](https://devtools.r-lib.org/reference/test.html),
-[`devtools::document()`](https://devtools.r-lib.org/reference/document.html),
-[`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html),
-[`devtools::install()`](https://devtools.r-lib.org/reference/install.html),
-[`devtools::build()`](https://devtools.r-lib.org/reference/build.html),
+Comandos triviais de pacote R (`devtools::check()`, `devtools::test()`,
+`devtools::document()`, `devtools::build_readme()`,
+`devtools::install()`, `devtools::build()`,
 [`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html),
 [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md))
 não estão listados aqui — usar diretamente.
