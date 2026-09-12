@@ -42,7 +42,26 @@ jobs:
           RUN_ID: ${{ github.event.workflow_run.id }}
           ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         run: |
+          set -euo pipefail
           echo "run $RUN_ID failed on attempt $ATTEMPT; waiting 10 min"
           sleep 600
+          # Belt to the job-level `if`. That guard reads the attempt out
+          # of the event payload, and a GitHub expression coerces an
+          # absent field to 0 — which would compare as "< 3" forever and
+          # turn a genuine, reproducible failure into an endless retry
+          # loop. So ask the API for the attempt the run is actually on,
+          # right before firing, and refuse from the live number.
+          live=$(gh api "repos/${{ github.repository }}/actions/runs/$RUN_ID" \
+            --jq '.run_attempt')
+          case "$live" in
+            ''|*[!0-9]*)
+              echo "could not read run_attempt (got '$live'); refusing" >&2
+              exit 1
+              ;;
+          esac
+          if [ "$live" -ge 3 ]; then
+            echo "run $RUN_ID is already on attempt $live; giving up"
+            exit 0
+          fi
           gh run rerun "$RUN_ID" --failed -R "${{ github.repository }}"
           echo "re-run requested for the failed jobs of $RUN_ID"
