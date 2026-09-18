@@ -519,9 +519,13 @@ quatro primeiros travam por push/PR; o quinto é operacional.
 
 ### 10.1 Comandos não-óbvios
 
-Comandos triviais de pacote R (`devtools::check()`, `devtools::test()`,
-`devtools::document()`, `devtools::build_readme()`,
-`devtools::install()`, `devtools::build()`,
+Comandos triviais de pacote R
+([`devtools::check()`](https://devtools.r-lib.org/reference/check.html),
+[`devtools::test()`](https://devtools.r-lib.org/reference/test.html),
+[`devtools::document()`](https://devtools.r-lib.org/reference/document.html),
+[`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html),
+[`devtools::install()`](https://devtools.r-lib.org/reference/install.html),
+[`devtools::build()`](https://devtools.r-lib.org/reference/build.html),
 [`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html),
 [`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md))
 não estão listados aqui — usar diretamente.
