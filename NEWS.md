@@ -99,6 +99,23 @@
   failure. A parquet that is missing without a recorded reason still
   hard-fails. Fixes the red `dfp`/`itr`/`fre` mirror jobs.
 
+## Internal
+
+* New contract test `test-schema-snapshot-consistency.R` pins the
+  invariants between the hand-written schema YAMLs and the derived
+  `cvm_dictionary_snapshot.csv`: every installed `(group, dataset,
+  table)` has snapshot rows and vice versa, `expected_field_count`
+  equals the snapshot's row count, `meta_status` agrees row by row,
+  and the 8 META-less FRE tables declare exactly the field names the
+  snapshot carries. Measured on 2026-09-17: 74 YAMLs, 74 tables in the
+  snapshot, zero divergences. This retires the pre-v0.1 roadmap item
+  "generate the remaining YAMLs from the dictionary snapshot": the
+  dependency runs the other way (`data-raw/build-dictionary-snapshot.R`
+  reads each YAML's `cvm_dictionary_url` to build the snapshot), so a
+  generator would be circular, and there are no remaining YAMLs to
+  generate. `data-raw/README.md` no longer lists the schema YAMLs as a
+  built artefact.
+
 # cvmdata 0.2.0 (2026-05-29)
 
 ## ⚠️ Breaking changes
