@@ -237,7 +237,8 @@ Política de versão: por default, mantém apenas o registro de maior
   `paste()`/`paste0()`.
 - Indentação 2 espaços, sem tabs.
 - Largura máxima 80 chars (tolerância até 100).
-- Style guide: tidyverse.
+- Style guide: tidyverse, aplicado pelo [Air](https://posit-dev.github.io/air/)
+  (`air format .`; configuração em `air.toml`). Rodar antes do lintr.
 - Lint clean (`lintr::lint_package()` retorna `character(0)`) antes
   de qualquer commit.
 - **Fully-qualified namespaces** em todo código (`dplyr::filter()`,
