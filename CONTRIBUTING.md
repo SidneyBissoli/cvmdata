@@ -28,8 +28,9 @@ Conduct](https://sidneybissoli.github.io/cvmdata/CODE_OF_CONDUCT.md).
 1.  **Fork** the repository and create a branch off `main`:
     `git checkout -b your-topic`.
 2.  **Match the project conventions**: snake_case function and argument
-    names; the native pipe `|>`; tidyverse style; fully-qualified
-    namespaces
+    names; the native pipe `|>`; tidyverse style, applied by the
+    [Air](https://posit-dev.github.io/air/) formatter (`air format .`);
+    fully-qualified namespaces
     ([`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
     [`httr2::request()`](https://httr2.r-lib.org/reference/request.html));
     messages via `cli::cli_*`. Strings preserved from the CVM portal
@@ -78,6 +79,9 @@ devtools::check()
 
 # all tests must pass (487+ as of v0.0.0.9000)
 devtools::test()
+
+# Air must leave every file unchanged (run in a terminal)
+# air format --check .
 
 # lintr must return character(0)
 lintr::lint_package()

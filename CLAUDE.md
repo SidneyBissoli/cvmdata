@@ -250,7 +250,9 @@ Política de versão: por default, mantém apenas o registro de maior
   [`paste()`](https://rdrr.io/r/base/paste.html)/[`paste0()`](https://rdrr.io/r/base/paste.html).
 - Indentação 2 espaços, sem tabs.
 - Largura máxima 80 chars (tolerância até 100).
-- Style guide: tidyverse.
+- Style guide: tidyverse, aplicado pelo
+  [Air](https://posit-dev.github.io/air/) (`air format .`; configuração
+  em `air.toml`). Rodar antes do lintr.
 - Lint clean
   ([`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html)
   retorna `character(0)`) antes de qualquer commit.

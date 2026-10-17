@@ -62,7 +62,7 @@
 <ol style="list-style-type: decimal"><li>
 <strong>Fork</strong> the repository and create a branch off <code>main</code>: <code>git checkout -b your-topic</code>.</li>
 <li>
-<strong>Match the project conventions</strong>: snake_case function and argument names; the native pipe <code>|&gt;</code>; tidyverse style; fully-qualified namespaces (<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>, <code><a href="https://httr2.r-lib.org/reference/request.html" class="external-link">httr2::request()</a></code>); messages via <code>cli::cli_*</code>. Strings preserved from the CVM portal (table names, column names, categorical values) stay in Portuguese; everything else (function names, arguments, messages, documentation) is in English.</li>
+<strong>Match the project conventions</strong>: snake_case function and argument names; the native pipe <code>|&gt;</code>; tidyverse style, applied by the <a href="https://posit-dev.github.io/air/" class="external-link">Air</a> formatter (<code>air format .</code>); fully-qualified namespaces (<code><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">dplyr::filter()</a></code>, <code><a href="https://httr2.r-lib.org/reference/request.html" class="external-link">httr2::request()</a></code>); messages via <code>cli::cli_*</code>. Strings preserved from the CVM portal (table names, column names, categorical values) stay in Portuguese; everything else (function names, arguments, messages, documentation) is in English.</li>
 <li>
 <strong>Run the quality gate locally</strong> (see next section) before pushing.</li>
 <li>
@@ -91,6 +91,9 @@
 <span></span>
 <span><span class="co"># all tests must pass (487+ as of v0.0.0.9000)</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Air must leave every file unchanged (run in a terminal)</span></span>
+<span><span class="co"># air format --check .</span></span>
 <span></span>
 <span><span class="co"># lintr must return character(0)</span></span>
 <span><span class="fu">lintr</span><span class="fu">::</span><span class="fu"><a href="https://lintr.r-lib.org/reference/lint.html" class="external-link">lint_package</a></span><span class="op">(</span><span class="op">)</span></span>

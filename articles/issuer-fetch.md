@@ -44,7 +44,7 @@ bb_bpa <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -52,7 +52,7 @@ bb_bpa <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 bb_bpa
-#> ℹ source: "mirror" | fetched_at: 2026-10-17 11:35:04.430161
+#> ℹ source: "mirror" | fetched_at: 2026-10-17 13:00:29.050109
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -100,7 +100,7 @@ classified **per element** by the pattern it matches:
 a <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "1023",                year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -110,7 +110,7 @@ a <- issuer_fetch("dfp", "bpa", report_type = "ind",
 b <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "001023",              year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -120,7 +120,7 @@ b <- issuer_fetch("dfp", "bpa", report_type = "ind",
 c <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "00.000.000/0001-91",  year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -147,7 +147,7 @@ match `denom_cia` with a word boundary.
 magalu <- issuer_fetch("dfp", "bpa", report_type = "ind",
                     issuer = "MAGAZINE LUIZA", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -166,7 +166,7 @@ scripts never silently grab the wrong issuer:
 issuer_fetch("dfp", "bpa", report_type = "ind",
           issuer = "BCO BRASIL", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -204,7 +204,7 @@ to the user:
 cap <- issuer_fetch("dfp", "composicao_capital",
                  issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -214,7 +214,7 @@ cap <- issuer_fetch("dfp", "composicao_capital",
 #> ℹ Resolving CD_CVM 1023 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 cap
-#> ℹ source: "mirror" | fetched_at: 2026-10-17 11:35:06.426282
+#> ℹ source: "mirror" | fetched_at: 2026-10-17 13:00:31.40244
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 1 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr
@@ -242,7 +242,7 @@ cvm_dataset_years("dfp")
 history <- issuer_fetch("dfp", "bpa", report_type = "ind",
                      issuer = "1023", year = 2022:2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZNjRKN/duckdb
+#> ℹ /tmp/RtmpplEdl5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -336,12 +336,12 @@ info
 #> # A tibble: 4 × 8
 #>   group   dataset file  path  size_bytes mtime               etag  last_modified
 #>   <chr>   <chr>   <chr> <chr>      <int> <dttm>              <chr> <chr>        
-#> 1 compan… dfp     dfp_… /hom…     182955 2026-10-17 11:35:06  NA   NA           
-#> 2 compan… dfp     dfp_… /hom…   13396144 2026-10-17 11:35:06 "\"6… Sun, 11 Oct …
-#> 3 compan… fre     fre_… /hom…    1086338 2026-10-17 11:34:51  NA   NA           
-#> 4 compan… fre     fre_… /hom…    8409664 2026-10-17 11:34:51 "\"6… Sun, 11 Oct …
+#> 1 compan… dfp     dfp_… /hom…     182955 2026-10-17 13:00:31  NA   NA           
+#> 2 compan… dfp     dfp_… /hom…   13396144 2026-10-17 13:00:31 "\"6… Sun, 11 Oct …
+#> 3 compan… fre     fre_… /hom…    1086338 2026-10-17 13:00:14  NA   NA           
+#> 4 compan… fre     fre_… /hom…    8409664 2026-10-17 13:00:14 "\"6… Sun, 11 Oct …
 attr(info, "total_size_bytes")
-#> [1] 23075474
+#> [1] 23075472
 ```
 
 `source` selects the backend: from v0.1.0 the default is `"mirror"`,
