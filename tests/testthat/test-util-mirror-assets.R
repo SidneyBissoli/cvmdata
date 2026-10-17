@@ -101,10 +101,17 @@ sample_inventory <- function() {
       "submissao__year.2024__part-0.parquet",
       "__source_hash.json"
     ),
-    url = sprintf("https://example.test/%s", c(
-      "bpa-ind-2023", "bpa-ind-2024", "bpa-con-2024",
-      "bpp-ind-2024", "sub-2024", "hash"
-    )),
+    url = sprintf(
+      "https://example.test/%s",
+      c(
+        "bpa-ind-2023",
+        "bpa-ind-2024",
+        "bpa-con-2024",
+        "bpp-ind-2024",
+        "sub-2024",
+        "hash"
+      )
+    ),
     size_bytes = c(1000L, 1100L, 1200L, 900L, 800L, 200L)
   )
 }
@@ -112,7 +119,10 @@ sample_inventory <- function() {
 test_that("filter_mirror_assets returns single (table, year, variant)", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = 2024L, report_type = "ind"
+    inv,
+    table = "bpa",
+    year = 2024L,
+    report_type = "ind"
   )
   expect_equal(nrow(out), 1L)
   expect_identical(out$year, 2024L)
@@ -123,7 +133,10 @@ test_that("filter_mirror_assets returns single (table, year, variant)", {
 test_that("filter_mirror_assets keeps multiple years", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = c(2023L, 2024L), report_type = "ind"
+    inv,
+    table = "bpa",
+    year = c(2023L, 2024L),
+    report_type = "ind"
   )
   expect_equal(nrow(out), 2L)
   expect_setequal(out$year, c(2023L, 2024L))
@@ -132,7 +145,10 @@ test_that("filter_mirror_assets keeps multiple years", {
 test_that("filter_mirror_assets honours year = NULL", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = NULL, report_type = "ind"
+    inv,
+    table = "bpa",
+    year = NULL,
+    report_type = "ind"
   )
   expect_equal(nrow(out), 2L)
 })
@@ -140,7 +156,10 @@ test_that("filter_mirror_assets honours year = NULL", {
 test_that("filter_mirror_assets honours report_type = NULL", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = 2024L, report_type = NULL
+    inv,
+    table = "bpa",
+    year = 2024L,
+    report_type = NULL
   )
   # ind + con for 2024
   expect_equal(nrow(out), 2L)
@@ -150,7 +169,10 @@ test_that("filter_mirror_assets honours report_type = NULL", {
 test_that("filter_mirror_assets excludes hash sidecar implicitly", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "submissao", year = 2024L, report_type = NULL
+    inv,
+    table = "submissao",
+    year = 2024L,
+    report_type = NULL
   )
   expect_equal(nrow(out), 1L)
   expect_identical(out$table, "submissao")
@@ -159,17 +181,25 @@ test_that("filter_mirror_assets excludes hash sidecar implicitly", {
 test_that("filter_mirror_assets returns 0 rows when no match", {
   inv <- sample_inventory()
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = 1999L, report_type = "ind"
+    inv,
+    table = "bpa",
+    year = 1999L,
+    report_type = "ind"
   )
   expect_equal(nrow(out), 0L)
 })
 
 test_that("filter_mirror_assets handles empty inventory", {
   inv <- tibble::tibble(
-    name = character(0L), url = character(0L), size_bytes = integer(0L)
+    name = character(0L),
+    url = character(0L),
+    size_bytes = integer(0L)
   )
   out <- cvmdata:::filter_mirror_assets(
-    inv, table = "bpa", year = 2024L, report_type = "ind"
+    inv,
+    table = "bpa",
+    year = 2024L,
+    report_type = "ind"
   )
   expect_equal(nrow(out), 0L)
   expect_true(all(c("table", "year", "report_type") %in% names(out)))
@@ -179,8 +209,7 @@ test_that("filter_mirror_assets handles empty inventory", {
 
 # Build a fake GitHub API response with the given asset names. Sizes
 # and URLs are synthetic.
-fake_github_release <- function(asset_names,
-                                base = "https://example.test") {
+fake_github_release <- function(asset_names, base = "https://example.test") {
   list(
     tag_name = "mirror-test-latest",
     assets = lapply(asset_names, function(n) {
@@ -222,7 +251,8 @@ test_that("mirror_list_assets parses a GitHub release JSON", {
   expect_s3_class(out, "tbl_df")
   expect_equal(nrow(out), 3L)
   expect_identical(
-    attr(out, "release_tag"), "mirror-companhias-dfp_test1-latest"
+    attr(out, "release_tag"),
+    "mirror-companhias-dfp_test1-latest"
   )
 })
 
@@ -240,8 +270,7 @@ test_that("mirror_list_assets caches per session", {
   httr2::with_mocked_responses(
     mock,
     {
-      cvmdata:::mirror_list_assets("companhias", "dfp_test2",
-                                   refresh = TRUE)
+      cvmdata:::mirror_list_assets("companhias", "dfp_test2", refresh = TRUE)
       cvmdata:::mirror_list_assets("companhias", "dfp_test2")
       cvmdata:::mirror_list_assets("companhias", "dfp_test2")
     }
@@ -259,8 +288,7 @@ test_that("mirror_list_assets aborts on HTTP 404", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvmdata:::mirror_list_assets("companhias", "nope_dataset",
-                                   refresh = TRUE)
+      cvmdata:::mirror_list_assets("companhias", "nope_dataset", refresh = TRUE)
     ),
     class = "cvmdata_error_http"
   )
@@ -272,8 +300,11 @@ test_that("mirror_list_assets aborts on network failure", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvmdata:::mirror_list_assets("companhias", "net_fail_dataset",
-                                   refresh = TRUE)
+      cvmdata:::mirror_list_assets(
+        "companhias",
+        "net_fail_dataset",
+        refresh = TRUE
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -282,7 +313,8 @@ test_that("mirror_list_assets aborts on network failure", {
 test_that("mirror_list_assets attaches source_hash attribute", {
   cvmdata:::mirror_assets_cache_clear()
   body <- fake_github_release(c(
-    "companhias__part-0.parquet", "__source_hash.json"
+    "companhias__part-0.parquet",
+    "__source_hash.json"
   ))
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
@@ -298,8 +330,7 @@ test_that("mirror_list_assets attaches source_hash attribute", {
   }
   out <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("companhias", "dfp_test_hash",
-                                 refresh = TRUE)
+    cvmdata:::mirror_list_assets("companhias", "dfp_test_hash", refresh = TRUE)
   )
   expect_identical(attr(out, "source_hash"), "deadbeef")
 })
@@ -315,8 +346,11 @@ test_that("mirror_list_assets returns NA hash when sidecar absent", {
   }
   out <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("companhias", "dfp_test_no_hash",
-                                 refresh = TRUE)
+    cvmdata:::mirror_list_assets(
+      "companhias",
+      "dfp_test_no_hash",
+      refresh = TRUE
+    )
   )
   expect_true(is.na(attr(out, "source_hash")))
 })

@@ -88,9 +88,18 @@ test_that("issuer_fetch IPE tracer returns cvm_tbl", {
   expect_true(nrow(result) > 0L)
   expect_identical(ncol(result), 13L)
   # FRE-detail-like convention with Codigo_CVM native in the header.
-  expect_true(all(c("cnpj_companhia", "data_referencia", "codigo_cvm",
-                    "categoria", "protocolo_entrega", "versao",
-                    "link_download") %in% names(result)))
+  expect_true(all(
+    c(
+      "cnpj_companhia",
+      "data_referencia",
+      "codigo_cvm",
+      "categoria",
+      "protocolo_entrega",
+      "versao",
+      "link_download"
+    ) %in%
+      names(result)
+  ))
   expect_type(result$cnpj_companhia, "character")
   expect_type(result$codigo_cvm, "character")
   expect_type(result$protocolo_entrega, "character")
@@ -106,8 +115,13 @@ test_that("issuer_fetch IPE filters by CNPJ via cnpj_companhia", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "00.000.000/0001-91",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "ipe",
+      "ipe",
+      issuer = "00.000.000/0001-91",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -137,16 +151,14 @@ test_that("IPE resolves CD_CVM directly, padded and unpadded", {
 
   padded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "001023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("ipe", "ipe", issuer = "001023", year = 2024L, source = "cvm")
   )
   expect_true(nrow(padded) > 0L)
   expect_true(all(padded$cnpj_companhia == "00.000.000/0001-91"))
 
   unpadded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "1023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("ipe", "ipe", issuer = "1023", year = 2024L, source = "cvm")
   )
   expect_identical(nrow(unpadded), nrow(padded))
 })
@@ -160,8 +172,13 @@ test_that("IPE CD_CVM lookup does not go through submissao", {
   expect_no_message(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("ipe", "ipe", issuer = "001023",
-                   year = 2024L, source = "cvm")
+      issuer_fetch(
+        "ipe",
+        "ipe",
+        issuer = "001023",
+        year = 2024L,
+        source = "cvm"
+      )
     ),
     message = "via .*submissao"
   )
@@ -208,8 +225,7 @@ test_that("IPE resolves a B3 ticker to its issuer via fca", {
   # the lookup resolves it to the CNPJ, which then matches the IPE rows.
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "BBAS3",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024L, source = "cvm")
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -223,8 +239,13 @@ test_that("report_type aborts for ipe/ipe", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("ipe", "ipe", year = 2024L,
-                   source = "cvm", report_type = "ind")
+      issuer_fetch(
+        "ipe",
+        "ipe",
+        year = 2024L,
+        source = "cvm",
+        report_type = "ind"
+      )
     ),
     class = "cvmdata_error_input"
   )

@@ -62,8 +62,10 @@ if (is.null(dataset)) {
   stop("--dataset is required", call. = FALSE)
 }
 if (!mirror_pair_valid(group, dataset)) {
-  stop(sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
-       call. = FALSE)
+  stop(
+    sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
+    call. = FALSE
+  )
 }
 
 gh_bin <- Sys.which("gh")
@@ -74,19 +76,25 @@ if (!nzchar(gh_bin)) {
 workspace <- mirror_workspace()
 dataset_dir <- file.path(workspace, "out", "parquet", group, dataset)
 if (!dir.exists(dataset_dir)) {
-  stop(sprintf(
-    "no parquet output for (%s, %s) (expected at %s)",
-    group, dataset, dataset_dir
-  ), call. = FALSE)
+  stop(
+    sprintf(
+      "no parquet output for (%s, %s) (expected at %s)",
+      group,
+      dataset,
+      dataset_dir
+    ),
+    call. = FALSE
+  )
 }
 
 parquets <- list.files(
-  dataset_dir, pattern = "\\.parquet$",
-  recursive = TRUE, full.names = TRUE
+  dataset_dir,
+  pattern = "\\.parquet$",
+  recursive = TRUE,
+  full.names = TRUE
 )
 if (!length(parquets)) {
-  stop(sprintf("no parquet files under %s", dataset_dir),
-       call. = FALSE)
+  stop(sprintf("no parquet files under %s", dataset_dir), call. = FALSE)
 }
 
 tag <- mirror_tag_latest(group, dataset)
@@ -103,21 +111,30 @@ message("[03-publish] computing source META hash")
 source_hash <- compute_source_hash(dataset)
 message(sprintf(
   "[03-publish] group=%s dataset=%s components=%d sha256=%s",
-  group, dataset, length(source_hash$components),
+  group,
+  dataset,
+  length(source_hash$components),
   short_hash(source_hash$hash)
 ))
 
 prev_hash_path <- tempfile(fileext = ".json")
 download_dir <- dirname(prev_hash_path)
 download_status <- suppressWarnings(system2(
-  "gh", c(
-    "release", "download", tag,
-    "--repo", mirror_repo,
-    "--pattern", "__source_hash.json",
-    "--dir", shQuote(download_dir),
+  "gh",
+  c(
+    "release",
+    "download",
+    tag,
+    "--repo",
+    mirror_repo,
+    "--pattern",
+    "__source_hash.json",
+    "--dir",
+    shQuote(download_dir),
     "--clobber"
   ),
-  stdout = NULL, stderr = NULL
+  stdout = NULL,
+  stderr = NULL
 ))
 prev_hash_file <- file.path(download_dir, "__source_hash.json")
 unlink(prev_hash_path)
@@ -127,8 +144,11 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
     jsonlite::read_json(prev_hash_file),
     error = function(e) NULL
   )
-  if (!is.null(prev) && identical(prev$hash, source_hash$hash) &&
-        !is.na(source_hash$hash)) {
+  if (
+    !is.null(prev) &&
+      identical(prev$hash, source_hash$hash) &&
+      !is.na(source_hash$hash)
+  ) {
     message(sprintf(
       "[03-publish] META unchanged (sha256=%s..); skipping publish",
       short_hash(source_hash$hash)
@@ -149,23 +169,36 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
 # Publish ---------------------------------------------------------------
 
 title <- sprintf("Mirror: %s/%s (latest)", group, dataset)
-notes <- sprintf(paste0(
-  "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
-  "Updated: %s\n\n",
-  "See https://sidneybissoli.github.io/cvmdata/articles/",
-  "cache-and-mirror.html for client usage."
-), group, dataset, format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC"))
+notes <- sprintf(
+  paste0(
+    "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
+    "Updated: %s\n\n",
+    "See https://sidneybissoli.github.io/cvmdata/articles/",
+    "cache-and-mirror.html for client usage."
+  ),
+  group,
+  dataset,
+  format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC")
+)
 
 # Recreate the release on every run so assets always reflect the
 # current parquet tree. `gh release delete` is idempotent under
 # --yes; missing release -> exit 1, which we swallow.
 suppressWarnings(
-  system2("gh", c(
-    "release", "delete", tag,
-    "--repo", mirror_repo,
-    "--yes",
-    "--cleanup-tag"
-  ), stdout = NULL, stderr = NULL)
+  system2(
+    "gh",
+    c(
+      "release",
+      "delete",
+      tag,
+      "--repo",
+      mirror_repo,
+      "--yes",
+      "--cleanup-tag"
+    ),
+    stdout = NULL,
+    stderr = NULL
+  )
 )
 
 message(sprintf("[03-publish] creating release %s", tag))
@@ -175,12 +208,20 @@ writeLines(notes, notes_file)
 # with spaces, parens or other shell metacharacters must be shQuote()d
 # explicitly. Otherwise gh re-parses them as positional args (e.g. a
 # title "Mirror: cad (latest)" becomes 3 file-pattern args).
-status <- system2("gh", c(
-  "release", "create", tag,
-  "--repo", mirror_repo,
-  "--title", shQuote(title),
-  "--notes-file", shQuote(notes_file)
-))
+status <- system2(
+  "gh",
+  c(
+    "release",
+    "create",
+    tag,
+    "--repo",
+    mirror_repo,
+    "--title",
+    shQuote(title),
+    "--notes-file",
+    shQuote(notes_file)
+  )
+)
 if (status != 0L) {
   stop("gh release create failed", call. = FALSE)
 }
@@ -206,12 +247,18 @@ for (k in seq_along(parquets)) {
 message(sprintf("[03-publish] uploading %d asset(s)", length(assets)))
 for (asset in assets) {
   message("  ", basename(asset))
-  status <- system2("gh", c(
-    "release", "upload", tag,
-    shQuote(asset),
-    "--repo", mirror_repo,
-    "--clobber"
-  ))
+  status <- system2(
+    "gh",
+    c(
+      "release",
+      "upload",
+      tag,
+      shQuote(asset),
+      "--repo",
+      mirror_repo,
+      "--clobber"
+    )
+  )
   if (status != 0L) {
     stop(sprintf("upload failed for %s", basename(asset)), call. = FALSE)
   }

@@ -41,15 +41,21 @@ plant_v0_1_raw_artifact <- function(cache_root, dataset, content = "x") {
 
 # Plant a v0.1-layout parquet artifact under
 # `<cache>/parquet/<dataset>/<table>/...`.
-plant_v0_1_parquet_artifact <- function(cache_root, dataset, table,
-                                        year = 2024) {
+plant_v0_1_parquet_artifact <- function(
+  cache_root,
+  dataset,
+  table,
+  year = 2024
+) {
   dir <- file.path(
-    cache_root, "parquet", dataset, table,
+    cache_root,
+    "parquet",
+    dataset,
+    table,
     sprintf("year=%d", year)
   )
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  writeBin(as.raw(c(0x50, 0x41, 0x52, 0x31)),
-           file.path(dir, "part-0.parquet"))
+  writeBin(as.raw(c(0x50, 0x41, 0x52, 0x31)), file.path(dir, "part-0.parquet"))
   invisible(dir)
 }
 
@@ -95,7 +101,11 @@ test_that("migrate moves v0.1 raw subtrees under <group>/<dataset>/", {
   expect_false(dir.exists(file.path(cache_root, "raw", "cad")))
   expect_false(dir.exists(file.path(cache_root, "raw", "dfp")))
   expect_true(file.exists(file.path(
-    cache_root, "raw", "companhias", "cad", "cad_payload.csv"
+    cache_root,
+    "raw",
+    "companhias",
+    "cad",
+    "cad_payload.csv"
   )))
 })
 
@@ -105,8 +115,13 @@ test_that("migrate also moves parquet subtrees", {
   result <- cache_migrate_v0_1_to_v0_2()
   expect_length(result$moved, 1L)
   expect_true(file.exists(file.path(
-    cache_root, "parquet", "companhias", "dfp", "bpa",
-    "year=2024", "part-0.parquet"
+    cache_root,
+    "parquet",
+    "companhias",
+    "dfp",
+    "bpa",
+    "year=2024",
+    "part-0.parquet"
   )))
   expect_false(dir.exists(file.path(cache_root, "parquet", "dfp")))
 })
@@ -124,7 +139,11 @@ test_that("migrate handles mixed v0.1 + v0.1.0.9000 layouts", {
   result <- cache_migrate_v0_1_to_v0_2()
   expect_length(result$moved, 1L)
   expect_true(file.exists(file.path(
-    cache_root, "raw", "companhias", "cad", "cad_payload.csv"
+    cache_root,
+    "raw",
+    "companhias",
+    "cad",
+    "cad_payload.csv"
   )))
   expect_true(file.exists(file.path(new_dir, "dfp_payload.csv")))
 })
@@ -145,7 +164,10 @@ test_that("migrate aborts before moving when a destination conflicts", {
   )
   # v0.1 subtree must remain untouched (transactional pre-flight):
   expect_true(file.exists(file.path(
-    cache_root, "raw", "cad", "cad_payload.csv"
+    cache_root,
+    "raw",
+    "cad",
+    "cad_payload.csv"
   )))
 })
 
@@ -177,7 +199,10 @@ test_that("migrate aborts with cvmdata_error_internal on read-only root", {
   )
   # v0.1 subtree must remain untouched:
   expect_true(file.exists(file.path(
-    cache_root, "raw", "cad", "cad_payload.csv"
+    cache_root,
+    "raw",
+    "cad",
+    "cad_payload.csv"
   )))
 })
 
@@ -214,15 +239,19 @@ test_that("migrate tolerates a corrupt audit log", {
 
 test_that("migrate returns a no-op for malformed cache_root", {
   expect_identical(
-    cache_migrate_v0_1_to_v0_2(NULL)$moved, character(0L)
+    cache_migrate_v0_1_to_v0_2(NULL)$moved,
+    character(0L)
   )
   expect_identical(
-    cache_migrate_v0_1_to_v0_2(NA_character_)$moved, character(0L)
+    cache_migrate_v0_1_to_v0_2(NA_character_)$moved,
+    character(0L)
   )
   expect_identical(
-    cache_migrate_v0_1_to_v0_2("")$moved, character(0L)
+    cache_migrate_v0_1_to_v0_2("")$moved,
+    character(0L)
   )
   expect_identical(
-    cache_migrate_v0_1_to_v0_2(c("a", "b"))$moved, character(0L)
+    cache_migrate_v0_1_to_v0_2(c("a", "b"))$moved,
+    character(0L)
   )
 })

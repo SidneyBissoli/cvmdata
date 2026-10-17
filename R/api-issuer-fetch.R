@@ -75,14 +75,17 @@
 #'
 #' @family fetchers
 #' @export
-issuer_fetch <- function(dataset, table,
-                         issuer      = NULL,
-                         year        = NULL,
-                         source      = NULL,
-                         report_type = NULL,
-                         on_error    = "abort",
-                         validate    = "strict",
-                         ...) {
+issuer_fetch <- function(
+  dataset,
+  table,
+  issuer = NULL,
+  year = NULL,
+  source = NULL,
+  report_type = NULL,
+  on_error = "abort",
+  validate = "strict",
+  ...
+) {
   dots <- list(...)
   if (length(dots) > 0L) {
     nms <- names(dots) %||% rep("", length(dots))
@@ -102,34 +105,38 @@ issuer_fetch <- function(dataset, table,
     source <- cvm_source_get()
   }
   issuer_fetch_internal(
-    dataset     = dataset,
-    table       = table,
-    issuer      = issuer,
-    year        = year,
-    source      = source,
+    dataset = dataset,
+    table = table,
+    issuer = issuer,
+    year = year,
+    source = source,
     report_type = report_type,
-    on_error    = on_error,
-    validate    = validate
+    on_error = on_error,
+    validate = validate
   )
 }
 
 # Internal orchestrator. Validates arguments, dispatches per
 # temporal_partitioning, applies schema-declared transformations,
 # filters by issuer, and attaches provenance metadata.
-issuer_fetch_internal <- function(dataset,
-                                  table,
-                                  issuer      = NULL,
-                                  year        = NULL,
-                                  source      = "mirror",
-                                  report_type = NULL,
-                                  on_error    = "abort",
-                                  validate    = "strict") {
+issuer_fetch_internal <- function(
+  dataset,
+  table,
+  issuer = NULL,
+  year = NULL,
+  source = "mirror",
+  report_type = NULL,
+  on_error = "abort",
+  validate = "strict"
+) {
   source <- rlang::arg_match0(source, c("mirror", "cvm"))
   validate <- rlang::arg_match0(
-    validate, c("strict", "warn", "skip")
+    validate,
+    c("strict", "warn", "skip")
   )
   on_error <- rlang::arg_match0(
-    on_error, c("abort", "warn", "silent")
+    on_error,
+    c("abort", "warn", "silent")
   )
   if (!is.null(report_type)) {
     report_type <- rlang::arg_match0(report_type, c("ind", "con"))
@@ -142,28 +149,39 @@ issuer_fetch_internal <- function(dataset,
   # request is a clean user-input concern rather than a backend HTTP 404
   # (source = "cvm") or a silent empty read (source = "mirror"). Genuine
   # network 404s on years that do exist stay governed by `on_error`.
-  if (!is.null(year) &&
-        identical(schema$temporal_partitioning %||% "none", "yearly")) {
+  if (
+    !is.null(year) &&
+      identical(schema$temporal_partitioning %||% "none", "yearly")
+  ) {
     year <- clamp_years_to_first(year, schema)
   }
 
   if (identical(source, "mirror")) {
     transformed <- fetch_via_mirror(
-      schema, dataset, year, issuer, report_type
+      schema,
+      dataset,
+      year,
+      issuer,
+      report_type
     )
     return(cvm_attach_metadata(
       transformed,
-      source  = source,
-      group   = schema$group,
+      source = source,
+      group = schema$group,
       dataset = dataset,
-      table   = table
+      table = table
     ))
   }
 
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "yearly")) {
     transformed <- fetch_yearly_partitioned(
-      schema, dataset, year, issuer, report_type, validate,
+      schema,
+      dataset,
+      year,
+      issuer,
+      report_type,
+      validate,
       on_error
     )
   } else {
@@ -179,17 +197,20 @@ issuer_fetch_internal <- function(dataset,
       )
     }
     transformed <- fetch_one_year(
-      schema, year = NULL, issuer = issuer,
-      report_type = report_type, validate = validate
+      schema,
+      year = NULL,
+      issuer = issuer,
+      report_type = report_type,
+      validate = validate
     )
   }
 
   cvm_attach_metadata(
     transformed,
-    source  = source,
-    group   = schema$group,
+    source = source,
+    group = schema$group,
     dataset = dataset,
-    table   = table
+    table = table
   )
 }
 
@@ -198,10 +219,11 @@ issuer_fetch_internal <- function(dataset,
 # `apply_schema_transformations()` step before writing parquet), so
 # the orchestrator only has to layer `filter_by_issuer()` and the
 # provenance metadata on top.
-fetch_via_mirror <- function(schema, dataset, year, issuer,
-                             report_type) {
+fetch_via_mirror <- function(schema, dataset, year, issuer, report_type) {
   transformed <- source_mirror_duckdb_get(
-    schema, year = year, report_type = report_type
+    schema,
+    year = year,
+    report_type = report_type
   )
   if (!is.null(issuer)) {
     # `filter_by_issuer()` may need the dataset's `submissao` table to
@@ -212,14 +234,18 @@ fetch_via_mirror <- function(schema, dataset, year, issuer,
     # may route the submissao lookup through the mirror as well.
     resolved_year <- if (!is.null(year)) {
       year[[1L]]
-    } else if ("year" %in% names(transformed) &&
-               any(!is.na(transformed$year))) {
+    } else if (
+      "year" %in% names(transformed) && any(!is.na(transformed$year))
+    ) {
       max(transformed$year, na.rm = TRUE)
     } else {
       NULL
     }
     transformed <- filter_by_issuer(
-      transformed, issuer, schema = schema, year = resolved_year
+      transformed,
+      issuer,
+      schema = schema,
+      year = resolved_year
     )
   }
   transformed
@@ -227,16 +253,27 @@ fetch_via_mirror <- function(schema, dataset, year, issuer,
 
 # Fetch + transform + filter for a single year (or a non-yearly
 # table, when year is NULL). Returns the post-filter tibble.
-fetch_one_year <- function(schema, year, issuer, report_type,
-                           validate, strict_text = TRUE) {
+fetch_one_year <- function(
+  schema,
+  year,
+  issuer,
+  report_type,
+  validate,
+  strict_text = TRUE
+) {
   path <- source_cvm_http_get(
-    schema, year = year, report_type = report_type
+    schema,
+    year = year,
+    report_type = report_type
   )
   raw <- read_cvm_csv(path, schema, validate = validate)
   transformed <- apply_schema_transformations(raw, schema)
   if (!is.null(issuer)) {
     transformed <- filter_by_issuer(
-      transformed, issuer, schema = schema, year = year,
+      transformed,
+      issuer,
+      schema = schema,
+      year = year,
       strict_text = strict_text
     )
   }
@@ -254,12 +291,23 @@ fetch_one_year <- function(schema, year, issuer, report_type,
 #   so the max-year ZIP may exist but lack civil-year filers.
 .latest_year_max_tries <- 3L
 
-fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
-                                     report_type, validate,
-                                     on_error = "abort") {
+fetch_yearly_partitioned <- function(
+  schema,
+  dataset,
+  year,
+  issuer,
+  report_type,
+  validate,
+  on_error = "abort"
+) {
   if (!is.null(year)) {
     return(fetch_explicit_years(
-      schema, year, issuer, report_type, validate, on_error
+      schema,
+      year,
+      issuer,
+      report_type,
+      validate,
+      on_error
     ))
   }
 
@@ -271,8 +319,11 @@ fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
 
   if (is.null(issuer)) {
     return(fetch_one_year(
-      schema, candidates[1L], issuer = NULL,
-      report_type = report_type, validate = validate
+      schema,
+      candidates[1L],
+      issuer = NULL,
+      report_type = report_type,
+      validate = validate
     ))
   }
 
@@ -287,7 +338,11 @@ fetch_yearly_partitioned <- function(schema, dataset, year, issuer,
     # filer. The final candidate keeps strict matching so a genuine
     # typo still surfaces the "verify the spelling" error (§2.7).
     out <- fetch_one_year(
-      schema, yr, issuer, report_type, validate,
+      schema,
+      yr,
+      issuer,
+      report_type,
+      validate,
       strict_text = i == length(candidates)
     )
     if (nrow(out) > 0L) {
@@ -362,8 +417,14 @@ clamp_years_to_first <- function(year, schema) {
 # aborts with `cvmdata_error_http` regardless of `on_error` — there is
 # no partial result to return and silently producing an empty tibble
 # would mask outages.
-fetch_explicit_years <- function(schema, year, issuer, report_type,
-                                 validate, on_error) {
+fetch_explicit_years <- function(
+  schema,
+  year,
+  issuer,
+  report_type,
+  validate,
+  on_error
+) {
   year <- as.integer(year)
   # A free-text issuer absent from one requested year must not abort the
   # whole span — it may be present in another. Filter each year
@@ -372,8 +433,14 @@ fetch_explicit_years <- function(schema, year, issuer, report_type,
   # fallback). CNPJ / CD_CVM misses stay silent-empty, as before.
   if (identical(on_error, "abort")) {
     parts <- lapply(year, function(yr) {
-      fetch_one_year(schema, yr, issuer, report_type, validate,
-                     strict_text = FALSE)
+      fetch_one_year(
+        schema,
+        yr,
+        issuer,
+        report_type,
+        validate,
+        strict_text = FALSE
+      )
     })
     out <- do.call(rbind, parts)
     abort_if_text_issuer_unmatched(out, issuer)
@@ -381,9 +448,18 @@ fetch_explicit_years <- function(schema, year, issuer, report_type,
   }
   attempts <- lapply(year, function(yr) {
     tryCatch(
-      list(year = yr, ok = TRUE, value = fetch_one_year(
-        schema, yr, issuer, report_type, validate, strict_text = FALSE
-      )),
+      list(
+        year = yr,
+        ok = TRUE,
+        value = fetch_one_year(
+          schema,
+          yr,
+          issuer,
+          report_type,
+          validate,
+          strict_text = FALSE
+        )
+      ),
       cvmdata_error_http = function(e) {
         list(year = yr, ok = FALSE, error = e)
       }
@@ -477,7 +553,8 @@ classify_issuer_tokens <- function(issuer_chr) {
     nchar(issuer_chr) >= 14L
   is_cdcvm <- !is_cnpj &
     grepl("^[0-9]{1,6}$", issuer_chr)
-  is_ticker <- !is_cnpj & !is_cdcvm &
+  is_ticker <- !is_cnpj &
+    !is_cdcvm &
     grepl("^[A-Z]{4}[0-9]{1,2}[A-Z]?$", toupper(issuer_chr))
   is_text <- !is_cnpj & !is_cdcvm & !is_ticker
   list(
@@ -550,11 +627,15 @@ match_by_cd_cvm <- function(df, issuer_chr, mask) {
   # decimal format to get "9512" -> "009512".
   df_padded <- formatC(
     suppressWarnings(as.integer(df[[col]])),
-    width = 6, flag = "0", format = "d"
+    width = 6,
+    flag = "0",
+    format = "d"
   )
   targets_padded <- formatC(
     as.integer(targets),
-    width = 6, flag = "0", format = "d"
+    width = 6,
+    flag = "0",
+    format = "d"
   )
   df[[col]] %in% targets | df_padded %in% targets_padded
 }
@@ -606,9 +687,13 @@ match_by_text <- function(df, issuer_chr, mask, strict = TRUE) {
 # identifiers, resolve them to CNPJs via the `submissao` table of the
 # same dataset/year. Requires `schema` and `year` to be passed by the
 # caller; without them the CD_CVM tokens silently fail to match.
-filter_by_issuer <- function(df, issuer,
-                             schema = NULL, year = NULL,
-                             strict_text = TRUE) {
+filter_by_issuer <- function(
+  df,
+  issuer,
+  schema = NULL,
+  year = NULL,
+  strict_text = TRUE
+) {
   issuer_chr <- as.character(issuer)
   cls <- classify_issuer_tokens(issuer_chr)
 
@@ -619,16 +704,23 @@ filter_by_issuer <- function(df, issuer,
   if (any(cls$is_ticker)) {
     lookup_year <- if (!is.null(year)) as.integer(year)[[1L]] else NULL
     resolved_cnpjs <- resolve_ticker_via_fca(
-      issuer_chr[cls$is_ticker], year = lookup_year
+      issuer_chr[cls$is_ticker],
+      year = lookup_year
     )
     issuer_chr <- c(issuer_chr[!cls$is_ticker], resolved_cnpjs)
     cls <- classify_issuer_tokens(issuer_chr)
   }
 
-  if (any(cls$is_cdcvm) && is.null(cdcvm_col(df)) &&
-      !is.null(schema) && !is.null(year)) {
+  if (
+    any(cls$is_cdcvm) &&
+      is.null(cdcvm_col(df)) &&
+      !is.null(schema) &&
+      !is.null(year)
+  ) {
     resolved <- resolve_cd_cvm_via_submissao(
-      issuer_chr[cls$is_cdcvm], schema, year
+      issuer_chr[cls$is_cdcvm],
+      schema,
+      year
     )
     issuer_chr[cls$is_cdcvm] <- resolved
     cls <- classify_issuer_tokens(issuer_chr)
@@ -671,7 +763,8 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
 
   cli::cli_inform(c(
     "i" = paste0(
-      "Resolving CD_CVM ", paste(cd_cvm_targets, collapse = ", "),
+      "Resolving CD_CVM ",
+      paste(cd_cvm_targets, collapse = ", "),
       " via {.val {dataset}}/submissao for {.val {year}}",
       " (table {.val {schema$table}} does not carry {.code cd_cvm})."
     )
@@ -679,7 +772,9 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
 
   sub_schema <- load_schema(dataset, "submissao")
   path <- source_cvm_http_get(
-    sub_schema, year = year, report_type = NULL
+    sub_schema,
+    year = year,
+    report_type = NULL
   )
   sub_df <- read_cvm_csv(path, sub_schema, validate = "skip")
 
@@ -703,17 +798,26 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
   }
   sub_cd_padded <- formatC(
     suppressWarnings(as.integer(sub_df[[sub_cd_col]])),
-    width = 6, flag = "0", format = "d"
+    width = 6,
+    flag = "0",
+    format = "d"
   )
   targets_padded <- formatC(
     as.integer(cd_cvm_targets),
-    width = 6, flag = "0", format = "d"
+    width = 6,
+    flag = "0",
+    format = "d"
   )
 
-  resolved <- vapply(targets_padded, function(tp) {
-    idx <- which(sub_cd_padded == tp)[1L]
-    if (is.na(idx)) NA_character_ else sub_df[[sub_cnpj_col]][idx]
-  }, character(1L), USE.NAMES = FALSE)
+  resolved <- vapply(
+    targets_padded,
+    function(tp) {
+      idx <- which(sub_cd_padded == tp)[1L]
+      if (is.na(idx)) NA_character_ else sub_df[[sub_cnpj_col]][idx]
+    },
+    character(1L),
+    USE.NAMES = FALSE
+  )
 
   missing_mask <- is.na(resolved)
   if (any(missing_mask)) {
@@ -743,8 +847,12 @@ resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
 # `is_interactive` is injectable so tests can simulate both modes
 # without relying on testthat::local_mocked_bindings against the
 # `base::interactive` primitive (which isn't explicitly imported).
-disambiguate_text_match <- function(df, hits, term,
-                                    is_interactive = interactive()) {
+disambiguate_text_match <- function(
+  df,
+  hits,
+  term,
+  is_interactive = interactive()
+) {
   # Preferred id is cd_cvm (CAD/submissao); falls back to whichever
   # CNPJ column the table carries (FRE-detail has only cnpj_companhia).
   id_col <- if ("cd_cvm" %in% names(df)) "cd_cvm" else cnpj_col(df)
@@ -760,21 +868,22 @@ disambiguate_text_match <- function(df, hits, term,
   unique_rows <- !duplicated(matched[[id_col]])
   matches_tbl <- matched[unique_rows, , drop = FALSE]
   if (!is.null(label_col)) {
-    matches_tbl <- matches_tbl[order(matches_tbl[[label_col]]),
-                               , drop = FALSE]
+    matches_tbl <- matches_tbl[order(matches_tbl[[label_col]]), , drop = FALSE]
   }
 
   if (!is_interactive) {
     abort_on_multiple_matches(term, matches_tbl, id_col, label_col)
   }
   chosen <- prompt_for_issuer_choice(
-    term, matches_tbl, id_col, label_col
+    term,
+    matches_tbl,
+    id_col,
+    label_col
   )
   hits & df[[id_col]] %in% chosen
 }
 
-abort_on_multiple_matches <- function(term, matches_tbl,
-                                      id_col, label_col) {
+abort_on_multiple_matches <- function(term, matches_tbl, id_col, label_col) {
   ids <- matches_tbl[[id_col]]
   labels <- if (!is.null(label_col)) {
     paste0(ids, " : ", matches_tbl[[label_col]])
@@ -795,8 +904,7 @@ abort_on_multiple_matches <- function(term, matches_tbl,
   )
 }
 
-prompt_for_issuer_choice <- function(term, matches_tbl,
-                                     id_col, label_col) {
+prompt_for_issuer_choice <- function(term, matches_tbl, id_col, label_col) {
   ids <- matches_tbl[[id_col]]
   labels <- if (!is.null(label_col)) {
     paste(ids, "-", matches_tbl[[label_col]])
@@ -838,7 +946,9 @@ search_issuers_textual <- function(names_vec, query) {
   for (tok in tokens) {
     alternatives <- expand_abbreviations(tok)
     pattern <- paste0(
-      "\\b(", paste(alternatives, collapse = "|"), ")\\b"
+      "\\b(",
+      paste(alternatives, collapse = "|"),
+      ")\\b"
     )
     hits <- hits & grepl(pattern, names_norm, perl = TRUE)
   }
@@ -848,8 +958,19 @@ search_issuers_textual <- function(names_vec, query) {
 normalize_issuer_text <- function(x) {
   x <- toupper(as.character(x))
   accented <- intToUtf8(c(
-    0x00C1, 0x00C2, 0x00C3, 0x00C0, 0x00C9, 0x00CA, 0x00CD,
-    0x00D3, 0x00D4, 0x00D5, 0x00DA, 0x00DC, 0x00C7
+    0x00C1,
+    0x00C2,
+    0x00C3,
+    0x00C0,
+    0x00C9,
+    0x00CA,
+    0x00CD,
+    0x00D3,
+    0x00D4,
+    0x00D5,
+    0x00DA,
+    0x00DC,
+    0x00C7
   ))
   plain <- "AAAAEEIOOOUUC"
   x <- chartr(accented, plain, x)
@@ -864,14 +985,14 @@ normalize_issuer_text <- function(x) {
 # empirically as needed.
 expand_abbreviations <- function(token) {
   alt <- list(
-    BANCO       = c("BANCO", "BCO"),
-    BCO         = c("BANCO", "BCO"),
-    COMPANHIA   = c("COMPANHIA", "CIA"),
-    CIA         = c("COMPANHIA", "CIA"),
-    INDUSTRIA   = c("INDUSTRIA", "IND"),
-    INDUSTRIAS  = c("INDUSTRIAS", "INDS"),
+    BANCO = c("BANCO", "BCO"),
+    BCO = c("BANCO", "BCO"),
+    COMPANHIA = c("COMPANHIA", "CIA"),
+    CIA = c("COMPANHIA", "CIA"),
+    INDUSTRIA = c("INDUSTRIA", "IND"),
+    INDUSTRIAS = c("INDUSTRIAS", "INDS"),
     PARTICIPACOES = c("PARTICIPACOES", "PART"),
-    PART        = c("PARTICIPACOES", "PART")
+    PART = c("PARTICIPACOES", "PART")
   )
   alt[[token]] %||% token
 }

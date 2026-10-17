@@ -82,8 +82,14 @@ stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 # `group` was added in Sessao 08 of v0.1.0.9000 so the validator looks
 # under the same `<group>/<dataset>/<table>/...` tree that stage 02
 # now writes.
-validate_parquet_path <- function(root, group, dataset, table, year,
-                                  report_type) {
+validate_parquet_path <- function(
+  root,
+  group,
+  dataset,
+  table,
+  year,
+  report_type
+) {
   parts <- c(root, "out", "parquet", group, dataset, table)
   if (!is.null(report_type)) {
     parts <- c(parts, sprintf("report_type=%s", report_type))
@@ -119,7 +125,10 @@ validate_tuple_key <- function(table, year, report_type) {
 # preserving the pre-existing contract.
 validate_skip_set <- function(dataset, workspace) {
   path <- file.path(
-    workspace, "out", "skip", sprintf("%s.json", dataset)
+    workspace,
+    "out",
+    "skip",
+    sprintf("%s.json", dataset)
   )
   empty <- stats::setNames(character(0L), character(0L))
   if (!file.exists(path)) {
@@ -136,7 +145,9 @@ validate_skip_set <- function(dataset, workspace) {
     seq_len(nrow(manifest)),
     function(i) {
       validate_tuple_key(
-        manifest$table[i], manifest$year[i], manifest$report_type[i]
+        manifest$table[i],
+        manifest$year[i],
+        manifest$report_type[i]
       )
     },
     character(1L)
@@ -203,8 +214,13 @@ validate_run_pointblank <- function(tbl, hints, table) {
   hard <- pb_levels(stop_at = 1L)
   soft <- pb_levels(warn_at = 1L)
 
-  cnpj_col <- if ("cnpj_cia" %in% names(tbl)) "cnpj_cia" else
-    if ("cnpj_companhia" %in% names(tbl)) "cnpj_companhia" else NA_character_
+  cnpj_col <- if ("cnpj_cia" %in% names(tbl)) {
+    "cnpj_cia"
+  } else if ("cnpj_companhia" %in% names(tbl)) {
+    "cnpj_companhia"
+  } else {
+    NA_character_
+  }
 
   # tidyselect::all_of() avoids the "external vector in selection"
   # deprecation warning that bites when `columns = a_character_var`
@@ -212,19 +228,25 @@ validate_run_pointblank <- function(tbl, hints, table) {
   col <- function(x) tidyselect::all_of(x)
 
   agent <- pointblank::create_agent(
-    tbl = tbl, tbl_name = table, label = sprintf("cvmdata-etl-%s", table)
+    tbl = tbl,
+    tbl_name = table,
+    label = sprintf("cvmdata-etl-%s", table)
   )
 
   # Hard tier --------------------------------------------------------
   if (!is.na(cnpj_col)) {
     agent <- pointblank::col_is_character(
-      agent, columns = col(cnpj_col), actions = hard,
+      agent,
+      columns = col(cnpj_col),
+      actions = hard,
       label = sprintf("%s is character", cnpj_col)
     )
   }
   if (isTRUE(hints$has_multiply_by_scale) && "vl_conta" %in% names(tbl)) {
     agent <- pointblank::col_is_numeric(
-      agent, columns = col("vl_conta"), actions = hard,
+      agent,
+      columns = col("vl_conta"),
+      actions = hard,
       label = "vl_conta is numeric"
     )
   }
@@ -232,15 +254,21 @@ validate_run_pointblank <- function(tbl, hints, table) {
   # Soft tier --------------------------------------------------------
   if (!is.na(cnpj_col)) {
     agent <- pointblank::col_vals_regex(
-      agent, columns = col(cnpj_col), regex = .cnpj_regex,
-      na_pass = TRUE, actions = soft,
+      agent,
+      columns = col(cnpj_col),
+      regex = .cnpj_regex,
+      na_pass = TRUE,
+      actions = soft,
       label = sprintf("%s matches CVM CNPJ format", cnpj_col)
     )
   }
   if ("cd_cvm" %in% names(tbl)) {
     agent <- pointblank::col_vals_regex(
-      agent, columns = col("cd_cvm"), regex = .cd_cvm_regex,
-      na_pass = TRUE, actions = soft,
+      agent,
+      columns = col("cd_cvm"),
+      regex = .cd_cvm_regex,
+      na_pass = TRUE,
+      actions = soft,
       label = "cd_cvm is all-digits"
     )
   }
@@ -249,9 +277,12 @@ validate_run_pointblank <- function(tbl, hints, table) {
       lower <- as.Date(sprintf("%d-01-01", hints$first_year))
       upper <- Sys.Date() + 365L
       agent <- pointblank::col_vals_between(
-        agent, columns = col(date_col),
-        left = lower, right = upper,
-        na_pass = TRUE, actions = soft,
+        agent,
+        columns = col(date_col),
+        left = lower,
+        right = upper,
+        na_pass = TRUE,
+        actions = soft,
         label = sprintf("%s within [%s, %s]", date_col, lower, upper)
       )
     }
@@ -272,8 +303,13 @@ validate_run_pointblank <- function(tbl, hints, table) {
 # The synthetic checks (existence, readable, n_rows > 0) always come
 # first and short-circuit: if any of them fails, the column-level
 # checks are skipped to keep the report cause-and-effect.
-validate_one_parquet <- function(parquet_path, dataset, table, hints,
-                                  skip_reason = NULL) {
+validate_one_parquet <- function(
+  parquet_path,
+  dataset,
+  table,
+  hints,
+  skip_reason = NULL
+) {
   if (!file.exists(parquet_path)) {
     if (!is.null(skip_reason)) {
       # Legitimately produced no parquet (see validate_skip_set): record
@@ -289,7 +325,8 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints,
         check = sprintf("upstream_%s", skip_reason),
         severity = "soft",
         status = "pass",
-        n = 0L, n_failed = 0L,
+        n = 0L,
+        n_failed = 0L,
         note = note
       ))
     }
@@ -297,7 +334,8 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints,
       check = "parquet_exists",
       severity = "hard",
       status = "fail",
-      n = 0L, n_failed = 0L,
+      n = 0L,
+      n_failed = 0L,
       note = parquet_path
     ))
   }
@@ -310,18 +348,17 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints,
       check = "parquet_readable",
       severity = "hard",
       status = "fail",
-      n = 0L, n_failed = 0L,
+      n = 0L,
+      n_failed = 0L,
       note = conditionMessage(tbl)
     ))
   }
   pre <- tibble::tibble(
     check = c("parquet_exists", "parquet_readable", "n_rows > 0"),
     severity = c("hard", "hard", "hard"),
-    status = c("pass", "pass",
-               if (nrow(tbl) > 0L) "pass" else "fail"),
+    status = c("pass", "pass", if (nrow(tbl) > 0L) "pass" else "fail"),
     n = c(NA_integer_, NA_integer_, nrow(tbl)),
-    n_failed = c(NA_integer_, NA_integer_,
-                 if (nrow(tbl) > 0L) 0L else 1L),
+    n_failed = c(NA_integer_, NA_integer_, if (nrow(tbl) > 0L) 0L else 1L),
     note = c("", "", sprintf("%d row(s)", nrow(tbl)))
   )
   if (nrow(tbl) == 0L) {
@@ -343,8 +380,7 @@ validate_one_parquet <- function(parquet_path, dataset, table, hints,
 
 # Returns a tibble with one row per (table, year, report_type) tuple,
 # carrying the aggregated status and the full per-check detail.
-validate_dataset <- function(group, dataset, workspace,
-                             years_arg = NULL) {
+validate_dataset <- function(group, dataset, workspace, years_arg = NULL) {
   expected <- validate_expected_tuples(dataset, years_arg)
   skip_set <- validate_skip_set(dataset, workspace)
   if (!length(expected)) {
@@ -362,10 +398,17 @@ validate_dataset <- function(group, dataset, workspace,
   for (i in seq_along(expected)) {
     e <- expected[[i]]
     path <- validate_parquet_path(
-      workspace, group, dataset, e$table, e$year, e$report_type
+      workspace,
+      group,
+      dataset,
+      e$table,
+      e$year,
+      e$report_type
     )
     label <- sprintf(
-      "%s/%s%s%s", dataset, e$table,
+      "%s/%s%s%s",
+      dataset,
+      e$table,
       if (!is.null(e$report_type)) sprintf("/%s", e$report_type) else "",
       if (!is.na(e$year)) sprintf("/%d", e$year) else ""
     )
@@ -373,14 +416,27 @@ validate_dataset <- function(group, dataset, workspace,
     key <- validate_tuple_key(e$table, e$year, e$report_type)
     skip_reason <- if (key %in% names(skip_set)) skip_set[[key]] else NULL
     details <- validate_one_parquet(
-      path, dataset, e$table, hints, skip_reason
+      path,
+      dataset,
+      e$table,
+      hints,
+      skip_reason
     )
-    hard_failed <- sum(details$status == "fail" &
-                         details$severity == "hard")
-    soft_failed <- sum(details$status == "fail" &
-                         details$severity == "soft")
-    status <- if (hard_failed > 0L) "hard_fail" else
-      if (soft_failed > 0L) "soft_fail" else "pass"
+    hard_failed <- sum(
+      details$status == "fail" &
+        details$severity == "hard"
+    )
+    soft_failed <- sum(
+      details$status == "fail" &
+        details$severity == "soft"
+    )
+    status <- if (hard_failed > 0L) {
+      "hard_fail"
+    } else if (soft_failed > 0L) {
+      "soft_fail"
+    } else {
+      "pass"
+    }
     message(sprintf(
       "  [%s] %s",
       switch(status, pass = "OK   ", soft_fail = "SOFT ", hard_fail = "HARD "),
@@ -437,10 +493,17 @@ validate_write_report <- function(results, dataset, out_dir) {
         } else {
           ""
         }
-        lines <- c(lines, sprintf(
-          "  - [%s] %s -- %s%s%s",
-          d$severity, d$status, d$check, suffix, note_suffix
-        ))
+        lines <- c(
+          lines,
+          sprintf(
+            "  - [%s] %s -- %s%s%s",
+            d$severity,
+            d$status,
+            d$check,
+            suffix,
+            note_suffix
+          )
+        )
       }
     }
     lines <- c(lines, "")
@@ -455,8 +518,10 @@ validate_write_report <- function(results, dataset, out_dir) {
 # Setting `options(cvmdata.etl_testing = TRUE)` keeps the helpers
 # loaded but skips the entry point. Calling with `Rscript` and no args
 # also exits early so source-evaluation in the IDE never side-effects.
-if (!isTRUE(getOption("cvmdata.etl_testing")) &&
-      length(commandArgs(trailingOnly = TRUE)) > 0L) {
+if (
+  !isTRUE(getOption("cvmdata.etl_testing")) &&
+    length(commandArgs(trailingOnly = TRUE)) > 0L
+) {
   args <- commandArgs(trailingOnly = TRUE)
   group <- NULL
   dataset <- NULL
@@ -487,10 +552,14 @@ if (!isTRUE(getOption("cvmdata.etl_testing")) &&
     stop("--dataset is required", call. = FALSE)
   }
   if (!mirror_pair_valid(group, dataset)) {
-    stop(sprintf(
-      "(%s, %s) not in mirror_datasets_v0_1",
-      group, dataset
-    ), call. = FALSE)
+    stop(
+      sprintf(
+        "(%s, %s) not in mirror_datasets_v0_1",
+        group,
+        dataset
+      ),
+      call. = FALSE
+    )
   }
   workspace <- mirror_workspace()
   options(
@@ -498,10 +567,16 @@ if (!isTRUE(getOption("cvmdata.etl_testing")) &&
     cvmdata.source = "cvm"
   )
 
-  message(sprintf("[02b-validate] group=%s dataset=%s workspace=%s",
-                  group, dataset, workspace))
+  message(sprintf(
+    "[02b-validate] group=%s dataset=%s workspace=%s",
+    group,
+    dataset,
+    workspace
+  ))
   results <- validate_dataset(
-    group, dataset, workspace,
+    group,
+    dataset,
+    workspace,
     years_arg = if (is.null(year)) NULL else year
   )
   if (!nrow(results)) {
@@ -509,13 +584,17 @@ if (!isTRUE(getOption("cvmdata.etl_testing")) &&
     quit(status = 2L)
   }
   out_path <- validate_write_report(
-    results, dataset, file.path(workspace, "out", "validation")
+    results,
+    dataset,
+    file.path(workspace, "out", "validation")
   )
   hard <- sum(results$hard_failed)
   soft <- sum(results$soft_failed)
   message(sprintf(
     "[02b-validate] done. %d parquet(s); %d hard fail(s); %d soft warn(s)",
-    nrow(results), hard, soft
+    nrow(results),
+    hard,
+    soft
   ))
   message(sprintf("[02b-validate] report at %s", out_path))
   if (hard > 0L) {

@@ -33,8 +33,10 @@ mirror_datasets_v0_1 <- tibble::tibble(
 # True iff (group, dataset) is in the v0.1 publish matrix. CLI scripts
 # use this to validate user-supplied --group / --dataset combinations.
 mirror_pair_valid <- function(group, dataset) {
-  any(mirror_datasets_v0_1$group == group &
-        mirror_datasets_v0_1$dataset == dataset)
+  any(
+    mirror_datasets_v0_1$group == group &
+      mirror_datasets_v0_1$dataset == dataset
+  )
 }
 
 # Tag templates --------------------------------------------------------
@@ -49,8 +51,7 @@ mirror_tag_latest <- function(group, dataset) {
 # paper reproducibility). Format keeps lexicographic order = temporal
 # order.
 mirror_tag_snapshot <- function(group, dataset, date = Sys.Date()) {
-  sprintf("mirror-%s-%s-snapshot-%s",
-          group, dataset, format(date, "%Y-%m-%d"))
+  sprintf("mirror-%s-%s-snapshot-%s", group, dataset, format(date, "%Y-%m-%d"))
 }
 
 # Parquet layout -------------------------------------------------------
@@ -59,8 +60,14 @@ mirror_tag_snapshot <- function(group, dataset, date = Sys.Date()) {
 # (CAD), in which case the file lives directly under the table dir.
 # Layout consumed by arrow::open_dataset() and duckdb read_parquet().
 # The `<group>` segment was introduced in Sessao 08 of v0.1.0.9000.
-mirror_parquet_path <- function(root, group, dataset, table,
-                                year = NULL, report_type = NULL) {
+mirror_parquet_path <- function(
+  root,
+  group,
+  dataset,
+  table,
+  year = NULL,
+  report_type = NULL
+) {
   parts <- c(root, "parquet", group, dataset, table)
   if (!is.null(report_type)) {
     parts <- c(parts, sprintf("report_type=%s", report_type))
@@ -95,13 +102,21 @@ mirror_workspace <- function() {
 mirror_schema_dir <- function(dataset) {
   group <- cvmdata:::dataset_group(dataset)
   path <- system.file(
-    "extdata", "schemas", group, dataset, package = "cvmdata"
+    "extdata",
+    "schemas",
+    group,
+    dataset,
+    package = "cvmdata"
   )
   if (!nzchar(path) || !dir.exists(path)) {
-    stop(sprintf(
-      "Schema directory not found for dataset '%s' in group '%s'",
-      dataset, group
-    ), call. = FALSE)
+    stop(
+      sprintf(
+        "Schema directory not found for dataset '%s' in group '%s'",
+        dataset,
+        group
+      ),
+      call. = FALSE
+    )
   }
   path
 }
@@ -118,7 +133,14 @@ mirror_tables <- function(dataset) {
 # API contract is part of the package surface (CLAUDE.md §2.1). All
 # ETL stages iterate over these variants when scheduling work.
 mirror_variant_tables <- c(
-  "bpa", "bpp", "dre", "dra", "dfc_md", "dfc_mi", "dmpl", "dva"
+  "bpa",
+  "bpp",
+  "dre",
+  "dra",
+  "dfc_md",
+  "dfc_mi",
+  "dmpl",
+  "dva"
 )
 
 # Returns the report_type values to iterate for a given table.

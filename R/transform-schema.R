@@ -42,8 +42,8 @@ apply_one_transformation <- function(df, tx, schema) {
   }
   switch(
     action,
-    multiply_by_scale  = tx_multiply_by_scale(df, tx, schema),
-    drop               = tx_drop(df, tx, schema),
+    multiply_by_scale = tx_multiply_by_scale(df, tx, schema),
+    drop = tx_drop(df, tx, schema),
     keep_latest_version = tx_keep_latest_version(df, tx, schema),
     cvmdata_abort(
       c(
@@ -104,8 +104,17 @@ tx_multiply_by_scale <- function(df, tx, schema) {
 scale_factor <- function(x) {
   norm <- toupper(as.character(x))
   accented <- intToUtf8(c(
-    0x00C1, 0x00C2, 0x00C3, 0x00C9, 0x00CA, 0x00CD,
-    0x00D3, 0x00D4, 0x00DA, 0x00DC, 0x00C7
+    0x00C1,
+    0x00C2,
+    0x00C3,
+    0x00C9,
+    0x00CA,
+    0x00CD,
+    0x00D3,
+    0x00D4,
+    0x00DA,
+    0x00DC,
+    0x00C7
   ))
   plain <- "AAAEEIOOUUC"
   norm <- chartr(accented, plain, norm)
@@ -156,12 +165,20 @@ tx_keep_latest_version <- function(df, tx, schema) {
   if (!"versao" %in% names(df)) {
     return(df)
   }
-  cnpj_c <- if ("cnpj_cia" %in% names(df)) "cnpj_cia"
-            else if ("cnpj_companhia" %in% names(df)) "cnpj_companhia"
-            else NULL
-  date_c <- if ("dt_refer" %in% names(df)) "dt_refer"
-            else if ("data_referencia" %in% names(df)) "data_referencia"
-            else NULL
+  cnpj_c <- if ("cnpj_cia" %in% names(df)) {
+    "cnpj_cia"
+  } else if ("cnpj_companhia" %in% names(df)) {
+    "cnpj_companhia"
+  } else {
+    NULL
+  }
+  date_c <- if ("dt_refer" %in% names(df)) {
+    "dt_refer"
+  } else if ("data_referencia" %in% names(df)) {
+    "data_referencia"
+  } else {
+    NULL
+  }
   if (is.null(cnpj_c) || is.null(date_c)) {
     return(df)
   }

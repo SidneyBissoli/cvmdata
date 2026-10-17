@@ -20,8 +20,7 @@
 # @param report_type Required when the schema declares
 #   `cvm_file_pattern_variants`.
 # @return Local filesystem path to the CSV.
-source_cvm_http_get <- function(schema, year = NULL,
-                                report_type = NULL, ...) {
+source_cvm_http_get <- function(schema, year = NULL, report_type = NULL, ...) {
   cache_migrate_v0_1_to_v0_2()
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "none")) {
@@ -76,8 +75,10 @@ get_simple_csv <- function(schema, report_type) {
     )
   }
   cache_dir <- file.path(
-    cvm_cache_path(), "raw",
-    dataset_group(schema$dataset), schema$dataset
+    cvm_cache_path(),
+    "raw",
+    dataset_group(schema$dataset),
+    schema$dataset
   )
   ensure_dir(cache_dir)
   csv_path <- file.path(cache_dir, basename(url))
@@ -87,14 +88,20 @@ get_simple_csv <- function(schema, report_type) {
 
 # Path for yearly-partitioned datasets (DFP/ITR/FRE-detail).
 get_yearly_csv <- function(schema, year, report_type) {
-  archive_url <- sub("\\{year\\}", year, schema$cvm_archive_url_pattern,
-                     fixed = FALSE)
+  archive_url <- sub(
+    "\\{year\\}",
+    year,
+    schema$cvm_archive_url_pattern,
+    fixed = FALSE
+  )
   csv_pattern <- resolve_file_pattern(schema, report_type)
   csv_name <- sub("\\{year\\}", year, csv_pattern, fixed = FALSE)
 
   cache_dir <- file.path(
-    cvm_cache_path(), "raw",
-    dataset_group(schema$dataset), schema$dataset,
+    cvm_cache_path(),
+    "raw",
+    dataset_group(schema$dataset),
+    schema$dataset,
     as.character(year)
   )
   ensure_dir(cache_dir)
@@ -102,8 +109,10 @@ get_yearly_csv <- function(schema, year, report_type) {
   download_with_etag(archive_url, zip_path)
 
   csv_path <- file.path(cache_dir, csv_name)
-  if (!file.exists(csv_path) ||
-        file.mtime(csv_path) < file.mtime(zip_path)) {
+  if (
+    !file.exists(csv_path) ||
+      file.mtime(csv_path) < file.mtime(zip_path)
+  ) {
     # base `unzip()` warns "requested file not found in the zip file"
     # when `csv_name` is absent; that is redundant with the clearer
     # cvmdata_error_zip_member_missing raised just below, so suppress
@@ -174,7 +183,8 @@ download_with_etag <- function(url, dest_path) {
       httr2::req_perform(
         httr2::req_retry(
           httr2::req_method(httr2::request(url), "HEAD"),
-          max_tries = 3L, retry_on_failure = TRUE
+          max_tries = 3L,
+          retry_on_failure = TRUE
         )
       ),
       error = function(e) {
@@ -191,9 +201,9 @@ download_with_etag <- function(url, dest_path) {
     remote_lm <- httr2::resp_header(head_resp, "Last-Modified")
     fresh <-
       (!is.null(remote_etag) &&
-         identical(cached_meta$etag, remote_etag)) ||
+        identical(cached_meta$etag, remote_etag)) ||
       (!is.null(remote_lm) &&
-         identical(cached_meta$last_modified, remote_lm))
+        identical(cached_meta$last_modified, remote_lm))
   }
 
   if (!fresh) {
@@ -201,7 +211,8 @@ download_with_etag <- function(url, dest_path) {
       httr2::req_perform(
         httr2::req_retry(
           httr2::request(url),
-          max_tries = 3L, retry_on_failure = TRUE
+          max_tries = 3L,
+          retry_on_failure = TRUE
         )
       ),
       error = function(e) {
@@ -271,8 +282,7 @@ cache_is_within_ttl <- function(dest_path, cached_meta) {
 # (caller treats NA as "no shortcut, always HEAD").
 read_cache_ttl <- function() {
   ttl <- getOption("cvmdata.cache_ttl_seconds", 2592000)
-  if (!is.numeric(ttl) || length(ttl) != 1L || is.na(ttl) ||
-        ttl < 0) {
+  if (!is.numeric(ttl) || length(ttl) != 1L || is.na(ttl) || ttl < 0) {
     return(NA_real_)
   }
   as.numeric(ttl)
@@ -282,8 +292,7 @@ read_cache_ttl <- function() {
 # (`"%Y-%m-%dT%H:%M:%OS3Z"`). Returns POSIXct NA on any parse failure
 # so callers can treat malformed sidecars as "no freshness info".
 parse_iso_utc <- function(s) {
-  if (is.null(s) || !is.character(s) || length(s) != 1L ||
-        !nzchar(s)) {
+  if (is.null(s) || !is.character(s) || length(s) != 1L || !nzchar(s)) {
     return(as.POSIXct(NA_character_, tz = "UTC"))
   }
   stripped <- sub("Z$", "", s)

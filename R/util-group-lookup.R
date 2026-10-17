@@ -15,8 +15,7 @@
 # at a fixture); falls back to the installed schemas directory.
 .schemas_root <- function() {
   opt <- getOption("cvmdata.schema_root", default = NULL)
-  if (!is.null(opt) && is.character(opt) && length(opt) == 1L &&
-        nzchar(opt)) {
+  if (!is.null(opt) && is.character(opt) && length(opt) == 1L && nzchar(opt)) {
     return(opt)
   }
   system.file("extdata", "schemas", package = "cvmdata")
@@ -33,9 +32,9 @@ schema_tree <- function() {
   }
   if (!nzchar(root) || !dir.exists(root)) {
     out <- data.frame(
-      group   = character(0L),
+      group = character(0L),
       dataset = character(0L),
-      table   = character(0L),
+      table = character(0L),
       stringsAsFactors = FALSE
     )
     .schema_tree_cache[[root]] <- out
@@ -49,15 +48,17 @@ schema_tree <- function() {
     for (d in datasets) {
       d_path <- file.path(g_path, d)
       yamls <- list.files(
-        d_path, pattern = "\\.yaml$", full.names = FALSE
+        d_path,
+        pattern = "\\.yaml$",
+        full.names = FALSE
       )
       if (!length(yamls)) {
         next
       }
       rows[[length(rows) + 1L]] <- data.frame(
-        group   = g,
+        group = g,
         dataset = d,
-        table   = sub("\\.yaml$", "", yamls),
+        table = sub("\\.yaml$", "", yamls),
         stringsAsFactors = FALSE
       )
     }
@@ -66,9 +67,9 @@ schema_tree <- function() {
     do.call(rbind, rows)
   } else {
     data.frame(
-      group   = character(0L),
+      group = character(0L),
       dataset = character(0L),
-      table   = character(0L),
+      table = character(0L),
       stringsAsFactors = FALSE
     )
   }
@@ -83,8 +84,12 @@ schema_tree <- function() {
 # than one group (does not happen in v0.1.0.9000 but the design needs
 # to sustain it from v0.4 onward when fundos arrive).
 dataset_group <- function(dataset) {
-  if (!is.character(dataset) || length(dataset) != 1L ||
-        is.na(dataset) || !nzchar(dataset)) {
+  if (
+    !is.character(dataset) ||
+      length(dataset) != 1L ||
+      is.na(dataset) ||
+      !nzchar(dataset)
+  ) {
     cvmdata_abort(
       c("{.arg dataset} must be a single non-empty string."),
       class = "cvmdata_error_internal"

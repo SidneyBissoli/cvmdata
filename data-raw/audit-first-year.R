@@ -31,7 +31,10 @@ schemas_root <- "inst/extdata/schemas"
 # --- collect yearly schemas -----------------------------------------
 
 yaml_files <- list.files(
-  schemas_root, pattern = "\\.yaml$", recursive = TRUE, full.names = TRUE
+  schemas_root,
+  pattern = "\\.yaml$",
+  recursive = TRUE,
+  full.names = TRUE
 )
 rows <- list()
 for (path in yaml_files) {
@@ -40,10 +43,10 @@ for (path in yaml_files) {
     next
   }
   rows[[length(rows) + 1L]] <- list(
-    dataset  = s$dataset,
-    table    = s$table,
+    dataset = s$dataset,
+    table = s$table,
     declared = as.integer(s$first_year),
-    schema   = s
+    schema = s
   )
 }
 message(sprintf("Found %d yearly schemas to audit.", length(rows)))
@@ -54,9 +57,16 @@ datasets <- unique(vapply(rows, `[[`, character(1L), "dataset"))
 listing_min <- new.env(parent = emptyenv())
 for (d in datasets) {
   years <- tryCatch(cvmdata::cvm_dataset_years(d), error = function(e) NULL)
-  assign(d, if (is.null(years)) NA_integer_ else min(years), envir = listing_min)
-  message(sprintf("  %-5s listing min = %s", d,
-                  if (is.null(years)) "ERROR" else min(years)))
+  assign(
+    d,
+    if (is.null(years)) NA_integer_ else min(years),
+    envir = listing_min
+  )
+  message(sprintf(
+    "  %-5s listing min = %s",
+    d,
+    if (is.null(years)) "ERROR" else min(years)
+  ))
 }
 
 # --- field-count check at a given year ------------------------------
@@ -84,8 +94,9 @@ header_matches <- function(schema, year) {
   if (is.null(resp) || resp_status(resp) >= 400L) {
     return(NA)
   }
-  members <- tryCatch(utils::unzip(tmp, list = TRUE)$Name,
-                      error = function(e) character(0))
+  members <- tryCatch(utils::unzip(tmp, list = TRUE)$Name, error = function(e) {
+    character(0)
+  })
   want <- tolower(member_names(schema, year))
   hit <- members[tolower(members) %in% want]
   if (!length(hit)) {
@@ -103,8 +114,12 @@ header_matches <- function(schema, year) {
 # --- per-table verdict ----------------------------------------------
 
 out <- data.frame(
-  dataset = character(), table = character(), declared = integer(),
-  listing_min = integer(), header_ok = character(), verdict = character(),
+  dataset = character(),
+  table = character(),
+  declared = integer(),
+  listing_min = integer(),
+  header_ok = character(),
+  verdict = character(),
   stringsAsFactors = FALSE
 )
 for (r in rows) {
@@ -122,14 +137,24 @@ for (r in rows) {
   } else if (isFALSE(header_ok)) {
     sprintf("REVIEW: listing min %d header != expected_field_count", lm)
   } else {
-    sprintf("REVIEW: declared %d != listing min %d (header unverified)",
-            r$declared, lm)
+    sprintf(
+      "REVIEW: declared %d != listing min %d (header unverified)",
+      r$declared,
+      lm
+    )
   }
-  out <- rbind(out, data.frame(
-    dataset = r$dataset, table = r$table, declared = r$declared,
-    listing_min = lm, header_ok = as.character(header_ok),
-    verdict = verdict, stringsAsFactors = FALSE
-  ))
+  out <- rbind(
+    out,
+    data.frame(
+      dataset = r$dataset,
+      table = r$table,
+      declared = r$declared,
+      listing_min = lm,
+      header_ok = as.character(header_ok),
+      verdict = verdict,
+      stringsAsFactors = FALSE
+    )
+  )
 }
 
 out <- out[order(out$dataset, out$table), ]
@@ -139,8 +164,10 @@ print(out, row.names = FALSE)
 flagged <- out[out$verdict != "OK", ]
 if (nrow(flagged)) {
   message("\n>>> NEEDS ATTENTION:")
-  print(flagged[, c("dataset", "table", "declared", "listing_min",
-                    "verdict")], row.names = FALSE)
+  print(
+    flagged[, c("dataset", "table", "declared", "listing_min", "verdict")],
+    row.names = FALSE
+  )
 } else {
   message("\nAll first_year values equal the portal listing minimum.")
 }

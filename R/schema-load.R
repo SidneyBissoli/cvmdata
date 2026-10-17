@@ -20,10 +20,18 @@
 load_schema <- function(dataset, table, group = NULL) {
   resolved_group <- resolve_schema_group(dataset, table, group)
   rel <- file.path(
-    "extdata", "schemas", resolved_group, dataset, paste0(table, ".yaml")
+    "extdata",
+    "schemas",
+    resolved_group,
+    dataset,
+    paste0(table, ".yaml")
   )
-  path <- file.path(.schemas_root(), resolved_group, dataset,
-                    paste0(table, ".yaml"))
+  path <- file.path(
+    .schemas_root(),
+    resolved_group,
+    dataset,
+    paste0(table, ".yaml")
+  )
   if (!file.exists(path)) {
     cvmdata_abort(
       c(
@@ -140,8 +148,7 @@ validate_url_topology <- function(s, dataset, table) {
           "exactly one of {.field cvm_archive_url_pattern} or",
           "{.field cvm_file_url_pattern}."
         ),
-        "x" = paste("Got archive={.val {archive}},",
-                    "file={.val {file_url}}.")
+        "x" = paste("Got archive={.val {archive}},", "file={.val {file_url}}.")
       ),
       class = "cvmdata_error_internal"
     )
@@ -217,8 +224,10 @@ validate_meta_status <- function(s, dataset, table) {
   if (!identical(meta_status, "missing")) {
     return(invisible(NULL))
   }
-  if (is.null(s$expected_field_names) ||
-        !length(s$expected_field_names)) {
+  if (
+    is.null(s$expected_field_names) ||
+      !length(s$expected_field_names)
+  ) {
     cvmdata_abort(
       c(
         paste(
@@ -251,8 +260,10 @@ validate_meta_status <- function(s, dataset, table) {
 
 # temporal_partitioning domain + first_year requirement.
 validate_temporal_partitioning <- function(s, dataset, table) {
-  if (!identical(s$temporal_partitioning, "none") &&
-        !identical(s$temporal_partitioning, "yearly")) {
+  if (
+    !identical(s$temporal_partitioning, "none") &&
+      !identical(s$temporal_partitioning, "yearly")
+  ) {
     cvmdata_abort(
       c(
         paste(
@@ -268,8 +279,11 @@ validate_temporal_partitioning <- function(s, dataset, table) {
     return(invisible(NULL))
   }
   fy <- s$first_year
-  ok <- !is.null(fy) && is.numeric(fy) && length(fy) == 1L &&
-    is.finite(fy) && fy == as.integer(fy)
+  ok <- !is.null(fy) &&
+    is.numeric(fy) &&
+    length(fy) == 1L &&
+    is.finite(fy) &&
+    fy == as.integer(fy)
   if (!ok) {
     cvmdata_abort(
       c(paste(
