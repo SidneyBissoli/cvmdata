@@ -27,7 +27,8 @@ By participating in this project you agree to abide by its
 1. **Fork** the repository and create a branch off `main`:
    `git checkout -b your-topic`.
 2. **Match the project conventions**: snake_case function and argument
-   names; the native pipe `|>`; tidyverse style; fully-qualified
+   names; the native pipe `|>`; tidyverse style, applied by the
+   [Air](https://posit-dev.github.io/air/) formatter (`air format .`); fully-qualified
    namespaces (`dplyr::filter()`, `httr2::request()`); messages via
    `cli::cli_*`. Strings preserved from the CVM portal (table names,
    column names, categorical values) stay in Portuguese; everything
@@ -73,6 +74,9 @@ devtools::check()
 
 # all tests must pass (487+ as of v0.0.0.9000)
 devtools::test()
+
+# Air must leave every file unchanged (run in a terminal)
+# air format --check .
 
 # lintr must return character(0)
 lintr::lint_package()
