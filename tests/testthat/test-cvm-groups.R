@@ -55,13 +55,16 @@ test_that("cvm_groups totals match the decision doc", {
   g <- cvm_groups()
   expect_identical(sum(g$n_datasets), 67L)
   expect_identical(
-    g$n_datasets[g$group == "companhias"], 12L
+    g$n_datasets[g$group == "companhias"],
+    12L
   )
   expect_identical(
-    g$n_datasets[g$group == "fundos-de-investimento"], 22L
+    g$n_datasets[g$group == "fundos-de-investimento"],
+    22L
   )
   expect_identical(
-    g$n_datasets[g$group == "fundos-estruturados"], 10L
+    g$n_datasets[g$group == "fundos-estruturados"],
+    10L
   )
 })
 

@@ -68,8 +68,9 @@ cvm_cache_path <- function() {
 #' @seealso [cvm_cache_path()]
 #' @export
 cvm_cache_set_path <- function(path) {
-  if (!is.character(path) || length(path) != 1L || !nzchar(path) ||
-        is.na(path)) {
+  if (
+    !is.character(path) || length(path) != 1L || !nzchar(path) || is.na(path)
+  ) {
     cvmdata_abort(
       c("{.arg path} must be a single non-empty string."),
       class = "cvmdata_error_input"
@@ -156,13 +157,13 @@ cvm_cache_set_path <- function(path) {
 cvm_cache_info <- function() {
   cache_migrate_v0_1_to_v0_2()
   schema <- tibble::tibble(
-    group         = character(0L),
-    dataset       = character(0L),
-    file          = character(0L),
-    path          = character(0L),
-    size_bytes    = integer(0L),
-    mtime         = as.POSIXct(character(0L), tz = "UTC"),
-    etag          = character(0L),
+    group = character(0L),
+    dataset = character(0L),
+    file = character(0L),
+    path = character(0L),
+    size_bytes = integer(0L),
+    mtime = as.POSIXct(character(0L), tz = "UTC"),
+    etag = character(0L),
     last_modified = character(0L)
   )
   attr(schema, "total_size_bytes") <- 0
@@ -171,7 +172,10 @@ cvm_cache_info <- function() {
     return(schema)
   }
   all_files <- list.files(
-    raw_root, recursive = TRUE, full.names = TRUE, no.. = TRUE
+    raw_root,
+    recursive = TRUE,
+    full.names = TRUE,
+    no.. = TRUE
   )
   artifacts <- all_files[!grepl("\\.etag\\.rds$", all_files)]
   if (!length(artifacts)) {
@@ -204,13 +208,13 @@ cvm_cache_info <- function() {
     }
   }
   out <- tibble::tibble(
-    group         = group,
-    dataset       = dataset,
-    file          = file_basename,
-    path          = artifacts,
-    size_bytes    = size_bytes,
-    mtime         = mtime,
-    etag          = etag,
+    group = group,
+    dataset = dataset,
+    file = file_basename,
+    path = artifacts,
+    size_bytes = size_bytes,
+    mtime = mtime,
+    etag = etag,
     last_modified = last_modified
   )
   out <- out[order(out$group, out$dataset, out$file), , drop = FALSE]
@@ -267,17 +271,27 @@ cvm_cache_info <- function() {
 #' cvm_cache_clear(what = "raw")
 #' @family cache
 #' @export
-cvm_cache_clear <- function(what = "all",
-                            dataset = NULL,
-                            group = NULL,
-                            year = NULL,
-                            confirm = interactive()) {
+cvm_cache_clear <- function(
+  what = "all",
+  dataset = NULL,
+  group = NULL,
+  year = NULL,
+  confirm = interactive()
+) {
   cache_migrate_v0_1_to_v0_2()
   args <- .validate_cache_clear_args(
-    what, dataset, group, year, confirm
+    what,
+    dataset,
+    group,
+    year,
+    confirm
   )
   target <- .cache_clear_target(
-    cvm_cache_path(), args$what, args$group, args$dataset, args$year
+    cvm_cache_path(),
+    args$what,
+    args$group,
+    args$dataset,
+    args$year
   )
   if (!dir.exists(target)) {
     if (!is.null(args$dataset)) {
@@ -317,8 +331,7 @@ cvm_cache_clear <- function(what = "all",
 # widened to "raw" when a group or dataset filter is supplied without
 # an explicit parquet target. `group` is inferred from `dataset` when
 # omitted; when both are supplied they must agree.
-.validate_cache_clear_args <- function(what, dataset, group, year,
-                                       confirm) {
+.validate_cache_clear_args <- function(what, dataset, group, year, confirm) {
   what <- rlang::arg_match0(what, c("all", "raw", "parquet"))
   if (!is.null(year) && is.null(dataset)) {
     cvmdata_abort(
@@ -356,8 +369,10 @@ cvm_cache_clear <- function(what = "all",
       )
     }
   }
-  if ((!is.null(group) || !is.null(dataset)) &&
-        identical(what, "all")) {
+  if (
+    (!is.null(group) || !is.null(dataset)) &&
+      identical(what, "all")
+  ) {
     what <- "raw"
   }
   year <- .check_year_arg(year)
@@ -379,16 +394,20 @@ cvm_cache_clear <- function(what = "all",
     )
   }
   .check_confirm_arg(confirm)
-  list(what = what, group = group, dataset = dataset,
-       year = year, confirm = confirm)
+  list(
+    what = what,
+    group = group,
+    dataset = dataset,
+    year = year,
+    confirm = confirm
+  )
 }
 
 .check_dataset_arg <- function(dataset) {
   if (is.null(dataset)) {
     return(invisible())
   }
-  if (!is.character(dataset) || length(dataset) != 1L ||
-        !nzchar(dataset)) {
+  if (!is.character(dataset) || length(dataset) != 1L || !nzchar(dataset)) {
     cvmdata_abort(
       c("{.arg dataset} must be a single non-empty string."),
       class = "cvmdata_error_input"
@@ -406,8 +425,12 @@ cvm_cache_clear <- function(what = "all",
   if (is.null(group)) {
     return(NULL)
   }
-  if (!is.character(group) || length(group) != 1L ||
-        is.na(group) || !nzchar(group)) {
+  if (
+    !is.character(group) ||
+      length(group) != 1L ||
+      is.na(group) ||
+      !nzchar(group)
+  ) {
     cvmdata_abort(
       c("{.arg group} must be a single non-empty string."),
       class = "cvmdata_error_input"
@@ -420,8 +443,12 @@ cvm_cache_clear <- function(what = "all",
   if (is.null(year)) {
     return(NULL)
   }
-  if (length(year) != 1L || is.na(year) ||
-        !is.numeric(year) || year != as.integer(year)) {
+  if (
+    length(year) != 1L ||
+      is.na(year) ||
+      !is.numeric(year) ||
+      year != as.integer(year)
+  ) {
     cvmdata_abort(
       c("{.arg year} must be a single integer."),
       class = "cvmdata_error_input"
@@ -521,7 +548,10 @@ build_cache_units <- function(raw_root) {
     return(empty)
   }
   all_files <- list.files(
-    raw_root, recursive = TRUE, full.names = TRUE, no.. = TRUE
+    raw_root,
+    recursive = TRUE,
+    full.names = TRUE,
+    no.. = TRUE
   )
   sidecars <- all_files[grepl("\\.etag\\.rds$", all_files)]
   if (!length(sidecars)) {
@@ -545,7 +575,10 @@ build_cache_units <- function(raw_root) {
     mtimes[[i]] <- max(file.mtime(anchors[idx]))
     if (dir.exists(key)) {
       files <- list.files(
-        key, recursive = TRUE, full.names = TRUE, no.. = TRUE
+        key,
+        recursive = TRUE,
+        full.names = TRUE,
+        no.. = TRUE
       )
     } else {
       files <- c(anchors[[idx[[1L]]]], sidecars[[idx[[1L]]]])
@@ -636,8 +669,7 @@ cache_enforce_limit <- function(protect = NULL) {
 # TRUE)`. The warning carries the number of units removed and the
 # bytes freed, plus the active limit so the user can decide whether
 # to bump it.
-cache_emit_eviction_warning <- function(removed, freed_bytes,
-                                        limit_bytes) {
+cache_emit_eviction_warning <- function(removed, freed_bytes, limit_bytes) {
   if (!should_warn_eviction()) {
     return(invisible())
   }
@@ -684,7 +716,9 @@ should_warn_eviction <- function() {
     return(FALSE)
   }
   normalised <- normalizePath(
-    unit_files, winslash = "/", mustWork = FALSE
+    unit_files,
+    winslash = "/",
+    mustWork = FALSE
   )
   protect_norm %in% normalised
 }
@@ -697,8 +731,10 @@ should_warn_eviction <- function() {
   unlink(files, force = TRUE)
   parent_dirs <- unique(dirname(files))
   for (d in parent_dirs) {
-    if (dir.exists(d) &&
-          !length(list.files(d, all.files = TRUE, no.. = TRUE))) {
+    if (
+      dir.exists(d) &&
+        !length(list.files(d, all.files = TRUE, no.. = TRUE))
+    ) {
       unlink(d, recursive = TRUE, force = TRUE)
     }
   }
@@ -734,8 +770,11 @@ should_warn_eviction <- function() {
 # `cvm_cache_clear()`; the no-op fast path keeps the steady-state cost
 # of those entries to a couple of `file.exists()` calls.
 cache_migrate_v0_1_to_v0_2 <- function(cache_root = cvm_cache_path()) {
-  empty <- list(moved = character(0L), log_path = NA_character_,
-                ts = as.POSIXct(NA_character_, tz = "UTC"))
+  empty <- list(
+    moved = character(0L),
+    log_path = NA_character_,
+    ts = as.POSIXct(NA_character_, tz = "UTC")
+  )
   if (!.cache_migrate_root_usable(cache_root)) {
     return(invisible(empty))
   }
@@ -757,8 +796,10 @@ cache_migrate_v0_1_to_v0_2 <- function(cache_root = cvm_cache_path()) {
 # a silent no-op — the migration is a side helper of the source layer,
 # not an API touchpoint.
 .cache_migrate_root_usable <- function(cache_root) {
-  is.character(cache_root) && length(cache_root) == 1L &&
-    !is.na(cache_root) && nzchar(cache_root) &&
+  is.character(cache_root) &&
+    length(cache_root) == 1L &&
+    !is.na(cache_root) &&
+    nzchar(cache_root) &&
     dir.exists(cache_root)
 }
 
@@ -767,7 +808,9 @@ cache_migrate_v0_1_to_v0_2 <- function(cache_root = cvm_cache_path()) {
 # a partial mix of v0.1 and v0.1.0.9000 caches fails fast.
 .cache_migrate_check_conflicts <- function(planned) {
   conflicts <- vapply(
-    planned, function(p) file.exists(p$dest), logical(1L)
+    planned,
+    function(p) file.exists(p$dest),
+    logical(1L)
   )
   if (!any(conflicts)) {
     return(invisible())

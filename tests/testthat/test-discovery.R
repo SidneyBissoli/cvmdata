@@ -20,8 +20,10 @@ test_that("cvm_tables errors on non-string dataset arg", {
 })
 
 test_that("cvm_tables errors on unknown dataset", {
-  expect_error(cvm_tables("not_a_real_dataset_xyz"),
-               class = "cvmdata_error_input")
+  expect_error(
+    cvm_tables("not_a_real_dataset_xyz"),
+    class = "cvmdata_error_input"
+  )
 })
 
 test_that("cvm_dictionary('dfp', 'bpa') returns parsed rows", {
@@ -29,8 +31,16 @@ test_that("cvm_dictionary('dfp', 'bpa') returns parsed rows", {
   expect_s3_class(d, "tbl_df")
   expect_named(
     d,
-    c("campo", "campo_original", "descricao", "dominio", "tipo_dados",
-      "tamanho", "precisao", "scale")
+    c(
+      "campo",
+      "campo_original",
+      "descricao",
+      "dominio",
+      "tipo_dados",
+      "tamanho",
+      "precisao",
+      "scale"
+    )
   )
   expect_gt(nrow(d), 0L)
   expect_true(all(!is.na(d$tipo_dados)))
@@ -177,8 +187,16 @@ test_that("cvm_dictionary accepts explicit group = 'companhias'", {
   expect_gt(nrow(d), 0L)
   expect_named(
     d,
-    c("campo", "campo_original", "descricao", "dominio", "tipo_dados",
-      "tamanho", "precisao", "scale")
+    c(
+      "campo",
+      "campo_original",
+      "descricao",
+      "dominio",
+      "tipo_dados",
+      "tamanho",
+      "precisao",
+      "scale"
+    )
   )
 })
 
@@ -211,8 +229,7 @@ test_that("cvm_codelist accepts explicit group = 'companhias'", {
 
 test_that("cvm_codelist with unknown group aborts cvmdata_error_input", {
   expect_error(
-    cvm_codelist("cad", "companhias", "sit",
-                 group = "fundos-de-investimento"),
+    cvm_codelist("cad", "companhias", "sit", group = "fundos-de-investimento"),
     class = "cvmdata_error_input"
   )
 })
@@ -352,7 +369,7 @@ test_that("cvm_dataset_years falls back to declared range when listing down", {
     yrs <- httr2::with_mocked_responses(mock, cvm_dataset_years("dfp")),
     class = "cvmdata_warn_year_listing_fallback"
   )
-  expect_identical(yrs, 2010:2026)   # dfp first_year = 2010
+  expect_identical(yrs, 2010:2026) # dfp first_year = 2010
 })
 
 test_that("cvm_dataset_years aborts when the listing has no year matches", {

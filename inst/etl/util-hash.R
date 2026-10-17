@@ -31,12 +31,17 @@ mirror_split_dict_url <- function(url) {
 mirror_collect_dict_urls <- function(dataset) {
   yaml_files <- list.files(
     mirror_schema_dir(dataset),
-    pattern = "\\.yaml$", full.names = TRUE
+    pattern = "\\.yaml$",
+    full.names = TRUE
   )
   raw <- unlist(lapply(yaml_files, function(p) {
     s <- yaml::read_yaml(p)
-    if (identical(s$meta_status, "missing")) return(character())
-    if (is.null(s$cvm_dictionary_url)) return(character())
+    if (identical(s$meta_status, "missing")) {
+      return(character())
+    }
+    if (is.null(s$cvm_dictionary_url)) {
+      return(character())
+    }
     s$cvm_dictionary_url
   }))
   sort(unique(raw))
@@ -65,9 +70,14 @@ mirror_hash_meta_entry <- function(local_base, fragment) {
   utils::unzip(local_base, files = fragment, exdir = extract_dir)
   extracted <- file.path(extract_dir, fragment)
   if (!file.exists(extracted)) {
-    stop(sprintf(
-      "META entry '%s' not found inside '%s'", fragment, local_base
-    ), call. = FALSE)
+    stop(
+      sprintf(
+        "META entry '%s' not found inside '%s'",
+        fragment,
+        local_base
+      ),
+      call. = FALSE
+    )
   }
   digest::digest(file = extracted, algo = "sha256")
 }
@@ -98,19 +108,27 @@ compute_source_hash <- function(dataset) {
   local_bases <- vapply(bases, mirror_download_meta, character(1L))
   names(local_bases) <- bases
 
-  components <- vapply(parsed, function(pair) {
-    mirror_hash_meta_entry(local_bases[[pair$base]], pair$fragment)
-  }, character(1L))
+  components <- vapply(
+    parsed,
+    function(pair) {
+      mirror_hash_meta_entry(local_bases[[pair$base]], pair$fragment)
+    },
+    character(1L)
+  )
   names(components) <- urls
 
   # Hash is taken over a canonical JSON encoding of the sorted components
   # map, so different platforms / orderings yield the same digest.
   payload <- jsonlite::toJSON(
     as.list(components)[order(names(components))],
-    auto_unbox = TRUE, pretty = FALSE
+    auto_unbox = TRUE,
+    pretty = FALSE
   )
-  c(out_meta, list(
-    hash = digest::digest(payload, algo = "sha256", serialize = FALSE),
-    components = as.list(components)
-  ))
+  c(
+    out_meta,
+    list(
+      hash = digest::digest(payload, algo = "sha256", serialize = FALSE),
+      components = as.list(components)
+    )
+  )
 }

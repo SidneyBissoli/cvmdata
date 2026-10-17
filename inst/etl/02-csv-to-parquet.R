@@ -49,8 +49,10 @@ if (is.null(dataset)) {
   stop("--dataset is required", call. = FALSE)
 }
 if (!mirror_pair_valid(group, dataset)) {
-  stop(sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
-       call. = FALSE)
+  stop(
+    sprintf("(%s, %s) not in mirror_datasets_v0_1", group, dataset),
+    call. = FALSE
+  )
 }
 
 workspace <- mirror_workspace()
@@ -93,7 +95,8 @@ write_one <- function(tbl, y, rtype) {
   rt_arg <- if (is.null(rtype)) NULL else rtype
   res <- tryCatch(
     cvmdata::issuer_fetch(
-      dataset, tbl,
+      dataset,
+      tbl,
       year = years_arg,
       report_type = rt_arg,
       source = "cvm"
@@ -111,11 +114,17 @@ write_one <- function(tbl, y, rtype) {
     }
     return("fail")
   }
-  if (nrow(res) == 0L) return("empty")
+  if (nrow(res) == 0L) {
+    return("empty")
+  }
 
   parts <- c("parquet", group, dataset, tbl)
-  if (!is.null(rtype)) parts <- c(parts, sprintf("report_type=%s", rtype))
-  if (!is.na(y)) parts <- c(parts, sprintf("year=%d", y))
+  if (!is.null(rtype)) {
+    parts <- c(parts, sprintf("report_type=%s", rtype))
+  }
+  if (!is.na(y)) {
+    parts <- c(parts, sprintf("year=%d", y))
+  }
   out_dir <- do.call(file.path, c(list(out_root), as.list(parts)))
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   out_path <- file.path(out_dir, "part-0.parquet")
@@ -135,7 +144,9 @@ write_one <- function(tbl, y, rtype) {
 log_and_write <- function(tbl, y, rt) {
   label <- if (is.null(rt)) tbl else sprintf("%s/%s", tbl, rt)
   message(sprintf(
-    "  -> %s/%s/%s", dataset, label,
+    "  -> %s/%s/%s",
+    dataset,
+    label,
     if (is.na(y)) "static" else as.character(y)
   ))
   write_one(tbl, y, rt)
@@ -155,7 +166,9 @@ skip_tuple_row <- function(tbl, y, rt, reason) {
 
 message(sprintf(
   "[02-parquet] group=%s dataset=%s tables=[%s] year =[%s]",
-  group, dataset, paste(tables, collapse = ", "),
+  group,
+  dataset,
+  paste(tables, collapse = ", "),
   paste(years_to_process, collapse = ", ")
 ))
 
@@ -166,7 +179,10 @@ for (tbl in tables) {
   for (y in years_to_process) {
     for (rt in mirror_variants_for(tbl)) {
       outcomes[[length(outcomes) + 1L]] <- list(
-        tbl = tbl, y = y, rt = rt, st = log_and_write(tbl, y, rt)
+        tbl = tbl,
+        y = y,
+        rt = rt,
+        st = log_and_write(tbl, y, rt)
       )
     }
   }
@@ -204,12 +220,17 @@ skip_manifest <- if (length(skip_tuples)) {
 jsonlite::write_json(
   skip_manifest,
   file.path(skip_dir, sprintf("%s.json", dataset)),
-  auto_unbox = TRUE, pretty = TRUE, na = "null"
+  auto_unbox = TRUE,
+  pretty = TRUE,
+  na = "null"
 )
 
 message(sprintf(
   "[02-parquet] done. %d ok / %d empty / %d absent / %d failed",
-  n_ok, n_empty, n_absent, n_fail
+  n_ok,
+  n_empty,
+  n_absent,
+  n_fail
 ))
 if (n_fail > 0L && n_ok == 0L) {
   quit(status = 1L)

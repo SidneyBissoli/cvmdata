@@ -53,8 +53,12 @@ cvm_source_get <- function() {
 #' @seealso [cvm_source_get()]
 #' @export
 cvm_source_set <- function(source) {
-  if (!is.character(source) || length(source) != 1L || is.na(source) ||
-        !nzchar(source)) {
+  if (
+    !is.character(source) ||
+      length(source) != 1L ||
+      is.na(source) ||
+      !nzchar(source)
+  ) {
     cvmdata_abort(
       c("{.arg source} must be a single non-empty string."),
       class = "cvmdata_error_input"

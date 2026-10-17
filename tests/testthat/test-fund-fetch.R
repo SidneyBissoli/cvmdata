@@ -17,8 +17,16 @@ test_that("fund_fetch has canonical signature", {
   fmls <- formals(fund_fetch)
   expect_named(
     fmls,
-    c("dataset", "table", "fund", "date",
-      "source", "on_error", "validate", "...")
+    c(
+      "dataset",
+      "table",
+      "fund",
+      "date",
+      "source",
+      "on_error",
+      "validate",
+      "..."
+    )
   )
   expect_null(fmls$fund)
   expect_null(fmls$date)

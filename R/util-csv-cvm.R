@@ -58,8 +58,7 @@ identifier_columns <- function(csv_names) {
 # known to the snapshot (`known`) and the subset declared as
 # `tipo_dados = "date"` (`date`).
 resolve_dict_columns <- function(schema) {
-  if (is.null(schema) || is.null(schema$dataset) ||
-        is.null(schema$table)) {
+  if (is.null(schema) || is.null(schema$dataset) || is.null(schema$table)) {
     return(NULL)
   }
   if (identical(schema$meta_status %||% "available", "missing")) {
@@ -182,7 +181,9 @@ validate_field_count <- function(csv_names, schema, validate, path) {
     )
   )
   emit_validation(
-    msg, validate, "cvmdata_error_parse",
+    msg,
+    validate,
+    "cvmdata_error_parse",
     .envir = environment()
   )
 }
@@ -214,21 +215,26 @@ validate_field_names <- function(csv_names, schema, validate, path) {
     )
   }
   emit_validation(
-    msg, validate, "cvmdata_error_parse",
+    msg,
+    validate,
+    "cvmdata_error_parse",
     .envir = environment()
   )
 }
 
-emit_validation <- function(msg,
-                            validate,
-                            error_class,
-                            .envir = parent.frame()) {
+emit_validation <- function(
+  msg,
+  validate,
+  error_class,
+  .envir = parent.frame()
+) {
   if (identical(validate, "strict")) {
     cvmdata_abort(msg, class = error_class, .envir = .envir)
   }
   if (identical(validate, "warn")) {
     cvmdata_warn(
-      msg, class = "cvmdata_warn_validation",
+      msg,
+      class = "cvmdata_warn_validation",
       .envir = .envir
     )
   }

@@ -46,8 +46,7 @@ test_that("issuer_fetch CGVN submissao tracer returns cvm_tbl", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "submissao",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("cgvn", "submissao", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -58,8 +57,10 @@ test_that("issuer_fetch CGVN submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "table"), "submissao")
   expect_true(nrow(result) > 0L)
   # FRE-detail convention: cnpj_companhia / data_referencia.
-  expect_true(all(c("cnpj_companhia", "data_referencia", "versao",
-                    "codigo_cvm") %in% names(result)))
+  expect_true(all(
+    c("cnpj_companhia", "data_referencia", "versao", "codigo_cvm") %in%
+      names(result)
+  ))
   expect_type(result$cnpj_companhia, "character")
   expect_type(result$codigo_cvm, "character")
   expect_s3_class(result$data_referencia, "Date")
@@ -71,15 +72,22 @@ test_that("issuer_fetch CGVN praticas tracer returns cvm_tbl", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("cgvn", "praticas", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
   expect_identical(attr(result, "table"), "praticas")
   expect_true(nrow(result) > 0L)
-  expect_true(all(c("cnpj_companhia", "data_referencia", "versao",
-                    "id_item", "pratica_adotada") %in% names(result)))
+  expect_true(all(
+    c(
+      "cnpj_companhia",
+      "data_referencia",
+      "versao",
+      "id_item",
+      "pratica_adotada"
+    ) %in%
+      names(result)
+  ))
   # praticas does not carry codigo_cvm natively (CGVN design).
   expect_false("codigo_cvm" %in% names(result))
   # id_item is the per-practice identifier; must be character to
@@ -95,9 +103,13 @@ test_that("issuer_fetch CGVN filters by CNPJ via cnpj_companhia", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas",
-                 issuer = "00.000.000/0001-91",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "cgvn",
+      "praticas",
+      issuer = "00.000.000/0001-91",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -113,9 +125,13 @@ test_that("issuer_fetch CGVN resolves CD_CVM via submissao for praticas", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas",
-                 issuer = "001023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "cgvn",
+      "praticas",
+      issuer = "001023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -127,13 +143,23 @@ test_that("CGVN CD_CVM resolution accepts unpadded input", {
 
   out_padded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas",
-                 issuer = "001023", year = 2024L, source = "cvm")
+    issuer_fetch(
+      "cgvn",
+      "praticas",
+      issuer = "001023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   out_unpadded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas",
-                 issuer = "1023", year = 2024L, source = "cvm")
+    issuer_fetch(
+      "cgvn",
+      "praticas",
+      issuer = "1023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_identical(nrow(out_padded), nrow(out_unpadded))
 })
@@ -151,16 +177,19 @@ test_that("load_schema accepts CGVN YAMLs", {
   prat <- load_schema("cgvn", "praticas")
   expect_equal(prat$expected_field_count, 11)
   expect_identical(
-    prat$cvm_file_pattern, "cgvn_cia_aberta_praticas_{year}.csv"
+    prat$cvm_file_pattern,
+    "cgvn_cia_aberta_praticas_{year}.csv"
   )
   # keep_latest_version with extra id_item key.
   txs <- prat$transformations
   expect_true(any(vapply(
-    txs, function(t) identical(t$action, "keep_latest_version"),
+    txs,
+    function(t) identical(t$action, "keep_latest_version"),
     logical(1L)
   )))
   klv <- Filter(
-    function(t) identical(t$action, "keep_latest_version"), txs
+    function(t) identical(t$action, "keep_latest_version"),
+    txs
   )[[1L]]
   expect_identical(klv$keys, "id_item")
 })
@@ -194,7 +223,9 @@ test_that("keep_latest_version composes (cnpj, date, id_item) for CGVN", {
   schema <- list(dataset = "cgvn", table = "praticas")
 
   out_no_key <- cvmdata:::tx_keep_latest_version(
-    df, list(action = "keep_latest_version"), schema
+    df,
+    list(action = "keep_latest_version"),
+    schema
   )
   expect_equal(nrow(out_no_key), 1L)
   expect_identical(out_no_key$id_item, "1.1.1")
@@ -233,34 +264,51 @@ test_that("keep_latest_version aborts on missing extra key", {
 
 test_that("identifier_columns classifies prefix + exact-match names", {
   positives <- c(
-    "cnpj_cia", "cnpj_companhia", "cnpj_escriturador",
-    "cpf_auditor", "cpf_responsavel_tecnico",
-    "codigo_cvm", "codigo_cvm_auditor", "codigo_negociacao",
-    "cd_cvm", "cep",
-    "ddi_telefone", "ddd_telefone",
-    "id_documento", "id_item", "id_doc",
+    "cnpj_cia",
+    "cnpj_companhia",
+    "cnpj_escriturador",
+    "cpf_auditor",
+    "cpf_responsavel_tecnico",
+    "codigo_cvm",
+    "codigo_cvm_auditor",
+    "codigo_negociacao",
+    "cd_cvm",
+    "cep",
+    "ddi_telefone",
+    "ddd_telefone",
+    "id_documento",
+    "id_item",
+    "id_doc",
     "protocolo_entrega",
-    "caixa_postal", "tel", "versao",
+    "caixa_postal",
+    "tel",
+    "versao",
     # case insensitivity
-    "CNPJ_CIA", "Codigo_CVM"
+    "CNPJ_CIA",
+    "Codigo_CVM"
   )
   negatives <- c(
-    "denom_cia", "nome_companhia", "categoria",
-    "vl_conta", "ordem_exerc",
-    "telefone",          # not exact-match `tel`; not in v0.1/v0.2 schemas
-    "data_referencia", "dt_refer",
-    "principio", "capitulo", "explicacao",
-    "pratica_adotada", "pratica_recomendada",
-    "categ_doc"          # categ_doc is not an identifier (codelist)
+    "denom_cia",
+    "nome_companhia",
+    "categoria",
+    "vl_conta",
+    "ordem_exerc",
+    "telefone", # not exact-match `tel`; not in v0.1/v0.2 schemas
+    "data_referencia",
+    "dt_refer",
+    "principio",
+    "capitulo",
+    "explicacao",
+    "pratica_adotada",
+    "pratica_recomendada",
+    "categ_doc" # categ_doc is not an identifier (codelist)
   )
   out_pos <- cvmdata:::identifier_columns(positives)
   out_neg <- cvmdata:::identifier_columns(negatives)
   failed_pos <- positives[!out_pos]
   failed_neg <- negatives[out_neg]
-  expect_identical(failed_pos, character(0L),
-                   info = "positives misclassified")
-  expect_identical(failed_neg, character(0L),
-                   info = "negatives misclassified")
+  expect_identical(failed_pos, character(0L), info = "positives misclassified")
+  expect_identical(failed_neg, character(0L), info = "negatives misclassified")
 })
 
 # Dictionary + codelist (snapshot-dependent) --------------------------

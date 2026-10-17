@@ -51,8 +51,7 @@ test_that("issuer_fetch VLMO submissao tracer returns cvm_tbl", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "submissao",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("vlmo", "submissao", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -63,8 +62,10 @@ test_that("issuer_fetch VLMO submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "table"), "submissao")
   expect_true(nrow(result) > 0L)
   # FRE-detail-like convention with Codigo_CVM in the header.
-  expect_true(all(c("cnpj_companhia", "data_referencia", "versao",
-                    "codigo_cvm") %in% names(result)))
+  expect_true(all(
+    c("cnpj_companhia", "data_referencia", "versao", "codigo_cvm") %in%
+      names(result)
+  ))
   expect_identical(ncol(result), 12L)
   expect_type(result$cnpj_companhia, "character")
   expect_type(result$codigo_cvm, "character")
@@ -77,17 +78,26 @@ test_that("issuer_fetch VLMO consolidado tracer returns cvm_tbl", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("vlmo", "consolidado", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
   expect_identical(attr(result, "table"), "consolidado")
   expect_true(nrow(result) > 0L)
   expect_identical(ncol(result), 17L)
-  expect_true(all(c("cnpj_companhia", "data_referencia", "versao",
-                    "tipo_cargo", "data_movimentacao", "quantidade",
-                    "preco_unitario", "volume") %in% names(result)))
+  expect_true(all(
+    c(
+      "cnpj_companhia",
+      "data_referencia",
+      "versao",
+      "tipo_cargo",
+      "data_movimentacao",
+      "quantidade",
+      "preco_unitario",
+      "volume"
+    ) %in%
+      names(result)
+  ))
   # consolidado does not carry codigo_cvm natively (CVM design).
   expect_false("codigo_cvm" %in% names(result))
   expect_s3_class(result$data_movimentacao, "Date")
@@ -104,9 +114,13 @@ test_that("issuer_fetch VLMO filters by CNPJ via cnpj_companhia", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado",
-                 issuer = "00.000.000/0001-91",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "vlmo",
+      "consolidado",
+      issuer = "00.000.000/0001-91",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -121,9 +135,13 @@ test_that("issuer_fetch VLMO resolves CD_CVM via submissao for consolidado", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado",
-                 issuer = "001023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "vlmo",
+      "consolidado",
+      issuer = "001023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -135,13 +153,23 @@ test_that("VLMO CD_CVM resolution accepts unpadded input", {
 
   out_padded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado",
-                 issuer = "001023", year = 2024L, source = "cvm")
+    issuer_fetch(
+      "vlmo",
+      "consolidado",
+      issuer = "001023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   out_unpadded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado",
-                 issuer = "1023", year = 2024L, source = "cvm")
+    issuer_fetch(
+      "vlmo",
+      "consolidado",
+      issuer = "1023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_identical(nrow(out_padded), nrow(out_unpadded))
 })
@@ -196,7 +224,8 @@ test_that("load_schema accepts VLMO YAMLs", {
   expect_equal(con$expected_field_count, 17)
   # CVM file is named "...con..."; package table is "consolidado".
   expect_identical(
-    con$cvm_file_pattern, "vlmo_cia_aberta_con_{year}.csv"
+    con$cvm_file_pattern,
+    "vlmo_cia_aberta_con_{year}.csv"
   )
   expect_length(con$transformations, 0L)
 })
@@ -216,8 +245,13 @@ test_that("report_type aborts for VLMO tables without variants", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("vlmo", "consolidado",
-                   year = 2024L, source = "cvm", report_type = "ind")
+      issuer_fetch(
+        "vlmo",
+        "consolidado",
+        year = 2024L,
+        source = "cvm",
+        report_type = "ind"
+      )
     ),
     class = "cvmdata_error_input"
   )
@@ -247,10 +281,12 @@ test_that("cvm_codelist for VLMO tipo_cargo lists the 5 categories", {
   # straight from CVM; expect_setequal tolerates ordering.
   expect_setequal(
     cl$value,
-    c("Conselho de Administração ou Vinculado",
+    c(
+      "Conselho de Administração ou Vinculado",
       "Conselho Fiscal ou Vinculado",
       "Controlador ou Vinculado",
       "Diretor ou Vinculado",
-      "Órgão Estatutário ou Vinculado")
+      "Órgão Estatutário ou Vinculado"
+    )
   )
 })

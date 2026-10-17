@@ -147,8 +147,16 @@ test_that("cvm_cache_info() returns empty tibble when cache absent", {
   expect_s3_class(out, "tbl_df")
   expect_named(
     out,
-    c("group", "dataset", "file", "path", "size_bytes", "mtime",
-      "etag", "last_modified")
+    c(
+      "group",
+      "dataset",
+      "file",
+      "path",
+      "size_bytes",
+      "mtime",
+      "etag",
+      "last_modified"
+    )
   )
   expect_identical(nrow(out), 0L)
 })
@@ -182,7 +190,8 @@ test_that("cvm_cache_info() fills etag/last_modified from sidecar", {
   cad_row <- out[out$file == "cad_cia_aberta.csv", ]
   expect_identical(cad_row$etag, "\"cad-etag\"")
   expect_identical(
-    cad_row$last_modified, "Mon, 19 May 2026 00:00:00 GMT"
+    cad_row$last_modified,
+    "Mon, 19 May 2026 00:00:00 GMT"
   )
   zip_row <- out[out$file == "dfp_cia_aberta_2024.zip", ]
   expect_identical(zip_row$etag, "\"dfp-etag\"")
@@ -228,7 +237,10 @@ test_that("cvm_cache_info() tolerates corrupt sidecar (returns NA)", {
   cache_root <- local_populated_cache()
   # Overwrite one sidecar with garbage that readRDS cannot parse.
   bad_sidecar <- file.path(
-    cache_root, "raw", "companhias", "cad",
+    cache_root,
+    "raw",
+    "companhias",
+    "cad",
     "cad_cia_aberta.csv.etag.rds"
   )
   writeBin(as.raw(c(0xDE, 0xAD, 0xBE, 0xEF)), bad_sidecar)
@@ -275,8 +287,7 @@ test_that("cvm_cache_clear(dataset = ) restricts to one dataset", {
   )
   expect_true(
     file.exists(
-      file.path(cache_root, "raw", "companhias", "cad",
-                "cad_cia_aberta.csv")
+      file.path(cache_root, "raw", "companhias", "cad", "cad_cia_aberta.csv")
     )
   )
 })
@@ -285,13 +296,19 @@ test_that("cvm_cache_clear(dataset = , year = ) restricts to one year", {
   cache_root <- local_populated_cache()
   # Add a second year so we can prove only one is removed.
   dir_2023 <- file.path(
-    cache_root, "raw", "companhias", "dfp", "2023"
+    cache_root,
+    "raw",
+    "companhias",
+    "dfp",
+    "2023"
   )
   dir.create(dir_2023, recursive = TRUE)
   writeLines("keep me", file.path(dir_2023, "dfp_cia_aberta_2023.zip"))
   result <- suppressMessages(
     cvm_cache_clear(
-      dataset = "dfp", year = 2024L, confirm = FALSE
+      dataset = "dfp",
+      year = 2024L,
+      confirm = FALSE
     )
   )
   expect_identical(result, 3L)
@@ -302,8 +319,14 @@ test_that("cvm_cache_clear(dataset = , year = ) restricts to one year", {
   )
   expect_true(
     file.exists(
-      file.path(cache_root, "raw", "companhias", "dfp", "2023",
-                "dfp_cia_aberta_2023.zip")
+      file.path(
+        cache_root,
+        "raw",
+        "companhias",
+        "dfp",
+        "2023",
+        "dfp_cia_aberta_2023.zip"
+      )
     )
   )
 })
@@ -323,7 +346,9 @@ test_that("cvm_cache_clear(group, dataset) agree -> evicts dataset", {
   cache_root <- local_populated_cache()
   result <- suppressMessages(
     cvm_cache_clear(
-      group = "companhias", dataset = "dfp", confirm = FALSE
+      group = "companhias",
+      dataset = "dfp",
+      confirm = FALSE
     )
   )
   expect_identical(result, 3L)
@@ -331,7 +356,11 @@ test_that("cvm_cache_clear(group, dataset) agree -> evicts dataset", {
     file.path(cache_root, "raw", "companhias", "dfp")
   ))
   expect_true(file.exists(file.path(
-    cache_root, "raw", "companhias", "cad", "cad_cia_aberta.csv"
+    cache_root,
+    "raw",
+    "companhias",
+    "cad",
+    "cad_cia_aberta.csv"
   )))
 })
 
@@ -339,7 +368,8 @@ test_that("cvm_cache_clear(group, dataset) disagree -> abort", {
   local_populated_cache()
   expect_error(
     cvm_cache_clear(
-      group = "fundos-de-investimento", dataset = "dfp",
+      group = "fundos-de-investimento",
+      dataset = "dfp",
       confirm = FALSE
     ),
     class = "cvmdata_error_input"
@@ -350,13 +380,18 @@ test_that("cvm_cache_clear(group) for an unknown-but-empty group: no-op", {
   cache_root <- local_populated_cache()
   result <- suppressMessages(
     cvm_cache_clear(
-      group = "fundos-de-investimento", confirm = FALSE
+      group = "fundos-de-investimento",
+      confirm = FALSE
     )
   )
   expect_identical(result, 0L)
   # Existing cache untouched:
   expect_true(file.exists(file.path(
-    cache_root, "raw", "companhias", "cad", "cad_cia_aberta.csv"
+    cache_root,
+    "raw",
+    "companhias",
+    "cad",
+    "cad_cia_aberta.csv"
   )))
 })
 
@@ -372,7 +407,9 @@ test_that("cvm_cache_clear() aborts on unknown year", {
   local_populated_cache()
   expect_error(
     cvm_cache_clear(
-      dataset = "dfp", year = 1999L, confirm = FALSE
+      dataset = "dfp",
+      year = 1999L,
+      confirm = FALSE
     ),
     class = "cvmdata_error_input"
   )
@@ -394,7 +431,9 @@ test_that("cvm_cache_clear() aborts on bad what / year / confirm", {
   )
   expect_error(
     cvm_cache_clear(
-      dataset = "dfp", year = 2024.5, confirm = FALSE
+      dataset = "dfp",
+      year = 2024.5,
+      confirm = FALSE
     ),
     class = "cvmdata_error_input"
   )
@@ -453,8 +492,7 @@ test_that("cvm_cache_clear() honors confirm = TRUE answer = no", {
   expect_identical(result, 0L)
   expect_true(
     file.exists(
-      file.path(cache_root, "raw", "companhias", "cad",
-                "cad_cia_aberta.csv")
+      file.path(cache_root, "raw", "companhias", "cad", "cad_cia_aberta.csv")
     )
   )
 })

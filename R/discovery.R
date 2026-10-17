@@ -135,11 +135,13 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
   validate_string_arg(table, "table")
   validate_optional_group_arg(group)
   snapshot_path <- require_snapshot_path(
-    "cvm_dictionary_snapshot.csv", "build-dictionary-snapshot.R"
+    "cvm_dictionary_snapshot.csv",
+    "build-dictionary-snapshot.R"
   )
   snapshot <- .read_dictionary_snapshot(snapshot_path)
   hit <- snapshot[
-    snapshot$dataset == dataset & snapshot$table == table, ,
+    snapshot$dataset == dataset & snapshot$table == table,
+    ,
     drop = FALSE
   ]
   if (!is.null(group)) {
@@ -150,14 +152,14 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
   }
   abort_if_ambiguous(hit$group, dataset, table, group)
   out <- tibble::tibble(
-    campo          = hit$campo,
+    campo = hit$campo,
     campo_original = hit$campo_original,
-    descricao      = hit$descricao,
-    dominio        = hit$dominio,
-    tipo_dados     = hit$tipo_dados,
-    tamanho        = hit$tamanho,
-    precisao       = hit$precisao,
-    scale          = hit$scale
+    descricao = hit$descricao,
+    dominio = hit$dominio,
+    tipo_dados = hit$tipo_dados,
+    tamanho = hit$tamanho,
+    precisao = hit$precisao,
+    scale = hit$scale
   )
   if (any(hit$meta_status == "missing", na.rm = TRUE)) {
     attr(out, "meta_status") <- "missing"
@@ -207,8 +209,7 @@ require_snapshot_path <- function(file, generator) {
 
 # When `requested_group` is NULL and `hit_groups` contains more than one
 # distinct slug, abort with `cvmdata_error_input_ambiguous`.
-abort_if_ambiguous <- function(hit_groups, dataset, table,
-                               requested_group) {
+abort_if_ambiguous <- function(hit_groups, dataset, table, requested_group) {
   if (!is.null(requested_group)) {
     return(invisible(NULL))
   }
@@ -297,13 +298,15 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
   validate_string_arg(column, "column")
   validate_optional_group_arg(group)
   snapshot_path <- require_snapshot_path(
-    "cvm_codelists_snapshot.csv", "build-codelists-snapshot.R"
+    "cvm_codelists_snapshot.csv",
+    "build-codelists-snapshot.R"
   )
   snapshot <- .read_codelists_snapshot(snapshot_path)
   hit <- snapshot[
     snapshot$dataset == dataset &
       snapshot$table == table &
-      snapshot$campo == column, ,
+      snapshot$campo == column,
+    ,
     drop = FALSE
   ]
   if (!is.null(group)) {
@@ -320,8 +323,7 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
 # the snapshot). Picks the most informative message available -- in
 # order: unknown dataset, unknown group, unknown table, non-codelist
 # known column, unknown column.
-handle_codelist_miss <- function(snapshot, dataset, table, column,
-                                 group) {
+handle_codelist_miss <- function(snapshot, dataset, table, column, group) {
   if (!dataset %in% cvm_datasets()) {
     cvmdata_abort(
       c(
@@ -356,15 +358,24 @@ handle_codelist_miss <- function(snapshot, dataset, table, column,
   }
   available_codes <- sort(unique(snapshot$campo[table_rows]))
   abort_known_or_unknown_column(
-    column, dataset, table, dict, available_codes
+    column,
+    dataset,
+    table,
+    dict,
+    available_codes
   )
 }
 
 # Emit either "column is not a codelist" (when the column exists in the
 # dictionary) or "unknown column" (when it does not), with a tail that
 # lists the codelist columns available -- or notes their absence.
-abort_known_or_unknown_column <- function(column, dataset, table, dict,
-                                          available_codes) {
+abort_known_or_unknown_column <- function(
+  column,
+  dataset,
+  table,
+  dict,
+  available_codes
+) {
   tail <- if (length(available_codes)) {
     "Codelist columns: {.val {available_codes}}."
   } else {
@@ -405,11 +416,11 @@ abort_known_or_unknown_column <- function(column, dataset, table, dict,
   df <- readr::read_csv(
     path,
     col_types = readr::cols(
-      group   = readr::col_character(),
+      group = readr::col_character(),
       dataset = readr::col_character(),
-      table   = readr::col_character(),
-      campo   = readr::col_character(),
-      value   = readr::col_character()
+      table = readr::col_character(),
+      campo = readr::col_character(),
+      value = readr::col_character()
     ),
     progress = FALSE
   )
@@ -428,18 +439,18 @@ abort_known_or_unknown_column <- function(column, dataset, table, dict,
   df <- readr::read_csv(
     path,
     col_types = readr::cols(
-      group          = readr::col_character(),
-      dataset        = readr::col_character(),
-      table          = readr::col_character(),
-      campo          = readr::col_character(),
+      group = readr::col_character(),
+      dataset = readr::col_character(),
+      table = readr::col_character(),
+      campo = readr::col_character(),
       campo_original = readr::col_character(),
-      descricao      = readr::col_character(),
-      dominio        = readr::col_character(),
-      tipo_dados     = readr::col_character(),
-      tamanho        = readr::col_integer(),
-      precisao       = readr::col_integer(),
-      scale          = readr::col_integer(),
-      meta_status    = readr::col_character()
+      descricao = readr::col_character(),
+      dominio = readr::col_character(),
+      tipo_dados = readr::col_character(),
+      tamanho = readr::col_integer(),
+      precisao = readr::col_integer(),
+      scale = readr::col_integer(),
+      meta_status = readr::col_character()
     ),
     progress = FALSE
   )
@@ -503,8 +514,7 @@ cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
 
   # URL base = diretório pai do pattern (tudo até a última '/')
   dir_url <- sub("/[^/]+$", "/", pattern_url)
-  zip_basename_glob <- sub("\\{year\\}", "[0-9]{4}",
-                           basename(pattern_url))
+  zip_basename_glob <- sub("\\{year\\}", "[0-9]{4}", basename(pattern_url))
 
   years <- tryCatch(
     get_years_from_listing(dir_url, zip_basename_glob),
@@ -569,7 +579,8 @@ get_years_from_listing <- function(dir_url, basename_regex) {
       # timeouts, not just transient HTTP statuses.
       httr2::req_retry(
         httr2::req_timeout(httr2::request(dir_url), 60L),
-        max_tries = 3L, retry_on_failure = TRUE
+        max_tries = 3L,
+        retry_on_failure = TRUE
       )
     ),
     error = function(e) {
@@ -584,10 +595,12 @@ get_years_from_listing <- function(dir_url, basename_regex) {
   )
   html <- httr2::resp_body_string(resp)
   matches <- regmatches(
-    html, gregexpr(basename_regex, html, perl = TRUE)
+    html,
+    gregexpr(basename_regex, html, perl = TRUE)
   )[[1L]]
   years <- as.integer(regmatches(
-    matches, regexpr("[0-9]{4}", matches)
+    matches,
+    regexpr("[0-9]{4}", matches)
   ))
   years <- unique(years[!is.na(years) & years >= 1990 & years <= 2100])
   .year_listing_cache[[dir_url]] <- years

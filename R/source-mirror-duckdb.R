@@ -27,26 +27,35 @@
 # - `report_type` is required for tables with `cvm_file_pattern_variants`
 #   and forbidden for the rest, with the same validation rules as the
 #   CVM-HTTP path (enforced one level up by `issuer_fetch_internal()`).
-source_mirror_duckdb_get <- function(schema, year = NULL,
-                                     report_type = NULL, ...) {
+source_mirror_duckdb_get <- function(
+  schema,
+  year = NULL,
+  report_type = NULL,
+  ...
+) {
   cache_migrate_v0_1_to_v0_2()
   dataset <- schema$dataset
   table <- schema$table
   partitioning <- schema$temporal_partitioning %||% "none"
   has_variants <- !is.null(schema$cvm_file_pattern_variants)
 
-  validate_mirror_args(schema, partitioning, has_variants,
-                       year, report_type)
+  validate_mirror_args(schema, partitioning, has_variants, year, report_type)
 
   group <- schema$group
   inventory <- mirror_list_assets(group, dataset)
   mirror_l3_validate_hash(dataset, attr(inventory, "source_hash"))
   resolved_years <- resolve_mirror_years(
-    inventory, table, year, report_type, partitioning
+    inventory,
+    table,
+    year,
+    report_type,
+    partitioning
   )
   matches <- filter_mirror_assets(
-    inventory, table = table,
-    year = resolved_years, report_type = report_type
+    inventory,
+    table = table,
+    year = resolved_years,
+    report_type = report_type
   )
   if (!nrow(matches)) {
     cvmdata_abort(
@@ -70,8 +79,13 @@ source_mirror_duckdb_get <- function(schema, year = NULL,
 # Bridge between `arg_match0()`-validated public arguments and the
 # partition layout each table expects. Mirrors the contract enforced
 # by `source_cvm_http_get()` so error classes line up across backends.
-validate_mirror_args <- function(schema, partitioning, has_variants,
-                                 year, report_type) {
+validate_mirror_args <- function(
+  schema,
+  partitioning,
+  has_variants,
+  year,
+  report_type
+) {
   if (identical(partitioning, "none") && !is.null(year)) {
     cvmdata_abort(
       c(
@@ -113,8 +127,13 @@ validate_mirror_args <- function(schema, partitioning, has_variants,
 # considering the requested table + report_type subset). NA for
 # non-yearly tables. Aborts when the table is yearly but the
 # inventory has no rows for it.
-resolve_mirror_years <- function(inventory, table, year, report_type,
-                                 partitioning) {
+resolve_mirror_years <- function(
+  inventory,
+  table,
+  year,
+  report_type,
+  partitioning
+) {
   if (!identical(partitioning, "yearly")) {
     return(NULL)
   }
@@ -122,8 +141,10 @@ resolve_mirror_years <- function(inventory, table, year, report_type,
     return(as.integer(year))
   }
   candidate <- filter_mirror_assets(
-    inventory, table = table,
-    year = NULL, report_type = report_type
+    inventory,
+    table = table,
+    year = NULL,
+    report_type = report_type
   )
   if (!nrow(candidate)) {
     cvmdata_abort(
@@ -221,8 +242,7 @@ mirror_duckdb_connect <- function() {
 # now an existing file is reused as-is. A future iteration may add
 # TTL / etag handling analogous to `download_with_etag()` in
 # R/source-cvm-http.R.
-mirror_fetch_to_l3 <- function(url, dataset, table, year,
-                               report_type) {
+mirror_fetch_to_l3 <- function(url, dataset, table, year, report_type) {
   dest <- mirror_l3_path(dataset, table, year, report_type)
   ensure_dir(dirname(dest))
   if (file.exists(dest)) {
@@ -264,8 +284,11 @@ mirror_fetch_to_l3 <- function(url, dataset, table, year,
 # in v0.1.0.9000; see `R/util-group-lookup.R`.
 mirror_l3_path <- function(dataset, table, year, report_type) {
   parts <- c(
-    cvm_cache_path(), "parquet",
-    dataset_group(dataset), dataset, table
+    cvm_cache_path(),
+    "parquet",
+    dataset_group(dataset),
+    dataset,
+    table
   )
   if (!is.na(report_type) && nzchar(report_type)) {
     parts <- c(parts, sprintf("report_type=%s", report_type))
@@ -300,13 +323,14 @@ mirror_quote_sql <- function(path) {
 #   "first call" path: nothing is evicted and the new hash is
 #   recorded.
 mirror_l3_validate_hash <- function(dataset, current_hash) {
-  if (is.null(current_hash) || is.na(current_hash) ||
-        !nzchar(current_hash)) {
+  if (is.null(current_hash) || is.na(current_hash) || !nzchar(current_hash)) {
     return(invisible())
   }
   dataset_root <- file.path(
-    cvm_cache_path(), "parquet",
-    dataset_group(dataset), dataset
+    cvm_cache_path(),
+    "parquet",
+    dataset_group(dataset),
+    dataset
   )
   sidecar <- file.path(dataset_root, "__source_hash.json")
 
@@ -339,8 +363,11 @@ mirror_l3_validate_hash <- function(dataset, current_hash) {
 # `format_years` out of inline cli expressions so the no-rows abort
 # reads cleanly with or without filters.
 format_chr <- function(x) {
-  if (is.null(x) || (length(x) == 1L && is.na(x))) "NULL" else
+  if (is.null(x) || (length(x) == 1L && is.na(x))) {
+    "NULL"
+  } else {
     sprintf('"%s"', x)
+  }
 }
 
 format_years <- function(years) {

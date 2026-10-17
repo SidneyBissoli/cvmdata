@@ -42,10 +42,13 @@ suppressPackageStartupMessages({
 
 # --- thresholds (Sessão 3.4) -----------------------------------------
 
-.MAX_TAMANHO <- 200L          # varchar fields wider than this are free text
-.MAX_CARDINALITY <- 50L       # hard cap on distinct values for a codelist
+.MAX_TAMANHO <- 200L # varchar fields wider than this are free text
+.MAX_CARDINALITY <- 50L # hard cap on distinct values for a codelist
 .FREE_TEXT_DOMAINS <- c(
-  "Alfanumérico", "Numérico", "Númerico", "AAAA-MM-DD"
+  "Alfanumérico",
+  "Numérico",
+  "Númerico",
+  "AAAA-MM-DD"
 )
 # Free-text / identifier columns to exclude from cardinality promotion.
 # Mirrors the reader's identifier classification in R/util-csv-cvm.R
@@ -87,9 +90,13 @@ suppressPackageStartupMessages({
 )
 
 is_excluded_column <- function(col) {
-  any(vapply(.EXCLUDE_PATTERNS, function(p) {
-    grepl(p, col, perl = TRUE)
-  }, logical(1L)))
+  any(vapply(
+    .EXCLUDE_PATTERNS,
+    function(p) {
+      grepl(p, col, perl = TRUE)
+    },
+    logical(1L)
+  ))
 }
 
 # --- helpers ----------------------------------------------------------
@@ -133,7 +140,9 @@ resolve_csv_path <- function(dataset, table, year_lookup) {
       NULL
     }
     return(cvmdata:::source_cvm_http_get(
-      schema, year = year, report_type = rt
+      schema,
+      year = year,
+      report_type = rt
     ))
   }
   cvmdata:::source_cvm_http_get(schema)
@@ -182,7 +191,9 @@ quietly <- function(expr) {
 
 build_codelists_snapshot <- function() {
   dict_path <- system.file(
-    "extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"
+    "extdata",
+    "cvm_dictionary_snapshot.csv",
+    package = "cvmdata"
   )
   if (!nzchar(dict_path)) {
     cli::cli_abort(
@@ -198,16 +209,20 @@ build_codelists_snapshot <- function() {
   cli::cli_h2("Branch 1 — enumerated dominio (no download)")
   enum_rows <- list()
   for (i in seq_len(nrow(dict))) {
-    if (!is_enumerated_domain(dict$dominio[i])) next
+    if (!is_enumerated_domain(dict$dominio[i])) {
+      next
+    }
     values <- parse_enum_values(dict$dominio[i])
-    if (!length(values)) next
+    if (!length(values)) {
+      next
+    }
     enum_rows[[length(enum_rows) + 1L]] <- tibble::tibble(
-      group   = dict$group[i],
+      group = dict$group[i],
       dataset = dict$dataset[i],
-      table   = dict$table[i],
-      campo   = dict$campo[i],
-      value   = values,
-      source  = "dominio"
+      table = dict$table[i],
+      campo = dict$campo[i],
+      value = values,
+      source = "dominio"
     )
   }
   enum_df <- dplyr::bind_rows(enum_rows)
@@ -237,9 +252,15 @@ build_codelists_snapshot <- function() {
     character(0L)
   }
   candidates <- candidates[
-    !(paste(candidates$group, candidates$dataset, candidates$table,
-            candidates$campo) %in% enum_keys),
-    , drop = FALSE
+    !(paste(
+      candidates$group,
+      candidates$dataset,
+      candidates$table,
+      candidates$campo
+    ) %in%
+      enum_keys),
+    ,
+    drop = FALSE
   ]
   cli::cli_alert_info(
     "Candidate (group,dataset,table,campo) for cardinality test: {.val {nrow(candidates)}}."
@@ -250,7 +271,9 @@ build_codelists_snapshot <- function() {
   year_lookup <- list()
   for (ds in datasets) {
     tabs <- cvm_tables(ds)
-    if (!length(tabs)) next
+    if (!length(tabs)) {
+      next
+    }
     s <- load_schema(ds, tabs[1L])
     if (identical(s$temporal_partitioning %||% "none", "yearly")) {
       yrs <- cvm_dataset_years(ds)
@@ -266,8 +289,7 @@ build_codelists_snapshot <- function() {
   # shadow the group-dimension concept.
   buckets <- split(
     candidates,
-    paste(candidates$group, candidates$dataset, candidates$table,
-          sep = "/")
+    paste(candidates$group, candidates$dataset, candidates$table, sep = "/")
   )
 
   card_rows <- list()
@@ -309,15 +331,19 @@ build_codelists_snapshot <- function() {
           character(0L)
         }
       )
-      if (!length(vals)) next
-      if (length(vals) > .MAX_CARDINALITY) next
+      if (!length(vals)) {
+        next
+      }
+      if (length(vals) > .MAX_CARDINALITY) {
+        next
+      }
       card_rows[[length(card_rows) + 1L]] <- tibble::tibble(
-        group   = grp,
+        group = grp,
         dataset = dataset,
-        table   = table,
-        campo   = col_lower,
-        value   = vals,
-        source  = "cardinality"
+        table = table,
+        campo = col_lower,
+        value = vals,
+        source = "cardinality"
       )
     }
   }
