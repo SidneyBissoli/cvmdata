@@ -66,15 +66,18 @@ mirror_release_tag <- function(group, dataset) {
 # session). When `GITHUB_TOKEN` or `GITHUB_PAT` is set, the call
 # attaches a Bearer header to bump the limit to 5000 req/h -- useful
 # for CI runners.
-mirror_list_assets <- function(group, dataset, repo = .mirror_repo,
-                               refresh = FALSE) {
+mirror_list_assets <- function(
+  group,
+  dataset,
+  repo = .mirror_repo,
+  refresh = FALSE
+) {
   key <- .mirror_cache_key(group, dataset)
   if (!isTRUE(refresh) && !is.null(.mirror_assets_cache[[key]])) {
     return(.mirror_assets_cache[[key]])
   }
   tag <- mirror_release_tag(group, dataset)
-  url <- sprintf("https://api.github.com/repos/%s/releases/tags/%s",
-                 repo, tag)
+  url <- sprintf("https://api.github.com/repos/%s/releases/tags/%s", repo, tag)
   req <- httr2::request(url) |>
     httr2::req_headers(
       Accept = "application/vnd.github+json",
@@ -153,8 +156,7 @@ mirror_assets_to_tibble <- function(assets) {
     ))
   }
   tibble::tibble(
-    name = vapply(assets, function(a) a$name %||% NA_character_,
-                  character(1L)),
+    name = vapply(assets, function(a) a$name %||% NA_character_, character(1L)),
     url = vapply(
       assets,
       function(a) a$browser_download_url %||% NA_character_,
@@ -328,8 +330,12 @@ parse_mirror_partition_segment <- function(seg, asset_name) {
 # - `report_type = NULL` keeps every variant (no filter); for tables
 #   that publish variants the caller is expected to pass either `"ind"`
 #   or `"con"`, otherwise the result mixes both.
-filter_mirror_assets <- function(assets, table, year = NULL,
-                                 report_type = NULL) {
+filter_mirror_assets <- function(
+  assets,
+  table,
+  year = NULL,
+  report_type = NULL
+) {
   if (!nrow(assets)) {
     return(annotate_mirror_assets(assets))
   }

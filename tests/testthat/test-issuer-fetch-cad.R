@@ -155,11 +155,13 @@ test_that("read_cvm_csv on fixture honours expected_field_count", {
 
 test_that("validate = 'strict' aborts on field-count mismatch", {
   raw <- list(
-    dataset = "cad", table = "companhias",
+    dataset = "cad",
+    table = "companhias",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = "https://example.com/x.csv",
     cvm_file_pattern = "x.csv",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "none",
     expected_field_count = 999L,
     transformations = list()
@@ -177,11 +179,13 @@ test_that("validate = 'strict' aborts on field-count mismatch", {
 
 test_that("validate = 'warn' warns on field-count mismatch", {
   raw <- list(
-    dataset = "cad", table = "companhias",
+    dataset = "cad",
+    table = "companhias",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = "https://example.com/x.csv",
     cvm_file_pattern = "x.csv",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "none",
     expected_field_count = 999L,
     transformations = list()
@@ -282,12 +286,15 @@ test_that("source_cvm_http_get re-downloads when ETag changes", {
 
 test_that("source_cvm_http_get requires year for yearly schema", {
   schema <- list(
-    dataset = "dfp", table = "bpa",
+    dataset = "dfp",
+    table = "bpa",
     cvm_archive_url_pattern = "https://example.com/x_{year}.zip",
     cvm_file_url_pattern = NULL,
     cvm_file_pattern = "x_{year}.csv",
-    temporal_partitioning = "yearly", first_year = 2010L,
-    encoding = "ISO-8859-1", delimiter = ";",
+    temporal_partitioning = "yearly",
+    first_year = 2010L,
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     expected_field_count = 14L,
     transformations = list()
   )
@@ -306,9 +313,11 @@ test_that("print.cvm_tbl emits provenance lines", {
     validate = "skip"
   )
   result <- cvm_attach_metadata(
-    df, source = "portal",
+    df,
+    source = "portal",
     group = "companhias",
-    dataset = "cad", table = "companhias"
+    dataset = "cad",
+    table = "companhias"
   )
   msg <- capture.output(
     print(result),
@@ -324,11 +333,13 @@ test_that("print.cvm_tbl emits provenance lines", {
 
 test_that("validate = 'skip' suppresses mismatch errors", {
   raw <- list(
-    dataset = "cad", table = "companhias",
+    dataset = "cad",
+    table = "companhias",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = "https://example.com/x.csv",
     cvm_file_pattern = "x.csv",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "none",
     expected_field_count = 999L,
     transformations = list()

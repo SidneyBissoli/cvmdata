@@ -26,7 +26,9 @@ local_dfp_cache_2024_fresh <- function(envir = parent.frame()) {
       etag = "\"FRESH\"",
       last_modified = "Mon, 19 May 2026 00:00:00 GMT",
       fetched_at = format(
-        Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC"
+        Sys.time(),
+        "%Y-%m-%dT%H:%M:%OS3Z",
+        tz = "UTC"
       )
     ),
     file.path(raw_dir, "dfp_cia_aberta_2024.zip.etag.rds")
@@ -50,9 +52,14 @@ test_that("on_error = 'warn' emits warning and returns surviving years", {
   expect_warning(
     result <- httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = c(2023L, 2024L),
-                source = "cvm", on_error = "warn")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = c(2023L, 2024L),
+        source = "cvm",
+        on_error = "warn"
+      )
     ),
     class = "cvmdata_warn_partial_failure"
   )
@@ -74,9 +81,14 @@ test_that("on_error = 'silent' returns surviving years without warning", {
   expect_no_warning(
     result <- httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = c(2023L, 2024L),
-                source = "cvm", on_error = "silent")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = c(2023L, 2024L),
+        source = "cvm",
+        on_error = "silent"
+      )
     )
   )
   expect_s3_class(result, "cvm_tbl")
@@ -96,9 +108,13 @@ test_that("on_error = 'abort' (default) propagates HTTP error in batch", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = c(2023L, 2024L),
-                source = "cvm")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = c(2023L, 2024L),
+        source = "cvm"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -115,9 +131,14 @@ test_that("on_error = 'warn' aborts when every year in the batch fails", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = c(2022L, 2023L),
-                source = "cvm", on_error = "warn")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = c(2022L, 2023L),
+        source = "cvm",
+        on_error = "warn"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -132,9 +153,14 @@ test_that("on_error = 'silent' aborts when every year in the batch fails", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = c(2022L, 2023L),
-                source = "cvm", on_error = "silent")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = c(2022L, 2023L),
+        source = "cvm",
+        on_error = "silent"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -151,9 +177,14 @@ test_that("on_error = 'warn' aborts on single-year (no parcial)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa",
-                report_type = "ind", year = 2024L,
-                source = "cvm", on_error = "warn")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "cvm",
+        on_error = "warn"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -168,8 +199,7 @@ test_that("on_error = 'warn' aborts on HTTP failure for non-yearly (CAD)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("cad", "companhias",
-                source = "cvm", on_error = "warn")
+      issuer_fetch("cad", "companhias", source = "cvm", on_error = "warn")
     ),
     class = "cvmdata_error_http"
   )

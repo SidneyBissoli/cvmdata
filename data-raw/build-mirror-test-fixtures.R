@@ -57,9 +57,11 @@ if (!length(.targets)) {
 }
 unknown_targets <- setdiff(.targets, .all_targets)
 if (length(unknown_targets)) {
-  stop(sprintf("Unknown fixture target(s): %s. Valid: %s",
-               paste(unknown_targets, collapse = ", "),
-               paste(.all_targets, collapse = ", ")))
+  stop(sprintf(
+    "Unknown fixture target(s): %s. Valid: %s",
+    paste(unknown_targets, collapse = ", "),
+    paste(.all_targets, collapse = ", ")
+  ))
 }
 
 write_parquet_via_duckdb <- function(df, path) {
@@ -77,68 +79,79 @@ write_parquet_via_duckdb <- function(df, path) {
 }
 
 build_parquet_fixtures <- function() {
+  # CAD ---------------------------------------------------------------------
 
-# CAD ---------------------------------------------------------------------
+  cad_schema <- cvmdata:::load_schema("cad", "companhias")
+  cad_df <- cvmdata:::read_cvm_csv(
+    "tests/testthat/fixtures/cad_sample.csv",
+    cad_schema,
+    validate = "skip"
+  )
+  cad_df <- cvmdata:::apply_schema_transformations(cad_df, cad_schema)
 
-cad_schema <- cvmdata:::load_schema("cad", "companhias")
-cad_df <- cvmdata:::read_cvm_csv(
-  "tests/testthat/fixtures/cad_sample.csv",
-  cad_schema,
-  validate = "skip"
-)
-cad_df <- cvmdata:::apply_schema_transformations(cad_df, cad_schema)
+  cad_out <- "tests/testthat/fixtures/mirror-cad-companhias.parquet"
+  write_parquet_via_duckdb(cad_df, cad_out)
+  cat(sprintf(
+    "[fixture] %s  %d rows, %s bytes\n",
+    cad_out,
+    nrow(cad_df),
+    format(file.info(cad_out)$size)
+  ))
 
-cad_out <- "tests/testthat/fixtures/mirror-cad-companhias.parquet"
-write_parquet_via_duckdb(cad_df, cad_out)
-cat(sprintf("[fixture] %s  %d rows, %s bytes\n",
-            cad_out, nrow(cad_df), format(file.info(cad_out)$size)))
+  # DFP BPA ind 2024 --------------------------------------------------------
 
-# DFP BPA ind 2024 --------------------------------------------------------
+  dfp_schema <- cvmdata:::load_schema("dfp", "bpa")
+  # Stage the fixture ZIP into a fake cache, then run the package
+  # pipeline against it so the resulting parquet matches what the ETL
+  # would publish (post-transformations, no companies filter).
+  fixt_zip <- "tests/testthat/fixtures/dfp_cia_aberta_2024.zip"
+  cache_root <- file.path(tempdir(), "cvmdata-build-fixtures-cache")
+  raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(fixt_zip, file.path(raw_dir, basename(fixt_zip)), overwrite = TRUE)
+  saveRDS(
+    list(
+      etag = '"fixture-etag"',
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC")
+    ),
+    file.path(raw_dir, paste0(basename(fixt_zip), ".etag.rds"))
+  )
+  withr::with_options(
+    list(
+      cvmdata.cache_dir = cache_root,
+      cvmdata.cache_ttl_seconds = Inf
+    ),
+    {
+      bpa <- issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024,
+        source = "cvm"
+      )
+    }
+  )
+  # Strip the cvm_tbl class + provenance attrs so the parquet body is a
+  # plain table — the mirror reader reattaches its own attrs from the
+  # parsed asset name.
+  attr(bpa, "source") <- NULL
+  attr(bpa, "fetched_at") <- NULL
+  attr(bpa, "dataset") <- NULL
+  attr(bpa, "table") <- NULL
+  attr(bpa, "package_version") <- NULL
+  class(bpa) <- setdiff(class(bpa), "cvm_tbl")
 
-dfp_schema <- cvmdata:::load_schema("dfp", "bpa")
-# Stage the fixture ZIP into a fake cache, then run the package
-# pipeline against it so the resulting parquet matches what the ETL
-# would publish (post-transformations, no companies filter).
-fixt_zip <- "tests/testthat/fixtures/dfp_cia_aberta_2024.zip"
-cache_root <- file.path(tempdir(), "cvmdata-build-fixtures-cache")
-raw_dir <- file.path(cache_root, "raw", "dfp", "2024")
-dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
-file.copy(fixt_zip, file.path(raw_dir, basename(fixt_zip)),
-          overwrite = TRUE)
-saveRDS(
-  list(
-    etag = '"fixture-etag"',
-    last_modified = "Mon, 19 May 2026 00:00:00 GMT",
-    fetched_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC")
-  ),
-  file.path(raw_dir, paste0(basename(fixt_zip), ".etag.rds"))
-)
-withr::with_options(
-  list(
-    cvmdata.cache_dir = cache_root,
-    cvmdata.cache_ttl_seconds = Inf
-  ),
-  {
-    bpa <- issuer_fetch("dfp", "bpa",
-                     report_type = "ind", year = 2024, source = "cvm")
-  }
-)
-# Strip the cvm_tbl class + provenance attrs so the parquet body is a
-# plain table — the mirror reader reattaches its own attrs from the
-# parsed asset name.
-attr(bpa, "source") <- NULL
-attr(bpa, "fetched_at") <- NULL
-attr(bpa, "dataset") <- NULL
-attr(bpa, "table") <- NULL
-attr(bpa, "package_version") <- NULL
-class(bpa) <- setdiff(class(bpa), "cvm_tbl")
+  bpa_out <- "tests/testthat/fixtures/mirror-dfp-bpa-ind-2024.parquet"
+  write_parquet_via_duckdb(bpa, bpa_out)
+  cat(sprintf(
+    "[fixture] %s  %d rows, %s bytes\n",
+    bpa_out,
+    nrow(bpa),
+    format(file.info(bpa_out)$size)
+  ))
 
-bpa_out <- "tests/testthat/fixtures/mirror-dfp-bpa-ind-2024.parquet"
-write_parquet_via_duckdb(bpa, bpa_out)
-cat(sprintf("[fixture] %s  %d rows, %s bytes\n",
-            bpa_out, nrow(bpa), format(file.info(bpa_out)$size)))
-
-invisible(NULL)
+  invisible(NULL)
 }
 
 # CGVN raw ZIP fixture (Sessao 10) ----------------------------------------
@@ -160,10 +173,16 @@ build_cgvn_raw_fixture <- function() {
   # fixtures for cross-test coherence).
   keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
   keep_meta <- list(
-    list(cd_cvm = "001023", cnpj_companhia = "00.000.000/0001-91",
-         nome_empresarial = "BCO BRASIL S.A."),
-    list(cd_cvm = "022470", cnpj_companhia = "47.960.950/0001-21",
-         nome_empresarial = "MAGAZINE LUIZA S.A.")
+    list(
+      cd_cvm = "001023",
+      cnpj_companhia = "00.000.000/0001-91",
+      nome_empresarial = "BCO BRASIL S.A."
+    ),
+    list(
+      cd_cvm = "022470",
+      cnpj_companhia = "47.960.950/0001-21",
+      nome_empresarial = "MAGAZINE LUIZA S.A."
+    )
   )
 
   stage <- tempfile("cgvn_fixture_")
@@ -200,35 +219,43 @@ build_cgvn_raw_fixture <- function() {
     body <- lines[-1L]
     body <- body[nzchar(body)]
     fields <- strsplit(body, ";", fixed = TRUE)
-    cnpjs <- vapply(fields, function(f) {
-      if (length(f) >= idx) f[idx] else NA_character_
-    }, character(1L))
+    cnpjs <- vapply(
+      fields,
+      function(f) {
+        if (length(f) >= idx) f[idx] else NA_character_
+      },
+      character(1L)
+    )
     keep_mask <- cnpjs %in% keep_cnpjs
     kept <- c(header, body[keep_mask])
     out <- file.path(extract_dir, paste0("subset_", name))
     out_raw <- charToRaw(
-      iconv(paste(kept, collapse = "\r\n"),
-            from = "UTF-8", to = "ISO-8859-1")
+      iconv(paste(kept, collapse = "\r\n"), from = "UTF-8", to = "ISO-8859-1")
     )
     writeBin(out_raw, out)
     list(path = out, n_rows = sum(keep_mask))
   }
 
   sub_info <- subset_csv("cgvn_cia_aberta_2024.csv", "cnpj_companhia")
-  prat_info <- subset_csv("cgvn_cia_aberta_praticas_2024.csv",
-                          "cnpj_companhia")
+  prat_info <- subset_csv("cgvn_cia_aberta_praticas_2024.csv", "cnpj_companhia")
 
   # Repack: only the two filtered CSVs (renamed back to canonical).
   pack_dir <- file.path(stage, "pack")
   dir.create(pack_dir)
-  file.copy(sub_info$path,
-            file.path(pack_dir, "cgvn_cia_aberta_2024.csv"),
-            overwrite = TRUE)
-  file.copy(prat_info$path,
-            file.path(pack_dir, "cgvn_cia_aberta_praticas_2024.csv"),
-            overwrite = TRUE)
+  file.copy(
+    sub_info$path,
+    file.path(pack_dir, "cgvn_cia_aberta_2024.csv"),
+    overwrite = TRUE
+  )
+  file.copy(
+    prat_info$path,
+    file.path(pack_dir, "cgvn_cia_aberta_praticas_2024.csv"),
+    overwrite = TRUE
+  )
 
-  if (file.exists(out_zip)) file.remove(out_zip)
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
   # zip writes relative to the pack_dir we cd into, so the zipfile arg
   # must be an absolute path before the with_dir; computing it after
   # with_dir would resolve it under pack_dir and silently fail on
@@ -267,10 +294,16 @@ build_cgvn_raw_fixture <- function() {
     out_meta
   )
 
-  cat(sprintf("[fixture] %s  %s bytes\n",
-              out_zip, format(file.info(out_zip)$size)))
-  cat(sprintf("[fixture] submissao subset: %d rows; praticas: %d rows\n",
-              sub_info$n_rows, prat_info$n_rows))
+  cat(sprintf(
+    "[fixture] %s  %s bytes\n",
+    out_zip,
+    format(file.info(out_zip)$size)
+  ))
+  cat(sprintf(
+    "[fixture] submissao subset: %d rows; praticas: %d rows\n",
+    sub_info$n_rows,
+    prat_info$n_rows
+  ))
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
@@ -295,10 +328,16 @@ build_vlmo_raw_fixture <- function() {
   # fixtures for cross-test coherence).
   keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
   keep_meta <- list(
-    list(cd_cvm = "001023", cnpj_companhia = "00.000.000/0001-91",
-         nome_companhia = "BCO BRASIL S.A."),
-    list(cd_cvm = "022470", cnpj_companhia = "47.960.950/0001-21",
-         nome_companhia = "MAGAZINE LUIZA S.A.")
+    list(
+      cd_cvm = "001023",
+      cnpj_companhia = "00.000.000/0001-91",
+      nome_companhia = "BCO BRASIL S.A."
+    ),
+    list(
+      cd_cvm = "022470",
+      cnpj_companhia = "47.960.950/0001-21",
+      nome_companhia = "MAGAZINE LUIZA S.A."
+    )
   )
 
   stage <- tempfile("vlmo_fixture_")
@@ -333,15 +372,18 @@ build_vlmo_raw_fixture <- function() {
     body <- lines[-1L]
     body <- body[nzchar(body)]
     fields <- strsplit(body, ";", fixed = TRUE)
-    cnpjs <- vapply(fields, function(f) {
-      if (length(f) >= idx) f[idx] else NA_character_
-    }, character(1L))
+    cnpjs <- vapply(
+      fields,
+      function(f) {
+        if (length(f) >= idx) f[idx] else NA_character_
+      },
+      character(1L)
+    )
     keep_mask <- cnpjs %in% keep_cnpjs
     kept <- c(header, body[keep_mask])
     out <- file.path(extract_dir, paste0("subset_", name))
     out_raw <- charToRaw(
-      iconv(paste(kept, collapse = "\r\n"),
-            from = "UTF-8", to = "ISO-8859-1")
+      iconv(paste(kept, collapse = "\r\n"), from = "UTF-8", to = "ISO-8859-1")
     )
     writeBin(out_raw, out)
     list(path = out, n_rows = sum(keep_mask))
@@ -353,14 +395,20 @@ build_vlmo_raw_fixture <- function() {
   # Repack: only the two filtered CSVs (renamed back to canonical).
   pack_dir <- file.path(stage, "pack")
   dir.create(pack_dir)
-  file.copy(sub_info$path,
-            file.path(pack_dir, "vlmo_cia_aberta_2024.csv"),
-            overwrite = TRUE)
-  file.copy(con_info$path,
-            file.path(pack_dir, "vlmo_cia_aberta_con_2024.csv"),
-            overwrite = TRUE)
+  file.copy(
+    sub_info$path,
+    file.path(pack_dir, "vlmo_cia_aberta_2024.csv"),
+    overwrite = TRUE
+  )
+  file.copy(
+    con_info$path,
+    file.path(pack_dir, "vlmo_cia_aberta_con_2024.csv"),
+    overwrite = TRUE
+  )
 
-  if (file.exists(out_zip)) file.remove(out_zip)
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
   out_zip_abs <- file.path(
     normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
     basename(out_zip)
@@ -394,10 +442,16 @@ build_vlmo_raw_fixture <- function() {
     out_meta
   )
 
-  cat(sprintf("[fixture] %s  %s bytes\n",
-              out_zip, format(file.info(out_zip)$size)))
-  cat(sprintf("[fixture] submissao subset: %d rows; con: %d rows\n",
-              sub_info$n_rows, con_info$n_rows))
+  cat(sprintf(
+    "[fixture] %s  %s bytes\n",
+    out_zip,
+    format(file.info(out_zip)$size)
+  ))
+  cat(sprintf(
+    "[fixture] submissao subset: %d rows; con: %d rows\n",
+    sub_info$n_rows,
+    con_info$n_rows
+  ))
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
@@ -421,10 +475,16 @@ build_fca_raw_fixture <- function() {
 
   keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
   keep_meta <- list(
-    list(cd_cvm = "001023", cnpj = "00.000.000/0001-91",
-         denom = "BCO BRASIL S.A."),
-    list(cd_cvm = "022470", cnpj = "47.960.950/0001-21",
-         denom = "MAGAZINE LUIZA S.A.")
+    list(
+      cd_cvm = "001023",
+      cnpj = "00.000.000/0001-91",
+      denom = "BCO BRASIL S.A."
+    ),
+    list(
+      cd_cvm = "022470",
+      cnpj = "47.960.950/0001-21",
+      denom = "MAGAZINE LUIZA S.A."
+    )
   )
 
   # (CSV file in the ZIP, CNPJ column used to subset). The first is the
@@ -438,8 +498,7 @@ build_fca_raw_fixture <- function() {
     c("fca_cia_aberta_endereco_2024.csv", "cnpj_companhia"),
     c("fca_cia_aberta_escriturador_2024.csv", "cnpj_companhia"),
     c("fca_cia_aberta_geral_2024.csv", "cnpj_companhia"),
-    c("fca_cia_aberta_pais_estrangeiro_negociacao_2024.csv",
-      "cnpj_companhia"),
+    c("fca_cia_aberta_pais_estrangeiro_negociacao_2024.csv", "cnpj_companhia"),
     c("fca_cia_aberta_valor_mobiliario_2024.csv", "cnpj_companhia")
   )
 
@@ -475,15 +534,18 @@ build_fca_raw_fixture <- function() {
     body <- lines[-1L]
     body <- body[nzchar(body)]
     fields <- strsplit(body, ";", fixed = TRUE)
-    cnpjs <- vapply(fields, function(f) {
-      if (length(f) >= idx) f[idx] else NA_character_
-    }, character(1L))
+    cnpjs <- vapply(
+      fields,
+      function(f) {
+        if (length(f) >= idx) f[idx] else NA_character_
+      },
+      character(1L)
+    )
     keep_mask <- cnpjs %in% keep_cnpjs
     kept <- c(header, body[keep_mask])
     out <- file.path(extract_dir, paste0("subset_", name))
     out_raw <- charToRaw(
-      iconv(paste(kept, collapse = "\r\n"),
-            from = "UTF-8", to = "ISO-8859-1")
+      iconv(paste(kept, collapse = "\r\n"), from = "UTF-8", to = "ISO-8859-1")
     )
     writeBin(out_raw, out)
     list(path = out, n_rows = sum(keep_mask))
@@ -498,7 +560,9 @@ build_fca_raw_fixture <- function() {
     row_counts[[t[[1L]]]] <- info$n_rows
   }
 
-  if (file.exists(out_zip)) file.remove(out_zip)
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
   out_zip_abs <- file.path(
     normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
     basename(out_zip)
@@ -533,8 +597,11 @@ build_fca_raw_fixture <- function() {
     out_meta
   )
 
-  cat(sprintf("[fixture] %s  %s bytes\n",
-              out_zip, format(file.info(out_zip)$size)))
+  cat(sprintf(
+    "[fixture] %s  %s bytes\n",
+    out_zip,
+    format(file.info(out_zip)$size)
+  ))
   for (nm in names(row_counts)) {
     cat(sprintf("[fixture]   %-52s %d rows\n", nm, row_counts[[nm]]))
   }
@@ -564,10 +631,16 @@ build_ipe_raw_fixture <- function() {
   # ITR/FRE fixtures for cross-test coherence).
   keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
   keep_meta <- list(
-    list(cd_cvm = "001023", cnpj_companhia = "00.000.000/0001-91",
-         nome_companhia = "BANCO DO BRASIL S.A."),
-    list(cd_cvm = "022470", cnpj_companhia = "47.960.950/0001-21",
-         nome_companhia = "MAGAZINE LUIZA S.A.")
+    list(
+      cd_cvm = "001023",
+      cnpj_companhia = "00.000.000/0001-91",
+      nome_companhia = "BANCO DO BRASIL S.A."
+    ),
+    list(
+      cd_cvm = "022470",
+      cnpj_companhia = "47.960.950/0001-21",
+      nome_companhia = "MAGAZINE LUIZA S.A."
+    )
   )
 
   stage <- tempfile("ipe_fixture_")
@@ -607,19 +680,29 @@ build_ipe_raw_fixture <- function() {
     body <- lines[-1L]
     body <- body[nzchar(body)]
     fields <- strsplit(body, ";", fixed = TRUE)
-    cnpjs <- vapply(fields, function(f) {
-      if (length(f) >= idx) f[idx] else NA_character_
-    }, character(1L))
+    cnpjs <- vapply(
+      fields,
+      function(f) {
+        if (length(f) >= idx) f[idx] else NA_character_
+      },
+      character(1L)
+    )
     keep_mask <- cnpjs %in% keep_cnpjs
     kept_fields <- fields[keep_mask]
-    categories <<- unique(c(categories, vapply(kept_fields, function(f) {
-      if (length(f) >= cat_idx) f[cat_idx] else NA_character_
-    }, character(1L))))
+    categories <<- unique(c(
+      categories,
+      vapply(
+        kept_fields,
+        function(f) {
+          if (length(f) >= cat_idx) f[cat_idx] else NA_character_
+        },
+        character(1L)
+      )
+    ))
     kept <- c(header, body[keep_mask])
     out <- file.path(extract_dir, paste0("subset_", name))
     out_raw <- charToRaw(
-      iconv(paste(kept, collapse = "\r\n"),
-            from = "UTF-8", to = "ISO-8859-1")
+      iconv(paste(kept, collapse = "\r\n"), from = "UTF-8", to = "ISO-8859-1")
     )
     writeBin(out_raw, out)
     list(path = out, n_rows = sum(keep_mask))
@@ -630,11 +713,15 @@ build_ipe_raw_fixture <- function() {
   # Repack: only the filtered CSV (renamed back to canonical).
   pack_dir <- file.path(stage, "pack")
   dir.create(pack_dir)
-  file.copy(ipe_info$path,
-            file.path(pack_dir, "ipe_cia_aberta_2024.csv"),
-            overwrite = TRUE)
+  file.copy(
+    ipe_info$path,
+    file.path(pack_dir, "ipe_cia_aberta_2024.csv"),
+    overwrite = TRUE
+  )
 
-  if (file.exists(out_zip)) file.remove(out_zip)
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
   out_zip_abs <- file.path(
     normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
     basename(out_zip)
@@ -670,16 +757,32 @@ build_ipe_raw_fixture <- function() {
     out_meta
   )
 
-  cat(sprintf("[fixture] %s  %s bytes\n",
-              out_zip, format(file.info(out_zip)$size)))
-  cat(sprintf("[fixture] ipe subset: %d rows, %d distinct categories\n",
-              ipe_info$n_rows, length(categories)))
+  cat(sprintf(
+    "[fixture] %s  %s bytes\n",
+    out_zip,
+    format(file.info(out_zip)$size)
+  ))
+  cat(sprintf(
+    "[fixture] ipe subset: %d rows, %d distinct categories\n",
+    ipe_info$n_rows,
+    length(categories)
+  ))
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
 # --- dispatch --------------------------------------------------------
-if ("parquet" %in% .targets) build_parquet_fixtures()
-if ("cgvn" %in% .targets) build_cgvn_raw_fixture()
-if ("vlmo" %in% .targets) build_vlmo_raw_fixture()
-if ("fca" %in% .targets) build_fca_raw_fixture()
-if ("ipe" %in% .targets) build_ipe_raw_fixture()
+if ("parquet" %in% .targets) {
+  build_parquet_fixtures()
+}
+if ("cgvn" %in% .targets) {
+  build_cgvn_raw_fixture()
+}
+if ("vlmo" %in% .targets) {
+  build_vlmo_raw_fixture()
+}
+if ("fca" %in% .targets) {
+  build_fca_raw_fixture()
+}
+if ("ipe" %in% .targets) {
+  build_ipe_raw_fixture()
+}

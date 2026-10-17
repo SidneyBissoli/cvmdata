@@ -17,8 +17,16 @@ test_that("agent_fetch has canonical signature", {
   fmls <- formals(agent_fetch)
   expect_named(
     fmls,
-    c("dataset", "table", "agent", "as_of",
-      "source", "on_error", "validate", "...")
+    c(
+      "dataset",
+      "table",
+      "agent",
+      "as_of",
+      "source",
+      "on_error",
+      "validate",
+      "..."
+    )
   )
   expect_null(fmls$agent)
   expect_null(fmls$as_of)

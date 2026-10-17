@@ -30,3 +30,4 @@
 ^teste.*\.R$
 ^teste.*\.md$
 ^teste.*\.html$
+^air\.toml$

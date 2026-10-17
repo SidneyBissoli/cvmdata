@@ -5,7 +5,8 @@
 
 write_csv_iso <- function(text) {
   path <- withr::local_tempfile(
-    fileext = ".csv", .local_envir = parent.frame()
+    fileext = ".csv",
+    .local_envir = parent.frame()
   )
   writeBin(charToRaw(text), path)
   path
@@ -69,14 +70,14 @@ test_that("snapshot declares non-date `vencimento` => Date column", {
   # canonical lookup must promote it over the name-based heuristic,
   # which would otherwise leave it to col_guess.
   fake_dict <- tibble::tibble(
-    campo          = c("cnpj_cia", "vencimento", "outro"),
+    campo = c("cnpj_cia", "vencimento", "outro"),
     campo_original = c("CNPJ_CIA", "Vencimento", "OUTRO"),
-    descricao      = NA_character_,
-    dominio        = NA_character_,
-    tipo_dados     = c("varchar", "date", "varchar"),
-    tamanho        = NA_integer_,
-    precisao       = NA_integer_,
-    scale          = NA_integer_
+    descricao = NA_character_,
+    dominio = NA_character_,
+    tipo_dados = c("varchar", "date", "varchar"),
+    tamanho = NA_integer_,
+    precisao = NA_integer_,
+    scale = NA_integer_
   )
   local_mocked_bindings(
     cvm_dictionary = function(dataset, table) fake_dict,
@@ -90,9 +91,12 @@ test_that("snapshot declares non-date `vencimento` => Date column", {
   )
   path <- write_csv_iso(csv)
   schema <- list(
-    dataset = "stub", table = "stub",
-    delimiter = ";", encoding = "ISO-8859-1",
-    expected_field_count = 3L, meta_status = "available"
+    dataset = "stub",
+    table = "stub",
+    delimiter = ";",
+    encoding = "ISO-8859-1",
+    expected_field_count = 3L,
+    meta_status = "available"
   )
   df <- read_cvm_csv(path, schema, validate = "strict")
   expect_s3_class(df$vencimento, "Date")
@@ -105,14 +109,14 @@ test_that("snapshot declares dt_/data_ as non-date => not parsed as Date", {
   # decide. Values are deliberately non-ISO so the test does not depend
   # on readr's guesser preferring character over Date.
   fake_dict <- tibble::tibble(
-    campo          = c("cnpj_cia", "dt_pseudo"),
+    campo = c("cnpj_cia", "dt_pseudo"),
     campo_original = c("CNPJ_CIA", "DT_PSEUDO"),
-    descricao      = NA_character_,
-    dominio        = NA_character_,
-    tipo_dados     = c("varchar", "varchar"),
-    tamanho        = NA_integer_,
-    precisao       = NA_integer_,
-    scale          = NA_integer_
+    descricao = NA_character_,
+    dominio = NA_character_,
+    tipo_dados = c("varchar", "varchar"),
+    tamanho = NA_integer_,
+    precisao = NA_integer_,
+    scale = NA_integer_
   )
   local_mocked_bindings(
     cvm_dictionary = function(dataset, table) fake_dict,
@@ -127,9 +131,12 @@ test_that("snapshot declares dt_/data_ as non-date => not parsed as Date", {
   )
   path <- write_csv_iso(csv)
   schema <- list(
-    dataset = "stub", table = "stub",
-    delimiter = ";", encoding = "ISO-8859-1",
-    expected_field_count = 2L, meta_status = "available"
+    dataset = "stub",
+    table = "stub",
+    delimiter = ";",
+    encoding = "ISO-8859-1",
+    expected_field_count = 2L,
+    meta_status = "available"
   )
   df <- read_cvm_csv(path, schema, validate = "strict")
   expect_type(df$dt_pseudo, "character")
@@ -147,11 +154,16 @@ test_that("meta_status:missing falls back to dt_/data_ heuristic", {
   )
   path <- write_csv_iso(csv)
   schema <- list(
-    dataset = "fre", table = "stub_missing",
-    delimiter = ";", encoding = "ISO-8859-1",
-    expected_field_count = 3L, meta_status = "missing",
+    dataset = "fre",
+    table = "stub_missing",
+    delimiter = ";",
+    encoding = "ISO-8859-1",
+    expected_field_count = 3L,
+    meta_status = "missing",
     expected_field_names = c(
-      "CNPJ_Companhia", "Data_Inventada", "OUTRO"
+      "CNPJ_Companhia",
+      "Data_Inventada",
+      "OUTRO"
     )
   )
   df <- read_cvm_csv(path, schema, validate = "skip")

@@ -23,11 +23,13 @@
 
 # Wrap `cli::cli_abort()` so that the parent class "cvmdata_error" is
 # always appended. Callers pass the specific subclass via `class`.
-cvmdata_abort <- function(message,
-                          class = NULL,
-                          ...,
-                          call = rlang::caller_env(),
-                          .envir = parent.frame()) {
+cvmdata_abort <- function(
+  message,
+  class = NULL,
+  ...,
+  call = rlang::caller_env(),
+  .envir = parent.frame()
+) {
   classes <- unique(c(class, "cvmdata_error"))
   cli::cli_abort(
     message,
@@ -39,10 +41,7 @@ cvmdata_abort <- function(message,
 }
 
 # Wrap `cli::cli_warn()` analogously. Parent class is "cvmdata_warn".
-cvmdata_warn <- function(message,
-                         class = NULL,
-                         ...,
-                         .envir = parent.frame()) {
+cvmdata_warn <- function(message, class = NULL, ..., .envir = parent.frame()) {
   classes <- unique(c(class, "cvmdata_warn"))
   cli::cli_warn(
     message,

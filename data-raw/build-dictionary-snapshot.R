@@ -64,13 +64,13 @@ read_iso_lines <- function(path) {
 # snapshot. The user-facing `campo` column is derived later as
 # tolower(campo_original).
 .meta_keys <- list(
-  list(key = "Campo",       canonical = "campo_original"),
-  list(key = "Descrição",  canonical = "descricao"),
-  list(key = "Domínio",  canonical = "dominio"),
-  list(key = "Tipo Dados",  canonical = "tipo_dados"),
-  list(key = "Tamanho",     canonical = "tamanho_str"),
+  list(key = "Campo", canonical = "campo_original"),
+  list(key = "Descrição", canonical = "descricao"),
+  list(key = "Domínio", canonical = "dominio"),
+  list(key = "Tipo Dados", canonical = "tipo_dados"),
+  list(key = "Tamanho", canonical = "tamanho_str"),
   list(key = "Precisão", canonical = "precisao_str"),
-  list(key = "Scale",       canonical = "scale_str")
+  list(key = "Scale", canonical = "scale_str")
 )
 
 # Parse one Campo block (lines from "Campo: <name>" up to the next
@@ -93,7 +93,9 @@ parse_meta_block <- function(lines) {
     if (is.null(matched_key) && !is.null(cur_key)) {
       # Continuation line for the current key. Skip pure separators
       # ("--------") and blank lines.
-      if (grepl("^\\s*-+\\s*$", line) || !nzchar(trimws(line))) next
+      if (grepl("^\\s*-+\\s*$", line) || !nzchar(trimws(line))) {
+        next
+      }
       extra <- trimws(line)
       if (nzchar(values[[cur_key]] %||% "")) {
         values[[cur_key]] <- paste(values[[cur_key]], extra)
@@ -105,12 +107,12 @@ parse_meta_block <- function(lines) {
   to_int <- function(x) suppressWarnings(as.integer(x %||% NA_character_))
   tibble::tibble(
     campo_original = values$campo_original %||% NA_character_,
-    descricao      = values$descricao      %||% NA_character_,
-    dominio        = values$dominio        %||% NA_character_,
-    tipo_dados     = values$tipo_dados     %||% NA_character_,
-    tamanho        = to_int(values$tamanho_str),
-    precisao       = to_int(values$precisao_str),
-    scale          = to_int(values$scale_str)
+    descricao = values$descricao %||% NA_character_,
+    dominio = values$dominio %||% NA_character_,
+    tipo_dados = values$tipo_dados %||% NA_character_,
+    tamanho = to_int(values$tamanho_str),
+    precisao = to_int(values$precisao_str),
+    scale = to_int(values$scale_str)
   )
 }
 
@@ -120,7 +122,9 @@ parse_meta_block <- function(lines) {
 parse_meta_txt <- function(path) {
   lines <- read_iso_lines(path)
   campo_idx <- grep("^\\s*Campo\\s*:", lines, perl = TRUE)
-  if (!length(campo_idx)) return(tibble::tibble())
+  if (!length(campo_idx)) {
+    return(tibble::tibble())
+  }
   block_end <- c(campo_idx[-1L] - 1L, length(lines))
   records <- vector("list", length(campo_idx))
   for (i in seq_along(campo_idx)) {
@@ -145,11 +149,14 @@ build_dictionary_snapshot <- function() {
   yamls <- list()
   for (g in groups) {
     datasets <- sort(list.dirs(
-      file.path(schemas_root, g), recursive = FALSE, full.names = FALSE
+      file.path(schemas_root, g),
+      recursive = FALSE,
+      full.names = FALSE
     ))
     for (ds in datasets) {
       yaml_files <- list.files(
-        file.path(schemas_root, g, ds), pattern = "\\.yaml$",
+        file.path(schemas_root, g, ds),
+        pattern = "\\.yaml$",
         full.names = TRUE
       )
       for (yp in yaml_files) {
@@ -179,24 +186,27 @@ build_dictionary_snapshot <- function() {
       if (is.null(fields) || !length(fields)) {
         cli::cli_abort(c(
           paste0(
-            "YAML {.val ", info$dataset, "/", info$table,
+            "YAML {.val ",
+            info$dataset,
+            "/",
+            info$table,
             "}: meta_status=missing but expected_field_names empty."
           )
         ))
       }
       all_rows[[length(all_rows) + 1L]] <- tibble::tibble(
-        group          = info$group,
-        dataset        = info$dataset,
-        table          = info$table,
-        campo          = tolower(fields),
+        group = info$group,
+        dataset = info$dataset,
+        table = info$table,
+        campo = tolower(fields),
         campo_original = fields,
-        descricao      = NA_character_,
-        dominio        = NA_character_,
-        tipo_dados     = NA_character_,
-        tamanho        = NA_integer_,
-        precisao       = NA_integer_,
-        scale          = NA_integer_,
-        meta_status    = "missing"
+        descricao = NA_character_,
+        dominio = NA_character_,
+        tipo_dados = NA_character_,
+        tamanho = NA_integer_,
+        precisao = NA_integer_,
+        scale = NA_integer_,
+        meta_status = "missing"
       )
       next
     }
@@ -206,7 +216,10 @@ build_dictionary_snapshot <- function() {
     if (is.null(url) || !nzchar(url)) {
       cli::cli_abort(c(
         paste0(
-          "YAML {.val ", info$dataset, "/", info$table,
+          "YAML {.val ",
+          info$dataset,
+          "/",
+          info$table,
           "}: meta_status=available but cvm_dictionary_url is empty."
         )
       ))
@@ -248,23 +261,38 @@ build_dictionary_snapshot <- function() {
     if (!nrow(entries)) {
       cli::cli_abort(c(
         paste0(
-          "No Campo entries parsed from {.path ", basename(txt_path),
-          "} ({.val ", info$dataset, "/", info$table, "})."
+          "No Campo entries parsed from {.path ",
+          basename(txt_path),
+          "} ({.val ",
+          info$dataset,
+          "/",
+          info$table,
+          "})."
         )
       ))
     }
 
     all_rows[[length(all_rows) + 1L]] <- entries |>
       dplyr::mutate(
-        group       = info$group,
-        dataset     = info$dataset,
-        table       = info$table,
-        campo       = tolower(.data$campo_original),
+        group = info$group,
+        dataset = info$dataset,
+        table = info$table,
+        campo = tolower(.data$campo_original),
         meta_status = "available"
       ) |>
       dplyr::select(
-        group, dataset, table, campo, campo_original, descricao, dominio,
-        tipo_dados, tamanho, precisao, scale, meta_status
+        group,
+        dataset,
+        table,
+        campo,
+        campo_original,
+        descricao,
+        dominio,
+        tipo_dados,
+        tamanho,
+        precisao,
+        scale,
+        meta_status
       )
   }
 
@@ -274,16 +302,19 @@ build_dictionary_snapshot <- function() {
   # present in the published source (ZIP archive or single .txt).
   inventory <- list()
   pairs <- unique(data.frame(
-    group   = vapply(yamls, `[[`, character(1L), "group"),
+    group = vapply(yamls, `[[`, character(1L), "group"),
     dataset = vapply(yamls, `[[`, character(1L), "dataset"),
     stringsAsFactors = FALSE
   ))
   for (i in seq_len(nrow(pairs))) {
     g <- pairs$group[i]
     ds <- pairs$dataset[i]
-    yamls_ds <- Filter(function(y) {
-      identical(y$group, g) && identical(y$dataset, ds)
-    }, yamls)
+    yamls_ds <- Filter(
+      function(y) {
+        identical(y$group, g) && identical(y$dataset, ds)
+      },
+      yamls
+    )
     urls <- unique(unlist(lapply(yamls_ds, function(y) {
       y$cvm_dictionary_url
     })))
@@ -291,17 +322,22 @@ build_dictionary_snapshot <- function() {
     n_entries <- 0L
     if (length(urls)) {
       zips <- unique(vapply(
-        urls, function(u) split_url(u)$zip, character(1L)
+        urls,
+        function(u) split_url(u)$zip,
+        character(1L)
       ))
       direct_txt_urls <- urls[is.na(vapply(
-        urls, function(u) split_url(u)$zip, character(1L)
+        urls,
+        function(u) split_url(u)$zip,
+        character(1L)
       ))]
       for (z in zips[!is.na(zips)]) {
         d <- zip_extract_cache[[z]]
         if (!is.null(d)) {
-          n_entries <- n_entries + length(
-            list.files(d, pattern = "\\.txt$")
-          )
+          n_entries <- n_entries +
+            length(
+              list.files(d, pattern = "\\.txt$")
+            )
         }
       }
       n_entries <- n_entries + length(direct_txt_urls)
@@ -309,11 +345,13 @@ build_dictionary_snapshot <- function() {
 
     n_tables_yaml <- length(yamls_ds)
     n_tables_available <- sum(vapply(
-      yamls_ds, function(y) identical(y$meta_status %||% "available", "available"),
+      yamls_ds,
+      function(y) identical(y$meta_status %||% "available", "available"),
       logical(1L)
     ))
     n_tables_missing <- sum(vapply(
-      yamls_ds, function(y) identical(y$meta_status, "missing"),
+      yamls_ds,
+      function(y) identical(y$meta_status, "missing"),
       logical(1L)
     ))
     inventory[[length(inventory) + 1L]] <- tibble::tibble(
