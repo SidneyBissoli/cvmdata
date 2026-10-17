@@ -26,14 +26,16 @@ devtools::load_all(".", quiet = TRUE)
 # Slice a cvm_tbl preserving provenance attributes and the S3 class.
 slice_cvm_tbl <- function(x, n) {
   attrs <- list(
-    source          = attr(x, "source", exact = TRUE),
-    fetched_at      = attr(x, "fetched_at", exact = TRUE),
-    dataset         = attr(x, "dataset", exact = TRUE),
-    table           = attr(x, "table", exact = TRUE),
+    source = attr(x, "source", exact = TRUE),
+    fetched_at = attr(x, "fetched_at", exact = TRUE),
+    dataset = attr(x, "dataset", exact = TRUE),
+    table = attr(x, "table", exact = TRUE),
     package_version = attr(x, "package_version", exact = TRUE)
   )
   out <- x[seq_len(min(n, nrow(x))), , drop = FALSE]
-  for (nm in names(attrs)) attr(out, nm) <- attrs[[nm]]
+  for (nm in names(attrs)) {
+    attr(out, nm) <- attrs[[nm]]
+  }
   if (!inherits(out, "cvm_tbl")) {
     class(out) <- c("cvm_tbl", class(out))
   }
@@ -46,7 +48,9 @@ args <- commandArgs(trailingOnly = TRUE)
 write_mode <- "--write" %in% args
 
 out_dir <- file.path("inst", "extdata", "vignette-data")
-if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+if (!dir.exists(out_dir)) {
+  dir.create(out_dir, recursive = TRUE)
+}
 
 cli::cli_h1("Fetching CAD registry (full snapshot)")
 cad_full <- issuer_fetch("cad", "companhias")
@@ -57,7 +61,8 @@ cad_sample <- slice_cvm_tbl(cad_full, 15L)
 
 cli::cli_h1("Fetching DFP/BPA individual 2024 (BCO BRASIL, CD_CVM 1023)")
 bb_bpa <- issuer_fetch(
-  "dfp", "bpa",
+  "dfp",
+  "bpa",
   report_type = "ind",
   issuer = "1023",
   year = 2024L
@@ -83,7 +88,7 @@ cvm_vs_mirror <- if (file.exists(cmp_src)) {
 
 if (write_mode) {
   cad_path <- file.path(out_dir, "cad_companhias_sample.rds")
-  bb_path  <- file.path(out_dir, "dfp_bpa_bb_2024_sample.rds")
+  bb_path <- file.path(out_dir, "dfp_bpa_bb_2024_sample.rds")
   saveRDS(cad_sample, cad_path, version = 2L)
   saveRDS(bb_bpa_sample, bb_path, version = 2L)
   cli::cli_alert_success(
@@ -94,7 +99,9 @@ if (write_mode) {
   )
 
   cm_dir <- file.path(out_dir, "cache-and-mirror")
-  if (!dir.exists(cm_dir)) dir.create(cm_dir, recursive = TRUE)
+  if (!dir.exists(cm_dir)) {
+    dir.create(cm_dir, recursive = TRUE)
+  }
   if (!is.null(cvm_vs_mirror)) {
     cm_path <- file.path(cm_dir, "cvm-vs-mirror.rds")
     saveRDS(cvm_vs_mirror, cm_path, version = 2L)

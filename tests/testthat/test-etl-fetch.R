@@ -15,11 +15,15 @@ load_etl_fetcher <- function() {
   script <- if (nzchar(installed)) {
     installed
   } else {
-    normalizePath(test_path("..", "..", "inst", "etl", "01-fetch-cvm.R"),
-                  winslash = "/")
+    normalizePath(
+      test_path("..", "..", "inst", "etl", "01-fetch-cvm.R"),
+      winslash = "/"
+    )
   }
-  withr::local_options(cvmdata.etl_testing = TRUE,
-                       .local_envir = parent.frame())
+  withr::local_options(
+    cvmdata.etl_testing = TRUE,
+    .local_envir = parent.frame()
+  )
   sys.source(script, envir = parent.frame())
 }
 
@@ -62,8 +66,11 @@ test_that("fetch_one reports a transport failure as transport", {
     issuer_fetch = function(...) {
       rlang::abort(
         "HTTP GET failed",
-        class = c("cvmdata_error_http_transport", "cvmdata_error_http",
-                  "cvmdata_error")
+        class = c(
+          "cvmdata_error_http_transport",
+          "cvmdata_error_http",
+          "cvmdata_error"
+        )
       )
     }
   )
@@ -95,8 +102,11 @@ test_that("fetch_one reports a missing ZIP member as non-transport", {
     issuer_fetch = function(...) {
       rlang::abort(
         "CSV not found inside ZIP",
-        class = c("cvmdata_error_zip_member_missing", "cvmdata_error_parse",
-                  "cvmdata_error")
+        class = c(
+          "cvmdata_error_zip_member_missing",
+          "cvmdata_error_parse",
+          "cvmdata_error"
+        )
       )
     }
   )
@@ -147,8 +157,11 @@ test_that("fetch_all never trips after something has come through", {
   n <- 0L
   fetch_one <- function(dataset, tbl, year, report_type) {
     n <<- n + 1L
-    if (n == 1L) list(ok = TRUE, transport = FALSE) else
+    if (n == 1L) {
+      list(ok = TRUE, transport = FALSE)
+    } else {
       list(ok = FALSE, transport = TRUE)
+    }
   }
   out <- suppressMessages(fetch_all("fre", "acao_entregue", 2010:2025))
   expect_false(out$tripped)
@@ -172,8 +185,13 @@ test_that("fetch_one reports success and carries year = NA through", {
   load_etl_fetcher()
   seen <- NULL
   local_mocked_bindings(
-    issuer_fetch = function(dataset, table, year = NULL,
-                            report_type = NULL, ...) {
+    issuer_fetch = function(
+      dataset,
+      table,
+      year = NULL,
+      report_type = NULL,
+      ...
+    ) {
       seen <<- list(year = year, report_type = report_type)
       tibble::tibble(x = 1L)
     }

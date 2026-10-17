@@ -18,11 +18,15 @@ load_etl_validator <- function() {
   script <- if (nzchar(installed)) {
     installed
   } else {
-    normalizePath(test_path("..", "..", "inst", "etl", "02b-validate.R"),
-                  winslash = "/")
+    normalizePath(
+      test_path("..", "..", "inst", "etl", "02b-validate.R"),
+      winslash = "/"
+    )
   }
-  withr::local_options(cvmdata.etl_testing = TRUE,
-                       .local_envir = parent.frame())
+  withr::local_options(
+    cvmdata.etl_testing = TRUE,
+    .local_envir = parent.frame()
+  )
   sys.source(script, envir = parent.frame())
 }
 
@@ -33,17 +37,37 @@ cad_fx <- function() test_path("fixtures", "mirror-cad-companhias.parquet")
 test_that("validate_parquet_path builds Hive-style locations", {
   load_etl_validator()
   expect_identical(
-    validate_parquet_path("/tmp/w", "companhias", "cad", "companhias",
-                          NA, NULL),
-    file.path("/tmp/w", "out", "parquet",
-              "companhias", "cad", "companhias", "part-0.parquet")
+    validate_parquet_path(
+      "/tmp/w",
+      "companhias",
+      "cad",
+      "companhias",
+      NA,
+      NULL
+    ),
+    file.path(
+      "/tmp/w",
+      "out",
+      "parquet",
+      "companhias",
+      "cad",
+      "companhias",
+      "part-0.parquet"
+    )
   )
   expect_identical(
-    validate_parquet_path("/tmp/w", "companhias", "dfp", "bpa",
-                          2024L, "ind"),
-    file.path("/tmp/w", "out", "parquet",
-              "companhias", "dfp", "bpa",
-              "report_type=ind", "year=2024", "part-0.parquet")
+    validate_parquet_path("/tmp/w", "companhias", "dfp", "bpa", 2024L, "ind"),
+    file.path(
+      "/tmp/w",
+      "out",
+      "parquet",
+      "companhias",
+      "dfp",
+      "bpa",
+      "report_type=ind",
+      "year=2024",
+      "part-0.parquet"
+    )
   )
 })
 
@@ -55,15 +79,19 @@ test_that("validate_one_parquet passes on a clean CAD fixture", {
   result <- validate_one_parquet(cad_fx(), "cad", "companhias", hints)
   expect_s3_class(result, "tbl_df")
   expect_true(all(result$status == "pass"))
-  expect_true(all(c("parquet_exists", "parquet_readable",
-                    "n_rows > 0") %in% result$check))
+  expect_true(all(
+    c("parquet_exists", "parquet_readable", "n_rows > 0") %in% result$check
+  ))
 })
 
 test_that("validate_one_parquet returns hard fail when file missing", {
   load_etl_validator()
   hints <- validate_schema_hints("cad", "companhias")
   result <- validate_one_parquet(
-    "/this/does/not/exist.parquet", "cad", "companhias", hints
+    "/this/does/not/exist.parquet",
+    "cad",
+    "companhias",
+    hints
   )
   expect_equal(nrow(result), 1L)
   expect_identical(result$check, "parquet_exists")
@@ -82,7 +110,8 @@ test_that("validate_one_parquet returns hard fail on empty parquet", {
   arrow::write_parquet(empty, tmp)
   result <- validate_one_parquet(tmp, "cad", "companhias", hints)
   expect_identical(
-    result$status[result$check == "n_rows > 0"], "fail"
+    result$status[result$check == "n_rows > 0"],
+    "fail"
   )
   expect_true(all(result$severity[result$status == "fail"] == "hard"))
 })
@@ -99,8 +128,10 @@ test_that("validate_one_parquet flags soft fail on bad CNPJ format", {
   arrow::write_parquet(bad, tmp)
   result <- validate_one_parquet(tmp, "cad", "companhias", hints)
   # Synthetic checks pass.
-  syn <- result[result$check %in%
-                  c("parquet_exists", "parquet_readable", "n_rows > 0"), ]
+  syn <- result[
+    result$check %in%
+      c("parquet_exists", "parquet_readable", "n_rows > 0"),
+  ]
   expect_true(all(syn$status == "pass"))
   # Hard col_is_character passes (cnpj_cia is character).
   hard_fail <- result[result$severity == "hard" & result$status == "fail", ]
@@ -147,7 +178,8 @@ test_that("validate_skip_set parses the stage-02 manifest with reasons", {
       stringsAsFactors = FALSE
     ),
     file.path(skip_dir, "fca.json"),
-    auto_unbox = TRUE, na = "null"
+    auto_unbox = TRUE,
+    na = "null"
   )
   skip <- validate_skip_set("fca", workspace)
   k_empty <- validate_tuple_key("departamento_acionistas", 2024L, NULL)
@@ -161,8 +193,11 @@ test_that("missing parquet is a soft pass when skipped (empty / absent)", {
   hints <- validate_schema_hints("fca", "departamento_acionistas")
   for (reason in c("empty", "absent")) {
     result <- validate_one_parquet(
-      "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
-      hints, skip_reason = reason
+      "/this/does/not/exist.parquet",
+      "fca",
+      "departamento_acionistas",
+      hints,
+      skip_reason = reason
     )
     expect_equal(nrow(result), 1L)
     expect_identical(result$check, sprintf("upstream_%s", reason))
@@ -177,7 +212,9 @@ test_that("missing parquet stays a hard fail when not skipped", {
   load_etl_validator()
   hints <- validate_schema_hints("fca", "departamento_acionistas")
   result <- validate_one_parquet(
-    "/this/does/not/exist.parquet", "fca", "departamento_acionistas",
+    "/this/does/not/exist.parquet",
+    "fca",
+    "departamento_acionistas",
     hints
   )
   expect_identical(result$check, "parquet_exists")
@@ -191,7 +228,12 @@ test_that("validate_dataset reports pass for a clean CAD workspace", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
   dest_dir <- file.path(
-    workspace, "out", "parquet", "companhias", "cad", "companhias"
+    workspace,
+    "out",
+    "parquet",
+    "companhias",
+    "cad",
+    "companhias"
   )
   dir.create(dest_dir, recursive = TRUE)
   file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
@@ -216,7 +258,12 @@ test_that("validate_write_report writes a markdown summary", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
   dest_dir <- file.path(
-    workspace, "out", "parquet", "companhias", "cad", "companhias"
+    workspace,
+    "out",
+    "parquet",
+    "companhias",
+    "cad",
+    "companhias"
   )
   dir.create(dest_dir, recursive = TRUE)
   file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
@@ -226,7 +273,6 @@ test_that("validate_write_report writes a markdown summary", {
   out_path <- validate_write_report(results, "cad", report_dir)
   expect_true(file.exists(out_path))
   content <- readLines(out_path)
-  expect_true(any(grepl("ETL validation report: cad", content,
-                        fixed = TRUE)))
+  expect_true(any(grepl("ETL validation report: cad", content, fixed = TRUE)))
   expect_true(any(grepl("PASS", content)))
 })

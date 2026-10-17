@@ -63,8 +63,10 @@ test_that("issuer_fetch FCA submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "table"), "submissao")
   expect_true(nrow(result) > 0L)
   # Classic convention, identical to ITR/DFP/FRE submissao.
-  expect_true(all(c("cnpj_cia", "dt_refer", "versao", "cd_cvm",
-                    "denom_cia") %in% names(result)))
+  expect_true(all(
+    c("cnpj_cia", "dt_refer", "versao", "cd_cvm", "denom_cia") %in%
+      names(result)
+  ))
   expect_identical(ncol(result), 9L)
   expect_type(result$cnpj_cia, "character")
   expect_type(result$cd_cvm, "character")
@@ -83,8 +85,10 @@ test_that("issuer_fetch FCA detail tracers return FRE-detail shape", {
     expect_s3_class(result, "cvm_tbl")
     expect_identical(attr(result, "table"), tb)
     expect_true(nrow(result) > 0L)
-    expect_true(all(c("cnpj_companhia", "data_referencia", "versao",
-                      "nome_empresarial") %in% names(result)))
+    expect_true(all(
+      c("cnpj_companhia", "data_referencia", "versao", "nome_empresarial") %in%
+        names(result)
+    ))
     expect_type(result$cnpj_companhia, "character")
     expect_s3_class(result$data_referencia, "Date")
     # FRE-detail tables do not carry cd_cvm.
@@ -115,8 +119,13 @@ test_that("issuer_fetch FCA filters a detail by CNPJ", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "geral", issuer = "00.000.000/0001-91",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "fca",
+      "geral",
+      issuer = "00.000.000/0001-91",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -132,16 +141,26 @@ test_that("FCA resolves CD_CVM via submissao for a detail table", {
 
   padded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "endereco", issuer = "001023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "fca",
+      "endereco",
+      issuer = "001023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_true(nrow(padded) > 0L)
   expect_true(all(padded$cnpj_companhia == "00.000.000/0001-91"))
 
   unpadded <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "endereco", issuer = "1023",
-                 year = 2024L, source = "cvm")
+    issuer_fetch(
+      "fca",
+      "endereco",
+      issuer = "1023",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_identical(nrow(unpadded), nrow(padded))
 })
@@ -155,8 +174,7 @@ test_that("FCA resolves a B3 ticker to its issuer CNPJ", {
   # BBAS3 is BCO BRASIL's ticker in the fixture's valor_mobiliario.
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "geral", issuer = "BBAS3",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("fca", "geral", issuer = "BBAS3", year = 2024L, source = "cvm")
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
@@ -168,8 +186,7 @@ test_that("FCA ticker lookup is case-insensitive", {
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "geral", issuer = "bbas3",
-                 year = 2024L, source = "cvm")
+    issuer_fetch("fca", "geral", issuer = "bbas3", year = 2024L, source = "cvm")
   )
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
@@ -181,8 +198,13 @@ test_that("unknown ticker aborts with cvmdata_error_input", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("fca", "geral", issuer = "ZZZZ9",
-                   year = 2024L, source = "cvm")
+      issuer_fetch(
+        "fca",
+        "geral",
+        issuer = "ZZZZ9",
+        year = 2024L,
+        source = "cvm"
+      )
     ),
     class = "cvmdata_error_input"
   )
@@ -192,10 +214,13 @@ test_that("unknown ticker aborts with cvmdata_error_input", {
 
 test_that("classify_issuer_tokens routes ticker vs CD_CVM vs CNPJ", {
   cls <- cvmdata:::classify_issuer_tokens(c(
-    "PETR4", "BBDC11", "ITSA4F",      # tickers
-    "1023", "001023",                  # CD_CVM
-    "00.000.000/0001-91",              # CNPJ
-    "BCO BRASIL"                       # free text
+    "PETR4",
+    "BBDC11",
+    "ITSA4F", # tickers
+    "1023",
+    "001023", # CD_CVM
+    "00.000.000/0001-91", # CNPJ
+    "BCO BRASIL" # free text
   ))
   expect_identical(
     cls$is_ticker,
@@ -232,8 +257,13 @@ test_that("departamento_acionistas returns 0 rows without aborting", {
   for (mode in c("strict", "warn", "skip")) {
     result <- httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("fca", "departamento_acionistas",
-                   year = 2024L, source = "cvm", validate = mode)
+      issuer_fetch(
+        "fca",
+        "departamento_acionistas",
+        year = 2024L,
+        source = "cvm",
+        validate = mode
+      )
     )
     expect_s3_class(result, "cvm_tbl")
     expect_identical(nrow(result), 0L)
@@ -249,8 +279,13 @@ test_that("report_type aborts for FCA tables without variants", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("fca", "submissao", year = 2024L,
-                   source = "cvm", report_type = "ind")
+      issuer_fetch(
+        "fca",
+        "submissao",
+        year = 2024L,
+        source = "cvm",
+        report_type = "ind"
+      )
     ),
     class = "cvmdata_error_input"
   )
@@ -260,9 +295,15 @@ test_that("report_type aborts for FCA tables without variants", {
 
 test_that("load_schema accepts the 10 FCA YAMLs", {
   expected <- c(
-    submissao = 9, auditor = 15, canal_divulgacao = 7,
-    departamento_acionistas = 23, dri = 26, endereco = 21,
-    escriturador = 24, geral = 26, pais_estrangeiro_negociacao = 7,
+    submissao = 9,
+    auditor = 15,
+    canal_divulgacao = 7,
+    departamento_acionistas = 23,
+    dri = 26,
+    endereco = 21,
+    escriturador = 24,
+    geral = 26,
+    pais_estrangeiro_negociacao = 7,
     valor_mobiliario = 18
   )
   for (tb in names(expected)) {
@@ -287,9 +328,18 @@ test_that("cvm_datasets includes fca", {
 test_that("cvm_tables('fca') lists the 10 tables", {
   expect_setequal(
     cvm_tables("fca"),
-    c("submissao", "auditor", "canal_divulgacao",
-      "departamento_acionistas", "dri", "endereco", "escriturador",
-      "geral", "pais_estrangeiro_negociacao", "valor_mobiliario")
+    c(
+      "submissao",
+      "auditor",
+      "canal_divulgacao",
+      "departamento_acionistas",
+      "dri",
+      "endereco",
+      "escriturador",
+      "geral",
+      "pais_estrangeiro_negociacao",
+      "valor_mobiliario"
+    )
   )
 })
 

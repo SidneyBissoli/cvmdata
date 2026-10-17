@@ -121,8 +121,7 @@ test_that("issuer_fetch() reads cvmdata.source when arg is NULL (default)", {
   withr::local_options(cvmdata.source = "cvm")
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("dfp", "bpa",
-              report_type = "ind", year = 2024)
+    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024)
   )
   expect_identical(attr(result, "source"), "cvm")
 })
@@ -133,9 +132,7 @@ test_that("issuer_fetch() explicit source argument wins over option", {
   withr::local_options(cvmdata.source = "mirror")
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("dfp", "bpa",
-              report_type = "ind", year = 2024,
-              source = "cvm")
+    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
   )
   expect_identical(attr(result, "source"), "cvm")
 })

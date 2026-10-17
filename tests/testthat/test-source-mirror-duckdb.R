@@ -30,8 +30,11 @@ fake_release <- function(entries, base = "https://example.test") {
 #   - Returns the fake release JSON for the API URL.
 #   - Returns parquet bytes (or 404) for asset GETs.
 #   - Returns a fake __source_hash.json body when one is requested.
-build_mock <- function(entries, hash = NA_character_,
-                       base = "https://example.test") {
+build_mock <- function(
+  entries,
+  hash = NA_character_,
+  base = "https://example.test"
+) {
   body <- fake_release(entries, base = base)
   function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
@@ -58,7 +61,9 @@ build_mock <- function(entries, hash = NA_character_,
       return(httr2::response(404L))
     }
     body_raw <- readBin(
-      hit$parquet, what = "raw", n = file.info(hit$parquet)$size
+      hit$parquet,
+      what = "raw",
+      n = file.info(hit$parquet)$size
     )
     httr2::response(
       status_code = 200L,
@@ -113,8 +118,12 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
   expect_no_warning(
     result <- httr2::with_mocked_responses(
       mock,
-      issuer_fetch("cad", "companhias", issuer = "08773135000100",
-                   source = "mirror")
+      issuer_fetch(
+        "cad",
+        "companhias",
+        issuer = "08773135000100",
+        source = "mirror"
+      )
     )
   )
   expect_s3_class(result, "cvm_tbl")
@@ -135,15 +144,20 @@ test_that("issuer_fetch DFP BPA ind 2024 returns rows via mirror", {
     ),
     list(
       name = "bpa__report_type.con__year.2024__part-0.parquet",
-      parquet = NULL  # exists in inventory but not under test
+      parquet = NULL # exists in inventory but not under test
     )
   )
   mock <- build_mock(entries)
 
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind",
-              year = 2024L, source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      source = "mirror"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
   expect_true(nrow(result) > 0L)
@@ -169,9 +183,14 @@ test_that("issuer_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind",
-              year = 2024L, issuer = "1023",  # BCO BRASIL
-              source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      issuer = "1023", # BCO BRASIL
+      source = "mirror"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
   expect_true(nrow(result) > 0L)
@@ -199,8 +218,13 @@ test_that("issuer_fetch concatenates multiple years from mirror", {
   mock <- build_mock(entries)
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind",
-              year = c(2023L, 2024L), source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = c(2023L, 2024L),
+      source = "mirror"
+    )
   )
   expect_true(nrow(result) > 0L)
   expect_setequal(unique(result$year), c(2023L, 2024L))
@@ -237,7 +261,8 @@ test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
-        status_code = 200L, body = fake_release(entries)
+        status_code = 200L,
+        body = fake_release(entries)
       ))
     }
     httr2::response(status_code = 500L, body = "Server Error")
@@ -245,8 +270,13 @@ test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa", report_type = "ind",
-                year = 2024L, source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -268,7 +298,8 @@ test_that("mirror short-circuits when hash matches sidecar", {
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
-        status_code = 200L, body = fake_release(entries)
+        status_code = 200L,
+        body = fake_release(entries)
       ))
     }
     if (grepl("__source_hash.json", req$url)) {
@@ -279,7 +310,9 @@ test_that("mirror short-circuits when hash matches sidecar", {
     }
     asset_calls <<- asset_calls + 1L
     body_raw <- readBin(
-      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+      dfp_fx(),
+      what = "raw",
+      n = file.info(dfp_fx())$size
     )
     httr2::response(
       status_code = 200L,
@@ -290,12 +323,22 @@ test_that("mirror short-circuits when hash matches sidecar", {
   httr2::with_mocked_responses(
     mock,
     {
-      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-                source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
       cvmdata:::mirror_assets_cache_clear()
       # Second call: sidecar matches, L3 retained, no asset re-fetch.
-      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-                source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
     }
   )
   expect_equal(asset_calls, 1L)
@@ -341,8 +384,13 @@ test_that("mirror aborts when no asset matches (table absent)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpp", report_type = "ind",
-                year = 2024L, source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpp",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
     ),
     class = "cvmdata_error_input"
   )
@@ -362,8 +410,13 @@ test_that("mirror aborts when no asset matches (year absent)", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa", report_type = "ind",
-                year = 1990L, source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 1990L,
+        source = "mirror"
+      )
     ),
     class = "cvmdata_error_input"
   )
@@ -399,8 +452,7 @@ test_that("mirror aborts when report_type passed to non-variant table", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("cad", "companhias", report_type = "ind",
-                source = "mirror")
+      issuer_fetch("cad", "companhias", report_type = "ind", source = "mirror")
     ),
     class = "cvmdata_error_input"
   )
@@ -438,8 +490,13 @@ test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch("dfp", "bpa", report_type = "ind",
-                year = 2024L, source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
     ),
     class = "cvmdata_error_http"
   )
@@ -461,12 +518,15 @@ test_that("mirror reuses the L3 cache on a second call", {
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
-        status_code = 200L, body = fake_release(entries)
+        status_code = 200L,
+        body = fake_release(entries)
       ))
     }
     asset_calls <<- asset_calls + 1L
     body_raw <- readBin(
-      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+      dfp_fx(),
+      what = "raw",
+      n = file.info(dfp_fx())$size
     )
     httr2::response(
       status_code = 200L,
@@ -477,10 +537,20 @@ test_that("mirror reuses the L3 cache on a second call", {
   httr2::with_mocked_responses(
     mock,
     {
-      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-                source = "mirror")
-      issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-                source = "mirror")
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2024L,
+        source = "mirror"
+      )
     }
   )
   # The asset is downloaded only once; the second call reads from L3.
@@ -495,7 +565,8 @@ make_hash_mock <- function(entries, hash_holder) {
   function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
-        status_code = 200L, body = fake_release(entries)
+        status_code = 200L,
+        body = fake_release(entries)
       ))
     }
     if (grepl("__source_hash.json", req$url)) {
@@ -505,7 +576,9 @@ make_hash_mock <- function(entries, hash_holder) {
       ))
     }
     body_raw <- readBin(
-      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+      dfp_fx(),
+      what = "raw",
+      n = file.info(dfp_fx())$size
     )
     httr2::response(
       status_code = 200L,
@@ -529,11 +602,21 @@ test_that("L3 sidecar is created on first fetch with a known hash", {
   hash <- list(value = "abc-first")
   httr2::with_mocked_responses(
     make_hash_mock(entries, hash),
-    issuer_fetch("dfp", "bpa", report_type = "ind",
-              year = 2024L, source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      source = "mirror"
+    )
   )
-  sidecar <- file.path(cache_root, "parquet", "companhias", "dfp",
-                       "__source_hash.json")
+  sidecar <- file.path(
+    cache_root,
+    "parquet",
+    "companhias",
+    "dfp",
+    "__source_hash.json"
+  )
   expect_true(file.exists(sidecar))
   expect_identical(readLines(sidecar), "abc-first")
 })
@@ -554,7 +637,8 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
-        status_code = 200L, body = fake_release(entries)
+        status_code = 200L,
+        body = fake_release(entries)
       ))
     }
     if (grepl("__source_hash.json", req$url)) {
@@ -565,7 +649,9 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
     }
     asset_calls <<- asset_calls + 1L
     body_raw <- readBin(
-      dfp_fx(), what = "raw", n = file.info(dfp_fx())$size
+      dfp_fx(),
+      what = "raw",
+      n = file.info(dfp_fx())$size
     )
     httr2::response(
       status_code = 200L,
@@ -576,8 +662,13 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
 
   httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-              source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      source = "mirror"
+    )
   )
   expect_equal(asset_calls, 1L)
 
@@ -587,12 +678,22 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
   cvmdata:::mirror_assets_cache_clear()
   httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-              source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      source = "mirror"
+    )
   )
   expect_equal(asset_calls, 2L)
-  sidecar <- file.path(cache_root, "parquet", "companhias", "dfp",
-                       "__source_hash.json")
+  sidecar <- file.path(
+    cache_root,
+    "parquet",
+    "companhias",
+    "dfp",
+    "__source_hash.json"
+  )
   expect_identical(readLines(sidecar), "v2")
 })
 
@@ -604,7 +705,10 @@ test_that("L3 cache is left alone when current hash is NA", {
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
   dataset_root <- file.path(
-    cache_root, "parquet", "companhias", "dfp"
+    cache_root,
+    "parquet",
+    "companhias",
+    "dfp"
   )
   dir.create(dataset_root, recursive = TRUE)
   writeLines("legacy-hash", file.path(dataset_root, "__source_hash.json"))
@@ -613,11 +717,16 @@ test_that("L3 cache is left alone when current hash is NA", {
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
     parquet = dfp_fx()
   ))
-  mock <- build_mock(entries)  # no __source_hash.json asset
+  mock <- build_mock(entries) # no __source_hash.json asset
   httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024L,
-              source = "mirror")
+    issuer_fetch(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024L,
+      source = "mirror"
+    )
   )
   expect_identical(
     readLines(file.path(dataset_root, "__source_hash.json")),
@@ -635,8 +744,13 @@ test_that("cvm_cache_clear what = parquet drops the L3 tree only", {
   dir.create(raw_dir, recursive = TRUE)
   writeLines("a", file.path(raw_dir, "marker.txt"))
   parquet_dir <- file.path(
-    cache_root, "parquet", "companhias", "dfp", "bpa",
-    "report_type=ind", "year=2024"
+    cache_root,
+    "parquet",
+    "companhias",
+    "dfp",
+    "bpa",
+    "report_type=ind",
+    "year=2024"
   )
   dir.create(parquet_dir, recursive = TRUE)
   writeLines("b", file.path(parquet_dir, "part-0.parquet"))
@@ -673,8 +787,12 @@ test_that("cvm_cache_clear rejects year with what = parquet", {
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
   expect_error(
-    cvm_cache_clear(what = "parquet", dataset = "dfp", year = 2024L,
-                    confirm = FALSE),
+    cvm_cache_clear(
+      what = "parquet",
+      dataset = "dfp",
+      year = 2024L,
+      confirm = FALSE
+    ),
     class = "cvmdata_error_input"
   )
 })

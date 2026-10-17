@@ -100,7 +100,8 @@ test_that("issuer_fetch accepts a vector via the singular `issuer` arg", {
   filtered <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
     issuer_fetch(
-      "cad", "companhias",
+      "cad",
+      "companhias",
       issuer = picks,
       source = "cvm"
     )

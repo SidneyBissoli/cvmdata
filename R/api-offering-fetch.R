@@ -57,13 +57,16 @@
 #'
 #' @family fetchers
 #' @export
-offering_fetch <- function(dataset, table,
-                           offering   = NULL,
-                           date_range = NULL,
-                           source     = NULL,
-                           on_error   = "abort",
-                           validate   = "strict",
-                           ...) {
+offering_fetch <- function(
+  dataset,
+  table,
+  offering = NULL,
+  date_range = NULL,
+  source = NULL,
+  on_error = "abort",
+  validate = "strict",
+  ...
+) {
   dots <- list(...)
   if (length(dots) > 0L) {
     nms <- names(dots) %||% rep("", length(dots))

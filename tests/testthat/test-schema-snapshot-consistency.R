@@ -14,7 +14,9 @@
 
 snapshot_by_table <- function() {
   path <- system.file(
-    "extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"
+    "extdata",
+    "cvm_dictionary_snapshot.csv",
+    package = "cvmdata"
   )
   snap <- .read_dictionary_snapshot(path)
   split(snap, paste(snap$group, snap$dataset, snap$table, sep = "/"))

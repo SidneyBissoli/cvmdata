@@ -28,11 +28,13 @@ test_that("schema with both URLs non-null is rejected", {
   yaml_path <- withr::local_tempfile(fileext = ".yaml")
   yaml::write_yaml(
     list(
-      dataset = "x", table = "y",
+      dataset = "x",
+      table = "y",
       cvm_archive_url_pattern = "https://example.com/x.zip",
       cvm_file_url_pattern = "https://example.com/x.csv",
       cvm_file_pattern = "x.csv",
-      encoding = "ISO-8859-1", delimiter = ";",
+      encoding = "ISO-8859-1",
+      delimiter = ";",
       temporal_partitioning = "none",
       expected_field_count = 1L,
       transformations = list()
@@ -48,11 +50,13 @@ test_that("schema with both URLs non-null is rejected", {
 
 test_that("schema with both URLs null is rejected", {
   raw <- list(
-    dataset = "x", table = "y",
+    dataset = "x",
+    table = "y",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = NULL,
     cvm_file_pattern = "x.csv",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "none",
     expected_field_count = 1L,
     transformations = list()
@@ -65,14 +69,17 @@ test_that("schema with both URLs null is rejected", {
 
 test_that("meta_status: missing without expected_field_names is rejected", {
   raw <- list(
-    dataset = "fre", table = "administrador_PCD",
+    dataset = "fre",
+    table = "administrador_PCD",
     cvm_archive_url_pattern = "https://example.com/x.zip",
     cvm_file_url_pattern = NULL,
     cvm_file_pattern = "x_{year}.csv",
     cvm_dictionary_url = NULL,
     meta_status = "missing",
-    encoding = "ISO-8859-1", delimiter = ";",
-    temporal_partitioning = "yearly", first_year = 2023L,
+    encoding = "ISO-8859-1",
+    delimiter = ";",
+    temporal_partitioning = "yearly",
+    first_year = 2023L,
     expected_field_count = 10L,
     transformations = list()
   )
@@ -84,14 +91,17 @@ test_that("meta_status: missing without expected_field_names is rejected", {
 
 test_that("meta_status: missing with cvm_dictionary_url is rejected", {
   raw <- list(
-    dataset = "fre", table = "administrador_PCD",
+    dataset = "fre",
+    table = "administrador_PCD",
     cvm_archive_url_pattern = "https://example.com/x.zip",
     cvm_file_url_pattern = NULL,
     cvm_file_pattern = "x_{year}.csv",
     cvm_dictionary_url = "https://example.com/meta.txt",
     meta_status = "missing",
-    encoding = "ISO-8859-1", delimiter = ";",
-    temporal_partitioning = "yearly", first_year = 2023L,
+    encoding = "ISO-8859-1",
+    delimiter = ";",
+    temporal_partitioning = "yearly",
+    first_year = 2023L,
     expected_field_count = 10L,
     expected_field_names = c("a", "b"),
     transformations = list()
@@ -104,12 +114,14 @@ test_that("meta_status: missing with cvm_dictionary_url is rejected", {
 
 test_that("invalid meta_status value is rejected", {
   raw <- list(
-    dataset = "x", table = "y",
+    dataset = "x",
+    table = "y",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = "https://example.com/x.csv",
     cvm_file_pattern = "x.csv",
     meta_status = "partial",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "none",
     expected_field_count = 1L,
     transformations = list()
@@ -122,11 +134,13 @@ test_that("invalid meta_status value is rejected", {
 
 test_that("invalid temporal_partitioning is rejected", {
   raw <- list(
-    dataset = "x", table = "y",
+    dataset = "x",
+    table = "y",
     cvm_archive_url_pattern = NULL,
     cvm_file_url_pattern = "https://example.com/x.csv",
     cvm_file_pattern = "x.csv",
-    encoding = "ISO-8859-1", delimiter = ";",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
     temporal_partitioning = "monthly",
     expected_field_count = 1L,
     transformations = list()

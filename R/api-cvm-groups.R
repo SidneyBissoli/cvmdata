@@ -34,13 +34,44 @@
       "securitizadoras"
     ),
     n_datasets = c(
-      2L, 1L, 1L, 1L, 1L, 1L, 12L, 1L, 1L, 1L,
-      22L, 4L, 10L, 1L, 2L, 1L, 1L, 4L
+      2L,
+      1L,
+      1L,
+      1L,
+      1L,
+      1L,
+      12L,
+      1L,
+      1L,
+      1L,
+      22L,
+      4L,
+      10L,
+      1L,
+      2L,
+      1L,
+      1L,
+      4L
     ),
     contract = c(
-      "agent", "agent", "agent", "event", "event", "agent", "issuer",
-      "agent", "agent", "issuer", "fund", "fund", "fund", "agent",
-      "offering", "agent", "offering", "issuer"
+      "agent",
+      "agent",
+      "agent",
+      "event",
+      "event",
+      "agent",
+      "issuer",
+      "agent",
+      "agent",
+      "issuer",
+      "fund",
+      "fund",
+      "fund",
+      "agent",
+      "offering",
+      "agent",
+      "offering",
+      "issuer"
     )
   )
 }

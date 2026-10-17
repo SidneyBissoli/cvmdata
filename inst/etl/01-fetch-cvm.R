@@ -74,8 +74,11 @@ fetch_transport_streak_limit <- function() {
 # Only fires while `n_ok == 0`: once anything has come through, the
 # portal is reachable and a later run of failures is data-shaped (a
 # table absent that year), which stage 02 handles.
-fetch_breaker_tripped <- function(n_ok, transport_streak,
-                                  limit = fetch_transport_streak_limit()) {
+fetch_breaker_tripped <- function(
+  n_ok,
+  transport_streak,
+  limit = fetch_transport_streak_limit()
+) {
   identical(as.integer(n_ok), 0L) && as.integer(transport_streak) >= limit
 }
 
@@ -86,7 +89,8 @@ fetch_one <- function(dataset, tbl, year, report_type) {
   cond <- NULL
   res <- tryCatch(
     cvmdata::issuer_fetch(
-      dataset, tbl,
+      dataset,
+      tbl,
       year = if (is.na(year)) NULL else year,
       report_type = report_type,
       source = "cvm"
@@ -121,8 +125,11 @@ fetch_all <- function(dataset, tables, years_to_fetch) {
     for (y in years_to_fetch) {
       for (rt in mirror_variants_for(tbl)) {
         rt_label <- if (is.null(rt)) "" else sprintf("/%s", rt)
-        label <- if (is.na(y)) sprintf("%s/%s%s", dataset, tbl, rt_label) else
+        label <- if (is.na(y)) {
+          sprintf("%s/%s%s", dataset, tbl, rt_label)
+        } else {
           sprintf("%s/%s%s/%d", dataset, tbl, rt_label, y)
+        }
         message("  -> ", label)
         out <- fetch_one(dataset, tbl, y, rt)
         if (out$ok) {
@@ -192,14 +199,22 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
     stop("--dataset is required", call. = FALSE)
   }
   if (!mirror_pair_valid(group, dataset)) {
-    stop(sprintf(
-      "(%s, %s) not in mirror_datasets_v0_1; valid pairs: %s",
-      group, dataset,
-      paste(sprintf("(%s, %s)",
-                    mirror_datasets_v0_1$group,
-                    mirror_datasets_v0_1$dataset),
-            collapse = ", ")
-    ), call. = FALSE)
+    stop(
+      sprintf(
+        "(%s, %s) not in mirror_datasets_v0_1; valid pairs: %s",
+        group,
+        dataset,
+        paste(
+          sprintf(
+            "(%s, %s)",
+            mirror_datasets_v0_1$group,
+            mirror_datasets_v0_1$dataset
+          ),
+          collapse = ", "
+        )
+      ),
+      call. = FALSE
+    )
   }
 
   # Pin the cache root to the ETL workspace so stage 02 finds the same
@@ -222,7 +237,8 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
 
   message(sprintf(
     "[01-fetch] group=%s dataset=%s tables=[%s] year =[%s] workspace=%s",
-    group, dataset,
+    group,
+    dataset,
     paste(tables, collapse = ", "),
     paste(years_to_fetch, collapse = ", "),
     workspace
@@ -232,7 +248,9 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
 
   message(sprintf(
     "[01-fetch] done. %d ok / %d failed (%d of them transport-level)",
-    tally$n_ok, tally$n_fail, tally$n_transport
+    tally$n_ok,
+    tally$n_fail,
+    tally$n_transport
   ))
   if (tally$tripped) {
     message(sprintf(

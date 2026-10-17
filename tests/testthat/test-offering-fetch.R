@@ -17,8 +17,16 @@ test_that("offering_fetch has canonical signature", {
   fmls <- formals(offering_fetch)
   expect_named(
     fmls,
-    c("dataset", "table", "offering", "date_range",
-      "source", "on_error", "validate", "...")
+    c(
+      "dataset",
+      "table",
+      "offering",
+      "date_range",
+      "source",
+      "on_error",
+      "validate",
+      "..."
+    )
   )
   expect_null(fmls$offering)
   expect_null(fmls$date_range)
