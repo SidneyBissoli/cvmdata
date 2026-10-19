@@ -203,38 +203,32 @@ notes <- sprintf(
   format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC")
 )
 
-# Recreate the release on every run so assets always reflect the
-# current parquet tree. `gh release delete` is idempotent under
-# --yes; missing release -> exit 1, which we swallow.
-suppressWarnings(
-  system2(
-    "gh",
-    c(
-      "release",
-      "delete",
-      tag,
-      "--repo",
-      mirror_repo,
-      "--yes",
-      "--cleanup-tag"
-    ),
-    stdout = NULL,
-    stderr = NULL
-  )
-)
-
-message(sprintf("[03-publish] creating release %s", tag))
+# Update the release in place: overwrite the assets, then remove the
+# ones the new tree no longer has. Until 2026-10-19 the release was
+# deleted and recreated, which left the mirror empty for the length of
+# the upload (up to ~15 min) and, on 19/10, failed for fre and itr: the
+# delete did not happen, its error was discarded, and the create hit
+# "tag_name already exists" while the June release stayed live.
 notes_file <- tempfile(fileext = ".md")
 writeLines(notes, notes_file)
 # system2 on Windows does not auto-quote vector args, so any string
 # with spaces, parens or other shell metacharacters must be shQuote()d
 # explicitly. Otherwise gh re-parses them as positional args (e.g. a
 # title "Mirror: cad (latest)" becomes 3 file-pattern args).
+release_exists <- system2(
+  "gh",
+  c("release", "view", tag, "--repo", mirror_repo, "--json", "tagName"),
+  stdout = NULL,
+  stderr = NULL
+) ==
+  0L
+verb <- if (release_exists) "edit" else "create"
+message(sprintf("[03-publish] %s release %s", verb, tag))
 status <- system2(
   "gh",
   c(
     "release",
-    "create",
+    verb,
     tag,
     "--repo",
     mirror_repo,
@@ -245,7 +239,7 @@ status <- system2(
   )
 )
 if (status != 0L) {
-  stop("gh release create failed", call. = FALSE)
+  stop(sprintf("gh release %s failed", verb), call. = FALSE)
 }
 
 stage_dir <- tempfile("cvmdata-mirror-stage-")
@@ -254,17 +248,20 @@ on.exit(unlink(stage_dir, recursive = TRUE), add = TRUE)
 
 # Drop the hash JSON alongside the parquets so it ships as a regular
 # release asset. The consumer can fetch it via the same URL pattern.
+# It goes LAST: the client keys its parquet cache on this hash, so a
+# client reading mid-upload must still see the old hash.
 hash_asset <- file.path(stage_dir, "__source_hash.json")
 jsonlite::write_json(source_hash, hash_asset, auto_unbox = TRUE, pretty = TRUE)
 
-assets <- c(hash_asset, character(length(parquets)))
+assets <- character(length(parquets))
 for (k in seq_along(parquets)) {
   rel <- substring(parquets[k], nchar(dataset_dir) + 2L)
   asset_name <- gsub("[/\\\\]", "__", rel)
   staged <- file.path(stage_dir, asset_name)
   file.copy(parquets[k], staged, overwrite = TRUE)
-  assets[k + 1L] <- staged
+  assets[k] <- staged
 }
+assets <- c(assets, hash_asset)
 
 message(sprintf("[03-publish] uploading %d asset(s)", length(assets)))
 for (asset in assets) {
@@ -283,6 +280,56 @@ for (asset in assets) {
   )
   if (status != 0L) {
     stop(sprintf("upload failed for %s", basename(asset)), call. = FALSE)
+  }
+}
+
+# Remove the assets of the previous tree that the new one does not have
+# (a partition that vanished upstream). Done after the upload, so the
+# release is never missing a partition that still exists.
+current <- system2(
+  "gh",
+  c(
+    "release",
+    "view",
+    tag,
+    "--repo",
+    mirror_repo,
+    "--json",
+    "assets",
+    "--jq",
+    shQuote(".assets[].name")
+  ),
+  stdout = TRUE
+)
+if (!is.null(attr(current, "status"))) {
+  stop("gh release view failed while listing assets", call. = FALSE)
+}
+# GitHub stores "year=2024" as "year.2024" (see parse_mirror_asset_name()),
+# so compare in its spelling; comparing the local names would mark every
+# asset stale and delete the release just uploaded.
+stale <- setdiff(current, gsub("=", ".", basename(assets), fixed = TRUE))
+if (length(stale) == length(current) && length(current) > 0L) {
+  stop(
+    "every asset of the release looks stale; refusing to delete them",
+    call. = FALSE
+  )
+}
+for (name in stale) {
+  message("  removing stale asset ", name)
+  status <- system2(
+    "gh",
+    c(
+      "release",
+      "delete-asset",
+      tag,
+      shQuote(name),
+      "--repo",
+      mirror_repo,
+      "--yes"
+    )
+  )
+  if (status != 0L) {
+    stop(sprintf("delete-asset failed for %s", name), call. = FALSE)
   }
 }
 
