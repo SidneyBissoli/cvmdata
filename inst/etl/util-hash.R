@@ -1,8 +1,17 @@
-# ETL helper: SHA-256 hash of the CVM dictionary (META) files for a dataset.
+# ETL helper: SHA-256 hash of what a mirror release would publish.
 #
-# Used by 03-publish.R to detect changes upstream: when the META content is
-# byte-identical to the last successful publish (recorded in the previous
-# release's `__source_hash.json` asset), the publish is skipped.
+# Used by 03-publish.R to detect changes: when the hash equals the one of
+# the last successful publish (recorded in the previous release's
+# `__source_hash.json` asset), the publish is skipped. The client also
+# evicts its L3 parquet cache when the hash changes.
+#
+# The hash covers the CVM dictionary (META) files AND the content of every
+# parquet about to be published. Until 2026-10-19 it covered META only, so
+# new filings, restatements and package fixes never reached the mirror
+# while the dictionaries stayed put: every release was frozen at its June
+# 2026 snapshot. A parquet is hashed by its rows and columns, not by its
+# bytes, because the bytes carry the `fetched_at` attribute and would
+# change on every run.
 #
 # The function does NOT use the package cache — META freshness checks have
 # to bite the network every time, otherwise the change-detection guarantee
@@ -11,6 +20,7 @@
 # Sourced (not loaded as a package). Depends on `00-config.R` having been
 # sourced first for `mirror_schema_dir()`.
 
+stopifnot(requireNamespace("arrow", quietly = TRUE))
 stopifnot(requireNamespace("digest", quietly = TRUE))
 stopifnot(requireNamespace("httr2", quietly = TRUE))
 stopifnot(requireNamespace("jsonlite", quietly = TRUE))
@@ -82,23 +92,79 @@ mirror_hash_meta_entry <- function(local_base, fragment) {
   digest::digest(file = extracted, algo = "sha256")
 }
 
-# Computes the source META hash for a dataset.
+# Hashes the rows and columns of one parquet. R attributes restored by
+# arrow (`fetched_at`, `package_version`, ...) are dropped first; column
+# classes stay, so a type change still counts as a change.
+mirror_hash_parquet <- function(path) {
+  df <- as.data.frame(arrow::read_parquet(path))
+  attributes(df) <- attributes(df)[c("names", "row.names", "class")]
+  digest::digest(df, algo = "sha256")
+}
+
+# Hashes every parquet of a dataset, keyed by its path relative to
+# `dataset_dir` (the partition, e.g. "bpa/report_type=ind/year=2024/...").
+mirror_hash_parquets <- function(parquets, dataset_dir) {
+  if (!length(parquets)) {
+    return(list())
+  }
+  rel <- substring(parquets, nchar(dataset_dir) + 2L)
+  rel <- gsub("\\\\", "/", rel)
+  hashes <- vapply(parquets, mirror_hash_parquet, character(1L))
+  names(hashes) <- rel
+  as.list(hashes)[order(rel)]
+}
+
+# SHA-256 of a canonical JSON encoding of a named list sorted by name, so
+# different platforms and orderings yield the same digest.
+mirror_digest_map <- function(x) {
+  payload <- jsonlite::toJSON(
+    x[order(names(x))],
+    auto_unbox = TRUE,
+    pretty = FALSE
+  )
+  digest::digest(payload, algo = "sha256", serialize = FALSE)
+}
+
+# Computes the publish hash for a dataset.
 #
 # Returns a list with:
-#   hash         : SHA-256 of the JSON-encoded sorted {url: file_sha256} map.
-#   components   : the same map (named list).
+#   hash         : SHA-256 over the META hash and the parquet hashes.
+#   meta_hash    : SHA-256 of the sorted {url: file_sha256} META map, or
+#                  NA when the dataset has no META.
+#   components   : the META map (named list).
+#   data         : {partition path: content sha256} for each parquet.
 #   computed_at  : ISO-8601 UTC timestamp.
 #   dataset      : echoed input.
 #
-# Datasets with no available META (all-missing) return hash = NA_character_.
-compute_source_hash <- function(dataset) {
-  urls <- mirror_collect_dict_urls(dataset)
-  out_meta <- list(
+# `hash` is NA only when there is neither META nor any parquet.
+compute_source_hash <- function(
+  dataset,
+  parquets = character(),
+  dataset_dir = NULL
+) {
+  meta <- compute_meta_hash(dataset)
+  data <- mirror_hash_parquets(parquets, dataset_dir)
+  hash <- if (is.na(meta$hash) && !length(data)) {
+    NA_character_
+  } else {
+    mirror_digest_map(list(meta = meta$hash, data = mirror_digest_map(data)))
+  }
+  list(
     dataset = dataset,
-    computed_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
+    computed_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
+    hash = hash,
+    meta_hash = meta$hash,
+    components = meta$components,
+    data = data
   )
+}
+
+# Computes the META hash for a dataset: list(hash, components). Datasets
+# with no available META (all-missing) return hash = NA_character_.
+compute_meta_hash <- function(dataset) {
+  urls <- mirror_collect_dict_urls(dataset)
   if (!length(urls)) {
-    return(c(out_meta, list(hash = NA_character_, components = list())))
+    return(list(hash = NA_character_, components = list()))
   }
 
   # Deduplicate downloads by base URL (DFP/ITR/FRE share one ZIP across
@@ -116,19 +182,6 @@ compute_source_hash <- function(dataset) {
     character(1L)
   )
   names(components) <- urls
-
-  # Hash is taken over a canonical JSON encoding of the sorted components
-  # map, so different platforms / orderings yield the same digest.
-  payload <- jsonlite::toJSON(
-    as.list(components)[order(names(components))],
-    auto_unbox = TRUE,
-    pretty = FALSE
-  )
-  c(
-    out_meta,
-    list(
-      hash = digest::digest(payload, algo = "sha256", serialize = FALSE),
-      components = as.list(components)
-    )
-  )
+  components <- as.list(components)
+  list(hash = mirror_digest_map(components), components = components)
 }

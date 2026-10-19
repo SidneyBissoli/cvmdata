@@ -18,6 +18,15 @@
 
 ## Bug fixes
 
+* The parquet mirror (`source = "mirror"`, the default) had stopped
+  updating in June 2026. The weekly ETL skipped a publish whenever the
+  CVM dictionary files were unchanged, and they rarely change, so new
+  filings, restatements and package fixes never reached the mirror. The
+  publish hash now covers the content of every parquet as well. The
+  `vlmo` mirror release had also been left as a draft since June, which
+  made `source = "mirror"` fail for `vlmo` with a 404; the ETL now
+  publishes the release explicitly and checks it without credentials.
+
 * `keep_latest_version` now keeps the last filing delivered, ranked by
   receipt date, then CVM document id, then `versao`, instead of the
   highest `versao`. The version number is not a filing key: the DFP 2023
