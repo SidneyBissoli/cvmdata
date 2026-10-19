@@ -19,11 +19,15 @@
 # partition name and they don't collide on basename.
 #
 # Change detection: before republishing, the script computes the SHA-256
-# of the CVM META files (via util-hash.R) and compares it against the
-# `__source_hash.json` asset of the previous release. If they match, the
-# publish is skipped (exit 0, log line). Otherwise the new hash is
-# written into the stage dir as `__source_hash.json` and uploaded
-# alongside the parquets.
+# of the CVM META files and of the content of every parquet (via
+# util-hash.R) and compares it against the `__source_hash.json` asset of
+# the previous release. If they match, the publish is skipped (exit 0,
+# log line). Otherwise the new hash is written into the stage dir as
+# `__source_hash.json` and uploaded alongside the parquets.
+#
+# After the upload the release is forced out of draft and checked
+# without credentials: on 2026-10-19 the vlmo release had been a draft
+# since June, so it answered 404 to every user while the job was green.
 #
 # The future R/source-mirror-duckdb.R consumer reconstructs the
 # partition tree client-side from the encoded names and feeds the
@@ -100,20 +104,37 @@ if (!length(parquets)) {
 tag <- mirror_tag_latest(group, dataset)
 
 # Change detection ------------------------------------------------------
-# Compute current META hash and compare against the prior release asset.
-# Skip publish when nothing upstream has changed.
+# Compute the current hash (META + parquet content) and compare against
+# the prior release asset. Skip publish when nothing would change.
 
 short_hash <- function(h) {
-  if (is.na(h)) "<no-meta>" else substr(h, 1L, 12L)
+  if (is.na(h)) "<none>" else substr(h, 1L, 12L)
 }
 
-message("[03-publish] computing source META hash")
-source_hash <- compute_source_hash(dataset)
+# HTTP status of the release as an anonymous user sees it (200 = public;
+# 404 = missing or draft).
+release_public_status <- function(tag) {
+  url <- sprintf(
+    "https://api.github.com/repos/%s/releases/tags/%s",
+    mirror_repo,
+    tag
+  )
+  httr2::request(url) |>
+    httr2::req_user_agent("cvmdata-etl") |>
+    httr2::req_error(is_error = function(resp) FALSE) |>
+    httr2::req_retry(max_tries = 3L) |>
+    httr2::req_perform() |>
+    httr2::resp_status()
+}
+
+message("[03-publish] computing source hash (META + parquet content)")
+source_hash <- compute_source_hash(dataset, parquets, dataset_dir)
 message(sprintf(
-  "[03-publish] group=%s dataset=%s components=%d sha256=%s",
+  "[03-publish] group=%s dataset=%s meta=%d parquets=%d sha256=%s",
   group,
   dataset,
   length(source_hash$components),
+  length(source_hash$data),
   short_hash(source_hash$hash)
 ))
 
@@ -147,17 +168,18 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
   if (
     !is.null(prev) &&
       identical(prev$hash, source_hash$hash) &&
-      !is.na(source_hash$hash)
+      !is.na(source_hash$hash) &&
+      release_public_status(tag) == 200L
   ) {
     message(sprintf(
-      "[03-publish] META unchanged (sha256=%s..); skipping publish",
+      "[03-publish] content unchanged (sha256=%s..); skipping publish",
       short_hash(source_hash$hash)
     ))
     unlink(prev_hash_file)
     quit(status = 0L)
   }
   message(sprintf(
-    "[03-publish] META changed (prev=%s.., cur=%s..); republishing",
+    "[03-publish] content changed (prev=%s.., cur=%s..); republishing",
     short_hash(prev$hash %||% NA_character_),
     short_hash(source_hash$hash)
   ))
@@ -263,4 +285,22 @@ for (asset in assets) {
     stop(sprintf("upload failed for %s", basename(asset)), call. = FALSE)
   }
 }
-message(sprintf("[03-publish] release %s ready.", tag))
+
+# A draft release answers 404 to anyone without push access, which is
+# every user of source = "mirror". Publish it explicitly, then prove it
+# from the outside with an anonymous request.
+status <- system2(
+  "gh",
+  c("release", "edit", tag, "--repo", mirror_repo, "--draft=false")
+)
+if (status != 0L) {
+  stop("gh release edit --draft=false failed", call. = FALSE)
+}
+public_status <- release_public_status(tag)
+if (public_status != 200L) {
+  stop(
+    sprintf("release %s answers %d without credentials", tag, public_status),
+    call. = FALSE
+  )
+}
+message(sprintf("[03-publish] release %s ready and public.", tag))
