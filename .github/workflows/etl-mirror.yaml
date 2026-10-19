@@ -18,8 +18,8 @@ name: ETL mirror
 # release and skips publishing when nothing would change.
 #
 # A run scoped to one `year` is a smoke test and never publishes: the
-# publish recreates the release from the local parquets, so it would
-# replace every other year with nothing.
+# publish makes the release match the local parquets, so it would
+# delete every other year.
 #
 # Sessao 08 (v0.1.0.9000): added the `<group>` segment to release tags
 # (`mirror-<group>-<dataset>-latest`) and to the local parquet layout
