@@ -235,9 +235,19 @@ numerada via [`utils::menu()`](https://rdrr.io/r/utils/menu.html); em
 batch/CI abortam com `cvmdata_error_input` listando candidatos. Zero
 matches aborta com `cvmdata_error_input`.
 
-Política de versão: por default, mantém apenas o registro de maior
-`VERSAO` por `(cnpj_cia, dt_refer)` via transformação canônica
-`keep_latest_version` no YAML.
+Política de versão: por default, mantém apenas a **última entrega** por
+`(cnpj_cia, dt_refer)` via transformação canônica `keep_latest_version`
+no YAML, ordenando por data de recebimento (`dt_receb`/`data_entrega`),
+depois id do documento (`id_doc`/`id_documento`/`protocolo_entrega`),
+depois `versao`. Tabelas sem colunas de entrega caem na maior `VERSAO`.
+`VERSAO` **não é chave** (medido 2026-10-18: TRV XLIII DFP 2023 tem duas
+v1; Travessia VI DFP 2024 tem 1, 2, 1 e a v1 de agosto é a vigente).
+Depois do backend, `check_filings()` (`R/util-filing-checks.R`) confere
+a tabela contra a `submissao`: em DFP/ITR tira linhas idênticas e avisa
+(varredura 2010-2026: 884 casos com a demonstração inteira em dobro, a
+maioria com UMA entrega no índice; em `vlmo` linhas idênticas são
+legítimas e ficam); avisa quando a tabela traz entrega anterior à
+última. Desliga com `options(cvmdata.check_filings = FALSE)`.
 
 ------------------------------------------------------------------------
 
@@ -369,9 +379,15 @@ depois delega a [`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
     ├── cvmdata_warn_year_listing_fallback (cvm_dataset_years: índice de
     │                                       diretório da CVM inalcançável após
     │                                       retries; caiu para first_year:ano_atual)
-    └── cvmdata_warn_eviction              (LRU eviction removeu unidades do
-                                            cache local para honrar
-                                            options(cvmdata.cache_max_size_mb))
+    ├── cvmdata_warn_eviction              (LRU eviction removeu unidades do
+    │                                       cache local para honrar
+    │                                       options(cvmdata.cache_max_size_mb))
+    ├── cvmdata_warn_duplicate_filing      (DFP/ITR: a CVM repetiu linhas;
+    │                                       cópias idênticas removidas)
+    ├── cvmdata_warn_conflicting_filing    (DFP/ITR: cópias da mesma entrega
+    │                                       com vl_conta diferente; mantidas)
+    └── cvmdata_warn_stale_filing          (a tabela traz entrega anterior à
+                                            última do índice submissao)
 
 Implementação via wrapper interno `cvmdata_abort(message, class, ...)`
 que adiciona `"cvmdata_error"` ao final do vetor de classes

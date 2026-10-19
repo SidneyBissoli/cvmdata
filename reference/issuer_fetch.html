@@ -170,6 +170,23 @@ attributes <code>source</code>, <code>fetched_at</code>, <code>dataset</code>, <
 in Portuguese exactly as published by CVM (snake_case minúsculo).</p>
     </div>
     <div class="section level2">
+    <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
+
+
+<p>When a table carries several filings for the same issuer and
+reference date, only the last one delivered is kept, ranked by
+receipt date, then CVM document id, then <code>versao</code>. The version number
+alone is not a filing key: the CVM index can list two filings under
+the same version, or a later filing under a lower one.</p>
+<p>Tables of datasets with a <code>submissao</code> index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (<code>cvmdata_warn_duplicate_filing</code>); copies that differ in
+<code>vl_conta</code> are kept (<code>cvmdata_warn_conflicting_filing</code>). A table
+holding an earlier filing than the last delivery keeps the CVM
+numbers and warns (<code>cvmdata_warn_stale_filing</code>). Set
+<code>options(cvmdata.check_filings = FALSE)</code> to skip these checks.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other fetchers:
 <code><a href="agent_fetch.html">agent_fetch()</a></code>,

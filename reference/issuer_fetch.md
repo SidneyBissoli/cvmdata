@@ -105,6 +105,22 @@ A tibble of class `cvm_tbl` carrying the five provenance attributes
 Column names, categorical values and free-text fields are preserved in
 Portuguese exactly as published by CVM (snake_case minúsculo).
 
+## Filing versions
+
+When a table carries several filings for the same issuer and reference
+date, only the last one delivered is kept, ranked by receipt date, then
+CVM document id, then `versao`. The version number alone is not a filing
+key: the CVM index can list two filings under the same version, or a
+later filing under a lower one.
+
+Tables of datasets with a `submissao` index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (`cvmdata_warn_duplicate_filing`); copies that differ in
+`vl_conta` are kept (`cvmdata_warn_conflicting_filing`). A table holding
+an earlier filing than the last delivery keeps the CVM numbers and warns
+(`cvmdata_warn_stale_filing`). Set
+`options(cvmdata.check_filings = FALSE)` to skip these checks.
+
 ## See also
 
 Other fetchers:

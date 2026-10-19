@@ -237,7 +237,7 @@
 <code>denom_cia</code> normalizada</td>
 </tr></tbody></table><p>Resolução CD_CVM → CNPJ via <code>submissao</code>: quando o usuário passa CD_CVM contra uma tabela sem <code>cd_cvm</code> (<code>composicao_capital</code>, <code>parecer</code>), o pipeline lê a <code>submissao</code> do mesmo dataset/year e faz lookup antes de filtrar. CD_CVMs ausentes na <code>submissao</code> daquele ano abortam com <code>cvmdata_error_input</code>. Datasets sem tabela <code>submissao</code> abortam com mensagem instruindo o uso de CNPJ ou texto.</p>
 <p>Match textual: múltiplas matches em modo <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> exibem lista numerada via <code><a href="https://rdrr.io/r/utils/menu.html" class="external-link">utils::menu()</a></code>; em batch/CI abortam com <code>cvmdata_error_input</code> listando candidatos. Zero matches aborta com <code>cvmdata_error_input</code>.</p>
-<p>Política de versão: por default, mantém apenas o registro de maior <code>VERSAO</code> por <code>(cnpj_cia, dt_refer)</code> via transformação canônica <code>keep_latest_version</code> no YAML.</p>
+<p>Política de versão: por default, mantém apenas a <strong>última entrega</strong> por <code>(cnpj_cia, dt_refer)</code> via transformação canônica <code>keep_latest_version</code> no YAML, ordenando por data de recebimento (<code>dt_receb</code>/<code>data_entrega</code>), depois id do documento (<code>id_doc</code>/<code>id_documento</code>/<code>protocolo_entrega</code>), depois <code>versao</code>. Tabelas sem colunas de entrega caem na maior <code>VERSAO</code>. <code>VERSAO</code> <strong>não é chave</strong> (medido 2026-10-18: TRV XLIII DFP 2023 tem duas v1; Travessia VI DFP 2024 tem 1, 2, 1 e a v1 de agosto é a vigente). Depois do backend, <code>check_filings()</code> (<code>R/util-filing-checks.R</code>) confere a tabela contra a <code>submissao</code>: em DFP/ITR tira linhas idênticas e avisa (varredura 2010-2026: 884 casos com a demonstração inteira em dobro, a maioria com UMA entrega no índice; em <code>vlmo</code> linhas idênticas são legítimas e ficam); avisa quando a tabela traz entrega anterior à última. Desliga com <code>options(cvmdata.check_filings = FALSE)</code>.</p>
 <hr></div>
 </div>
 <div class="section level2">
@@ -323,9 +323,15 @@ cvmdata_warn                           (pai genérico de warnings)
 ├── cvmdata_warn_year_listing_fallback (cvm_dataset_years: índice de
 │                                       diretório da CVM inalcançável após
 │                                       retries; caiu para first_year:ano_atual)
-└── cvmdata_warn_eviction              (LRU eviction removeu unidades do
-                                        cache local para honrar
-                                        options(cvmdata.cache_max_size_mb))</code></pre>
+├── cvmdata_warn_eviction              (LRU eviction removeu unidades do
+│                                       cache local para honrar
+│                                       options(cvmdata.cache_max_size_mb))
+├── cvmdata_warn_duplicate_filing      (DFP/ITR: a CVM repetiu linhas;
+│                                       cópias idênticas removidas)
+├── cvmdata_warn_conflicting_filing    (DFP/ITR: cópias da mesma entrega
+│                                       com vl_conta diferente; mantidas)
+└── cvmdata_warn_stale_filing          (a tabela traz entrega anterior à
+                                        última do índice submissao)</code></pre>
 <p>Implementação via wrapper interno <code>cvmdata_abort(message, class, ...)</code> que adiciona <code>"cvmdata_error"</code> ao final do vetor de classes automaticamente. Análogo <code>cvmdata_warn()</code> para warnings.</p>
 <hr></div>
 <div class="section level2">

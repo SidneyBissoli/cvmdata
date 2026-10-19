@@ -41,9 +41,11 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 8 | Eight FRE tables ship without published META | Dictionary `.txt` never released for `empregado_PCD` and seven kin | **See example below.** YAML declares `meta_status: missing`; `validate = "warn"` or `"skip"` opt-in required. |
 | 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1 | Returned as-is. To assemble three or more consecutive years, pass an explicit `years` vector spanning the range. |
 | 10 | FRE 2024 META URL anomalies | Archive name is `meta_fre_cia_aberta.zip` (no `_txt.zip` suffix); `empregado_local_faixa_etaria` entry lives without the `meta_` prefix | Schema-level fixups: `cvm_dictionary_url` lists the archive plus entry; reader looks for both prefixed and bare entry names. |
-| 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation. |
+| 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see \#14). |
 | 12 | Dates as `YYYY-MM-DD` strings | Plain strings in the CSV | Converted to R `Date` for every column the dictionary declares `tipo_dados: "date"`. |
 | 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column | Filter must run on CNPJ | **See example below.** CD_CVM tokens resolve to CNPJ via the dataset’s `submissao` of the same year. |
+| 14 | Repeated filings and repeated rows | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** The last delivery wins in `submissao`; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
+| 15 | A later filing delivered under a lower `VERSAO` | The statement CSVs keep the highest version, not the last delivery | **See below.** `cvmdata_warn_stale_filing` names the issuers; the table keeps the CVM numbers. |
 
 ## Mini-examples for the structural cases
 
@@ -58,7 +60,15 @@ normalizes both:
 a <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "1023",   year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -68,7 +78,15 @@ a <- issuer_fetch("dfp", "bpa", report_type = "ind",
 b <- issuer_fetch("dfp", "bpa", report_type = "ind",
                issuer = "001023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -109,7 +127,15 @@ yaml::read_yaml(system.file(
 bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
                  issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -119,7 +145,7 @@ bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-10-17 13:00:12.572405
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 11:13:05.525484
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -140,7 +166,7 @@ dictionary. The default `validate = "strict"` refuses to read them:
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -149,7 +175,7 @@ issuer_fetch("fre", "empregado_PCD",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-10-17 13:00:14.326588
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 11:13:07.362193
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -191,7 +217,7 @@ Result: at most one row per filing key in the returned tibble.
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -200,6 +226,14 @@ auditor <- issuer_fetch("fre", "auditor",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp7wowEO/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 # One row per (cnpj_companhia, data_referencia):
 nrow(unique(auditor[, c("cnpj_companhia", "data_referencia")])) ==
   nrow(auditor)
@@ -219,7 +253,7 @@ applies the filter on CNPJ:
 auditor <- issuer_fetch("fre", "auditor",
                      issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpIth8R1/duckdb
+#> ℹ /tmp/Rtmp7wowEO/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -228,6 +262,14 @@ auditor <- issuer_fetch("fre", "auditor",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp7wowEO/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 "cd_cvm" %in% names(auditor)
 #> [1] FALSE
 unique(auditor$cnpj_companhia)
@@ -240,6 +282,41 @@ The interface is identical regardless of which table holds CD_CVM
 natively. If a CD_CVM token is not present in the year’s `submissao`,
 the call aborts with `cvmdata_error_input` rather than silently
 returning an empty tibble.
+
+### \#14 and \#15 — `VERSAO` is not a filing key
+
+`keep_latest_version` ranks filings by delivery, not by version number:
+receipt date (`dt_receb`, `data_entrega`), then the CVM document id,
+then `versao`. Tables without delivery columns fall back to the highest
+`versao`. Two cases measured on 2026-10-18 show why the version number
+alone fails:
+
+- **TRV XLIII Securitizadora, DFP 2023.** The filing index lists two
+  deliveries as version 1 (document ids 135158 and 135670). The DFP
+  statement CSVs carry both, every account twice, with no column to tell
+  them apart, so a sum over the issuer counts double. Dibens Leasing
+  (ITR, 2023-09-30) is the same case.
+
+  Repeated rows are more common than repeated filings. Across every DFP
+  and ITR file from 2010 to 2026, 884 issuer-period-table cases have the
+  whole statement doubled and 110 more a few accounts repeated, most of
+  them with a single filing in the index (AXIA Energia Norte, DFP 2023,
+  is one). A statement has one row per account, order and period, so the
+  package drops the identical copies and warns with
+  `cvmdata_warn_duplicate_filing`. Copies that differ in `vl_conta` are
+  kept, with `cvmdata_warn_conflicting_filing`, since nothing says which
+  is right.
+
+- **Travessia Securitizadora VI, DFP 2024.** Versions 1, 2 and again 1,
+  the last one delivered on 2025-08-14. That filing has other numbers
+  (total assets R\$ 14.4 million against R\$ 31.2 million in version 2),
+  and it is the one the issuer reports as the 2024 comparative in its
+  DFP 2025. The DFP 2024 statement CSVs still hold version 2. The
+  package returns the CVM numbers and warns with
+  `cvmdata_warn_stale_filing`.
+
+Both checks read the dataset’s `submissao` of the same year and run for
+either backend. `options(cvmdata.check_filings = FALSE)` turns them off.
 
 ## Reading the other defects directly
 
