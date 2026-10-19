@@ -18,6 +18,31 @@
 
 ## Bug fixes
 
+* `keep_latest_version` now keeps the last filing delivered, ranked by
+  receipt date, then CVM document id, then `versao`, instead of the
+  highest `versao`. The version number is not a filing key: the DFP 2023
+  index lists two "version 1" filings for TRV XLIII Securitizadora, and
+  the DFP 2024 index lists versions 1, 2 and again 1 for Travessia
+  Securitizadora VI, the last one being the filing the issuer carries
+  forward. `submissao` used to return both TRV rows and the superseded
+  Travessia row. Tables with no delivery columns still keep the highest
+  `versao`.
+
+* `issuer_fetch()` checks each table against its dataset's filing
+  index (`submissao`). The CVM statement CSVs repeat rows: a sweep of every DFP and ITR file
+  from 2010 to 2026 found 884 issuer-period-table cases with the whole
+  statement doubled and 110 with a few accounts repeated, some from two
+  filings under the same version (TRV XLIII, DFP 2023), most with a
+  single filing in the index. Sums over those issuers counted double.
+  Identical rows are now dropped and `cvmdata_warn_duplicate_filing`
+  names the issuers; copies that differ in `vl_conta` are kept and flagged
+  with `cvmdata_warn_conflicting_filing`. When the table holds an
+  earlier filing than the last delivery (the Travessia case, whose
+  statement CSVs stayed on version 2), `cvmdata_warn_stale_filing` names
+  the issuers. Both checks run for either backend and can be turned off
+  with `options(cvmdata.check_filings = FALSE)`. See defects #14 and #15
+  in the data-defects article.
+
 * The mirror ETL no longer burns a whole runner on a portal that is not
   answering it. Of the 14 scheduled mirror runs between 2026-06-09 and
   2026-09-08, 8 went red, every one of them in stage 01 and on a

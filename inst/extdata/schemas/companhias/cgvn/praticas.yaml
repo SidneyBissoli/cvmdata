@@ -32,6 +32,6 @@ transformations:
   - action: keep_latest_version
     keys: [id_item]
     note: >-
-      Mantem apenas a maior VERSAO por
+      Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por
       (cnpj_companhia, data_referencia, id_item). Sem id_item na chave,
       o dedup colapsaria as 54 praticas distintas do informe.
