@@ -459,7 +459,12 @@ conteúdo (linhas e colunas, sem atributos) de cada parquet**; até
 junho/2026. Depois do upload, o release é forçado para fora de draft e
 conferido sem credencial (o vlmo foi draft = 404 para todos de junho a
 outubro). Rodada com `year` é smoke test e NÃO publica (o publish
-recria o release só com os parquets locais). Encoding dos asset names:
+deixa o release igual aos parquets locais e apagaria os outros anos).
+O release é atualizado NO LUGAR (`gh release edit` + upload
+`--clobber` + `delete-asset` dos que sobraram, com `=` → `.` na
+comparação), nunca apagado e recriado: o delete+create deixava o
+mirror vazio durante o upload e, em 19/10, falhou calado no fre/itr.
+`__source_hash.json` sobe por último. Encoding dos asset names:
 `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
 GitHub Releases sanitiza `=` → `.` no URL público;
 `parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.
