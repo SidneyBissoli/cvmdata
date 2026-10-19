@@ -1377,6 +1377,9 @@ rename_pcd_header <- function(lines) {
 test_that("issuer_fetch FRE auditor tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_fre_cache()
+  # The fixture's synthetic VERSAO=99 auditor row is not in the filing
+  # index, so the stale-filing check would warn; it is tested below.
+  withr::local_options(cvmdata.check_filings = FALSE)
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
@@ -1458,6 +1461,9 @@ test_that("load_schema marks 8 detail tables as meta_status missing", {
 test_that("issuer_fetch FRE detail filters by CNPJ via cnpj_companhia", {
   skip_if_not_installed("httptest2")
   local_prepare_fre_cache()
+  # The fixture's synthetic VERSAO=99 auditor row is not in the filing
+  # index, so the stale-filing check would warn; it is tested below.
+  withr::local_options(cvmdata.check_filings = FALSE)
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
@@ -1496,6 +1502,9 @@ test_that("issuer_fetch FRE detail textual search filters via nome_companhia", {
 test_that("issuer_fetch FRE resolves CD_CVM via submissao for detail", {
   skip_if_not_installed("httptest2")
   local_prepare_fre_cache()
+  # The fixture's synthetic VERSAO=99 auditor row is not in the filing
+  # index, so the stale-filing check would warn; it is tested below.
+  withr::local_options(cvmdata.check_filings = FALSE)
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
@@ -1524,16 +1533,20 @@ test_that(
 
     # Fixture: BB has 2 rows VERSAO=14 + 1 synthetic VERSAO=99 — all on
     # the same (cnpj_companhia, data_referencia). After transform, BB
-    # should keep only the VERSAO=99 row.
-    result <- httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      issuer_fetch(
-        "fre",
-        "auditor",
-        issuer = "00.000.000/0001-91",
-        year = 2024L,
-        source = "cvm"
-      )
+    # should keep only the VERSAO=99 row. The filing index lists
+    # VERSAO=14 as the last delivery, so the stale-filing check flags it.
+    expect_warning(
+      result <- httr2::with_mocked_responses(
+        function(req) fresh_head_response(),
+        issuer_fetch(
+          "fre",
+          "auditor",
+          issuer = "00.000.000/0001-91",
+          year = 2024L,
+          source = "cvm"
+        )
+      ),
+      class = "cvmdata_warn_stale_filing"
     )
     expect_identical(nrow(result), 1L)
     expect_identical(as.integer(result$versao), 99L)

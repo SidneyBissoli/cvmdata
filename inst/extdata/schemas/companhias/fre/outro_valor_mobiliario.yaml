@@ -28,4 +28,4 @@ expected_field_count: 24
 # Transformations ------------------------------------------------------
 transformations:
   - action: keep_latest_version
-    note: Mantem apenas o registro de maior VERSAO por (cnpj_companhia, data_referencia).
+    note: Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por (cnpj_companhia, data_referencia).

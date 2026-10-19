@@ -31,5 +31,5 @@ expected_field_count: 9
 transformations:
   - action: keep_latest_version
     note: >-
-      Mantém apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).
+      Mantém apenas a última entrega (data de recebimento, id, VERSAO) por (cnpj_cia, dt_refer).
       Reapresentações ficam acessíveis em v0.2+ via argumento opcional.
