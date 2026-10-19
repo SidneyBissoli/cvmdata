@@ -206,8 +206,69 @@ tx_keep_latest_version <- function(df, tx, schema) {
     if (inherits(df[[col]], "Date")) format(df[[col]]) else df[[col]]
   })
   key <- do.call(paste, c(key_parts, list(sep = "|")))
-  # Build a logical mask: TRUE where this row's versao == max versao
-  # within its key.
-  max_ver <- ave(ver, key, FUN = function(v) max(v, na.rm = TRUE))
-  df[ver == max_ver & !is.na(ver), , drop = FALSE]
+  # Rank every filing by delivery order and keep, within each key, the
+  # rows of the last filing delivered. `versao` alone is not a key: the
+  # CVM index carries two VERSAO 1 filings for the same (cnpj, date)
+  # (TRV XLIII DFP 2023) and a VERSAO 1 delivered after VERSAO 2
+  # (Travessia VI DFP 2024). Tables without delivery columns fall back
+  # to the highest `versao`, which is all they carry.
+  rank <- filing_rank(df, ver)
+  max_rank <- ave(rank, key, FUN = function(r) max(r, na.rm = TRUE))
+  df[rank == max_rank & !is.na(ver), , drop = FALSE]
+}
+
+# Delivery-order columns, in snake_case as the reader returns them.
+# Receipt date first, then the CVM document id (sequential), then the
+# protocol number for tables that carry no id (vlmo).
+.filing_receipt_cols <- c("dt_receb", "data_entrega", "data_recebimento")
+.filing_id_cols <- c("id_doc", "id_documento", "protocolo_entrega")
+
+first_present <- function(df, candidates) {
+  hit <- intersect(candidates, names(df))
+  if (length(hit)) hit[[1L]] else NULL
+}
+
+# Dense rank of each row's filing by (receipt, id, versao), ascending.
+# Rows of the same filing share a rank.
+filing_rank <- function(df, ver) {
+  receipt_c <- first_present(df, .filing_receipt_cols)
+  id_c <- first_present(df, .filing_id_cols)
+  parts <- list()
+  if (!is.null(receipt_c)) {
+    parts$receipt <- as_sortable_time(df[[receipt_c]])
+  }
+  if (!is.null(id_c)) {
+    parts$id <- as_sortable_id(df[[id_c]])
+  }
+  parts$ver <- ver
+  ord <- do.call(order, c(unname(parts), list(na.last = FALSE)))
+  tuple <- do.call(paste, c(lapply(parts, as.character), list(sep = "|")))
+  match(tuple, unique(tuple[ord]))
+}
+
+as_sortable_time <- function(x) {
+  if (inherits(x, c("Date", "POSIXt"))) {
+    return(as.numeric(as.POSIXct(x, tz = "UTC")))
+  }
+  x <- as.character(x)
+  out <- suppressWarnings(as.numeric(as.POSIXct(
+    x,
+    tz = "UTC",
+    format = "%Y-%m-%d %H:%M:%OS"
+  )))
+  date_only <- is.na(out) & !is.na(x)
+  out[date_only] <- suppressWarnings(as.numeric(as.POSIXct(
+    x[date_only],
+    tz = "UTC",
+    format = "%Y-%m-%d"
+  )))
+  out
+}
+
+as_sortable_id <- function(x) {
+  num <- suppressWarnings(as.numeric(as.character(x)))
+  if (all(is.na(num) == is.na(x))) {
+    return(num)
+  }
+  xtfrm(as.character(x))
 }

@@ -44,5 +44,5 @@ transformations:
     note: Removida após ser internalizada em vl_conta.
   - action: keep_latest_version
     note: >-
-      Mantém apenas o registro de maior VERSAO por (cnpj_cia, dt_refer).
+      Mantém apenas a última entrega (data de recebimento, id, VERSAO) por (cnpj_cia, dt_refer).
       Em ITR, dt_refer identifica o trimestre.
