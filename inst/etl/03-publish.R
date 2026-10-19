@@ -264,20 +264,34 @@ for (k in seq_along(parquets)) {
 assets <- c(assets, hash_asset)
 
 message(sprintf("[03-publish] uploading %d asset(s)", length(assets)))
+# GitHub answers an occasional HTTP 500 on one of the hundreds of uploads
+# (19/10: fre failed at asset 216 of ~400). --clobber makes a retry safe
+# whether or not the failed attempt already removed the old asset.
+upload_attempts <- 4L
 for (asset in assets) {
   message("  ", basename(asset))
-  status <- system2(
-    "gh",
-    c(
-      "release",
-      "upload",
-      tag,
-      shQuote(asset),
-      "--repo",
-      mirror_repo,
-      "--clobber"
+  for (attempt in seq_len(upload_attempts)) {
+    status <- system2(
+      "gh",
+      c(
+        "release",
+        "upload",
+        tag,
+        shQuote(asset),
+        "--repo",
+        mirror_repo,
+        "--clobber"
+      )
     )
-  )
+    if (status == 0L) {
+      break
+    }
+    if (attempt < upload_attempts) {
+      wait <- 10 * 2^(attempt - 1L)
+      message(sprintf("    upload failed; retry %d in %ds", attempt, wait))
+      Sys.sleep(wait)
+    }
+  }
   if (status != 0L) {
     stop(sprintf("upload failed for %s", basename(asset)), call. = FALSE)
   }
