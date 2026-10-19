@@ -31,3 +31,4 @@
 ^teste.*\.md$
 ^teste.*\.html$
 ^air\.toml$
+^\.git-blame-ignore-revs$
