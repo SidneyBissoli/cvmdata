@@ -453,7 +453,13 @@ Mirror parquet: workflow semanal `etl-mirror.yaml` (cron `0 7 * * 2`)
 roda matrix bidimensional `(group, dataset)` (`fail-fast: false`); cada
 job encadeia os scripts `01→02→02b→03` com flags `--group --dataset`. O
 publish detecta mudança via hash SHA-256 (`util-hash.R`) e skipa
-republish quando o hash bate o anterior. Encoding dos asset names:
+republish quando o hash bate o anterior. O hash cobre os META **e o
+conteúdo (linhas e colunas, sem atributos) de cada parquet**; até
+2026-10-19 cobria só os META e o mirror ficou congelado no retrato de
+junho/2026. Depois do upload, o release é forçado para fora de draft e
+conferido sem credencial (o vlmo foi draft = 404 para todos de junho a
+outubro). Rodada com `year` é smoke test e NÃO publica (o publish
+recria o release só com os parquets locais). Encoding dos asset names:
 `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
 GitHub Releases sanitiza `=` → `.` no URL público;
 `parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.
