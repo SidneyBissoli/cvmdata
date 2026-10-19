@@ -58,7 +58,10 @@ if (!mirror_pair_valid(group, dataset)) {
 workspace <- mirror_workspace()
 options(
   cvmdata.cache_dir = file.path(workspace, "cache"),
-  cvmdata.source = "cvm"
+  cvmdata.source = "cvm",
+  # The mirror keeps the CVM rows as published; issuer_fetch() runs
+  # the filing checks at read time, so mirror users get the warnings.
+  cvmdata.check_filings = FALSE
 )
 
 tables <- mirror_tables(dataset)
