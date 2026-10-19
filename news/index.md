@@ -28,6 +28,8 @@
   `vlmo` mirror release had also been left as a draft since June, which
   made `source = "mirror"` fail for `vlmo` with a 404; the ETL now
   publishes the release explicitly and checks it without credentials.
+  Releases are now updated in place instead of deleted and recreated, so
+  the mirror no longer goes empty while a new snapshot uploads.
 
 - `keep_latest_version` now keeps the last filing delivered, ranked by
   receipt date, then CVM document id, then `versao`, instead of the

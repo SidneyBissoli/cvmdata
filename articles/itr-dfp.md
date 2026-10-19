@@ -54,7 +54,7 @@ bpa <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -62,7 +62,7 @@ bpa <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -70,7 +70,7 @@ bpa <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 bpa
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 13:53:33.333275
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:04:26.200624
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 226 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -107,7 +107,7 @@ ativo_total <- bpa[
   c("cnpj_cia", "denom_cia", "dt_fim_exerc", "vl_conta")
 ]
 ativo_total
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 13:53:33.333275
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:04:26.200624
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 2 × 4
 #>   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta
@@ -130,7 +130,7 @@ bpa_history <- issuer_fetch(
   year = 2022:2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -138,7 +138,7 @@ bpa_history <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -150,7 +150,7 @@ ativo_history <- bpa_history[
   c("dt_fim_exerc", "vl_conta")
 ]
 ativo_history[order(ativo_history$dt_fim_exerc), ]
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 13:53:34.415796
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:04:27.230072
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 3 × 2
 #>   dt_fim_exerc      vl_conta
@@ -175,7 +175,7 @@ cap <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -185,7 +185,7 @@ cap <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023, 22470 via "dfp"/submissao for 2024 (table
 #>   "composicao_capital" does not carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -193,7 +193,7 @@ cap <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 cap
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 13:53:34.78991
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:04:27.63114
 #> ℹ group: "companhias" | dataset: "dfp" | table: "composicao_capital"
 #> # A tibble: 2 × 11
 #>   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹
@@ -219,7 +219,7 @@ sub <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHXii78/duckdb
+#> ℹ /tmp/RtmpUGFqN9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -227,7 +227,7 @@ sub <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 13:53:34.941427
+#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:04:27.799066
 #> ℹ group: "companhias" | dataset: "dfp" | table: "submissao"
 #> # A tibble: 2 × 4
 #>   cd_cvm denom_cia           dt_refer   id_doc
