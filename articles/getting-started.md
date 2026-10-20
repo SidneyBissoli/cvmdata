@@ -432,7 +432,11 @@ CVM publishes only `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 returns the literal CSV content for each year you ask for; users build
 longer histories by passing a longer vector and deduplicating
-downstream.
+downstream. The `PENÚLTIMO` column is the issuer’s comparative for the
+previous exercise and is often restated;
+`reading = c("original", "restated")` reads an exercise by its own year
+and returns the figures originally filed and the comparative of the
+following year’s file, labelled (see the `issuer-fetch` article).
 
 For slices smaller than a year, pass `from` and `to` together as
 complete dates (`"YYYY-MM-DD"`). Rows are kept by the document’s

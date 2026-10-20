@@ -511,7 +511,12 @@ historical reach, just pass a longer vector:</p>
 yearly CSV (i.e. the declared year and its N-1).
 <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> returns the literal CSV content for each year
 you ask for; users build longer histories by passing a longer vector and
-deduplicating downstream.</p>
+deduplicating downstream. The <code>PENÚLTIMO</code> column is the
+issuer’s comparative for the previous exercise and is often restated;
+<code>reading = c("original", "restated")</code> reads an exercise by
+its own year and returns the figures originally filed and the
+comparative of the following year’s file, labelled (see the
+<code>issuer-fetch</code> article).</p>
 <p>For slices smaller than a year, pass <code>from</code> and
 <code>to</code> together as complete dates (<code>"YYYY-MM-DD"</code>).
 Rows are kept by the document’s reference date (<code>dt_refer</code> /

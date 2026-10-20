@@ -358,7 +358,10 @@ company name is not accepted — look it up in the registry
 `cnpj_cia`). The period is either whole `year`s or a `from`/`to` window
 of complete dates on the document’s reference date. Financial statements
 published in individual and consolidated variants require `basis` and
-always carry a `basis` column.
+always carry a `basis` column. On those same tables, `reading` reads an
+exercise by its own year and labels its two readings: the figures
+originally filed (`"original"`) and the comparative the issuer presented
+in the following year’s file (`"restated"`), which is often different.
 
 ``` r
 
@@ -370,6 +373,10 @@ cvm_fetch("dfp", "bpa", ticker = "BBAS3",
 # Both bases, three years:
 cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
           year = 2022:2024, basis = c("ind", "con"))
+# Exercise 2022 as filed and as restated in the 2023 file:
+cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+          year = 2022, basis = "con",
+          reading = c("original", "restated"))
 ```
 
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
@@ -433,8 +440,8 @@ Further reading on the pkgdown site:
 - **issuer-fetch** — deep dive on
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
   including
-  `cnpj`/`ticker`/`year`/`from`/`to`/`basis`/`on_error`/`validate`
-  semantics.
+  `cnpj`/`ticker`/`year`/`from`/`to`/`basis`/`reading`/`on_error`/
+  `validate` semantics.
 - **itr-dfp** — quarterly and annual financial statements, with two
   end-to-end workflows.
 - **fre** — reference form, including the eight ESG/governance tables

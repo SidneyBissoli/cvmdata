@@ -74,6 +74,7 @@ carrying provenance attributes.</p>
 <span>  from <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  to <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  basis <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  reading <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  source <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  on_error <span class="op">=</span> <span class="st">"abort"</span>,</span>
 <span>  validate <span class="op">=</span> <span class="st">"strict"</span>,</span>
@@ -141,6 +142,22 @@ was requested. Must be <code>NULL</code> for every other table; passing it
 aborts.</p></dd>
 
 
+<dt id="arg-reading">reading<a class="anchor" aria-label="anchor" href="#arg-reading"></a></dt>
+<dd><p>Which reading of each fiscal exercise to return, for
+the DFP and ITR statement tables (the ones with <code>ordem_exerc</code>):
+<code>"original"</code> (the figures the issuer filed for the exercise, the
+<code>ÚLTIMO</code> rows of that year's file), <code>"restated"</code> (the comparative
+figures for the same exercise in the following year's file, the
+<code>PENÚLTIMO</code> rows there) or <code>c("original", "restated")</code>, which
+stacks both. <code>NULL</code> (default) returns each year's file as the CVM
+publishes it, <code>ÚLTIMO</code> and <code>PENÚLTIMO</code> rows together, without a
+<code>reading</code> column. When set, <code>year</code> names the exercises and the
+following year's files are read as needed; the result carries a
+<code>reading</code> column. See the section <em>Readings of an exercise</em>.
+Must be <code>NULL</code> for tables without <code>ordem_exerc</code>; passing it
+aborts.</p></dd>
+
+
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
 <dd><p>One of <code>"mirror"</code> (parquet via DuckDB) or <code>"cvm"</code>
 (CVM Open Data Portal). <code>NULL</code> (default) resolves to the active
@@ -178,6 +195,43 @@ and <code>package_version</code>.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Column names, categorical values and free-text fields are preserved
 in Portuguese exactly as published by CVM (snake_case minúsculo).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="readings-of-an-exercise">Readings of an exercise<a class="anchor" aria-label="anchor" href="#readings-of-an-exercise"></a></h2>
+
+
+<p>Every yearly DFP and ITR statement file carries two columns of
+figures per account: <code>ordem_exerc = "ÚLTIMO"</code>, the exercise the
+file is about, and <code>ordem_exerc = "PENÚLTIMO"</code>, the comparative
+the issuer presented for the previous exercise. The comparative is
+often not the figure originally filed: issuers restate it after a
+change of accounting policy, an error or a reorganisation (about a
+third of the issuers in the DFP, measured on the 2023 file against
+the 2022 one), and the restated figure is the one later statements
+build on. With <code>reading</code>, <code>cvm_fetch()</code> reads the exercise by its
+own year and labels each row:</p><ul><li><p><code>"original"</code>: the <code>ÚLTIMO</code> rows of the file of <code>year</code>.</p></li>
+<li><p><code>"restated"</code>: the <code>PENÚLTIMO</code> rows of the file of <code>year + 1</code>,
+read in addition to (or instead of) the file of <code>year</code>. Rows are
+returned as the CVM publishes them, so <code>dt_refer</code> and <code>versao</code>
+are those of the following year's document and <code>dt_fim_exerc</code>
+(and <code>dt_ini_exerc</code>) identify the exercise the figure belongs
+to. An exercise whose following year's file is not published yet
+has no restated reading; the call says so and returns what
+exists. When the file exists but the issuer has not filed in it
+yet, its restated rows are simply absent.</p></li>
+</ul><p>The two readings of an exercise pair on the issuer, the exercise
+dates, <code>cd_conta</code> and, in <code>dmpl</code>, <code>coluna_df</code>. Either reading can be
+absent for an issuer (it stopped filing, or started filing in the
+following year), and a restated figure can be <code>0</code> where the issuer
+presented no comparative at all, as the banks did for 2024 on the
+individual basis after adopting CMN Resolution 4,966 in 2025. In
+the ITR, the comparative of the balance sheet (<code>bpa</code>, <code>bpp</code>) is the
+previous year end, not the previous year's quarter, so the restated
+reading of an ITR balance sheet is the year-end balance as the
+following year's quarterly filings present it.</p>
+<p>With <code>from</code>/<code>to</code>, the window applies to the exercise end
+(<code>dt_fim_exerc</code>) rather than to the document date, so an exercise's
+two readings stay together.</p>
     </div>
     <div class="section level2">
     <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
@@ -227,6 +281,16 @@ numbers and warns (<code>cvmdata_warn_stale_filing</code>). Set
 <span class="r-in"><span>  <span class="st">"itr"</span>, <span class="st">"bpa"</span>,</span></span>
 <span class="r-in"><span>  from <span class="op">=</span> <span class="st">"2024-01-01"</span>, to <span class="op">=</span> <span class="st">"2024-06-30"</span>,</span></span>
 <span class="r-in"><span>  basis <span class="op">=</span> <span class="st">"con"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Exercise 2022 as originally filed and as restated in the 2023</span></span></span>
+<span class="r-in"><span><span class="co"># file, side by side in a `reading` column</span></span></span>
+<span class="r-in"><span><span class="va">pssa</span> <span class="op">&lt;-</span> <span class="fu">cvm_fetch</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span></span>
+<span class="r-in"><span>  ticker <span class="op">=</span> <span class="st">"PSSA3"</span>,</span></span>
+<span class="r-in"><span>  year <span class="op">=</span> <span class="fl">2022</span>,</span></span>
+<span class="r-in"><span>  basis <span class="op">=</span> <span class="st">"con"</span>,</span></span>
+<span class="r-in"><span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>

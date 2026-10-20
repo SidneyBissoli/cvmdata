@@ -18,6 +18,7 @@ cvm_fetch(
   from = NULL,
   to = NULL,
   basis = NULL,
+  reading = NULL,
   source = NULL,
   on_error = "abort",
   validate = "strict",
@@ -80,6 +81,21 @@ cvm_fetch(
   column in the result, even when a single value was requested. Must be
   `NULL` for every other table; passing it aborts.
 
+- reading:
+
+  Which reading of each fiscal exercise to return, for the DFP and ITR
+  statement tables (the ones with `ordem_exerc`): `"original"` (the
+  figures the issuer filed for the exercise, the `ÚLTIMO` rows of that
+  year's file), `"restated"` (the comparative figures for the same
+  exercise in the following year's file, the `PENÚLTIMO` rows there) or
+  `c("original", "restated")`, which stacks both. `NULL` (default)
+  returns each year's file as the CVM publishes it, `ÚLTIMO` and
+  `PENÚLTIMO` rows together, without a `reading` column. When set,
+  `year` names the exercises and the following year's files are read as
+  needed; the result carries a `reading` column. See the section
+  *Readings of an exercise*. Must be `NULL` for tables without
+  `ordem_exerc`; passing it aborts.
+
 - source:
 
   One of `"mirror"` (parquet via DuckDB) or `"cvm"` (CVM Open Data
@@ -115,6 +131,44 @@ A tibble of class `cvm_tbl` carrying the provenance attributes `source`,
 
 Column names, categorical values and free-text fields are preserved in
 Portuguese exactly as published by CVM (snake_case minúsculo).
+
+## Readings of an exercise
+
+Every yearly DFP and ITR statement file carries two columns of figures
+per account: `ordem_exerc = "ÚLTIMO"`, the exercise the file is about,
+and `ordem_exerc = "PENÚLTIMO"`, the comparative the issuer presented
+for the previous exercise. The comparative is often not the figure
+originally filed: issuers restate it after a change of accounting
+policy, an error or a reorganisation (about a third of the issuers in
+the DFP, measured on the 2023 file against the 2022 one), and the
+restated figure is the one later statements build on. With `reading`,
+`cvm_fetch()` reads the exercise by its own year and labels each row:
+
+- `"original"`: the `ÚLTIMO` rows of the file of `year`.
+
+- `"restated"`: the `PENÚLTIMO` rows of the file of `year + 1`, read in
+  addition to (or instead of) the file of `year`. Rows are returned as
+  the CVM publishes them, so `dt_refer` and `versao` are those of the
+  following year's document and `dt_fim_exerc` (and `dt_ini_exerc`)
+  identify the exercise the figure belongs to. An exercise whose
+  following year's file is not published yet has no restated reading;
+  the call says so and returns what exists. When the file exists but the
+  issuer has not filed in it yet, its restated rows are simply absent.
+
+The two readings of an exercise pair on the issuer, the exercise dates,
+`cd_conta` and, in `dmpl`, `coluna_df`. Either reading can be absent for
+an issuer (it stopped filing, or started filing in the following year),
+and a restated figure can be `0` where the issuer presented no
+comparative at all, as the banks did for 2024 on the individual basis
+after adopting CMN Resolution 4,966 in 2025. In the ITR, the comparative
+of the balance sheet (`bpa`, `bpp`) is the previous year end, not the
+previous year's quarter, so the restated reading of an ITR balance sheet
+is the year-end balance as the following year's quarterly filings
+present it.
+
+With `from`/`to`, the window applies to the exercise end
+(`dt_fim_exerc`) rather than to the document date, so an exercise's two
+readings stay together.
 
 ## Filing versions
 
@@ -164,6 +218,16 @@ h1 <- cvm_fetch(
   "itr", "bpa",
   from = "2024-01-01", to = "2024-06-30",
   basis = "con"
+)
+
+# Exercise 2022 as originally filed and as restated in the 2023
+# file, side by side in a `reading` column
+pssa <- cvm_fetch(
+  "dfp", "bpa",
+  ticker = "PSSA3",
+  year = 2022,
+  basis = "con",
+  reading = c("original", "restated")
 )
 }
 ```

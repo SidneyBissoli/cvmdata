@@ -453,7 +453,11 @@ in the registry (<code>cvm_fetch("cad", "companhias")</code> carries
 a <code>from</code>/<code>to</code> window of complete dates on the
 document’s reference date. Financial statements published in individual
 and consolidated variants require <code>basis</code> and always carry a
-<code>basis</code> column.</p>
+<code>basis</code> column. On those same tables, <code>reading</code>
+reads an exercise by its own year and labels its two readings: the
+figures originally filed (<code>"original"</code>) and the comparative
+the issuer presented in the following year’s file
+(<code>"restated"</code>), which is often different.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Two ways to name one issuer:</span></span>
 <span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
@@ -462,7 +466,11 @@ and consolidated variants require <code>basis</code> and always carry a
 <span>          year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co"># Both bases, three years:</span></span>
 <span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
-<span>          year <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span>, basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ind"</span>, <span class="st">"con"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>          year <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span>, basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ind"</span>, <span class="st">"con"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Exercise 2022 as filed and as restated in the 2023 file:</span></span>
+<span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>          year <span class="op">=</span> <span class="fl">2022</span>, basis <span class="op">=</span> <span class="st">"con"</span>,</span>
+<span>          reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>, the entry point of earlier releases, is
 deprecated and still works with a warning. The <code>issuer-fetch</code>
 article goes through every <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> argument in
@@ -520,8 +528,8 @@ selected per call or persisted via
 <li>
 <strong>issuer-fetch</strong> — deep dive on
 <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>, including
-<code>cnpj</code>/<code>ticker</code>/<code>year</code>/<code>from</code>/<code>to</code>/<code>basis</code>/<code>on_error</code>/<code>validate</code>
-semantics.</li>
+<code>cnpj</code>/<code>ticker</code>/<code>year</code>/<code>from</code>/<code>to</code>/<code>basis</code>/<code>reading</code>/<code>on_error</code>/
+<code>validate</code> semantics.</li>
 <li>
 <strong>itr-dfp</strong> — quarterly and annual financial
 statements, with two end-to-end workflows.</li>

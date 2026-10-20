@@ -56,7 +56,7 @@
 <p>Nomes de tabelas, colunas, valores categóricos e texto livre são preservados em português, exatamente como a CVM publica. Nomes de função, argumentos e atributos de metadado seguem o padrão inglês-tidyverse esperado pelo rOpenSci e CRAN.</p>
 <div class="section level2">
 <h2 id="por-que-cvmdata">Por que cvmdata<a class="anchor" aria-label="anchor" href="#por-que-cvmdata"></a></h2>
-<p>A CVM publica os formulários em ZIPs anuais de CSVs com codificação ISO-8859-1, schema específico por tabela e sem dicionário de dados unificado. Workflows comuns — “me dá o DFP da empresa X de 2018 a 2024” — exigem download manual, tratamento de encoding, conversão de <code>VL_CONTA</code> por <code>ESCALA_MOEDA</code> e join contra uma <code>submissao</code> separada para traduzir CD_CVM em CNPJ. O <code>cvmdata</code> consolida tudo isso atrás de uma chamada <code>cvm_fetch(dataset, table, cnpj, year, basis, ...)</code> e embarca o dicionário oficial como snapshot, então os tipos de coluna vêm prontos.</p>
+<p>A CVM publica os formulários em ZIPs anuais de CSVs com codificação ISO-8859-1, schema específico por tabela e sem dicionário de dados unificado. Workflows comuns — “me dá o DFP da empresa X de 2018 a 2024” — exigem download manual, tratamento de encoding, conversão de <code>VL_CONTA</code> por <code>ESCALA_MOEDA</code> e join contra uma <code>submissao</code> separada para traduzir CD_CVM em CNPJ. O <code>cvmdata</code> consolida tudo isso atrás de uma chamada <code>cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)</code> e embarca o dicionário oficial como snapshot, então os tipos de coluna vêm prontos.</p>
 <p>Dois pacotes já existentes do Marcelo Perlin endereçam fatias adjacentes do problema:</p>
 <ul><li>
 <a href="https://github.com/msperlin/GetITRData" class="external-link"><code>GetITRData</code></a> cobria o ITR, mas foi arquivado pelo autor em março de 2020 e não recebe mais manutenção.</li>
@@ -206,8 +206,18 @@ varchar
 <span>  year    <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span>,</span>
 <span>  basis   <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Limpe e formate CNPJs:</p>
+<p>Cada arquivo anual traz também o comparativo que a companhia apresentou para o exercício anterior, muitas vezes reexpresso. <code>reading</code> coloca as duas leituras de um exercício lado a lado, rotuladas: os números entregues originalmente e o comparativo do arquivo do ano seguinte:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bpa_2022</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span>  dataset <span class="op">=</span> <span class="st">"dfp"</span>,</span>
+<span>  table   <span class="op">=</span> <span class="st">"bpa"</span>,</span>
+<span>  ticker  <span class="op">=</span> <span class="st">"PSSA3"</span>,</span>
+<span>  year    <span class="op">=</span> <span class="fl">2022</span>,</span>
+<span>  basis   <span class="op">=</span> <span class="st">"con"</span>,</span>
+<span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Limpe e formate CNPJs:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>

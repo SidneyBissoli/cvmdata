@@ -73,7 +73,7 @@
 <div class="section level2">
 <h2 id="why-cvmdata">Why cvmdata<a class="anchor" aria-label="anchor" href="#why-cvmdata"></a>
 </h2>
-<p>CVM publishes filings as yearly ZIPs of CSVs with mixed encodings, table-specific schemas, and no unified data dictionary. Common workflows — “give me DFP for company X across 2018-2024” — typically require manual ZIP downloads, ISO-8859-1 handling, scale-by-<code>ESCALA_MOEDA</code> conversion, and joins against a separate <code>submissao</code> header to translate CD_CVM to CNPJ. <code>cvmdata</code> consolidates these steps behind a single <code>cvm_fetch(dataset, table, cnpj, year, basis, ...)</code> call and ships the official dictionary as an embedded snapshot, so column types are picked up automatically.</p>
+<p>CVM publishes filings as yearly ZIPs of CSVs with mixed encodings, table-specific schemas, and no unified data dictionary. Common workflows — “give me DFP for company X across 2018-2024” — typically require manual ZIP downloads, ISO-8859-1 handling, scale-by-<code>ESCALA_MOEDA</code> conversion, and joins against a separate <code>submissao</code> header to translate CD_CVM to CNPJ. <code>cvmdata</code> consolidates these steps behind a single <code>cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)</code> call and ships the official dictionary as an embedded snapshot, so column types are picked up automatically.</p>
 <p>Two existing R packages by Marcelo Perlin address adjacent slices of this problem:</p>
 <ul>
 <li>
@@ -249,8 +249,18 @@ varchar
 <span>  year    <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span>,</span>
 <span>  basis   <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
+<p>Each yearly file also carries the comparative the issuer presented for the previous exercise, which is often restated. <code>reading</code> puts the two readings of an exercise side by side, labelled: the figures originally filed and the comparative in the following year’s file:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bpa_2022</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span>  dataset <span class="op">=</span> <span class="st">"dfp"</span>,</span>
+<span>  table   <span class="op">=</span> <span class="st">"bpa"</span>,</span>
+<span>  ticker  <span class="op">=</span> <span class="st">"PSSA3"</span>,</span>
+<span>  year    <span class="op">=</span> <span class="fl">2022</span>,</span>
+<span>  basis   <span class="op">=</span> <span class="st">"con"</span>,</span>
+<span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>

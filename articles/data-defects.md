@@ -39,13 +39,14 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 6 | CNPJ comes with punctuation (`00.000.000/0001-91`) | Per-row formatting; not stripped upstream | Preserved in `cnpj_cia`. `cnpj` accepts both punctuated and clean forms. [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md) / [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md) round-trip. |
 | 7 | `VL_CONTA × ESCALA_MOEDA` (UNIDADE / MIL / MILHÃO / BILHÃO) | Two columns; user must multiply | **See example below.** Applied via the canonical `multiply_by_scale` transformation; `escala_moeda` dropped. |
 | 8 | Eight FRE tables ship without published META | Dictionary `.txt` never released for `empregado_PCD` and seven kin | **See example below.** YAML declares `meta_status: missing`; `validate = "warn"` or `"skip"` opt-in required. |
-| 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1 | Returned as-is. To assemble three or more consecutive years, pass an explicit `year` vector spanning the range. |
+| 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1, and the N − 1 column is the issuer’s comparative, often restated | Returned as-is by default. `reading = c("original", "restated")` reads an exercise by its own year and labels the figures originally filed and the comparative of the following year’s file. To assemble three or more consecutive years, pass an explicit `year` vector spanning the range. |
 | 10 | FRE 2024 META URL anomalies | Archive name is `meta_fre_cia_aberta.zip` (no `_txt.zip` suffix); `empregado_local_faixa_etaria` entry lives without the `meta_` prefix | Schema-level fixups: `cvm_dictionary_url` lists the archive plus entry; reader looks for both prefixed and bare entry names. |
 | 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see \#14). |
 | 12 | Dates as `YYYY-MM-DD` strings | Plain strings in the CSV | Converted to R `Date` for every column the dictionary declares `tipo_dados: "date"`. |
 | 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column | Filter must run on CNPJ | **See example below.** [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) identifies issuers by CNPJ (or ticker) only, matching `cnpj_cia` or `cnpj_companhia` as the table carries. |
 | 14 | Repeated filings and repeated rows | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** Detail tables keep the last delivery; `submissao` lists every one; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
 | 15 | A later filing delivered under a lower `VERSAO` | The statement CSVs keep the highest version, not the last delivery | **See below.** `cvmdata_warn_stale_filing` names the issuers; the table keeps the CVM numbers. |
+| 16 | Comparative column filled with zeros | When an issuer presents no comparative, the `PENÚLTIMO` rows carry `0`, not `NA`: 21 banks did so for 2024 on the individual basis in the DFP 2025, after adopting CMN Resolution 4,966 without restating | Returned as-is, including through `reading = "restated"`. A zero in a comparative column of a bank’s individual statements for 2024 means “not presented”, not a zero balance. |
 
 ## Mini-examples for the structural cases
 
@@ -59,7 +60,7 @@ selected by CNPJ in both, shows the two forms:
 a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -67,7 +68,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -76,7 +77,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ See ?duckdb_storage for details and alternatives.
 b <- cvm_fetch("cad", "companhias", cnpj = "00.000.000/0001-91")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -119,7 +120,7 @@ yaml::read_yaml(system.file(
 bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                  year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -127,7 +128,7 @@ bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -137,7 +138,7 @@ bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:48:52.911838
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 13:10:26.886298
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -158,14 +159,14 @@ dictionary. The default `validate = "strict"` refuses to read them:
 cvm_fetch("fre", "empregado_PCD",
           cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:48:53.761749
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 13:10:28.13495
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -210,7 +211,7 @@ index and returns every delivery, with its receipt date and document id
 auditor <- cvm_fetch("fre", "auditor",
                      cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -218,7 +219,7 @@ auditor <- cvm_fetch("fre", "auditor",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -245,7 +246,7 @@ matches whichever CNPJ column the table carries:
 auditor <- cvm_fetch("fre", "auditor",
                      cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -253,7 +254,7 @@ auditor <- cvm_fetch("fre", "auditor",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgG074F/duckdb
+#> ℹ /tmp/Rtmpp65kL7/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
