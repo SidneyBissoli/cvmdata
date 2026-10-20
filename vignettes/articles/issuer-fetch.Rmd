@@ -80,12 +80,12 @@ A CVM code (`"1023"`) or a company name (`"BCO BRASIL"`) passed as
 `cnpj` aborts with `cvmdata_error_input`: there is no free-text
 search and no CD_CVM lookup in `cvm_fetch()`. To find the CNPJ of a
 company you know by name or by CVM code, read the registry, which
-carries `cd_cvm`, `denom_cia` and `cnpj_cia` side by side:
+carries `cd_cvm`, `denom_social` and `cnpj_cia` side by side:
 
 ```{r registry-lookup}
 registry <- cvm_fetch("cad", "companhias")
-registry[grepl("MAGAZINE LUIZA", registry$denom_cia),
-         c("cd_cvm", "denom_cia", "cnpj_cia")]
+registry[grepl("MAGAZINE LUIZA", registry$denom_social),
+         c("cd_cvm", "denom_social", "cnpj_cia")]
 ```
 
 ### CNPJ: punctuated or clean, same rows
