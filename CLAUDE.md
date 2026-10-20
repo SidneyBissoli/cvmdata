@@ -464,7 +464,13 @@ O release é atualizado NO LUGAR (`gh release edit` + upload
 `--clobber` + `delete-asset` dos que sobraram, com `=` → `.` na
 comparação), nunca apagado e recriado: o delete+create deixava o
 mirror vazio durante o upload e, em 19/10, falhou calado no fre/itr.
-`__source_hash.json` sobe por último. Encoding dos asset names:
+`__source_hash.json` sobe por último; um upload que falha (o GitHub
+responde 500 esporádico no `--clobber`) é tentado de novo até três vezes.
+Fora do repo, o portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere
+toda semana, sem credencial, a última entrega de cada dataset na CVM
+contra a do espelho, e abre o item `cvmdata:mirror-atrasado` no painel
+quando falta entrega há mais de 7 dias ou o release não abre anônimo — é
+o alarme que faltou de junho a outubro/2026. Encoding dos asset names:
 `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
 GitHub Releases sanitiza `=` → `.` no URL público;
 `parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.
