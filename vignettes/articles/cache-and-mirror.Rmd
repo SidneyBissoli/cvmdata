@@ -83,6 +83,26 @@ worst case (empty / unreadable / wrong-type), soft checks bound the
 content noise the CVM occasionally publishes. New checks land in the
 same script; documenting them here is the rOpenSci-auditable surface.
 
+### Superseded filings
+
+Each CVM annual file carries only the filing delivered last for every
+company and reference date, so a restatement silently replaces the
+previous numbers in the file, and the mirror followed suit until
+2026-10. Since then the publish step compares, for every partition
+whose content hash moved, the parquet of the previous release with the
+new one, filing by filing, and appends the rows of the filings that
+were replaced or dropped to a cumulative history asset of the same
+partition, named `<table>__report_type=R__year=Y__history.parquet`,
+with two extra columns: `superseded_at` (the ETL run, UTC) and
+`superseded_by_versao` (the `versao` of the replacing filing, `NA` when
+the filing vanished). A filing counts as changed by the content of its
+rows, not by a new `versao` or document id with the same numbers (the
+`submissao` table already records every delivery). The `-latest`
+parquets and `cvm_fetch()` are untouched: the client ignores the
+history assets. Reading them through the package, and recovering
+filings superseded before the history existed, are planned separately
+(see the roadmap).
+
 ## Workflow 1 — Working with the mirror (default)
 
 From v0.1.0 the mirror is the default backend, so `cvm_fetch()`

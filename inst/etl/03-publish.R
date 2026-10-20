@@ -25,6 +25,18 @@
 # log line). Otherwise the new hash is written into the stage dir as
 # `__source_hash.json` and uploaded alongside the parquets.
 #
+# History of superseded filings (since 2026-10, Part 3 of the versions
+# work): for every partition whose content hash moved, the parquet of
+# the previous release is downloaded and compared with the new one
+# filing by filing (util-history.R). The rows of the filings the new
+# file replaces or drops are appended to the history asset of that
+# partition, `<table>__report_type=R__year=Y__history.parquet`, which
+# accumulates across runs and is never deleted as stale. The `-latest`
+# parquets are untouched, and clients ignore the history assets
+# (`parse_mirror_asset_name()` rejects the name). The JSON gains a
+# `history` map ({partition: content sha256}) that the next run uses to
+# know which history assets exist; the `hash` field keeps its meaning.
+#
 # After the upload the release is forced out of draft and checked
 # without credentials: on 2026-10-19 the vlmo release had been a draft
 # since June, so it answered 404 to every user while the job was green.
@@ -38,13 +50,20 @@
 #
 # Usage:
 #   Rscript inst/etl/03-publish.R --group companhias --dataset cad
+#   Rscript inst/etl/03-publish.R --group companhias --dataset dfp --dry-run
+#
+# `--dry-run` computes the hash and the history against the live release
+# and lists what would be uploaded, without touching the release (local
+# smoke test after 01/02 with `--year`).
 
 source("inst/etl/00-config.R")
 source("inst/etl/util-hash.R")
+source("inst/etl/util-history.R")
 
 args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
 dataset <- NULL
+dry_run <- FALSE
 i <- 1L
 while (i <= length(args)) {
   if (args[i] == "--group") {
@@ -55,6 +74,11 @@ while (i <= length(args)) {
   if (args[i] == "--dataset") {
     dataset <- args[i + 1L]
     i <- i + 2L
+    next
+  }
+  if (args[i] == "--dry-run") {
+    dry_run <- TRUE
+    i <- i + 1L
     next
   }
   i <- i + 1L
@@ -138,29 +162,58 @@ message(sprintf(
   short_hash(source_hash$hash)
 ))
 
-prev_hash_path <- tempfile(fileext = ".json")
-download_dir <- dirname(prev_hash_path)
-download_status <- suppressWarnings(system2(
-  "gh",
-  c(
-    "release",
-    "download",
-    tag,
-    "--repo",
-    mirror_repo,
-    "--pattern",
-    "__source_hash.json",
-    "--dir",
-    shQuote(download_dir),
-    "--clobber"
-  ),
-  stdout = NULL,
-  stderr = NULL
-))
-prev_hash_file <- file.path(download_dir, "__source_hash.json")
-unlink(prev_hash_path)
+# Asset name of a partition path, as staged ("=" kept) or as GitHub
+# serves it ("=" replaced by ".", see parse_mirror_asset_name()).
+asset_name_of <- function(rel) {
+  gsub("[/\\\\]", "__", rel)
+}
+public_asset_name <- function(rel) {
+  gsub("=", ".", asset_name_of(rel), fixed = TRUE)
+}
 
-if (download_status == 0L && file.exists(prev_hash_file)) {
+# Downloads one asset of the release into `dir` and returns its path, or
+# NULL when gh could not fetch it (missing asset or a failure that three
+# attempts did not clear; gh does not tell the two apart).
+download_release_asset <- function(tag, name, dir, attempts = 3L) {
+  for (attempt in seq_len(attempts)) {
+    status <- suppressWarnings(system2(
+      "gh",
+      c(
+        "release",
+        "download",
+        tag,
+        "--repo",
+        mirror_repo,
+        "--pattern",
+        name,
+        "--dir",
+        shQuote(dir),
+        "--clobber"
+      ),
+      stdout = NULL,
+      stderr = NULL
+    ))
+    path <- file.path(dir, name)
+    if (status == 0L && file.exists(path)) {
+      return(path)
+    }
+    if (attempt < attempts) {
+      Sys.sleep(5 * attempt)
+    }
+  }
+  NULL
+}
+
+download_dir <- tempfile("cvmdata-mirror-prev-")
+dir.create(download_dir)
+on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
+prev_hash_file <- download_release_asset(
+  tag,
+  "__source_hash.json",
+  download_dir
+)
+prev <- NULL
+if (!is.null(prev_hash_file)) {
   prev <- tryCatch(
     jsonlite::read_json(prev_hash_file),
     error = function(e) NULL
@@ -175,7 +228,6 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
       "[03-publish] content unchanged (sha256=%s..); skipping publish",
       short_hash(source_hash$hash)
     ))
-    unlink(prev_hash_file)
     quit(status = 0L)
   }
   message(sprintf(
@@ -183,9 +235,130 @@ if (download_status == 0L && file.exists(prev_hash_file)) {
     short_hash(prev$hash %||% NA_character_),
     short_hash(source_hash$hash)
   ))
-  unlink(prev_hash_file)
 } else {
   message("[03-publish] no previous __source_hash.json; publishing fresh")
+}
+
+# History of superseded filings -----------------------------------------
+# For every partition whose content moved, fetch the parquet of the
+# previous release and keep the rows of the filings the new one replaces
+# or drops. Tables that keep every filing (submissao, cad, ...) lose
+# nothing on republish and are skipped. A listed asset that cannot be
+# downloaded stops the run: publishing over it would lose history.
+
+history_dir <- file.path(workspace, "out", "history", group, dataset)
+
+# Returns list(map = {history partition: content sha256} after this run,
+# files = local history parquets written now).
+build_history <- function(prev, source_hash) {
+  map <- if (is.null(prev)) list() else prev$history %||% list()
+  files <- character()
+  if (is.null(prev)) {
+    return(list(map = map, files = files))
+  }
+  changed <- Filter(
+    function(rel) {
+      !is.null(prev$data[[rel]]) &&
+        !identical(prev$data[[rel]], source_hash$data[[rel]])
+    },
+    names(source_hash$data)
+  )
+  message(sprintf(
+    "[03-publish] %d partition(s) changed since the previous release",
+    length(changed)
+  ))
+  for (rel in changed) {
+    versioning <- mirror_table_versioning(
+      dataset,
+      mirror_partition_table(rel)
+    )
+    if (!versioning$versioned) {
+      next
+    }
+    old_path <- download_release_asset(
+      tag,
+      public_asset_name(rel),
+      download_dir
+    )
+    if (is.null(old_path)) {
+      stop(
+        sprintf("previous parquet of %s is listed but not downloadable", rel),
+        call. = FALSE
+      )
+    }
+    old <- arrow::read_parquet(old_path)
+    new <- arrow::read_parquet(file.path(dataset_dir, rel))
+    keys <- mirror_filing_keys(new, versioning$keys)
+    if (is.null(keys)) {
+      message("  ", rel, ": no filing keys; no history kept")
+      next
+    }
+    diff <- mirror_superseded_rows(old, new, keys, source_hash$computed_at)
+    if (length(diff$columns_added) || length(diff$columns_dropped)) {
+      message(sprintf(
+        "  %s: columns added [%s], dropped [%s]; compared on the rest",
+        rel,
+        paste(diff$columns_added, collapse = ", "),
+        paste(diff$columns_dropped, collapse = ", ")
+      ))
+    }
+    if (!nrow(diff$rows)) {
+      next
+    }
+    hist_rel <- mirror_history_rel(rel)
+    previous <- NULL
+    if (!is.null(map[[hist_rel]])) {
+      prev_path <- download_release_asset(
+        tag,
+        public_asset_name(hist_rel),
+        download_dir
+      )
+      if (is.null(prev_path)) {
+        stop(
+          sprintf("history of %s is listed but not downloadable", rel),
+          call. = FALSE
+        )
+      }
+      previous <- arrow::read_parquet(prev_path)
+    }
+    out <- file.path(history_dir, hist_rel)
+    dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
+    arrow::write_parquet(
+      mirror_append_history(previous, diff$rows),
+      out,
+      compression = "snappy"
+    )
+    map[[hist_rel]] <- mirror_hash_parquet(out)
+    files <- c(files, out)
+    message(sprintf(
+      "  %s: %d filing(s) replaced, %d removed -> %d row(s) to history",
+      rel,
+      diff$n_replaced,
+      diff$n_removed,
+      nrow(diff$rows)
+    ))
+  }
+  list(map = map, files = files)
+}
+
+history <- build_history(prev, source_hash)
+source_hash$history <- history$map
+message(sprintf(
+  "[03-publish] history: %d asset(s) in the release, %d written now",
+  length(history$map),
+  length(history$files)
+))
+
+if (dry_run) {
+  message("[03-publish] dry run: would upload")
+  for (p in parquets) {
+    message("  ", asset_name_of(substring(p, nchar(dataset_dir) + 2L)))
+  }
+  for (p in history$files) {
+    message("  ", asset_name_of(substring(p, nchar(history_dir) + 2L)))
+  }
+  message("  __source_hash.json")
+  quit(status = 0L)
 }
 
 # Publish ---------------------------------------------------------------
@@ -253,15 +426,23 @@ on.exit(unlink(stage_dir, recursive = TRUE), add = TRUE)
 hash_asset <- file.path(stage_dir, "__source_hash.json")
 jsonlite::write_json(source_hash, hash_asset, auto_unbox = TRUE, pretty = TRUE)
 
-assets <- character(length(parquets))
-for (k in seq_along(parquets)) {
-  rel <- substring(parquets[k], nchar(dataset_dir) + 2L)
-  asset_name <- gsub("[/\\\\]", "__", rel)
-  staged <- file.path(stage_dir, asset_name)
-  file.copy(parquets[k], staged, overwrite = TRUE)
-  assets[k] <- staged
+stage_assets <- function(paths, root) {
+  staged <- character(length(paths))
+  for (k in seq_along(paths)) {
+    rel <- substring(paths[k], nchar(root) + 2L)
+    staged[k] <- file.path(stage_dir, asset_name_of(rel))
+    file.copy(paths[k], staged[k], overwrite = TRUE)
+  }
+  staged
 }
-assets <- c(assets, hash_asset)
+# History assets that did not change this run stay as they are on the
+# release (they are never stale, see below), so only the ones written
+# now are uploaded.
+assets <- c(
+  stage_assets(parquets, dataset_dir),
+  stage_assets(history$files, history_dir),
+  hash_asset
+)
 
 message(sprintf("[03-publish] uploading %d asset(s)", length(assets)))
 # GitHub answers an occasional HTTP 500 on one of the hundreds of uploads
@@ -320,7 +501,9 @@ if (!is.null(attr(current, "status"))) {
 }
 # GitHub stores "year=2024" as "year.2024" (see parse_mirror_asset_name()),
 # so compare in its spelling; comparing the local names would mark every
-# asset stale and delete the release just uploaded.
+# asset stale and delete the release just uploaded. History assets are
+# cumulative and most of them are not re-uploaded: never stale.
+current <- current[!mirror_is_history_asset(current)]
 stale <- setdiff(current, gsub("=", ".", basename(assets), fixed = TRUE))
 if (length(stale) == length(current) && length(current) > 0L) {
   stop(
