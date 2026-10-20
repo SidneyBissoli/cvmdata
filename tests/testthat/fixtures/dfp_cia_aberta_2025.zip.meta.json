@@ -1,0 +1,18 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/dfp_cia_aberta_2025.zip",
+  "fetched_at": "2026-10-20",
+  "companies_included": [
+    {
+      "cd_cvm": "001023",
+      "cnpj_cia": "00.000.000/0001-91",
+      "denom_cia": "BCO BRASIL S.A."
+    },
+    {
+      "cd_cvm": "022470",
+      "cnpj_cia": "47.960.950/0001-21",
+      "denom_cia": "MAGAZINE LUIZA S.A."
+    }
+  ],
+  "files_included": ["dfp_cia_aberta_2025.csv", "dfp_cia_aberta_BPA_ind_2025.csv", "dfp_cia_aberta_BPA_con_2025.csv", "dfp_cia_aberta_DRE_ind_2025.csv", "dfp_cia_aberta_composicao_capital_2025.csv"],
+  "notes": "Subset filtered by CNPJ_CIA (BCO BRASIL + MAGAZINE LUIZA). ISO-8859-1 encoding preserved. Built from the 2025 yearly archive for the `reading` tests of cvm_fetch() (v0.3): its PENULTIMO rows are the restated reading of exercise 2024. BCO BRASIL consolidated restates 12 BPA accounts of 2024; BCO BRASIL individual carries the 2024 comparative as zeros (CMN Resolution 4,966 adopted in 2025 without restating); MAGAZINE LUIZA restates nothing."
+}

@@ -39,9 +39,9 @@ table-specific schemas, and no unified data dictionary. Common workflows
 manual ZIP downloads, ISO-8859-1 handling, scale-by-`ESCALA_MOEDA`
 conversion, and joins against a separate `submissao` header to translate
 CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
-`cvm_fetch(dataset, table, cnpj, year, basis, ...)` call and ships the
-official dictionary as an embedded snapshot, so column types are picked
-up automatically.
+`cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)` call and
+ships the official dictionary as an embedded snapshot, so column types
+are picked up automatically.
 
 Two existing R packages by Marcelo Perlin address adjacent slices of
 this problem:
@@ -340,6 +340,22 @@ bpa <- cvm_fetch(
   cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
   year    = 2022:2024,
   basis   = "ind"
+)
+```
+
+Each yearly file also carries the comparative the issuer presented for
+the previous exercise, which is often restated. `reading` puts the two
+readings of an exercise side by side, labelled: the figures originally
+filed and the comparative in the following year’s file:
+
+``` r
+bpa_2022 <- cvm_fetch(
+  dataset = "dfp",
+  table   = "bpa",
+  ticker  = "PSSA3",
+  year    = 2022,
+  basis   = "con",
+  reading = c("original", "restated")
 )
 ```
 
