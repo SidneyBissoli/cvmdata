@@ -31,7 +31,13 @@ stopifnot(requireNamespace("dplyr", quietly = TRUE))
 stopifnot(requireNamespace("yaml", quietly = TRUE))
 
 # Columns appended to every history row.
-mirror_history_cols <- c("superseded_at", "superseded_by_versao")
+mirror_history_cols <- c(
+  "superseded_at",
+  "superseded_by_versao",
+  "history_source",
+  "id_doc",
+  "motivo_reapresentacao"
+)
 
 # Columns that identify the delivery, not its content (CLAUDE.md 2.3 and
 # R/transform-schema.R): left out of the comparison.
@@ -133,6 +139,9 @@ mirror_superseded_rows <- function(old, new, keys, stamp) {
     new,
     n$key
   )
+  # the other path into the same asset is the RAD backfill
+  # (04-rad-fetch.R, `history_source = "rad"`)
+  rows$history_source <- rep("mirror", nrow(rows))
   list(
     rows = rows,
     n_replaced = length(replaced),
