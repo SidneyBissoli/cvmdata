@@ -63,7 +63,7 @@ auditor <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -73,7 +73,7 @@ auditor <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
 #>   carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -81,7 +81,7 @@ auditor <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:35:10.075695
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.473096
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -112,7 +112,7 @@ refuses to read it:
 issuer_fetch("fre", "empregado_PCD",
           issuer = "1023", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -121,7 +121,7 @@ issuer_fetch("fre", "empregado_PCD",
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:35:10.336038
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.736846
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -143,7 +143,7 @@ pcd <- issuer_fetch(
   validate  = "warn"
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -153,7 +153,7 @@ pcd <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
 #>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:35:10.489551
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.896266
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -180,7 +180,7 @@ posicao <- issuer_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -190,7 +190,7 @@ posicao <- issuer_fetch(
 #> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "posicao_acionaria"
 #>   does not carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpLPSLiR/duckdb
+#> ℹ /tmp/RtmpYuDIIS/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -206,7 +206,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-10-19 23:35:11.052146
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:11.382915
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
