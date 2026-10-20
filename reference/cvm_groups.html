@@ -28,8 +28,8 @@ fetcher contract that covers it."></head><body>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -78,13 +78,13 @@ covers (or will cover) the group.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>v0.1.0.9000 implements only the <code>companhias</code> group (via
-<code><a href="issuer_fetch.html">issuer_fetch()</a></code>); the remaining 17 rows document the planned
-v0.2-v0.8 coverage so users can navigate the universe of CVM data
-before the corresponding fetchers ship. Calls to the four
-non-<code>issuer</code> fetchers in v0.1.0.9000 abort with
-<code>cvmdata_error_input_group</code>; see <code><a href="fund_fetch.html">fund_fetch()</a></code>, <code><a href="agent_fetch.html">agent_fetch()</a></code>,
-<code><a href="offering_fetch.html">offering_fetch()</a></code> and <code><a href="event_fetch.html">event_fetch()</a></code>.</p>
+    <p>Only the <code>companhias</code> group is covered so far (every dataset is
+served by <code><a href="cvm_fetch.html">cvm_fetch()</a></code>); the remaining 17 rows document the planned
+v0.4-v0.8 coverage so users can navigate the universe of CVM data
+before the corresponding datasets ship. The <code>contract</code> column is a
+planning map of the identity key and temporal axis each group
+needs; new groups extend <code><a href="cvm_fetch.html">cvm_fetch()</a></code> through their schemas rather
+than through new fetcher functions.</p>
 <p>The <code>n_datasets</code> column reports the totals published by CVM, not the
 count currently implemented in the package. The mapping between
 groups and contracts is fixed for the lifetime of v0.1.x; see

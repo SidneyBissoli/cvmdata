@@ -30,8 +30,8 @@ unificado. Workflows comuns — “me dá o DFP da empresa X de 2018 a 2024”
 — exigem download manual, tratamento de encoding, conversão de
 `VL_CONTA` por `ESCALA_MOEDA` e join contra uma `submissao` separada
 para traduzir CD_CVM em CNPJ. O `cvmdata` consolida tudo isso atrás de
-uma chamada `issuer_fetch(dataset, table, issuer, year, ...)` e embarca
-o dicionário oficial como snapshot, então os tipos de coluna vêm
+uma chamada `cvm_fetch(dataset, table, cnpj, year, basis, ...)` e
+embarca o dicionário oficial como snapshot, então os tipos de coluna vêm
 prontos.
 
 Dois pacotes já existentes do Marcelo Perlin endereçam fatias adjacentes
@@ -46,12 +46,13 @@ do problema:
   (CAD) estão fora do escopo.
 
 O `cvmdata` unifica CAD, ITR, DFP e FRE atrás de uma única
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
-com filtros consistentes para companhias (CNPJ / CD_CVM / texto livre
-com expansão de abreviações), cache HTTP com revalidação por
-ETag/Last-Modified e janela TTL configurável, e o dicionário e as
-codelists da CVM embarcados como snapshots (tipos de coluna e valores
-categóricos canônicos, sem consulta em tempo de execução).
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+com filtros consistentes para companhias (CNPJ ou ticker da B3) e
+períodos (anos inteiros ou janela de datas pela data de referência),
+cache HTTP com revalidação por ETag/Last-Modified e janela TTL
+configurável, e o dicionário e as codelists da CVM embarcados como
+snapshots (tipos de coluna e valores categóricos canônicos, sem consulta
+em tempo de execução).
 
 ## Instalação
 
@@ -102,19 +103,18 @@ cat('<div align="center">', tbl, '</div>', sep = "\n")
 | escala_moeda | Escala monetária                | varchar    |     100 |
 
 Baixe os balanços patrimoniais ativos individuais (“BPA individual”)
-para duas companhias em anos recentes. Companhias podem ser
-identificadas por CNPJ, CD_CVM ou texto livre — neste último caso com
-expansão de abreviações (`BANCO` casa `BCO`, `COMPANHIA` casa `CIA`, e
-assim por diante):
+para duas companhias em anos recentes. Companhias são identificadas por
+CNPJ (com ou sem pontuação) ou por ticker da B3; `basis` escolhe as
+demonstrações individuais, consolidadas ou ambas:
 
 ``` r
 
-bpa <- issuer_fetch(
-  dataset     = "dfp",
-  table       = "bpa",
-  report_type = "ind",
-  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  year = 2022:2024
+bpa <- cvm_fetch(
+  dataset = "dfp",
+  table   = "bpa",
+  cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
+  year    = 2022:2024,
+  basis   = "ind"
 )
 ```
 
@@ -133,18 +133,14 @@ cnpj_format("00000000000191")
 Referência e artigos em <https://sidneybissoli.github.io/cvmdata/>. A
 API exportada está agrupada em cinco famílias:
 
-- **Fetchers** —
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  é o entry point único para todos os datasets de emissor. Quatro
-  fetchers irmãos por contrato —
-  [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
-  [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
-  e
-  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
-  — já estão exportados como skeletons na v0.1.0.9000; chamá-los aborta
-  com `cvmdata_error_input_group`. Implementação plena chega a partir da
-  v0.4.
+- **Fetcher** —
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  é a função única para qualquer dataset e tabela; os grupos ainda no
+  roadmap (fundos, agentes, ofertas, eventos) vão estendê-la pelos seus
+  schemas.
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+  o entry point das versões anteriores, está depreciada e será removida
+  em uma release futura.
 - **Discovery** —
   [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
   [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
@@ -172,7 +168,7 @@ Os dados vêm do Portal de Dados Abertos da CVM
 (<https://dados.cvm.gov.br/>). O backend ativo é selecionável via
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
 (ou pelo argumento `source` de
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)):
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
 
 - `"mirror"` (default a partir da v0.1.0) — snapshots em parquet
   publicados em GitHub Releases e consultados via DuckDB com filter

@@ -1,8 +1,9 @@
 # Fetch a CVM open-data table
 
-Single entry point for retrieving any table from any CVM dataset covered
-by the package. Selects the right URL, downloads (or serves from cache),
-parses, applies schema-declared transformations, and returns a tibble
+Single public entry point for any table of any dataset covered by the
+package. Selects the right file, downloads (or serves from the cache or
+the parquet mirror), parses, applies the schema-declared
+transformations, filters by issuer and period, and returns a tibble
 carrying provenance attributes.
 
 ## Usage
@@ -11,10 +12,13 @@ carrying provenance attributes.
 cvm_fetch(
   dataset,
   table,
-  companies = NULL,
-  years = NULL,
+  cnpj = NULL,
+  ticker = NULL,
+  year = NULL,
+  from = NULL,
+  to = NULL,
+  basis = NULL,
   source = NULL,
-  report_type = NULL,
   on_error = "abort",
   validate = "strict",
   ...
@@ -29,56 +33,68 @@ cvm_fetch(
 
 - table:
 
-  Snake-case table name (e.g. `"companhias"`, `"bpa"`). For datasets
-  with conceptually paired tables (individual / consolidated), `table`
-  is the concept name and `report_type` selects the variant.
+  Snake-case table name (e.g. `"companhias"`, `"bpa"`). For tables
+  published in individual and consolidated variants, `table` is the
+  concept name and `basis` selects the variant(s).
 
-- companies:
+- cnpj:
 
-  Optional character vector identifying companies to include. Accepts
-  CNPJ (with or without punctuation), CD_CVM (with or without
-  zero-padding), or free-text matched against `denom_cia`. Detection is
-  automatic per element. `NULL` (default) returns every company. When
-  the target table does not carry a `cd_cvm` column (e.g.
-  `composicao_capital`, `parecer`), CD_CVM tokens are resolved to CNPJ
-  via the dataset's `submissao` table for the same year — the
-  user-facing interface is identical regardless of which table holds
-  CD_CVM natively.
+  Optional character vector of issuer CNPJs, with or without punctuation
+  (`"00.000.000/0001-91"` or `"00000000000191"`). Only CNPJs are
+  accepted: a CVM code or a company name aborts with
+  `cvmdata_error_input`. `NULL` (default) keeps every issuer. A CNPJ
+  absent from the table yields zero rows for it, silently.
 
-- years:
+- ticker:
 
-  Integer vector of years to fetch. `NULL` (default) fetches the latest
-  available year. Ignored for datasets with
-  `temporal_partitioning: none` (e.g. CAD).
+  Optional character vector of B3 trading codes (`"PETR4"`, `"BBAS3"`).
+  Each ticker is resolved to its issuer CNPJ through
+  `fca/valor_mobiliario` (read from the same `source`) and then filtered
+  like `cnpj`; the two arguments combine. A ticker absent from the
+  lookup aborts with `cvmdata_error_input`.
+
+- year:
+
+  Integer vector of years to fetch, as the CVM publishes them (one file
+  per year). `NULL` (default) fetches the latest available year. Must be
+  `NULL` for datasets with `temporal_partitioning: none` (e.g. CAD), and
+  cannot be combined with `from`/`to`.
+
+- from, to:
+
+  Optional period bounds, both required together, as complete dates
+  (`"YYYY-MM-DD"` strings or `Date` scalars). Rows are kept when the
+  document's reference date (`dt_refer` or `data_referencia`) falls
+  inside `[from, to]`; the yearly files read are the years spanned by
+  the interval. Incomplete dates (`"2024"`, `"2024-06"`) are rejected.
+  Cannot be combined with `year`, and do not apply to snapshot tables
+  such as CAD.
+
+- basis:
+
+  Individual (`"ind"`), consolidated (`"con"`) or both
+  (`c("ind", "con")`) financial statements. Required for tables that
+  publish the two variants (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
+  `dfc_mi`, `dmpl`, `dva`): there is no default, because many issuers
+  file only individual statements. Those tables always carry a `basis`
+  column in the result, even when a single value was requested. Must be
+  `NULL` for every other table; passing it aborts.
 
 - source:
 
   One of `"mirror"` (parquet via DuckDB) or `"cvm"` (CVM Open Data
   Portal). `NULL` (default) resolves to the active backend via
-  [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
-  — `"mirror"` from v0.1.0 onward unless the user has flipped it via
-  `cvm_source_set("cvm")`.
-
-- report_type:
-
-  One of `"ind"`, `"con"`, or `NULL`. Required for tables that publish
-  individual and consolidated variants (`bpa`, `bpp`, `dre`, `dra`,
-  `dfc_md`, `dfc_mi`, `dmpl`, `dva`). Must be `NULL` for tables without
-  that distinction (`composicao_capital`, `submissao`, `parecer`,
-  `companhias`).
+  [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md).
 
 - on_error:
 
   One of `"abort"` (default), `"warn"` or `"silent"`. Controls behaviour
-  on HTTP failures for batches of yearly tables (`years = c(...)` with
-  more than one element). With `"warn"`, the failed years are skipped
-  and a `cvmdata_warn_partial_failure` warning lists them; with
-  `"silent"`, the failed years are skipped silently; with `"abort"`, the
-  first failure aborts the call. Total batch failure (every year fails)
-  always aborts regardless of the setting — there is no partial result
-  to return. Parse/validation failures are governed by `validate`, not
-  `on_error`. Single-year calls, non-yearly tables, and the implicit
-  fallback when `years = NULL` always abort on HTTP failure.
+  on HTTP failures when several yearly files are read (`year` with more
+  than one element, or a `from`/`to` window spanning several years).
+  With `"warn"`, the failed years are skipped and a
+  `cvmdata_warn_partial_failure` warning lists them; with `"silent"`,
+  they are skipped silently; with `"abort"`, the first failure aborts
+  the call. Total failure always aborts.
 
 - validate:
 
@@ -87,34 +103,59 @@ cvm_fetch(
 
 - ...:
 
-  Reserved for forward compatibility.
+  Reserved for forward compatibility. Currently no extra arguments are
+  accepted; passing any aborts with `cvmdata_error_input`.
 
 ## Value
 
-A tibble of class `cvm_tbl` carrying the five provenance attributes
-`source`, `fetched_at`, `dataset`, `table` and `package_version`.
+A tibble of class `cvm_tbl` carrying the provenance attributes `source`,
+`fetched_at`, `group`, `dataset`, `table` and `package_version`.
 
 ## Details
 
 Column names, categorical values and free-text fields are preserved in
 Portuguese exactly as published by CVM (snake_case minúsculo).
 
-## See also
+## Filing versions
 
-Other fetchers:
-[`cad_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cad_fetch.md)
+When a table carries several filings for the same issuer and reference
+date, only the last one delivered is kept, ranked by receipt date, then
+CVM document id, then `versao`. The version number alone is not a filing
+key: the CVM index can list two filings under the same version, or a
+later filing under a lower one.
+
+Tables of datasets with a `submissao` index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (`cvmdata_warn_duplicate_filing`); copies that differ in
+`vl_conta` are kept (`cvmdata_warn_conflicting_filing`). A table holding
+an earlier filing than the last delivery keeps the CVM numbers and warns
+(`cvmdata_warn_stale_filing`). Set
+`options(cvmdata.check_filings = FALSE)` to skip these checks.
 
 ## Examples
 
 ``` r
 if (FALSE) { # interactive()
-# CAD: single snapshot, no temporal partitioning, no report_type
-companies <- cvm_fetch("cad", "companhias")
+# CAD: single snapshot, no year, no basis
+issuers <- cvm_fetch("cad", "companhias")
 
-# DFP BPA individual, latest year, single company
-bb <- cvm_fetch("dfp", "bpa",
-                report_type = "ind",
-                companies = "BCO BRASIL",
-                years = 2024)
+# DFP balance sheet (assets), individual statements, latest year,
+# one issuer by CNPJ
+bb <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91", basis = "ind")
+
+# Both bases, 2022 to 2024, issuer by B3 ticker
+petr <- cvm_fetch(
+  "dfp", "dre",
+  ticker = "PETR4",
+  year = 2022:2024,
+  basis = c("ind", "con")
+)
+
+# ITR by reference date: the quarters of the first half of 2024
+h1 <- cvm_fetch(
+  "itr", "bpa",
+  from = "2024-01-01", to = "2024-06-30",
+  basis = "con"
+)
 }
 ```

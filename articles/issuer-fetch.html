@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>issuer_fetch(): the generic API • cvmdata</title>
+<title>cvm_fetch(): the generic API • cvmdata</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="issuer_fetch(): the generic API">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="cvm_fetch(): the generic API">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,8 +37,8 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -66,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>issuer_fetch(): the generic API</h1>
+      <h1>cvm_fetch(): the generic API</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/main/vignettes/articles/issuer-fetch.Rmd" class="external-link"><code>vignettes/articles/issuer-fetch.Rmd</code></a></small>
@@ -75,44 +75,54 @@
 
     
     
-<p><code>issuer_fetch(dataset, table, ...)</code> is the single entry
-point for every CVM issuer dataset and every table covered by the
-package.</p>
-<p>This article walks through each argument, the issuer-detection logic,
-the <code>year</code> semantics, the <code>report_type</code> rule, the
+<p><code>cvm_fetch(dataset, table, ...)</code> is the single entry point
+for every CVM dataset and every table covered by the package.</p>
+<p>This article walks through each argument: how issuers are selected
+(<code>cnpj</code>, <code>ticker</code>), how the period is selected
+(<code>year</code> or <code>from</code>/<code>to</code>), the
+<code>basis</code> rule for financial statements, the
 <code>validate</code> and <code>on_error</code> modes, and the
 cache/source plumbing.</p>
+<p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>, the entry point of v0.1 and v0.2, is
+deprecated: it still works, with a lifecycle warning, and will be
+removed in a later release. Its <code>issuer</code> argument (CNPJ,
+CD_CVM, free text or ticker) and <code>report_type</code> map onto the
+arguments described here.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="anatomy">Anatomy<a class="anchor" aria-label="anchor" href="#anatomy"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="va">dataset</span>,</span>
 <span>  <span class="va">table</span>,</span>
-<span>  issuer <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  source      <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  report_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  on_error    <span class="op">=</span> <span class="st">"abort"</span>,</span>
-<span>  validate    <span class="op">=</span> <span class="st">"strict"</span>,</span>
+<span>  cnpj     <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ticker   <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  year     <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  from     <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  to       <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  basis    <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  source   <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  on_error <span class="op">=</span> <span class="st">"abort"</span>,</span>
+<span>  validate <span class="op">=</span> <span class="st">"strict"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Returns a tibble of subclass <code>cvm_tbl</code> carrying five
+<p>Returns a tibble of subclass <code>cvm_tbl</code> carrying six
 provenance attributes (<code>source</code>, <code>fetched_at</code>,
-<code>dataset</code>, <code>table</code>, <code>package_version</code>).
-Column names, table names and categorical values are preserved in
-Portuguese as published by CVM; the API surface is in English.</p>
+<code>group</code>, <code>dataset</code>, <code>table</code>,
+<code>package_version</code>). Column names, table names and categorical
+values are preserved in Portuguese as published by CVM; the API surface
+is in English.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bb_bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">bb_bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
-<span>  report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>  issuer <span class="op">=</span> <span class="st">"1023"</span>,</span>
-<span>  year <span class="op">=</span> <span class="fl">2024</span></span>
+<span>  cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
+<span>  basis <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -120,7 +130,7 @@ Portuguese as published by CVM; the API surface is in English.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -128,7 +138,7 @@ Portuguese as published by CVM; the API surface is in English.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="va">bb_bpa</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 00:32:19.830007</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 01:09:03.750886</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 96 × 15</span></span></span>
 <span><span class="co">#&gt;    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc</span></span>
@@ -145,7 +155,7 @@ Portuguese as published by CVM; the API surface is in English.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 86 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: dt_fim_exerc &lt;date&gt;, cd_conta &lt;chr&gt;, ds_conta &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   vl_conta &lt;dbl&gt;, st_conta_fixa &lt;chr&gt;, report_type &lt;chr&gt;, year &lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   vl_conta &lt;dbl&gt;, st_conta_fixa &lt;chr&gt;, year &lt;int&gt;, basis &lt;chr&gt;</span></span></span>
 <span></span>
 <span><span class="co"># Provenance:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">bb_bpa</span>, <span class="st">"source"</span><span class="op">)</span></span>
@@ -158,56 +168,71 @@ Portuguese as published by CVM; the API surface is in English.</p>
 <div class="section level2">
 <h2 id="identifying-issuers">Identifying issuers<a class="anchor" aria-label="anchor" href="#identifying-issuers"></a>
 </h2>
-<p><code>issuer</code> accepts a character vector of any length. Each
-element is classified <strong>per element</strong> by the pattern it
-matches:</p>
+<p><code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> identifies issuers by two keys only, and the
+two combine in a single call:</p>
 <table class="table">
 <colgroup>
+<col width="8%">
+<col width="48%">
 <col width="42%">
-<col width="26%">
-<col width="31%">
 </colgroup>
 <thead><tr class="header">
-<th>Pattern</th>
-<th>Interpretation</th>
+<th>Argument</th>
+<th>Accepts</th>
 <th>Match against</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>14 digits, no punctuation</td>
-<td>CNPJ (clean)</td>
-<td><code>cnpj_clean(cnpj_cia)</code></td>
+<td><code>cnpj</code></td>
+<td>CNPJ, with or without punctuation, vector of any length</td>
+<td>
+<code>cnpj_cia</code> / <code>cnpj_companhia</code>, punctuation
+stripped</td>
 </tr>
 <tr class="even">
-<td>14 digits with <code>.</code> / <code>/</code> / <code>-</code>
-</td>
-<td>CNPJ (formatted)</td>
+<td><code>ticker</code></td>
+<td>B3 trading code (<code>PETR4</code>, <code>BBAS3</code>,
+<code>BBDC11</code>)</td>
 <td>
-<code>cnpj_cia</code> (literal)</td>
-</tr>
-<tr class="odd">
-<td>1–6 digits</td>
-<td>CD_CVM</td>
-<td>
-<code>cd_cvm</code> (with / without zero-padding)</td>
-</tr>
-<tr class="even">
-<td>Anything else (≥ 1 alphabetic token)</td>
-<td>Free-text search</td>
-<td>
-<code>denom_cia</code> (normalized)</td>
+<code>codigo_negociacao</code> in <code>fca/valor_mobiliario</code>,
+resolved to the issuer’s CNPJ</td>
 </tr>
 </tbody>
 </table>
-<div class="section level3">
-<h3 id="cnpj-cd_cvm-free-text-same-issuer-three-calls">CNPJ, CD_CVM, free text — same issuer, three calls<a class="anchor" aria-label="anchor" href="#cnpj-cd_cvm-free-text-same-issuer-three-calls"></a>
-</h3>
+<p>A CVM code (<code>"1023"</code>) or a company name
+(<code>"BCO BRASIL"</code>) passed as <code>cnpj</code> aborts with
+<code>cvmdata_error_input</code>: there is no free-text search and no
+CD_CVM lookup in <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>. To find the CNPJ of a company
+you know by name or by CVM code, read the registry, which carries
+<code>cd_cvm</code>, <code>denom_social</code> and <code>cnpj_cia</code>
+side by side:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">registry</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="va">registry</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"MAGAZINE LUIZA"</span>, <span class="va">registry</span><span class="op">$</span><span class="va">denom_social</span><span class="op">)</span>,</span>
+<span>         <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cd_cvm"</span>, <span class="st">"denom_social"</span>, <span class="st">"cnpj_cia"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 01:09:04.245322</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"cad"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"companhias"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
+<span><span class="co">#&gt;   cd_cvm denom_social      cnpj_cia          </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 22470  MAGAZINE LUIZA SA 47.960.950/0001-21</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="cnpj-punctuated-or-clean-same-rows">CNPJ: punctuated or clean, same rows<a class="anchor" aria-label="anchor" href="#cnpj-punctuated-or-clean-same-rows"></a>
+</h3>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Each call returns identical rows.</span></span>
-<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>               issuer <span class="op">=</span> <span class="st">"1023"</span>,                year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>               year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -215,35 +240,17 @@ matches:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>               issuer <span class="op">=</span> <span class="st">"001023"</span>,              year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00000000000191"</span>,</span>
+<span>               year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
-<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
-<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="va">c</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>               issuer <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,  year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -251,7 +258,7 @@ matches:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -260,116 +267,89 @@ matches:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">c</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>A CNPJ absent from the table yields zero rows for it, silently — a
+miss on a taxpayer id is not a typo the package can second-guess.</p>
 </div>
 <div class="section level3">
-<h3 id="free-text-matching-with-abbreviations">Free-text matching with abbreviations<a class="anchor" aria-label="anchor" href="#free-text-matching-with-abbreviations"></a>
+<h3 id="ticker-resolved-through-the-registration-form">Ticker: resolved through the registration form<a class="anchor" aria-label="anchor" href="#ticker-resolved-through-the-registration-form"></a>
 </h3>
-<p>Text search tokenizes the input by whitespace, normalizes (uppercase,
-no accents, no punctuation), applies a built-in abbreviation map
-(<code>BANCO ↔︎ BCO</code>, <code>COMPANHIA ↔︎ CIA</code>, etc.) and
-requires every token to match <code>denom_cia</code> with a word
-boundary.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># A distinctive stem resolves cleanly to one issuer:</span></span>
-<span><span class="va">magalu</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>                    issuer <span class="op">=</span> <span class="st">"MAGAZINE LUIZA"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
-<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
-<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">magalu</span><span class="op">$</span><span class="va">denom_cia</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "MAGAZINE LUIZA S.A."</span></span></code></pre></div>
-<p>A non-unique stem aborts (in batch) with the list of candidates so
-scripts never silently grab the wrong issuer:</p>
+<p>A B3 trading code is looked up in <code>fca/valor_mobiliario</code>
+(read from the same <code>source</code> as the data), keeping only
+securities still traded, and the issuer’s CNPJ is then filtered exactly
+as <code>cnpj</code> would be. Tickers cover only exchange-listed
+securities; an unknown ticker aborts with
+<code>cvmdata_error_input</code> rather than returning an empty
+tibble.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>          issuer <span class="op">=</span> <span class="st">"BCO BRASIL"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">petr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, ticker <span class="op">=</span> <span class="st">"PETR4"</span>,</span>
+<span>                  year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"con"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `abort_on_multiple_matches()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Multiple issuers match <span style="color: #0000BB;">"BCO BRASIL"</span>.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Pass `issuer` as CD_CVM or CNPJ to disambiguate, or run interactively to pick</span></span>
-<span><span class="co">#&gt;   from a menu.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 021466 : BANCO RCI BRASIL S.A.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 020958 : BCO ABC BRASIL S.A.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 001023 : BCO BRASIL S.A.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 001325 : BCO MERCANTIL DO BRASIL S.A.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 001228 : BCO NORDESTE DO BRASIL S.A.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> 020532 : BCO SANTANDER (BRASIL) S.A.</span></span></code></pre></div>
-<p>In <code><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive()</a></code> sessions an <code><a href="https://rdrr.io/r/utils/menu.html" class="external-link">utils::menu()</a></code>
-prompt appears instead. Zero matches abort with the same error
-class.</p>
-</div>
-<div class="section level3">
-<h3 id="cd_cvm-lookup-for-tables-without-cd_cvm">CD_CVM lookup for tables without <code>cd_cvm</code><a class="anchor" aria-label="anchor" href="#cd_cvm-lookup-for-tables-without-cd_cvm"></a>
-</h3>
-<p>Some tables (e.g. <code>composicao_capital</code>,
-<code>parecer</code> in ITR/DFP) do not carry a <code>cd_cvm</code>
-column. When the user passes CD_CVM tokens against such a table,
-<code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> reads the dataset’s <code>submissao</code>
-for the same year, looks up CNPJ for each CD_CVM and applies the filter
-on CNPJ. The interface is identical to the user:</p>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">petr</span><span class="op">$</span><span class="va">denom_cia</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "PETROLEO BRASILEIRO S.A. PETROBRAS"</span></span></code></pre></div>
+<p><code>cnpj</code> and <code>ticker</code> combine; the result is the
+union of both sets:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cap</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"composicao_capital"</span>,</span>
-<span>                 issuer <span class="op">=</span> <span class="st">"1023"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">two</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
+<span>                 cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>                 ticker <span class="op">=</span> <span class="st">"MGLU3"</span>,</span>
+<span>                 year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Resolving CD_CVM 1023 via <span style="color: #0000BB;">"dfp"</span>/submissao for <span style="color: #0000BB;">2024</span> (table</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">"composicao_capital"</span> does not carry `cd_cvm`).</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="va">cap</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 00:32:22.115391</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"composicao_capital"</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
-<span><span class="co">#&gt;   cnpj_cia           dt_refer   versao denom_cia       qt_acao_ordin_cap_integr</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 00.000.000/0001-91 2024-12-31 1      BCO BRASIL S.A.               <span style="text-decoration: underline;">5</span>730<span style="text-decoration: underline;">834</span>040</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 6 more variables: qt_acao_pref_cap_integr &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   qt_acao_total_cap_integr &lt;dbl&gt;, qt_acao_ordin_tesouro &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   qt_acao_pref_tesouro &lt;dbl&gt;, qt_acao_total_tesouro &lt;dbl&gt;, year &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">two</span><span class="op">$</span><span class="va">denom_cia</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "BCO BRASIL S.A."     "MAGAZINE LUIZA S.A."</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="selecting-years">Selecting years<a class="anchor" aria-label="anchor" href="#selecting-years"></a>
+<h2 id="selecting-the-period">Selecting the period<a class="anchor" aria-label="anchor" href="#selecting-the-period"></a>
 </h2>
+<p>Two mutually exclusive forms; passing both aborts.</p>
+<div class="section level3">
+<h3 id="whole-years-with-year">Whole years with <code>year</code><a class="anchor" aria-label="anchor" href="#whole-years-with-year"></a>
+</h3>
 <p><code>year</code> is an integer vector of any length (singular naming
-follows tidyverse conventions). <code>NULL</code> (default) fetches the
-<strong>latest available year</strong>, discovered by HEAD-probing CVM’s
-listing.</p>
+follows tidyverse conventions), matching the yearly files the CVM
+publishes. <code>NULL</code> (default) fetches the <strong>latest
+available year</strong>, discovered by HEAD-probing CVM’s listing (or
+from the mirror’s inventory). Must be <code>NULL</code> for snapshot
+tables such as <code>cad/companhias</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># What's published upstream?</span></span>
 <span><span class="fu"><a href="../reference/cvm_dataset_years.html">cvm_dataset_years</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
@@ -377,10 +357,10 @@ listing.</p>
 <span><span class="co">#&gt; [16] 2025 2026</span></span>
 <span></span>
 <span><span class="co"># Pass an explicit vector to back-fill history:</span></span>
-<span><span class="va">history</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, report_type <span class="op">=</span> <span class="st">"ind"</span>,</span>
-<span>                     issuer <span class="op">=</span> <span class="st">"1023"</span>, year <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">history</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>                     year <span class="op">=</span> <span class="fl">2022</span><span class="op">:</span><span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -388,7 +368,7 @@ listing.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpVJSp1Q/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -399,7 +379,7 @@ listing.</p>
 <span><span class="co">#&gt; [1] "2022" "2023" "2024"</span></span></code></pre></div>
 <p>Each CSV publishes <code>ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}</code> —
 the declared year and N − 1. The antepenultimate of year N is the last
-of year N − 2. <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> does not synthesize the
+of year N − 2. <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> does not synthesize the
 antepenultimate; ask for <code>year = (N - 2):N</code> if you need
 it.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -407,10 +387,50 @@ it.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; PENÚLTIMO    ÚLTIMO </span></span>
 <span><span class="co">#&gt;       144       144</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="a-date-window-with-from-and-to">A date window with <code>from</code> and <code>to</code><a class="anchor" aria-label="anchor" href="#a-date-window-with-from-and-to"></a>
+</h3>
+<p>For slices smaller than a year, pass <code>from</code> and
+<code>to</code> together as complete dates (<code>"YYYY-MM-DD"</code>
+strings or <code>Date</code> scalars). Rows are kept when the document’s
+<strong>reference date</strong> (<code>dt_refer</code> in
+CAD/ITR/DFP-style tables, <code>data_referencia</code> in FRE-style
+tables) falls inside the window; the yearly files actually read are the
+years the window spans. The reference date is the period the filing
+describes, not the day it was delivered.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ITR balance sheets referenced in the first half of 2024</span></span>
+<span><span class="va">h1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"itr"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>                from <span class="op">=</span> <span class="st">"2024-01-01"</span>, to <span class="op">=</span> <span class="st">"2024-06-30"</span>,</span>
+<span>                basis <span class="op">=</span> <span class="st">"con"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">h1</span><span class="op">$</span><span class="va">dt_refer</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "2024-03-31" "2024-06-30"</span></span></code></pre></div>
+<p>Incomplete dates (<code>"2024"</code>, <code>"2024-06"</code>) are
+rejected, as is a window on a snapshot table. One bound without the
+other aborts; for whole years use <code>year</code>.</p>
+</div>
 <div class="section level3">
 <h3 id="partial-failure-with-on_error">Partial failure with <code>on_error</code><a class="anchor" aria-label="anchor" href="#partial-failure-with-on_error"></a>
 </h3>
-<p>For multi-year calls (more than one element in <code>year</code>),
+<p>When several yearly files are read (more than one element in
+<code>year</code>, or a window spanning several years),
 <code>on_error = "warn"</code> keeps surviving years and emits
 <code>cvmdata_warn_partial_failure</code> listing failures.
 <code>on_error = "silent"</code> does the same without the warning.
@@ -424,29 +444,81 @@ treated as a separate signal.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="report_type">
-<code>report_type</code><a class="anchor" aria-label="anchor" href="#report_type"></a>
+<h2 id="basis">
+<code>basis</code><a class="anchor" aria-label="anchor" href="#basis"></a>
 </h2>
 <p>Eight tables in ITR/DFP publish both <strong>individual</strong> and
 <strong>consolidated</strong> variants of the same concept
 (<code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>,
 <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>,
-<code>dva</code>). <code>report_type</code> is <strong>required</strong>
-for those:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, issuer <span class="op">=</span> <span class="st">"1023"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `validate_mirror_args()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Table <span style="color: #0000BB;">"dfp"</span>/<span style="color: #0000BB;">"bpa"</span> requires `report_type` (<span style="color: #0000BB;">"ind"</span> or <span style="color: #0000BB;">"con"</span>).</span></span></code></pre></div>
-<p>And <strong>must be <code>NULL</code></strong> for tables without the
-distinction (<code>companhias</code>, <code>submissao</code>,
-<code>parecer</code>, <code>composicao_capital</code>):</p>
+<code>dva</code>). <code>basis</code> is <strong>required</strong> for
+those, with no default: many issuers file only individual statements, so
+defaulting to <code>"con"</code> would silently drop them.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"composicao_capital"</span>,</span>
-<span>          issuer <span class="op">=</span> <span class="st">"1023"</span>, year <span class="op">=</span> <span class="fl">2024</span>,</span>
-<span>          report_type <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `validate_mirror_args()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Table <span style="color: #0000BB;">"dfp"</span>/<span style="color: #0000BB;">"composicao_capital"</span> does not support `report_type`; pass</span></span>
-<span><span class="co">#&gt;   `NULL`.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `check_basis()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Table <span style="color: #0000BB;">"dfp"</span>/<span style="color: #0000BB;">"bpa"</span> requires `basis`.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Pass `basis = "ind"` for individual statements, `basis = "con"` for</span></span>
+<span><span class="co">#&gt;   consolidated, or `basis = c("ind", "con")` for both.</span></span></code></pre></div>
+<p><code>basis</code> takes <code>"ind"</code>, <code>"con"</code> or
+<code>c("ind", "con")</code>. With both, the two variants are read and
+stacked. Whatever you ask for, those eight tables <strong>always carry a
+<code>basis</code> column</strong> in the result, so a single value and
+a stacked pair have the same shape:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">both</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>                  year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ind"</span>, <span class="st">"con"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp3XseBV/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">both</span><span class="op">$</span><span class="va">basis</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; con ind </span></span>
+<span><span class="co">#&gt;  82  96</span></span>
+<span><span class="st">"basis"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">bb_bpa</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>On every other table (<code>companhias</code>,
+<code>submissao</code>, <code>parecer</code>,
+<code>composicao_capital</code>, every FRE/FCA detail table)
+<code>basis</code> must be left unset; passing it aborts rather than
+being ignored:</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"composicao_capital"</span>,</span>
+<span>          cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>, year <span class="op">=</span> <span class="fl">2024</span>,</span>
+<span>          basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `check_basis()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Table <span style="color: #0000BB;">"dfp"</span>/<span style="color: #0000BB;">"composicao_capital"</span> has no individual/consolidated split;</span></span>
+<span><span class="co">#&gt;   leave `basis` unset.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Got <span style="color: #0000BB;">"ind"</span>.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="validate">
@@ -501,18 +573,14 @@ a 30-day TTL (configurable via
 <code>options(cvmdata.cache_ttl_seconds)</code>). Cached units are
 LRU-evicted once total size exceeds the limit set by
 <code>options(cvmdata.cache_max_size_mb)</code> (default 100 MiB).</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_cache_info.html">cvm_cache_info</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">info</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
-<span><span class="co">#&gt;   group   dataset file  path  size_bytes mtime               etag  last_modified</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> compan… dfp     dfp_… /hom…     <span style="text-decoration: underline;">182</span>955 2026-10-20 <span style="color: #949494;">00:32:21</span>  <span style="color: #BB0000;">NA</span>   <span style="color: #BB0000;">NA</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> compan… dfp     dfp_… /hom…   13<span style="text-decoration: underline;">396</span>140 2026-10-20 <span style="color: #949494;">00:32:21</span> <span style="color: #949494;">"</span>\"6… Sun, 18 Oct …</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> compan… fre     fre_… /hom…    1<span style="text-decoration: underline;">086</span>338 2026-10-20 <span style="color: #949494;">00:32:03</span>  <span style="color: #BB0000;">NA</span>   <span style="color: #BB0000;">NA</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> compan… fre     fre_… /hom…    8<span style="text-decoration: underline;">409</span>540 2026-10-20 <span style="color: #949494;">00:32:03</span> <span style="color: #949494;">"</span>\"6… Sun, 18 Oct …</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 8 variables: group &lt;chr&gt;, dataset &lt;chr&gt;, file &lt;chr&gt;, path &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   size_bytes &lt;int&gt;, mtime &lt;dttm&gt;, etag &lt;chr&gt;, last_modified &lt;chr&gt;</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">info</span>, <span class="st">"total_size_bytes"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 23075345</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
 <p><code>source</code> selects the backend: from v0.1.0 the default is
 <code>"mirror"</code>, which reads parquet snapshots from GitHub
 Releases via DuckDB with year-partition filter pushdown;
@@ -520,7 +588,7 @@ Releases via DuckDB with year-partition filter pushdown;
 fully supported. The current backend is read by
 <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code> and changed at session scope by
 <code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_source_get.html">cvm_source_get</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "mirror"</span></span></code></pre></div>
 </div>

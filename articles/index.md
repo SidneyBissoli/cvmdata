@@ -9,9 +9,9 @@
 
 - [Getting started with
   cvmdata](https://sidneybissoli.github.io/cvmdata/articles/getting-started.md):
-- [Groups overview: the 18 CKAN groups and 5 fetcher
-  contracts](https://sidneybissoli.github.io/cvmdata/articles/groups-overview.md):
-- [issuer_fetch(): the generic
+- [Groups overview: the 18 CKAN groups and the single
+  fetcher](https://sidneybissoli.github.io/cvmdata/articles/groups-overview.md):
+- [cvm_fetch(): the generic
   API](https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.md):
 - [Quarterly and annual statements (ITR &
   DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):

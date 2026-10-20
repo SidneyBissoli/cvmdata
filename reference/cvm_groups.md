@@ -27,17 +27,15 @@ A tibble with 18 rows, sorted alphabetically by `group`. Columns:
 
 ## Details
 
-v0.1.0.9000 implements only the `companhias` group (via
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md));
-the remaining 17 rows document the planned v0.2-v0.8 coverage so users
-can navigate the universe of CVM data before the corresponding fetchers
-ship. Calls to the four non-`issuer` fetchers in v0.1.0.9000 abort with
-`cvmdata_error_input_group`; see
-[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
-[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
-and
-[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md).
+Only the `companhias` group is covered so far (every dataset is served
+by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md));
+the remaining 17 rows document the planned v0.4-v0.8 coverage so users
+can navigate the universe of CVM data before the corresponding datasets
+ship. The `contract` column is a planning map of the identity key and
+temporal axis each group needs; new groups extend
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+through their schemas rather than through new fetcher functions.
 
 The `n_datasets` column reports the totals published by CVM, not the
 count currently implemented in the package. The mapping between groups

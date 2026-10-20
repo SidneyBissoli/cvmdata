@@ -22,8 +22,8 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -46,9 +46,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="fetchers">Fetchers<a class="anchor" aria-label="anchor" href="#fetchers"></a></h2>
+      <h2 id="fetcher">Fetcher<a class="anchor" aria-label="anchor" href="#fetcher"></a></h2>
 
-      <div class="section-desc"><p>Five functions to retrieve any CVM open-data table covered by the package. v0.1.0.9000 ships only <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> as functional; <code><a href="../reference/fund_fetch.html">fund_fetch()</a></code>, <code><a href="../reference/agent_fetch.html">agent_fetch()</a></code>, <code><a href="../reference/offering_fetch.html">offering_fetch()</a></code> and <code><a href="../reference/event_fetch.html">event_fetch()</a></code> are exported as skeletons documenting the planned v0.4-v0.8 contracts (calling them aborts with <code>cvmdata_error_input_group</code>).</p></div>
+      <div class="section-desc"><p>One function retrieves any CVM open-data table covered by the package. <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> is its deprecated predecessor and will be removed in a later release.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -57,38 +57,17 @@
 
       <dl><dt>
 
+          <code><a href="cvm_fetch.html">cvm_fetch()</a></code>
+
+        </dt>
+        <dd>Fetch a CVM open-data table</dd>
+
+        <dt>
+
           <code><a href="issuer_fetch.html">issuer_fetch()</a></code>
 
         </dt>
-        <dd>Fetch a CVM open-data table for an issuer dataset</dd>
-
-        <dt>
-
-          <code><a href="fund_fetch.html">fund_fetch()</a></code>
-
-        </dt>
-        <dd>Fetch a CVM open-data table for a fund dataset</dd>
-
-        <dt>
-
-          <code><a href="agent_fetch.html">agent_fetch()</a></code>
-
-        </dt>
-        <dd>Fetch a CVM open-data table for a registered-agent dataset</dd>
-
-        <dt>
-
-          <code><a href="offering_fetch.html">offering_fetch()</a></code>
-
-        </dt>
-        <dd>Fetch a CVM open-data table for a public-offering dataset</dd>
-
-        <dt>
-
-          <code><a href="event_fetch.html">event_fetch()</a></code>
-
-        </dt>
-        <dd>Fetch a CVM open-data table for a regulatory-event dataset</dd>
+        <dd>Fetch a CVM open-data table for an issuer dataset (deprecated)</dd>
       </dl></div><div class="section level2">
       <h2 id="cache">Cache<a class="anchor" aria-label="anchor" href="#cache"></a></h2>
 
@@ -129,7 +108,7 @@
       </dl></div><div class="section level2">
       <h2 id="source-backend">Source backend<a class="anchor" aria-label="anchor" href="#source-backend"></a></h2>
 
-      <div class="section-desc"><p>Configure which backend <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> queries (direct CVM portal or the parquet mirror published in GitHub Releases).</p></div>
+      <div class="section-desc"><p>Configure which backend <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> queries (direct CVM portal or the parquet mirror published in GitHub Releases).</p></div>
 
       <dl></dl></div><div class="section level2">
 

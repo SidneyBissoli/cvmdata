@@ -1,13 +1,13 @@
 # Getting started with cvmdata
 
-This article is a guided tour of every public feature in `cvmdata` as of
-v0.1.0.9000 (toward v0.2). It is meant to be read top-to-bottom in one
-sitting: by the end you will know what the package covers, the five
-fetchers it exports, how to filter and discover data, what the two
-backends do, how the cache behaves, and which error classes are worth
-catching in your own code. Live chunks use the default mirror backend
-(GitHub Releases + DuckDB); the CVM Open Data Portal backend is
-documented alongside the mirror in its own article.
+This article is a guided tour of every public feature in `cvmdata`. It
+is meant to be read top-to-bottom in one sitting: by the end you will
+know what the package covers, the single fetcher it exports, how to
+filter and discover data, what the two backends do, how the cache
+behaves, and which error classes are worth catching in your own code.
+Live chunks use the default mirror backend (GitHub Releases + DuckDB);
+the CVM Open Data Portal backend is documented alongside the mirror in
+its own article.
 
 ``` r
 
@@ -18,12 +18,15 @@ library(cvmdata)
 
 `cvmdata` consolidates the messy parts of working with CVM open data
 (yearly ZIPs of CSVs, mixed `ISO-8859-1` encoding, per-table schemas, no
-unified dictionary, `VL_CONTA × ESCALA_MOEDA` arithmetic,
-`CD_CVM → CNPJ` joins through a header table) behind one function:
+unified dictionary, `VL_CONTA × ESCALA_MOEDA` arithmetic, one issuer id
+per table convention) behind one function:
 
 ``` r
 
-issuer_fetch(dataset, table, issuer = NULL, year = NULL, ...)
+cvm_fetch(dataset, table,
+          cnpj = NULL, ticker = NULL,
+          year = NULL, from = NULL, to = NULL,
+          basis = NULL, ...)
 ```
 
 Column names, table names and categorical values arrive in Portuguese
@@ -35,11 +38,13 @@ attributes are in English (rOpenSci / tidyverse conventions).
 Discovery functions read from snapshots bundled with the package, so
 they do not touch the network and work offline.
 
-### Groups and the 5 fetcher contracts
+### Groups
 
 CVM publishes data in **18 thematic groups** on its CKAN portal.
-`cvmdata` collapses those into **5 fetcher contracts**, one per kind of
-identity key (issuer / fund / agent / offering / event):
+`cvmdata` serves every group through the same
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md);
+each dataset’s schema declares which columns identify the entity (issuer
+/ fund / agent / offering / event):
 
 ``` r
 
@@ -67,8 +72,9 @@ cvm_groups()
 #> 18 securitizadoras                              4 issuer
 ```
 
-The `contract` column names the fetcher that does (or will) cover each
-group; the `groups-overview` article expands on the rationale.
+The `contract` column is a planning map naming the kind of entity each
+group is keyed on; the `groups-overview` article expands on the
+rationale and on which groups are implemented today.
 
 ### Datasets, tables, and years
 
@@ -132,50 +138,38 @@ cvm_codelist("cgvn", "praticas", "pratica_adotada")
 #> 4 Sim
 ```
 
-## The five fetchers
+## One fetcher
 
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-is the only fetcher with a real implementation in v0.1.0.9000. The other
-four are exported as **skeletons** that abort with the condition class
-`cvmdata_error_input_group`, with a message pointing to the roadmap.
-They are exported now so the API surface is locked ahead of incremental
-data implementation.
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+is the only fetcher: one function for any dataset and any table, with
+the entity filter (`cnpj`, `ticker`), the period (`year` or `from`/`to`)
+and the statement `basis` interpreted through each dataset’s schema.
+Groups not yet implemented (funds, registered agents, public offerings,
+regulatory events) will arrive as new schemas behind the same function,
+not as new fetchers.
 
-| Fetcher | Group(s) covered | Status |
-|----|----|----|
-| [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md) | `companhias`, `securitizadoras`, `emissores-de-cepac` | functional |
-| [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md) | `fundos-de-investimento`, `fundos-de-investimento-imobiliarios`, `fundos-estruturados` | skeleton, v0.4–v0.6 |
-| [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md) | 8 registered-agent groups | skeleton, v0.7 |
-| [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md) | `ofertas-publicas`, `plataformas-de-crowdfunding` | skeleton, v0.7 |
-| [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md) | `atividade-sancionadora`, `atos-declaratorios` | skeleton, v0.8 |
-
-Calling a skeleton:
-
-``` r
-
-fund_fetch("fi-cad", "registro")
-#> Error in `fund_fetch()`:
-#> ! `fund_fetch()` is exported as a skeleton in "0.1.0.9000"; the fund
-#>   datasets are not yet implemented.
-#> ℹ Groups "fundos-de-investimento", "fundos-de-investimento-imobiliarios" and
-#>   "fundos-estruturados" arrive in v0.4-v0.6.
-#> ℹ See ROADMAP.md for the release plan.
-```
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+the entry point of v0.1 and v0.2, is deprecated. It still works and
+emits a lifecycle warning pointing to
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md);
+it will be removed in a later release.
 
 ## Fetching data — a tour of the 8 issuer datasets
 
-v0.1.0.9000 implements eight datasets in the `companhias` group: `cad`,
-`dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca`, `ipe` (added
-toward v0.2). The examples below are marked `eval = FALSE` to keep the
-article fast; copy any of them into your R session as-is.
+The package implements eight datasets in the `companhias` group: `cad`,
+`dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca`, `ipe` (v0.2). The
+examples below are marked `eval = FALSE` to keep the article fast; copy
+any of them into your R session as-is.
 
 ### `cad` — company registry
 
-A single, time-less snapshot. No `year`, no `report_type`.
+A single, time-less snapshot. No `year`, no `basis`. It is also where a
+CVM code or a company name resolves to a CNPJ: `cd_cvm`, `denom_social`
+and `cnpj_cia` sit side by side.
 
 ``` r
 
-companies <- issuer_fetch("cad", "companhias")
+companies <- cvm_fetch("cad", "companhias")
 companies
 ```
 
@@ -185,24 +179,33 @@ Annual (DFP) and quarterly (ITR) financial statements share an identical
 table set (11 tables: balance sheet, income statement, cash flow, etc.).
 Accounting tables that publish individual and consolidated variants —
 `bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva` — require
-`report_type ∈ c("ind", "con")`.
+`basis`: `"ind"`, `"con"` or `c("ind", "con")` to stack both. Those
+tables always carry a `basis` column in the result.
 
 ``` r
 
-# BCO BRASIL individual balance sheet, latest year
-bb <- issuer_fetch(
+# BCO BRASIL individual balance sheet, 2024
+bb <- cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "BCO BRASIL",
-  year = 2024
+  cnpj = "00.000.000/0001-91",
+  year = 2024,
+  basis = "ind"
 )
 
-# Two companies across three years
-two <- issuer_fetch(
+# Two companies across three years, both bases stacked
+two <- cvm_fetch(
   "dfp", "dre",
-  report_type = "ind",
-  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  year = 2022:2024
+  cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
+  year = 2022:2024,
+  basis = c("ind", "con")
+)
+
+# ITR balance sheets referenced in the first half of 2024
+h1 <- cvm_fetch(
+  "itr", "bpa",
+  ticker = "PETR4",
+  from = "2024-01-01", to = "2024-06-30",
+  basis = "con"
 )
 ```
 
@@ -222,14 +225,14 @@ defense-in-depth check.
 
 ``` r
 
-auditor <- issuer_fetch(
+auditor <- cvm_fetch(
   "fre", "auditor",
-  issuer = "BCO BRASIL",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 
 # Genuine empty table is fine — FRE/empregado_PCD has meta_status: missing
-pcd <- issuer_fetch(
+pcd <- cvm_fetch(
   "fre", "empregado_PCD",
   year = 2024,
   validate = "warn"  # or "strict" / "skip"
@@ -238,11 +241,9 @@ pcd <- issuer_fetch(
 
 FRE detail tables use a different naming convention: `cnpj_companhia`,
 `data_referencia`, `nome_companhia`, `versao`, `id_documento`. There is
-**no `cd_cvm`** column in the detail tables; filtering by CD_CVM still
-works because
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-automatically resolves the code to a CNPJ through the dataset’s
-`submissao` table.
+**no `cd_cvm`** column in the detail tables; `cnpj` filters on
+`cnpj_companhia` there and on `cnpj_cia` elsewhere, so the call is the
+same for every table.
 
 ### `cgvn` — Brazilian Corporate Governance Code informe
 
@@ -252,9 +253,9 @@ explain” detail with 54 recommended practices per filing).
 
 ``` r
 
-praticas <- issuer_fetch(
+praticas <- cvm_fetch(
   "cgvn", "praticas",
-  issuer = "BCO BRASIL",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 # Columns include: cnpj_companhia, data_referencia, versao,
@@ -264,9 +265,8 @@ praticas <- issuer_fetch(
 ```
 
 CGVN follows a third naming convention (`codigo_cvm` instead of `cd_cvm`
-in the submissao table). The CD_CVM resolver detects the column
-automatically, so `issuer = "1023"` works against any of the three
-conventions.
+in the submissao table). The CNPJ column is what `cnpj` matches, so the
+three conventions are invisible at the call.
 
 ### `vlmo` — securities traded and held by insiders
 
@@ -277,9 +277,9 @@ device name on Windows.
 
 ``` r
 
-movements <- issuer_fetch(
+movements <- cvm_fetch(
   "vlmo", "consolidado",
-  issuer = "BCO BRASIL",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 # Columns include: cnpj_companhia, data_referencia, versao,
@@ -294,10 +294,8 @@ so each `versao` is kept verbatim (collapsing by version would merge
 distinct movements). Second, insider identity is **opaque by design of
 the CVM** — there is no CPF in the detail, only the category
 `tipo_cargo` and, for corporate insiders, a name in `empresa`. The
-`issuer` argument filters the issuing company; to slice by insider
+`cnpj` argument filters the issuing company; to slice by insider
 category, filter `tipo_cargo` on the returned tibble with `dplyr`.
-`consolidado` carries no `codigo_cvm`, so CD_CVM filtering resolves
-through `vlmo/submissao` automatically.
 
 ### `fca` — registration form (10 tables)
 
@@ -312,23 +310,22 @@ to ITR/DFP/FRE) plus nine FRE-detail tables — `auditor`,
 ``` r
 
 # Current registration state, latest year
-geral <- issuer_fetch("fca", "geral", issuer = "BCO BRASIL")
+geral <- cvm_fetch("fca", "geral", cnpj = "00.000.000/0001-91")
 
 # Securities and their B3 trading tickers
-vm <- issuer_fetch("fca", "valor_mobiliario", year = 2024)
+vm <- cvm_fetch("fca", "valor_mobiliario", year = 2024)
 
-# A ticker is itself a valid issuer (see "Selecting issuers" below)
-petr <- issuer_fetch("fca", "geral", issuer = "PETR4")
+# A ticker selects the issuer (see "Selecting issuers" below)
+petr <- cvm_fetch("fca", "geral", ticker = "PETR4")
 ```
 
-Because `submissao` is classic (`cnpj_cia` + `cd_cvm`) while the nine
-detail tables are FRE-detail (`cnpj_companhia`, no `cd_cvm`), filtering
-a detail by CD_CVM routes through `fca/submissao` and maps to the
-detail’s `cnpj_companhia` automatically.
+`submissao` is classic (`cnpj_cia` + `cd_cvm`) while the nine detail
+tables are FRE-detail (`cnpj_companhia`, no `cd_cvm`); `cnpj` matches
+whichever CNPJ column the table carries.
 
 Two FCA specifics worth knowing. First, `fca/valor_mobiliario` is the
-source of the **B3 ticker lookup** — its `codigo_negociacao` column lets
-you pass a ticker (`"PETR4"`, `"BBDC11"`) as `issuer` to *any* dataset.
+source of the **B3 ticker lookup** — its `codigo_negociacao` column is
+what lets you pass `ticker = "PETR4"` (or `"BBDC11"`) to *any* dataset.
 Second, `fca/departamento_acionistas` is published with a valid 23-field
 header but **no data rows from 2024 onward** (it carried data through
 2023, then zeroed after a regulatory change); the call returns an empty
@@ -354,12 +351,11 @@ Added in v0.1.0.9000 toward v0.2. `ipe` (Informações Periódicas e
 Eventuais) is a **single-table manifest**: one row per document a
 company filed with the CVM — roughly 50,000 documents a year, across
 every category (Fato Relevante, Comunicado ao Mercado, Assembleia, …).
-It carries `codigo_cvm` natively, so CD_CVM and tickers filter directly.
 
 ``` r
 
 # Everything Banco do Brasil filed in 2024
-docs <- issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024)
+docs <- cvm_fetch("ipe", "ipe", ticker = "BBAS3", year = 2024)
 
 # Slice the manifest by document class — a plain dplyr step
 library(dplyr)
@@ -381,49 +377,36 @@ locate** the filed documents (and their PDFs) in any category. The
 
 ## Selecting issuers
 
-The `issuer` argument accepts a vector of any length. Each element is
-classified automatically:
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+identifies issuers by two keys, which combine in one call:
 
-| Element pattern | Interpreted as |
+| Argument | Accepts |
 |----|----|
-| `^[0-9]{14}$` | CNPJ without punctuation |
-| 14 digits with `.` `/` `-` separators | CNPJ with punctuation |
-| `^[0-9]{1,6}$` | CD_CVM (with or without zero padding) |
-| `^[A-Z]{4}[0-9]{1,2}[A-Z]?$` | B3 ticker (e.g. `PETR4`, `BBDC11`), resolved to CNPJ via `fca/valor_mobiliario` |
-| Otherwise | Free-text search against `denom_cia` |
+| `cnpj` | CNPJ, with or without punctuation, vector of any length |
+| `ticker` | B3 trading code (`PETR4`, `BBDC11`), resolved to the issuer’s CNPJ via `fca/valor_mobiliario` |
 
-Tickers are checked after CNPJ and CD_CVM; the four-letter prefix means
-a numeric CD_CVM is never mistaken for a ticker. An unknown ticker
-aborts with `cvmdata_error_input` (tickers cover only exchange-listed
-securities — debentures and private placements have none).
+A CVM code or a company name passed as `cnpj` aborts with
+`cvmdata_error_input` — there is no free-text search. To find a CNPJ you
+know only by name or by CVM code, read the registry:
+`cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_social` and
+`cnpj_cia` side by side. (The deprecated
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+still accepts CD_CVM and free text through its `issuer` argument until
+it is removed.)
 
-Text search normalises accents and casing, splits on word boundaries,
-and expands a small abbreviation map (`BCO ↔︎ BANCO`, `CIA ↔︎ COMPANHIA`,
-`IND ↔︎ INDUSTRIA`, `PART ↔︎ PARTICIPACOES`). All tokens of the query must
-match (AND semantics):
-
-``` r
-
-issuer_fetch("dfp", "bpa", report_type = "ind",
-             issuer = "banco brasil", year = 2024)  # matches BCO BRASIL S.A.
-```
-
-Multiple hits in interactive R sessions open a
-[`utils::menu()`](https://rdrr.io/r/utils/menu.html); in non-interactive
-sessions (scripts, CI) they abort with `cvmdata_error_input` listing the
-candidates — so batch jobs never silently pick the wrong issuer. Zero
-matches also abort.
-
-You can mix kinds in a single call:
+An unknown ticker aborts with `cvmdata_error_input` (tickers cover only
+exchange-listed securities — debentures and private placements have
+none). A CNPJ absent from the table yields zero rows, silently.
 
 ``` r
 
-issuer_fetch("dfp", "bpa", report_type = "ind",
-             issuer = c("001023", "47.960.950/0001-21", "ITAU UNIBANCO"),
-             year = 2024)
+cvm_fetch("dfp", "bpa",
+          cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
+          ticker = "PETR4",
+          year = 2024, basis = "ind")
 ```
 
-## Year semantics
+## Period semantics
 
 `year` accepts an integer vector or `NULL`. When `NULL`, the package
 fetches the **latest year published upstream**. If the latest year has
@@ -437,24 +420,30 @@ historical reach, just pass a longer vector:
 
 ``` r
 
-hist <- issuer_fetch("dfp", "dre",
-                     report_type = "ind",
-                     issuer = "BCO BRASIL",
-                     year = 2012:2024)
+hist <- cvm_fetch("dfp", "dre",
+                  cnpj = "00.000.000/0001-91",
+                  year = 2012:2024,
+                  basis = "ind")
 ```
 
 CVM publishes only `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV
 (i.e. the declared year and its N-1).
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 returns the literal CSV content for each year you ask for; users build
 longer histories by passing a longer vector and deduplicating
 downstream.
 
+For slices smaller than a year, pass `from` and `to` together as
+complete dates (`"YYYY-MM-DD"`). Rows are kept by the document’s
+reference date (`dt_refer` / `data_referencia`), and the yearly files
+read are the years the window spans. `year` and `from`/`to` are mutually
+exclusive, and neither applies to the `cad` snapshot.
+
 ## Provenance — what every tibble carries
 
-Every tibble returned by an
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-family call is of class `cvm_tbl` and carries six provenance attributes:
+Every tibble returned by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+is of class `cvm_tbl` and carries six provenance attributes:
 
 ``` r
 
@@ -527,7 +516,6 @@ most likely to appear in user code:
 |----|----|
 | `cvmdata_error_input` | User-supplied argument failed validation. |
 | `cvmdata_error_input_ambiguous` | A `(dataset, table)` slug exists in more than one group; pass `group =`. |
-| `cvmdata_error_input_group` | A skeleton fetcher (`fund/agent/offering/event_fetch`) was called. |
 | `cvmdata_error_http` | HTTP fetch failed. |
 | `cvmdata_error_parse` | Field-count or field-name validation failed under `validate = "strict"`. |
 | `cvmdata_error_meta_unavailable` | `meta_status: missing` table called under `validate = "strict"`. |
@@ -544,13 +532,12 @@ keyed on the class string, e.g.:
 ``` r
 
 out <- tryCatch(
-  issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "001023", year = 2024),
+  cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+            year = 2024, basis = "ind", source = "cvm"),
   cvmdata_error_http = function(e) {
     message("Portal indisponivel, tentando mirror.")
-    issuer_fetch("dfp", "bpa", report_type = "ind",
-                 issuer = "001023", year = 2024,
-                 source = "mirror")
+    cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+              year = 2024, basis = "ind", source = "mirror")
   }
 )
 ```
@@ -560,12 +547,12 @@ out <- tryCatch(
 Topic-specific articles on the pkgdown site:
 
 - **issuer-fetch** — every
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   argument in depth.
 - **itr-dfp** — quarterly + annual statements, end-to-end workflows.
 - **fre** — reference form, including the 8 ESG/governance tables
   without CVM META.
-- **groups-overview** — the 18 CKAN groups and the 5 fetcher contracts.
+- **groups-overview** — the 18 CKAN groups and the single fetcher.
 - **cache-and-mirror** — backend dual contract, cache layout, ETL
   refresh cadence.
 - **data-defects** — known quirks of the CVM publication and how

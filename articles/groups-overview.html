@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Groups overview: the 18 CKAN groups and 5 fetcher contracts • cvmdata</title>
+<title>Groups overview: the 18 CKAN groups and the single fetcher • cvmdata</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Groups overview: the 18 CKAN groups and 5 fetcher contracts">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Groups overview: the 18 CKAN groups and the single fetcher">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,8 +37,8 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -66,7 +66,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Groups overview: the 18 CKAN groups and 5 fetcher contracts</h1>
+      <h1>Groups overview: the 18 CKAN groups and the single fetcher</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/main/vignettes/articles/groups-overview.Rmd" class="external-link"><code>vignettes/articles/groups-overview.Rmd</code></a></small>
@@ -78,21 +78,19 @@
 <p>The CVM publishes its open data in <strong>18 thematic
 groups</strong> on the CKAN portal at
 <code>&lt;https://dados.cvm.gov.br/group/&gt;</code>.
-<code>cvmdata</code> collapses those 18 groups into <strong>5
-data-contract fetchers</strong> based on the kind of identity key
-(issuer CNPJ, fund CNPJ, registered agent CPF/CNPJ, public-offering
-number, regulatory event ID), the temporal granularity (annual,
-quarterly, monthly, ad-hoc), and the typical use case. The full
-rationale is in
+<code>cvmdata</code> serves every group through <strong>one
+function</strong>, <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>: the dataset’s schema YAML
+tells the package which columns identify the entity (issuer CNPJ today;
+fund CNPJ, registered-agent id, offering number or event id as those
+groups arrive) and how the data is partitioned in time, so the same
+arguments work across groups. The full rationale is in
 <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code>;
 this article is the navigation map.</p>
-<p>In v0.1.0.9000, only the <code>companhias</code> group is
-functionally implemented (via <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>); the four
-remaining fetchers are exported as skeletons that abort with
-<code>cvmdata_error_input_group</code> when called, with a pointer back
-to the roadmap. They are documented now so the upcoming rOpenSci
-submission reviews the complete API surface ahead of incremental data
-implementation.</p>
+<p>Today only the <code>companhias</code> group is implemented. The
+others are scheduled on the roadmap (funds from v0.4, agents and public
+offerings in v0.7, regulatory events in v0.8) and will extend
+<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> through their own schemas, not through new
+fetchers.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
@@ -123,8 +121,11 @@ implementation.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span> securitizadoras                              4 issuer</span></span></code></pre></div>
 <p>The <code>n_datasets</code> column counts datasets published by CVM,
 not the count currently implemented in the package. The
-<code>contract</code> column names the fetcher that does (or will) cover
-the group.</p>
+<code>contract</code> column is a planning map: it names the kind of
+entity each group is keyed on (<code>issuer</code>, <code>fund</code>,
+<code>agent</code>, <code>offering</code>, <code>event</code>), which is
+what decides how <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> will identify rows once the
+group ships.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_groups.html">cvm_groups</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">g</span><span class="op">$</span><span class="va">group</span>, <span class="va">g</span><span class="op">$</span><span class="va">contract</span><span class="op">)</span></span>
@@ -148,100 +149,67 @@ the group.</p>
 <span><span class="co">#&gt; [1] "ofertas-publicas"            "plataformas-de-crowdfunding"</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="issuer_fetch-fully-implemented-in-v0-1">issuer_fetch() — fully implemented in v0.1<a class="anchor" aria-label="anchor" href="#issuer_fetch-fully-implemented-in-v0-1"></a>
+<h2 id="issuers-implemented">Issuers — implemented<a class="anchor" aria-label="anchor" href="#issuers-implemented"></a>
 </h2>
 <p>Covers <strong>issuers</strong> of securities: companies
 (<code>companhias</code>), securitisation vehicles
 (<code>securitizadoras</code>), and CEPAC issuers
 (<code>emissores-de-cepac</code>). v0.1 shipped the four core
 <code>companhias</code> datasets: <code>cad</code>, <code>dfp</code>,
-<code>itr</code>, <code>fre</code>. v0.1.0.9000 added <code>cgvn</code>
+<code>itr</code>, <code>fre</code>. v0.2 added <code>cgvn</code>
 (Brazilian Corporate Governance Code informe), <code>vlmo</code>
 (securities traded and held by insiders), <code>fca</code> (registration
 form, which also backs the B3 ticker lookup) and <code>ipe</code>
-(manifest of periodic and eventual documents) toward v0.2 — eight
+(manifest of periodic and eventual documents) — eight
 <code>companhias</code> datasets in all.</p>
-<p>The identity key is CNPJ + denomination (plus <code>CD_CVM</code> for
-companhias-style issuers). The temporal axis is annual (with quarterly
-via ITR) and the <code>report_type</code> argument selects
-individual/consolidated variants for accounting tables.</p>
+<p>The identity key is the issuer’s CNPJ, selected with
+<code>cnpj</code> or, through the registration form, with a B3
+<code>ticker</code>. The temporal axis is annual (with quarterly via
+ITR), selected with <code>year</code> or a
+<code>from</code>/<code>to</code> window on the reference date, and the
+<code>basis</code> argument selects individual/consolidated variants for
+accounting tables.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Companies registry (no time partitioning, no report_type)</span></span>
-<span><span class="va">issuers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Companies registry (no time partitioning, no basis)</span></span>
+<span><span class="va">issuers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># DFP balance sheet, individual, latest year, one issuer</span></span>
-<span><span class="va">bb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span></span>
+<span><span class="co"># DFP balance sheet, individual, one year, one issuer</span></span>
+<span><span class="va">bb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
-<span>  issuer <span class="op">=</span> <span class="st">"BCO BRASIL"</span>,</span>
+<span>  cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
 <span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
-<span>  report_type <span class="op">=</span> <span class="st">"ind"</span></span>
+<span>  basis <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> is the only fetcher with a real
-implementation in v0.1.0.9000. The four below export the same shape as
-skeletons.</p>
 </div>
 <div class="section level2">
-<h2 id="fund_fetch-investment-funds-v0-4v0-6">fund_fetch() — investment funds (v0.4–v0.6)<a class="anchor" aria-label="anchor" href="#fund_fetch-investment-funds-v0-4v0-6"></a>
+<h2 id="funds-agents-offerings-events-on-the-roadmap">Funds, agents, offerings, events — on the roadmap<a class="anchor" aria-label="anchor" href="#funds-agents-offerings-events-on-the-roadmap"></a>
 </h2>
-<p>Covers the three fund groups: <code>fundos-de-investimento</code>
-(ICVM 555, 22 datasets),
-<code>fundos-de-investimento-imobiliarios</code> (FII, 4 datasets), and
-<code>fundos-estruturados</code> (FIP, FIDC, FAPI, 10 datasets). The
-identity key is the fund’s CNPJ; the temporal axis is monthly or
-quarterly depending on the dataset. <code>date</code> is the singular
-for pointwise reference dates; <code>date_range</code> does not apply
-here.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Will abort in v0.1.0.9000 with cvmdata_error_input_group:</span></span>
-<span><span class="co"># fund_fetch("fi-cad", "registro", fund = "00.000.000/0001-91")</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="agent_fetch-registered-agents-v0-7">agent_fetch() — registered agents (v0.7)<a class="anchor" aria-label="anchor" href="#agent_fetch-registered-agents-v0-7"></a>
-</h2>
-<p>Covers the eight agent-registry groups: <code>administradores</code>,
-<code>agentes-autonomos</code>, <code>agentes-fiduciarios</code>,
-<code>auditores</code>, <code>consultores-de-valores-mobiliarios</code>,
-<code>coordenadores-de-ofertas</code>,
-<code>participantes-intermediarios</code>, and
-<code>investidores-nao-residentes</code>. Identity keys range from CPF
-(individual autonomous agents) through CNPJ (broker-dealers, audit
-firms) to dataset-specific registration numbers. <code>as_of</code>
-selects a snapshot date for cadastral views.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Will abort in v0.1.0.9000 with cvmdata_error_input_group:</span></span>
-<span><span class="co"># agent_fetch("administradores", "registro", as_of = Sys.Date())</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="offering_fetch-public-offerings-v0-7">offering_fetch() — public offerings (v0.7)<a class="anchor" aria-label="anchor" href="#offering_fetch-public-offerings-v0-7"></a>
-</h2>
-<p>Covers <code>ofertas-publicas</code> and
-<code>plataformas-de-crowdfunding</code> (Resolução CVM 88). The
-identity key is <code>numero_oferta</code>; <code>date_range</code> is
-the window operator (offerings cluster around events, ranges are the
-natural slice). Crowdfunding is treated as a public offering subtype
-because, under CVM 88, it is structurally an offering dispensed from
-registration and intermediated by a platform.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Will abort in v0.1.0.9000 with cvmdata_error_input_group:</span></span>
-<span><span class="co"># offering_fetch(</span></span>
-<span><span class="co">#   "ofertas-publicas", "ofertas",</span></span>
-<span><span class="co">#   date_range = as.Date(c("2024-01-01", "2024-12-31"))</span></span>
-<span><span class="co"># )</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="event_fetch-regulatory-events-v0-8">event_fetch() — regulatory events (v0.8)<a class="anchor" aria-label="anchor" href="#event_fetch-regulatory-events-v0-8"></a>
-</h2>
-<p>Covers <code>atividade-sancionadora</code> (sanctioning proceedings)
-and <code>atos-declaratorios</code> (declaratory acts from the CVM
-directorate). Identity key is the process ID or act ID;
-<code>date_range</code> is the natural slice for audit / monitoring use
-cases.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Will abort in v0.1.0.9000 with cvmdata_error_input_group:</span></span>
-<span><span class="co"># event_fetch(</span></span>
-<span><span class="co">#   "atividade-sancionadora", "processos",</span></span>
-<span><span class="co">#   date_range = as.Date(c("2023-01-01", Sys.Date()))</span></span>
-<span><span class="co"># )</span></span></code></pre></div>
+<ul>
+<li>
+<strong>Funds</strong> (v0.4–v0.6):
+<code>fundos-de-investimento</code> (ICVM 555),
+<code>fundos-de-investimento-imobiliarios</code> (FII) and
+<code>fundos-estruturados</code> (FIP, FIDC, FAPI). Keyed on the fund’s
+CNPJ; monthly or quarterly depending on the dataset.</li>
+<li>
+<strong>Registered agents</strong> (v0.7): the eight agent-registry
+groups, from <code>administradores</code> to
+<code>investidores-nao-residentes</code>. Keys range from CNPJ
+(broker-dealers, audit firms) to dataset-specific registration numbers;
+the CVM publishes no CPF, so a filter for natural persons is still an
+open decision.</li>
+<li>
+<strong>Public offerings</strong> (v0.7):
+<code>ofertas-publicas</code> and
+<code>plataformas-de-crowdfunding</code> (Resolução CVM 88). Keyed on
+the offering number; a date window is the natural slice.</li>
+<li>
+<strong>Regulatory events</strong> (v0.8):
+<code>atividade-sancionadora</code> and <code>atos-declaratorios</code>.
+Keyed on the process or act id.</li>
+</ul>
+<p>Each of these lands as schema YAMLs under the group’s slug; the
+<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> signature does not change.</p>
 </div>
 <div class="section level2">
 <h2 id="discovery-functions-accept-group">Discovery functions accept <code>group</code><a class="anchor" aria-label="anchor" href="#discovery-functions-accept-group"></a>
@@ -252,7 +220,7 @@ the discovery functions resolve by uniqueness when <code>group</code> is
 omitted, and abort with <code>cvmdata_error_input_ambiguous</code> when
 it cannot disambiguate. Pass <code>group</code> explicitly to skip the
 lookup:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span>group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span>, group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
@@ -264,9 +232,9 @@ lookup:</p>
 <code><a href="../reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="../reference/cvm_tables.html">cvm_tables()</a></code>,
 <code><a href="../reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="../reference/cvm_codelist.html">cvm_codelist()</a></code>, and
 <code><a href="../reference/cvm_dataset_years.html">cvm_dataset_years()</a></code>. The returned <code>cvm_tbl</code> from
-any fetcher also carries <code>group</code> as a provenance attribute
-(<code>attr(x, "group")</code>), and <code>print.cvm_tbl()</code>
-renders it in the header.</p>
+<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> also carries <code>group</code> as a provenance
+attribute (<code>attr(x, "group")</code>), and
+<code>print.cvm_tbl()</code> renders it in the header.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

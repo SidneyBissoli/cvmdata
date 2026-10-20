@@ -1,7 +1,7 @@
 # Cache and mirror backend
 
 `cvmdata` ships two interchangeable backends behind
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 and a multi-layer disk cache that both backends share. This article
 walks through the contract, the pipeline that keeps the mirror fresh,
 and the workflows for switching between backends, inspecting the cache,
@@ -23,7 +23,7 @@ library(cvmdata)
 
 The active backend is selected at three precedence levels: an explicit
 `source = ...` argument to
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 wins over the option `cvmdata.source` (set via
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)),
 which in turn wins over the built-in default returned by
@@ -90,7 +90,7 @@ same script; documenting them here is the rOpenSci-auditable surface.
 ## Workflow 1 — Working with the mirror (default)
 
 From v0.1.0 the mirror is the default backend, so
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 routes every call through DuckDB without further configuration. The
 snippet below makes the choice explicit (helpful in scripts that may
 inherit a different session option) and exercises both the cold and warm
@@ -105,37 +105,37 @@ cvm_source_set("mirror")
 # First call: the mirror's release inventory is fetched once via the
 # GitHub REST API, parquet assets are downloaded into the L3 cache, and
 # DuckDB reads them from disk.
-bb_bpa_mirror <- issuer_fetch(
+bb_bpa_mirror <- cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "1023",
-  year = 2024
+  cnpj = "00.000.000/0001-91",
+  year = 2024,
+  basis = "ind"
 )
 
 # Second call: the L3 cache short-circuits the download; the API
 # inventory is reused from the session cache; only DuckDB runs.
-issuer_fetch(
+cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "1023",
-  year = 2024
+  cnpj = "00.000.000/0001-91",
+  year = 2024,
+  basis = "ind"
 )
 ```
 
 The argument `source = ...` to
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 always overrides the option, so a single call can fall back to the CVM
 portal without disturbing the session-wide setting:
 
 ``` r
 
 # Persisted setting is "mirror"; this one call still queries CVM live.
-issuer_fetch(
+cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024,
-  source      = "cvm"
+  basis = "ind",
+  source = "cvm"
 )
 ```
 
@@ -143,9 +143,12 @@ issuer_fetch(
 
 The mirror backend returns tibbles that are column- and type-equivalent
 to the CVM HTTP path on the common columns. The mirror additionally
-attaches two partition columns (`year`, `report_type`) reattached from
-the asset filename — they are not present on the CVM path because the
-CVM CSV does not carry them. The table below was captured by
+attaches a `year` partition column reattached from the asset filename —
+it is not present on the CVM path because the CVM CSV does not carry it.
+The `report_type` partition the mirror also carries is exposed by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+under the public name `basis`, on both backends, for the tables that
+have the individual/consolidated split. The table below was captured by
 `data-raw/validate-mirror-end-to-end.R`, which runs the same four calls
 through both backends and compares schemas:
 
@@ -248,11 +251,12 @@ how much disk it freed.
 
 ## Where to read next
 
-- **groups-overview** — the 18 CKAN groups, the five contract fetchers
-  they map to, and which datasets each `cvmdata` release unlocks.
+- **groups-overview** — the 18 CKAN groups, the single fetcher that
+  serves them, and which datasets each `cvmdata` release unlocks.
 - **issuer-fetch** — argument-level deep dive on
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
-  including `issuer` / `year` / `report_type` / `validate` / `on_error`.
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+  including `cnpj` / `ticker` / `year` / `from` / `to` / `basis` /
+  `validate` / `on_error`.
 - **itr-dfp** — end-to-end workflows on annual and quarterly financial
   statements.
 - **data-defects** — known CVM publication quirks (and other source

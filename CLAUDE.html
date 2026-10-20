@@ -22,8 +22,8 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -48,7 +48,7 @@
 
 <div id="claudemd--contexto-persistente-do-pacote-cvmdata" class="section level1">
 
-<p>Documento de referência para sessões do Claude Code no diretório <code>C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata</code>. Consolida o essencial dos canônicos de planejamento para que sessões futuras não precisem reler tudo. Quando este <code>CLAUDE.md</code> divergir de um canônico, <strong>prevalece o canônico</strong> — em particular <code>cvmdata_rodada2-5_naming_unificado-v03.md</code> para naming de colunas e tabelas, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code> para a política do reader, e <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code> para a arquitetura de 5 fetchers por contrato. Estado de execução por fase no <code>ROADMAP.md</code>; histórico de breaking changes em <code>NEWS.md</code>.</p>
+<p>Documento de referência para sessões do Claude Code no diretório <code>C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata</code>. Consolida o essencial dos canônicos de planejamento para que sessões futuras não precisem reler tudo. Quando este <code>CLAUDE.md</code> divergir de um canônico, <strong>prevalece o canônico</strong> — em particular <code>cvmdata_rodada2-5_naming_unificado-v03.md</code> para naming de colunas e tabelas, <code>cvmdata_rodada3-0-2_politica_reader_sem_meta.md</code> para a política do reader, e <code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code> para a arquitetura de grupos (os 5 fetchers por contrato que ele previa foram substituídos pela função única <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> em 2026-10 — §2.1; o arquivo está ausente do disco desde 2026-10-16, item do ROADMAP). Estado de execução por fase no <code>ROADMAP.md</code>; histórico de breaking changes em <code>NEWS.md</code>.</p>
 <p>Comunicação com Sidney é em <strong>português brasileiro</strong>. Tom direto, técnico, sem fluff, sem puxa-saquismo. Quando ele perguntar problemas, dizer diretamente; se não houver, dizer isso. Críticas construtivas bem-vindas. Em decisões arquiteturais relevantes não fechadas nos canônicos: apresentar 2-3 alternativas com prós/contras e recomendar uma.</p>
 <hr><div class="section level2">
 <h2 id="id_1-régua-de-idioma">1. Régua de idioma<a class="anchor" aria-label="anchor" href="#id_1-r%C3%A9gua-de-idioma"></a></h2>
@@ -108,25 +108,29 @@
 <h2 id="id_2-naming-canônico">2. Naming canônico<a class="anchor" aria-label="anchor" href="#id_2-naming-can%C3%B4nico"></a></h2>
 <div class="section level3">
 <h3 id="id_21-funções-públicas">2.1 Funções públicas<a class="anchor" aria-label="anchor" href="#id_21-fun%C3%A7%C3%B5es-p%C3%BAblicas"></a></h3>
-<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). API pública organizada em <strong>5 fetchers por contrato de dado</strong>, um por tipo de entidade regulada pela CVM. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> é funcional e cobre v0.1–v0.2 (grupo <code>companhias</code>); v0.3 em diante estende a cobertura. Os outros 4 são skeletons exportados que abortam com <code>cvmdata_error_input_group</code>, com implementação plena em v0.4–v0.8. Skeletons foram exportados antes da implementação para <strong>travar a superfície da API pública cedo</strong>, de modo que as releases v0.4+ estendam cobertura sem reformatar a API.</p>
+<p>Padrão <code>object_verb</code> (Dev Guide rOpenSci). <strong>Função única</strong> (decisão de Sidney, 2026-10-16, que reabriu a arquitetura de 5 fetchers por contrato de 2026-05-25): <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> serve qualquer conjunto; os grupos planejados para v0.4–v0.8 (fundos, agentes, ofertas, eventos) estendem <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> pelo YAML de cada conjunto, sem funções novas. Os 4 skeletons (<code>fund_fetch()</code>, <code>agent_fetch()</code>, <code>offering_fetch()</code>, <code>event_fetch()</code>) e a classe <code>cvmdata_error_input_group</code> saíram na v0.3. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> segue exportada como wrapper DEPRECADO (<code><a href="https://lifecycle.r-lib.org/reference/deprecate_soft.html" class="external-link">lifecycle::deprecate_warn()</a></code>), com o comportamento antigo intacto (<code>issuer</code> aceita CNPJ / CD_CVM / texto / ticker; <code>report_type</code>), até ser removida.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Issuer datasets — companhias abertas (grupo CKAN "companhias").</span></span>
+<code class="sourceCode R"><span><span class="co"># Função única — qualquer conjunto coberto (hoje: grupo "companhias").</span></span>
 <span><span class="co"># Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.</span></span>
-<span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
-<span>             issuer      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># CNPJ / CD_CVM / texto, vetor</span></span>
-<span>             year        <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># integer vector, NULL → último</span></span>
-<span>             source      <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># via cvm_source_get()</span></span>
-<span>             report_type <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># "ind" / "con" / NULL</span></span>
-<span>             on_error    <span class="op">=</span> <span class="st">"abort"</span>,</span>
-<span>             validate    <span class="op">=</span> <span class="st">"strict"</span>,</span>
-<span>             <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>,</span>
+<span>          cnpj     <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># SÓ CNPJ (com ou sem pontuação); código CVM</span></span>
+<span>                                <span class="co"># e nome são recusados (cvmdata_error_input)</span></span>
+<span>          ticker   <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># código B3; resolvido via fca/valor_mobiliario</span></span>
+<span>                                <span class="co"># no mesmo `source`; soma-se a `cnpj`</span></span>
+<span>          year     <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># anos inteiros, NULL → último; OU</span></span>
+<span>          from     <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># janela de datas COMPLETAS ("YYYY-MM-DD"),</span></span>
+<span>          to       <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co">#   os dois juntos; filtra pela data de</span></span>
+<span>                                <span class="co">#   REFERÊNCIA (dt_refer/data_referencia);</span></span>
+<span>                                <span class="co">#   com `year` = erro; em cad = erro</span></span>
+<span>          basis    <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># "ind" / "con" / c("ind","con") — ver abaixo</span></span>
+<span>          source   <span class="op">=</span> <span class="cn">NULL</span>,      <span class="co"># via cvm_source_get()</span></span>
+<span>          on_error <span class="op">=</span> <span class="st">"abort"</span>,</span>
+<span>          validate <span class="op">=</span> <span class="st">"strict"</span>,</span>
+<span>          <span class="va">...</span><span class="op">)</span>                  <span class="co"># reservado: qualquer extra aborta</span></span>
 <span></span>
-<span><span class="co"># Skeletons (abort com cvmdata_error_input_group no ciclo atual)</span></span>
-<span><span class="fu"><a href="reference/fund_fetch.html">fund_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, fund <span class="op">=</span> <span class="cn">NULL</span>, date <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>        <span class="co"># v0.4-v0.6</span></span>
-<span><span class="fu"><a href="reference/agent_fetch.html">agent_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, agent <span class="op">=</span> <span class="cn">NULL</span>, as_of <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>     <span class="co"># v0.7</span></span>
-<span><span class="fu"><a href="reference/offering_fetch.html">offering_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, offering <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>               date_range <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>                            <span class="co"># v0.7</span></span>
-<span><span class="fu"><a href="reference/event_fetch.html">event_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, event <span class="op">=</span> <span class="cn">NULL</span>, date_range <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span>  <span class="co"># v0.8</span></span>
+<span><span class="co"># Deprecada (wrapper com aviso; remoção em release futura)</span></span>
+<span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, issuer <span class="op">=</span> <span class="cn">NULL</span>, year <span class="op">=</span> <span class="cn">NULL</span>, source <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>             report_type <span class="op">=</span> <span class="cn">NULL</span>, on_error <span class="op">=</span> <span class="st">"abort"</span>, validate <span class="op">=</span> <span class="st">"strict"</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Descoberta</span></span>
 <span><span class="fu"><a href="reference/cvm_groups.html">cvm_groups</a></span><span class="op">(</span><span class="op">)</span>                                          <span class="co"># 18 grupos + contrato</span></span>
@@ -160,10 +164,12 @@
 <li>
 <code>on_error ∈ c("abort", "warn", "silent")</code>, default <code>"abort"</code>.</li>
 <li>
-<code>report_type ∈ c("ind", "con")</code> ou <code>NULL</code> (só em <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>). <strong>Obrigatório</strong> para tabelas com variantes individual/consolidada (<code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dva</code>). <strong>Erro</strong> se passado a tabelas sem essa distinção (<code>composicao_capital</code>, <code>submissao</code>, <code>parecer</code>, <code>companhias</code>).</li>
+<code>basis</code> (Sidney, 2026-10-19; nome escolhido contra <code>report_type</code>, <code>type_format</code>, <code>scope</code>, <code>report</code>, <code>type</code>, <code>view</code>): <code>"ind"</code>, <code>"con"</code> ou <code>c("ind", "con")</code> (empilha as duas). <strong>Obrigatório, sem padrão</strong>, para tabelas com variantes individual/consolidada (<code>bpa</code>, <code>bpp</code>, <code>dre</code>, <code>dra</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dva</code>) — recusado <code>"con"</code> como padrão: 35% das cias DFP 2023 só têm <code>"ind"</code>. Essas tabelas trazem <strong>sempre</strong> a coluna <code>basis</code> no resultado, nos dois backends (<code>set_basis_column()</code> em <code>R/api-cvm-fetch.R</code> substitui o <code>report_type</code> vazado pelo mirror). <strong>Erro</strong> se passado a tabelas sem a divisão (<code>composicao_capital</code>, <code>submissao</code>, <code>parecer</code>, <code>companhias</code>) — não ignorar calado. <code>report_type ∈ c("ind", "con")</code> ou <code>NULL</code> sobrevive só em <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> (deprecada).</li>
 <li>
 <code>year</code>: integer vector ou <code>NULL</code>. <code>NULL</code> → <strong>último ano disponível</strong>, descoberto por <code>HEAD</code> probing decrescente. Para histórico, integer vector explícito (<code>year = 2012:2024</code>). Helper <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code> devolve o range. <strong>Sem sentinela <code>"all"</code></strong> — tipo único.</li>
-</ul><p>Sobre exercícios contidos em cada CSV anual: o portal publica em cada ano apenas <code>ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}</code> — o ano declarado e seu N-1. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> não reconstrói o antepenúltimo: retorna o conteúdo literal do CSV do <code>year</code> pedido. Para histórico mais longo, pedir <code>year = (N-2):N</code> e empilhar; dedup por <code>(cd_cvm, cd_conta, dt_fim_exerc)</code> é trivial.</p>
+<li>
+<code>from</code>/<code>to</code> (só em <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>): datas completas, os dois juntos (<code>"YYYY-MM-DD"</code> ou <code>Date</code>); <code>year</code> junto = erro; data incompleta = erro (recusado por complexidade); em tabela sem partição anual = erro. Os anos lidos são os abrangidos pela janela; o corte é pós-leitura pela data de REFERÊNCIA do documento (<code>dt_refer</code> ou <code>data_referencia</code>), nunca pela data de entrega (<code>filter_by_reference_date()</code>).</li>
+</ul><p>Sobre exercícios contidos em cada CSV anual: o portal publica em cada ano apenas <code>ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}</code> — o ano declarado e seu N-1. <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> não reconstrói o antepenúltimo: retorna o conteúdo literal do CSV do <code>year</code> pedido. Para histórico mais longo, pedir <code>year = (N-2):N</code> e empilhar; dedup por <code>(cd_cvm, cd_conta, dt_fim_exerc)</code> é trivial.</p>
 </div>
 <div class="section level3">
 <h3 id="id_22-colunas-chave-universais-cad--itr--dfp--fre-header">2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)<a class="anchor" aria-label="anchor" href="#id_22-colunas-chave-universais-cad--itr--dfp--fre-header"></a></h3>
@@ -212,9 +218,9 @@
 <p>Em tabelas ITR/DFP contábeis: <code>VL_CONTA</code> é multiplicada por <code>ESCALA_MOEDA</code> (<code>UNIDADE</code>=1, <code>MIL</code>=1e3, <code>MILHÃO</code>=1e6, <code>BILHÃO</code>=1e9) e retornada em reais absolutos. <code>escala_moeda</code> é removida do tibble; <code>moeda</code> mantida (constante <code>"REAL"</code> na v0.1).</p>
 </div>
 <div class="section level3">
-<h3 id="id_27-seleção-de-companhias-via-issuer">2.7 Seleção de companhias via <code>issuer</code>
-<a class="anchor" aria-label="anchor" href="#id_27-sele%C3%A7%C3%A3o-de-companhias-via-issuer"></a></h3>
-<p>Argumento único com <strong>detecção automática de tipo</strong> (implementado em <code>filter_by_issuer()</code> em <code>R/api-issuer-fetch.R</code>):</p>
+<h3 id="id_27-seleção-de-companhias-via-issuer-e-cnpjticker">2.7 Seleção de companhias via <code>issuer</code> (e <code>cnpj</code>/<code>ticker</code>)<a class="anchor" aria-label="anchor" href="#id_27-sele%C3%A7%C3%A3o-de-companhias-via-issuer-e-cnpjticker"></a></h3>
+<p>Em <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> (v0.3) a seleção é por <strong><code>cnpj</code></strong> (só CNPJ, com ou sem pontuação — <code>check_cnpj()</code> recusa código CVM e nome, inclusive como cortesia a quem migra do GetDFPData2) e/ou <strong><code>ticker</code></strong> (código B3 → CNPJ via <code>fca/valor_mobiliario</code>, lido do mesmo <code>source</code>; <code>check_ticker()</code> recusa o que não tem forma de ticker). Os dois se somam; CNPJ ausente da tabela = zero linhas, calado; ticker ausente do FCA = <code>cvmdata_error_input</code>. Busca textual e CD_CVM ficaram SÓ em <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code> (deprecada); o cadastro <code>cvm_fetch("cad", "companhias")</code> é o lugar de resolver nome/código → CNPJ. Sem <code>cpf</code>: a CVM não publica CPF (cadastros PF só trazem nome; filtro de PF fica para a v0.7).</p>
+<p>Em <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>, argumento único com <strong>detecção automática de tipo</strong> (implementado em <code>filter_by_issuer()</code> em <code>R/api-issuer-fetch.R</code>, que <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> reaproveita só no ramo CNPJ):</p>
 <table class="table"><colgroup><col width="33%"><col width="33%"><col width="33%"></colgroup><thead><tr><th>Padrão do input (após <code><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character()</a></code>)</th>
 <th>Interpretação</th>
 <th>Match contra</th>
@@ -260,7 +266,7 @@
 <table class="table"><colgroup><col width="50%"><col width="50%"></colgroup><thead><tr><th>Prefixo</th>
 <th>Conteúdo</th>
 </tr></thead><tbody><tr><td><code>api-</code></td>
-<td>Fetchers públicos (<code>issuer</code>, <code>fund</code>, <code>agent</code>, <code>offering</code>, <code>event</code>) + <code>cvm-groups</code>
+<td>Fetcher público (<code>api-cvm-fetch.R</code>: casca de validação sobre <code>issuer_fetch_internal()</code>), <code>api-issuer-fetch.R</code> (pipeline + wrapper deprecado + <code>filter_by_issuer()</code> + resolver de ticker) + <code>cvm-groups</code>
 </td>
 </tr><tr><td><code>schema-</code></td>
 <td>Loader de YAML (<code>schema-load.R</code>)</td>
@@ -292,12 +298,12 @@
 <div class="section level2">
 <h2 id="id_6-hierarquia-de-classes-de-condição">6. Hierarquia de classes de condição<a class="anchor" aria-label="anchor" href="#id_6-hierarquia-de-classes-de-condi%C3%A7%C3%A3o"></a></h2>
 <pre><code>cvmdata_error                          (pai genérico de erros)
-├── cvmdata_error_input                (argumento inválido do usuário)
-│   ├── cvmdata_error_input_ambiguous  ((dataset, table) ocorre em mais
-│   │                                   de um group; passar group explícito)
-│   └── cvmdata_error_input_group      (fund/agent/offering/event_fetch
-│                                       chamada antes da implementação plena
-│                                       — aponta para ROADMAP)
+├── cvmdata_error_input                (argumento inválido do usuário;
+│   │                                   inclui cnpj/ticker/basis/from/to
+│   │                                   malformados em cvm_fetch())
+│   └── cvmdata_error_input_ambiguous  ((dataset, table) ocorre em mais
+│                                       de um group; passar group explícito)
+│       (cvmdata_error_input_group saiu na v0.3 com os skeletons)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
 │   └── cvmdata_error_http_transport   (o portal não respondeu: DNS,
 │                                       connect TCP, TLS, timeout de

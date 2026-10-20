@@ -2,6 +2,52 @@
 
 ## cvmdata 0.2.0.9000 (in development)
 
+### ⚠️ Breaking changes
+
+- The four skeleton fetchers `fund_fetch()`, `agent_fetch()`,
+  `offering_fetch()` and `event_fetch()`, exported since v0.1.0.9000 as
+  placeholders that only aborted, are gone, and so is their condition
+  class `cvmdata_error_input_group`. The 2026-05-25 architecture of five
+  fetchers by data contract is superseded: a single function serves
+  every dataset, and the groups planned for v0.4-v0.8 (funds, agents,
+  offerings, events) will extend
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  through their schemas instead of shipping new functions.
+  [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+  keeps its `contract` column as a planning map.
+
+- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  is deprecated in favour of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and warns once per session (`lifecycle`). It keeps its behaviour,
+  including the `issuer` argument’s CVM-code and free-text forms, until
+  it is removed in a later release.
+
+### New features
+
+- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  is the single public fetcher, built on the same pipeline as
+  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md):
+  `cvm_fetch(dataset, table, cnpj, ticker, year, from, to, basis, ...)`.
+  - Issuers are selected by `cnpj` (CNPJ only, with or without
+    punctuation; a CVM code or a company name aborts) and/or `ticker`
+    (B3 trading code, resolved through `fca/valor_mobiliario` from the
+    same `source`). The free-text and CVM-code lookups of `issuer` were
+    not carried over: the registry `cvm_fetch("cad", "companhias")` is
+    the place to resolve a name or a code to a CNPJ.
+  - The period is `year` (whole published years, as before) or a
+    `from`/`to` window of complete dates: the yearly files spanned by
+    the window are read and rows are kept by the document’s reference
+    date (`dt_refer` / `data_referencia`). Giving both aborts, as does
+    an incomplete date or a window on a snapshot table such as CAD.
+  - `basis` replaces `report_type` for the tables published in
+    individual and consolidated variants: `"ind"`, `"con"` or
+    `c("ind", "con")`, which stacks both. There is no default, because
+    many issuers file only individual statements. Those tables always
+    carry a `basis` column in the result, on both backends; the mirror’s
+    `report_type` partition column no longer leaks through
+    [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+
 ### Data coverage
 
 - Corrected the declared `first_year` for the v0.2 datasets, which had
@@ -170,7 +216,8 @@
 
 ### ⚠️ Breaking changes
 
-- `cvm_fetch()` has been renamed
+- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  has been renamed
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   to reflect the contract of CVM’s company-issuer datasets (the v0.1
   scope). The rename is mechanical:
@@ -188,11 +235,11 @@
   years and defaults to the latest available year when `NULL`. The
   renamed arguments still accept vectors of any length.
 
-  `cvm_fetch()` is **removed without a deprecation wrapper**. Calls
-  using the old name will fail with
-  `could not find function "cvm_fetch"`. Likewise, passing the old
-  argument names will abort with `cvmdata_error_input` and a hint
-  suggesting the new names.
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  is **removed without a deprecation wrapper**. Calls using the old name
+  will fail with `could not find function "cvm_fetch"`. Likewise,
+  passing the old argument names will abort with `cvmdata_error_input`
+  and a hint suggesting the new names.
 
   Rationale: cvmdata has zero CRAN distribution and zero external users
   at v0.1.0; the breaking change is contained to a few collaborators who
@@ -206,13 +253,9 @@
   character longer and removes a thin alias that was only retained for
   ergonomics during the Session 01 prototype.
 
-- Four further fetchers
-  ([`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
-  [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md),
-  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md))
-  will be exported as skeletons in the following development cycle.
-  v0.1.0.9000 itself only ships
+- Four further fetchers (`fund_fetch()`, `agent_fetch()`,
+  `offering_fetch()`, `event_fetch()`) will be exported as skeletons in
+  the following development cycle. v0.1.0.9000 itself only ships
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   as a functional fetcher.
 
@@ -339,21 +382,16 @@
   with `cvmdata_error_input_ambiguous`.
 
 - Four new fetchers exported with skeleton implementation:
-  [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
-  (fund datasets — `fundos-de-investimento`,
+  `fund_fetch()` (fund datasets — `fundos-de-investimento`,
   `fundos-de-investimento-imobiliarios`, `fundos-estruturados`, full
-  implementation arriving in v0.4-v0.6);
-  [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md)
-  (registered agents across the eight `administradores`,
-  `agentes-autonomos`, `agentes-fiduciarios`, `auditores`,
+  implementation arriving in v0.4-v0.6); `agent_fetch()` (registered
+  agents across the eight `administradores`, `agentes-autonomos`,
+  `agentes-fiduciarios`, `auditores`,
   `consultores-de-valores-mobiliarios`, `coordenadores-de-ofertas`,
   `participantes-intermediarios` and `investidores-nao-residentes`
-  groups, v0.7);
-  [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
-  (public offerings — `ofertas-publicas` and
-  `plataformas-de-crowdfunding`, v0.7); and
-  [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
-  (sanctioning proceedings and declaratory acts —
+  groups, v0.7); `offering_fetch()` (public offerings —
+  `ofertas-publicas` and `plataformas-de-crowdfunding`, v0.7); and
+  `event_fetch()` (sanctioning proceedings and declaratory acts —
   `atividade-sancionadora` and `atos-declaratorios`, v0.8). Calling any
   of these in v0.1.0.9000 aborts with the new condition class
   `cvmdata_error_input_group` and a message pointing to ROADMAP.md.
@@ -451,7 +489,8 @@
   this clears the path for v0.2+ datasets that live under other groups
   (`fundos-de-investimento`, etc.) without colliding dataset slugs. A
   one-time internal helper (`cache_migrate_v0_1_to_v0_2()`, not
-  exported) runs automatically on first invocation of `cvm_fetch()`,
+  exported) runs automatically on first invocation of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
   [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
   or
   [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
@@ -508,7 +547,8 @@
 
 ### Bug fixes
 
-- `cvm_fetch()` and `cad_fetch()` no longer fail with the cryptic
+- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and `cad_fetch()` no longer fail with the cryptic
   `cvmdata_error_internal` “Got archive=, file=” when the R session runs
   under `LC_CTYPE = "C"`. The schema loader now reads the bundled YAMLs
   forcing UTF-8 instead of relying on the active locale, so multibyte
@@ -526,18 +566,20 @@
 
 First public release. Covers the four core CVM publicly-traded-company
 datasets — CAD (registry), DFP (annual statements), ITR (quarterly
-statements) and FRE (reference form) — with a tidy `cvm_fetch()` API,
-year-partitioned mirror in GitHub Releases (refreshed weekly), and an
-HTTP-with-cache backend against `dados.cvm.gov.br` for byte-level
+statements) and FRE (reference form) — with a tidy
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+API, year-partitioned mirror in GitHub Releases (refreshed weekly), and
+an HTTP-with-cache backend against `dados.cvm.gov.br` for byte-level
 freshness.
 
 ### Breaking changes
 
-- The default `source` of `cvm_fetch()` is now `"mirror"` (parquet via
-  DuckDB), not `"cvm"` (CVM Open Data Portal). Scripts that need
-  byte-level freshness from the regulator should pass `source = "cvm"`
-  explicitly or persist the choice with `cvm_source_set("cvm")`. The
-  `"cvm"` backend remains fully supported.
+- The default `source` of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  is now `"mirror"` (parquet via DuckDB), not `"cvm"` (CVM Open Data
+  Portal). Scripts that need byte-level freshness from the regulator
+  should pass `source = "cvm"` explicitly or persist the choice with
+  `cvm_source_set("cvm")`. The `"cvm"` backend remains fully supported.
 
 ### ETL and mirror
 
@@ -609,8 +651,8 @@ freshness.
   reads `getOption("cvmdata.source", "cvm")`;
   [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
   validates the value against `c("cvm", "mirror")` and persists it.
-  `cvm_fetch()` now declares `source = NULL` and resolves the default
-  via
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  now declares `source = NULL` and resolves the default via
   [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md),
   so precedence is arg \> option \> built-in default. The built-in
   default is `"cvm"` in the v0.1 series and transitions to `"mirror"` in

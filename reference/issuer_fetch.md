@@ -1,9 +1,22 @@
-# Fetch a CVM open-data table for an issuer dataset
+# Fetch a CVM open-data table for an issuer dataset (deprecated)
 
-Single entry point for retrieving any table from any CVM issuer-class
-dataset covered by the package. Selects the right URL, downloads (or
-serves from cache), parses, applies schema-declared transformations, and
-returns a tibble carrying provenance attributes.
+`issuer_fetch()` was superseded by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+the single public fetcher, and is deprecated: every call warns once per
+session and the function will be removed in a later release. Migrate by
+selecting issuers with `cnpj` (CNPJ only) or `ticker` (B3 code) instead
+of `issuer`, and the statement basis with `basis` instead of
+`report_type`.
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+does not take CVM codes or company names; look them up in
+`cvm_fetch("cad", "companhias")`.
+
+Until removal the function keeps its original behaviour: it selects the
+right URL, downloads (or serves from cache), parses, applies
+schema-declared transformations, and returns a tibble carrying
+provenance attributes. Column names, categorical values and free-text
+fields are preserved in Portuguese exactly as published by CVM
+(snake_case minúsculo).
 
 ## Usage
 
@@ -100,11 +113,6 @@ issuer_fetch(
 A tibble of class `cvm_tbl` carrying the five provenance attributes
 `source`, `fetched_at`, `dataset`, `table` and `package_version`.
 
-## Details
-
-Column names, categorical values and free-text fields are preserved in
-Portuguese exactly as published by CVM (snake_case minúsculo).
-
 ## Filing versions
 
 When a table carries several filings for the same issuer and reference
@@ -123,11 +131,7 @@ an earlier filing than the last delivery keeps the CVM numbers and warns
 
 ## See also
 
-Other fetchers:
-[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md),
-[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
-[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 
 ## Examples
 

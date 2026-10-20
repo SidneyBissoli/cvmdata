@@ -11,9 +11,9 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
 - FRE detail tables use a different header convention from CAD/ITR/DFP:
   `cnpj_companhia`, `data_referencia`, `nome_companhia` (no `cd_cvm`
   column in the detail rows).
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  smooths over this — CD_CVM filters resolve via the dataset’s
-  `submissao` and the user-facing interface stays identical.
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  smooths over this — `cnpj` matches `cnpj_companhia` here and
+  `cnpj_cia` elsewhere, so the call is the same everywhere.
 - Eight tables in FRE ship **without published META** (CVM never
   released the dictionary file). The package declares them with
   `meta_status: missing` and requires `validate = "warn"` or `"skip"` to
@@ -50,30 +50,28 @@ marked ✱ return rows with `NA` in every dictionary column except
 ## Workflow 1 — Audit and ESG/PCD disclosures for one issuer
 
 Goal: pull the audit firm history and the PCD (*Pessoa com Deficiência*)
-employment counts for **BCO BRASIL S.A.** (CD_CVM `1023`), reference
-year 2024.
+employment counts for **BCO BRASIL S.A.** (CNPJ `00.000.000/0001-91`),
+reference year 2024.
 
 ### The audit firm
 
 ``` r
 
-auditor <- issuer_fetch(
+auditor <- cvm_fetch(
   "fre", "auditor",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
-#>   carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -81,7 +79,7 @@ auditor <- issuer_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.473096
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:53.49654
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -97,9 +95,9 @@ auditor
 ```
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
-`nome_companhia` (no `cd_cvm`). The package looked up CNPJ for CD_CVM
-`1023` through `fre/submissao` of the same year, then filtered on CNPJ.
-`keep_latest_version` has already de-duplicated re-filings.
+`nome_companhia` (no `cd_cvm`). The `cnpj` filter matched
+`cnpj_companhia` directly. `keep_latest_version` has already
+de-duplicated re-filings.
 
 ### PCD employment counts (table without published META)
 
@@ -109,19 +107,17 @@ refuses to read it:
 
 ``` r
 
-issuer_fetch("fre", "empregado_PCD",
-          issuer = "1023", year = 2024)
+cvm_fetch("fre", "empregado_PCD",
+          cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
-#>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.736846
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:53.691521
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -136,24 +132,22 @@ and returns the tibble; with `validate = "skip"` it runs silently:
 
 ``` r
 
-pcd <- issuer_fetch(
+pcd <- cvm_fetch(
   "fre", "empregado_PCD",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024,
   validate  = "warn"
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
-#>   does not carry `cd_cvm`).
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:10.896266
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:53.845045
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -174,23 +168,21 @@ FRE filing.
 
 ``` r
 
-posicao <- issuer_fetch(
+posicao <- cvm_fetch(
   "fre", "posicao_acionaria",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "posicao_acionaria"
-#>   does not carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpYuDIIS/duckdb
+#> ℹ /tmp/Rtmp4XrZXF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -206,7 +198,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:11.382915
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:54.400269
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
@@ -237,8 +229,8 @@ declared in each YAML guard against silent schema drift.
 
 ## Where to read next
 
-- **issuer-fetch** — `companies` / `years` / `validate` semantics in
-  full.
+- **issuer-fetch** — `cnpj` / `ticker` / `year` / `from` / `to` /
+  `validate` semantics in full.
 - **itr-dfp** — financial statements; same package, different table
   semantics.
 - **cvm-defects** — why eight FRE tables lack META, plus the broader

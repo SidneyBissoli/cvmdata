@@ -37,8 +37,8 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Deep dives</h6></li>
     <li><a class="dropdown-item" href="../articles/getting-started.html">Getting started with cvmdata</a></li>
-    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and 5 fetcher contracts</a></li>
-    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">issuer_fetch(): the generic API</a></li>
+    <li><a class="dropdown-item" href="../articles/groups-overview.html">Groups overview: the 18 CKAN groups and the single fetcher</a></li>
+    <li><a class="dropdown-item" href="../articles/issuer-fetch.html">cvm_fetch(): the generic API</a></li>
     <li><a class="dropdown-item" href="../articles/itr-dfp.html">Quarterly and annual statements (ITR &amp; DFP)</a></li>
     <li><a class="dropdown-item" href="../articles/fre.html">Reference Form (FRE)</a></li>
     <li><a class="dropdown-item" href="../articles/ipe-vlmo.html">IPE and VLMO: the document index vs. the structured data</a></li>
@@ -108,7 +108,7 @@ points at with a <code>link_download</code> URL is the one VLMO has
 already parsed into rows and columns.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># IPE: the index entry for the art. 11 filing (a PDF link)</span></span>
-<span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"ipe"</span>, <span class="st">"ipe"</span>, issuer <span class="op">=</span> <span class="st">"BBAS3"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"ipe"</span>, <span class="st">"ipe"</span>, ticker <span class="op">=</span> <span class="st">"BBAS3"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">art11</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span></span>
 <span>  <span class="va">idx</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Valores Mobili"</span>, <span class="va">categoria</span>, fixed <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -116,8 +116,8 @@ already parsed into rows and columns.</p>
 <span><span class="va">art11</span><span class="op">$</span><span class="va">link_download</span>   <span class="co"># URL of the filed PDF on the CVM portal</span></span>
 <span></span>
 <span><span class="co"># VLMO: the structured movements from that same filing</span></span>
-<span><span class="va">mov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="st">"vlmo"</span>, <span class="st">"consolidado"</span>, issuer <span class="op">=</span> <span class="st">"BBAS3"</span>,</span>
-<span>                    year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">mov</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"vlmo"</span>, <span class="st">"consolidado"</span>, ticker <span class="op">=</span> <span class="st">"BBAS3"</span>,</span>
+<span>                 year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="va">mov</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tipo_cargo"</span>, <span class="st">"data_movimentacao"</span>, <span class="st">"quantidade"</span>,</span>
 <span>        <span class="st">"preco_unitario"</span>, <span class="st">"volume"</span><span class="op">)</span><span class="op">]</span></span></code></pre></div>
 </div>

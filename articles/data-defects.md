@@ -35,32 +35,31 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 2 | CEP loses leading zeros in CAD | META declares `tipo_dados: numeric`; “01310-100” arrives as `1310100` | Preserved; a `cep_pad()` helper is on the v0.2 list. The column is forced to `character`. |
 | 3 | Empty `Descrição` / `Domínio` in some META FRE entries | Reader sees partial metadata blocks | Tolerated. The dictionary snapshot keeps the row with `NA` for the empty fields. |
 | 4 | `VL_CONTA` declared `decimal(29,10)` | Up to 29 digits of precision; R `double` resolves ~15–17 significant figures | Documented limitation. No silent truncation; values above the safe range have not been observed in the public companies feed. |
-| 5 | CD_CVM zero-padding inconsistent between datasets | CAD ships `1023`; ITR/DFP ship `001023` | **See example below.** `companies` accepts either form; internal match strips/restores padding. |
-| 6 | CNPJ comes with punctuation (`00.000.000/0001-91`) | Per-row formatting; not stripped upstream | Preserved in `cnpj_cia`. `companies` accepts both punctuated and clean forms. [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md) / [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md) round-trip. |
+| 5 | CD_CVM zero-padding inconsistent between datasets | CAD ships `1023`; ITR/DFP ship `001023` | **See example below.** Preserved as published; [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) filters by CNPJ, so the padding never enters a call. |
+| 6 | CNPJ comes with punctuation (`00.000.000/0001-91`) | Per-row formatting; not stripped upstream | Preserved in `cnpj_cia`. `cnpj` accepts both punctuated and clean forms. [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md) / [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md) round-trip. |
 | 7 | `VL_CONTA × ESCALA_MOEDA` (UNIDADE / MIL / MILHÃO / BILHÃO) | Two columns; user must multiply | **See example below.** Applied via the canonical `multiply_by_scale` transformation; `escala_moeda` dropped. |
 | 8 | Eight FRE tables ship without published META | Dictionary `.txt` never released for `empregado_PCD` and seven kin | **See example below.** YAML declares `meta_status: missing`; `validate = "warn"` or `"skip"` opt-in required. |
-| 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1 | Returned as-is. To assemble three or more consecutive years, pass an explicit `years` vector spanning the range. |
+| 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1 | Returned as-is. To assemble three or more consecutive years, pass an explicit `year` vector spanning the range. |
 | 10 | FRE 2024 META URL anomalies | Archive name is `meta_fre_cia_aberta.zip` (no `_txt.zip` suffix); `empregado_local_faixa_etaria` entry lives without the `meta_` prefix | Schema-level fixups: `cvm_dictionary_url` lists the archive plus entry; reader looks for both prefixed and bare entry names. |
 | 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see \#14). |
 | 12 | Dates as `YYYY-MM-DD` strings | Plain strings in the CSV | Converted to R `Date` for every column the dictionary declares `tipo_dados: "date"`. |
-| 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column | Filter must run on CNPJ | **See example below.** CD_CVM tokens resolve to CNPJ via the dataset’s `submissao` of the same year. |
+| 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column | Filter must run on CNPJ | **See example below.** [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) identifies issuers by CNPJ (or ticker) only, matching `cnpj_cia` or `cnpj_companhia` as the table carries. |
 | 14 | Repeated filings and repeated rows | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** The last delivery wins in `submissao`; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
 | 15 | A later filing delivered under a lower `VERSAO` | The statement CSVs keep the highest version, not the last delivery | **See below.** `cvmdata_warn_stale_filing` names the issuers; the table keeps the CVM numbers. |
 
 ## Mini-examples for the structural cases
 
-### \#5 — CD_CVM padding accepted in either form
+### \#5 — CD_CVM padding preserved per dataset
 
-CAD ships CD_CVM unpadded, ITR/DFP pad to six digits.
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-normalizes both:
+CAD ships CD_CVM unpadded, ITR/DFP pad to six digits. The same issuer,
+selected by CNPJ in both, shows the two forms:
 
 ``` r
 
-a <- issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "1023",   year = 2024)
+a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+               year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -68,42 +67,35 @@ a <- issuer_fetch("dfp", "bpa", report_type = "ind",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-b <- issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "001023", year = 2024)
+b <- cvm_fetch("cad", "companhias", cnpj = "00.000.000/0001-91")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-identical(a[, !(names(a) %in% character(0))],
-          b[, !(names(b) %in% character(0))])
-#> [1] FALSE
 unique(a$cd_cvm)
 #> [1] "001023"
+unique(b$cd_cvm)
+#> [1] "1023"
 ```
 
 The returned `cd_cvm` column is whatever the dataset publishes —
 six-digit padded for DFP, two- to five-digit unpadded for CAD.
 Identifier columns are forced to `character` (CLAUDE.md §2.4) so neither
-form is corrupted.
+form is corrupted. Because
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+selects issuers by CNPJ, the padding never has to be normalised at the
+call; the registry is where a CVM code is translated to its CNPJ.
 
 ### \#7 — `VL_CONTA × ESCALA_MOEDA` applied as published
 
@@ -124,10 +116,10 @@ yaml::read_yaml(system.file(
 
 ``` r
 
-bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
-                 issuer = "1023", year = 2024)
+bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+                 year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -135,7 +127,7 @@ bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -145,7 +137,7 @@ bpa <- issuer_fetch("dfp", "bpa", report_type = "ind",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:01.81096
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:48.341696
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -163,19 +155,17 @@ dictionary. The default `validate = "strict"` refuses to read them:
 
 ``` r
 
-issuer_fetch("fre", "empregado_PCD",
-          issuer = "1023", year = 2024)
+cvm_fetch("fre", "empregado_PCD",
+          cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "empregado_PCD"
-#>   does not carry `cd_cvm`).
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 00:32:03.581573
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:08:49.584686
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -214,20 +204,18 @@ Result: at most one row per filing key in the returned tibble.
 
 ``` r
 
-auditor <- issuer_fetch("fre", "auditor",
-                     issuer = "1023", year = 2024)
+auditor <- cvm_fetch("fre", "auditor",
+                     cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
-#>   carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -240,30 +228,29 @@ nrow(unique(auditor[, c("cnpj_companhia", "data_referencia")])) ==
 #> [1] FALSE
 ```
 
-### \#13 — CD_CVM filter against tables without `cd_cvm`
+### \#13 — Tables without `cd_cvm`
 
 `fre/auditor`, `dfp/composicao_capital`, `dfp/parecer`, and several
 FRE-detail tables index by `cnpj_companhia` (or `cnpj_cia`) without
-carrying `cd_cvm`. The package reads the dataset’s `submissao` for the
-same year, looks up CNPJ for each CD_CVM token in `companies`, and
-applies the filter on CNPJ:
+carrying `cd_cvm`.
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+identifies issuers by CNPJ (or by a B3 ticker, resolved to CNPJ), and
+matches whichever CNPJ column the table carries:
 
 ``` r
 
-auditor <- issuer_fetch("fre", "auditor",
-                     issuer = "1023", year = 2024)
+auditor <- cvm_fetch("fre", "auditor",
+                     cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ Resolving CD_CVM 1023 via "fre"/submissao for 2024 (table "auditor" does not
-#>   carry `cd_cvm`).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpbWVpjU/duckdb
+#> ℹ /tmp/RtmpJtmAJd/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -279,9 +266,11 @@ unique(auditor$nome_companhia)
 ```
 
 The interface is identical regardless of which table holds CD_CVM
-natively. If a CD_CVM token is not present in the year’s `submissao`,
-the call aborts with `cvmdata_error_input` rather than silently
-returning an empty tibble.
+natively. A CVM code known only by itself is translated to its CNPJ
+through the registry (`cvm_fetch("cad", "companhias")`) or the dataset’s
+`submissao`; the deprecated
+[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+still does that lookup on the caller’s behalf until it is removed.
 
 ### \#14 and \#15 — `VERSAO` is not a filing key
 
@@ -324,8 +313,8 @@ For defects 1, 2, 3, 4, 6, 9, 10, and 12 the package’s behaviour is
 either purely preservational (1, 2, 3, 4, 6) or structurally declared in
 the schema (9, 10, 12). The inventory table above points at each YAML
 and at the relevant CLAUDE.md section; the package’s source under
-`R/transform-schema.R`, `R/util-csv-cvm.R` and `R/api-issuer-fetch.R` is
-the canonical reference.
+`R/transform-schema.R`, `R/util-csv-cvm.R`, `R/api-cvm-fetch.R` and
+`R/api-issuer-fetch.R` is the canonical reference.
 
 ## Where to read next
 

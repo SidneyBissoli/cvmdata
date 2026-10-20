@@ -1,29 +1,15 @@
 # Package index
 
-## Fetchers
+## Fetcher
 
-Five functions to retrieve any CVM open-data table covered by the
-package. v0.1.0.9000 ships only
+One function retrieves any CVM open-data table covered by the package.
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-as functional;
-[`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md),
-[`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md),
-[`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
-and
-[`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
-are exported as skeletons documenting the planned v0.4-v0.8 contracts
-(calling them aborts with `cvmdata_error_input_group`).
+is its deprecated predecessor and will be removed in a later release.
 
+- [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  : Fetch a CVM open-data table
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  : Fetch a CVM open-data table for an issuer dataset
-- [`fund_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/fund_fetch.md)
-  : Fetch a CVM open-data table for a fund dataset
-- [`agent_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/agent_fetch.md)
-  : Fetch a CVM open-data table for a registered-agent dataset
-- [`offering_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/offering_fetch.md)
-  : Fetch a CVM open-data table for a public-offering dataset
-- [`event_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/event_fetch.md)
-  : Fetch a CVM open-data table for a regulatory-event dataset
+  : Fetch a CVM open-data table for an issuer dataset (deprecated)
 
 ## Cache
 
@@ -43,7 +29,7 @@ window for HTTP revalidation is configurable via the
 ## Source backend
 
 Configure which backend
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 queries (direct CVM portal or the parquet mirror published in GitHub
 Releases).
 
