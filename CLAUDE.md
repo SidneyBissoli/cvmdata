@@ -8,10 +8,12 @@ precisem reler tudo. Quando este `CLAUDE.md` divergir de um canônico,
 `cvmdata_rodada2-5_naming_unificado-v03.md` para naming de colunas e
 tabelas, `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para a
 política do reader, e
-`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` para a
-arquitetura de grupos (os 5 fetchers por contrato que ele previa foram
-substituídos pela função única `cvm_fetch()` em 2026-10 — §2.1; o
-arquivo está ausente do disco desde 2026-10-16, item do ROADMAP).
+`data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md` para a
+arquitetura da API (função única `cvm_fetch()`, 2026-10-16/19 — §2.1).
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`
+(2026-05-25) é HISTÓRICO: os 5 fetchers por contrato que ele previa
+foram superados; valem ainda a §1.1 (mapping grupo → contrato), §3.2
+(singular), §4.3 (mirror) e §4.6 (atributo `group`).
 Estado de execução por fase no
 `ROADMAP.md`; histórico de breaking changes em `NEWS.md`.
 
@@ -329,9 +331,11 @@ snapshots, fixtures e vignette data) com **auditorias one-shot**
   e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` (reader), junto
   com os demais docs `cvmdata_rodada*.md` e os `PROMPT_CLAUDE_*.md` de
   sessão.
-- **`data-raw/decisions/`**: `cvmdata_arquitetura_grupos_decisao_v2.md`
-  (arquitetura de grupos) + docs de planejamento v0.2
-  (`cvmdata_v0-2_*.md`).
+- **`data-raw/decisions/`**: `cvmdata_v0-3_funcao_unica_decisao.md`
+  (arquitetura vigente), `cvmdata_arquitetura_grupos_decisao_v2.md`
+  (histórico; mapping de grupos) + docs de planejamento v0.2
+  (`cvmdata_v0-2_*.md`). O `.gitignore` ancora `/cvmdata_arquitetura_*`
+  na raiz de propósito: sem a barra o padrão engolia esta pasta.
 
 Apenas os build scripts são regenerados em ciclo normal; canônicos só
 mudam por decisão deliberada.

@@ -75,9 +75,11 @@ cvmdata_rodada*.md
 
 # Locally rendered architecture decision docs — the canonical copies
 # live in data-raw/decisions/; renders dropped at the repo root are
-# local working copies.
-cvmdata_arquitetura_*.md
-cvmdata_arquitetura_*.html
+# local working copies. Anchored to the root on purpose: without the
+# leading slash the pattern also matched data-raw/decisions/ and the
+# canonical v2 doc dropped out of the index (2026-08-25 to 2026-10-19).
+/cvmdata_arquitetura_*.md
+/cvmdata_arquitetura_*.html
 
 # Locally rendered per-version planning docs (e.g.
 # cvmdata_v0-2_planejamento_decisao.html). Only the .html renders are
