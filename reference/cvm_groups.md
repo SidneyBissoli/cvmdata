@@ -39,9 +39,11 @@ through their schemas rather than through new fetcher functions.
 
 The `n_datasets` column reports the totals published by CVM, not the
 count currently implemented in the package. The mapping between groups
-and contracts is fixed for the lifetime of v0.1.x; see
-`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` for the
-rationale.
+and contracts changes only when CVM reorganises its portal; see
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` §1.1 for
+the rationale (historical: the fetchers it planned were superseded by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+decided in `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`).
 
 ## See also
 

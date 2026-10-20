@@ -83,9 +83,12 @@ function</strong>, <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></
 tells the package which columns identify the entity (issuer CNPJ today;
 fund CNPJ, registered-agent id, offering number or event id as those
 groups arrive) and how the data is partitioned in time, so the same
-arguments work across groups. The full rationale is in
-<code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code>;
-this article is the navigation map.</p>
+arguments work across groups. The decision for the single function is in
+<code>data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md</code>;
+the group taxonomy and its contracts come from
+<code>data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md</code>
+§1.1 (the rest of that document is historical); this article is the
+navigation map.</p>
 <p>Today only the <code>companhias</code> group is implemented. The
 others are scheduled on the roadmap (funds from v0.4, agents and public
 offerings in v0.7, regulatory events in v0.8) and will extend

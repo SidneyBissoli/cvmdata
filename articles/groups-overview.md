@@ -7,10 +7,13 @@ group through **one function**,
 the dataset’s schema YAML tells the package which columns identify the
 entity (issuer CNPJ today; fund CNPJ, registered-agent id, offering
 number or event id as those groups arrive) and how the data is
-partitioned in time, so the same arguments work across groups. The full
-rationale is in
-`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`; this
-article is the navigation map.
+partitioned in time, so the same arguments work across groups. The
+decision for the single function is in
+`data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`; the group
+taxonomy and its contracts come from
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` §1.1 (the
+rest of that document is historical); this article is the navigation
+map.
 
 Today only the `companhias` group is implemented. The others are
 scheduled on the roadmap (funds from v0.4, agents and public offerings
