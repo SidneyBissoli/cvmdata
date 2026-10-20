@@ -5,9 +5,10 @@ Documento de referência para sessões do Claude Code no diretório
 essencial dos canônicos de planejamento para que sessões futuras não
 precisem reler tudo. Quando este `CLAUDE.md` divergir de um canônico,
 **prevalece o canônico** — em particular
-`cvmdata_rodada2-5_naming_unificado-v03.md` para naming de colunas e
-tabelas, `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para a
-política do reader, e
+`data-raw/decisions/cvmdata_rodada2-5_naming_unificado-v03.md` para
+naming de colunas e tabelas,
+`data-raw/decisions/cvmdata_rodada3-0-2_politica_reader_sem_meta.md`
+para a política do reader, e
 `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md` para a
 arquitetura da API (função única
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
@@ -358,16 +359,18 @@ no `ROADMAP.md`. Layout do ETL:
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
 snapshots, fixtures e vignette data) com **auditorias one-shot**
 (`run-capacity-audit.R`, `validate-mirror-end-to-end.R`) e
-**`data-raw/decisions/`**. Os canônicos NÃO vivem todos no mesmo
-lugar: - **Raiz do repo**: `cvmdata_rodada2-5_naming_unificado-v03.md`
-(naming) e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` (reader),
-junto com os demais docs `cvmdata_rodada*.md` e os `PROMPT_CLAUDE_*.md`
-de sessão. - **`data-raw/decisions/`**:
+**`data-raw/decisions/`**, onde vivem TODOS os canônicos rastreados
+(desde 2026-10-19): - `cvmdata_rodada2-5_naming_unificado-v03.md`
+(naming) e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` (reader) —
+citados por seção no código e no schema do CAD. -
 `cvmdata_v0-3_funcao_unica_decisao.md` (arquitetura vigente),
 `cvmdata_arquitetura_grupos_decisao_v2.md` (histórico; mapping de
-grupos) + docs de planejamento v0.2 (`cvmdata_v0-2_*.md`). O
-`.gitignore` ancora `/cvmdata_arquitetura_*` na raiz de propósito: sem a
-barra o padrão engolia esta pasta.
+grupos) + docs de planejamento v0.2 (`cvmdata_v0-2_*.md`). Os demais
+`cvmdata_rodada*.md` (rodadas 1, 2, 2.6, 3.0, 3.1) e os
+`PROMPT_CLAUDE_*.md` de sessão ficam FORA do repo (histórico;
+`git show ad04382^:<nome>`). O `.gitignore` ancora `/cvmdata_rodada*.md`
+e `/cvmdata_arquitetura_*` na raiz de propósito: sem a barra o padrão
+engolia esta pasta.
 
 Apenas os build scripts são regenerados em ciclo normal; canônicos só
 mudam por decisão deliberada.

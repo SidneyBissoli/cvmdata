@@ -63,7 +63,7 @@ auditor <- cvm_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -71,7 +71,7 @@ auditor <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -79,7 +79,7 @@ auditor <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 auditor
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:45:55.138787
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:01.618837
 #> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
 #> # A tibble: 2 × 19
 #>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
@@ -110,14 +110,14 @@ refuses to read it:
 cvm_fetch("fre", "empregado_PCD",
           cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:45:55.349403
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:01.823875
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -139,7 +139,7 @@ pcd <- cvm_fetch(
   validate  = "warn"
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -147,7 +147,7 @@ pcd <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 pcd
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:45:55.513836
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:01.984525
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -174,7 +174,7 @@ posicao <- cvm_fetch(
   year = 2024
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -182,7 +182,7 @@ posicao <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwqXigQ/duckdb
+#> ℹ /tmp/RtmplQoFTe/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -198,7 +198,7 @@ cols <- intersect(
   names(posicao)
 )
 posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 01:45:56.077496
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:02.450695
 #> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
 #> # A tibble: 5 × 6
 #>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
