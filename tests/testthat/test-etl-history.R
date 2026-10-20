@@ -73,7 +73,7 @@ test_that("identical content in another row order is not a change", {
   expect_identical(out$n_replaced, 0L)
   expect_named(
     out$rows,
-    c(names(old), "superseded_at", "superseded_by_versao")
+    c(names(old), "superseded_at", "superseded_by_versao", "history_source")
   )
 })
 

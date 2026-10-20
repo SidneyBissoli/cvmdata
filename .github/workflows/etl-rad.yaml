@@ -1,0 +1,109 @@
+name: ETL RAD history
+
+# Recovers the superseded DFP/ITR filings from the CVM RAD and appends
+# them to the history assets of the mirror releases (Part 3b of the
+# versions work, decisions of 2026-10-20; see inst/etl/04-rad-fetch.R).
+#
+# Triggers:
+#   - schedule: daily 02:00 UTC (23:00 BRT), out of the Tuesday 07:00 UTC
+#     window of etl-mirror.yaml. Both robots append to the same history
+#     assets, so they must not run at the same time: a run here lasts
+#     at most `timeout-minutes` and ends before 05:30 UTC.
+#   - workflow_dispatch: `dataset` (empty = dfp then itr, as the cron),
+#     `limit` (documents per dataset, default 300), `year` (one
+#     reference year, smoke test), `dry_run` (read, do not publish).
+#
+# One job per dataset, DFP first (decision 3: most recent year first,
+# DFP before ITR). Each document costs ~26 s of download plus a 10 s
+# crawl delay; 300 documents are ~3 h. A refusal by the RAD (403 or an
+# HTML body) or more than ~10% of failures stops the run with exit
+# status 2 after publishing what was read, which turns the job red: the
+# portfolio monitor watches this workflow and the public
+# `__rad_unread.csv` asset.
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: Dataset (`both` runs dfp then itr, as the cron)
+        required: false
+        default: both
+        type: choice
+        options:
+          - both
+          - dfp
+          - itr
+      limit:
+        description: Documents per dataset in this run
+        required: false
+        default: '300'
+        type: string
+      year:
+        description: Reference year (optional; smoke test, one year only)
+        required: false
+        type: string
+      dry_run:
+        description: Read the documents but do not publish
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write  # gh release upload
+
+concurrency:
+  group: etl-rad
+  cancel-in-progress: false
+
+jobs:
+  rad:
+    runs-on: ubuntu-latest
+    # 300 documents at ~36 s each are ~180 min; the script stops starting
+    # new downloads after --minutes and publishes what it has.
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        dataset: ${{ (github.event_name == 'schedule' || inputs.dataset == 'both') && fromJSON('["dfp","itr"]') || fromJSON(format('["{0}"]', inputs.dataset)) }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CVMDATA_ETL_WORKSPACE: /tmp/cvmdata-etl
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::arrow, any::devtools, any::digest, any::dplyr, any::jsonlite, any::xml2
+          needs: check
+
+      - name: Install cvmdata from source
+        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = FALSE)'
+
+      - name: Stage 04 — RAD history
+        run: |
+          args="--group companhias --dataset ${{ matrix.dataset }}"
+          args="$args --limit ${{ inputs.limit || '300' }}"
+          if [ -n "${{ inputs.year }}" ]; then
+            args="$args --year ${{ inputs.year }}"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args="$args --dry-run"
+          fi
+          # shellcheck disable=SC2086
+          Rscript inst/etl/04-rad-fetch.R $args
+
+      - name: Upload the unread list
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rad-unread-${{ matrix.dataset }}
+          path: ${{ env.CVMDATA_ETL_WORKSPACE }}/out/rad/companhias/${{ matrix.dataset }}/__rad_unread.csv
+          if-no-files-found: ignore
