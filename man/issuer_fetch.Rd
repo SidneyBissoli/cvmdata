@@ -2,7 +2,7 @@
 % Please edit documentation in R/api-issuer-fetch.R
 \name{issuer_fetch}
 \alias{issuer_fetch}
-\title{Fetch a CVM open-data table for an issuer dataset}
+\title{Fetch a CVM open-data table for an issuer dataset (deprecated)}
 \usage{
 issuer_fetch(
   dataset,
@@ -81,15 +81,20 @@ attributes \code{source}, \code{fetched_at}, \code{dataset}, \code{table} and
 \code{package_version}.
 }
 \description{
-Single entry point for retrieving any table from any CVM
-issuer-class dataset covered by the package. Selects the right URL,
-downloads (or serves from cache), parses, applies schema-declared
-transformations, and returns a tibble carrying provenance
-attributes.
-}
-\details{
-Column names, categorical values and free-text fields are preserved
-in Portuguese exactly as published by CVM (snake_case minúsculo).
+\code{issuer_fetch()} was superseded by \code{\link[=cvm_fetch]{cvm_fetch()}}, the single public
+fetcher, and is deprecated: every call warns once per session and
+the function will be removed in a later release. Migrate by
+selecting issuers with \code{cnpj} (CNPJ only) or \code{ticker} (B3 code)
+instead of \code{issuer}, and the statement basis with \code{basis} instead
+of \code{report_type}. \code{cvm_fetch()} does not take CVM codes or company
+names; look them up in \code{cvm_fetch("cad", "companhias")}.
+
+Until removal the function keeps its original behaviour: it selects
+the right URL, downloads (or serves from cache), parses, applies
+schema-declared transformations, and returns a tibble carrying
+provenance attributes. Column names, categorical values and
+free-text fields are preserved in Portuguese exactly as published by
+CVM (snake_case minúsculo).
 }
 \section{Filing versions}{
 
@@ -121,10 +126,6 @@ bb <- issuer_fetch("dfp", "bpa",
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-Other fetchers:
-\code{\link[=agent_fetch]{agent_fetch()}},
-\code{\link[=event_fetch]{event_fetch()}},
-\code{\link[=fund_fetch]{fund_fetch()}},
-\code{\link[=offering_fetch]{offering_fetch()}}
+\code{\link[=cvm_fetch]{cvm_fetch()}}
 }
-\concept{fetchers}
+\keyword{internal}

@@ -1,8 +1,8 @@
-# Regression tests for the Session 06 rename (cvm_fetch -> issuer_fetch,
-# cad_fetch removed, companies -> issuer, years -> year). The renamed
-# orchestration paths are covered by test-issuer-fetch-yearly.R and
-# test-issuer-fetch-cad.R; this file pins down the deprecation surface
-# so that a future refactor cannot silently restore the old names.
+# Regression tests for the Session 06 rename (cad_fetch removed,
+# companies -> issuer, years -> year) and for the v0.3 deprecation of
+# issuer_fetch() in favour of cvm_fetch(). The orchestration paths are
+# covered by test-issuer-fetch-yearly.R and test-issuer-fetch-cad.R;
+# this file pins down the deprecation surface.
 
 # Setup -----------------------------------------------------------------
 
@@ -10,6 +10,7 @@ local_prepare_cad_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
@@ -41,13 +42,17 @@ fresh_head_response <- function() {
 
 # Tests -----------------------------------------------------------------
 
-test_that("cvm_fetch is no longer exported", {
-  expect_false(exists(
-    "cvm_fetch",
-    mode = "function",
-    envir = asNamespace("cvmdata"),
-    inherits = FALSE
-  ))
+test_that("issuer_fetch is deprecated in favour of cvm_fetch", {
+  skip_if_not_installed("httptest2")
+  local_prepare_cad_cache()
+  withr::local_options(lifecycle_verbosity = "warning")
+  lifecycle::expect_deprecated(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      issuer_fetch("cad", "companhias", source = "cvm")
+    ),
+    regexp = "cvm_fetch"
+  )
 })
 
 test_that("cad_fetch is no longer exported", {
@@ -60,6 +65,7 @@ test_that("cad_fetch is no longer exported", {
 })
 
 test_that("issuer_fetch(years = ...) aborts with a migration hint", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", years = 2024),
     class = "cvmdata_error_input"
@@ -71,6 +77,7 @@ test_that("issuer_fetch(years = ...) aborts with a migration hint", {
 })
 
 test_that("issuer_fetch(companies = ...) aborts with a migration hint", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", companies = "BCO BRASIL"),
     class = "cvmdata_error_input"
@@ -82,6 +89,7 @@ test_that("issuer_fetch(companies = ...) aborts with a migration hint", {
 })
 
 test_that("issuer_fetch rejects unknown extra arguments via ...", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", bogus = 1),
     class = "cvmdata_error_input"

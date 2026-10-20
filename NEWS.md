@@ -1,5 +1,46 @@
 # cvmdata 0.2.0.9000 (in development)
 
+## ⚠️ Breaking changes
+
+* The four skeleton fetchers `fund_fetch()`, `agent_fetch()`,
+  `offering_fetch()` and `event_fetch()`, exported since v0.1.0.9000 as
+  placeholders that only aborted, are gone, and so is their condition
+  class `cvmdata_error_input_group`. The 2026-05-25 architecture of five
+  fetchers by data contract is superseded: a single function serves
+  every dataset, and the groups planned for v0.4-v0.8 (funds, agents,
+  offerings, events) will extend `cvm_fetch()` through their schemas
+  instead of shipping new functions. `cvm_groups()` keeps its `contract`
+  column as a planning map.
+
+* `issuer_fetch()` is deprecated in favour of `cvm_fetch()` and warns
+  once per session (`lifecycle`). It keeps its behaviour, including the
+  `issuer` argument's CVM-code and free-text forms, until it is removed
+  in a later release.
+
+## New features
+
+* `cvm_fetch()` is the single public fetcher, built on the same pipeline
+  as `issuer_fetch()`:
+  `cvm_fetch(dataset, table, cnpj, ticker, year, from, to, basis, ...)`.
+  - Issuers are selected by `cnpj` (CNPJ only, with or without
+    punctuation; a CVM code or a company name aborts) and/or `ticker`
+    (B3 trading code, resolved through `fca/valor_mobiliario` from the
+    same `source`). The free-text and CVM-code lookups of `issuer` were
+    not carried over: the registry `cvm_fetch("cad", "companhias")` is
+    the place to resolve a name or a code to a CNPJ.
+  - The period is `year` (whole published years, as before) or a
+    `from`/`to` window of complete dates: the yearly files spanned by
+    the window are read and rows are kept by the document's reference
+    date (`dt_refer` / `data_referencia`). Giving both aborts, as does
+    an incomplete date or a window on a snapshot table such as CAD.
+  - `basis` replaces `report_type` for the tables published in
+    individual and consolidated variants: `"ind"`, `"con"` or
+    `c("ind", "con")`, which stacks both. There is no default, because
+    many issuers file only individual statements. Those tables always
+    carry a `basis` column in the result, on both backends; the mirror's
+    `report_type` partition column no longer leaks through
+    `cvm_fetch()`.
+
 ## Data coverage
 
 * Corrected the declared `first_year` for the v0.2 datasets, which had
