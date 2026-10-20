@@ -36,6 +36,12 @@
 #   surrounding spaces and then its line breaks, as the CVM converter
 #   does; the per-share accounts `3.99*` are "N" in `st_conta_fixa`
 #   whatever the XML says.
+# * `st_conta_fixa` is otherwise the document's own flag. The CSV takes
+#   it from the chart of accounts in force when the file is GENERATED,
+#   so for a few accounts whose status changed between chart versions
+#   the two differ (30 rows in 3 of the 60 calibration documents, all
+#   ITR 2019). Accepted by the owner on 2026-10-20: the document's flag
+#   is the one that held when the filing was delivered.
 # * Only the two most recent periods are kept (`ÚLTIMO`, `PENÚLTIMO`);
 #   the DFP XML also carries the third one, the CSV does not.
 # * Two period columns with the same dates (first quarter: the quarter
