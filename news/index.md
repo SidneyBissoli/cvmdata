@@ -266,7 +266,28 @@
   last delivery (`keep_latest_version`) have a history; `submissao`
   already lists every delivery. Reading the history from
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  and recovering filings superseded before 2026-10 are separate items.
+  is a separate item.
+
+- The filings superseded BEFORE the mirror kept a history are recovered
+  from the CVM document archive (RAD) by a daily robot
+  (`.github/workflows/etl-rad.yaml`, `inst/etl/04-rad-fetch.R`): every
+  DFP/ITR delivery the `submissao` index lists that is not the current
+  one is downloaded, read from its XML (`inst/etl/util-rad.R`, both
+  layouts the RAD has used since 2010) into the eight statement tables
+  with exactly the columns and conventions of the CSV, and appended to
+  the same history assets with `history_source = "rad"`, the receipt
+  date of the delivery that replaced it (`superseded_at`), its `id_doc`
+  and the reason for restatement the document declares
+  (`motivo_reapresentacao`). Rows written by the mirror path carry
+  `history_source = "mirror"`. The reader was calibrated against 60
+  current filings of 2010-2025 read back from the mirror, account by
+  account: values, accounts, periods and descriptions identical;
+  `st_conta_fixa` differs in 30 rows of three 2019 documents, because
+  the CSV takes that flag from the chart of accounts in force when the
+  file is generated; the history keeps the document’s own flag, the one
+  that held when the filing was delivered. Documents the robot cannot
+  read are listed in the public asset `__rad_unread.csv` of each
+  release.
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
