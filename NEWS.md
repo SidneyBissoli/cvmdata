@@ -68,6 +68,31 @@
     `report_type` partition column no longer leaks through
     `cvm_fetch()`.
 
+* `cvm_fetch()` gains `reading`, for the DFP and ITR statement tables
+  (the ones with `ordem_exerc`): the two readings of a fiscal exercise,
+  side by side. Every yearly file carries the exercise it is about
+  (`ÚLTIMO`) and the comparative the issuer presented for the previous
+  one (`PENÚLTIMO`), and the comparative is often restated: about a
+  third of the DFP issuers in 2023 restated 2022 (Porto Seguro's
+  consolidated total assets of 2022 are R$ 50.5 bn in the 2022 file
+  and R$ 39.9 bn in the 2023 one). With `reading = "original"` the call
+  returns the `ÚLTIMO` rows of the file of `year`; with
+  `reading = "restated"`, the `PENÚLTIMO` rows of the file of
+  `year + 1`, which the call reads on its own; with both, the two
+  stacked. Rows come as published, with a `reading` column appended:
+  `dt_refer` and `versao` are those of the document each row came
+  from, and `dt_fim_exerc` (plus `dt_ini_exerc`) identify the
+  exercise. An exercise whose following file is not published yet has
+  no restated reading, and the call says so. `from`/`to` then apply to
+  the exercise end. The default, `reading = NULL`, returns each file as
+  before, `ÚLTIMO` and `PENÚLTIMO` together and no `reading` column.
+  Two things the data showed while measuring: in the ITR, the
+  comparative of a balance sheet is the previous year end, not the
+  previous year's quarter; and the banks, which adopted CMN Resolution
+  4,966 in 2025 without restating, carry the 2024 comparative of their
+  individual statements as zeros, which the restated reading returns as
+  the CVM publishes them.
+
 ## Data coverage
 
 * Corrected the declared `first_year` for the v0.2 datasets, which had
