@@ -8,9 +8,13 @@
 #
 #   - drop: removes `column` from the tibble.
 #
-#   - keep_latest_version: keeps only the row of highest `versao` per
-#     `(cnpj_cia, dt_refer)`. Default policy for v0.1 — historical
-#     versions accessible in v0.2+ via opt-in argument.
+#   - keep_latest_version: keeps, per `(cnpj, reference date)`, the rows
+#     of the filing delivered last — ranked by receipt date, then CVM
+#     document id, then `versao` (see `filing_rank()`). Declared by the
+#     detail tables of every versioned dataset. The `submissao` tables
+#     declare it no more (0.2.0.9000): they are the filing index and
+#     return every delivery; `check_filings()` computes the current
+#     filing from them when it needs one.
 #
 # Unknown actions abort with cvmdata_error_internal.
 
@@ -152,8 +156,8 @@ tx_drop <- function(df, tx, schema) {
 }
 
 # keep_latest_version: groups by the (cnpj, ref_date) pair the table
-# carries and keeps the row of highest `versao`. CAD/ITR/DFP submissao
-# use (cnpj_cia, dt_refer); FRE-detail uses
+# carries and keeps the rows of the filing delivered last. ITR/DFP
+# statement tables use (cnpj_cia, dt_refer); FRE-detail uses
 # (cnpj_companhia, data_referencia) per CLAUDE.md §2.2. When the triple
 # is absent (e.g., CAD has none of them) this is a no-op.
 #
