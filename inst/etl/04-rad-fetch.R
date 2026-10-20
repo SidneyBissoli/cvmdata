@@ -24,7 +24,8 @@
 #   retried on later runs up to `rad_max_attempts` times. A 403 or an
 #   HTML body (the WAF) stops the run at once; more than ~10% of
 #   failures stops it too. Both exit with status 2 after publishing
-#   what was read.
+#   what was read. A run publishes in checkpoints of `rad_checkpoint_docs`
+#   documents, so a job killed later keeps what it had published.
 # * State lives in the release as `__rad_state.json` (documents done, by
 #   `id_doc` with the hash of the XML; documents unread with the reason;
 #   the last runs). The `hash` of `__source_hash.json` is NOT touched:
@@ -70,6 +71,7 @@ rad_crawl_delay <- 10 # seconds between two requests to the RAD
 rad_max_attempts <- 3L # tries per unread document, across runs
 rad_failure_rate <- 0.10 # of the documents attempted in the run
 rad_failure_floor <- 10L # attempts before the rate is judged
+rad_checkpoint_docs <- 50L # documents between two publications of a run
 
 utc_now <- function(t = Sys.time()) {
   format(t, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
@@ -363,18 +365,31 @@ upload_release_asset <- function(tag, path, attempts = 4L) {
 # --- the run ----------------------------------------------------------
 
 # Downloads and reads the queue until `limit` documents, `minutes` of
-# wall clock, a refusal by the RAD or too many failures. Returns
-# list(by_rel, state, attempted, n_read, failed, stopped).
-rad_run_queue <- function(queue, state, work, limit, minutes, t_start) {
+# wall clock (counted from `t_start`), a refusal by the RAD or too many
+# failures. `tally` carries the counts of the earlier checkpoints of the
+# same run, so the failure rate is judged over the whole run. Returns
+# list(by_rel, state, attempted, n_read, failed, stopped, time_out).
+rad_run_queue <- function(
+  queue,
+  state,
+  work,
+  limit,
+  minutes,
+  t_start,
+  tally = NULL
+) {
   stopped <- NA_character_
+  time_out <- FALSE
   attempted <- 0L
   failed <- 0L
   n_read <- 0L
+  before <- tally %||% list(attempted = 0L, failed = 0L)
   by_rel <- list()
   last_request <- Sys.time() - rad_crawl_delay
   for (i in seq_len(min(limit, nrow(queue)))) {
     if (as.numeric(difftime(Sys.time(), t_start, units = "mins")) > minutes) {
       message(sprintf("[04-rad] time budget of %d min reached", minutes))
+      time_out <- TRUE
       break
     }
     f <- queue[i, ]
@@ -401,14 +416,17 @@ rad_run_queue <- function(queue, state, work, limit, minutes, t_start) {
         message("[04-rad] the RAD refused the request (WAF): stopping")
         break
       }
+      all_attempted <- before$attempted + attempted
+      all_failed <- before$failed + failed
       if (
-        attempted >= rad_failure_floor && failed / attempted > rad_failure_rate
+        all_attempted >= rad_failure_floor &&
+          all_failed / all_attempted > rad_failure_rate
       ) {
         stopped <- "failure-rate"
         message(sprintf(
           "[04-rad] %d of %d documents failed: stopping",
-          failed,
-          attempted
+          all_failed,
+          all_attempted
         ))
         break
       }
@@ -428,7 +446,8 @@ rad_run_queue <- function(queue, state, work, limit, minutes, t_start) {
     attempted = attempted,
     n_read = n_read,
     failed = failed,
-    stopped = stopped
+    stopped = stopped,
+    time_out = time_out
   )
 }
 
@@ -483,7 +502,7 @@ rad_fetch_one <- function(f, work) {
   )
 }
 
-# Merges the rows of the run into the history assets. Returns
+# Merges the rows of a checkpoint into the history assets. Returns
 # list(uploads, n_added, n_skipped, source_hash).
 rad_build_history <- function(by_rel, tag, prev_dir, hist_dir, source_hash) {
   uploads <- character()
@@ -525,6 +544,61 @@ rad_build_history <- function(by_rel, tag, prev_dir, hist_dir, source_hash) {
     n_skipped = n_skipped,
     source_hash = source_hash
   )
+}
+
+# The record of the current run goes first in `state$runs`; a checkpoint
+# of the same run (same `at`) replaces it instead of adding another.
+rad_record_run <- function(state, record, keep = 30L) {
+  runs <- state$runs
+  same <- length(runs) > 0L && identical(runs[[1L]]$at, record$at)
+  if (same) {
+    runs[[1L]] <- record
+  } else {
+    runs <- c(list(record), runs)
+  }
+  state$runs <- utils::head(runs, keep)
+  state
+}
+
+# Writes the state, the unread list and the hash map under `out_dir` and
+# uploads them with the history assets built, unless `dry_run`. Called at
+# every checkpoint, so a run that dies later keeps what it published.
+rad_publish <- function(built, state, index, out_dir, tag, dry_run) {
+  state_path <- rad_write_state(state, file.path(out_dir, "__rad_state.json"))
+  unread_path <- file.path(out_dir, "__rad_unread.csv")
+  utils::write.csv(
+    rad_unread_table(state, index),
+    unread_path,
+    row.names = FALSE,
+    na = ""
+  )
+  hash_path <- file.path(out_dir, "__source_hash.json")
+  jsonlite::write_json(
+    built$source_hash,
+    hash_path,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+  if (dry_run) {
+    message(sprintf(
+      "[04-rad] dry run: %d history asset(s) under %s; nothing uploaded",
+      length(built$uploads),
+      out_dir
+    ))
+    return(invisible(0L))
+  }
+  assets <- c(
+    built$uploads,
+    if (length(built$uploads)) hash_path,
+    state_path,
+    unread_path
+  )
+  for (p in assets) {
+    message("  uploading ", basename(p))
+    upload_release_asset(tag, p)
+  }
+  message(sprintf("[04-rad] published %d asset(s) to %s", length(assets), tag))
+  invisible(length(assets))
 }
 
 rad_main <- function(group, dataset, limit, minutes, year, dry_run) {
@@ -571,80 +645,112 @@ rad_main <- function(group, dataset, limit, minutes, year, dry_run) {
     length(state$unread)
   ))
 
-  run <- rad_run_queue(queue, state, work, limit, minutes, t_start)
-  state <- run$state
+  ctx <- list(
+    tag = tag,
+    work = work,
+    prev_dir = prev_dir,
+    hist_dir = hist_dir,
+    out_dir = out_dir,
+    index = index,
+    limit = limit,
+    minutes = minutes,
+    t_start = t_start,
+    dry_run = dry_run
+  )
+  res <- rad_run_checkpoints(queue, state, source_hash, ctx)
+  tally <- res$tally
   message(sprintf(
-    "[04-rad] run: %d attempted, %d read, %d failed, %d partitions%s",
-    run$attempted,
-    run$n_read,
-    run$failed,
-    length(run$by_rel),
-    if (is.na(run$stopped)) "" else paste0(" (stopped: ", run$stopped, ")")
+    "[04-rad] run: %d tried, %d read, %d failed, +%d rows, %d checkpoint(s)%s",
+    tally$attempted,
+    tally$read,
+    tally$failed,
+    tally$rows,
+    tally$checkpoints,
+    if (is.na(res$stopped)) "" else paste0(" (stopped: ", res$stopped, ")")
   ))
-
-  built <- rad_build_history(run$by_rel, tag, prev_dir, hist_dir, source_hash)
-  message(sprintf(
-    "[04-rad] %d rows appended, %d already in the history",
-    built$n_added,
-    built$n_skipped
-  ))
-
-  state$runs <- c(
-    list(list(
-      at = utc_now(t_start),
-      queue = nrow(queue),
-      attempted = run$attempted,
-      read = run$n_read,
-      failed = run$failed,
-      rows = built$n_added,
-      stopped = if (is.na(run$stopped)) NULL else run$stopped,
-      seconds = round(as.numeric(difftime(Sys.time(), t_start, units = "secs")))
-    )),
-    utils::head(state$runs, 29L)
-  )
-  state_path <- rad_write_state(state, file.path(out_dir, "__rad_state.json"))
-  unread_path <- file.path(out_dir, "__rad_unread.csv")
-  utils::write.csv(
-    rad_unread_table(state, index),
-    unread_path,
-    row.names = FALSE,
-    na = ""
-  )
-  hash_path <- file.path(out_dir, "__source_hash.json")
-  jsonlite::write_json(
-    built$source_hash,
-    hash_path,
-    auto_unbox = TRUE,
-    pretty = TRUE
-  )
-
-  if (dry_run) {
-    message(sprintf(
-      "[04-rad] dry run: %d history asset(s) under %s; nothing uploaded",
-      length(built$uploads),
-      out_dir
-    ))
-  } else {
-    assets <- c(
-      built$uploads,
-      if (length(built$uploads)) hash_path,
-      state_path,
-      unread_path
-    )
-    for (p in assets) {
-      message("  uploading ", basename(p))
-      upload_release_asset(tag, p)
-    }
-    message(sprintf(
-      "[04-rad] published %d asset(s) to %s",
-      length(assets),
-      tag
-    ))
-  }
-  if (!is.na(run$stopped)) {
+  if (!is.na(res$stopped)) {
     quit(status = 2L)
   }
   invisible(NULL)
+}
+
+# The run goes in checkpoints of `rad_checkpoint_docs` documents: each
+# one is merged into the history assets and published before the next
+# starts, so a job killed later loses at most one checkpoint. `ctx` holds
+# the paths and limits of the run. Returns list(tally, stopped).
+rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
+  tally <- list(
+    attempted = 0L,
+    failed = 0L,
+    read = 0L,
+    rows = 0L,
+    checkpoints = 0L
+  )
+  pos <- 1L
+  stopped <- NA_character_
+  repeat {
+    n <- min(rad_checkpoint_docs, ctx$limit - tally$attempted)
+    if (n <= 0L || pos > nrow(queue)) {
+      break
+    }
+    run <- rad_run_queue(
+      queue[seq.int(pos, nrow(queue)), , drop = FALSE],
+      state,
+      ctx$work,
+      n,
+      ctx$minutes,
+      ctx$t_start,
+      tally
+    )
+    pos <- pos + run$attempted
+    state <- run$state
+    tally$attempted <- tally$attempted + run$attempted
+    tally$failed <- tally$failed + run$failed
+    tally$read <- tally$read + run$n_read
+    stopped <- run$stopped
+    built <- rad_build_history(
+      run$by_rel,
+      ctx$tag,
+      ctx$prev_dir,
+      ctx$hist_dir,
+      source_hash
+    )
+    source_hash <- built$source_hash
+    tally$rows <- tally$rows + built$n_added
+    tally$checkpoints <- tally$checkpoints + 1L
+    message(sprintf(
+      "[04-rad] checkpoint %d: %d tried, %d read, %d failed, +%d rows%s",
+      tally$checkpoints,
+      tally$attempted,
+      tally$read,
+      tally$failed,
+      built$n_added,
+      if (is.na(stopped)) "" else paste0(" (stopped: ", stopped, ")")
+    ))
+    state <- rad_record_run(
+      state,
+      list(
+        at = utc_now(ctx$t_start),
+        queue = nrow(queue),
+        attempted = tally$attempted,
+        read = tally$read,
+        failed = tally$failed,
+        rows = tally$rows,
+        checkpoints = tally$checkpoints,
+        stopped = if (is.na(stopped)) NULL else stopped,
+        seconds = round(as.numeric(difftime(
+          Sys.time(),
+          ctx$t_start,
+          units = "secs"
+        )))
+      )
+    )
+    rad_publish(built, state, ctx$index, ctx$out_dir, ctx$tag, ctx$dry_run)
+    if (!is.na(stopped) || run$time_out || run$attempted == 0L) {
+      break
+    }
+  }
+  list(tally = tally, stopped = stopped)
 }
 
 rad_parse_args <- function(args) {

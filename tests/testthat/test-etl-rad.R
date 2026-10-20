@@ -615,3 +615,16 @@ test_that("free text follows the Latin-1 CSV: dashes, tabs, 100 chars", {
     )
   )
 })
+
+test_that("a checkpoint replaces the record of its own run, not another", {
+  load_etl_rad()
+  state <- rad_empty_state("dfp")
+  state <- rad_record_run(state, list(at = "2026-11-01T02:00:00Z", read = 50L))
+  state <- rad_record_run(state, list(at = "2026-11-01T02:00:00Z", read = 100L))
+  expect_length(state$runs, 1L)
+  expect_identical(state$runs[[1L]]$read, 100L)
+  state <- rad_record_run(state, list(at = "2026-11-02T02:00:00Z", read = 10L))
+  expect_length(state$runs, 2L)
+  expect_identical(state$runs[[1L]]$at, "2026-11-02T02:00:00Z")
+  expect_length(rad_record_run(state, list(at = "x"), keep = 2L)$runs, 2L)
+})
