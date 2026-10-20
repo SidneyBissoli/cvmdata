@@ -70,8 +70,10 @@ memory/
 .claude/
 
 # Planning artefacts (round decision docs) — kept locally, not part of
-# the public repo or tarball
-cvmdata_rodada*.md
+# the public repo or tarball. Anchored to the root: the two canonicals
+# the code cites by section (naming v03, reader policy 3.0.2) are
+# tracked in data-raw/decisions/ since 2026-10-19.
+/cvmdata_rodada*.md
 
 # Locally rendered architecture decision docs — the canonical copies
 # live in data-raw/decisions/; renders dropped at the repo root are
