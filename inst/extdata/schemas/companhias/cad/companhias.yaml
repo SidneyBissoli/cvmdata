@@ -30,14 +30,16 @@ temporal_partitioning: none
 # Field count (validation aid) --------------------------------------------
 # Reader should assert that the CSV header has exactly this many columns.
 # Updated to 47 after empirical re-verification on 2026-05-19; see
-# cvmdata_rodada3-0-2_politica_reader_sem_meta.md §2.4. The 2026-05-18
+# data-raw/decisions/cvmdata_rodada3-0-2_politica_reader_sem_meta.md
+# §2.4. The 2026-05-18
 # prototype declared 46 — one less than the actual CSV header.
 expected_field_count: 47
 
 # Transformations ---------------------------------------------------------
 # CAD requires no shape-altering transformations. Date columns are detected
 # from the dictionary type (`Tipo Dados: date`) and converted automatically;
-# they are not declared here. See cvmdata_rodada2-5_naming_unificado.md §9
+# they are not declared here. See
+# data-raw/decisions/cvmdata_rodada2-5_naming_unificado-v03.md §9
 # for the definition of "shape-altering" transformations that must be
 # declared in this section.
 #
