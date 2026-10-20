@@ -262,7 +262,11 @@
   reason for restatement the document declares (`motivo_reapresentacao`).
   Rows written by the mirror path carry `history_source = "mirror"`. The
   reader was calibrated against 60 current filings of 2010-2025 read back
-  from the mirror, account by account, with no difference. Documents the
+  from the mirror, account by account: values, accounts, periods and
+  descriptions identical; `st_conta_fixa` differs in 30 rows of three
+  2019 documents, because the CSV takes that flag from the chart of
+  accounts in force when the file is generated, not from the document.
+  Documents the
   robot cannot read are listed in the public asset `__rad_unread.csv` of
   each release.
 

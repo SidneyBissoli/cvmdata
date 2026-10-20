@@ -746,13 +746,28 @@ rad_account_columns <- function(df, codigo, descricao, fixa) {
 }
 
 # Free text as the CVM CSV carries it, measured against the raw CSV
-# files (2026-10-20): SPACES at both ends are removed first, then the
-# line breaks, so `"Outros créditos "` becomes `"Outros créditos"` while
-# `"Ativo financeiro setorial \n"` keeps its trailing space. Only spaces
-# are trimmed (an SQL-style RTRIM), never other whitespace.
-rad_csv_text <- function(x) {
+# files (2026-10-20): SPACES at both ends are removed first, then line
+# breaks and tabs, so `"Outros créditos "` becomes `"Outros créditos"`
+# while `"Ativo financeiro setorial \n"` keeps its trailing space. Only
+# spaces are trimmed (an SQL-style RTRIM). The CSV is ISO-8859-1, so the
+# dashes and quotes outside Latin-1 come out as their ASCII cousins, and
+# `DS_CONTA` is a varchar(100): longer descriptions are cut.
+rad_csv_text <- function(x, width = 100L) {
   x <- gsub("^ +| +$", "", x)
-  gsub("[\r\n]", "", x)
+  x <- gsub("[\r\n\t]", "", x)
+  ascii <- c(
+    "–" = "-",
+    "—" = "-",
+    "‘" = "'",
+    "’" = "'",
+    "“" = "\"",
+    "”" = "\""
+  )
+  for (from in names(ascii)) {
+    x <- gsub(from, ascii[[from]], x, fixed = TRUE)
+  }
+  x <- gsub("…", "...", x, fixed = TRUE)
+  substr(x, 1L, width)
 }
 
 # The DMPL: one `DMPL` node per period, the equity components as
