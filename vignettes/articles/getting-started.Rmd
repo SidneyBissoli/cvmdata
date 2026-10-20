@@ -126,8 +126,8 @@ article fast; copy any of them into your R session as-is.
 ### `cad` — company registry
 
 A single, time-less snapshot. No `year`, no `basis`. It is also where
-a CVM code or a company name resolves to a CNPJ: `cd_cvm`, `denom_cia`
-and `cnpj_cia` sit side by side.
+a CVM code or a company name resolves to a CNPJ: `cd_cvm`,
+`denom_social` and `cnpj_cia` sit side by side.
 
 ```{r cad, eval = FALSE}
 companies <- cvm_fetch("cad", "companhias")
@@ -345,7 +345,7 @@ call:
 A CVM code or a company name passed as `cnpj` aborts with
 `cvmdata_error_input` — there is no free-text search. To find a
 CNPJ you know only by name or by CVM code, read the registry:
-`cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_cia` and
+`cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_social` and
 `cnpj_cia` side by side. (The deprecated `issuer_fetch()` still
 accepts CD_CVM and free text through its `issuer` argument until it
 is removed.)

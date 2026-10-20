@@ -104,7 +104,7 @@ Issuers are selected by `cnpj` (with or without punctuation) or by
 `ticker` (a B3 trading code, resolved to the issuer's CNPJ through
 the registration form); both accept vectors and combine. A CVM code
 or a company name is not accepted — look it up in the registry
-(`cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_cia` and
+(`cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_social` and
 `cnpj_cia`). The period is either whole `year`s or a `from`/`to`
 window of complete dates on the document's reference date. Financial
 statements published in individual and consolidated variants
