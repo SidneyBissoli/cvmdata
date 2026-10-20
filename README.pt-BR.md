@@ -37,7 +37,7 @@ unificado. Workflows comuns — "me dá o DFP da empresa X de 2018 a
 2024" — exigem download manual, tratamento de encoding, conversão de
 `VL_CONTA` por `ESCALA_MOEDA` e join contra uma `submissao` separada
 para traduzir CD_CVM em CNPJ. O `cvmdata` consolida tudo isso atrás de
-uma chamada `issuer_fetch(dataset, table, issuer, year, ...)` e
+uma chamada `cvm_fetch(dataset, table, cnpj, year, basis, ...)` e
 embarca o dicionário oficial como snapshot, então os tipos de coluna
 vêm prontos.
 
@@ -53,8 +53,9 @@ adjacentes do problema:
   cadastro (CAD) estão fora do escopo.
 
 O `cvmdata` unifica CAD, ITR, DFP e FRE atrás de uma única
-`issuer_fetch()`, com filtros consistentes para companhias (CNPJ /
-CD_CVM / texto livre com expansão de abreviações), cache HTTP com
+`cvm_fetch()`, com filtros consistentes para companhias (CNPJ ou
+ticker da B3) e períodos (anos inteiros ou janela de datas pela data
+de referência), cache HTTP com
 revalidação por ETag/Last-Modified e janela TTL configurável, e o
 dicionário e as codelists da CVM embarcados como snapshots (tipos de
 coluna e valores categóricos canônicos, sem consulta em tempo de
@@ -160,18 +161,17 @@ cat('<div align="center">', tbl, '</div>', sep = "\n")
 </div>
 
 Baixe os balanços patrimoniais ativos individuais ("BPA individual")
-para duas companhias em anos recentes. Companhias podem ser
-identificadas por CNPJ, CD_CVM ou texto livre — neste último caso com
-expansão de abreviações (`BANCO` casa `BCO`, `COMPANHIA` casa `CIA`,
-e assim por diante):
+para duas companhias em anos recentes. Companhias são identificadas
+por CNPJ (com ou sem pontuação) ou por ticker da B3; `basis` escolhe
+as demonstrações individuais, consolidadas ou ambas:
 
 ``` r
-bpa <- issuer_fetch(
-  dataset     = "dfp",
-  table       = "bpa",
-  report_type = "ind",
-  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  year = 2022:2024
+bpa <- cvm_fetch(
+  dataset = "dfp",
+  table   = "bpa",
+  cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
+  year    = 2022:2024,
+  basis   = "ind"
 )
 ```
 
@@ -191,12 +191,11 @@ Referência e artigos em
 <https://sidneybissoli.github.io/cvmdata/>. A API exportada está
 agrupada em cinco famílias:
 
-- **Fetchers** — `issuer_fetch()` é o entry point único para todos os
-  datasets de emissor. Quatro fetchers irmãos por contrato —
-  `fund_fetch()`, `agent_fetch()`, `offering_fetch()` e
-  `event_fetch()` — já estão exportados como skeletons na v0.1.0.9000;
-  chamá-los aborta com `cvmdata_error_input_group`. Implementação
-  plena chega a partir da v0.4.
+- **Fetcher** — `cvm_fetch()` é a função única para qualquer dataset
+  e tabela; os grupos ainda no roadmap (fundos, agentes, ofertas,
+  eventos) vão estendê-la pelos seus schemas. `issuer_fetch()`, o
+  entry point das versões anteriores, está depreciada e será removida
+  em uma release futura.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
   `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
@@ -210,7 +209,7 @@ agrupada em cinco famílias:
 
 Os dados vêm do Portal de Dados Abertos da CVM
 (<https://dados.cvm.gov.br/>). O backend ativo é selecionável via
-`cvm_source_set()` (ou pelo argumento `source` de `issuer_fetch()`):
+`cvm_source_set()` (ou pelo argumento `source` de `cvm_fetch()`):
 
 - `"mirror"` (default a partir da v0.1.0) — snapshots em parquet
   publicados em GitHub Releases e consultados via DuckDB com filter

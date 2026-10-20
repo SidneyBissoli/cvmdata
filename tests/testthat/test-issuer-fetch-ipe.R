@@ -15,6 +15,7 @@ local_prepare_ipe_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   # The ticker lookup table is session-cached; clear it so each test

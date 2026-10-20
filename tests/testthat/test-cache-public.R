@@ -16,6 +16,7 @@ local_populated_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   # Redirect the cache-migration audit log to a tempdir so its writes
@@ -163,7 +164,10 @@ test_that("cvm_cache_info() returns empty tibble when cache absent", {
 
 test_that("cvm_cache_info() returns empty tibble with raw/ but no files", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   dir.create(file.path(cache_root, "raw"), recursive = TRUE)
   out <- cvm_cache_info()
   expect_identical(nrow(out), 0L)
@@ -461,7 +465,10 @@ test_that("cvm_cache_clear() aborts on non-character dataset", {
 
 test_that("cvm_cache_clear() returns 0L silently when raw/ absent", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   result <- suppressMessages(
     cvm_cache_clear(what = "raw", confirm = FALSE)
   )

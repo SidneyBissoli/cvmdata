@@ -4,85 +4,19 @@
 #
 # The download path also goes through httr2 (the `browser_download_url`
 # of an asset), so a single mock covers both the API listing and the
-# binary fetch.
-
-# Helpers -----------------------------------------------------------------
-
-# Fake release body for the GitHub API. Each entry describes one asset:
-#   name      : asset filename as it would appear on the release
-#   parquet   : optional local path to a parquet fixture; when provided,
-#               a GET to the asset's browser_download_url returns its
-#               raw bytes. When NULL, the GET 404s.
-fake_release <- function(entries, base = "https://example.test") {
-  list(
-    tag_name = "mirror-test-latest",
-    assets = lapply(entries, function(e) {
-      list(
-        name = e$name,
-        browser_download_url = sprintf("%s/%s", base, e$name),
-        size = if (!is.null(e$parquet)) file.info(e$parquet)$size else 0L
-      )
-    })
-  )
-}
-
-# Build a mock that:
-#   - Returns the fake release JSON for the API URL.
-#   - Returns parquet bytes (or 404) for asset GETs.
-#   - Returns a fake __source_hash.json body when one is requested.
-build_mock <- function(
-  entries,
-  hash = NA_character_,
-  base = "https://example.test"
-) {
-  body <- fake_release(entries, base = base)
-  function(req) {
-    if (grepl("api.github.com", req$url, fixed = TRUE)) {
-      return(httr2::response_json(status_code = 200L, body = body))
-    }
-    name <- basename(req$url)
-    if (identical(name, "__source_hash.json")) {
-      if (is.na(hash)) {
-        return(httr2::response(404L))
-      }
-      return(httr2::response_json(
-        status_code = 200L,
-        body = list(hash = hash, components = list())
-      ))
-    }
-    hit <- NULL
-    for (e in entries) {
-      if (identical(e$name, name)) {
-        hit <- e
-        break
-      }
-    }
-    if (is.null(hit) || is.null(hit$parquet)) {
-      return(httr2::response(404L))
-    }
-    body_raw <- readBin(
-      hit$parquet,
-      what = "raw",
-      n = file.info(hit$parquet)$size
-    )
-    httr2::response(
-      status_code = 200L,
-      headers = list("Content-Type" = "application/octet-stream"),
-      body = body_raw
-    )
-  }
-}
-
-# Path helpers — keep the test names short.
-cad_fx <- function() test_path("fixtures", "mirror-cad-companhias.parquet")
-dfp_fx <- function() test_path("fixtures", "mirror-dfp-bpa-ind-2024.parquet")
+# binary fetch. The mock builders (`fake_release()`, `build_mock()`,
+# `cad_fx()`, `dfp_fx()`) live in helper-mirror-mock.R, shared with
+# test-cvm-fetch.R.
 
 # CAD (no partition) ------------------------------------------------------
 
 test_that("issuer_fetch CAD returns a cvm_tbl via mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(
     list(name = "companhias__part-0.parquet", parquet = cad_fx())
@@ -108,7 +42,10 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
   # year" plus a -Inf warning. Guarded on column presence.
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(
     list(name = "companhias__part-0.parquet", parquet = cad_fx())
@@ -135,7 +72,10 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
 test_that("issuer_fetch DFP BPA ind 2024 returns rows via mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(
     list(
@@ -173,7 +113,10 @@ test_that("issuer_fetch DFP BPA ind 2024 returns rows via mirror", {
 test_that("issuer_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -203,7 +146,10 @@ test_that("issuer_fetch DFP BPA mirror honours companies filter (CD_CVM)", {
 test_that("issuer_fetch concatenates multiple years from mirror", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(
     list(
@@ -233,7 +179,10 @@ test_that("issuer_fetch concatenates multiple years from mirror", {
 test_that("issuer_fetch aborts when no asset matches with year =NULL", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   # Inventory has bpa but caller asks for bpp; default years path
   # walks resolve_mirror_years() into its zero-rows abort.
   entries <- list(list(
@@ -253,7 +202,10 @@ test_that("issuer_fetch aborts when no asset matches with year =NULL", {
 test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
     parquet = dfp_fx()
@@ -285,7 +237,10 @@ test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
 test_that("mirror short-circuits when hash matches sidecar", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(
     list(
       name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -347,7 +302,10 @@ test_that("mirror short-circuits when hash matches sidecar", {
 test_that("issuer_fetch resolves year =NULL to latest mirror year", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(
     list(
@@ -373,7 +331,10 @@ test_that("issuer_fetch resolves year =NULL to latest mirror year", {
 test_that("mirror aborts when no asset matches (table absent)", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -399,7 +360,10 @@ test_that("mirror aborts when no asset matches (table absent)", {
 test_that("mirror aborts when no asset matches (year absent)", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -425,7 +389,10 @@ test_that("mirror aborts when no asset matches (year absent)", {
 test_that("mirror aborts when report_type missing for variant table", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
     parquet = dfp_fx()
@@ -443,7 +410,10 @@ test_that("mirror aborts when report_type missing for variant table", {
 test_that("mirror aborts when report_type passed to non-variant table", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(list(
     name = "companhias__part-0.parquet",
     parquet = cad_fx()
@@ -461,7 +431,10 @@ test_that("mirror aborts when report_type passed to non-variant table", {
 test_that("mirror aborts when years passed to non-yearly table", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(list(
     name = "companhias__part-0.parquet",
     parquet = cad_fx()
@@ -479,7 +452,10 @@ test_that("mirror aborts when years passed to non-yearly table", {
 test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   # Listed in the inventory but the GET 404s.
   entries <- list(list(
@@ -507,7 +483,10 @@ test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
 test_that("mirror reuses the L3 cache on a second call", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
 
   entries <- list(list(
     name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -591,7 +570,10 @@ make_hash_mock <- function(entries, hash_holder) {
 test_that("L3 sidecar is created on first fetch with a known hash", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(
     list(
       name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -624,7 +606,10 @@ test_that("L3 sidecar is created on first fetch with a known hash", {
 test_that("L3 cache evicts the dataset tree when the hash changes", {
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   entries <- list(
     list(
       name = "bpa__report_type.ind__year.2024__part-0.parquet",
@@ -703,7 +688,10 @@ test_that("L3 cache is left alone when current hash is NA", {
   # must not evict.
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   dataset_root <- file.path(
     cache_root,
     "parquet",
@@ -738,7 +726,10 @@ test_that("L3 cache is left alone when current hash is NA", {
 
 test_that("cvm_cache_clear what = parquet drops the L3 tree only", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   # Seed both layers.
   raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
   dir.create(raw_dir, recursive = TRUE)
@@ -763,7 +754,10 @@ test_that("cvm_cache_clear what = parquet drops the L3 tree only", {
 
 test_that("cvm_cache_clear what = parquet scoped by dataset", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   for (ds in c("dfp", "itr")) {
     dir.create(
       file.path(cache_root, "parquet", "companhias", ds),
@@ -785,7 +779,10 @@ test_that("cvm_cache_clear what = parquet scoped by dataset", {
 
 test_that("cvm_cache_clear rejects year with what = parquet", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   expect_error(
     cvm_cache_clear(
       what = "parquet",

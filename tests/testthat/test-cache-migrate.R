@@ -13,6 +13,7 @@ local_migrate_env <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   log_dir <- withr::local_tempdir(.local_envir = envir)

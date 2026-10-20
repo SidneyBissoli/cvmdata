@@ -13,6 +13,7 @@ local_dfp_cache_2024_fresh <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
@@ -124,7 +125,10 @@ test_that("on_error = 'abort' (default) propagates HTTP error in batch", {
 
 test_that("on_error = 'warn' aborts when every year in the batch fails", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   mock <- function(req) {
     stop("simulated total outage")
   }
@@ -146,7 +150,10 @@ test_that("on_error = 'warn' aborts when every year in the batch fails", {
 
 test_that("on_error = 'silent' aborts when every year in the batch fails", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   mock <- function(req) {
     stop("simulated total outage")
   }
@@ -170,7 +177,10 @@ test_that("on_error = 'silent' aborts when every year in the batch fails", {
 
 test_that("on_error = 'warn' aborts on single-year (no parcial)", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   mock <- function(req) {
     stop("simulated outage for 2024")
   }
@@ -192,7 +202,10 @@ test_that("on_error = 'warn' aborts on single-year (no parcial)", {
 
 test_that("on_error = 'warn' aborts on HTTP failure for non-yearly (CAD)", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   mock <- function(req) {
     stop("simulated outage for CAD CSV")
   }

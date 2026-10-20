@@ -4,11 +4,10 @@
 # warnings inherit from "cvmdata_warn". The hierarchy is documented in
 # the naming doc v03 §6.1 with the refinement from Rodada 3.0.2.
 #
-# Known subclasses of "cvmdata_error_input" (siblings of one another):
+# Known subclass of "cvmdata_error_input":
 #   * cvmdata_error_input_ambiguous (S05) — (dataset, table) resolves
 #     to more than one group when the caller did not disambiguate.
-#   * cvmdata_error_input_group     (S07) — caller invoked a skeleton
-#     fetcher whose group is not yet implemented in this release.
+#   (cvmdata_error_input_group left with the skeleton fetchers in v0.3.)
 #
 # Subclass of "cvmdata_error_parse":
 #   * cvmdata_error_zip_member_missing — the requested detail table's

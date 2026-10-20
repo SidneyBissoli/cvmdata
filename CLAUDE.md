@@ -9,7 +9,10 @@ precisem reler tudo. Quando este `CLAUDE.md` divergir de um canônico,
 tabelas, `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` para a
 política do reader, e
 `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` para a
-arquitetura de 5 fetchers por contrato. Estado de execução por fase no
+arquitetura de grupos (os 5 fetchers por contrato que ele previa foram
+substituídos pela função única `cvm_fetch()` em 2026-10 — §2.1; o
+arquivo está ausente do disco desde 2026-10-16, item do ROADMAP).
+Estado de execução por fase no
 `ROADMAP.md`; histórico de breaking changes em `NEWS.md`.
 
 Comunicação com Sidney é em **português brasileiro**. Tom direto,
@@ -60,34 +63,40 @@ função (palavra técnica internacionalizada); a coluna paralela em
 
 ### 2.1 Funções públicas
 
-Padrão `object_verb` (Dev Guide rOpenSci). API pública organizada em
-**5 fetchers por contrato de dado**, um por tipo de entidade regulada
-pela CVM. `issuer_fetch()` é funcional e cobre v0.1–v0.2 (grupo
-`companhias`); v0.3 em diante estende a cobertura. Os outros 4 são
-skeletons exportados que abortam com
-`cvmdata_error_input_group`, com implementação plena em v0.4–v0.8.
-Skeletons foram exportados antes da implementação para **travar a
-superfície da API pública cedo**, de modo que as releases v0.4+
-estendam cobertura sem reformatar a API.
+Padrão `object_verb` (Dev Guide rOpenSci). **Função única** (decisão
+de Sidney, 2026-10-16, que reabriu a arquitetura de 5 fetchers por
+contrato de 2026-05-25): `cvm_fetch()` serve qualquer conjunto; os
+grupos planejados para v0.4–v0.8 (fundos, agentes, ofertas, eventos)
+estendem `cvm_fetch()` pelo YAML de cada conjunto, sem funções novas.
+Os 4 skeletons (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`,
+`event_fetch()`) e a classe `cvmdata_error_input_group` saíram na v0.3.
+`issuer_fetch()` segue exportada como wrapper DEPRECADO
+(`lifecycle::deprecate_warn()`), com o comportamento antigo intacto
+(`issuer` aceita CNPJ / CD_CVM / texto / ticker; `report_type`), até
+ser removida.
 
 ```r
-# Issuer datasets — companhias abertas (grupo CKAN "companhias").
+# Função única — qualquer conjunto coberto (hoje: grupo "companhias").
 # Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.
-issuer_fetch(dataset, table,
-             issuer      = NULL,      # CNPJ / CD_CVM / texto, vetor
-             year        = NULL,      # integer vector, NULL → último
-             source      = NULL,      # via cvm_source_get()
-             report_type = NULL,      # "ind" / "con" / NULL
-             on_error    = "abort",
-             validate    = "strict",
-             ...)
+cvm_fetch(dataset, table,
+          cnpj     = NULL,      # SÓ CNPJ (com ou sem pontuação); código CVM
+                                # e nome são recusados (cvmdata_error_input)
+          ticker   = NULL,      # código B3; resolvido via fca/valor_mobiliario
+                                # no mesmo `source`; soma-se a `cnpj`
+          year     = NULL,      # anos inteiros, NULL → último; OU
+          from     = NULL,      # janela de datas COMPLETAS ("YYYY-MM-DD"),
+          to       = NULL,      #   os dois juntos; filtra pela data de
+                                #   REFERÊNCIA (dt_refer/data_referencia);
+                                #   com `year` = erro; em cad = erro
+          basis    = NULL,      # "ind" / "con" / c("ind","con") — ver abaixo
+          source   = NULL,      # via cvm_source_get()
+          on_error = "abort",
+          validate = "strict",
+          ...)                  # reservado: qualquer extra aborta
 
-# Skeletons (abort com cvmdata_error_input_group no ciclo atual)
-fund_fetch(dataset, table, fund = NULL, date = NULL, ...)        # v0.4-v0.6
-agent_fetch(dataset, table, agent = NULL, as_of = NULL, ...)     # v0.7
-offering_fetch(dataset, table, offering = NULL,
-               date_range = NULL, ...)                            # v0.7
-event_fetch(dataset, table, event = NULL, date_range = NULL, ...)  # v0.8
+# Deprecada (wrapper com aviso; remoção em release futura)
+issuer_fetch(dataset, table, issuer = NULL, year = NULL, source = NULL,
+             report_type = NULL, on_error = "abort", validate = "strict", ...)
 
 # Descoberta
 cvm_groups()                                          # 18 grupos + contrato
@@ -131,19 +140,33 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
   do option (mesmo padrão de `cvm_cache_path()` ↔ `cvm_cache_set_path()`).
 - `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
 - `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
-- `report_type ∈ c("ind", "con")` ou `NULL` (só em `issuer_fetch()`).
-  **Obrigatório** para tabelas com variantes individual/consolidada
-  (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`).
-  **Erro** se passado a tabelas sem essa distinção
-  (`composicao_capital`, `submissao`, `parecer`, `companhias`).
+- `basis` (Sidney, 2026-10-19; nome escolhido contra `report_type`,
+  `type_format`, `scope`, `report`, `type`, `view`): `"ind"`, `"con"`
+  ou `c("ind", "con")` (empilha as duas). **Obrigatório, sem padrão**,
+  para tabelas com variantes individual/consolidada (`bpa`, `bpp`,
+  `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`) — recusado `"con"`
+  como padrão: 35% das cias DFP 2023 só têm `"ind"`. Essas tabelas
+  trazem **sempre** a coluna `basis` no resultado, nos dois backends
+  (`set_basis_column()` em `R/api-cvm-fetch.R` substitui o
+  `report_type` vazado pelo mirror). **Erro** se passado a tabelas sem
+  a divisão (`composicao_capital`, `submissao`, `parecer`,
+  `companhias`) — não ignorar calado. `report_type ∈ c("ind", "con")`
+  ou `NULL` sobrevive só em `issuer_fetch()` (deprecada).
 - `year`: integer vector ou `NULL`. `NULL` → **último ano disponível**,
   descoberto por `HEAD` probing decrescente. Para histórico, integer
   vector explícito (`year = 2012:2024`). Helper `cvm_dataset_years()`
   devolve o range. **Sem sentinela `"all"`** — tipo único.
+- `from`/`to` (só em `cvm_fetch()`): datas completas, os dois juntos
+  (`"YYYY-MM-DD"` ou `Date`); `year` junto = erro; data incompleta =
+  erro (recusado por complexidade); em tabela sem partição anual =
+  erro. Os anos lidos são os abrangidos pela janela; o corte é
+  pós-leitura pela data de REFERÊNCIA do documento (`dt_refer` ou
+  `data_referencia`), nunca pela data de entrega
+  (`filter_by_reference_date()`).
 
 Sobre exercícios contidos em cada CSV anual: o portal publica em cada
 ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e
-seu N-1. `issuer_fetch()` não reconstrói o antepenúltimo: retorna o
+seu N-1. `cvm_fetch()` não reconstrói o antepenúltimo: retorna o
 conteúdo literal do CSV do `year` pedido. Para histórico mais longo,
 pedir `year = (N-2):N` e empilhar; dedup por
 `(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
@@ -200,10 +223,23 @@ Em tabelas ITR/DFP contábeis: `VL_CONTA` é multiplicada por
 retornada em reais absolutos. `escala_moeda` é removida do tibble;
 `moeda` mantida (constante `"REAL"` na v0.1).
 
-### 2.7 Seleção de companhias via `issuer`
+### 2.7 Seleção de companhias via `issuer` (e `cnpj`/`ticker`)
 
-Argumento único com **detecção automática de tipo** (implementado em
-`filter_by_issuer()` em `R/api-issuer-fetch.R`):
+Em `cvm_fetch()` (v0.3) a seleção é por **`cnpj`** (só CNPJ, com ou sem
+pontuação — `check_cnpj()` recusa código CVM e nome, inclusive como
+cortesia a quem migra do GetDFPData2) e/ou **`ticker`** (código B3 →
+CNPJ via `fca/valor_mobiliario`, lido do mesmo `source`;
+`check_ticker()` recusa o que não tem forma de ticker). Os dois se
+somam; CNPJ ausente da tabela = zero linhas, calado; ticker ausente do
+FCA = `cvmdata_error_input`. Busca textual e CD_CVM ficaram SÓ em
+`issuer_fetch()` (deprecada); o cadastro `cvm_fetch("cad",
+"companhias")` é o lugar de resolver nome/código → CNPJ. Sem `cpf`: a
+CVM não publica CPF (cadastros PF só trazem nome; filtro de PF fica
+para a v0.7).
+
+Em `issuer_fetch()`, argumento único com **detecção automática de
+tipo** (implementado em `filter_by_issuer()` em
+`R/api-issuer-fetch.R`, que `cvm_fetch()` reaproveita só no ramo CNPJ):
 
 | Padrão do input (após `as.character()`) | Interpretação | Match contra |
 |---|---|---|
@@ -273,7 +309,7 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 
 | Prefixo | Conteúdo |
 |---|---|
-| `api-` | Fetchers públicos (`issuer`, `fund`, `agent`, `offering`, `event`) + `cvm-groups` |
+| `api-` | Fetcher público (`api-cvm-fetch.R`: casca de validação sobre `issuer_fetch_internal()`), `api-issuer-fetch.R` (pipeline + wrapper deprecado + `filter_by_issuer()` + resolver de ticker) + `cvm-groups` |
 | `schema-` | Loader de YAML (`schema-load.R`) |
 | `source-` | Backends de dados (`source-cvm-http.R`, `source-mirror-duckdb.R`) |
 | `transform-` | Transformações declarativas (`transform-schema.R`) |
@@ -329,12 +365,12 @@ depois delega a `NextMethod()`.
 
 ```
 cvmdata_error                          (pai genérico de erros)
-├── cvmdata_error_input                (argumento inválido do usuário)
-│   ├── cvmdata_error_input_ambiguous  ((dataset, table) ocorre em mais
-│   │                                   de um group; passar group explícito)
-│   └── cvmdata_error_input_group      (fund/agent/offering/event_fetch
-│                                       chamada antes da implementação plena
-│                                       — aponta para ROADMAP)
+├── cvmdata_error_input                (argumento inválido do usuário;
+│   │                                   inclui cnpj/ticker/basis/from/to
+│   │                                   malformados em cvm_fetch())
+│   └── cvmdata_error_input_ambiguous  ((dataset, table) ocorre em mais
+│                                       de um group; passar group explícito)
+│       (cvmdata_error_input_group saiu na v0.3 com os skeletons)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
 │   └── cvmdata_error_http_transport   (o portal não respondeu: DNS,
 │                                       connect TCP, TLS, timeout de
