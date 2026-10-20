@@ -9,6 +9,7 @@ local_prepare_dfp_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
@@ -668,6 +669,7 @@ test_that("explicit years stay silent-empty when CNPJ matches no year", {
 # Schema validation --------------------------------------------------
 
 test_that("issuer_fetch DFP requires report_type for tables with variants", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("dfp", "bpa", year = 2024, source = "cvm"),
     class = "cvmdata_error_input"
@@ -675,6 +677,7 @@ test_that("issuer_fetch DFP requires report_type for tables with variants", {
 })
 
 test_that("issuer_fetch DFP rejects report_type for tables without variants", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch(
       "dfp",
@@ -688,6 +691,7 @@ test_that("issuer_fetch DFP rejects report_type for tables without variants", {
 })
 
 test_that("issuer_fetch CAD rejects years argument", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", year = 2024, source = "cvm"),
     class = "cvmdata_error_input"
@@ -701,7 +705,10 @@ test_that("issuer_fetch aborts on unreachable mirror release", {
   # is caught if it ever regresses.
   cvmdata:::mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   mock <- function(req) stop("simulated DNS error")
   expect_error(
     httr2::with_mocked_responses(
@@ -713,6 +720,7 @@ test_that("issuer_fetch aborts on unreachable mirror release", {
 })
 
 test_that("issuer_fetch rejects unknown source value", {
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", source = "bogus"),
     class = "rlang_error"
@@ -880,7 +888,10 @@ test_that("apply_schema_transformations no-op when transformations empty", {
 test_that("get_yearly_csv downloads ZIP when cache is empty", {
   skip_if_not_installed("httptest2")
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   zip_bytes <- readBin(
     test_path("fixtures", "dfp_cia_aberta_2024.zip"),
     what = "raw",
@@ -1058,6 +1069,7 @@ local_prepare_itr_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "itr", "2024")
@@ -1302,6 +1314,7 @@ local_prepare_fre_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "fre", "2024")
@@ -1328,6 +1341,7 @@ local_fre_cache_bad_pcd <- function(modify_fn, envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "fre", "2024")

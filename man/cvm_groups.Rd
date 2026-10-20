@@ -26,13 +26,13 @@ datasets the portal exposes for it and the canonical \code{cvmdata}
 fetcher contract that covers it.
 }
 \details{
-v0.1.0.9000 implements only the \code{companhias} group (via
-\code{\link[=issuer_fetch]{issuer_fetch()}}); the remaining 17 rows document the planned
-v0.2-v0.8 coverage so users can navigate the universe of CVM data
-before the corresponding fetchers ship. Calls to the four
-non-\code{issuer} fetchers in v0.1.0.9000 abort with
-\code{cvmdata_error_input_group}; see \code{\link[=fund_fetch]{fund_fetch()}}, \code{\link[=agent_fetch]{agent_fetch()}},
-\code{\link[=offering_fetch]{offering_fetch()}} and \code{\link[=event_fetch]{event_fetch()}}.
+Only the \code{companhias} group is covered so far (every dataset is
+served by \code{\link[=cvm_fetch]{cvm_fetch()}}); the remaining 17 rows document the planned
+v0.4-v0.8 coverage so users can navigate the universe of CVM data
+before the corresponding datasets ship. The \code{contract} column is a
+planning map of the identity key and temporal axis each group
+needs; new groups extend \code{cvm_fetch()} through their schemas rather
+than through new fetcher functions.
 
 The \code{n_datasets} column reports the totals published by CVM, not the
 count currently implemented in the package. The mapping between

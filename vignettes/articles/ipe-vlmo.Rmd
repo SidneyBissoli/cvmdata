@@ -42,7 +42,7 @@ URL is the one VLMO has already parsed into rows and columns.
 
 ```{r overlap, eval = FALSE}
 # IPE: the index entry for the art. 11 filing (a PDF link)
-idx <- issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024)
+idx <- cvm_fetch("ipe", "ipe", ticker = "BBAS3", year = 2024)
 art11 <- subset(
   idx,
   grepl("Valores Mobili", categoria, fixed = FALSE)
@@ -50,8 +50,8 @@ art11 <- subset(
 art11$link_download   # URL of the filed PDF on the CVM portal
 
 # VLMO: the structured movements from that same filing
-mov <- issuer_fetch("vlmo", "consolidado", issuer = "BBAS3",
-                    year = 2024)
+mov <- cvm_fetch("vlmo", "consolidado", ticker = "BBAS3",
+                 year = 2024)
 mov[, c("tipo_cargo", "data_movimentacao", "quantidade",
         "preco_unitario", "volume")]
 ```

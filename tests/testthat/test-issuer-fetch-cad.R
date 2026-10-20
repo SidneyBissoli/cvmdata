@@ -10,6 +10,7 @@ local_prepare_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
@@ -136,6 +137,7 @@ test_that("issuer_fetch filters by cd_cvm via the issuer arg", {
 test_that("issuer_fetch rejects unsupported source values cleanly", {
   # "mirror" now ships (Sessao 3.13); only truly unsupported source
   # values abort. arg_match0() raises an `rlang_error`.
+  withr::local_options(lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("cad", "companhias", source = "bogus"),
     class = "rlang_error"
@@ -204,7 +206,10 @@ test_that("validate = 'warn' warns on field-count mismatch", {
 test_that("source_cvm_http_get downloads when cache is empty", {
   skip_if_not_installed("httptest2")
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   csv_bytes <- readBin(
     test_path("fixtures", "cad_sample.csv"),
     what = "raw",
@@ -240,7 +245,10 @@ test_that("source_cvm_http_get downloads when cache is empty", {
 test_that("source_cvm_http_get re-downloads when ETag changes", {
   skip_if_not_installed("httptest2")
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(

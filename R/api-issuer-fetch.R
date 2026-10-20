@@ -1,14 +1,22 @@
-#' Fetch a CVM open-data table for an issuer dataset
+#' Fetch a CVM open-data table for an issuer dataset (deprecated)
 #'
-#' Single entry point for retrieving any table from any CVM
-#' issuer-class dataset covered by the package. Selects the right URL,
-#' downloads (or serves from cache), parses, applies schema-declared
-#' transformations, and returns a tibble carrying provenance
-#' attributes.
+#' @description
+#' `issuer_fetch()` was superseded by [cvm_fetch()], the single public
+#' fetcher, and is deprecated: every call warns once per session and
+#' the function will be removed in a later release. Migrate by
+#' selecting issuers with `cnpj` (CNPJ only) or `ticker` (B3 code)
+#' instead of `issuer`, and the statement basis with `basis` instead
+#' of `report_type`. `cvm_fetch()` does not take CVM codes or company
+#' names; look them up in `cvm_fetch("cad", "companhias")`.
 #'
-#' Column names, categorical values and free-text fields are preserved
-#' in Portuguese exactly as published by CVM (snake_case minúsculo).
+#' Until removal the function keeps its original behaviour: it selects
+#' the right URL, downloads (or serves from cache), parses, applies
+#' schema-declared transformations, and returns a tibble carrying
+#' provenance attributes. Column names, categorical values and
+#' free-text fields are preserved in Portuguese exactly as published by
+#' CVM (snake_case minúsculo).
 #'
+#' @keywords internal
 #' @param dataset Short dataset id (e.g. `"cad"`, `"dfp"`).
 #' @param table Snake-case table name (e.g. `"companhias"`, `"bpa"`).
 #'   For datasets with conceptually paired tables (individual /
@@ -88,7 +96,7 @@
 #'                    issuer = "BCO BRASIL",
 #'                    year = 2024)
 #'
-#' @family fetchers
+#' @seealso [cvm_fetch()]
 #' @export
 issuer_fetch <- function(
   dataset,
@@ -101,6 +109,15 @@ issuer_fetch <- function(
   validate = "strict",
   ...
 ) {
+  lifecycle::deprecate_warn(
+    when = "0.3.0",
+    what = "issuer_fetch()",
+    with = "cvm_fetch()",
+    details = paste(
+      "Select issuers with `cnpj` or `ticker` and the statement basis",
+      "with `basis`."
+    )
+  )
   dots <- list(...)
   if (length(dots) > 0L) {
     nms <- names(dots) %||% rep("", length(dots))
@@ -1058,7 +1075,7 @@ ticker_lookup_cache_clear <- function() {
 # placements legitimately have none). Returns the unique set of
 # resolved CNPJs across all requested tickers.
 resolve_ticker_via_fca <- function(tickers, year = NULL, source = "cvm") {
-  lut <- ticker_lookup_table(year = year)
+  lut <- ticker_lookup_table(year = year, source = source)
   year <- attr(lut, "year")
   tickers_up <- toupper(trimws(tickers))
   resolved <- character(0L)
@@ -1086,28 +1103,47 @@ resolve_ticker_via_fca <- function(tickers, year = NULL, source = "cvm") {
 }
 
 # Build (and session-cache) the ticker -> CNPJ table from
-# fca/valor_mobiliario. When `year` is NULL the latest available fca
-# year is discovered via cvm_dataset_years(); callers that already know
-# the request year pass it through to skip the discovery round-trip.
-# Keeps only active tickers (is_active_ticker()). Always routes through
-# the CVM HTTP path for self-consistency with
-# resolve_cd_cvm_via_submissao(); a future iteration may wire the mirror
-# path in. Returns a data frame with `ticker` and `cnpj_companhia`
-# columns and a `year` attribute. Cached per resolved year.
-ticker_lookup_table <- function(year = NULL) {
+# fca/valor_mobiliario, read through the requested `source`. When
+# `year` is NULL the latest available fca year is used: discovered via
+# cvm_dataset_years() on the CVM path, resolved by the mirror itself on
+# the mirror path. Callers that already know the request year pass it
+# through to skip the discovery round-trip. Keeps only active tickers
+# (is_active_ticker()). Returns a data frame with `ticker` and
+# `cnpj_companhia` columns and a `year` attribute. Cached per
+# (source, year).
+ticker_lookup_table <- function(year = NULL, source = "cvm") {
+  source <- rlang::arg_match0(source, c("mirror", "cvm"))
   schema <- load_schema("fca", "valor_mobiliario")
-  if (is.null(year)) {
+  if (is.null(year) && identical(source, "cvm")) {
     year <- max(cvm_dataset_years("fca", schema = schema))
   }
-  year <- as.integer(year)
-  cache_key <- paste0("fca_valor_mobiliario_", year)
+  if (!is.null(year)) {
+    year <- as.integer(year)
+  }
+  cache_key <- paste0(
+    "fca_valor_mobiliario_",
+    source,
+    "_",
+    if (is.null(year)) "latest" else year
+  )
   cached <- .ticker_lookup_cache[[cache_key]]
   if (!is.null(cached)) {
     return(cached)
   }
-  path <- source_cvm_http_get(schema, year = year, report_type = NULL)
-  raw <- read_cvm_csv(path, schema, validate = "skip")
-  df <- apply_schema_transformations(raw, schema)
+  if (identical(source, "mirror")) {
+    df <- source_mirror_duckdb_get(schema, year = year, report_type = NULL)
+    if (is.null(year)) {
+      year <- if ("year" %in% names(df)) {
+        max(df$year, na.rm = TRUE)
+      } else {
+        NA_integer_
+      }
+    }
+  } else {
+    path <- source_cvm_http_get(schema, year = year, report_type = NULL)
+    raw <- read_cvm_csv(path, schema, validate = "skip")
+    df <- apply_schema_transformations(raw, schema)
+  }
   cnpj_c <- cnpj_col(df)
   if (is.null(cnpj_c) || !"codigo_negociacao" %in% names(df)) {
     cvmdata_abort(
