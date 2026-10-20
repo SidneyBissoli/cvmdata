@@ -575,12 +575,25 @@ release é atualizado NO LUGAR (`gh release edit` + upload `--clobber` +
 apagado e recriado: o delete+create deixava o mirror vazio durante o
 upload e, em 19/10, falhou calado no fre/itr. `__source_hash.json` sobe
 por último; um upload que falha (o GitHub responde 500 esporádico no
-`--clobber`) é tentado de novo até três vezes. Fora do repo, o
-portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere toda semana,
-sem credencial, a última entrega de cada dataset na CVM contra a do
-espelho, e abre o item `cvmdata:mirror-atrasado` no painel quando falta
-entrega há mais de 7 dias ou o release não abre anônimo — é o alarme que
-faltou de junho a outubro/2026. Encoding dos asset names:
+`--clobber`) é tentado de novo até três vezes. **Histórico de entregas
+substituídas** (Parte 3 das versões, 2026-10): para cada partição cujo
+hash de conteúdo mudou, o publish baixa o parquet do release anterior e
+compara entrega por entrega (`inst/etl/util-history.R`: chave
+`(cnpj, data[, extras do YAML])`, assinatura = linhas ordenadas sobre as
+colunas comuns, SEM `versao`/ `id_doc`/`dt_receb` — documento novo com
+os mesmos números não é versão); as linhas das entregas trocadas ou
+sumidas vão, com `superseded_at` e `superseded_by_versao`, para o asset
+acumulativo `<table>__report_type=R__year=Y__history.parquet`, que nunca
+é apagado como stale. Só tabelas com `keep_latest_version` têm
+histórico; o `-latest` não muda; o cliente ignora o asset (o parser
+recusa o nome); o JSON ganha o mapa `history` (partição → sha256),
+`hash` mantém o significado. `03-publish.R --dry-run` = smoke local sem
+tocar o release. Fora do repo, o portfolio-monitor
+(`R/collect_vigia_mirror_cvm.R`) confere toda semana, sem credencial, a
+última entrega de cada dataset na CVM contra a do espelho, e abre o item
+`cvmdata:mirror-atrasado` no painel quando falta entrega há mais de 7
+dias ou o release não abre anônimo — é o alarme que faltou de junho a
+outubro/2026. Encoding dos asset names:
 `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
 GitHub Releases sanitiza `=` → `.` no URL público;
 `parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.

@@ -264,6 +264,29 @@ worst case (empty / unreadable / wrong-type), soft checks bound the
 content noise the CVM occasionally publishes. New checks land in the
 same script; documenting them here is the rOpenSci-auditable
 surface.</p>
+<div class="section level3">
+<h3 id="superseded-filings">Superseded filings<a class="anchor" aria-label="anchor" href="#superseded-filings"></a>
+</h3>
+<p>Each CVM annual file carries only the filing delivered last for every
+company and reference date, so a restatement silently replaces the
+previous numbers in the file, and the mirror followed suit until
+2026-10. Since then the publish step compares, for every partition whose
+content hash moved, the parquet of the previous release with the new
+one, filing by filing, and appends the rows of the filings that were
+replaced or dropped to a cumulative history asset of the same partition,
+named
+<code>&lt;table&gt;__report_type=R__year=Y__history.parquet</code>, with
+two extra columns: <code>superseded_at</code> (the ETL run, UTC) and
+<code>superseded_by_versao</code> (the <code>versao</code> of the
+replacing filing, <code>NA</code> when the filing vanished). A filing
+counts as changed by the content of its rows, not by a new
+<code>versao</code> or document id with the same numbers (the
+<code>submissao</code> table already records every delivery). The
+<code>-latest</code> parquets and <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> are
+untouched: the client ignores the history assets. Reading them through
+the package, and recovering filings superseded before the history
+existed, are planned separately (see the roadmap).</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="workflow-1-working-with-the-mirror-default">Workflow 1 — Working with the mirror (default)<a class="anchor" aria-label="anchor" href="#workflow-1-working-with-the-mirror-default"></a>

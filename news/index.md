@@ -248,6 +248,26 @@
 
 ### Internal
 
+- The mirror ETL keeps the filings it supersedes. Every CVM annual file
+  carries only the filing delivered last for each company and reference
+  date, so when a company restated a statement the previous rows
+  vanished from the mirror on the next weekly publish. Now, for every
+  partition whose content hash moved, `inst/etl/03-publish.R` downloads
+  the parquet of the previous release and compares it filing by filing
+  (`inst/etl/util-history.R`): the rows of the filings the new file
+  replaces or drops are appended, with `superseded_at` and
+  `superseded_by_versao`, to a cumulative history asset of the same
+  partition (`<table>__report_type=R__year=Y__history.parquet`). A
+  filing counts as changed by the content of its rows, never by a new
+  `versao` or document id alone, and a column the CVM adds upstream is
+  not a change of every filing. The `-latest` parquets and the client
+  are untouched (`parse_mirror_asset_name()` rejects the history names);
+  `__source_hash.json` gains a `history` map. Only tables that keep the
+  last delivery (`keep_latest_version`) have a history; `submissao`
+  already lists every delivery. Reading the history from
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and recovering filings superseded before 2026-10 are separate items.
+
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
   `cvm_dictionary_snapshot.csv`: every installed
