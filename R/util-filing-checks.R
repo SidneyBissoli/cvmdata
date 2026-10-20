@@ -137,6 +137,18 @@ warn_stale_filings <- function(
   if (is.null(sub) || !nrow(sub)) {
     return(invisible())
   }
+  # The index lists every delivery of a filing (the `submissao` schemas
+  # declare no `keep_latest_version` since 0.2.0.9000), so the filing
+  # the issuer carries forward is computed here: the last one delivered
+  # per (cnpj, date), ranked by receipt date, document id and `versao`.
+  # The `match()` below needs one row per key; on the raw index it
+  # would pick the first delivery listed, which in the CVM files is the
+  # oldest one.
+  sub <- tx_keep_latest_version(
+    sub,
+    tx = list(action = "keep_latest_version"),
+    schema = list(dataset = dataset, table = "submissao")
+  )
   sub_cnpj <- first_present(sub, c("cnpj_cia", "cnpj_companhia"))
   sub_date <- first_present(sub, c("dt_refer", "data_referencia"))
   if (is.null(sub_cnpj) || is.null(sub_date)) {

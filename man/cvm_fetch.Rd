@@ -99,11 +99,19 @@ in Portuguese exactly as published by CVM (snake_case minúsculo).
 }
 \section{Filing versions}{
 
-When a table carries several filings for the same issuer and
+When a detail table carries several filings for the same issuer and
 reference date, only the last one delivered is kept, ranked by
 receipt date, then CVM document id, then \code{versao}. The version number
 alone is not a filing key: the CVM index can list two filings under
 the same version, or a later filing under a lower one.
+
+The \code{submissao} table of each dataset is the filing index and is not
+collapsed: it returns one row per delivery, re-filings included, with
+the receipt date (\code{dt_receb} or \code{data_entrega}), the document id
+(\code{id_doc}, \code{id_documento} or \code{protocolo_entrega}) and \code{versao}. The
+current filing of an issuer and reference date is the last row by
+that order; joining \code{submissao} to a detail table on the issuer and
+reference date alone matches every delivery.
 
 Tables of datasets with a \code{submissao} index are checked against it
 before returning. In DFP and ITR tables, rows the CVM file holds twice
