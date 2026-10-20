@@ -7,6 +7,11 @@
 > `fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`),
 > com `cvm_fetch()` e `cad_fetch()` removidos sem wrapper. Ver `NEWS.md`
 > e `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
+> **Nota de 2026-10-19:** a arquitetura mudou de novo — voltou a uma
+> função única, `cvm_fetch()`, com assinatura nova (`cnpj`/`ticker`,
+> `year` ou `from`/`to`, `basis`); os 5 fetchers são história. Ver
+> `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`. Este draft
+> continua desatualizado e será reescrito do zero.
 >
 > Por decisão de timing de 2026-05-28, a submissão ao rOpenSci foi
 > adiada para o **fim do ciclo de desenvolvimento** (após v1.0, com os

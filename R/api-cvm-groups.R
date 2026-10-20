@@ -1,8 +1,12 @@
 # Static taxonomy of the 18 CKAN groups published by the CVM Open Data
-# Portal, mapped to the 5 data-contract fetchers `cvmdata` exposes.
-# Verified against <https://dados.cvm.gov.br/group/> on 2026-05-25; see
-# `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` for the
-# rationale behind the contract assignments. The table is intentionally
+# Portal, mapped to the data contract (identity key + temporal axis)
+# each group needs. Verified against <https://dados.cvm.gov.br/group/>
+# on 2026-05-25; see
+# `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` §1.1 for
+# the rationale behind the contract assignments (the five fetchers that
+# document planned were superseded by `cvm_fetch()`; see
+# `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`). The
+# contract is a planning map, not a function. The table is intentionally
 # embedded in code (not a `inst/extdata/` CSV) because it changes only
 # when CVM reorganises CKAN -- a rare event -- and shipping it as data
 # would add a moving part without ergonomic benefit.
@@ -93,9 +97,11 @@
 #'
 #' The `n_datasets` column reports the totals published by CVM, not the
 #' count currently implemented in the package. The mapping between
-#' groups and contracts is fixed for the lifetime of v0.1.x; see
-#' `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` for the
-#' rationale.
+#' groups and contracts changes only when CVM reorganises its portal;
+#' see `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`
+#' §1.1 for the rationale (historical: the fetchers it planned were
+#' superseded by `cvm_fetch()`, decided in
+#' `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`).
 #'
 #' @return A tibble with 18 rows, sorted alphabetically by `group`.
 #'   Columns:
