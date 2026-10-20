@@ -44,7 +44,7 @@ unificado. Workflows comuns — "me dá o DFP da empresa X de 2018 a
 2024" — exigem download manual, tratamento de encoding, conversão de
 `VL_CONTA` por `ESCALA_MOEDA` e join contra uma `submissao` separada
 para traduzir CD_CVM em CNPJ. O `cvmdata` consolida tudo isso atrás de
-uma chamada `cvm_fetch(dataset, table, cnpj, year, basis, ...)` e
+uma chamada `cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)` e
 embarca o dicionário oficial como snapshot, então os tipos de coluna
 vêm prontos.
 
@@ -113,6 +113,23 @@ bpa <- cvm_fetch(
   cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
   year    = 2022:2024,
   basis   = "ind"
+)
+```
+
+Cada arquivo anual traz também o comparativo que a companhia
+apresentou para o exercício anterior, muitas vezes reexpresso.
+`reading` coloca as duas leituras de um exercício lado a lado,
+rotuladas: os números entregues originalmente e o comparativo do
+arquivo do ano seguinte:
+
+``` r
+bpa_2022 <- cvm_fetch(
+  dataset = "dfp",
+  table   = "bpa",
+  ticker  = "PSSA3",
+  year    = 2022,
+  basis   = "con",
+  reading = c("original", "restated")
 )
 ```
 

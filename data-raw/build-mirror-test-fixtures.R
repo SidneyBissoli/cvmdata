@@ -29,16 +29,22 @@
 #       MAGAZINE LUIZA, repacked under 200 KB. Added in v0.2 Sessao 13.
 #       Keeps every Categoria emitted by the pair (manifest is
 #       event-per-row, no dedup) for the category-filter test.
+#   tests/testthat/fixtures/dfp_cia_aberta_2025.zip and
+#   tests/testthat/fixtures/mirror-dfp-bpa-ind-2025.parquet
+#     - subset of DFP 2025 (submissao, BPA ind/con, DRE ind,
+#       composicao_capital) to the same pair, plus the bpa ind parquet
+#       built from it. The following year's file of the 2024 fixtures,
+#       for the `reading` tests of cvm_fetch() (v0.3).
 #
 # Run with `Rscript data-raw/build-mirror-test-fixtures.R` from the
 # package root to (re)build everything, or pass one or more targets to
 # build a subset, e.g. `Rscript data-raw/build-mirror-test-fixtures.R
 # fca` to rebuild only the FCA fixture in isolation (the pattern used
 # from Sessao 11 onward to avoid disturbing already-committed
-# fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`, `ipe`.
-# Idempotent — overwrites any pre-existing fixtures it touches. The
-# cgvn/vlmo/fca/ipe raw-fixture steps require network access to the CVM
-# portal.
+# fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`, `ipe`,
+# `dfp2025`. Idempotent — overwrites any pre-existing fixtures it
+# touches. The cgvn/vlmo/fca/ipe/dfp2025 raw-fixture steps require
+# network access to the CVM portal.
 
 stopifnot(requireNamespace("devtools", quietly = TRUE))
 stopifnot(requireNamespace("DBI", quietly = TRUE))
@@ -50,7 +56,7 @@ devtools::load_all(quiet = TRUE)
 options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
 
 # Target selection: default to all; CLI args restrict to a subset.
-.all_targets <- c("parquet", "cgvn", "vlmo", "fca", "ipe")
+.all_targets <- c("parquet", "cgvn", "vlmo", "fca", "ipe", "dfp2025")
 .targets <- commandArgs(trailingOnly = TRUE)
 if (!length(.targets)) {
   .targets <- .all_targets
@@ -770,9 +776,211 @@ build_ipe_raw_fixture <- function() {
   cat(sprintf("[fixture] %s\n", out_meta))
 }
 
+# DFP 2025 raw ZIP + mirror parquet fixtures (v0.3, `reading`) ----------
+# Downloads the real 2025 DFP ZIP, filters submissao + BPA ind/con +
+# DRE ind + composicao_capital to BCO BRASIL + MAGAZINE LUIZA and
+# repacks as a small fixture, then runs the package pipeline on it to
+# produce the 2025 mirror parquet of bpa ind. The pair was chosen in
+# 2024; its 2025 file exercises the three readings cases measured on
+# 2026-10-20: BB consolidated restates 12 BPA accounts of 2024, BB
+# individual carries the 2024 comparative as zeros (CMN Resolution
+# 4,966 adopted in 2025 without restating), MAGAZINE LUIZA restates
+# nothing.
+
+build_dfp_2025_fixtures <- function() {
+  dfp_url <- paste0(
+    "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/DFP/DADOS/",
+    "dfp_cia_aberta_2025.zip"
+  )
+  out_zip <- "tests/testthat/fixtures/dfp_cia_aberta_2025.zip"
+  out_meta <- paste0(out_zip, ".meta.json")
+  members <- c(
+    "dfp_cia_aberta_2025.csv",
+    "dfp_cia_aberta_BPA_ind_2025.csv",
+    "dfp_cia_aberta_BPA_con_2025.csv",
+    "dfp_cia_aberta_DRE_ind_2025.csv",
+    "dfp_cia_aberta_composicao_capital_2025.csv"
+  )
+
+  keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
+  keep_meta <- list(
+    list(
+      cd_cvm = "001023",
+      cnpj_cia = "00.000.000/0001-91",
+      denom_cia = "BCO BRASIL S.A."
+    ),
+    list(
+      cd_cvm = "022470",
+      cnpj_cia = "47.960.950/0001-21",
+      denom_cia = "MAGAZINE LUIZA S.A."
+    )
+  )
+
+  stage <- tempfile("dfp2025_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+
+  zip_local <- file.path(stage, "dfp_cia_aberta_2025.zip")
+  cat(sprintf("[dfp2025] Downloading %s\n", dfp_url))
+  resp <- httr2::req_perform(
+    httr2::req_timeout(httr2::request(dfp_url), 600L)
+  )
+  writeBin(httr2::resp_body_raw(resp), zip_local)
+
+  extract_dir <- file.path(stage, "extract")
+  dir.create(extract_dir)
+  utils::unzip(zip_local, files = members, exdir = extract_dir)
+
+  # Whole-file character round trip so every byte of the kept lines
+  # survives; filter on the CNPJ_CIA column; write back ISO-8859-1.
+  subset_csv <- function(name, cnpj_col = "cnpj_cia") {
+    path <- file.path(extract_dir, name)
+    if (!file.exists(path)) {
+      stop(sprintf("Expected CSV not found in DFP ZIP: %s", name))
+    }
+    raw <- readBin(path, "raw", n = file.info(path)$size)
+    txt <- iconv(rawToChar(raw), from = "ISO-8859-1", to = "UTF-8")
+    lines <- strsplit(txt, "\r?\n", perl = TRUE)[[1L]]
+    header <- lines[1L]
+    cols <- strsplit(header, ";", fixed = TRUE)[[1L]]
+    idx <- which(tolower(cols) == cnpj_col)
+    if (!length(idx)) {
+      stop(sprintf("CNPJ column %s not found in %s", cnpj_col, name))
+    }
+    body <- lines[-1L]
+    body <- body[nzchar(body)]
+    fields <- strsplit(body, ";", fixed = TRUE)
+    cnpjs <- vapply(
+      fields,
+      function(f) {
+        if (length(f) >= idx) f[idx] else NA_character_
+      },
+      character(1L)
+    )
+    keep_mask <- cnpjs %in% keep_cnpjs
+    kept <- c(header, body[keep_mask])
+    out <- file.path(extract_dir, paste0("subset_", name))
+    out_raw <- charToRaw(
+      iconv(paste(kept, collapse = "\r\n"), from = "UTF-8", to = "ISO-8859-1")
+    )
+    writeBin(out_raw, out)
+    list(path = out, n_rows = sum(keep_mask))
+  }
+
+  pack_dir <- file.path(stage, "pack")
+  dir.create(pack_dir)
+  n_rows <- integer(0)
+  for (m in members) {
+    info <- subset_csv(m)
+    n_rows[[m]] <- info$n_rows
+    file.copy(info$path, file.path(pack_dir, m), overwrite = TRUE)
+  }
+
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
+  out_zip_abs <- file.path(
+    normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
+    basename(out_zip)
+  )
+  withr::with_dir(pack_dir, {
+    utils::zip(
+      zipfile = out_zip_abs,
+      files = list.files("."),
+      flags = "-q9X"
+    )
+  })
+
+  meta <- list(
+    source_url = dfp_url,
+    fetched_at = format(Sys.Date()),
+    companies_included = keep_meta,
+    files_included = members,
+    notes = paste(
+      "Subset filtered by CNPJ_CIA (BCO BRASIL + MAGAZINE LUIZA).",
+      "ISO-8859-1 encoding preserved. Built from the 2025 yearly",
+      "archive for the `reading` tests of cvm_fetch() (v0.3): its",
+      "PENULTIMO rows are the restated reading of exercise 2024. BCO",
+      "BRASIL consolidated restates 12 BPA accounts of 2024; BCO BRASIL",
+      "individual carries the 2024 comparative as zeros (CMN",
+      "Resolution 4,966 adopted in 2025 without restating); MAGAZINE",
+      "LUIZA restates nothing."
+    )
+  )
+  writeLines(
+    jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+    out_meta
+  )
+  cat(sprintf(
+    "[fixture] %s  %s bytes (%s)\n",
+    out_zip,
+    format(file.info(out_zip)$size),
+    paste(
+      sprintf("%s=%d", sub("dfp_cia_aberta_", "", members), n_rows),
+      collapse = " "
+    )
+  ))
+  cat(sprintf("[fixture] %s\n", out_meta))
+
+  # Mirror parquet of bpa ind 2025 from the fixture just built, through
+  # the package pipeline (same recipe as build_parquet_fixtures()).
+  cache_root <- file.path(tempdir(), "cvmdata-build-fixtures-cache-2025")
+  raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2025")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(out_zip, file.path(raw_dir, basename(out_zip)), overwrite = TRUE)
+  saveRDS(
+    list(
+      etag = '"fixture-etag"',
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = format(Sys.time(), "%Y-%m-%dT%H:%M:%OS3Z", tz = "UTC")
+    ),
+    file.path(raw_dir, paste0(basename(out_zip), ".etag.rds"))
+  )
+  withr::with_options(
+    list(
+      cvmdata.cache_dir = cache_root,
+      cvmdata.cache_ttl_seconds = Inf,
+      cvmdata.check_filings = FALSE
+    ),
+    {
+      bpa <- cvm_fetch(
+        "dfp",
+        "bpa",
+        basis = "ind",
+        year = 2025,
+        source = "cvm"
+      )
+    }
+  )
+  bpa$basis <- NULL
+  for (a in c(
+    "source",
+    "fetched_at",
+    "group",
+    "dataset",
+    "table",
+    "package_version"
+  )) {
+    attr(bpa, a) <- NULL
+  }
+  class(bpa) <- setdiff(class(bpa), "cvm_tbl")
+  bpa_out <- "tests/testthat/fixtures/mirror-dfp-bpa-ind-2025.parquet"
+  write_parquet_via_duckdb(bpa, bpa_out)
+  cat(sprintf(
+    "[fixture] %s  %d rows, %s bytes\n",
+    bpa_out,
+    nrow(bpa),
+    format(file.info(bpa_out)$size)
+  ))
+  invisible(NULL)
+}
+
 # --- dispatch --------------------------------------------------------
 if ("parquet" %in% .targets) {
   build_parquet_fixtures()
+}
+if ("dfp2025" %in% .targets) {
+  build_dfp_2025_fixtures()
 }
 if ("cgvn" %in% .targets) {
   build_cgvn_raw_fixture()

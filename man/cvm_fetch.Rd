@@ -13,6 +13,7 @@ cvm_fetch(
   from = NULL,
   to = NULL,
   basis = NULL,
+  reading = NULL,
   source = NULL,
   on_error = "abort",
   validate = "strict",
@@ -62,6 +63,20 @@ carry a \code{basis} column in the result, even when a single value
 was requested. Must be \code{NULL} for every other table; passing it
 aborts.}
 
+\item{reading}{Which reading of each fiscal exercise to return, for
+the DFP and ITR statement tables (the ones with \code{ordem_exerc}):
+\code{"original"} (the figures the issuer filed for the exercise, the
+\code{ÚLTIMO} rows of that year's file), \code{"restated"} (the comparative
+figures for the same exercise in the following year's file, the
+\code{PENÚLTIMO} rows there) or \code{c("original", "restated")}, which
+stacks both. \code{NULL} (default) returns each year's file as the CVM
+publishes it, \code{ÚLTIMO} and \code{PENÚLTIMO} rows together, without a
+\code{reading} column. When set, \code{year} names the exercises and the
+following year's files are read as needed; the result carries a
+\code{reading} column. See the section \emph{Readings of an exercise}.
+Must be \code{NULL} for tables without \code{ordem_exerc}; passing it
+aborts.}
+
 \item{source}{One of \code{"mirror"} (parquet via DuckDB) or \code{"cvm"}
 (CVM Open Data Portal). \code{NULL} (default) resolves to the active
 backend via \code{\link[=cvm_source_get]{cvm_source_get()}}.}
@@ -97,6 +112,47 @@ carrying provenance attributes.
 Column names, categorical values and free-text fields are preserved
 in Portuguese exactly as published by CVM (snake_case minúsculo).
 }
+\section{Readings of an exercise}{
+
+Every yearly DFP and ITR statement file carries two columns of
+figures per account: \code{ordem_exerc = "ÚLTIMO"}, the exercise the
+file is about, and \code{ordem_exerc = "PENÚLTIMO"}, the comparative
+the issuer presented for the previous exercise. The comparative is
+often not the figure originally filed: issuers restate it after a
+change of accounting policy, an error or a reorganisation (about a
+third of the issuers in the DFP, measured on the 2023 file against
+the 2022 one), and the restated figure is the one later statements
+build on. With \code{reading}, \code{cvm_fetch()} reads the exercise by its
+own year and labels each row:
+\itemize{
+\item \code{"original"}: the \code{ÚLTIMO} rows of the file of \code{year}.
+\item \code{"restated"}: the \code{PENÚLTIMO} rows of the file of \code{year + 1},
+read in addition to (or instead of) the file of \code{year}. Rows are
+returned as the CVM publishes them, so \code{dt_refer} and \code{versao}
+are those of the following year's document and \code{dt_fim_exerc}
+(and \code{dt_ini_exerc}) identify the exercise the figure belongs
+to. An exercise whose following year's file is not published yet
+has no restated reading; the call says so and returns what
+exists. When the file exists but the issuer has not filed in it
+yet, its restated rows are simply absent.
+}
+
+The two readings of an exercise pair on the issuer, the exercise
+dates, \code{cd_conta} and, in \code{dmpl}, \code{coluna_df}. Either reading can be
+absent for an issuer (it stopped filing, or started filing in the
+following year), and a restated figure can be \code{0} where the issuer
+presented no comparative at all, as the banks did for 2024 on the
+individual basis after adopting CMN Resolution 4,966 in 2025. In
+the ITR, the comparative of the balance sheet (\code{bpa}, \code{bpp}) is the
+previous year end, not the previous year's quarter, so the restated
+reading of an ITR balance sheet is the year-end balance as the
+following year's quarterly filings present it.
+
+With \code{from}/\code{to}, the window applies to the exercise end
+(\code{dt_fim_exerc}) rather than to the document date, so an exercise's
+two readings stay together.
+}
+
 \section{Filing versions}{
 
 When a detail table carries several filings for the same issuer and
@@ -144,6 +200,16 @@ h1 <- cvm_fetch(
   "itr", "bpa",
   from = "2024-01-01", to = "2024-06-30",
   basis = "con"
+)
+
+# Exercise 2022 as originally filed and as restated in the 2023
+# file, side by side in a `reading` column
+pssa <- cvm_fetch(
+  "dfp", "bpa",
+  ticker = "PSSA3",
+  year = 2022,
+  basis = "con",
+  reading = c("original", "restated")
 )
 \dontshow{\}) # examplesIf}
 }
