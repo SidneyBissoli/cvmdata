@@ -118,11 +118,19 @@ Portuguese exactly as published by CVM (snake_case minúsculo).
 
 ## Filing versions
 
-When a table carries several filings for the same issuer and reference
-date, only the last one delivered is kept, ranked by receipt date, then
-CVM document id, then `versao`. The version number alone is not a filing
-key: the CVM index can list two filings under the same version, or a
-later filing under a lower one.
+When a detail table carries several filings for the same issuer and
+reference date, only the last one delivered is kept, ranked by receipt
+date, then CVM document id, then `versao`. The version number alone is
+not a filing key: the CVM index can list two filings under the same
+version, or a later filing under a lower one.
+
+The `submissao` table of each dataset is the filing index and is not
+collapsed: it returns one row per delivery, re-filings included, with
+the receipt date (`dt_receb` or `data_entrega`), the document id
+(`id_doc`, `id_documento` or `protocolo_entrega`) and `versao`. The
+current filing of an issuer and reference date is the last row by that
+order; joining `submissao` to a detail table on the issuer and reference
+date alone matches every delivery.
 
 Tables of datasets with a `submissao` index are checked against it
 before returning. In DFP and ITR tables, rows the CVM file holds twice

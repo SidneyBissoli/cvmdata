@@ -54,7 +54,7 @@ bb_bpa <- cvm_fetch(
   basis = "ind"
 )
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -62,7 +62,7 @@ bb_bpa <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -70,7 +70,7 @@ bb_bpa <- cvm_fetch(
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 bb_bpa
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:12.210177
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:49:09.423631
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 96 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
@@ -121,7 +121,7 @@ side:
 
 registry <- cvm_fetch("cad", "companhias")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -130,7 +130,7 @@ registry <- cvm_fetch("cad", "companhias")
 #> ℹ See ?duckdb_storage for details and alternatives.
 registry[grepl("MAGAZINE LUIZA", registry$denom_social),
          c("cd_cvm", "denom_social", "cnpj_cia")]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:03:12.80352
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:49:09.884092
 #> ℹ group: "companhias" | dataset: "cad" | table: "companhias"
 #> # A tibble: 1 × 3
 #>   cd_cvm denom_social      cnpj_cia          
@@ -146,7 +146,7 @@ registry[grepl("MAGAZINE LUIZA", registry$denom_social),
 a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -154,7 +154,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -164,7 +164,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 b <- cvm_fetch("dfp", "bpa", cnpj = "00000000000191",
                year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -172,7 +172,7 @@ b <- cvm_fetch("dfp", "bpa", cnpj = "00000000000191",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -200,7 +200,7 @@ cover only exchange-listed securities; an unknown ticker aborts with
 petr <- cvm_fetch("dfp", "bpa", ticker = "PETR4",
                   year = 2024, basis = "con")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -208,7 +208,7 @@ petr <- cvm_fetch("dfp", "bpa", ticker = "PETR4",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -216,7 +216,7 @@ petr <- cvm_fetch("dfp", "bpa", ticker = "PETR4",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -236,7 +236,7 @@ two <- cvm_fetch("dfp", "bpa",
                  ticker = "MGLU3",
                  year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -244,7 +244,7 @@ two <- cvm_fetch("dfp", "bpa",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -278,7 +278,7 @@ cvm_dataset_years("dfp")
 history <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                      year = 2022:2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -286,7 +286,7 @@ history <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -328,7 +328,7 @@ h1 <- cvm_fetch("itr", "bpa", cnpj = "00.000.000/0001-91",
                 from = "2024-01-01", to = "2024-06-30",
                 basis = "con")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -336,7 +336,7 @@ h1 <- cvm_fetch("itr", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -392,7 +392,7 @@ stacked pair have the same shape:
 both <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                   year = 2024, basis = c("ind", "con"))
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -400,7 +400,7 @@ both <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -408,7 +408,7 @@ both <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -416,7 +416,7 @@ both <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpyBGR2E/duckdb
+#> ℹ /tmp/Rtmp4GtPqv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

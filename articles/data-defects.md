@@ -44,7 +44,7 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see \#14). |
 | 12 | Dates as `YYYY-MM-DD` strings | Plain strings in the CSV | Converted to R `Date` for every column the dictionary declares `tipo_dados: "date"`. |
 | 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column | Filter must run on CNPJ | **See example below.** [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) identifies issuers by CNPJ (or ticker) only, matching `cnpj_cia` or `cnpj_companhia` as the table carries. |
-| 14 | Repeated filings and repeated rows | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** The last delivery wins in `submissao`; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
+| 14 | Repeated filings and repeated rows | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** Detail tables keep the last delivery; `submissao` lists every one; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
 | 15 | A later filing delivered under a lower `VERSAO` | The statement CSVs keep the highest version, not the last delivery | **See below.** `cvmdata_warn_stale_filing` names the issuers; the table keeps the CVM numbers. |
 
 ## Mini-examples for the structural cases
@@ -59,7 +59,7 @@ selected by CNPJ in both, shows the two forms:
 a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -67,7 +67,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -76,7 +76,7 @@ a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ See ?duckdb_storage for details and alternatives.
 b <- cvm_fetch("cad", "companhias", cnpj = "00.000.000/0001-91")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -119,7 +119,7 @@ yaml::read_yaml(system.file(
 bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
                  year = 2024, basis = "ind")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -127,7 +127,7 @@ bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -137,7 +137,7 @@ bpa <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
 
 # Total assets reported by BCO BRASIL in 2024 (reais):
 bpa[bpa$cd_conta == "1" & bpa$ordem_exerc == "ÚLTIMO", "vl_conta"]
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:02:56.789631
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:48:52.911838
 #> ℹ group: "companhias" | dataset: "dfp" | table: "bpa"
 #> # A tibble: 1 × 1
 #>        vl_conta
@@ -158,14 +158,14 @@ dictionary. The default `validate = "strict"` refuses to read them:
 cvm_fetch("fre", "empregado_PCD",
           cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
 #> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:02:57.609439
+#> ℹ source: "mirror" | fetched_at: 2026-10-20 02:48:53.761749
 #> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
 #> # A tibble: 0 × 11
 #> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
@@ -186,7 +186,7 @@ See the **fre** article for the worked example.
 ### \#11 — `keep_latest_version` collapses re-filings
 
 A filing can be re-submitted; CVM keeps every version in the CSV. For
-each table where re-filings happen, the schema declares a
+each detail table where re-filings happen, the schema declares a
 `keep_latest_version` transformation which the package applies before
 returning:
 
@@ -200,14 +200,17 @@ yaml::read_yaml(system.file(
 #> NULL
 ```
 
-Result: at most one row per filing key in the returned tibble.
+Result: at most one row per filing key in the returned tibble. The
+`submissao` table of each dataset is the exception: it is the filing
+index and returns every delivery, with its receipt date and document id
+(see \#14 and \#15 below for how to read the current one).
 
 ``` r
 
 auditor <- cvm_fetch("fre", "auditor",
                      cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -215,7 +218,7 @@ auditor <- cvm_fetch("fre", "auditor",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -242,7 +245,7 @@ matches whichever CNPJ column the table carries:
 auditor <- cvm_fetch("fre", "auditor",
                      cnpj = "00.000.000/0001-91", year = 2024)
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -250,7 +253,7 @@ auditor <- cvm_fetch("fre", "auditor",
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmprSMEWv/duckdb
+#> ℹ /tmp/RtmpgG074F/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -304,8 +307,33 @@ alone fails:
   package returns the CVM numbers and warns with
   `cvmdata_warn_stale_filing`.
 
-Both checks read the dataset’s `submissao` of the same year and run for
-either backend. `options(cvmdata.check_filings = FALSE)` turns them off.
+Both checks read the dataset’s `submissao` of the same year, take the
+last delivery of each filing key from it, and run for either backend.
+`options(cvmdata.check_filings = FALSE)` turns them off.
+
+The `submissao` itself is not collapsed since 0.2.0.9000: it lists every
+delivery of a filing, so the history behind both cases above is one call
+away, and the current filing is the last row by receipt date, then
+document id, then `versao`:
+
+``` r
+
+history <- cvm_fetch("dfp", "submissao",
+                     cnpj = "43.335.774/0001-86", year = 2024)
+history[, c("dt_refer", "versao", "id_doc", "dt_receb")]
+# Three deliveries for 2024-12-31: versions 1, 2 and again 1.
+
+current <- history |>
+  dplyr::arrange(dt_receb, as.integer(id_doc), as.integer(versao)) |>
+  dplyr::slice_tail(n = 1, by = c(cnpj_cia, dt_refer))
+# id_doc and versao are character (identifiers); as.integer() orders
+# them numerically.
+```
+
+Before this release the index returned only that last row, so a join of
+`submissao` to a statement table on `(cnpj_cia, dt_refer)` matched one
+delivery; it now matches all of them, and the recipe above restores the
+one-row-per-filing view.
 
 ## Reading the other defects directly
 

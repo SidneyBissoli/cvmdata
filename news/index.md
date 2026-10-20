@@ -23,6 +23,34 @@
   including the `issuer` argument’s CVM-code and free-text forms, until
   it is removed in a later release.
 
+- The `submissao` table of every dataset (`dfp`, `itr`, `fre`, `fca`,
+  `cgvn`, `vlmo`) now returns the complete filing history: one row per
+  delivery, re-filings included, each with its receipt date (`dt_receb`
+  / `data_entrega`), document id (`id_doc` / `id_documento` /
+  `protocolo_entrega`) and `versao`, as the CVM publishes it. The
+  schemas no longer declare `keep_latest_version` for it; the detail
+  tables still keep the last delivery. The CVM statement CSVs carry a
+  single version per filing, so `submissao` was the only place the
+  history could be read from, and the index is where the Travessia and
+  TRV cases of the 0.2.0.9000 fixes below are visible. Code that joins
+  `submissao` to a detail table on the issuer and reference date now
+  matches every delivery; to get the current filing, keep the last row
+  per key:
+
+  ``` r
+
+  sub |>
+    dplyr::arrange(dt_receb, as.integer(id_doc), as.integer(versao)) |>
+    dplyr::slice_tail(n = 1, by = c(cnpj_cia, dt_refer))
+  ```
+
+  The fetch-time check that warns about a stale filing
+  (`cvmdata_warn_stale_filing`) computes that row itself before
+  comparing. The parquet mirror (`source = "mirror"`, the default)
+  carries the history once the weekly ETL republishes the six datasets
+  with this version of the package; until then it serves the collapsed
+  index.
+
 ### New features
 
 - [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)

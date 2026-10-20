@@ -214,7 +214,12 @@ idêntica.
 
 Tabela de cabeçalho dos três datasets chama-se `submissao`. 9 campos:
 `cnpj_cia`, `dt_refer`, `versao`, `denom_cia`, `cd_cvm`, `categ_doc`,
-`id_doc`, `dt_receb`, `link_doc`.
+`id_doc`, `dt_receb`, `link_doc`. É o **índice de entregas** do dataset:
+uma linha por documento entregue, reapresentações incluídas (sem
+`keep_latest_version` desde 0.2.0.9000 — Parte 1 das versões, ROADMAP).
+A entrega vigente de um `(cnpj_cia, dt_refer)` é a última por
+`(dt_receb, id_doc, versao)`; o pacote a calcula onde precisa
+(`check_filings()`), não a marca com coluna.
 
 ### 2.4 Regra dos identificadores → character
 
@@ -285,19 +290,24 @@ numerada via [`utils::menu()`](https://rdrr.io/r/utils/menu.html); em
 batch/CI abortam com `cvmdata_error_input` listando candidatos. Zero
 matches aborta com `cvmdata_error_input`.
 
-Política de versão: por default, mantém apenas a **última entrega** por
-`(cnpj_cia, dt_refer)` via transformação canônica `keep_latest_version`
-no YAML, ordenando por data de recebimento (`dt_receb`/`data_entrega`),
-depois id do documento (`id_doc`/`id_documento`/`protocolo_entrega`),
-depois `versao`. Tabelas sem colunas de entrega caem na maior `VERSAO`.
-`VERSAO` **não é chave** (medido 2026-10-18: TRV XLIII DFP 2023 tem duas
-v1; Travessia VI DFP 2024 tem 1, 2, 1 e a v1 de agosto é a vigente).
-Depois do backend, `check_filings()` (`R/util-filing-checks.R`) confere
-a tabela contra a `submissao`: em DFP/ITR tira linhas idênticas e avisa
-(varredura 2010-2026: 884 casos com a demonstração inteira em dobro, a
-maioria com UMA entrega no índice; em `vlmo` linhas idênticas são
-legítimas e ficam); avisa quando a tabela traz entrega anterior à
-última. Desliga com `options(cvmdata.check_filings = FALSE)`.
+Política de versão: as tabelas de **detalhe** mantêm apenas a **última
+entrega** por `(cnpj_cia, dt_refer)` via transformação canônica
+`keep_latest_version` no YAML, ordenando por data de recebimento
+(`dt_receb`/`data_entrega`), depois id do documento
+(`id_doc`/`id_documento`/`protocolo_entrega`), depois `versao`. Tabelas
+sem colunas de entrega caem na maior `VERSAO`. A **`submissao` não
+deduplica** (0.2.0.9000): é o índice de entregas e devolve todas, com a
+data de recebimento — quem faz join por `(cnpj, data)` casa todas as
+entregas; a vigente é a última pela mesma ordem (§2.3). `VERSAO` **não é
+chave** (medido 2026-10-18: TRV XLIII DFP 2023 tem duas v1; Travessia VI
+DFP 2024 tem 1, 2, 1 e a v1 de agosto é a vigente). Depois do backend,
+`check_filings()` (`R/util-filing-checks.R`) confere a tabela contra a
+`submissao` (calculando a entrega vigente de cada chave antes de
+comparar): em DFP/ITR tira linhas idênticas e avisa (varredura
+2010-2026: 884 casos com a demonstração inteira em dobro, a maioria com
+UMA entrega no índice; em `vlmo` linhas idênticas são legítimas e
+ficam); avisa quando a tabela traz entrega anterior à última. Desliga
+com `options(cvmdata.check_filings = FALSE)`.
 
 ------------------------------------------------------------------------
 

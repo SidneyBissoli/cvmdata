@@ -248,8 +248,9 @@ same for every table.
 ### `cgvn` — Brazilian Corporate Governance Code informe
 
 Added in v0.1.0.9000 toward v0.2. Two tables: `submissao` (one row per
-ICBGC informe per company per fiscal year) and `praticas` (“comply or
-explain” detail with 54 recommended practices per filing).
+delivery of the ICBGC informe, re-filings included) and `praticas`
+(“comply or explain” detail with 54 recommended practices per filing,
+last delivery only).
 
 ``` r
 
@@ -271,9 +272,9 @@ three conventions are invisible at the call.
 ### `vlmo` — securities traded and held by insiders
 
 Added in v0.1.0.9000 toward v0.2. Two tables: `submissao` (one row per
-filing) and `consolidado` (one row per security movement). The package
-table is named `consolidado` — the CVM file token is `con`, a reserved
-device name on Windows.
+delivery, re-filings included) and `consolidado` (one row per security
+movement). The package table is named `consolidado` — the CVM file token
+is `con`, a reserved device name on Windows.
 
 ``` r
 
@@ -338,11 +339,11 @@ Both describe the company itself, but they are different artifacts and
 should not be confused. `cad` is a single, time-less, unversioned
 snapshot of the *current* registry state. `fca` is a **versioned,
 yearly-partitioned history** of the registration form: one filing per
-company per year, with reapresentations resolved to the latest `versao`.
-There is no automatic dedup or join between the two. To relate them,
-join manually on the issuer CNPJ — `cad$cnpj_cia` against `fca`’s
-`cnpj_cia` (submissao) or `cnpj_companhia` (detail) — after normalising
-both with
+company per year. Its detail tables keep the filing delivered last; its
+`submissao` lists every delivery, re-filings included. There is no
+automatic dedup or join between the two. To relate them, join manually
+on the issuer CNPJ — `cad$cnpj_cia` against `fca`’s `cnpj_cia`
+(submissao) or `cnpj_companhia` (detail) — after normalising both with
 [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md).
 
 ### `ipe` — manifest of periodic and eventual documents

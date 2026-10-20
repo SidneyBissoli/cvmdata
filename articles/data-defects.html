@@ -247,9 +247,9 @@ carries.</td>
 <td>Two filings under the same version; DFP/ITR statement CSVs repeat
 rows, often the whole statement</td>
 <td>
-<strong>See below.</strong> The last delivery wins in
-<code>submissao</code>; identical rows dropped from DFP/ITR tables with
-<code>cvmdata_warn_duplicate_filing</code>.</td>
+<strong>See below.</strong> Detail tables keep the last delivery;
+<code>submissao</code> lists every one; identical rows dropped from
+DFP/ITR tables with <code>cvmdata_warn_duplicate_filing</code>.</td>
 </tr>
 <tr class="odd">
 <td>15</td>
@@ -276,7 +276,7 @@ issuer, selected by CNPJ in both, shows the two forms:</p>
 <code class="sourceCode R"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
 <span>               year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -284,7 +284,7 @@ issuer, selected by CNPJ in both, shows the two forms:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -293,7 +293,7 @@ issuer, selected by CNPJ in both, shows the two forms:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="va">b</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -330,7 +330,7 @@ declares the transformation, and the package returns absolute reais with
 <code class="sourceCode R"><span><span class="va">bpa</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
 <span>                 year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -338,7 +338,7 @@ declares the transformation, and the package returns absolute reais with
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -348,7 +348,7 @@ declares the transformation, and the package returns absolute reais with
 <span></span>
 <span><span class="co"># Total assets reported by BCO BRASIL in 2024 (reais):</span></span>
 <span><span class="va">bpa</span><span class="op">[</span><span class="va">bpa</span><span class="op">$</span><span class="va">cd_conta</span> <span class="op">==</span> <span class="st">"1"</span> <span class="op">&amp;</span> <span class="va">bpa</span><span class="op">$</span><span class="va">ordem_exerc</span> <span class="op">==</span> <span class="st">"ÚLTIMO"</span>, <span class="st">"vl_conta"</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 02:02:56.789631</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 02:48:52.911838</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 1</span></span></span>
 <span><span class="co">#&gt;        vl_conta</span></span>
@@ -370,14 +370,14 @@ them:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"fre"</span>, <span class="st">"empregado_PCD"</span>,</span>
 <span>          cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 02:02:57.609439</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-20 02:48:53.761749</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"fre"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"empregado_PCD"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 11</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 variables: cnpj_companhia &lt;chr&gt;, data_referencia &lt;date&gt;, versao &lt;chr&gt;,</span></span></span>
@@ -396,7 +396,7 @@ not publish.</p>
 <h3 id="keep_latest_version-collapses-re-filings">#11 — <code>keep_latest_version</code> collapses re-filings<a class="anchor" aria-label="anchor" href="#keep_latest_version-collapses-re-filings"></a>
 </h3>
 <p>A filing can be re-submitted; CVM keeps every version in the CSV. For
-each table where re-filings happen, the schema declares a
+each detail table where re-filings happen, the schema declares a
 <code>keep_latest_version</code> transformation which the package
 applies before returning:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -406,12 +406,15 @@ applies before returning:</p>
 <span><span class="co">#&gt; Warning in file(file, "rt", encoding = fileEncoding): file("") only supports</span></span>
 <span><span class="co">#&gt; open = "w+" and open = "w+b": using the former</span></span>
 <span><span class="co">#&gt; NULL</span></span></code></pre></div>
-<p>Result: at most one row per filing key in the returned tibble.</p>
+<p>Result: at most one row per filing key in the returned tibble. The
+<code>submissao</code> table of each dataset is the exception: it is the
+filing index and returns every delivery, with its receipt date and
+document id (see #14 and #15 below for how to read the current one).</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">auditor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"fre"</span>, <span class="st">"auditor"</span>,</span>
 <span>                     cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -419,7 +422,7 @@ applies before returning:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -444,7 +447,7 @@ the table carries:</p>
 <code class="sourceCode R"><span><span class="va">auditor</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"fre"</span>, <span class="st">"auditor"</span>,</span>
 <span>                     cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -452,7 +455,7 @@ the table carries:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmprSMEWv/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgG074F/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -508,8 +511,29 @@ package returns the CVM numbers and warns with
 <code>cvmdata_warn_stale_filing</code>.</p></li>
 </ul>
 <p>Both checks read the dataset’s <code>submissao</code> of the same
-year and run for either backend.
-<code>options(cvmdata.check_filings = FALSE)</code> turns them off.</p>
+year, take the last delivery of each filing key from it, and run for
+either backend. <code>options(cvmdata.check_filings = FALSE)</code>
+turns them off.</p>
+<p>The <code>submissao</code> itself is not collapsed since 0.2.0.9000:
+it lists every delivery of a filing, so the history behind both cases
+above is one call away, and the current filing is the last row by
+receipt date, then document id, then <code>versao</code>:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">history</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"submissao"</span>,</span>
+<span>                     cnpj <span class="op">=</span> <span class="st">"43.335.774/0001-86"</span>, year <span class="op">=</span> <span class="fl">2024</span><span class="op">)</span></span>
+<span><span class="va">history</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dt_refer"</span>, <span class="st">"versao"</span>, <span class="st">"id_doc"</span>, <span class="st">"dt_receb"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co"># Three deliveries for 2024-12-31: versions 1, 2 and again 1.</span></span>
+<span></span>
+<span><span class="va">current</span> <span class="op">&lt;-</span> <span class="va">history</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">dt_receb</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">id_doc</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="va">versao</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_tail</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">1</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cnpj_cia</span>, <span class="va">dt_refer</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># id_doc and versao are character (identifiers); as.integer() orders</span></span>
+<span><span class="co"># them numerically.</span></span></code></pre></div>
+<p>Before this release the index returned only that last row, so a join
+of <code>submissao</code> to a statement table on
+<code>(cnpj_cia, dt_refer)</code> matched one delivery; it now matches
+all of them, and the recipe above restores the one-row-per-filing
+view.</p>
 </div>
 </div>
 <div class="section level2">

@@ -138,7 +138,7 @@
 <li>
 <code>drop</code> — remove a column from the returned tibble.</li>
 <li>
-<code>keep_latest_version</code> — keep only the highest <code>versao</code> per identifier/date key.</li>
+<code>keep_latest_version</code> — keep only the filing delivered last per identifier/date key (ranked by receipt date, document id, then <code>versao</code>). Declared by the detail tables; the <code>submissao</code> tables declare no transformation, since they are the filing index and return every delivery.</li>
 </ul><p>When proposing a brand-new dataset, please also:</p>
 <ul><li>Add a small fixture (<code>tests/testthat/fixtures/&lt;dataset&gt;_*.zip</code> or <code>.csv</code>, with a <code>.meta.json</code> recording origin).</li>
 <li>Add a mocked test under <code>tests/testthat/test-&lt;dataset&gt;*.R</code> (use <code><a href="https://httr2.r-lib.org/reference/with_mocked_responses.html" class="external-link">httr2::with_mocked_responses()</a></code>).</li>

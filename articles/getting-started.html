@@ -310,9 +310,9 @@ table.</p>
 <code>cgvn</code> — Brazilian Corporate Governance Code informe<a class="anchor" aria-label="anchor" href="#cgvn-brazilian-corporate-governance-code-informe"></a>
 </h3>
 <p>Added in v0.1.0.9000 toward v0.2. Two tables: <code>submissao</code>
-(one row per ICBGC informe per company per fiscal year) and
+(one row per delivery of the ICBGC informe, re-filings included) and
 <code>praticas</code> (“comply or explain” detail with 54 recommended
-practices per filing).</p>
+practices per filing, last delivery only).</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">praticas</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"cgvn"</span>, <span class="st">"praticas"</span>,</span>
@@ -333,9 +333,10 @@ invisible at the call.</p>
 <code>vlmo</code> — securities traded and held by insiders<a class="anchor" aria-label="anchor" href="#vlmo-securities-traded-and-held-by-insiders"></a>
 </h3>
 <p>Added in v0.1.0.9000 toward v0.2. Two tables: <code>submissao</code>
-(one row per filing) and <code>consolidado</code> (one row per security
-movement). The package table is named <code>consolidado</code> — the CVM
-file token is <code>con</code>, a reserved device name on Windows.</p>
+(one row per delivery, re-filings included) and <code>consolidado</code>
+(one row per security movement). The package table is named
+<code>consolidado</code> — the CVM file token is <code>con</code>, a
+reserved device name on Windows.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">movements</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"vlmo"</span>, <span class="st">"consolidado"</span>,</span>
@@ -402,9 +403,10 @@ and should not be confused. <code>cad</code> is a single, time-less,
 unversioned snapshot of the <em>current</em> registry state.
 <code>fca</code> is a <strong>versioned, yearly-partitioned
 history</strong> of the registration form: one filing per company per
-year, with reapresentations resolved to the latest <code>versao</code>.
-There is no automatic dedup or join between the two. To relate them,
-join manually on the issuer CNPJ — <code>cad$cnpj_cia</code> against
+year. Its detail tables keep the filing delivered last; its
+<code>submissao</code> lists every delivery, re-filings included. There
+is no automatic dedup or join between the two. To relate them, join
+manually on the issuer CNPJ — <code>cad$cnpj_cia</code> against
 <code>fca</code>’s <code>cnpj_cia</code> (submissao) or
 <code>cnpj_companhia</code> (detail) — after normalising both with
 <code><a href="../reference/cnpj_clean.html">cnpj_clean()</a></code>.</p>
