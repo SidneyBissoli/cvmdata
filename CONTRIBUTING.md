@@ -132,8 +132,11 @@ Accepted `action` values in `transformations`:
 - `multiply_by_scale` — multiply a column by a scale column (requires
   `scale_column:`).
 - `drop` — remove a column from the returned tibble.
-- `keep_latest_version` — keep only the highest `versao` per
-  identifier/date key.
+- `keep_latest_version` — keep only the filing delivered last per
+  identifier/date key (ranked by receipt date, document id, then
+  `versao`). Declared by the detail tables; the `submissao` tables
+  declare no transformation, since they are the filing index and return
+  every delivery.
 
 When proposing a brand-new dataset, please also:
 

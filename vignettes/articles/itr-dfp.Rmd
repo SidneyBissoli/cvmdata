@@ -40,7 +40,7 @@ library(cvmdata)
 | `dva`                | Statement of value added (Brazilian-specific)          | Yes                     | Idem.                                                        |
 | `composicao_capital` | Capital composition (share counts by class)            | No (leave unset)        | No `cd_cvm` column; indexed by `cnpj_cia`.                   |
 | `parecer`            | Auditor opinion (free-text)                            | No                      | One row per filing, with full opinion text in `texto`.       |
-| `submissao`          | Filing header — `id_doc`, `dt_receb`, `link_doc`, etc. | No                      | The dataset's index. Every filing has exactly one row here.  |
+| `submissao`          | Filing header — `id_doc`, `dt_receb`, `link_doc`, etc. | No                      | The dataset's index: one row per delivery, re-filings included; the current one is the last by `dt_receb`, `id_doc`. |
 
 The eight tables that take `basis` always carry a `basis` column in
 the result, whether you asked for one variant or for
@@ -73,8 +73,9 @@ The tibble carries provenance attributes and the package has already:
 * multiplied `VL_CONTA` by `ESCALA_MOEDA` and dropped the scale column
   (values are in absolute reais);
 * converted `DT_REFER`, `DT_FIM_EXERC` to R `Date`;
-* kept only the latest `VERSAO` per `(cnpj_cia, dt_refer)` — so
-  re-filings do not produce duplicated rows.
+* kept only the filing delivered last per `(cnpj_cia, dt_refer)` — so
+  re-filings do not produce duplicated rows. The `submissao` index is
+  the exception: it lists every delivery, with its receipt date.
 
 Total assets is the top of the asset hierarchy (`cd_conta == "1"`):
 

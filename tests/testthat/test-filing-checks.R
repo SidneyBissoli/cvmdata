@@ -144,13 +144,13 @@ travessia_bpa_v2 <- function() {
   )
 }
 
+# The mocked index is the raw `submissao`, every delivery listed, as the
+# pipeline returns it since the schema stopped collapsing it: the check
+# must pick the last delivery of each filing key by itself.
 test_that("a table behind the latest delivery is flagged", {
-  latest <- cvmdata:::tx_keep_latest_version(
-    travessia_submissao(),
-    list(),
-    list()
+  local_mocked_bindings(
+    issuer_fetch_internal = function(...) travessia_submissao()
   )
-  local_mocked_bindings(issuer_fetch_internal = function(...) latest)
   expect_snapshot(
     out <- cvmdata:::check_filings(
       travessia_bpa_v2(),
@@ -166,12 +166,9 @@ test_that("a table behind the latest delivery is flagged", {
 })
 
 test_that("stale warning carries its class", {
-  latest <- cvmdata:::tx_keep_latest_version(
-    travessia_submissao(),
-    list(),
-    list()
+  local_mocked_bindings(
+    issuer_fetch_internal = function(...) travessia_submissao()
   )
-  local_mocked_bindings(issuer_fetch_internal = function(...) latest)
   expect_warning(
     cvmdata:::check_filings(
       travessia_bpa_v2(),
@@ -184,6 +181,45 @@ test_that("stale warning carries its class", {
     ),
     class = "cvmdata_warn_stale_filing"
   )
+})
+
+# MAGAZINE LUIZA ITR 2024-06-30 as the CVM index lists it: version 1
+# (2024-08-08) before version 2 (2024-08-09). The statement CSV holds
+# version 2. Matching the table against the first row of the index
+# would flag the current filing as stale.
+mglu_submissao <- function() {
+  tibble::tibble(
+    cnpj_cia = "47.960.950/0001-21",
+    dt_refer = as.Date("2024-06-30"),
+    versao = c("1", "2"),
+    denom_cia = "MAGAZINE LUIZA S.A.",
+    cd_cvm = "022470",
+    categ_doc = "ITR",
+    id_doc = c("140630", "140658"),
+    dt_receb = as.Date(c("2024-08-08", "2024-08-09"))
+  )
+}
+
+test_that("the stale check uses the last delivery, not the first row", {
+  local_mocked_bindings(
+    issuer_fetch_internal = function(...) mglu_submissao()
+  )
+  bpa <- travessia_bpa_v2()
+  bpa$cnpj_cia <- "47.960.950/0001-21"
+  bpa$dt_refer <- as.Date("2024-06-30")
+  bpa$denom_cia <- "MAGAZINE LUIZA S.A."
+  expect_no_warning(
+    out <- cvmdata:::check_filings(
+      bpa,
+      schema = list(),
+      dataset = "itr",
+      table = "bpa",
+      year = 2024L,
+      source = "cvm",
+      validate = "strict"
+    )
+  )
+  expect_identical(out, bpa)
 })
 
 test_that("an unreachable filing index skips the stale check", {

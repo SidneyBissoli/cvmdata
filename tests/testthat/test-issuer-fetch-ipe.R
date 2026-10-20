@@ -207,10 +207,15 @@ test_that("ipe/ipe declares no keep_latest_version", {
   expect_equal(nrow(out), 3L)
   expect_setequal(out$versao, c(1L, 2L, 3L))
 
-  # Sanity: a deduping schema WOULD collapse the same rows to the latest
-  # version, proving the difference is the missing transform.
-  sub_schema <- load_schema("vlmo", "submissao")
-  collapsed <- cvmdata:::apply_schema_transformations(df, sub_schema)
+  # Sanity: a schema declaring keep_latest_version (as the detail tables
+  # of the versioned datasets do) WOULD collapse the same rows to the
+  # last delivery, proving the difference is the missing transform.
+  dedup_schema <- list(
+    dataset = "ipe",
+    table = "ipe",
+    transformations = list(list(action = "keep_latest_version"))
+  )
+  collapsed <- cvmdata:::apply_schema_transformations(df, dedup_schema)
   expect_equal(nrow(collapsed), 1L)
   expect_identical(collapsed$versao, 3L)
 })
