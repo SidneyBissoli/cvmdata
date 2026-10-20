@@ -16,6 +16,7 @@ local_dfp_cache_with_sidecar <- function(
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
@@ -279,7 +280,10 @@ test_that("absent CSV in the ZIP raises cvmdata_error_zip_member_missing", {
 
 test_that("download_with_etag fetches via GET when cache is empty", {
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   fixture_body <- fixture_zip_body()
   mock <- function(req) {
     expect_false(identical(req$method, "HEAD"))
@@ -353,7 +357,10 @@ test_that("get_simple_csv aborts when report_type is supplied", {
   # report_type via arg_match0("ind", "con") before reaching the source;
   # the abort then fires at get_simple_csv().
   cache_root <- withr::local_tempdir()
-  withr::local_options(cvmdata.cache_dir = cache_root)
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
   expect_error(
     issuer_fetch("cad", "companhias", source = "cvm", report_type = "ind"),
     class = "cvmdata_error_input"

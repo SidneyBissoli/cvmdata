@@ -20,7 +20,7 @@ tables** and the same schema, differing only in cadence:
 The package's tooling is identical for both: pass `"itr"` or `"dfp"`
 as `dataset`, the same `table` name, and the same arguments. Eight
 tables out of eleven publish individual / consolidated variants
-selected through `report_type`.
+selected through `basis`.
 
 ```{r setup}
 library(cvmdata)
@@ -28,9 +28,9 @@ library(cvmdata)
 
 ## Reference: tables available
 
-| Table                | What it carries                                        | `report_type` required? | Notes                                                        |
+| Table                | What it carries                                        | `basis` required?       | Notes                                                        |
 |----------------------|--------------------------------------------------------|-------------------------|--------------------------------------------------------------|
-| `bpa`                | Asset side of the balance sheet                        | Yes (`ind` / `con`)     | `VL_CONTA × ESCALA_MOEDA` applied (`multiply_by_scale`).     |
+| `bpa`                | Asset side of the balance sheet                        | Yes (`ind` / `con` / both) | `VL_CONTA × ESCALA_MOEDA` applied (`multiply_by_scale`).  |
 | `bpp`                | Liabilities + equity side                              | Yes                     | Idem.                                                        |
 | `dre`                | Income statement                                       | Yes                     | Idem.                                                        |
 | `dra`                | Statement of comprehensive income                      | Yes                     | Idem.                                                        |
@@ -38,9 +38,13 @@ library(cvmdata)
 | `dfc_mi`             | Cash-flow statement, indirect method                   | Yes                     | Idem.                                                        |
 | `dmpl`               | Statement of changes in equity                         | Yes                     | Idem; wider table (multiple equity columns).                 |
 | `dva`                | Statement of value added (Brazilian-specific)          | Yes                     | Idem.                                                        |
-| `composicao_capital` | Capital composition (share counts by class)            | No (`NULL`)             | No `cd_cvm` column — CD_CVM filters resolve via `submissao`. |
+| `composicao_capital` | Capital composition (share counts by class)            | No (leave unset)        | No `cd_cvm` column; indexed by `cnpj_cia`.                   |
 | `parecer`            | Auditor opinion (free-text)                            | No                      | One row per filing, with full opinion text in `texto`.       |
 | `submissao`          | Filing header — `id_doc`, `dt_receb`, `link_doc`, etc. | No                      | The dataset's index. Every filing has exactly one row here.  |
+
+The eight tables that take `basis` always carry a `basis` column in
+the result, whether you asked for one variant or for
+`c("ind", "con")` (which stacks both).
 
 Use `cvm_dictionary("dfp", "<table>")` to see the column-level
 metadata (descriptions, domain, data type, size) for any of the
@@ -49,16 +53,17 @@ enumerated categorical values.
 
 ## Workflow 1 — Side-by-side total assets across two issuers
 
-Goal: compare 2024 total assets for **BCO BRASIL S.A.** (CD_CVM
-`1023`) and **MAGAZINE LUIZA S.A.** (CD_CVM `22470`) using the
-individual balance sheet (`dfp/bpa`).
+Goal: compare 2024 total assets for **BCO BRASIL S.A.** (CNPJ
+`00.000.000/0001-91`) and **MAGAZINE LUIZA S.A.** (CNPJ
+`47.960.950/0001-21`) using the individual balance sheet
+(`dfp/bpa`).
 
 ```{r workflow-1-fetch}
-bpa <- issuer_fetch(
+bpa <- cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = c("1023", "22470"),
-  year = 2024
+  cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
+  year = 2024,
+  basis = "ind"
 )
 bpa
 ```
@@ -87,11 +92,11 @@ comparative previous year). To pick up an older comparative,
 request the matching upstream year explicitly:
 
 ```{r workflow-1-history}
-bpa_history <- issuer_fetch(
+bpa_history <- cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "1023",
-  year = 2022:2024
+  cnpj = "00.000.000/0001-91",
+  year = 2022:2024,
+  basis = "ind"
 )
 ativo_history <- bpa_history[
   bpa_history$cd_conta == "1" & bpa_history$ordem_exerc == "ÚLTIMO",
@@ -100,47 +105,59 @@ ativo_history <- bpa_history[
 ativo_history[order(ativo_history$dt_fim_exerc), ]
 ```
 
-## Workflow 2 — Capital composition through `submissao` lookup
+## Workflow 2 — Capital composition and the filing header
 
 `composicao_capital` does not carry `cd_cvm` — it indexes by
-`cnpj_cia`. The package reads the dataset's `submissao` table for
-the same year, looks up CNPJ for each CD_CVM passed in `companies`,
-and applies the filter on CNPJ. The user-facing interface is
-identical:
+`cnpj_cia`, which is exactly what `cnpj` matches, so the call is the
+same as for any other table:
 
 ```{r workflow-2-fetch}
-cap <- issuer_fetch(
+cap <- cvm_fetch(
   "dfp", "composicao_capital",
-  issuer = c("1023", "22470"),
+  cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
   year = 2024
 )
 cap
 ```
 
-Note: no `report_type` argument — `composicao_capital` is a single
-concept, not split into individual / consolidated.
+Note: no `basis` argument — `composicao_capital` is a single
+concept, not split into individual / consolidated, and passing
+`basis` to it aborts.
 
-Cross-check against the underlying submissao header:
+Cross-check against the underlying submissao header, which is also
+where a CVM code (`cd_cvm`) meets its CNPJ:
 
 ```{r workflow-2-header}
-sub <- issuer_fetch(
+sub <- cvm_fetch(
   "dfp", "submissao",
-  issuer = c("1023", "22470"),
+  cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
   year = 2024
 )
 sub[, c("cd_cvm", "denom_cia", "dt_refer", "id_doc")]
 ```
 
 ITR works the same way — replace `"dfp"` with `"itr"`. The trimester
-breakdown then shows up in `dt_fim_exerc` and in the `ds_conta` /
-`grupo_dfp` columns; the underlying mechanics
+breakdown then shows up in `dt_refer`, `dt_fim_exerc` and in the
+`ds_conta` / `grupo_dfp` columns; the underlying mechanics
 (`multiply_by_scale`, `keep_latest_version`, date conversion via
-the dictionary) are shared.
+the dictionary) are shared. To pick quarters rather than whole
+years, pass a `from`/`to` window on the reference date:
+
+```{r workflow-2-itr}
+h1 <- cvm_fetch(
+  "itr", "bpa",
+  cnpj = "00.000.000/0001-91",
+  from = "2024-01-01", to = "2024-06-30",
+  basis = "con"
+)
+unique(h1$dt_refer)
+```
 
 ## Where to read next
 
-* **issuer-fetch** — argument reference and the full `companies` /
-  `years` / `report_type` / `validate` / `on_error` semantics.
+* **issuer-fetch** — argument reference and the full `cnpj` /
+  `ticker` / `year` / `from` / `to` / `basis` / `validate` /
+  `on_error` semantics.
 * **fre** — reference form. Same package, different table semantics.
 * **cvm-defects** — known publication quirks behind the
   transformations applied here.

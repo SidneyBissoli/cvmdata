@@ -358,6 +358,7 @@ test_that("cvm_cache_info() carries total_size_bytes attribute", {
 
 test_that("download_with_etag triggers eviction after a real write", {
   cache <- local_cache_dir()
+  withr::local_options(lifecycle_verbosity = "quiet")
   now <- Sys.time()
   # Pre-seed an old unit large enough that the 38 KiB fixture pushes
   # the total past the 90% threshold and triggers eviction.

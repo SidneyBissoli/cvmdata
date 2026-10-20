@@ -39,7 +39,7 @@ table-specific schemas, and no unified data dictionary. Common workflows
 manual ZIP downloads, ISO-8859-1 handling, scale-by-`ESCALA_MOEDA`
 conversion, and joins against a separate `submissao` header to translate
 CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
-`issuer_fetch(dataset, table, issuer, year, ...)` call and ships the
+`cvm_fetch(dataset, table, cnpj, year, basis, ...)` call and ships the
 official dictionary as an embedded snapshot, so column types are picked
 up automatically.
 
@@ -54,13 +54,13 @@ this problem:
   API (`get_dfp_data()`) covers the *annual* statements; ITR, FRE and
   the company registry (CAD) are out of scope.
 
-`cvmdata` unifies CAD, ITR, DFP and FRE behind a single `issuer_fetch()`
-entry point, with consistent filtering semantics for companies (CNPJ /
-CD_CVM / free text with abbreviation expansion),
-ETag/Last-Modified-aware HTTP caching with a configurable TTL window,
-and the CVM dictionary and code lists shipped as embedded snapshots (so
-column types and categorical values are canonical without a runtime
-fetch).
+`cvmdata` unifies CAD, ITR, DFP and FRE behind a single `cvm_fetch()`
+entry point, with consistent filtering semantics for companies (CNPJ or
+B3 ticker) and periods (whole years or a date window on the reference
+date), ETag/Last-Modified-aware HTTP caching with a configurable TTL
+window, and the CVM dictionary and code lists shipped as embedded
+snapshots (so column types and categorical values are canonical without
+a runtime fetch).
 
 ## Installation
 
@@ -328,18 +328,18 @@ varchar
 
 </div>
 
-Fetch quarterly individual balance sheets (“BPA individual”) for two
-companies across recent years. Companies can be identified by CNPJ,
-CD_CVM, or free text — the latter with abbreviation expansion (`BANCO`
-matches `BCO`, `COMPANHIA` matches `CIA`, and so on):
+Fetch annual individual balance sheets (“BPA individual”) for two
+companies across recent years. Companies are identified by CNPJ (with or
+without punctuation) or by B3 ticker; `basis` picks the individual or
+consolidated statements, or both:
 
 ``` r
-bpa <- issuer_fetch(
-  dataset     = "dfp",
-  table       = "bpa",
-  report_type = "ind",
-  issuer = c("BCO BRASIL", "MAGAZINE LUIZA"),
-  year = 2022:2024
+bpa <- cvm_fetch(
+  dataset = "dfp",
+  table   = "bpa",
+  cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
+  year    = 2022:2024,
+  basis   = "ind"
 )
 ```
 
@@ -357,12 +357,11 @@ cnpj_format("00000000000191")
 Reference and articles at <https://sidneybissoli.github.io/cvmdata/>.
 The exported API is grouped into five families:
 
-- **Fetchers** — `issuer_fetch()` is the single entry point for every
-  issuer-class dataset. Four contract-specific siblings —
-  `fund_fetch()`, `agent_fetch()`, `offering_fetch()` and
-  `event_fetch()` — are already exported as skeletons in v0.1.0.9000;
-  calling them aborts with `cvmdata_error_input_group`. Full
-  implementation arrives from v0.4 onward.
+- **Fetcher** — `cvm_fetch()` is the single function for every dataset
+  and table; the groups still on the roadmap (funds, agents, offerings,
+  events) will extend it through their schemas. `issuer_fetch()`, the
+  entry point of earlier releases, is deprecated and will be removed in
+  a later release.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
   `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,
@@ -379,7 +378,7 @@ The exported API is grouped into five families:
 
 Data is fetched from the official CVM Open Data Portal
 (<https://dados.cvm.gov.br/>). The active backend is selectable via
-`cvm_source_set()` (or the `source` argument of `issuer_fetch()`):
+`cvm_source_set()` (or the `source` argument of `cvm_fetch()`):
 
 - `"mirror"` (default from v0.1.0) — parquet snapshots in GitHub
   Releases queried via DuckDB with year-partition filter pushdown,

@@ -26,7 +26,7 @@ delimiter: ";"
 # Temporal coverage -----------------------------------------------------
 # first_year = earliest year the CVM directory listing serves
 # (min(cvm_dataset_years()), verified 2026-06-02; the 2010 CSV header
-# already matches the current field count). The clamp in issuer_fetch()
+# already matches the current field count). The clamp in cvm_fetch()
 # and the ETL's expected-year enumeration both key off it, so it must
 # equal the listing minimum.
 temporal_partitioning: yearly

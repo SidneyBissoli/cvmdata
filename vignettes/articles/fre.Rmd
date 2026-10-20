@@ -22,8 +22,8 @@ up-front:
 * FRE detail tables use a different header convention from
   CAD/ITR/DFP: `cnpj_companhia`, `data_referencia`,
   `nome_companhia` (no `cd_cvm` column in the detail rows).
-  `issuer_fetch()` smooths over this — CD_CVM filters resolve via the
-  dataset's `submissao` and the user-facing interface stays identical.
+  `cvm_fetch()` smooths over this — `cnpj` matches `cnpj_companhia`
+  here and `cnpj_cia` elsewhere, so the call is the same everywhere.
 * Eight tables in FRE ship **without published META** (CVM never
   released the dictionary file). The package declares them with
   `meta_status: missing` and requires `validate = "warn"` or
@@ -58,25 +58,24 @@ marked ✱ return rows with `NA` in every dictionary column except
 ## Workflow 1 — Audit and ESG/PCD disclosures for one issuer
 
 Goal: pull the audit firm history and the PCD (*Pessoa com
-Deficiência*) employment counts for **BCO BRASIL S.A.** (CD_CVM
-`1023`), reference year 2024.
+Deficiência*) employment counts for **BCO BRASIL S.A.** (CNPJ
+`00.000.000/0001-91`), reference year 2024.
 
 ### The audit firm
 
 ```{r workflow-1-auditor}
-auditor <- issuer_fetch(
+auditor <- cvm_fetch(
   "fre", "auditor",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 auditor
 ```
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
-`nome_companhia` (no `cd_cvm`). The package looked up CNPJ for
-CD_CVM `1023` through `fre/submissao` of the same year, then
-filtered on CNPJ. `keep_latest_version` has already de-duplicated
-re-filings.
+`nome_companhia` (no `cd_cvm`). The `cnpj` filter matched
+`cnpj_companhia` directly. `keep_latest_version` has already
+de-duplicated re-filings.
 
 ### PCD employment counts (table without published META)
 
@@ -85,8 +84,8 @@ released a dictionary for. With the default `validate = "strict"`
 the package refuses to read it:
 
 ```{r workflow-1-pcd-strict, error = TRUE}
-issuer_fetch("fre", "empregado_PCD",
-          issuer = "1023", year = 2024)
+cvm_fetch("fre", "empregado_PCD",
+          cnpj = "00.000.000/0001-91", year = 2024)
 ```
 
 The reader expects the user to opt in by relaxing validation. With
@@ -94,9 +93,9 @@ The reader expects the user to opt in by relaxing validation. With
 and returns the tibble; with `validate = "skip"` it runs silently:
 
 ```{r workflow-1-pcd-warn, warning = TRUE}
-pcd <- issuer_fetch(
+pcd <- cvm_fetch(
   "fre", "empregado_PCD",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024,
   validate  = "warn"
 )
@@ -114,9 +113,9 @@ Goal: extract the top shareholders of BCO BRASIL recorded in the
 2024 FRE filing.
 
 ```{r workflow-2-posicao}
-posicao <- issuer_fetch(
+posicao <- cvm_fetch(
   "fre", "posicao_acionaria",
-  issuer = "1023",
+  cnpj = "00.000.000/0001-91",
   year = 2024
 )
 
@@ -149,8 +148,8 @@ silent schema drift.
 
 ## Where to read next
 
-* **issuer-fetch** — `companies` / `years` / `validate` semantics in
-  full.
+* **issuer-fetch** — `cnpj` / `ticker` / `year` / `from` / `to` /
+  `validate` semantics in full.
 * **itr-dfp** — financial statements; same package, different table
   semantics.
 * **cvm-defects** — why eight FRE tables lack META, plus the broader

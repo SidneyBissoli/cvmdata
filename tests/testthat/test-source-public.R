@@ -87,6 +87,7 @@ local_prepare_dfp_cache <- function(envir = parent.frame()) {
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet",
     .local_envir = envir
   )
   raw_dir <- file.path(cache_root, "raw", "companhias", "dfp", "2024")
@@ -144,7 +145,7 @@ test_that("issuer_fetch() explicit source argument wins over option", {
 # itself is exercised there.
 
 test_that("issuer_fetch() aborts on source outside domain", {
-  withr::local_options(cvmdata.source = NULL)
+  withr::local_options(cvmdata.source = NULL, lifecycle_verbosity = "quiet")
   expect_error(
     issuer_fetch("dfp", "bpa", source = "bogus"),
     class = "rlang_error"

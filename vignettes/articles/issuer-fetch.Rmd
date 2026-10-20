@@ -1,5 +1,5 @@
 ---
-title: "issuer_fetch(): the generic API"
+title: "cvm_fetch(): the generic API"
 ---
 
 ```{r, include = FALSE}
@@ -9,12 +9,18 @@ knitr::opts_chunk$set(
 )
 ```
 
-`issuer_fetch(dataset, table, ...)` is the single entry point for
-every CVM issuer dataset and every table covered by the package.
+`cvm_fetch(dataset, table, ...)` is the single entry point for every
+CVM dataset and every table covered by the package.
 
-This article walks through each argument, the issuer-detection
-logic, the `year` semantics, the `report_type` rule, the `validate`
-and `on_error` modes, and the cache/source plumbing.
+This article walks through each argument: how issuers are selected
+(`cnpj`, `ticker`), how the period is selected (`year` or
+`from`/`to`), the `basis` rule for financial statements, the
+`validate` and `on_error` modes, and the cache/source plumbing.
+
+`issuer_fetch()`, the entry point of v0.1 and v0.2, is deprecated: it
+still works, with a lifecycle warning, and will be removed in a later
+release. Its `issuer` argument (CNPJ, CD_CVM, free text or ticker)
+and `report_type` map onto the arguments described here.
 
 ```{r setup}
 library(cvmdata)
@@ -23,31 +29,34 @@ library(cvmdata)
 ## Anatomy
 
 ```r
-issuer_fetch(
+cvm_fetch(
   dataset,
   table,
-  issuer = NULL,
-  year = NULL,
-  source      = NULL,
-  report_type = NULL,
-  on_error    = "abort",
-  validate    = "strict",
+  cnpj     = NULL,
+  ticker   = NULL,
+  year     = NULL,
+  from     = NULL,
+  to       = NULL,
+  basis    = NULL,
+  source   = NULL,
+  on_error = "abort",
+  validate = "strict",
   ...
 )
 ```
 
-Returns a tibble of subclass `cvm_tbl` carrying five provenance
-attributes (`source`, `fetched_at`, `dataset`, `table`,
+Returns a tibble of subclass `cvm_tbl` carrying six provenance
+attributes (`source`, `fetched_at`, `group`, `dataset`, `table`,
 `package_version`). Column names, table names and categorical values
 are preserved in Portuguese as published by CVM; the API surface is
 in English.
 
 ```{r anatomy}
-bb_bpa <- issuer_fetch(
+bb_bpa <- cvm_fetch(
   "dfp", "bpa",
-  report_type = "ind",
-  issuer = "1023",
-  year = 2024
+  cnpj = "00.000.000/0001-91",
+  year = 2024,
+  basis = "ind"
 )
 bb_bpa
 
@@ -59,126 +68,165 @@ attr(bb_bpa, "table")
 
 ## Identifying issuers
 
-`issuer` accepts a character vector of any length. Each element is
-classified **per element** by the pattern it matches:
+`cvm_fetch()` identifies issuers by two keys only, and the two
+combine in a single call:
 
-| Pattern                              | Interpretation         | Match against              |
-|--------------------------------------|------------------------|----------------------------|
-| 14 digits, no punctuation            | CNPJ (clean)           | `cnpj_clean(cnpj_cia)`     |
-| 14 digits with `.` / `/` / `-`       | CNPJ (formatted)       | `cnpj_cia` (literal)       |
-| 1–6 digits                           | CD_CVM                 | `cd_cvm` (with / without zero-padding) |
-| Anything else (≥ 1 alphabetic token) | Free-text search       | `denom_cia` (normalized)   |
+| Argument | Accepts                                              | Match against                                  |
+|----------|------------------------------------------------------|------------------------------------------------|
+| `cnpj`   | CNPJ, with or without punctuation, vector of any length | `cnpj_cia` / `cnpj_companhia`, punctuation stripped |
+| `ticker` | B3 trading code (`PETR4`, `BBAS3`, `BBDC11`)          | `codigo_negociacao` in `fca/valor_mobiliario`, resolved to the issuer's CNPJ |
 
-### CNPJ, CD_CVM, free text — same issuer, three calls
+A CVM code (`"1023"`) or a company name (`"BCO BRASIL"`) passed as
+`cnpj` aborts with `cvmdata_error_input`: there is no free-text
+search and no CD_CVM lookup in `cvm_fetch()`. To find the CNPJ of a
+company you know by name or by CVM code, read the registry, which
+carries `cd_cvm`, `denom_cia` and `cnpj_cia` side by side:
+
+```{r registry-lookup}
+registry <- cvm_fetch("cad", "companhias")
+registry[grepl("MAGAZINE LUIZA", registry$denom_cia),
+         c("cd_cvm", "denom_cia", "cnpj_cia")]
+```
+
+### CNPJ: punctuated or clean, same rows
 
 ```{r identifiers}
 # Each call returns identical rows.
-a <- issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "1023",                year = 2024)
-b <- issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "001023",              year = 2024)
-c <- issuer_fetch("dfp", "bpa", report_type = "ind",
-               issuer = "00.000.000/0001-91",  year = 2024)
+a <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+               year = 2024, basis = "ind")
+b <- cvm_fetch("dfp", "bpa", cnpj = "00000000000191",
+               year = 2024, basis = "ind")
 
 identical(nrow(a), nrow(b))
-identical(nrow(a), nrow(c))
 ```
 
-### Free-text matching with abbreviations
+A CNPJ absent from the table yields zero rows for it, silently — a
+miss on a taxpayer id is not a typo the package can second-guess.
 
-Text search tokenizes the input by whitespace, normalizes (uppercase,
-no accents, no punctuation), applies a built-in abbreviation map
-(`BANCO ↔ BCO`, `COMPANHIA ↔ CIA`, etc.) and requires every token to
-match `denom_cia` with a word boundary.
+### Ticker: resolved through the registration form
 
-```{r text-search}
-# A distinctive stem resolves cleanly to one issuer:
-magalu <- issuer_fetch("dfp", "bpa", report_type = "ind",
-                    issuer = "MAGAZINE LUIZA", year = 2024)
-unique(magalu$denom_cia)
+A B3 trading code is looked up in `fca/valor_mobiliario` (read from
+the same `source` as the data), keeping only securities still
+traded, and the issuer's CNPJ is then filtered exactly as `cnpj`
+would be. Tickers cover only exchange-listed securities; an unknown
+ticker aborts with `cvmdata_error_input` rather than returning an
+empty tibble.
+
+```{r ticker}
+petr <- cvm_fetch("dfp", "bpa", ticker = "PETR4",
+                  year = 2024, basis = "con")
+unique(petr$denom_cia)
 ```
 
-A non-unique stem aborts (in batch) with the list of candidates so
-scripts never silently grab the wrong issuer:
+`cnpj` and `ticker` combine; the result is the union of both sets:
 
-```{r text-ambiguous, error = TRUE}
-issuer_fetch("dfp", "bpa", report_type = "ind",
-          issuer = "BCO BRASIL", year = 2024)
+```{r mixed}
+two <- cvm_fetch("dfp", "bpa",
+                 cnpj = "00.000.000/0001-91",
+                 ticker = "MGLU3",
+                 year = 2024, basis = "ind")
+unique(two$denom_cia)
 ```
 
-In `interactive()` sessions an `utils::menu()` prompt appears
-instead. Zero matches abort with the same error class.
+## Selecting the period
 
-### CD_CVM lookup for tables without `cd_cvm`
+Two mutually exclusive forms; passing both aborts.
 
-Some tables (e.g. `composicao_capital`, `parecer` in ITR/DFP) do not
-carry a `cd_cvm` column. When the user passes CD_CVM tokens against
-such a table, `issuer_fetch()` reads the dataset's `submissao` for the
-same year, looks up CNPJ for each CD_CVM and applies the filter on
-CNPJ. The interface is identical to the user:
-
-```{r cd-cvm-lookup}
-cap <- issuer_fetch("dfp", "composicao_capital",
-                 issuer = "1023", year = 2024)
-cap
-```
-
-## Selecting years
+### Whole years with `year`
 
 `year` is an integer vector of any length (singular naming follows
-tidyverse conventions). `NULL` (default) fetches the **latest
-available year**, discovered by HEAD-probing CVM's listing.
+tidyverse conventions), matching the yearly files the CVM publishes.
+`NULL` (default) fetches the **latest available year**, discovered by
+HEAD-probing CVM's listing (or from the mirror's inventory). Must be
+`NULL` for snapshot tables such as `cad/companhias`.
 
 ```{r years-discovery}
 # What's published upstream?
 cvm_dataset_years("dfp")
 
 # Pass an explicit vector to back-fill history:
-history <- issuer_fetch("dfp", "bpa", report_type = "ind",
-                     issuer = "1023", year = 2022:2024)
+history <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+                     year = 2022:2024, basis = "ind")
 sort(unique(format(history$dt_refer, "%Y")))
 ```
 
 Each CSV publishes `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — the
 declared year and N − 1. The antepenultimate of year N is the last
-of year N − 2. `issuer_fetch()` does not synthesize the antepenultimate;
+of year N − 2. `cvm_fetch()` does not synthesize the antepenultimate;
 ask for `year = (N - 2):N` if you need it.
 
 ```{r exercise-ordering}
 table(history$ordem_exerc)
 ```
 
+### A date window with `from` and `to`
+
+For slices smaller than a year, pass `from` and `to` together as
+complete dates (`"YYYY-MM-DD"` strings or `Date` scalars). Rows are
+kept when the document's **reference date** (`dt_refer` in
+CAD/ITR/DFP-style tables, `data_referencia` in FRE-style tables)
+falls inside the window; the yearly files actually read are the
+years the window spans. The reference date is the period the filing
+describes, not the day it was delivered.
+
+```{r from-to}
+# ITR balance sheets referenced in the first half of 2024
+h1 <- cvm_fetch("itr", "bpa", cnpj = "00.000.000/0001-91",
+                from = "2024-01-01", to = "2024-06-30",
+                basis = "con")
+unique(h1$dt_refer)
+```
+
+Incomplete dates (`"2024"`, `"2024-06"`) are rejected, as is a
+window on a snapshot table. One bound without the other aborts; for
+whole years use `year`.
+
 ### Partial failure with `on_error`
 
-For multi-year calls (more than one element in `year`),
-`on_error = "warn"` keeps surviving years and emits
-`cvmdata_warn_partial_failure` listing failures.
-`on_error = "silent"` does the same without the warning.
+When several yearly files are read (more than one element in `year`,
+or a window spanning several years), `on_error = "warn"` keeps
+surviving years and emits `cvmdata_warn_partial_failure` listing
+failures. `on_error = "silent"` does the same without the warning.
 `on_error = "abort"` (default) aborts at the first HTTP failure.
-Total failure (every year fails) always aborts regardless. Single-year
-calls, non-yearly tables (CAD) and the implicit `year = NULL`
-fallback always abort on HTTP failure.
+Total failure (every year fails) always aborts regardless.
+Single-year calls, non-yearly tables (CAD) and the implicit
+`year = NULL` fallback always abort on HTTP failure.
 
 Parse and schema-validation failures are governed by `validate`, not
 by `on_error` — schema drift is treated as a separate signal.
 
-## `report_type`
+## `basis`
 
 Eight tables in ITR/DFP publish both **individual** and **consolidated**
 variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
-`dfc_mi`, `dmpl`, `dva`). `report_type` is **required** for those:
+`dfc_mi`, `dmpl`, `dva`). `basis` is **required** for those, with no
+default: many issuers file only individual statements, so defaulting
+to `"con"` would silently drop them.
 
-```{r report-type-required, error = TRUE}
-issuer_fetch("dfp", "bpa", issuer = "1023", year = 2024)
+```{r basis-required, error = TRUE}
+cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91", year = 2024)
 ```
 
-And **must be `NULL`** for tables without the distinction
-(`companhias`, `submissao`, `parecer`, `composicao_capital`):
+`basis` takes `"ind"`, `"con"` or `c("ind", "con")`. With both, the
+two variants are read and stacked. Whatever you ask for, those eight
+tables **always carry a `basis` column** in the result, so a single
+value and a stacked pair have the same shape:
 
-```{r report-type-forbidden, error = TRUE}
-issuer_fetch("dfp", "composicao_capital",
-          issuer = "1023", year = 2024,
-          report_type = "ind")
+```{r basis-both}
+both <- cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
+                  year = 2024, basis = c("ind", "con"))
+table(both$basis)
+"basis" %in% names(bb_bpa)
+```
+
+On every other table (`companhias`, `submissao`, `parecer`,
+`composicao_capital`, every FRE/FCA detail table) `basis` must be
+left unset; passing it aborts rather than being ignored:
+
+```{r basis-forbidden, error = TRUE}
+cvm_fetch("dfp", "composicao_capital",
+          cnpj = "00.000.000/0001-91", year = 2024,
+          basis = "ind")
 ```
 
 ## `validate`
