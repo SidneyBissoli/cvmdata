@@ -593,7 +593,25 @@ test_that("plain integers parse and free text follows the CVM converter", {
       "Ativo setorial ",
       "Almoxarifado",
       "Depósitos",
-      "x\ty"
+      "xy"
+    )
+  )
+})
+
+test_that("free text follows the Latin-1 CSV: dashes, tabs, 100 chars", {
+  load_etl_rad()
+  expect_identical(
+    rad_csv_text(c(
+      "Hedge – fluxo",
+      "Provisões ambientais \t",
+      "19\tProvisões",
+      strrep("a", 120)
+    )),
+    c(
+      "Hedge - fluxo",
+      "Provisões ambientais ",
+      "19Provisões",
+      strrep("a", 100)
     )
   )
 })
