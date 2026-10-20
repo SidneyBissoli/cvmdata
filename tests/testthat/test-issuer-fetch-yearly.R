@@ -1139,6 +1139,57 @@ test_that("issuer_fetch ITR applies multiply_by_scale (MIL -> 1e3)", {
   expect_lt(ativo_total, 1e13)
 })
 
+# Filing history in submissao (0.2.0.9000) ---------------------------
+
+test_that("ITR submissao returns every delivery, re-filings included", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  sub <- httr2::with_mocked_responses(
+    function(req) fresh_head_response(),
+    cvm_fetch("itr", "submissao", year = 2024, source = "cvm")
+  )
+  # The fixture index has 7 deliveries: MAGAZINE LUIZA filed the
+  # 2024-06-30 ITR twice (id_doc 140630 on 2024-08-08, 140658 the day
+  # after). The old schema collapsed them to 6 rows.
+  expect_identical(nrow(sub), 7L)
+  mglu_q2 <- sub[
+    sub$cnpj_cia == "47.960.950/0001-21" &
+      sub$dt_refer == as.Date("2024-06-30"),
+  ]
+  expect_identical(nrow(mglu_q2), 2L)
+  expect_setequal(mglu_q2$versao, c("1", "2"))
+  expect_setequal(mglu_q2$id_doc, c("140630", "140658"))
+  expect_true(all(c("dt_receb", "link_doc") %in% names(sub)))
+})
+
+test_that("ITR bpa is not flagged stale when the index lists v1 before v2", {
+  skip_if_not_installed("httptest2")
+  local_prepare_itr_cache()
+
+  # The BPA fixture holds MAGAZINE LUIZA 2024-06-30 at versao 2, the
+  # last delivery. The check must compare against that delivery, not
+  # against the first row of the (now complete) index.
+  expect_no_warning(
+    result <- httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch(
+        "itr",
+        "bpa",
+        cnpj = "47.960.950/0001-21",
+        year = 2024,
+        basis = "ind",
+        source = "cvm"
+      )
+    ),
+    class = "cvmdata_warn_stale_filing"
+  )
+  expect_identical(
+    unique(result$versao[result$dt_refer == as.Date("2024-06-30")]),
+    "2"
+  )
+})
+
 test_that("cvm_datasets includes itr", {
   ds <- cvm_datasets()
   expect_true("itr" %in% ds)

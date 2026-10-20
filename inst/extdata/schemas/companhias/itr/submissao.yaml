@@ -30,10 +30,11 @@ first_year: 2011
 expected_field_count: 9
 
 # Transformations ---------------------------------------------------------
-transformations:
-  - action: keep_latest_version
-    note: >-
-      Mantém apenas a última entrega (data de recebimento, id, VERSAO) por (cnpj_cia, dt_refer).
-      Em ITR, dt_refer identifica o trimestre, então cada trimestre é
-      mantido independentemente. Reapresentações ficam acessíveis em
-      v0.2+ via argumento opcional.
+# Nenhuma (desde 0.2.0.9000). A submissao é o índice de entregas do
+# dataset: uma linha por documento entregue, inclusive reapresentações,
+# com dt_receb, id_doc e link_doc. Em ITR, dt_refer identifica o
+# trimestre. A entrega vigente de um (cnpj_cia, dt_refer) é a última
+# recebida — ordem (dt_receb, id_doc, versao), a mesma que
+# keep_latest_version aplica nas tabelas de detalhe; check_filings() a
+# calcula ao conferir uma tabela contra este índice.
+transformations: []

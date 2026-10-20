@@ -54,7 +54,7 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings                             | Multiple rows for the same filing key when re-filed                        | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see #14). |
 | 12 | Dates as `YYYY-MM-DD` strings                                                      | Plain strings in the CSV                                                   | Converted to R `Date` for every column the dictionary declares `tipo_dados: "date"`.             |
 | 13 | FRE-detail and some ITR/DFP tables lack a `cd_cvm` column                          | Filter must run on CNPJ                                                    | **See example below.** `cvm_fetch()` identifies issuers by CNPJ (or ticker) only, matching `cnpj_cia` or `cnpj_companhia` as the table carries. |
-| 14 | Repeated filings and repeated rows                                                 | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** The last delivery wins in `submissao`; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
+| 14 | Repeated filings and repeated rows                                                 | Two filings under the same version; DFP/ITR statement CSVs repeat rows, often the whole statement | **See below.** Detail tables keep the last delivery; `submissao` lists every one; identical rows dropped from DFP/ITR tables with `cvmdata_warn_duplicate_filing`. |
 | 15 | A later filing delivered under a lower `VERSAO`                                    | The statement CSVs keep the highest version, not the last delivery          | **See below.** `cvmdata_warn_stale_filing` names the issuers; the table keeps the CVM numbers.   |
 
 ## Mini-examples for the structural cases
@@ -123,7 +123,7 @@ See the **fre** article for the worked example.
 ### #11 — `keep_latest_version` collapses re-filings
 
 A filing can be re-submitted; CVM keeps every version in the CSV.
-For each table where re-filings happen, the schema declares a
+For each detail table where re-filings happen, the schema declares a
 `keep_latest_version` transformation which the package applies
 before returning:
 
@@ -133,7 +133,10 @@ yaml::read_yaml(system.file(
 ))$transformations
 ```
 
-Result: at most one row per filing key in the returned tibble.
+Result: at most one row per filing key in the returned tibble. The
+`submissao` table of each dataset is the exception: it is the filing
+index and returns every delivery, with its receipt date and document
+id (see #14 and #15 below for how to read the current one).
 
 ```{r ex11-data}
 auditor <- cvm_fetch("fre", "auditor",
@@ -196,9 +199,32 @@ version number alone fails:
   package returns the CVM numbers and warns with
   `cvmdata_warn_stale_filing`.
 
-Both checks read the dataset's `submissao` of the same year and run
-for either backend. `options(cvmdata.check_filings = FALSE)` turns
-them off.
+Both checks read the dataset's `submissao` of the same year, take the
+last delivery of each filing key from it, and run for either backend.
+`options(cvmdata.check_filings = FALSE)` turns them off.
+
+The `submissao` itself is not collapsed since 0.2.0.9000: it lists
+every delivery of a filing, so the history behind both cases above is
+one call away, and the current filing is the last row by receipt date,
+then document id, then `versao`:
+
+```{r ex14-history, eval = FALSE}
+history <- cvm_fetch("dfp", "submissao",
+                     cnpj = "43.335.774/0001-86", year = 2024)
+history[, c("dt_refer", "versao", "id_doc", "dt_receb")]
+# Three deliveries for 2024-12-31: versions 1, 2 and again 1.
+
+current <- history |>
+  dplyr::arrange(dt_receb, as.integer(id_doc), as.integer(versao)) |>
+  dplyr::slice_tail(n = 1, by = c(cnpj_cia, dt_refer))
+# id_doc and versao are character (identifiers); as.integer() orders
+# them numerically.
+```
+
+Before this release the index returned only that last row, so a join
+of `submissao` to a statement table on `(cnpj_cia, dt_refer)` matched
+one delivery; it now matches all of them, and the recipe above
+restores the one-row-per-filing view.
 
 ## Reading the other defects directly
 

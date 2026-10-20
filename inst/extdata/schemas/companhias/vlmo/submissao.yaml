@@ -32,6 +32,12 @@ first_year: 2018
 expected_field_count: 12
 
 # Transformations ------------------------------------------------------
-transformations:
-  - action: keep_latest_version
-    note: Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por (cnpj_companhia, data_referencia).
+# Nenhuma (desde 0.2.0.9000). A submissao e o indice de entregas do
+# dataset: uma linha por documento entregue, inclusive reapresentacoes,
+# com data_entrega, protocolo_entrega, tipo_apresentacao e
+# motivo_reapresentacao. A entrega vigente de um (cnpj_companhia,
+# data_referencia) e a ultima recebida — ordem (data_entrega,
+# protocolo_entrega, versao), a mesma que keep_latest_version aplica
+# nas tabelas de detalhe dos outros datasets; check_filings() a calcula
+# ao conferir uma tabela contra este indice.
+transformations: []

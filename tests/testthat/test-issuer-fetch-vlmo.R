@@ -198,10 +198,15 @@ test_that("vlmo/consolidado declares no keep_latest_version", {
   expect_equal(nrow(out), 3L)
   expect_setequal(out$versao, c(1L, 2L, 3L))
 
-  # Sanity: the submissao schema WOULD collapse the same rows to the
-  # latest version, proving the difference is the missing transform.
-  sub_schema <- load_schema("vlmo", "submissao")
-  collapsed <- cvmdata:::apply_schema_transformations(df, sub_schema)
+  # Sanity: a schema declaring keep_latest_version (as the detail tables
+  # of the other versioned datasets do) WOULD collapse the same rows to
+  # the last delivery, proving the difference is the missing transform.
+  dedup_schema <- list(
+    dataset = "vlmo",
+    table = "consolidado",
+    transformations = list(list(action = "keep_latest_version"))
+  )
+  collapsed <- cvmdata:::apply_schema_transformations(df, dedup_schema)
   expect_equal(nrow(collapsed), 1L)
   expect_identical(collapsed$versao, 3L)
 })
@@ -215,11 +220,8 @@ test_that("load_schema accepts VLMO YAMLs", {
   expect_equal(sub$first_year, 2018)
   expect_equal(sub$expected_field_count, 12)
   expect_identical(sub$cvm_file_pattern, "vlmo_cia_aberta_{year}.csv")
-  expect_true(any(vapply(
-    sub$transformations,
-    function(t) identical(t$action, "keep_latest_version"),
-    logical(1L)
-  )))
+  # The filing index returns every delivery: no transformation at all.
+  expect_length(sub$transformations, 0L)
 
   con <- load_schema("vlmo", "consolidado")
   expect_equal(con$expected_field_count, 17)
