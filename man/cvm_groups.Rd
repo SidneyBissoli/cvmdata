@@ -36,9 +36,11 @@ than through new fetcher functions.
 
 The \code{n_datasets} column reports the totals published by CVM, not the
 count currently implemented in the package. The mapping between
-groups and contracts is fixed for the lifetime of v0.1.x; see
-\code{data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md} for the
-rationale.
+groups and contracts changes only when CVM reorganises its portal;
+see \code{data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md}
+§1.1 for the rationale (historical: the fetchers it planned were
+superseded by \code{cvm_fetch()}, decided in
+\verb{data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md}).
 }
 \examples{
 cvm_groups()
