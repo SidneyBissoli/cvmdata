@@ -92,6 +92,8 @@ cvm_fetch(dataset, table,
                                 #   REFERÊNCIA (dt_refer/data_referencia);
                                 #   com `year` = erro; em cad = erro
           basis    = NULL,      # "ind" / "con" / c("ind","con") — ver abaixo
+          reading  = NULL,      # "original" / "restated" / os dois — só nas
+                                #   16 tabelas com ordem_exerc; ver abaixo
           source   = NULL,      # via cvm_source_get()
           on_error = "abort",
           validate = "strict",
@@ -169,10 +171,29 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
 
 Sobre exercícios contidos em cada CSV anual: o portal publica em cada
 ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e
-seu N-1. `cvm_fetch()` não reconstrói o antepenúltimo: retorna o
-conteúdo literal do CSV do `year` pedido. Para histórico mais longo,
-pedir `year = (N-2):N` e empilhar; dedup por
-`(cd_cvm, cd_conta, dt_fim_exerc)` é trivial.
+seu N-1. Sem `reading`, `cvm_fetch()` retorna o conteúdo literal do
+CSV do `year` pedido (não reconstrói o antepenúltimo; para histórico
+mais longo, pedir `year = (N-2):N` e empilhar).
+
+- `reading` (Sidney, 2026-10-20; Parte 2 das versões): as duas
+  leituras de um exercício. `"original"` = linhas `ÚLTIMO` do arquivo
+  de `year`; `"restated"` = linhas `PENÚLTIMO` do arquivo de `year + 1`
+  (lido pelo pacote; só se publicado — senão `cli_inform` e devolve o
+  que existe); `c("original", "restated")` empilha na ordem pedida.
+  Coluna `reading` no resultado só quando o argumento é dado; linhas
+  como a CVM publica (`dt_refer`/`versao` do documento de origem;
+  `dt_fim_exerc`/`dt_ini_exerc` identificam o exercício). Só nas 16
+  tabelas com `ordem_exerc` (DFP/ITR `bpa`…`dva`, conferido no
+  dicionário); em outra tabela = erro. `year = NULL` resolve o último
+  ano como sem `reading`, depois busca o seguinte. Com `from`/`to`, a
+  janela corta por `dt_fim_exerc`. Medido 2026-10-20: ano do arquivo
+  = ano de `dt_refer` (0 divergências em dfp/itr bpa/dre); no ITR o
+  `PENÚLTIMO` de `bpa`/`bpp` é o fechamento do ano anterior (leitura
+  reexpressa do trimestre não existe para balanço); 21 bancos trazem o
+  comparativo individual de 2024 **zerado** na DFP 2025 (Res. CMN
+  4.966 sem reapresentar) — fica zero, como na CVM. Fixture real
+  `dfp_cia_aberta_2025.zip` + `mirror-dfp-bpa-ind-2025.parquet`
+  (BB con reexpressa 12 contas; BB ind zeros; MGLU igual).
 
 ### 2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)
 
