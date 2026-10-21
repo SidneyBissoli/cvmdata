@@ -287,7 +287,19 @@
   file is generated; the history keeps the document’s own flag, the one
   that held when the filing was delivered. Documents the robot cannot
   read are listed in the public asset `__rad_unread.csv` of each
-  release.
+  release. The first real run (2026-10-20, DFP 2025) set aside 8 of 73
+  documents and stopped, as designed, over two defects of the reader,
+  both fixed: the XML is parsed without libxml2’s 10 MB text-node limit
+  (the embedded PDF of five documents exceeded it, and libxml2 2.9
+  refused the whole file as “Extra content at the end of the document”),
+  and the DMPL columns of the flat variant follow the converter’s order
+  of elements present in the document rather than a fixed map, so the
+  equity columns of financial institutions
+  (`AjustesAvaliacaoPatrimonial`, the three-way split of consolidated
+  equity, nine columns with the ninth unlabelled) come out as the CSV
+  writes them (Banestes and Banco Pine, DFP 2025, account by account).
+  The state now records which reader set a document aside, and attempts
+  made by an earlier reader no longer spend the document.
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
