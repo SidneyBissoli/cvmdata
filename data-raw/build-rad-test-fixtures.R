@@ -31,8 +31,15 @@
 #       DMPL with seven (ind) and eight (con) columns; the CSV labels the
 #       columns by position (its "Participacao dos Nao Controladores" of
 #       the individual DMPL is the equity total).
+#   tests/testthat/fixtures/rad_dfp_2025_154846.zip
+#     - new layout, DFP 2025, Banestes v1 (set aside on 2026-10-20): the
+#       DMPL of a financial institution, with `AjustesAvaliacaoPatrimonial`
+#       and the three-way equity split of the consolidated statement
+#       (controlling, non-controlling, consolidated) — seven columns in
+#       the individual DMPL, nine in the consolidated, labelled by the
+#       converter's order (`rad_dmpl_tag_order`), the ninth without label.
 #
-# Usage, from the package root, with the five original ZIPs (as
+# Usage, from the package root, with the six original ZIPs (as
 # downloaded from the RAD, named `<id_doc>.zip`) in one directory:
 #   Rscript data-raw/build-rad-test-fixtures.R <dir-with-zips>
 
@@ -49,7 +56,8 @@ docs <- list(
   list(id = "143043", name = "rad_itr_2024_143043", layout = "new"),
   list(id = "15513", name = "rad_dfp_2011_15513", layout = "old"),
   list(id = "17509", name = "rad_itr_2012_17509", layout = "old"),
-  list(id = "14281", name = "rad_dfp_2011_14281", layout = "old")
+  list(id = "14281", name = "rad_dfp_2011_14281", layout = "old"),
+  list(id = "154846", name = "rad_dfp_2025_154846", layout = "new")
 )
 
 keep_conta <- function(codes) {
@@ -57,7 +65,8 @@ keep_conta <- function(codes) {
 }
 
 trim_new <- function(xml_path, out_path) {
-  doc <- xml2::read_xml(xml_path)
+  # HUGE: the embedded PDF can exceed libxml2's 10 MB text node limit
+  doc <- xml2::read_xml(xml_path, options = c("NOBLANKS", "HUGE"))
   for (x in c(
     "//AnexosDocumento",
     "//PareceresDeclaracoes",
@@ -176,7 +185,15 @@ trim_old <- function(inner_zip, out_inner) {
 
 for (d in docs) {
   zip <- file.path(src, paste0(d$id, ".zip"))
-  stopifnot(file.exists(zip))
+  if (!file.exists(zip)) {
+    message(sprintf(
+      "%s: %s not in %s, fixture kept as it is",
+      d$name,
+      basename(zip),
+      src
+    ))
+    next
+  }
   entries <- utils::unzip(zip, list = TRUE)$Name
   work <- tempfile("rad-build-")
   dir.create(work)

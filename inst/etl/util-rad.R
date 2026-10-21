@@ -131,18 +131,34 @@ rad_dmpl_labels <- c(
   "Patrimônio Líquido Consolidado"
 )
 
-# New-layout DMPL element names -> position in `rad_dmpl_labels`.
-rad_dmpl_tags <- c(
-  CapitalSocialIntegralizado = 1L,
-  ReservasCapital = 2L,
-  ReservasCapitalOpcoesOutorgAcoesTesour = 2L,
-  ReservasLucro = 3L,
-  LucroPrejuizoAcumulado = 4L,
-  OutrosResultadosAbrangentes = 5L,
-  PatrimonioLiquido = 6L,
-  PatrimonioLiquidoAcionistasNaoControl = 7L,
-  PatrimonioLiquidoConsolidado = 8L
+# New-layout DMPL element names in the order the CVM converter writes
+# them: the n-th element PRESENT in the document is the n-th CSV column,
+# labelled by its position in `rad_dmpl_labels` (a ninth column has no
+# label). The order is the converter's, not the document's. Measured
+# 2026-10-20 against the DFP 2025 CSV of Banestes and Banco Pine, whose
+# equity has the columns of a financial institution: in the individual
+# DMPL the CSV writes `AjustesAvaliacaoPatrimonial` under "Lucros ou
+# Prejuízos Acumulados" and the equity total under "Participação dos Não
+# Controladores"; in the consolidated one the controlling shareholders'
+# equity is column 7, the non-controlling interest column 8 and the
+# consolidated total the unlabelled column 9, although the XML writes the
+# total before the non-controlling interest.
+rad_dmpl_tag_order <- c(
+  "CapitalSocialIntegralizado",
+  "ReservasCapital",
+  "ReservasCapitalOpcoesOutorgAcoesTesour",
+  "ReservasLucro",
+  "AjustesAvaliacaoPatrimonial",
+  "LucroPrejuizoAcumulado",
+  "OutrosResultadosAbrangentes",
+  "PatrimonioLiquido",
+  "PatrimonioLiquidoAcionistasControl",
+  "PatrimonioLiquidoAcionistasNaoControl",
+  "PatrimonioLiquidoConsolidado"
 )
+
+# DMPL columns the CSV carries: the eight labels plus one without label.
+rad_dmpl_max_cols <- length(rad_dmpl_labels) + 1L
 
 # Columns of each table, in CSV order (`escala_moeda` already dropped).
 rad_table_columns <- function(table) {
@@ -538,10 +554,21 @@ xml_text1 <- function(node, xpath) {
   xml2::xml_text(xml2::xml_find_first(node, xpath))
 }
 
+# `xml2::read_xml()` on a document file, without libxml2's size limits
+# (`HUGE`). A RAD document embeds its PDF as one base64 text node; when
+# the PDF exceeds 10 MB (5 of the 73 DFP 2025 read on 2026-10-20, e.g.
+# REVEE id 155949, a 20 MB XML), libxml2 2.9 stops at the node and
+# refuses the rest as "Extra content at the end of the document", while
+# libxml2 2.12 warns "huge text node" and goes on. The statements are
+# intact either way; the limit is what is lifted.
+rad_read_xml <- function(path) {
+  xml2::read_xml(path, options = c("NOBLANKS", "HUGE"))
+}
+
 # --- new layout -------------------------------------------------------
 
 rad_read_new <- function(path) {
-  doc <- xml2::read_xml(path)
+  doc <- rad_read_xml(path)
   dataset <- switch(
     xml2::xml_name(doc),
     XmlDemonstracoesFinanceiras = "dfp",
@@ -808,7 +835,7 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
   if (length(dados) > 0L) {
     # positional variant: the n-th field is the n-th label
     n_col <- length(dados)
-    if (n_col > length(rad_dmpl_labels)) {
+    if (n_col > rad_dmpl_max_cols) {
       return(list(
         problem = sprintf("dmpl/%s: %d DMPL columns", basis, n_col)
       ))
@@ -829,11 +856,11 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
     )
     return(list(contas = contas, cols = cols))
   }
-  tags <- intersect(names(rad_dmpl_tags), names(contas))
+  tags <- intersect(rad_dmpl_tag_order, names(contas))
   unknown <- setdiff(
     names(contas),
     c(
-      names(rad_dmpl_tags),
+      rad_dmpl_tag_order,
       "ContaFixa",
       "CodigoConta",
       "DescricaoConta",
@@ -852,11 +879,16 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
       )
     ))
   }
+  if (length(tags) > rad_dmpl_max_cols) {
+    return(list(
+      problem = sprintf("dmpl/%s: %d DMPL columns", basis, length(tags))
+    ))
+  }
   cols <- rad_cols(
     tag = tags,
     dt_ini = dt_ini,
     dt_fim = dt_fim,
-    col = unname(rad_dmpl_tags[tags]),
+    col = seq_along(tags),
     rank = 1L
   )
   list(contas = contas, cols = cols)
@@ -912,7 +944,7 @@ rad_read_old <- function(inner_zip) {
 }
 
 rad_old_meta <- function(path, inner_zip) {
-  doc <- xml2::read_xml(path)
+  doc <- rad_read_xml(path)
   tipo_doc <- xml_text1(doc, "./CodigoTipoDocumento")
   list(
     layout = "old",
@@ -938,7 +970,7 @@ rad_old_meta <- function(path, inner_zip) {
 
 # Period id -> dates.
 rad_old_periods <- function(path) {
-  per <- xml2::xml_find_all(xml2::read_xml(path), "/*/*")
+  per <- xml2::xml_find_all(rad_read_xml(path), "/*/*")
   data.frame(
     id = xml2::xml_text(xml2::xml_find_first(
       per,
@@ -959,7 +991,7 @@ rad_old_periods <- function(path) {
 # Which value columns each (statement, basis) has: the first record of
 # each pair in the column table, as data.frame(col, period).
 rad_old_colsets <- function(path) {
-  recs <- xml2::xml_find_all(xml2::read_xml(path), "/*/*")
+  recs <- xml2::xml_find_all(rad_read_xml(path), "/*/*")
   plan <- "./PlanoConta/VersaoPlanoConta/"
   rkey <- paste(
     xml2::xml_text(xml2::xml_find_first(
@@ -995,7 +1027,7 @@ rad_old_colsets <- function(path) {
 
 # One row per account record with its twelve raw values.
 rad_old_accounts <- function(path) {
-  nodes <- xml2::xml_find_all(xml2::read_xml(path), "/*/InfoFinaDFin")
+  nodes <- xml2::xml_find_all(rad_read_xml(path), "/*/InfoFinaDFin")
   gx <- function(xpath) xml2::xml_text(xml2::xml_find_first(nodes, xpath))
   plan <- "./PlanoConta/VersaoPlanoConta/"
   acc <- data.frame(
@@ -1121,3 +1153,18 @@ rad_compare <- function(rad, mirror, tol = 1e-6) {
     value_diff = value_diff
   )
 }
+
+# --- reader fingerprint -----------------------------------------------
+
+# The code of every `rad_*` object above, digested. The state records it
+# with each unread document and the queue only counts the attempts made
+# with the reader as it is now, so a document set aside by an earlier
+# reader is tried again once the reader changes (on 2026-10-20 eight
+# documents were refused by two defects of the reader, none of the
+# documents).
+rad_reader_id <- local({
+  env <- environment()
+  env <- parent.env(env)
+  objs <- mget(sort(ls(env, pattern = "^rad_")), envir = env)
+  substr(digest::digest(lapply(objs, deparse)), 1L, 12L)
+})
