@@ -274,12 +274,16 @@
   both fixed: the XML is parsed without libxml2's 10 MB text-node limit
   (the embedded PDF of five documents exceeded it, and libxml2 2.9
   refused the whole file as "Extra content at the end of the document"),
-  and the DMPL columns of the flat variant follow the converter's order
-  of elements present in the document rather than a fixed map, so the
-  equity columns of financial institutions (`AjustesAvaliacaoPatrimonial`,
-  the three-way split of consolidated equity, nine columns with the
-  ninth unlabelled) come out as the CSV writes them (Banestes and Banco
-  Pine, DFP 2025, account by account). The state now records which
+  and the DMPL columns of the flat variant follow the document's own
+  order of elements rather than a fixed map (the converter only
+  reorders the three-way split of consolidated equity: controlling,
+  non-controlling, consolidated), so the equity columns of financial
+  institutions, which differ between two filing templates
+  (`AjustesAvaliacaoPatrimonial` before or after
+  `LucroPrejuizoAcumulado`, `ReservasReavaliacao`, nine consolidated
+  columns with the ninth unlabelled), come out as the CSV writes them:
+  Banestes, Banco Pine, Daycoval, BTG Pactual and Itaú, DFP 2025,
+  account by account, zero differences. The state now records which
   reader set a document aside, and attempts made by an earlier reader
   no longer spend the document.
 
