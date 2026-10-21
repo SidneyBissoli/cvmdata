@@ -21,7 +21,8 @@
 #   (cnpj, dt_refer, versao) the mirror path already wrote is skipped.
 # * Errors: a document that cannot be downloaded or read is set aside
 #   WHOLE in a public list (`__rad_unread.csv` next to the parquets) and
-#   retried on later runs up to `rad_max_attempts` times. A 403 or an
+#   retried on later runs up to `rad_max_attempts` times with the same
+#   reader (`rad_reader_id`; a changed reader starts over). A 403 or an
 #   HTML body (the WAF) stops the run at once; more than ~10% of
 #   failures stops it too. Both exit with status 2 after publishing
 #   what was read. A run publishes in checkpoints of `rad_checkpoint_docs`
@@ -147,9 +148,14 @@ rad_queue <- function(
     idx <- idx[refer_year %in% year, , drop = FALSE]
     refer_year <- refer_year[refer_year %in% year]
   }
+  # out of attempts WITH THIS reader: a document refused by an earlier
+  # reader (`reader` absent or different) is tried again
   spent <- names(state$unread)[vapply(
     state$unread,
-    function(u) (u$attempts %||% 0L) >= max_attempts,
+    function(u) {
+      (u$attempts %||% 0L) >= max_attempts &&
+        identical(u$reader %||% "", rad_reader_id)
+    },
     logical(1)
   )]
   keep <- !idx$id_doc %in% c(names(state$done), spent)
@@ -196,10 +202,13 @@ rad_write_state <- function(state, path) {
 
 rad_mark_unread <- function(state, id_doc, reason) {
   prev <- state$unread[[id_doc]]
+  # attempts of an earlier reader do not count against the document
+  same <- identical(prev$reader %||% "", rad_reader_id)
   state$unread[[id_doc]] <- list(
     reason = reason,
     at = utc_now(),
-    attempts = as.integer(prev$attempts %||% 0L) + 1L
+    attempts = if (same) as.integer(prev$attempts %||% 0L) + 1L else 1L,
+    reader = rad_reader_id
   )
   state
 }

@@ -397,6 +397,80 @@ test_that("old layout with consolidated: DMPL labels are positional", {
   )
 })
 
+test_that("a text node above libxml2's 10 MB limit is read whole", {
+  load_etl_rad()
+  # the embedded PDF of a RAD document is one base64 text node; five
+  # DFP 2025 documents of 2026-10-20 (e.g. REVEE, id 155949) carry one
+  # above 10 MB, which libxml2 2.9 refuses as "Extra content at the end
+  # of the document" and libxml2 2.12 truncates with a warning
+  path <- withr::local_tempfile(fileext = ".xml")
+  blob <- strrep("QUJD", 2750000L) # 11 MB of base64
+  writeLines(
+    c(
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+      "<XmlDemonstracoesFinanceiras><DadosDFP><AnexosDocumento>",
+      paste0("<ImagemObjetoArquivoPdf>", blob, "</ImagemObjetoArquivoPdf>"),
+      "</AnexosDocumento><DataReferencia>31/12/2025</DataReferencia>",
+      "</DadosDFP></XmlDemonstracoesFinanceiras>"
+    ),
+    path
+  )
+  doc <- expect_no_condition(rad_read_xml(path))
+  expect_identical(
+    nchar(xml_text1(doc, "./DadosDFP/AnexosDocumento/ImagemObjetoArquivoPdf")),
+    11000000L
+  )
+  expect_identical(xml_text1(doc, "./DadosDFP/DataReferencia"), "31/12/2025")
+})
+
+test_that("new layout of a bank: DMPL columns follow the converter's order", {
+  load_etl_rad()
+  f <- filing_row(
+    "28.127.603/0001-78",
+    "2025-12-31",
+    "1",
+    "BANESTES S.A. - BCO EST ESPIRITO SANTO",
+    "001155",
+    "154846"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2025_154846"), f)
+  expect_identical(r$problems, character())
+  # individual: seven elements, `AjustesAvaliacaoPatrimonial` fourth, so
+  # the CSV writes the adjustments under "Lucros ou Prejuízos Acumulados"
+  # and the equity total under "Participação dos Não Controladores"
+  ind <- r$tables[["dmpl/ind"]]
+  expect_identical(unique(ind$coluna_df), rad_dmpl_labels[1:7])
+  saldo <- ind[ind$cd_conta == "5.01" & ind$ordem_exerc == ultimo, ]
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[1]],
+    1600000000
+  )
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[4]],
+    -31429000
+  )
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[7]],
+    2357214000
+  )
+  # consolidated: nine elements; the controlling shareholders' equity is
+  # column 7, the non-controlling interest column 8 and the consolidated
+  # total the unlabelled ninth, although the XML writes the total before
+  # the non-controlling interest
+  con <- r$tables[["dmpl/con"]]
+  expect_identical(unique(con$coluna_df), c(rad_dmpl_labels, NA))
+  saldo <- con[con$cd_conta == "5.01" & con$ordem_exerc == ultimo, ]
+  expect_identical(
+    saldo$vl_conta[which(saldo$coluna_df == rad_dmpl_labels[7])],
+    2313548000
+  )
+  expect_identical(
+    saldo$vl_conta[which(saldo$coluna_df == rad_dmpl_labels[8])],
+    0
+  )
+  expect_identical(saldo$vl_conta[is.na(saldo$coluna_df)], 2313548000)
+})
+
 test_that("a document that does not match its index row is set aside", {
   load_etl_rad()
   f <- filing_row(
@@ -470,8 +544,17 @@ test_that("the queue holds the superseded deliveries, newest year first", {
   expect_identical(q$superseded_at, c("2025-08-01", "2025-03-10", "2024-03-05"))
   expect_identical(q$superseded_by_versao, c("1", "2", "2"))
   state$done[["11"]] <- list(hash = "x")
-  state$unread[["10"]] <- list(reason = "r", attempts = 3L)
+  state$unread[["10"]] <- list(
+    reason = "r",
+    attempts = 3L,
+    reader = rad_reader_id
+  )
   expect_identical(rad_queue(index, state)$id_doc, "30")
+  # the attempts of an earlier reader do not spend the document
+  state$unread[["10"]]$reader <- "0ld"
+  expect_identical(rad_queue(index, state)$id_doc, c("10", "30"))
+  state$unread[["10"]]$reader <- NULL
+  expect_identical(rad_queue(index, state)$id_doc, c("10", "30"))
   expect_identical(
     rad_queue(index, rad_empty_state("dfp"), year = 2023)$id_doc,
     "30"
@@ -528,6 +611,14 @@ test_that("the state round-trips and the unread list is legible", {
   load_etl_rad()
   state <- rad_empty_state("dfp")
   state <- rad_mark_unread(state, "77", "HTTP 500")
+  state <- rad_mark_unread(state, "77", "HTTP 500")
+  expect_identical(state$unread[["77"]]$attempts, 2L)
+  expect_identical(state$unread[["77"]]$reader, rad_reader_id)
+  expect_match(rad_reader_id, "^[0-9a-f]{12}$")
+  # a document refused by an earlier reader starts its attempts over
+  state$unread[["77"]]$reader <- "0ld"
+  state <- rad_mark_unread(state, "77", "HTTP 500")
+  expect_identical(state$unread[["77"]]$attempts, 1L)
   state <- rad_mark_unread(state, "77", "HTTP 500")
   expect_identical(state$unread[["77"]]$attempts, 2L)
   state$done[["15513"]] <- list(hash = "abc", rows = 10L)
