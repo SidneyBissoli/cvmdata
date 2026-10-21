@@ -131,27 +131,41 @@ rad_dmpl_labels <- c(
   "Patrimônio Líquido Consolidado"
 )
 
-# New-layout DMPL element names in the order the CVM converter writes
-# them: the n-th element PRESENT in the document is the n-th CSV column,
-# labelled by its position in `rad_dmpl_labels` (a ninth column has no
-# label). The order is the converter's, not the document's. Measured
-# 2026-10-20 against the DFP 2025 CSV of Banestes and Banco Pine, whose
-# equity has the columns of a financial institution: in the individual
-# DMPL the CSV writes `AjustesAvaliacaoPatrimonial` under "Lucros ou
-# Prejuízos Acumulados" and the equity total under "Participação dos Não
-# Controladores"; in the consolidated one the controlling shareholders'
-# equity is column 7, the non-controlling interest column 8 and the
-# consolidated total the unlabelled column 9, although the XML writes the
-# total before the non-controlling interest.
-rad_dmpl_tag_order <- c(
+# New-layout DMPL element names the CVM converter knows. The n-th element
+# PRESENT in the document is the n-th CSV column, labelled by its
+# position in `rad_dmpl_labels` (a ninth column has no label), and the
+# columns come in the DOCUMENT's order, which depends on the template the
+# company filed with: a financial institution writes
+# `AjustesAvaliacaoPatrimonial` before `LucroPrejuizoAcumulado` in one
+# template (Banestes, Pine, Daycoval, Banese) and after it in another
+# (BTG Pactual, Itaú, with `ReservasReavaliacao` third), and the CSV
+# follows each. Measured account by account against the DFP 2025 CSV on
+# 2026-10-20/21 (six current versions, zero differences). In the
+# individual DMPL of a bank the CSV therefore writes the adjustments under
+# "Lucros ou Prejuízos Acumulados" or "Patrimônio Líquido" and the equity
+# total under "Participação dos Não Controladores". An element outside
+# this set sets the document aside: the labels are positional, so an
+# unmeasured element would silently shift every column after it.
+rad_dmpl_tags <- c(
   "CapitalSocialIntegralizado",
   "ReservasCapital",
   "ReservasCapitalOpcoesOutorgAcoesTesour",
+  "ReservasReavaliacao",
   "ReservasLucro",
   "AjustesAvaliacaoPatrimonial",
   "LucroPrejuizoAcumulado",
   "OutrosResultadosAbrangentes",
   "PatrimonioLiquido",
+  "PatrimonioLiquidoAcionistasControl",
+  "PatrimonioLiquidoAcionistasNaoControl",
+  "PatrimonioLiquidoConsolidado"
+)
+
+# The one place the converter does NOT follow the document: the three-way
+# equity split of a consolidated DMPL is written as controlling (column
+# 7), non-controlling (8) and consolidated total (the unlabelled 9),
+# although the XML writes the total before the non-controlling interest.
+rad_dmpl_tail <- c(
   "PatrimonioLiquidoAcionistasControl",
   "PatrimonioLiquidoAcionistasNaoControl",
   "PatrimonioLiquidoConsolidado"
@@ -856,11 +870,9 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
     )
     return(list(contas = contas, cols = cols))
   }
-  tags <- intersect(rad_dmpl_tag_order, names(contas))
-  unknown <- setdiff(
+  present <- setdiff(
     names(contas),
     c(
-      rad_dmpl_tag_order,
       "ContaFixa",
       "CodigoConta",
       "DescricaoConta",
@@ -870,6 +882,7 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
       "st_conta_fixa"
     )
   )
+  unknown <- setdiff(present, rad_dmpl_tags)
   if (length(unknown)) {
     return(list(
       problem = sprintf(
@@ -879,6 +892,11 @@ rad_new_dmpl_period <- function(nodes, basis, dt_ini, dt_fim) {
       )
     ))
   }
+  # document order, the three-way equity split in the converter's order
+  tags <- c(
+    present[!present %in% rad_dmpl_tail],
+    intersect(rad_dmpl_tail, present)
+  )
   if (length(tags) > rad_dmpl_max_cols) {
     return(list(
       problem = sprintf("dmpl/%s: %d DMPL columns", basis, length(tags))
