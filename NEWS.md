@@ -231,6 +231,13 @@
 
 ## Internal
 
+* The two ETL workflows that append to the history assets
+  (`etl-mirror.yaml`, weekly, and `etl-rad.yaml`, daily) share the
+  GitHub Actions concurrency group `etl-history`, so a run of one waits
+  for the other to finish. The schedules alone did not keep them apart:
+  the RAD run reads `dfp` and `itr` in series and can last until
+  08:40 UTC, past the Tuesday 07:00 UTC run of the mirror.
+
 * The mirror ETL keeps the filings it supersedes. Every CVM annual file
   carries only the filing delivered last for each company and reference
   date, so when a company restated a statement the previous rows
