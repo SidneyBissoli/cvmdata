@@ -36,10 +36,18 @@
 #       DMPL of a financial institution, with `AjustesAvaliacaoPatrimonial`
 #       and the three-way equity split of the consolidated statement
 #       (controlling, non-controlling, consolidated) — seven columns in
-#       the individual DMPL, nine in the consolidated, labelled by the
-#       converter's order (`rad_dmpl_tag_order`), the ninth without label.
+#       the individual DMPL, nine in the consolidated, labelled by
+#       position, the ninth without label; the XML writes the consolidated
+#       total before the non-controlling interest, the CSV the reverse.
+#   tests/testthat/fixtures/rad_dfp_2025_154641.zip
+#     - new layout, DFP 2025, BTG Pactual v1 (set aside on 2026-10-21):
+#       the other bank template, with `ReservasReavaliacao` third and
+#       `AjustesAvaliacaoPatrimonial` AFTER `LucroPrejuizoAcumulado` (the
+#       reverse of Banestes), seven columns in the individual DMPL; the
+#       consolidated DMPL is the positional variant (`DadosContas`, eight
+#       fields). Proves that the CSV follows the document's order.
 #
-# Usage, from the package root, with the six original ZIPs (as
+# Usage, from the package root, with the seven original ZIPs (as
 # downloaded from the RAD, named `<id_doc>.zip`) in one directory:
 #   Rscript data-raw/build-rad-test-fixtures.R <dir-with-zips>
 
@@ -57,7 +65,8 @@ docs <- list(
   list(id = "15513", name = "rad_dfp_2011_15513", layout = "old"),
   list(id = "17509", name = "rad_itr_2012_17509", layout = "old"),
   list(id = "14281", name = "rad_dfp_2011_14281", layout = "old"),
-  list(id = "154846", name = "rad_dfp_2025_154846", layout = "new")
+  list(id = "154846", name = "rad_dfp_2025_154846", layout = "new"),
+  list(id = "154641", name = "rad_dfp_2025_154641", layout = "new")
 )
 
 keep_conta <- function(codes) {

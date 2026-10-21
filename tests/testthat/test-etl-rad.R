@@ -471,6 +471,77 @@ test_that("new layout of a bank: DMPL columns follow the converter's order", {
   expect_identical(saldo$vl_conta[is.na(saldo$coluna_df)], 2313548000)
 })
 
+test_that("new layout, other bank template: DMPL columns follow the document", {
+  load_etl_rad()
+  f <- filing_row(
+    "30.306.294/0001-45",
+    "2025-12-31",
+    "1",
+    "BCO BTG PACTUAL S.A.",
+    "022616",
+    "154641"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2025_154641"), f)
+  expect_identical(r$problems, character())
+  # individual: seven elements in the document's order, `ReservasReavaliacao`
+  # third and `AjustesAvaliacaoPatrimonial` AFTER `LucroPrejuizoAcumulado`,
+  # the reverse of Banestes; the CSV follows the document, so the retained
+  # earnings column carries the profit reserves and the equity column the
+  # adjustments (measured against the DFP 2025 CSV, zero differences)
+  ind <- r$tables[["dmpl/ind"]]
+  expect_identical(unique(ind$coluna_df), rad_dmpl_labels[1:7])
+  saldo <- ind[ind$cd_conta == "5.01" & ind$ordem_exerc == ultimo, ]
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[1]],
+    15760364000
+  )
+  expect_identical(saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[3]], 0)
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[4]],
+    40185539000
+  )
+  expect_identical(saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[5]], 0)
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[6]],
+    1502059000
+  )
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[7]],
+    57466518000
+  )
+  # consolidated: the positional variant (`DadosContas`), eight fields
+  con <- r$tables[["dmpl/con"]]
+  expect_identical(unique(con$coluna_df), rad_dmpl_labels)
+  saldo <- con[con$cd_conta == "5.01" & con$ordem_exerc == penultimo, ]
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[8]],
+    56388167000
+  )
+})
+
+test_that("an unmeasured DMPL element sets the document aside", {
+  load_etl_rad()
+  f <- filing_row(
+    "30.306.294/0001-45",
+    "2025-12-31",
+    "1",
+    "BCO BTG PACTUAL S.A.",
+    "022616",
+    "154641"
+  )
+  tmp <- withr::local_tempdir()
+  utils::unzip(rad_fx("rad_dfp_2025_154641"), exdir = tmp)
+  xml <- list.files(tmp, pattern = "DFP.*[.]xml$", full.names = TRUE)
+  txt <- readLines(xml, encoding = "UTF-8", warn = FALSE)
+  txt <- gsub("ReservasReavaliacao", "ReservasInventadas", txt, fixed = TRUE)
+  writeLines(txt, xml, useBytes = TRUE)
+  zip <- file.path(tmp, "154641.zip")
+  withr::with_dir(tmp, utils::zip(zip, basename(xml), flags = "-q"))
+  r <- rad_read_zip(zip, f)
+  expect_match(r$problems, "dmpl/ind: unknown DMPL columns ReservasInventadas")
+  expect_false("dmpl/ind" %in% names(r$tables))
+})
+
 test_that("a document that does not match its index row is set aside", {
   load_etl_rad()
   f <- filing_row(
