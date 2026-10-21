@@ -5,10 +5,12 @@ name: ETL RAD history
 # versions work, decisions of 2026-10-20; see inst/etl/04-rad-fetch.R).
 #
 # Triggers:
-#   - schedule: daily 02:00 UTC (23:00 BRT), out of the Tuesday 07:00 UTC
-#     window of etl-mirror.yaml. Both robots append to the same history
-#     assets, so they must not run at the same time: a run here lasts
-#     at most `timeout-minutes` and ends before 05:30 UTC.
+#   - schedule: daily 02:00 UTC (23:00 BRT). Both robots append to the
+#     same history assets, so this workflow and etl-mirror.yaml share
+#     the concurrency group `etl-history`: a run of one waits for the
+#     other to finish. The cron alone does not keep them apart: with
+#     `dfp` and `itr` in series a run lasts up to twice `timeout-minutes`
+#     (08:40 UTC), past the Tuesday 07:00 UTC run of the mirror.
 #   - workflow_dispatch: `dataset` (empty = dfp then itr, as the cron),
 #     `limit` (documents per dataset, default 300), `year` (one
 #     reference year, smoke test), `dry_run` (read, do not publish).
@@ -54,7 +56,8 @@ permissions:
   contents: write  # gh release upload
 
 concurrency:
-  group: etl-rad
+  # Shared with etl-mirror.yaml (same history assets); see the header.
+  group: etl-history
   cancel-in-progress: false
 
 jobs:
