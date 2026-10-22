@@ -217,7 +217,8 @@ rad_document_url <- function(id_doc) {
 # list(ok, status, bytes, seconds, error). The RAD answers
 # `Content-Type: text/html` even for the ZIP, so the body is checked by
 # its magic bytes, not by the header. A 403 or an HTML body is how the
-# WAF refuses: the caller stops the whole round on it.
+# WAF refuses: the caller pauses and retries the document, and stops
+# the whole round only when every try is refused.
 rad_download <- function(id_doc, dest, timeout = 180) {
   stopifnot(requireNamespace("httr2", quietly = TRUE))
   t0 <- Sys.time()
