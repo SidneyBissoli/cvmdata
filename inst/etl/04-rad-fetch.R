@@ -23,10 +23,15 @@
 #   WHOLE in a public list (`__rad_unread.csv` next to the parquets) and
 #   retried on later runs up to `rad_max_attempts` times with the same
 #   reader (`rad_reader_id`; a changed reader starts over). A 403 or an
-#   HTML body (the WAF) stops the run at once; more than ~10% of
-#   failures stops it too. Both exit with status 2 after publishing
-#   what was read. A run publishes in checkpoints of `rad_checkpoint_docs`
-#   documents, so a job killed later keeps what it had published.
+#   HTML body (the WAF) is first taken as transient: the run pauses
+#   `rad_waf_pause` seconds and asks for the SAME document again, up to
+#   `rad_waf_retries` times (decision of 2026-10-22: one refusal in the
+#   middle of a good run of 74 turned the job red, and the document
+#   downloaded whole hours later). Only a document refused every time
+#   stops the run; more than ~10% of failures stops it too. Both exit
+#   with status 2 after publishing what was read. A run publishes in
+#   checkpoints of `rad_checkpoint_docs` documents, so a job killed
+#   later keeps what it had published.
 # * State lives in the release as `__rad_state.json` (documents done, by
 #   `id_doc` with the hash of the XML; documents unread with the reason;
 #   the last runs). The `hash` of `__source_hash.json` is NOT touched:
@@ -69,6 +74,8 @@ stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 stopifnot(requireNamespace("dplyr", quietly = TRUE))
 
 rad_crawl_delay <- 10 # seconds between two requests to the RAD
+rad_waf_pause <- 90 # seconds of pause after a refusal, before retrying
+rad_waf_retries <- 2L # retries of one document refused by the WAF
 rad_max_attempts <- 3L # tries per unread document, across runs
 rad_failure_rate <- 0.10 # of the documents attempted in the run
 rad_failure_floor <- 10L # attempts before the rate is judged
@@ -462,14 +469,42 @@ rad_run_queue <- function(
 
 # Downloads and reads one document. Returns list(ok, waf, note, rows,
 # done): `note` is the reason when not ok, a summary otherwise; `done`
-# is the state entry of a document read.
-rad_fetch_one <- function(f, work) {
+# is the state entry of a document read. A refusal by the WAF (403 or
+# an HTML body) is retried after `pause` seconds, `retries` times; `waf`
+# is TRUE only when every try was refused.
+rad_fetch_one <- function(
+  f,
+  work,
+  pause = rad_waf_pause,
+  retries = rad_waf_retries
+) {
   zip <- file.path(work, paste0(f$id_doc, ".zip"))
-  dl <- rad_download(f$id_doc, zip)
-  if (!dl$ok) {
+  for (try in seq_len(retries + 1L)) {
+    dl <- rad_download(f$id_doc, zip)
+    if (dl$ok) {
+      break
+    }
     waf <- identical(dl$status, 403L) ||
       grepl("not a ZIP", dl$error, fixed = TRUE)
-    return(list(ok = FALSE, waf = waf, note = dl$error))
+    if (!waf) {
+      return(list(ok = FALSE, waf = FALSE, note = dl$error))
+    }
+    if (try > retries) {
+      return(list(
+        ok = FALSE,
+        waf = TRUE,
+        note = sprintf("%s, refused %d times", dl$error, try)
+      ))
+    }
+    message(sprintf(
+      "  %s refused by the RAD (%s): pausing %ds before try %d of %d",
+      f$id_doc,
+      dl$error,
+      as.integer(pause),
+      try + 1L,
+      retries + 1L
+    ))
+    Sys.sleep(pause)
   }
   res <- tryCatch(rad_read_zip(zip, f), error = function(e) {
     list(meta = list(), tables = list(), problems = conditionMessage(e))
