@@ -508,6 +508,46 @@ test_that("ticker resolution names the years searched when a code is absent", {
   )
 })
 
+# years the table is published for ------------------------------------
+
+# dfp/composicao_capital declares first_year 2020 (absent from the
+# CVM's ZIPs before, confirmed in the 2015 and 2019 members).
+test_that("cvm_fetch refuses a year the table is not published for", {
+  expect_error(
+    cvm_fetch("dfp", "composicao_capital", year = 2015, source = "cvm"),
+    regexp = "not published for.*2015",
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_fetch("dfp", "composicao_capital", year = 2018:2021, source = "cvm"),
+    regexp = "2018.*2019",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("check_published_years clips a window to the published years", {
+  schema <- cvmdata:::load_schema("dfp", "composicao_capital")
+  window <- cvmdata:::check_period(NULL, "2019-01-01", "2021-12-31", schema)
+  expect_message(
+    clipped <- cvmdata:::check_published_years(window, schema),
+    regexp = "not published before.*2020"
+  )
+  expect_identical(clipped$year, 2020:2021)
+  expect_identical(clipped$from, as.Date("2019-01-01"))
+  expect_error(
+    cvmdata:::check_published_years(
+      cvmdata:::check_period(NULL, "2018-01-01", "2019-12-31", schema),
+      schema
+    ),
+    regexp = "not published for",
+    class = "cvmdata_error_input"
+  )
+  plain <- cvmdata:::check_period(2020:2024, NULL, NULL, schema)
+  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
+  latest <- cvmdata:::check_period(NULL, NULL, NULL, schema)
+  expect_identical(cvmdata:::check_published_years(latest, schema), latest)
+})
+
 # as_of ----------------------------------------------------------------
 
 # cad_sample.csv: 50 rows, 41 cancelled, 3 CNPJs repeated by tp_merc;
