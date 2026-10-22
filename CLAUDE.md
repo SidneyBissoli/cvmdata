@@ -85,12 +85,17 @@ cvm_fetch(dataset, table,
           cnpj     = NULL,      # SÓ CNPJ (com ou sem pontuação); código CVM
                                 # e nome são recusados (cvmdata_error_input)
           ticker   = NULL,      # código B3; resolvido via fca/valor_mobiliario
-                                # no mesmo `source`; soma-se a `cnpj`
+                                # no mesmo `source`, contra a UNIÃO dos anos
+                                # com ticker (2018→último; deslistadas
+                                # resolvem); soma-se a `cnpj`
           year     = NULL,      # anos inteiros, NULL → último; OU
           from     = NULL,      # janela de datas COMPLETAS ("YYYY-MM-DD"),
           to       = NULL,      #   os dois juntos; filtra pela data de
                                 #   REFERÊNCIA (dt_refer/data_referencia);
                                 #   com `year` = erro; em cad = erro
+          as_of    = NULL,      # data COMPLETA; só em tabela-registro com
+                                #   `as_of:` no YAML (cad/companhias):
+                                #   registros vigentes na data, linhas de HOJE
           basis    = NULL,      # "ind" / "con" / c("ind","con") — ver abaixo
           reading  = NULL,      # "original" / "restated" / os dois — só nas
                                 #   16 tabelas com ordem_exerc; ver abaixo
@@ -168,6 +173,19 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
   pós-leitura pela data de REFERÊNCIA do documento (`dt_refer` ou
   `data_referencia`), nunca pela data de entrega
   (`filter_by_reference_date()`).
+
+- `as_of` (Sidney, 2026-10-21; frente Deslistadas): data completa, só
+  em tabela-registro cujo YAML declara `as_of: {registered, cancelled}`
+  (hoje `cad/companhias`: `dt_reg`/`dt_cancel`); outra tabela = erro.
+  Mantém os REGISTROS vigentes na data (`dt_reg <= X` e `dt_cancel`
+  vazia ou `> X`), olhando cada `(cnpj_cia, cd_cvm)` — 34 CNPJ têm dois
+  registros. As linhas são as de HOJE (a CVM não publica o cadastro do
+  passado); o retrato do ano é `fca/geral`. Chave do CAD =
+  `(cnpj_cia, cd_cvm, tp_merc)`: 107 registros repetem-se só por
+  `tp_merc` e ficam como a CVM publica (receita de uma linha por
+  registro no help); `tp_merc` vazio nas canceladas. Sem argumentos
+  extras de código CVM ou mercado (recusados 2026-10-21). Mesmo nome
+  previsto na v0.7 para os cadastros de agentes.
 
 Sobre exercícios contidos em cada CSV anual: o portal publica em cada
 ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e
@@ -258,9 +276,15 @@ Em `cvm_fetch()` (v0.3) a seleção é por **`cnpj`** (só CNPJ, com ou sem
 pontuação — `check_cnpj()` recusa código CVM e nome, inclusive como
 cortesia a quem migra do GetDFPData2) e/ou **`ticker`** (código B3 →
 CNPJ via `fca/valor_mobiliario`, lido do mesmo `source`;
-`check_ticker()` recusa o que não tem forma de ticker). Os dois se
-somam; CNPJ ausente da tabela = zero linhas, calado; ticker ausente do
-FCA = `cvmdata_error_input`. Busca textual e CD_CVM ficaram SÓ em
+`check_ticker()` recusa o que não tem forma de ticker). O ticker é
+procurado na UNIÃO de todos os anos do FCA com a coluna
+(`ticker_first_year: 2018` no YAML; vazia em 2010–2017), não só no ano
+pedido — assim o código de uma deslistada (GOLL4, BPAN4) resolve para
+qualquer `year` (decisão 2026-10-21; `resolve_ticker_all_years()`).
+Os dois se somam; CNPJ ausente da tabela = zero linhas, calado; ticker
+ausente de TODOS os anos = `cvmdata_error_input`; ticker que aponta
+para mais de um CNPJ = `cvmdata_error_input` pedindo `cnpj` (guarda;
+medido 2026-10-21: nenhum reusado). Busca textual e CD_CVM ficaram SÓ em
 `issuer_fetch()` (deprecada); o cadastro `cvm_fetch("cad",
 "companhias")` é o lugar de resolver nome/código → CNPJ. Sem `cpf`: a
 CVM não publica CPF (cadastros PF só trazem nome; filtro de PF fica
