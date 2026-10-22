@@ -18,10 +18,11 @@ name: ETL RAD history
 # One job per dataset, DFP first (decision 3: most recent year first,
 # DFP before ITR). Each document costs ~26 s of download plus a 10 s
 # crawl delay; 300 documents are ~3 h. A refusal by the RAD (403 or an
-# HTML body) or more than ~10% of failures stops the run with exit
-# status 2 after publishing what was read, which turns the job red: the
-# portfolio monitor watches this workflow and the public
-# `__rad_unread.csv` asset.
+# HTML body) is retried after a pause, twice, before it counts: a
+# document refused every time, or more than ~10% of failures, stops
+# the run with exit status 2 after publishing what was read, which
+# turns the job red: the portfolio monitor watches this workflow and
+# the public `__rad_unread.csv` asset.
 
 on:
   schedule:

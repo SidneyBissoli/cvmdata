@@ -790,3 +790,131 @@ test_that("a checkpoint replaces the record of its own run, not another", {
   expect_identical(state$runs[[1L]]$at, "2026-11-02T02:00:00Z")
   expect_length(rad_record_run(state, list(at = "x"), keep = 2L)$runs, 2L)
 })
+
+# A refusal by the WAF is retried after a pause (decision of 2026-10-22:
+# one refusal in a good run of 74 turned the job red, and the document
+# downloaded whole hours later). The download is replaced below: the
+# scripts are sourced into this environment, so a `rad_download` defined
+# here is the one `rad_fetch_one()` finds.
+waf_download <- function(answers, fixture) {
+  tally <- new.env()
+  tally$calls <- 0L
+  download <- function(id_doc, dest, timeout = 180) {
+    tally$calls <- tally$calls + 1L
+    answer <- answers[[min(tally$calls, length(answers))]]
+    if (identical(answer, "zip")) {
+      file.copy(rad_fx(fixture), dest, overwrite = TRUE)
+      return(list(
+        ok = TRUE,
+        status = 200L,
+        bytes = file.size(dest),
+        seconds = 1,
+        error = NA_character_
+      ))
+    }
+    if (identical(answer, "html")) {
+      return(list(
+        ok = FALSE,
+        status = 200L,
+        bytes = 1024,
+        seconds = 1,
+        error = "body is not a ZIP (WAF page?)"
+      ))
+    }
+    if (identical(answer, "403")) {
+      return(list(
+        ok = FALSE,
+        status = 403L,
+        bytes = NA_real_,
+        seconds = 1,
+        error = "HTTP 403"
+      ))
+    }
+    list(
+      ok = FALSE,
+      status = 500L,
+      bytes = NA_real_,
+      seconds = 1,
+      error = "HTTP 500"
+    )
+  }
+  list(download = download, calls = function() tally$calls)
+}
+
+test_that("one refusal by the WAF is retried and the document is read", {
+  load_etl_rad()
+  fake <- waf_download(c("html", "zip"), "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row(
+    "43.335.774/0001-86",
+    "2024-12-31",
+    "1",
+    "TRAVESSIA SECURITIZADORA DE CRÉDITOS MERCANTIS VI S.A.",
+    "026824",
+    "151243"
+  )
+  work <- withr::local_tempdir()
+  expect_message(
+    got <- rad_fetch_one(f, work, pause = 0),
+    "refused by the RAD .*pausing 0s before try 2 of 3"
+  )
+  expect_true(got$ok)
+  expect_false(got$waf)
+  expect_identical(fake$calls(), 2L)
+  expect_gt(got$done$rows, 0L)
+})
+
+test_that("a document refused every time stops the run as WAF", {
+  load_etl_rad()
+  fake <- waf_download(c("html", "403", "html"), "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row("A", "2024-12-31", "1", "A", "1", "1")
+  work <- withr::local_tempdir()
+  got <- suppressMessages(rad_fetch_one(f, work, pause = 0))
+  expect_false(got$ok)
+  expect_true(got$waf)
+  expect_identical(fake$calls(), 3L)
+  expect_match(got$note, "refused 3 times")
+})
+
+test_that("a failure that is not a refusal is not retried", {
+  load_etl_rad()
+  fake <- waf_download("500", "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row("A", "2024-12-31", "1", "A", "1", "1")
+  work <- withr::local_tempdir()
+  got <- rad_fetch_one(f, work, pause = 0)
+  expect_false(got$ok)
+  expect_false(got$waf)
+  expect_identical(got$note, "HTTP 500")
+  expect_identical(fake$calls(), 1L)
+})
+
+test_that("the queue stops on a persistent refusal, not on a transient one", {
+  load_etl_rad()
+  f <- filing_row(c("A", "B"), "2024-12-31", "1", c("A", "B"), "1", c("1", "2"))
+  state <- rad_empty_state("dfp")
+  seen <- new.env()
+  seen$ids <- character()
+  rad_fetch_one <- function(f, work, ...) {
+    seen$ids <- c(seen$ids, f$id_doc)
+    if (f$id_doc == "1") {
+      list(ok = FALSE, waf = TRUE, note = "HTTP 403, refused 3 times")
+    } else {
+      list(ok = TRUE, waf = FALSE, note = "read", rows = list(), done = list())
+    }
+  }
+  rad_crawl_delay <- 0
+  run <- suppressMessages(rad_run_queue(
+    f,
+    state,
+    withr::local_tempdir(),
+    limit = 2L,
+    minutes = 10,
+    Sys.time()
+  ))
+  expect_identical(run$stopped, "waf")
+  expect_identical(seen$ids, "1")
+  expect_identical(run$failed, 1L)
+  expect_identical(names(run$state$unread), "1")
+})
