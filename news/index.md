@@ -132,6 +132,23 @@
     distinct CVM codes. The file is returned as published; the recipe
     for one row per registration is in the help.
 
+- A year the table is not published for is refused before any download.
+  A table can start later than its dataset: the CVM’s yearly ZIP simply
+  lacks its CSV before then. The schemas now declare the measured first
+  year of 19 tables that used to claim 2010 or 2011
+  (`composicao_capital` of the DFP and ITR from 2020; fourteen FRE
+  tables such as `acao_entregue`, `remuneracao_variavel` and the
+  diversity tables from 2023; `mercado_estrangeiro` from 2019,
+  `titular_valor_mobiliario` from 2018, `titulo_exterior` from 2016;
+  measured on the mirror’s inventory and confirmed in the ZIP members).
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  aborts with `cvmdata_error_input` (“not published for”) when `year`
+  names an earlier year, and a `from`/`to` window drops the years the
+  table does not exist for, saying so. The backend errors for a CSV
+  missing from a ZIP, or a partition missing from the mirror, now say
+  the table is not published for that year instead of blaming the
+  schema.
+
 ### Data coverage
 
 - Corrected the declared `first_year` for the v0.2 datasets, which had

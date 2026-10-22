@@ -183,7 +183,13 @@ Domínio dos argumentos enumerados (validados via
   descoberto por `HEAD` probing decrescente. Para histórico, integer
   vector explícito (`year = 2012:2024`). Helper
   [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
-  devolve o range. **Sem sentinela `"all"`** — tipo único.
+  devolve o range. **Sem sentinela `"all"`** — tipo único. Ano anterior
+  ao `first_year` da TABELA (medido no espelho em 2026-10-21; uma tabela
+  pode começar depois do dataset: `composicao_capital` 2020, 14 do FRE
+
+  2023. = `cvmdata_error_input` antes de baixar
+        (`check_published_years()`); em janela `from`/`to`, os anos
+        inexistentes caem com `cli_inform`.
 
 - `from`/`to` (só em
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
