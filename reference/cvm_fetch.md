@@ -17,6 +17,7 @@ cvm_fetch(
   year = NULL,
   from = NULL,
   to = NULL,
+  as_of = NULL,
   basis = NULL,
   reading = NULL,
   source = NULL,
@@ -51,8 +52,12 @@ cvm_fetch(
   Optional character vector of B3 trading codes (`"PETR4"`, `"BBAS3"`).
   Each ticker is resolved to its issuer CNPJ through
   `fca/valor_mobiliario` (read from the same `source`) and then filtered
-  like `cnpj`; the two arguments combine. A ticker absent from the
-  lookup aborts with `cvmdata_error_input`.
+  like `cnpj`; the two arguments combine. The lookup reads every yearly
+  FCA file that carries trading codes (2018 onwards), so the code of a
+  company that has since left the exchange still resolves, for any
+  `year`. A ticker absent from every file aborts with
+  `cvmdata_error_input`; so does a ticker that maps to more than one
+  issuer (pass `cnpj` instead).
 
 - year:
 
@@ -70,6 +75,15 @@ cvm_fetch(
   the interval. Incomplete dates (`"2024"`, `"2024-06"`) are rejected.
   Cannot be combined with `year`, and do not apply to snapshot tables
   such as CAD.
+
+- as_of:
+
+  Optional complete date (`"YYYY-MM-DD"` or `Date`) for registry tables
+  only (`cad/companhias`): keeps the registrations in force on that
+  date, i.e. registered on or before it and not cancelled by it. The
+  rows are the register as the CVM publishes it today, not a
+  reconstruction of the past. See the section *Company register*.
+  Passing it for any other table aborts.
 
 - basis:
 
@@ -170,6 +184,39 @@ With `from`/`to`, the window applies to the exercise end
 (`dt_fim_exerc`) rather than to the document date, so an exercise's two
 readings stay together.
 
+## Company register
+
+`cad/companhias` is a single file holding today's state of every
+registration the CVM ever granted: companies that cancelled their
+registration stay in it, with `sit = "CANCELADA"`, `dt_cancel` and
+`motivo_cancel` (cancellations go back to 1984 and are three quarters of
+the rows). Its key is `(cnpj_cia, cd_cvm, tp_merc)`, which has two
+consequences for joins:
+
+- A few dozen CNPJs hold **two registrations** (a company that cancelled
+  and registered again years later under a new CVM code). These are
+  distinct registrations and the package keeps them apart.
+
+- About a hundred registrations are **repeated in two or three rows that
+  differ only in `tp_merc`** (the markets the company is admitted to:
+  exchange, organised OTC, non-organised OTC). Every other column is
+  identical. A join on `cnpj_cia` alone duplicates those companies. The
+  package returns the file as published; for one row per registration,
+  drop the market before joining, e.g.
+  `dplyr::distinct(reg, cnpj_cia, cd_cvm, .keep_all = TRUE)`. `tp_merc`
+  is empty for almost every cancelled company, so filtering on it
+  discards delisted companies.
+
+`as_of` answers "which companies were registered on date X" from the
+registration and cancellation dates of each registration, which is what
+a survivorship-free universe needs. The rows it returns are still
+today's: a company registered in 2012 and cancelled in 2017 is part of
+the 2015 universe, but its row says `"CANCELADA"`, because the CVM does
+not publish past states of the register (the file only records when the
+current value of each field started). The yearly `fca/geral` file is the
+CVM's own picture of a company in a given year (name, registration
+situation, category, issuer situation).
+
 ## Filing versions
 
 When a detail table carries several filings for the same issuer and
@@ -200,6 +247,14 @@ an earlier filing than the last delivery keeps the CVM numbers and warns
 if (FALSE) { # interactive()
 # CAD: single snapshot, no year, no basis
 issuers <- cvm_fetch("cad", "companhias")
+
+# Registrations in force at the end of 2015 (survivorship-free
+# universe), one row per registration
+u2015 <- cvm_fetch("cad", "companhias", as_of = "2015-12-31")
+u2015 <- dplyr::distinct(u2015, cnpj_cia, cd_cvm, .keep_all = TRUE)
+
+# A delisted company by its former ticker
+gol <- cvm_fetch("dfp", "dre", ticker = "GOLL4", year = 2019, basis = "con")
 
 # DFP balance sheet (assets), individual statements, latest year,
 # one issuer by CNPJ

@@ -73,6 +73,7 @@ carrying provenance attributes.</p>
 <span>  year <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  from <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  to <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  as_of <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  basis <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  reading <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  source <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -109,8 +110,12 @@ for it, silently.</p></dd>
 <dd><p>Optional character vector of B3 trading codes
 (<code>"PETR4"</code>, <code>"BBAS3"</code>). Each ticker is resolved to its issuer CNPJ
 through <code>fca/valor_mobiliario</code> (read from the same <code>source</code>) and
-then filtered like <code>cnpj</code>; the two arguments combine. A ticker
-absent from the lookup aborts with <code>cvmdata_error_input</code>.</p></dd>
+then filtered like <code>cnpj</code>; the two arguments combine. The lookup
+reads every yearly FCA file that carries trading codes (2018
+onwards), so the code of a company that has since left the
+exchange still resolves, for any <code>year</code>. A ticker absent from
+every file aborts with <code>cvmdata_error_input</code>; so does a ticker
+that maps to more than one issuer (pass <code>cnpj</code> instead).</p></dd>
 
 
 <dt id="arg-year">year<a class="anchor" aria-label="anchor" href="#arg-year"></a></dt>
@@ -129,6 +134,15 @@ are kept when the document's reference date (<code>dt_refer</code> or
 read are the years spanned by the interval. Incomplete dates
 (<code>"2024"</code>, <code>"2024-06"</code>) are rejected. Cannot be combined with
 <code>year</code>, and do not apply to snapshot tables such as CAD.</p></dd>
+
+
+<dt id="arg-as-of">as_of<a class="anchor" aria-label="anchor" href="#arg-as-of"></a></dt>
+<dd><p>Optional complete date (<code>"YYYY-MM-DD"</code> or <code>Date</code>) for
+registry tables only (<code>cad/companhias</code>): keeps the registrations
+in force on that date, i.e. registered on or before it and not
+cancelled by it. The rows are the register as the CVM publishes it
+today, not a reconstruction of the past. See the section <em>Company
+register</em>. Passing it for any other table aborts.</p></dd>
 
 
 <dt id="arg-basis">basis<a class="anchor" aria-label="anchor" href="#arg-basis"></a></dt>
@@ -234,6 +248,37 @@ following year's quarterly filings present it.</p>
 two readings stay together.</p>
     </div>
     <div class="section level2">
+    <h2 id="company-register">Company register<a class="anchor" aria-label="anchor" href="#company-register"></a></h2>
+
+
+<p><code>cad/companhias</code> is a single file holding today's state of every
+registration the CVM ever granted: companies that cancelled their
+registration stay in it, with <code>sit = "CANCELADA"</code>, <code>dt_cancel</code> and
+<code>motivo_cancel</code> (cancellations go back to 1984 and are three quarters
+of the rows). Its key is <code>(cnpj_cia, cd_cvm, tp_merc)</code>, which has two
+consequences for joins:</p><ul><li><p>A few dozen CNPJs hold <strong>two registrations</strong> (a company that
+cancelled and registered again years later under a new CVM code).
+These are distinct registrations and the package keeps them apart.</p></li>
+<li><p>About a hundred registrations are <strong>repeated in two or three rows
+that differ only in <code>tp_merc</code></strong> (the markets the company is
+admitted to: exchange, organised OTC, non-organised OTC). Every
+other column is identical. A join on <code>cnpj_cia</code> alone duplicates
+those companies. The package returns the file as published; for one
+row per registration, drop the market before joining, e.g.
+<code>dplyr::distinct(reg, cnpj_cia, cd_cvm, .keep_all = TRUE)</code>.
+<code>tp_merc</code> is empty for almost every cancelled company, so filtering
+on it discards delisted companies.</p></li>
+</ul><p><code>as_of</code> answers "which companies were registered on date X" from the
+registration and cancellation dates of each registration, which is
+what a survivorship-free universe needs. The rows it returns are still
+today's: a company registered in 2012 and cancelled in 2017 is part of
+the 2015 universe, but its row says <code>"CANCELADA"</code>, because the CVM
+does not publish past states of the register (the file only records
+when the current value of each field started). The yearly
+<code>fca/geral</code> file is the CVM's own picture of a company in a given
+year (name, registration situation, category, issuer situation).</p>
+    </div>
+    <div class="section level2">
     <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
 
 
@@ -263,6 +308,14 @@ numbers and warns (<code>cvmdata_warn_stale_filing</code>). Set
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># interactive()</span></span></span>
 <span class="r-in"><span><span class="co"># CAD: single snapshot, no year, no basis</span></span></span>
 <span class="r-in"><span><span class="va">issuers</span> <span class="op">&lt;-</span> <span class="fu">cvm_fetch</span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Registrations in force at the end of 2015 (survivorship-free</span></span></span>
+<span class="r-in"><span><span class="co"># universe), one row per registration</span></span></span>
+<span class="r-in"><span><span class="va">u2015</span> <span class="op">&lt;-</span> <span class="fu">cvm_fetch</span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span>, as_of <span class="op">=</span> <span class="st">"2015-12-31"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">u2015</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">u2015</span>, <span class="va">cnpj_cia</span>, <span class="va">cd_cvm</span>, .keep_all <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># A delisted company by its former ticker</span></span></span>
+<span class="r-in"><span><span class="va">gol</span> <span class="op">&lt;-</span> <span class="fu">cvm_fetch</span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"dre"</span>, ticker <span class="op">=</span> <span class="st">"GOLL4"</span>, year <span class="op">=</span> <span class="fl">2019</span>, basis <span class="op">=</span> <span class="st">"con"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># DFP balance sheet (assets), individual statements, latest year,</span></span></span>
 <span class="r-in"><span><span class="co"># one issuer by CNPJ</span></span></span>
