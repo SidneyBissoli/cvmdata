@@ -30,6 +30,10 @@ delimiter: ";"
 # Temporal coverage -----------------------------------------------------
 temporal_partitioning: yearly
 first_year: 2010
+# Codigo_Negociacao is empty in the 2010-2017 files (measured 2026-10-21
+# on the mirror: 0 tickers before 2018, 477 in 2018). The ticker -> CNPJ
+# lookup of cvm_fetch() reads every file from this year on.
+ticker_first_year: 2018
 
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 18

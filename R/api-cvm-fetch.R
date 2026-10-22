@@ -22,8 +22,12 @@
 #' @param ticker Optional character vector of B3 trading codes
 #'   (`"PETR4"`, `"BBAS3"`). Each ticker is resolved to its issuer CNPJ
 #'   through `fca/valor_mobiliario` (read from the same `source`) and
-#'   then filtered like `cnpj`; the two arguments combine. A ticker
-#'   absent from the lookup aborts with `cvmdata_error_input`.
+#'   then filtered like `cnpj`; the two arguments combine. The lookup
+#'   reads every yearly FCA file that carries trading codes (2018
+#'   onwards), so the code of a company that has since left the
+#'   exchange still resolves, for any `year`. A ticker absent from
+#'   every file aborts with `cvmdata_error_input`; so does a ticker
+#'   that maps to more than one issuer (pass `cnpj` instead).
 #' @param year Integer vector of years to fetch, as the CVM publishes
 #'   them (one file per year). `NULL` (default) fetches the latest
 #'   available year. Must be `NULL` for datasets with
@@ -36,6 +40,12 @@
 #'   read are the years spanned by the interval. Incomplete dates
 #'   (`"2024"`, `"2024-06"`) are rejected. Cannot be combined with
 #'   `year`, and do not apply to snapshot tables such as CAD.
+#' @param as_of Optional complete date (`"YYYY-MM-DD"` or `Date`) for
+#'   registry tables only (`cad/companhias`): keeps the registrations
+#'   in force on that date, i.e. registered on or before it and not
+#'   cancelled by it. The rows are the register as the CVM publishes it
+#'   today, not a reconstruction of the past. See the section *Company
+#'   register*. Passing it for any other table aborts.
 #' @param basis Individual (`"ind"`), consolidated (`"con"`) or both
 #'   (`c("ind", "con")`) financial statements. Required for tables
 #'   that publish the two variants (`bpa`, `bpp`, `dre`, `dra`,
@@ -113,6 +123,37 @@
 #' (`dt_fim_exerc`) rather than to the document date, so an exercise's
 #' two readings stay together.
 #'
+#' @section Company register:
+#' `cad/companhias` is a single file holding today's state of every
+#' registration the CVM ever granted: companies that cancelled their
+#' registration stay in it, with `sit = "CANCELADA"`, `dt_cancel` and
+#' `motivo_cancel` (cancellations go back to 1984 and are three quarters
+#' of the rows). Its key is `(cnpj_cia, cd_cvm, tp_merc)`, which has two
+#' consequences for joins:
+#'
+#' * A few dozen CNPJs hold **two registrations** (a company that
+#'   cancelled and registered again years later under a new CVM code).
+#'   These are distinct registrations and the package keeps them apart.
+#' * About a hundred registrations are **repeated in two or three rows
+#'   that differ only in `tp_merc`** (the markets the company is
+#'   admitted to: exchange, organised OTC, non-organised OTC). Every
+#'   other column is identical. A join on `cnpj_cia` alone duplicates
+#'   those companies. The package returns the file as published; for one
+#'   row per registration, drop the market before joining, e.g.
+#'   `dplyr::distinct(reg, cnpj_cia, cd_cvm, .keep_all = TRUE)`.
+#'   `tp_merc` is empty for almost every cancelled company, so filtering
+#'   on it discards delisted companies.
+#'
+#' `as_of` answers "which companies were registered on date X" from the
+#' registration and cancellation dates of each registration, which is
+#' what a survivorship-free universe needs. The rows it returns are still
+#' today's: a company registered in 2012 and cancelled in 2017 is part of
+#' the 2015 universe, but its row says `"CANCELADA"`, because the CVM
+#' does not publish past states of the register (the file only records
+#' when the current value of each field started). The yearly
+#' `fca/geral` file is the CVM's own picture of a company in a given
+#' year (name, registration situation, category, issuer situation).
+#'
 #' @return A tibble of class `cvm_tbl` carrying the provenance
 #'   attributes `source`, `fetched_at`, `group`, `dataset`, `table`
 #'   and `package_version`.
@@ -120,6 +161,14 @@
 #' @examplesIf interactive()
 #' # CAD: single snapshot, no year, no basis
 #' issuers <- cvm_fetch("cad", "companhias")
+#'
+#' # Registrations in force at the end of 2015 (survivorship-free
+#' # universe), one row per registration
+#' u2015 <- cvm_fetch("cad", "companhias", as_of = "2015-12-31")
+#' u2015 <- dplyr::distinct(u2015, cnpj_cia, cd_cvm, .keep_all = TRUE)
+#'
+#' # A delisted company by its former ticker
+#' gol <- cvm_fetch("dfp", "dre", ticker = "GOLL4", year = 2019, basis = "con")
 #'
 #' # DFP balance sheet (assets), individual statements, latest year,
 #' # one issuer by CNPJ
@@ -160,6 +209,7 @@ cvm_fetch <- function(
   year = NULL,
   from = NULL,
   to = NULL,
+  as_of = NULL,
   basis = NULL,
   reading = NULL,
   source = NULL,
@@ -193,13 +243,10 @@ cvm_fetch <- function(
   basis <- check_basis(basis, schema)
   reading <- check_reading(reading, schema)
   period <- check_period(year, from, to, schema)
+  as_of <- check_as_of(as_of, schema)
   cnpj <- check_cnpj(cnpj)
   if (!is.null(ticker)) {
-    resolved <- resolve_ticker_via_fca(
-      check_ticker(ticker),
-      year = ticker_lookup_year(period),
-      source = source
-    )
+    resolved <- resolve_ticker_all_years(check_ticker(ticker), source = source)
     cnpj <- unique(c(cnpj, cnpj_clean(resolved)))
   }
 
@@ -247,6 +294,7 @@ cvm_fetch <- function(
     schema,
     col = if (is.null(reading)) NULL else "dt_fim_exerc"
   )
+  out <- filter_as_of(out, as_of, schema)
 
   cvm_attach_metadata(
     out,
@@ -718,14 +766,77 @@ check_ticker <- function(ticker) {
   unique(up)
 }
 
-# Which fca/valor_mobiliario year to resolve tickers against: the most
-# recent year of the request, or NULL (latest available) when the
-# request itself asks for the latest year.
-ticker_lookup_year <- function(period) {
-  if (is.null(period$year)) {
+# `as_of`: registrations in force on a date -------------------------------
+
+# Validate `as_of` against the table. Only registry tables declare in
+# their schema which columns hold the registration and cancellation
+# dates (`as_of: {registered: ..., cancelled: ...}`; today
+# cad/companhias), and only they accept the argument. Returns the
+# parsed Date, or NULL.
+check_as_of <- function(as_of, schema) {
+  if (is.null(as_of)) {
     return(NULL)
   }
-  max(as.integer(period$year))
+  spec <- schema$as_of
+  if (is.null(spec$registered) || is.null(spec$cancelled)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} is not a",
+          "registry; {.arg as_of} does not apply."
+        ),
+        "i" = paste(
+          "{.arg as_of} keeps the registrations in force on a date and",
+          "needs a table with registration and cancellation dates, such",
+          "as {.val cad}/{.val companhias}."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  parse_full_date(as_of, "as_of")
+}
+
+# Keep the registrations in force on `as_of`: registered on or before
+# the date and not cancelled by it (cancellation date empty or later).
+# A row without a registration date cannot be placed in time and is
+# dropped (measured 2026-10-21: none in the CAD). The rows kept are the
+# register as published today, not the state on `as_of`.
+filter_as_of <- function(df, as_of, schema) {
+  if (is.null(as_of)) {
+    return(df)
+  }
+  spec <- schema$as_of
+  missing_cols <- setdiff(c(spec$registered, spec$cancelled), names(df))
+  if (length(missing_cols)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} lacks the",
+          "registry date column{?s} its schema declares:",
+          "{.code {missing_cols}}."
+        )
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
+  registered <- as_date_column(df[[spec$registered]])
+  cancelled <- as_date_column(df[[spec$cancelled]])
+  keep <- !is.na(registered) &
+    registered <= as_of &
+    (is.na(cancelled) | cancelled > as_of)
+  df[keep, , drop = FALSE]
+}
+
+# Dates in the CAD arrive as Date through the dictionary; coerce
+# defensively so a backend that leaves them as text still compares.
+as_date_column <- function(x) {
+  if (inherits(x, "Date")) {
+    return(x)
+  }
+  x <- as.character(x)
+  x[!nzchar(trimws(x))] <- NA_character_
+  as.Date(x, format = "%Y-%m-%d")
 }
 
 # Drop the `cvm_tbl` class and provenance attributes from a fetched part

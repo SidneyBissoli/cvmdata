@@ -56,6 +56,41 @@ with_fixture_http <- function(expr) {
   httr2::with_mocked_responses(function(req) fresh_head_response(), expr)
 }
 
+# Pin the years the CVM "publishes" for every yearly dataset, so the
+# ticker lookup (all FCA years from 2018) and the restated reading (the
+# following year's file) only ask for files the fixtures provide.
+local_published_years <- function(
+  years = c(2024L, 2025L),
+  envir = parent.frame()
+) {
+  testthat::local_mocked_bindings(
+    cvm_dataset_years = function(dataset, group = NULL, schema = NULL) years,
+    .env = envir
+  )
+}
+
+# Stage the CAD fixture as the cached `cad_cia_aberta.csv` with a fresh
+# etag sidecar (same pattern as test-issuer-fetch-cad.R).
+local_prepare_cad_cache <- function(envir = parent.frame()) {
+  cache_root <- withr::local_tempdir(.local_envir = envir)
+  withr::local_options(cvmdata.cache_dir = cache_root, .local_envir = envir)
+  raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
+  dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
+  file.copy(
+    test_path("fixtures", "cad_sample.csv"),
+    file.path(raw_dir, "cad_cia_aberta.csv")
+  )
+  saveRDS(
+    list(
+      etag = "\"fixture-etag\"",
+      last_modified = "Mon, 19 May 2026 00:00:00 GMT",
+      fetched_at = "2026-05-19T00:00:00.000Z"
+    ),
+    file.path(raw_dir, "cad_cia_aberta.csv.etag.rds")
+  )
+  cache_root
+}
+
 bb_cnpj <- "00.000.000/0001-91" # BCO BRASIL S.A.
 mglu_cnpj <- "47960950000121" # MAGAZINE LUIZA S.A.
 
@@ -335,6 +370,7 @@ test_that("cvm_fetch with a CNPJ absent from the table returns zero rows", {
 test_that("cvm_fetch resolves a ticker to its CNPJ via fca", {
   skip_if_not_installed("httptest2")
   local_prepare_cvm_cache(c("dfp", "fca"))
+  local_published_years(2024L)
 
   by_ticker <- with_fixture_http(
     cvm_fetch(
@@ -364,6 +400,7 @@ test_that("cvm_fetch resolves a ticker to its CNPJ via fca", {
 test_that("cvm_fetch combines cnpj and ticker", {
   skip_if_not_installed("httptest2")
   local_prepare_cvm_cache(c("dfp", "fca"))
+  local_published_years(2024L)
 
   result <- with_fixture_http(
     cvm_fetch(
@@ -382,6 +419,7 @@ test_that("cvm_fetch combines cnpj and ticker", {
 test_that("cvm_fetch aborts on a ticker absent from fca", {
   skip_if_not_installed("httptest2")
   local_prepare_cvm_cache(c("dfp", "fca"))
+  local_published_years(2024L)
   expect_error(
     with_fixture_http(
       cvm_fetch(
@@ -393,9 +431,155 @@ test_that("cvm_fetch aborts on a ticker absent from fca", {
         source = "cvm"
       )
     ),
-    regexp = "not found",
+    regexp = "not found.*any year",
     class = "cvmdata_error_input"
   )
+})
+
+# The lookup unions every FCA year from 2018 on; these tests feed the
+# session cache directly so the resolver's rules are exercised without
+# a multi-year fixture.
+local_ticker_lut <- function(lut, years, envir = parent.frame()) {
+  cvmdata:::ticker_lookup_cache_clear()
+  withr::defer(cvmdata:::ticker_lookup_cache_clear(), envir = envir)
+  attr(lut, "years") <- years
+  assign(
+    "fca_valor_mobiliario_cvm_all",
+    lut,
+    envir = cvmdata:::.ticker_lookup_cache
+  )
+}
+
+test_that("ticker resolution finds a code that only older FCA files carry", {
+  local_ticker_lut(
+    data.frame(
+      ticker = c("GOLL4", "PETR4", "PETR4"),
+      cnpj_companhia = c(
+        "06.164.253/0001-87",
+        "33.000.167/0001-01",
+        "33.000.167/0001-01"
+      ),
+      year = c(2019L, 2019L, 2024L),
+      stringsAsFactors = FALSE
+    ),
+    years = c(2019L, 2024L)
+  )
+  expect_identical(
+    cvmdata:::resolve_ticker_all_years("goll4", source = "cvm"),
+    "06.164.253/0001-87"
+  )
+  expect_identical(
+    cvmdata:::resolve_ticker_all_years(c("PETR4", "GOLL4"), source = "cvm"),
+    c("33.000.167/0001-01", "06.164.253/0001-87")
+  )
+})
+
+test_that("ticker resolution aborts when a code maps to two issuers", {
+  local_ticker_lut(
+    data.frame(
+      ticker = c("ABCD3", "ABCD3"),
+      cnpj_companhia = c("11.111.111/0001-11", "22.222.222/0001-22"),
+      year = c(2018L, 2024L),
+      stringsAsFactors = FALSE
+    ),
+    years = c(2018L, 2024L)
+  )
+  expect_error(
+    cvmdata:::resolve_ticker_all_years("ABCD3", source = "cvm"),
+    regexp = "more than one issuer",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("ticker resolution names the years searched when a code is absent", {
+  local_ticker_lut(
+    data.frame(
+      ticker = "PETR4",
+      cnpj_companhia = "33.000.167/0001-01",
+      year = 2024L,
+      stringsAsFactors = FALSE
+    ),
+    years = c(2018L, 2024L)
+  )
+  expect_error(
+    cvmdata:::resolve_ticker_all_years("XXXX3", source = "cvm"),
+    regexp = "2018-2024",
+    class = "cvmdata_error_input"
+  )
+})
+
+# as_of ----------------------------------------------------------------
+
+# cad_sample.csv: 50 rows, 41 cancelled, 3 CNPJs repeated by tp_merc;
+# 11.396.633/0001-87 registered 2010-03-08 and cancelled 2015-12-18.
+test_that("cvm_fetch as_of keeps the registrations in force on the date", {
+  skip_if_not_installed("httptest2")
+  local_prepare_cad_cache()
+  all_rows <- with_fixture_http(
+    cvm_fetch("cad", "companhias", source = "cvm")
+  )
+  at <- as.Date("2012-12-31")
+  u2012 <- with_fixture_http(
+    cvm_fetch("cad", "companhias", as_of = at, source = "cvm")
+  )
+  expect_s3_class(u2012, "cvm_tbl")
+  expect_identical(names(u2012), names(all_rows))
+  expect_true(nrow(u2012) > 0L && nrow(u2012) < nrow(all_rows))
+  expect_true(all(u2012$dt_reg <= at))
+  expect_true(all(is.na(u2012$dt_cancel) | u2012$dt_cancel > at))
+  expect_identical(
+    nrow(u2012),
+    sum(
+      all_rows$dt_reg <= at &
+        (is.na(all_rows$dt_cancel) | all_rows$dt_cancel > at)
+    )
+  )
+  # The 2010-2015 registration is in the 2012 universe with today's
+  # row (already cancelled), and out of the 2016 one.
+  reg_2010 <- "11.396.633/0001-87"
+  expect_true(reg_2010 %in% u2012$cnpj_cia)
+  expect_identical(
+    unique(u2012$sit[u2012$cnpj_cia == reg_2010]),
+    "CANCELADA"
+  )
+  u2016 <- with_fixture_http(
+    cvm_fetch("cad", "companhias", as_of = "2016-12-31", source = "cvm")
+  )
+  expect_false(reg_2010 %in% u2016$cnpj_cia)
+})
+
+test_that("cvm_fetch as_of rejects non-registry tables and partial dates", {
+  expect_error(
+    cvm_fetch("dfp", "bpa", year = 2024, basis = "ind", as_of = "2015-12-31"),
+    regexp = "not a registry",
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_fetch("cad", "companhias", as_of = "2015", source = "cvm"),
+    regexp = "complete date",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("filter_as_of places rows by registration and cancellation", {
+  schema <- cvmdata:::load_schema("cad", "companhias")
+  df <- data.frame(
+    cnpj_cia = c("a", "b", "c", "d"),
+    dt_reg = as.Date(c("2010-01-01", "2010-01-01", "2016-01-01", NA)),
+    dt_cancel = as.Date(c(NA, "2015-06-30", NA, NA)),
+    stringsAsFactors = FALSE
+  )
+  at <- as.Date("2015-12-31")
+  expect_identical(cvmdata:::filter_as_of(df, at, schema)$cnpj_cia, "a")
+  expect_identical(
+    cvmdata:::filter_as_of(df, as.Date("2015-06-30"), schema)$cnpj_cia,
+    "a"
+  )
+  expect_identical(
+    cvmdata:::filter_as_of(df, as.Date("2015-06-29"), schema)$cnpj_cia,
+    c("a", "b")
+  )
+  expect_identical(cvmdata:::filter_as_of(df, NULL, schema), df)
 })
 
 test_that("cvm_fetch rejects a ticker that is not a B3 code", {
@@ -593,27 +777,14 @@ test_that("check_period derives the yearly files from the window", {
   expect_null(plain$from)
 })
 
-test_that("ticker_lookup_year uses the most recent requested year", {
-  expect_identical(cvmdata:::ticker_lookup_year(list(year = 2021:2024)), 2024L)
-  expect_null(cvmdata:::ticker_lookup_year(list(year = NULL)))
-})
-
 # reading --------------------------------------------------------------
 
 # The DFP fixtures cover 2024 and 2025 for BCO BRASIL + MAGAZINE LUIZA,
 # so the 2025 file is the "following year" of exercise 2024. Measured
 # on the real files (2026-10-20): BB consolidated restates 12 BPA
 # accounts of 2024, BB individual carries the 2024 comparative as
-# zeros, MAGAZINE LUIZA restates nothing.
-local_published_years <- function(
-  years = c(2024L, 2025L),
-  envir = parent.frame()
-) {
-  testthat::local_mocked_bindings(
-    cvm_dataset_years = function(dataset, group = NULL, schema = NULL) years,
-    .env = envir
-  )
-}
+# zeros, MAGAZINE LUIZA restates nothing. `local_published_years()` (top
+# of the file) pins the published years.
 
 fetch_bpa <- function(...) {
   with_fixture_http(cvm_fetch("dfp", "bpa", source = "cvm", ...))

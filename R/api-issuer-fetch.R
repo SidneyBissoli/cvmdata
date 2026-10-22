@@ -1175,6 +1175,125 @@ ticker_lookup_table <- function(year = NULL, source = "cvm") {
   lut
 }
 
+# Ticker -> CNPJ across every fca/valor_mobiliario year that carries the
+# trading code (schema `ticker_first_year`: the column is empty in the
+# 2010-2017 files) up to the latest published on `source`. Every row
+# counts, extinct securities included: a code that stopped trading
+# still identifies its issuer, which is the point of resolving the
+# tickers of delisted companies (measured 2026-10-21: 239 of 713 codes
+# appear only in files before the latest one; none maps to two CNPJs).
+# Returns a data frame with `ticker`, `cnpj_companhia` and `year`, with
+# a `years` attribute. Cached per source for the session.
+ticker_lookup_table_all <- function(source = "cvm") {
+  source <- rlang::arg_match0(source, c("mirror", "cvm"))
+  cache_key <- paste0("fca_valor_mobiliario_", source, "_all")
+  cached <- .ticker_lookup_cache[[cache_key]]
+  if (!is.null(cached)) {
+    return(cached)
+  }
+  schema <- load_schema("fca", "valor_mobiliario")
+  first <- as.integer(schema$ticker_first_year %||% schema$first_year)
+  years <- published_file_years(schema, NULL, source)
+  years <- sort(unique(as.integer(years[years >= first])))
+  if (!length(years)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "No {.val fca}/{.val valor_mobiliario} file from {.val {first}}",
+          "on is available from source {.val {source}}; cannot resolve",
+          "tickers."
+        ),
+        "i" = "Pass {.arg cnpj} instead, or try the other {.arg source}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  parts <- lapply(years, function(y) {
+    df <- if (identical(source, "mirror")) {
+      source_mirror_duckdb_get(schema, year = y, report_type = NULL)
+    } else {
+      path <- source_cvm_http_get(schema, year = y, report_type = NULL)
+      raw <- read_cvm_csv(path, schema, validate = "skip")
+      apply_schema_transformations(raw, schema)
+    }
+    ticker_rows(df, year = y)
+  })
+  lut <- do.call(rbind, parts)
+  rownames(lut) <- NULL
+  attr(lut, "years") <- years
+  .ticker_lookup_cache[[cache_key]] <- lut
+  lut
+}
+
+# The (ticker, cnpj_companhia, year) rows of one fca/valor_mobiliario
+# file: trading code upper-cased and trimmed, empty codes dropped.
+ticker_rows <- function(df, year) {
+  cnpj_c <- cnpj_col(df)
+  if (is.null(cnpj_c) || !"codigo_negociacao" %in% names(df)) {
+    cvmdata_abort(
+      c(paste(
+        "{.val fca}/{.val valor_mobiliario} lacks the columns needed",
+        "for ticker resolution ({.code codigo_negociacao} +",
+        "{.code cnpj_companhia})."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  out <- data.frame(
+    ticker = toupper(trimws(as.character(df$codigo_negociacao))),
+    cnpj_companhia = as.character(df[[cnpj_c]]),
+    year = rep(as.integer(year), nrow(df)),
+    stringsAsFactors = FALSE
+  )
+  out[!is.na(out$ticker) & nzchar(out$ticker), , drop = FALSE]
+}
+
+# Resolve tickers against every FCA year (ticker_lookup_table_all()).
+# A code absent from every file aborts; a code that maps to more than
+# one issuer aborts as well, asking for `cnpj`, rather than picking one
+# silently (the B3 may reuse codes; none is reused today). Returns the
+# unique issuer CNPJs as published in the FCA.
+resolve_ticker_all_years <- function(tickers, source = "cvm") {
+  lut <- ticker_lookup_table_all(source = source)
+  years <- attr(lut, "years")
+  span <- paste(range(years), collapse = "-")
+  resolved <- character(0L)
+  for (tk in toupper(trimws(tickers))) {
+    cnpjs <- unique(lut$cnpj_companhia[lut$ticker == tk])
+    cnpjs <- cnpjs[!is.na(cnpjs) & nzchar(cnpjs)]
+    if (!length(cnpjs)) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Ticker {.val {tk}} not found in {.val fca}/{.val",
+            "valor_mobiliario} for any year ({span})."
+          ),
+          "i" = paste(
+            "Check the spelling, or pass {.arg cnpj}. Tickers cover only",
+            "exchange-listed securities, and the CVM files carry trading",
+            "codes from {.val {min(years)}} on."
+          )
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    if (length(cnpjs) > 1L) {
+      cvmdata_abort(
+        c(
+          paste(
+            "Ticker {.val {tk}} maps to more than one issuer in",
+            "{.val fca}/{.val valor_mobiliario}: {.val {cnpjs}}."
+          ),
+          "i" = "Pass {.arg cnpj} to choose the issuer."
+        ),
+        class = "cvmdata_error_input"
+      )
+    }
+    resolved <- c(resolved, cnpjs)
+  }
+  unique(resolved)
+}
+
 # A security is active when Data_Fim_Negociacao is unset (NA / empty)
 # or in the future. When the column is absent (older schema variant),
 # treat every row as active. Returns a logical vector aligned with df.
