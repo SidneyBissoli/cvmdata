@@ -126,13 +126,15 @@ get_yearly_csv <- function(schema, year, report_type) {
     cvmdata_abort(
       c(
         paste(
-          "CSV {.val {csv_name}} not found inside ZIP",
-          "{.path {basename(zip_path)}}."
+          "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+          "published for {.val {year}}: CSV {.val {csv_name}} not found",
+          "inside ZIP {.path {basename(zip_path)}}."
         ),
         "i" = paste(
-          "Either the schema declares the wrong",
-          "{.field cvm_file_pattern_variants} or the upstream archive",
-          "layout changed."
+          "A table can start later or stop earlier than its dataset;",
+          "{.fn cvm_dataset_years} lists the dataset's years. If the",
+          "table is published for that year, the schema's",
+          "{.field cvm_file_pattern} no longer matches the archive."
         )
       ),
       # Dedicated subclass (still a `cvmdata_error_parse`) so consumers

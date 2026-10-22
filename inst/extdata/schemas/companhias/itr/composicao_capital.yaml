@@ -20,8 +20,10 @@ encoding: ISO-8859-1
 delimiter: ";"
 
 temporal_partitioning: yearly
-first_year: 2011
-
+# The table is absent from the CVM's itr_cia_aberta_<year>.zip before 2020
+# (declared 2011 until 2026-10-21; measured on the mirror's inventory and
+# confirmed in the ZIP members). cvm_fetch() refuses earlier years upfront.
+first_year: 2020
 expected_field_count: 10
 
 transformations:

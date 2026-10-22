@@ -20,8 +20,10 @@ delimiter: ";"
 
 # Temporal coverage -----------------------------------------------------
 temporal_partitioning: yearly
-first_year: 2010
-
+# The table is absent from the CVM's fre_cia_aberta_<year>.zip before 2016
+# (declared 2010 until 2026-10-21; measured on the mirror's inventory and
+# confirmed in the ZIP members). cvm_fetch() refuses earlier years upfront.
+first_year: 2016
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 21
 

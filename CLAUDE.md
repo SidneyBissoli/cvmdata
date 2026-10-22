@@ -165,7 +165,12 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
 - `year`: integer vector ou `NULL`. `NULL` → **último ano disponível**,
   descoberto por `HEAD` probing decrescente. Para histórico, integer
   vector explícito (`year = 2012:2024`). Helper `cvm_dataset_years()`
-  devolve o range. **Sem sentinela `"all"`** — tipo único.
+  devolve o range. **Sem sentinela `"all"`** — tipo único. Ano anterior
+  ao `first_year` da TABELA (medido no espelho em 2026-10-21; uma tabela
+  pode começar depois do dataset: `composicao_capital` 2020, 14 do FRE
+  2023) = `cvmdata_error_input` antes de baixar
+  (`check_published_years()`); em janela `from`/`to`, os anos
+  inexistentes caem com `cli_inform`.
 - `from`/`to` (só em `cvm_fetch()`): datas completas, os dois juntos
   (`"YYYY-MM-DD"` ou `Date`); `year` junto = erro; data incompleta =
   erro (recusado por complexidade); em tabela sem partição anual =
