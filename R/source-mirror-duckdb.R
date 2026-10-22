@@ -68,6 +68,12 @@ source_mirror_duckdb_get <- function(
           "Searched release {.val {attr(inventory, 'release_tag')}}",
           "for {.code year = {format_years(resolved_years)}}",
           "{.code report_type = {format_chr(report_type)}}."
+        ),
+        "i" = paste(
+          "The CVM may not publish the table for that year (a table",
+          "can start later or stop earlier than its dataset), or the",
+          "mirror may not have it yet; {.code source = \"cvm\"} reads",
+          "the portal directly."
         )
       ),
       class = "cvmdata_error_input"

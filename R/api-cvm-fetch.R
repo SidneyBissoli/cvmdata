@@ -243,6 +243,7 @@ cvm_fetch <- function(
   basis <- check_basis(basis, schema)
   reading <- check_reading(reading, schema)
   period <- check_period(year, from, to, schema)
+  period <- check_published_years(period, schema)
   as_of <- check_as_of(as_of, schema)
   cnpj <- check_cnpj(cnpj)
   if (!is.null(ticker)) {
@@ -764,6 +765,53 @@ check_ticker <- function(ticker) {
     )
   }
   unique(up)
+}
+
+# Years the table is published for ----------------------------------------
+
+# A table can start later than its dataset: the CVM's yearly ZIP simply
+# lacks its CSV before then (composicao_capital from 2020, thirteen FRE
+# tables from 2023; measured 2026-10-21 on the mirror's inventory and
+# confirmed in the ZIP members). The schema's `first_year` records
+# that. Years before it are refused here, before any download, rather
+# than failing deep in the backend with a message about ZIP members:
+# an explicit `year` aborts; a `from`/`to` window drops the years the
+# table does not exist for and says so, unless nothing is left.
+check_published_years <- function(period, schema) {
+  first <- schema$first_year
+  if (is.null(period$year) || is.null(first)) {
+    return(period)
+  }
+  first <- as.integer(first)
+  years <- as.integer(period$year)
+  early <- years[years < first]
+  if (!length(early)) {
+    return(period)
+  }
+  if (is.null(period$from) || length(early) == length(years)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+          "published for {.val {early}}."
+        ),
+        "i" = paste(
+          "The CVM's {.val {schema$dataset}} files carry it from",
+          "{.val {first}} on."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  kept <- years[years >= first]
+  cli::cli_inform(c(
+    "i" = paste(
+      "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+      "published before {.val {first}}; reading {.val {kept}}."
+    )
+  ))
+  period$year <- kept
+  period
 }
 
 # `as_of`: registrations in force on a date -------------------------------
