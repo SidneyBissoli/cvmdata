@@ -93,6 +93,34 @@
   individual statements as zeros, which the restated reading returns as
   the CVM publishes them.
 
+* Delisted companies (decisions of 2026-10-21, after a quant reader's
+  questions):
+  - `cvm_fetch("cad", "companhias", as_of = "2015-12-31")` keeps the
+    registrations in force on a date: registered on or before it and
+    not cancelled by it. The register is today's state of every
+    registration ever granted (cancellations back to 1984 are three
+    quarters of the file), so this is the survivorship-free universe a
+    backtest needs; the rows are still today's (a company cancelled in
+    2017 is in the 2015 universe with `sit = "CANCELADA"`), because the
+    CVM does not publish past states of the register. Registry tables
+    declare the date columns in their schema (`as_of:`); every other
+    table rejects the argument. Measured against the 2015 DFP index:
+    599 of the 633 filers fall inside the 640-company universe, the 34
+    outside being 11 companies absent from the register and 23 that
+    registered in 2016 and filed the 2015 statements on registration.
+  - `ticker` now resolves against every yearly `fca/valor_mobiliario`
+    file that carries trading codes (2018 onwards; the column is empty
+    before), not only the file of the latest requested year. A code
+    that left the exchange (`GOLL4`, `BPAN4`) resolves for any `year`,
+    and `PETR4` resolves for years before 2018, which used to abort.
+    A code that maps to more than one issuer now aborts asking for
+    `cnpj` instead of picking one; none does today.
+  - The register's key, `(cnpj_cia, cd_cvm, tp_merc)`, is documented in
+    `?cvm_fetch` (section *Company register*): 107 registrations repeat
+    in rows that differ only in `tp_merc`, and 34 CNPJs hold two
+    registrations under distinct CVM codes. The file is returned as
+    published; the recipe for one row per registration is in the help.
+
 ## Data coverage
 
 * Corrected the declared `first_year` for the v0.2 datasets, which had

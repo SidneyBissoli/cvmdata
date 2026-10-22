@@ -106,11 +106,16 @@ miss on a taxpayer id is not a typo the package can second-guess.
 ### Ticker: resolved through the registration form
 
 A B3 trading code is looked up in `fca/valor_mobiliario` (read from
-the same `source` as the data), keeping only securities still
-traded, and the issuer's CNPJ is then filtered exactly as `cnpj`
-would be. Tickers cover only exchange-listed securities; an unknown
-ticker aborts with `cvmdata_error_input` rather than returning an
-empty tibble.
+the same `source` as the data), and the issuer's CNPJ is then
+filtered exactly as `cnpj` would be. The lookup reads every yearly
+FCA file that carries trading codes (2018 onwards; the column is
+empty in earlier files), so the code of a company that has since left
+the exchange still resolves, for any `year`: `GOLL4` fetches Gol's
+statements of 2019 although the company cancelled its registration in
+2026. Tickers cover only exchange-listed securities; a code absent
+from every file aborts with `cvmdata_error_input` rather than
+returning an empty tibble, and so does a code that maps to more than
+one issuer (none does today; pass `cnpj` in that case).
 
 ```{r ticker}
 petr <- cvm_fetch("dfp", "bpa", ticker = "PETR4",

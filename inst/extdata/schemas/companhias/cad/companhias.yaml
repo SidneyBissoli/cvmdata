@@ -27,6 +27,19 @@ delimiter: ";"
 # state. Each download supersedes the previous one.
 temporal_partitioning: none
 
+# Registry dates (cvm_fetch(as_of = )) -------------------------------------
+# The file is today's state of EVERY registration ever made: cancelled
+# companies stay, with dt_cancel and motivo_cancel (cancellations back to
+# 1984). `as_of` keeps the registrations in force on a date: registered
+# on or before it and not cancelled by it. Measured 2026-10-21: dt_reg is
+# never empty; dt_cancel is filled exactly when sit == CANCELADA. The key
+# of the file is (cnpj_cia, cd_cvm, tp_merc): 34 CNPJs hold two
+# registrations (distinct cd_cvm) and 107 registrations repeat in 2-3
+# rows that differ only in tp_merc.
+as_of:
+  registered: dt_reg
+  cancelled: dt_cancel
+
 # Field count (validation aid) --------------------------------------------
 # Reader should assert that the CSV header has exactly this many columns.
 # Updated to 47 after empirical re-verification on 2026-05-19; see
