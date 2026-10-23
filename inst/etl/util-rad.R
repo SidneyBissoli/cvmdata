@@ -51,8 +51,10 @@
 # * Values are published in the scale the document declares (2 = MIL);
 #   `vl_conta` is in reais, as the package's `multiply_by_scale` does.
 # * The DMPL column labels (`coluna_df`) are POSITIONAL: the n-th value
-#   column takes the n-th label of a fixed list of eight. The CSV does
-#   the same, even where it mislabels (Banrisul DFP 2011, individual).
+#   column takes the n-th label of a fixed list of eight, and a ninth
+#   column (the consolidated equity of a bank, in both layouts) has no
+#   label. The CSV does the same, even where it mislabels (Banrisul DFP
+#   2011, individual).
 #
 # Numbers come in three spellings: `14.410` (dot as thousands
 # separator), `31159,0000000000` / `0,00635` (comma decimal) and
@@ -1094,9 +1096,13 @@ rad_old_statement <- function(parts, sub, colset, periods, dt_refer) {
     return(none(paste0("no column list for ", table, "/", basis)))
   }
   if (table == "dmpl") {
-    # the period is on the record, the columns are the components
+    # the period is on the record, the columns are the components; a
+    # consolidated DMPL of a bank has nine (controlling, non-controlling
+    # and consolidated equity in columns 7-9, already in the CSV's order:
+    # Banrisul DFP 2021 and BRB DFP 2020, measured 2026-10-23 against the
+    # DFP CSV), the ninth without label, as in the new layout
     n_col <- max(colset$col)
-    if (n_col > length(rad_dmpl_labels)) {
+    if (n_col > rad_dmpl_max_cols) {
       return(none(sprintf("dmpl/%s: %d DMPL columns", basis, n_col)))
     }
     rows <- lapply(unique(sub$period), function(pid) {

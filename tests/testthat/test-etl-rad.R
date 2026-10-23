@@ -397,6 +397,55 @@ test_that("old layout with consolidated: DMPL labels are positional", {
   )
 })
 
+test_that("old layout of a bank: nine consolidated DMPL columns", {
+  load_etl_rad()
+  # Banrisul DFP 2021 v1 (id 111777), set aside on 2026-10-23 as
+  # "dmpl/con: 9 DMPL columns": the old layout stopped at the eight
+  # labels, but a bank's consolidated DMPL carries the three-way equity
+  # split in columns 7-9, already in the converter's order (controlling,
+  # non-controlling, consolidated), the ninth without label. Measured
+  # against the DFP 2021 CSV (the v2): the 2020 opening balances of the
+  # consolidated DMPL agree in all nine columns, the individual in all
+  # seven. This v1 has no consolidated DMPL for 2021 at all (periods 2
+  # and 3 only), which is the document's doing, not the reader's.
+  f <- filing_row(
+    "92.702.067/0001-96",
+    "2021-12-31",
+    "1",
+    "BCO ESTADO DO RIO GRANDE DO SUL S.A.",
+    "001210",
+    "111777"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2021_111777"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  ind <- r$tables[["dmpl/ind"]]
+  expect_identical(unique(ind$coluna_df), rad_dmpl_labels[1:7])
+  saldo <- ind[ind$cd_conta == "5.01" & ind$ordem_exerc == penultimo, ]
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df == rad_dmpl_labels[7]],
+    7792367000
+  )
+  con <- r$tables[["dmpl/con"]]
+  expect_identical(unique(con$coluna_df), c(rad_dmpl_labels, NA))
+  expect_identical(unique(con$ordem_exerc), penultimo)
+  saldo <- con[con$cd_conta == "5.01", ]
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df %in% rad_dmpl_labels[1:3]],
+    c(5200000000, 4511000, 2773279000)
+  )
+  expect_identical(
+    saldo$vl_conta[saldo$coluna_df %in% rad_dmpl_labels[7:8]],
+    c(7804535000, 1995000)
+  )
+  expect_identical(saldo$vl_conta[is.na(saldo$coluna_df)], 7806530000)
+  # the unlabelled ninth column is the sum of the two before it
+  expect_identical(
+    sum(saldo$vl_conta[saldo$coluna_df %in% rad_dmpl_labels[7:8]]),
+    saldo$vl_conta[is.na(saldo$coluna_df)]
+  )
+})
+
 test_that("a text node above libxml2's 10 MB limit is read whole", {
   load_etl_rad()
   # the embedded PDF of a RAD document is one base64 text node; five
