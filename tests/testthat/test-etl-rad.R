@@ -1041,6 +1041,42 @@ test_that("a document the reader cannot make sense of is the reader's", {
   expect_match(got$note, "unknown DMPL columns")
 })
 
+test_that("a ZIP that is not a DFP/ITR is set aside as a document", {
+  load_etl_rad()
+  # the ITR 2023 index lists id 132214 as one of the two deliveries of
+  # Dibens Leasing for 2023-09-30 (the other, 132223, is the ITR); the
+  # RAD serves an IPE under that number. Until 2026-10-23 the reader
+  # crashed on its empty meta ("missing value where TRUE/FALSE needed")
+  # and the failure was counted as the reader's.
+  f <- filing_row(
+    "65.654.303/0001-73",
+    "2023-09-30",
+    "1",
+    "DIBENS LEASING S.A. - ARREND.MERCANTIL",
+    "014214",
+    "132214"
+  )
+  r <- expect_no_error(rad_read_zip(rad_fx("rad_ipe_2023_132214"), f))
+  expect_identical(r$problems, "unknown XML root: Documento")
+  expect_identical(r$kind, "document")
+  expect_identical(r$tables, list())
+  expect_false(r$index_mismatch)
+  rad_download <- function(id_doc, dest, timeout = 180) {
+    file.copy(rad_fx("rad_ipe_2023_132214"), dest, overwrite = TRUE)
+    list(
+      ok = TRUE,
+      status = 200L,
+      bytes = 1,
+      seconds = 1,
+      error = NA_character_
+    )
+  }
+  got <- rad_fetch_one(f, withr::local_tempdir())
+  expect_false(got$ok)
+  expect_identical(got$kind, "document")
+  expect_match(got$note, "unknown XML root: Documento")
+})
+
 # A stand-in for `rad_fetch_one()` that fails the documents named in
 # `fails` (id_doc -> kind) and reads the others.
 fetch_by_kind <- function(fails) {

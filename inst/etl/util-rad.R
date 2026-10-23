@@ -308,7 +308,8 @@ rad_read_zip <- function(zip, filing = NULL) {
           "cannot find the statements XML in the ZIP (",
           length(xmls),
           " candidates)"
-        )
+        ),
+        kind = "document"
       ))
     }
     path <- utils::unzip(zip, files = xmls, exdir = tmp)
@@ -317,8 +318,17 @@ rad_read_zip <- function(zip, filing = NULL) {
   rad_finish(res, filing)
 }
 
-rad_result <- function(meta = list(), rows = NULL, problems = character()) {
-  list(meta = meta, rows = rows, problems = problems)
+# `kind` names who is to blame when the reader gives up before reading:
+# "document" when the ZIP is not a DFP/ITR at all (the index of the ITR
+# 2023 lists id 132214 for Dibens Leasing; the RAD serves an IPE under
+# that number), NULL when the decision is left to the caller.
+rad_result <- function(
+  meta = list(),
+  rows = NULL,
+  problems = character(),
+  kind = NULL
+) {
+  list(meta = meta, rows = rows, problems = problems, kind = kind)
 }
 
 # Cross-checks the document against its `submissao` row, applies the
@@ -327,6 +337,19 @@ rad_finish <- function(res, filing) {
   problems <- res$problems
   meta <- res$meta
   index_mismatch <- FALSE
+  if (is.null(meta$dt_refer)) {
+    # nothing was read (not a DFP/ITR, or the old layout is incomplete):
+    # no document to cross-check against the index. Until 2026-10-23 the
+    # checks below ran on the empty meta and the reader crashed on the
+    # IPE of id 132214 ("missing value where TRUE/FALSE needed").
+    return(list(
+      meta = meta,
+      tables = list(),
+      problems = problems,
+      index_mismatch = FALSE,
+      kind = res$kind
+    ))
+  }
   if (!is.null(filing)) {
     checked <- rad_apply_filing(meta, as.list(filing))
     meta <- checked$meta
@@ -374,7 +397,8 @@ rad_finish <- function(res, filing) {
     meta = meta,
     tables = tables,
     problems = problems,
-    index_mismatch = index_mismatch
+    index_mismatch = index_mismatch,
+    kind = res$kind
   )
 }
 
@@ -605,8 +629,10 @@ rad_read_new <- function(path) {
     NA_character_
   )
   if (is.na(dataset)) {
+    # not a DFP/ITR: an IPE (`Documento`) served under an ITR id
     return(rad_result(
-      problems = paste0("unknown XML root: ", xml2::xml_name(doc))
+      problems = paste0("unknown XML root: ", xml2::xml_name(doc)),
+      kind = "document"
     ))
   }
   data <- xml2::xml_find_first(
@@ -946,7 +972,8 @@ rad_read_old <- function(inner_zip) {
       problems = paste0(
         "old layout without ",
         paste(setdiff(rad_old_files, entries), collapse = ", ")
-      )
+      ),
+      kind = "document"
     ))
   }
   utils::unzip(inner_zip, files = rad_old_files, exdir = tmp)
@@ -954,7 +981,8 @@ rad_read_old <- function(inner_zip) {
   if (is.na(meta$dataset)) {
     return(rad_result(
       meta,
-      problems = paste0("unknown CodigoTipoDocumento: ", meta$tipo_doc)
+      problems = paste0("unknown CodigoTipoDocumento: ", meta$tipo_doc),
+      kind = "document"
     ))
   }
   periods <- rad_old_periods(

@@ -31,8 +31,9 @@
 #   stops the run. Every failure is recorded with its `kind`:
 #   `download` (the RAD did not deliver: transport error or an HTTP
 #   status other than 403), `document` (the ZIP is not the document the
-#   index describes, or carries no statement with rows), `reader` (the
-#   reader could not make sense of it) and `waf`. The failure rate that
+#   index describes, is not a DFP/ITR at all, or carries no statement
+#   with rows), `reader` (the reader could not make sense of it) and
+#   `waf`. The failure rate that
 #   also stops the run (more than `rad_failure_rate` of the attempts)
 #   counts ONLY the `reader` kind, and only after `rad_failure_floor`
 #   attempts (decision of 2026-10-23: a run of 16 stopped with one
@@ -543,13 +544,15 @@ rad_fetch_one <- function(
     } else {
       "no statement with rows"
     }
-    # a document that is not the one the index describes, or that has
-    # nothing to read, is set aside for what it is, not for the reader
-    kind <- if (isTRUE(res$index_mismatch) || length(res$problems) == 0L) {
-      "document"
-    } else {
-      "reader"
-    }
+    # a document that is not the one the index describes (or not a
+    # DFP/ITR at all: the reader says so in `kind`), or that has nothing
+    # to read, is set aside for what it is, not for the reader
+    kind <- res$kind %||%
+      if (isTRUE(res$index_mismatch) || length(res$problems) == 0L) {
+        "document"
+      } else {
+        "reader"
+      }
     return(list(
       ok = FALSE,
       waf = FALSE,
