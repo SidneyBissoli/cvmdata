@@ -60,6 +60,12 @@
 #       `Documento`, an `.ipe` inside). The reader crashed on it on
 #       2026-10-23 instead of setting it aside as a document of another
 #       type. Kept whole (the XML is 8 KB; the `.ipe` is dropped).
+#   tests/testthat/fixtures/rad_dfp_2021_113859.zip
+#     - new layout, DFP 2021, Inter & Co v1 (set aside on 2026-10-23): a
+#       company abroad whose document carries the CNPJ as zeros and the
+#       former name (Inter Platform, Inc.); the CVM code (057886) is the
+#       one the index lists for this delivery. Consolidated statements
+#       only.
 #
 # Usage, from the package root, with the original ZIPs (as downloaded
 # from the RAD, named `<id_doc>.zip`) in one directory; a fixture whose
@@ -83,7 +89,8 @@ docs <- list(
   list(id = "154846", name = "rad_dfp_2025_154846", layout = "new"),
   list(id = "154641", name = "rad_dfp_2025_154641", layout = "new"),
   list(id = "111777", name = "rad_dfp_2021_111777", layout = "old"),
-  list(id = "132214", name = "rad_ipe_2023_132214", layout = "new")
+  list(id = "132214", name = "rad_ipe_2023_132214", layout = "new"),
+  list(id = "113859", name = "rad_dfp_2021_113859", layout = "new")
 )
 
 keep_conta <- function(codes) {
