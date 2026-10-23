@@ -918,3 +918,178 @@ test_that("the queue stops on a persistent refusal, not on a transient one", {
   expect_identical(run$failed, 1L)
   expect_identical(names(run$state$unread), "1")
 })
+
+# Every failure carries a kind, and only the reader's kind weighs on the
+# failure rate (decision of 2026-10-23: a run of 16 stopped with one
+# connection reset and one document whose cnpj differed from the index).
+test_that("a download failure and a mismatched document are not the reader's", {
+  load_etl_rad()
+  work <- withr::local_tempdir()
+  fake <- waf_download("500", "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  got <- rad_fetch_one(filing_row("A", "2024-12-31", "1", "A", "1", "1"), work)
+  expect_identical(got$kind, "download")
+  # the ZIP arrives whole but is not the document the index describes
+  fake <- waf_download("zip", "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row(
+    "00.000.000/0001-91",
+    "2024-12-31",
+    "1",
+    "OUTRA",
+    "1",
+    "151243"
+  )
+  got <- rad_fetch_one(f, work)
+  expect_false(got$ok)
+  expect_identical(got$kind, "document")
+  expect_match(got$note, "cnpj in the document")
+  # the right document, read whole
+  f <- filing_row(
+    "43.335.774/0001-86",
+    "2024-12-31",
+    "1",
+    "TRAVESSIA SECURITIZADORA DE CRÉDITOS MERCANTIS VI S.A.",
+    "026824",
+    "151243"
+  )
+  got <- rad_fetch_one(f, work)
+  expect_true(got$ok)
+  expect_identical(got$kind, NA_character_)
+})
+
+test_that("a document the reader cannot make sense of is the reader's", {
+  load_etl_rad()
+  f <- filing_row(
+    "30.306.294/0001-45",
+    "2025-12-31",
+    "1",
+    "BCO BTG PACTUAL S.A.",
+    "022616",
+    "154641"
+  )
+  tmp <- withr::local_tempdir()
+  utils::unzip(rad_fx("rad_dfp_2025_154641"), exdir = tmp)
+  xml <- list.files(tmp, pattern = "DFP.*[.]xml$", full.names = TRUE)
+  txt <- readLines(xml, encoding = "UTF-8", warn = FALSE)
+  txt <- gsub("ReservasReavaliacao", "ReservasInventadas", txt, fixed = TRUE)
+  writeLines(txt, xml, useBytes = TRUE)
+  bad <- file.path(tmp, "bad.zip")
+  withr::with_dir(tmp, utils::zip(bad, basename(xml), flags = "-q"))
+  rad_download <- function(id_doc, dest, timeout = 180) {
+    file.copy(bad, dest, overwrite = TRUE)
+    list(
+      ok = TRUE,
+      status = 200L,
+      bytes = 1,
+      seconds = 1,
+      error = NA_character_
+    )
+  }
+  got <- rad_fetch_one(f, withr::local_tempdir())
+  expect_false(got$ok)
+  expect_identical(got$kind, "reader")
+  expect_match(got$note, "unknown DMPL columns")
+})
+
+# A stand-in for `rad_fetch_one()` that fails the documents named in
+# `fails` (id_doc -> kind) and reads the others.
+fetch_by_kind <- function(fails) {
+  function(f, work, ...) {
+    kind <- fails[[f$id_doc]]
+    if (is.null(kind)) {
+      list(
+        ok = TRUE,
+        waf = FALSE,
+        kind = NA_character_,
+        note = "read",
+        rows = list(),
+        done = list()
+      )
+    } else {
+      list(ok = FALSE, waf = FALSE, kind = kind, note = paste("failed:", kind))
+    }
+  }
+}
+
+queue_of <- function(n) {
+  ids <- as.character(seq_len(n))
+  filing_row(ids, "2024-12-31", "1", ids, "1", ids)
+}
+
+test_that("download and document failures do not weigh on the failure rate", {
+  load_etl_rad()
+  rad_fetch_one <- fetch_by_kind(list("2" = "download", "3" = "document"))
+  rad_crawl_delay <- 0
+  rad_failure_floor <- 4L
+  run <- suppressMessages(rad_run_queue(
+    queue_of(6),
+    rad_empty_state("dfp"),
+    withr::local_tempdir(),
+    limit = 6L,
+    minutes = 10,
+    Sys.time()
+  ))
+  expect_identical(run$stopped, NA_character_)
+  expect_identical(run$attempted, 6L)
+  expect_identical(run$failed, 2L)
+  expect_identical(run$reader_failed, 0L)
+  expect_identical(run$state$unread[["2"]]$kind, "download")
+  expect_identical(run$state$unread[["3"]]$kind, "document")
+  tab <- rad_unread_table(run$state, queue_of(6))
+  expect_identical(tab$kind, c("download", "document"))
+})
+
+test_that("the reader's failures stop the run, but only past the floor", {
+  load_etl_rad()
+  rad_crawl_delay <- 0
+  rad_fetch_one <- fetch_by_kind(list("2" = "reader", "4" = "reader"))
+  # floor not reached: 2 of 6 (33%) is tolerated
+  run <- suppressMessages(rad_run_queue(
+    queue_of(6),
+    rad_empty_state("dfp"),
+    withr::local_tempdir(),
+    limit = 6L,
+    minutes = 10,
+    Sys.time()
+  ))
+  expect_identical(run$stopped, NA_character_)
+  expect_identical(run$reader_failed, 2L)
+  # floor reached: the run stops at the failure that crosses the rate
+  rad_failure_floor <- 4L
+  msgs <- character()
+  run <- withCallingHandlers(
+    rad_run_queue(
+      queue_of(6),
+      rad_empty_state("dfp"),
+      withr::local_tempdir(),
+      limit = 6L,
+      minutes = 10,
+      Sys.time()
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_match(
+    msgs,
+    "the reader failed on 2 of 4 documents: stopping",
+    all = FALSE
+  )
+  expect_identical(run$stopped, "failure-rate")
+  expect_identical(run$attempted, 4L)
+  # the tally of the earlier checkpoints counts: 5 of 50 plus one more
+  rad_fetch_one <- fetch_by_kind(list("1" = "reader"))
+  run <- suppressMessages(rad_run_queue(
+    queue_of(3),
+    rad_empty_state("dfp"),
+    withr::local_tempdir(),
+    limit = 3L,
+    minutes = 10,
+    Sys.time(),
+    tally = list(attempted = 50L, failed = 7L, reader_failed = 5L)
+  ))
+  expect_identical(run$stopped, "failure-rate")
+  expect_identical(run$attempted, 1L)
+})
