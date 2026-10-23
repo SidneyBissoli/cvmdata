@@ -363,7 +363,17 @@
   consolidated DMPL columns (it stopped at eight: Banrisul DFP 2021 and
   BRB DFP 2020 were set aside on 2026-10-23; measured against the CSV,
   the ninth is the consolidated equity, unlabelled, as in the new
-  layout).
+  layout). And a ZIP that is not a DFP/ITR at all is set aside as a
+  document of another type instead of crashing the reader: the ITR 2023
+  index lists id 132214 for Dibens Leasing, and the RAD serves an IPE
+  under it. Two decisions of 2026-10-23 on the remaining documents set
+  aside: a blank CNPJ in the document (all zeros: Inter & Co, DFP 2021,
+  a company abroad) is checked by the CVM code of the index instead of
+  being refused as a different CNPJ (the rows carry the index’s identity
+  either way); and the download gives up only when the connection stalls
+  (below 1 KB/s for 60 s) or past 15 min, instead of 180 s of total
+  time, which no document with a huge embedded PDF ever fitted (NEXPE
+  DFP 2021, 59 MB in 180 s; Orizon DFP 2020, 126 MB).
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
