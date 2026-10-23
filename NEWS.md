@@ -340,6 +340,9 @@
   consolidated DMPL columns (it stopped at eight: Banrisul DFP 2021 and
   BRB DFP 2020 were set aside on 2026-10-23; measured against the CSV,
   the ninth is the consolidated equity, unlabelled, as in the new layout).
+  And a ZIP that is not a DFP/ITR at all is set aside as a document of
+  another type instead of crashing the reader: the ITR 2023 index lists
+  id 132214 for Dibens Leasing, and the RAD serves an IPE under it.
 
 * New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
