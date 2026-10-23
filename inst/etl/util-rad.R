@@ -221,7 +221,30 @@ rad_document_url <- function(id_doc) {
 # its magic bytes, not by the header. A 403 or an HTML body is how the
 # WAF refuses: the caller pauses and retries the document, and stops
 # the whole round only when every try is refused.
-rad_download <- function(id_doc, dest, timeout = 180) {
+#
+# The download gives up when the connection STALLS (below
+# `rad_download_stall_bps` for `rad_download_stall_secs`) or past
+# `timeout`, a ceiling. Until 2026-10-23 `timeout` was 180 s of total
+# time, and a document with a huge embedded PDF never fitted: NEXPE DFP
+# 2021 (59 MB received in 180 s) and Orizon DFP 2020 (126 MB) failed on
+# every attempt. Decision of 2026-10-23: a stalled connection is the
+# failure, size is not.
+rad_download_stall_bps <- 1024
+rad_download_stall_secs <- 60
+rad_download_timeout <- 900
+
+rad_download_request <- function(id_doc, timeout = rad_download_timeout) {
+  req <- httr2::request(rad_document_url(id_doc))
+  req <- httr2::req_user_agent(req, rad_user_agent)
+  req <- httr2::req_timeout(req, timeout)
+  httr2::req_options(
+    req,
+    low_speed_limit = rad_download_stall_bps,
+    low_speed_time = rad_download_stall_secs
+  )
+}
+
+rad_download <- function(id_doc, dest, timeout = rad_download_timeout) {
   stopifnot(requireNamespace("httr2", quietly = TRUE))
   t0 <- Sys.time()
   out <- list(
@@ -231,9 +254,7 @@ rad_download <- function(id_doc, dest, timeout = 180) {
     seconds = NA_real_,
     error = NA_character_
   )
-  req <- httr2::request(rad_document_url(id_doc))
-  req <- httr2::req_user_agent(req, rad_user_agent)
-  req <- httr2::req_timeout(req, timeout)
+  req <- rad_download_request(id_doc, timeout)
   resp <- tryCatch(
     httr2::req_perform(req, path = dest),
     httr2_http = function(e) e$resp,
@@ -410,7 +431,27 @@ rad_apply_filing <- function(meta, filing) {
   problems <- character()
   doc_cnpj <- gsub("[^0-9]", "", meta$cnpj_cia %||% "")
   idx_cnpj <- gsub("[^0-9]", "", filing$cnpj_cia)
-  if (nzchar(doc_cnpj) && doc_cnpj != idx_cnpj) {
+  if (grepl("^0+$", doc_cnpj)) {
+    # a blank CNPJ (all zeros: Inter & Co, DFP 2021, a company abroad)
+    # is not a different CNPJ; the identity is then checked by the CVM
+    # code, which the index lists for the delivery (decision of
+    # 2026-10-23). The rows carry the index's identity either way.
+    doc_cd <- rad_format_cd_cvm(meta$cd_cvm)
+    idx_cd <- rad_format_cd_cvm(filing$cd_cvm)
+    if (is.na(doc_cd) || !identical(doc_cd, idx_cd)) {
+      problems <- c(
+        problems,
+        sprintf(
+          paste0(
+            "cnpj blank in the document and cd_cvm (%s) ",
+            "differs from the index (%s)"
+          ),
+          doc_cd,
+          idx_cd
+        )
+      )
+    }
+  } else if (nzchar(doc_cnpj) && doc_cnpj != idx_cnpj) {
     problems <- c(
       problems,
       sprintf(
