@@ -46,9 +46,17 @@
 #       reverse of Banestes), seven columns in the individual DMPL; the
 #       consolidated DMPL is the positional variant (`DadosContas`, eight
 #       fields). Proves that the CSV follows the document's order.
+#   tests/testthat/fixtures/rad_dfp_2021_111777.zip
+#     - old layout, DFP 2021, Banrisul v1 (set aside on 2026-10-23): the
+#       consolidated DMPL of a bank in the OLD layout has nine columns
+#       (controlling, non-controlling and consolidated equity in 7-9,
+#       already in the CSV's order), the ninth without label; the
+#       individual has seven. BRB DFP 2020 (ids 104653, 102706) is the
+#       same class and was measured, not kept.
 #
-# Usage, from the package root, with the seven original ZIPs (as
-# downloaded from the RAD, named `<id_doc>.zip`) in one directory:
+# Usage, from the package root, with the original ZIPs (as downloaded
+# from the RAD, named `<id_doc>.zip`) in one directory; a fixture whose
+# original is absent is kept as it is:
 #   Rscript data-raw/build-rad-test-fixtures.R <dir-with-zips>
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -66,7 +74,8 @@ docs <- list(
   list(id = "17509", name = "rad_itr_2012_17509", layout = "old"),
   list(id = "14281", name = "rad_dfp_2011_14281", layout = "old"),
   list(id = "154846", name = "rad_dfp_2025_154846", layout = "new"),
-  list(id = "154641", name = "rad_dfp_2025_154641", layout = "new")
+  list(id = "154641", name = "rad_dfp_2025_154641", layout = "new"),
+  list(id = "111777", name = "rad_dfp_2021_111777", layout = "old")
 )
 
 keep_conta <- function(codes) {
