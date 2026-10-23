@@ -336,7 +336,10 @@
   Banestes, Banco Pine, Daycoval, BTG Pactual and Itaú, DFP 2025,
   account by account, zero differences. The state now records which
   reader set a document aside, and attempts made by an earlier reader
-  no longer spend the document.
+  no longer spend the document. The old layout accepts the same nine
+  consolidated DMPL columns (it stopped at eight: Banrisul DFP 2021 and
+  BRB DFP 2020 were set aside on 2026-10-23; measured against the CSV,
+  the ninth is the consolidated equity, unlabelled, as in the new layout).
 
 * New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
