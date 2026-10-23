@@ -53,6 +53,13 @@
 #       already in the CSV's order), the ninth without label; the
 #       individual has seven. BRB DFP 2020 (ids 104653, 102706) is the
 #       same class and was measured, not kept.
+#   tests/testthat/fixtures/rad_ipe_2023_132214.zip
+#     - NOT a DFP/ITR: the ITR 2023 index lists id 132214 as one of two
+#       deliveries of Dibens Leasing for 2023-09-30 (the other, 132223,
+#       is the ITR), but the RAD serves an IPE under that number (root
+#       `Documento`, an `.ipe` inside). The reader crashed on it on
+#       2026-10-23 instead of setting it aside as a document of another
+#       type. Kept whole (the XML is 8 KB; the `.ipe` is dropped).
 #
 # Usage, from the package root, with the original ZIPs (as downloaded
 # from the RAD, named `<id_doc>.zip`) in one directory; a fixture whose
@@ -75,7 +82,8 @@ docs <- list(
   list(id = "14281", name = "rad_dfp_2011_14281", layout = "old"),
   list(id = "154846", name = "rad_dfp_2025_154846", layout = "new"),
   list(id = "154641", name = "rad_dfp_2025_154641", layout = "new"),
-  list(id = "111777", name = "rad_dfp_2021_111777", layout = "old")
+  list(id = "111777", name = "rad_dfp_2021_111777", layout = "old"),
+  list(id = "132214", name = "rad_ipe_2023_132214", layout = "new")
 )
 
 keep_conta <- function(codes) {
