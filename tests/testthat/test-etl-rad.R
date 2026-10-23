@@ -1077,6 +1077,52 @@ test_that("a ZIP that is not a DFP/ITR is set aside as a document", {
   expect_match(got$note, "unknown XML root: Documento")
 })
 
+test_that("a blank CNPJ in the document is checked by the CVM code", {
+  load_etl_rad()
+  # Inter & Co, DFP 2021 v1 (id 113859): a company abroad, CNPJ written
+  # as zeros and the former name in the document; the CVM code (057886)
+  # is the one the index lists for this delivery. Decision of
+  # 2026-10-23: blank is not different; the identity comes from the
+  # index, as in every row.
+  f <- filing_row(
+    "42.737.954/0001-21",
+    "2021-12-31",
+    "1",
+    "INTER & CO, INC.",
+    "057886",
+    "113859"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2021_113859"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  expect_true("bpa/con" %in% names(r$tables))
+  expect_identical(unique(r$tables[["bpa/con"]]$cnpj_cia), "42.737.954/0001-21")
+  expect_identical(unique(r$tables[["bpa/con"]]$denom_cia), "INTER & CO, INC.")
+  expect_identical(unique(r$tables[["bpa/con"]]$cd_cvm), "057886")
+  # a blank CNPJ with another CVM code is still not the document
+  other <- filing_row(
+    "42.737.954/0001-21",
+    "2021-12-31",
+    "1",
+    "INTER & CO, INC.",
+    "080217",
+    "113966"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2021_113859"), other)
+  expect_match(r$problems, "cnpj blank in the document and cd_cvm")
+  expect_true(r$index_mismatch)
+})
+
+test_that("the download gives up on a stalled connection, not on size", {
+  load_etl_rad()
+  req <- rad_download_request("113859")
+  expect_match(req$url, "NumeroSequencialDocumento=113859")
+  expect_identical(req$options$low_speed_limit, rad_download_stall_bps)
+  expect_identical(req$options$low_speed_time, rad_download_stall_secs)
+  expect_identical(req$options$timeout_ms, rad_download_timeout * 1000)
+  expect_identical(rad_download_timeout, 900)
+})
+
 # A stand-in for `rad_fetch_one()` that fails the documents named in
 # `fails` (id_doc -> kind) and reads the others.
 fetch_by_kind <- function(fails) {
