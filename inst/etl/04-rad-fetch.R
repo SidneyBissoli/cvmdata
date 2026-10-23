@@ -28,10 +28,19 @@
 #   `rad_waf_retries` times (decision of 2026-10-22: one refusal in the
 #   middle of a good run of 74 turned the job red, and the document
 #   downloaded whole hours later). Only a document refused every time
-#   stops the run; more than ~10% of failures stops it too. Both exit
-#   with status 2 after publishing what was read. A run publishes in
-#   checkpoints of `rad_checkpoint_docs` documents, so a job killed
-#   later keeps what it had published.
+#   stops the run. Every failure is recorded with its `kind`:
+#   `download` (the RAD did not deliver: transport error or an HTTP
+#   status other than 403), `document` (the ZIP is not the document the
+#   index describes, or carries no statement with rows), `reader` (the
+#   reader could not make sense of it) and `waf`. The failure rate that
+#   also stops the run (more than `rad_failure_rate` of the attempts)
+#   counts ONLY the `reader` kind, and only after `rad_failure_floor`
+#   attempts (decision of 2026-10-23: a run of 16 stopped with one
+#   connection reset and one document whose cnpj differed from the
+#   index — neither says anything about the reader, which is what the
+#   rate guards). Both stops exit with status 2 after publishing what
+#   was read. A run publishes in checkpoints of `rad_checkpoint_docs`
+#   documents, so a job killed later keeps what it had published.
 # * State lives in the release as `__rad_state.json` (documents done, by
 #   `id_doc` with the hash of the XML; documents unread with the reason;
 #   the last runs). The `hash` of `__source_hash.json` is NOT touched:
@@ -40,7 +49,7 @@
 #
 # Usage:
 #   Rscript inst/etl/04-rad-fetch.R --group companhias --dataset dfp \
-#     [--limit 300] [--minutes 170] [--year 2024] [--dry-run]
+#     [--limit 300] [--minutes 260] [--year 2024] [--dry-run]
 #
 # `--dry-run` reads and writes the parquets under
 # <workspace>/out/rad/<group>/<dataset>/ without touching the release.
@@ -77,8 +86,8 @@ rad_crawl_delay <- 10 # seconds between two requests to the RAD
 rad_waf_pause <- 90 # seconds of pause after a refusal, before retrying
 rad_waf_retries <- 2L # retries of one document refused by the WAF
 rad_max_attempts <- 3L # tries per unread document, across runs
-rad_failure_rate <- 0.10 # of the documents attempted in the run
-rad_failure_floor <- 10L # attempts before the rate is judged
+rad_failure_rate <- 0.10 # reader failures over the attempts of the run
+rad_failure_floor <- 50L # attempts before the rate is judged
 rad_checkpoint_docs <- 50L # documents between two publications of a run
 
 utc_now <- function(t = Sys.time()) {
@@ -207,12 +216,13 @@ rad_write_state <- function(state, path) {
   path
 }
 
-rad_mark_unread <- function(state, id_doc, reason) {
+rad_mark_unread <- function(state, id_doc, reason, kind = "reader") {
   prev <- state$unread[[id_doc]]
   # attempts of an earlier reader do not count against the document
   same <- identical(prev$reader %||% "", rad_reader_id)
   state$unread[[id_doc]] <- list(
     reason = reason,
+    kind = kind,
     at = utc_now(),
     attempts = if (same) as.integer(prev$attempts %||% 0L) + 1L else 1L,
     reader = rad_reader_id
@@ -231,6 +241,7 @@ rad_unread_table <- function(state, index) {
       dt_refer = character(),
       versao = character(),
       reason = character(),
+      kind = character(),
       attempts = integer(),
       last_attempt = character(),
       stringsAsFactors = FALSE
@@ -247,6 +258,7 @@ rad_unread_table <- function(state, index) {
     dt_refer = format(index$dt_refer[m], "%Y-%m-%d"),
     versao = as.character(index$versao[m]),
     reason = field("reason", "", as.character),
+    kind = field("kind", "", as.character),
     attempts = field("attempts", 0L, as.integer),
     last_attempt = field("at", "", as.character),
     stringsAsFactors = FALSE
@@ -382,9 +394,13 @@ upload_release_asset <- function(tag, path, attempts = 4L) {
 
 # Downloads and reads the queue until `limit` documents, `minutes` of
 # wall clock (counted from `t_start`), a refusal by the RAD or too many
-# failures. `tally` carries the counts of the earlier checkpoints of the
-# same run, so the failure rate is judged over the whole run. Returns
-# list(by_rel, state, attempted, n_read, failed, stopped, time_out).
+# failures of the reader. `tally` carries the counts of the earlier
+# checkpoints of the same run, so the failure rate is judged over the
+# whole run: `reader_failed` of the attempts, only once `attempted`
+# reached `rad_failure_floor`; failures of the other kinds (download,
+# document) are set aside without weighing on the rate. Returns
+# list(by_rel, state, attempted, n_read, failed, reader_failed, stopped,
+# time_out).
 rad_run_queue <- function(
   queue,
   state,
@@ -398,8 +414,9 @@ rad_run_queue <- function(
   time_out <- FALSE
   attempted <- 0L
   failed <- 0L
+  reader_failed <- 0L
   n_read <- 0L
-  before <- tally %||% list(attempted = 0L, failed = 0L)
+  before <- tally %||% list(attempted = 0L, reader_failed = 0L)
   by_rel <- list()
   last_request <- Sys.time() - rad_crawl_delay
   for (i in seq_len(min(limit, nrow(queue)))) {
@@ -426,21 +443,26 @@ rad_run_queue <- function(
     ))
     if (!got$ok) {
       failed <- failed + 1L
-      state <- rad_mark_unread(state, f$id_doc, got$note)
+      kind <- got$kind %||% if (got$waf) "waf" else "reader"
+      state <- rad_mark_unread(state, f$id_doc, got$note, kind)
       if (got$waf) {
         stopped <- "waf"
         message("[04-rad] the RAD refused the request (WAF): stopping")
         break
       }
+      if (kind != "reader") {
+        next
+      }
+      reader_failed <- reader_failed + 1L
       all_attempted <- before$attempted + attempted
-      all_failed <- before$failed + failed
+      all_failed <- (before$reader_failed %||% 0L) + reader_failed
       if (
         all_attempted >= rad_failure_floor &&
           all_failed / all_attempted > rad_failure_rate
       ) {
         stopped <- "failure-rate"
         message(sprintf(
-          "[04-rad] %d of %d documents failed: stopping",
+          "[04-rad] the reader failed on %d of %d documents: stopping",
           all_failed,
           all_attempted
         ))
@@ -462,16 +484,20 @@ rad_run_queue <- function(
     attempted = attempted,
     n_read = n_read,
     failed = failed,
+    reader_failed = reader_failed,
     stopped = stopped,
     time_out = time_out
   )
 }
 
-# Downloads and reads one document. Returns list(ok, waf, note, rows,
-# done): `note` is the reason when not ok, a summary otherwise; `done`
-# is the state entry of a document read. A refusal by the WAF (403 or
-# an HTML body) is retried after `pause` seconds, `retries` times; `waf`
-# is TRUE only when every try was refused.
+# Downloads and reads one document. Returns list(ok, waf, kind, note,
+# rows, done): `note` is the reason when not ok, a summary otherwise;
+# `done` is the state entry of a document read. A refusal by the WAF
+# (403 or an HTML body) is retried after `pause` seconds, `retries`
+# times; `waf` is TRUE only when every try was refused. `kind` names the
+# failure (see the header): "waf", "download" (the RAD did not deliver
+# the ZIP), "document" (not the document of the index row, or nothing
+# in it) or "reader" (the reader could not read it); NA when ok.
 rad_fetch_one <- function(
   f,
   work,
@@ -487,12 +513,13 @@ rad_fetch_one <- function(
     waf <- identical(dl$status, 403L) ||
       grepl("not a ZIP", dl$error, fixed = TRUE)
     if (!waf) {
-      return(list(ok = FALSE, waf = FALSE, note = dl$error))
+      return(list(ok = FALSE, waf = FALSE, kind = "download", note = dl$error))
     }
     if (try > retries) {
       return(list(
         ok = FALSE,
         waf = TRUE,
+        kind = "waf",
         note = sprintf("%s, refused %d times", dl$error, try)
       ))
     }
@@ -516,9 +543,17 @@ rad_fetch_one <- function(
     } else {
       "no statement with rows"
     }
+    # a document that is not the one the index describes, or that has
+    # nothing to read, is set aside for what it is, not for the reader
+    kind <- if (isTRUE(res$index_mismatch) || length(res$problems) == 0L) {
+      "document"
+    } else {
+      "reader"
+    }
     return(list(
       ok = FALSE,
       waf = FALSE,
+      kind = kind,
       note = paste0("set aside (", reason, ")")
     ))
   }
@@ -527,6 +562,7 @@ rad_fetch_one <- function(
   list(
     ok = TRUE,
     waf = FALSE,
+    kind = NA_character_,
     note = sprintf(
       "v%s, %s layout, %d tables, %d rows (%.0fs)",
       f$versao,
@@ -726,6 +762,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
   tally <- list(
     attempted = 0L,
     failed = 0L,
+    reader_failed = 0L,
     read = 0L,
     rows = 0L,
     checkpoints = 0L
@@ -750,6 +787,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
     state <- run$state
     tally$attempted <- tally$attempted + run$attempted
     tally$failed <- tally$failed + run$failed
+    tally$reader_failed <- tally$reader_failed + run$reader_failed
     tally$read <- tally$read + run$n_read
     stopped <- run$stopped
     built <- rad_build_history(
@@ -779,6 +817,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
         attempted = tally$attempted,
         read = tally$read,
         failed = tally$failed,
+        reader_failed = tally$reader_failed,
         rows = tally$rows,
         checkpoints = tally$checkpoints,
         stopped = if (is.na(stopped)) NULL else stopped,
@@ -802,7 +841,7 @@ rad_parse_args <- function(args) {
     group = "companhias",
     dataset = NULL,
     limit = 300L,
-    minutes = 170,
+    minutes = 260,
     year = NULL,
     dry_run = FALSE
   )

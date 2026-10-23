@@ -10,19 +10,22 @@ name: ETL RAD history
 #     the concurrency group `etl-history`: a run of one waits for the
 #     other to finish. The cron alone does not keep them apart: with
 #     `dfp` and `itr` in series a run lasts up to twice `timeout-minutes`
-#     (08:40 UTC), past the Tuesday 07:00 UTC run of the mirror.
+#     (12:00 UTC), past the Tuesday 07:00 UTC run of the mirror.
 #   - workflow_dispatch: `dataset` (empty = dfp then itr, as the cron),
 #     `limit` (documents per dataset, default 300), `year` (one
 #     reference year, smoke test), `dry_run` (read, do not publish).
 #
 # One job per dataset, DFP first (decision 3: most recent year first,
-# DFP before ITR). Each document costs ~26 s of download plus a 10 s
-# crawl delay; 300 documents are ~3 h. A refusal by the RAD (403 or an
-# HTML body) is retried after a pause, twice, before it counts: a
-# document refused every time, or more than ~10% of failures, stops
-# the run with exit status 2 after publishing what was read, which
-# turns the job red: the portfolio monitor watches this workflow and
-# the public `__rad_unread.csv` asset.
+# DFP before ITR). Each document costs ~40–50 s (download, reading and
+# a 10 s crawl delay; measured 2026-10-22: 200 documents in 2 h 56);
+# 300 documents are ~4 h. A refusal by the RAD (403 or an HTML body)
+# is retried after a 90 s pause, twice, before it counts: a document
+# refused every time stops the run, and so does a reader failing on
+# more than ~10% of the documents once 50 were attempted (download
+# errors and documents set aside for what they are do not count;
+# decision of 2026-10-23). Both exit with status 2 after publishing
+# what was read, which turns the job red: the portfolio monitor
+# watches this workflow and the public `__rad_unread.csv` asset.
 
 on:
   schedule:
@@ -64,9 +67,12 @@ concurrency:
 jobs:
   rad:
     runs-on: ubuntu-latest
-    # 300 documents at ~36 s each are ~180 min; the script stops starting
-    # new downloads after --minutes and publishes what it has.
-    timeout-minutes: 200
+    # The script stops starting new downloads after --minutes (default
+    # 260) and publishes what it has; the 40 min on top cover the R
+    # setup, the last document (up to two 90 s WAF pauses) and the last
+    # checkpoint. Raised from 200 on 2026-10-23: a 200-document lot took
+    # 2 h 56 clean and overran 200 min with the WAF pauses.
+    timeout-minutes: 300
     strategy:
       fail-fast: false
       max-parallel: 1

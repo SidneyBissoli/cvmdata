@@ -282,6 +282,11 @@ rad_is_zip <- function(path) {
 #            columns of `rad_table_columns(table)`; empty statements are
 #            absent
 #   problems character(0) when the document is trustworthy
+#   index_mismatch TRUE when the document is not the one the index
+#            row describes (cnpj or dt_refer differ): the document is
+#            set aside for what it IS, not for how it was read. The
+#            fetch stage keeps such a failure out of the reader's
+#            failure rate.
 rad_read_zip <- function(zip, filing = NULL) {
   stopifnot(file.exists(zip))
   entries <- utils::unzip(zip, list = TRUE)$Name
@@ -319,10 +324,12 @@ rad_result <- function(meta = list(), rows = NULL, problems = character()) {
 rad_finish <- function(res, filing) {
   problems <- res$problems
   meta <- res$meta
+  index_mismatch <- FALSE
   if (!is.null(filing)) {
     checked <- rad_apply_filing(meta, as.list(filing))
     meta <- checked$meta
     problems <- c(problems, checked$problems)
+    index_mismatch <- length(checked$problems) > 0L
   } else {
     meta$cnpj_cia <- rad_format_cnpj(meta$cnpj_cia)
     meta$cd_cvm <- rad_format_cd_cvm(meta$cd_cvm)
@@ -361,7 +368,12 @@ rad_finish <- function(res, filing) {
     rows$grupo_dfp <- rad_grupo_dfp(rows$table, rows$report_type)
     tables <- rad_split(rows)
   }
-  list(meta = meta, tables = tables, problems = problems)
+  list(
+    meta = meta,
+    tables = tables,
+    problems = problems,
+    index_mismatch = index_mismatch
+  )
 }
 
 # The identity of the filing comes from the index; the document is
