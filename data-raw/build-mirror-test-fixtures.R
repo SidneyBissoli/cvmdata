@@ -29,6 +29,13 @@
 #       MAGAZINE LUIZA, repacked under 200 KB. Added in v0.2 Sessao 13.
 #       Keeps every Categoria emitted by the pair (manifest is
 #       event-per-row, no dedup) for the category-filter test.
+#   tests/testthat/fixtures/mirror-dfp-dre-con-2023.parquet and
+#   tests/testthat/fixtures/mirror-dfp-dre-con-2023-history.parquet
+#     - the current (`part-0`) and superseded (`history`) assets of
+#       dfp/dre con 2023 as published on the mirror, cut to BRASKEM
+#       (versions 1, 2 and the current 3) and PETROBRAS (1 and the
+#       current 2) and to four income-statement accounts. Consumed by
+#       test-cvm-versions.R.
 #   tests/testthat/fixtures/dfp_cia_aberta_2025.zip and
 #   tests/testthat/fixtures/mirror-dfp-bpa-ind-2025.parquet
 #     - subset of DFP 2025 (submissao, BPA ind/con, DRE ind,
@@ -42,9 +49,10 @@
 # fca` to rebuild only the FCA fixture in isolation (the pattern used
 # from Sessao 11 onward to avoid disturbing already-committed
 # fixtures). Targets: `parquet`, `cgvn`, `vlmo`, `fca`, `ipe`,
-# `dfp2025`. Idempotent — overwrites any pre-existing fixtures it
-# touches. The cgvn/vlmo/fca/ipe/dfp2025 raw-fixture steps require
-# network access to the CVM portal.
+# `dfp2025`, `dre2023`. Idempotent — overwrites any pre-existing
+# fixtures it touches. The cgvn/vlmo/fca/ipe/dfp2025 raw-fixture steps
+# require network access to the CVM portal; `dre2023` downloads two
+# assets of the parquet mirror from GitHub Releases.
 
 stopifnot(requireNamespace("devtools", quietly = TRUE))
 stopifnot(requireNamespace("DBI", quietly = TRUE))
@@ -56,7 +64,15 @@ devtools::load_all(quiet = TRUE)
 options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
 
 # Target selection: default to all; CLI args restrict to a subset.
-.all_targets <- c("parquet", "cgvn", "vlmo", "fca", "ipe", "dfp2025")
+.all_targets <- c(
+  "parquet",
+  "cgvn",
+  "vlmo",
+  "fca",
+  "ipe",
+  "dfp2025",
+  "dre2023"
+)
 .targets <- commandArgs(trailingOnly = TRUE)
 if (!length(.targets)) {
   .targets <- .all_targets
@@ -975,12 +991,124 @@ build_dfp_2025_fixtures <- function() {
   invisible(NULL)
 }
 
+# DFP DRE con 2023: current + history mirror assets (cvm_versions()) ------
+# Downloads the two assets of the (dre, con, 2023) partition from the
+# release `mirror-companhias-dfp-latest` and cuts both to two issuers
+# whose 2023 income statement was re-filed: PETROBRAS (version 1
+# superseded on 2024-03-25 by version 2, same net income) and BRASKEM
+# (version 1 in R$ units superseded by version 2 "to reflect the R$
+# thousand scale", itself superseded by version 3). Four accounts are
+# kept so the fixture stays small; every version and reading
+# (`ordem_exerc`) of them survives. The history asset carries the five
+# columns the current one lacks (`superseded_at`, `superseded_by_versao`,
+# `history_source`, `id_doc`, `motivo_reapresentacao`), as published.
+build_dre_2023_fixtures <- function() {
+  base_url <- paste0(
+    "https://github.com/SidneyBissoli/cvmdata/releases/download/",
+    "mirror-companhias-dfp-latest/"
+  )
+  assets <- c(
+    current = "dre__report_type.con__year.2023__part-0.parquet",
+    history = "dre__report_type.con__year.2023__history.parquet"
+  )
+  outputs <- c(
+    current = "tests/testthat/fixtures/mirror-dfp-dre-con-2023.parquet",
+    history = "tests/testthat/fixtures/mirror-dfp-dre-con-2023-history.parquet"
+  )
+  keep_cnpjs <- c("33.000.167/0001-01", "42.150.391/0001-70")
+  keep_accounts <- c("3.01", "3.03", "3.05", "3.11")
+  keep_meta <- list(
+    list(
+      cd_cvm = "009512",
+      cnpj_cia = "33.000.167/0001-01",
+      denom_cia = "PETROLEO BRASILEIRO S.A. PETROBRAS"
+    ),
+    list(
+      cd_cvm = "004820",
+      cnpj_cia = "42.150.391/0001-70",
+      denom_cia = "BRASKEM S.A."
+    )
+  )
+
+  stage <- tempfile("dre2023_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+
+  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
+  sql_list <- function(x) paste(sprintf("'%s'", x), collapse = ", ")
+  n_rows <- integer(0)
+  for (kind in names(assets)) {
+    url <- paste0(base_url, assets[[kind]])
+    local <- file.path(stage, assets[[kind]])
+    cat(sprintf("[dre2023] Downloading %s\n", url))
+    resp <- httr2::req_perform(
+      httr2::req_timeout(httr2::request(url), 600L)
+    )
+    writeBin(httr2::resp_body_raw(resp), local)
+    out <- outputs[[kind]]
+    if (file.exists(out)) {
+      file.remove(out)
+    }
+    DBI::dbExecute(
+      con,
+      sprintf(
+        paste(
+          "COPY (SELECT * FROM read_parquet('%s') WHERE cnpj_cia IN (%s)",
+          "AND cd_conta IN (%s) ORDER BY cnpj_cia, versao, ordem_exerc,",
+          "cd_conta) TO '%s' (FORMAT 'parquet', COMPRESSION 'snappy')"
+        ),
+        gsub("\\\\", "/", local),
+        sql_list(keep_cnpjs),
+        sql_list(keep_accounts),
+        gsub("\\\\", "/", out)
+      )
+    )
+    n_rows[[kind]] <- DBI::dbGetQuery(
+      con,
+      sprintf("SELECT count(*) AS n FROM read_parquet('%s')", out)
+    )$n
+    meta <- list(
+      source_url = url,
+      fetched_at = format(Sys.Date()),
+      companies_included = keep_meta,
+      accounts_included = keep_accounts,
+      notes = paste(
+        "Subset of the mirror asset filtered by cnpj_cia (PETROBRAS +",
+        "BRASKEM) and cd_conta, columns as published. Built for the",
+        "cvm_versions() tests: PETROBRAS DFP 2023 has versions 1 and 2",
+        "(same net income); BRASKEM has versions 1 (R$ units), 2 (R$",
+        "thousand, with motivo_reapresentacao) and 3.",
+        if (identical(kind, "history")) {
+          "Every row is history_source = 'rad' (recovered from the RAD)."
+        } else {
+          "Current versions only (3 for BRASKEM, 2 for PETROBRAS)."
+        }
+      )
+    )
+    writeLines(
+      jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+      paste0(out, ".meta.json")
+    )
+    cat(sprintf(
+      "[fixture] %s  %d rows, %s bytes\n",
+      out,
+      n_rows[[kind]],
+      format(file.info(out)$size)
+    ))
+  }
+  invisible(outputs)
+}
+
 # --- dispatch --------------------------------------------------------
 if ("parquet" %in% .targets) {
   build_parquet_fixtures()
 }
 if ("dfp2025" %in% .targets) {
   build_dfp_2025_fixtures()
+}
+if ("dre2023" %in% .targets) {
+  build_dre_2023_fixtures()
 }
 if ("cgvn" %in% .targets) {
   build_cgvn_raw_fixture()

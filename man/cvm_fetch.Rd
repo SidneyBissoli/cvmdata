@@ -267,4 +267,8 @@ pssa <- cvm_fetch(
 )
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other fetchers:
+\code{\link[=cvm_versions]{cvm_versions()}}
+}
 \concept{fetchers}

@@ -134,6 +134,22 @@ bpa_2022 <- cvm_fetch(
 )
 ```
 
+A filing may be re-filed, and `cvm_fetch()` returns the current
+version. `cvm_versions()` returns every known version, the current one
+included, each superseded version dated and pointing at the version
+that replaced it (Braskem filed its 2023 income statement three times;
+version 1 was in R$ units by mistake):
+
+``` r
+brkm <- cvm_versions(
+  dataset = "dfp",
+  table   = "dre",
+  cnpj    = "42.150.391/0001-70",
+  year    = 2023,
+  basis   = "con"
+)
+```
+
 Parse and format Brazilian corporate taxpayer IDs (CNPJ):
 
 ```{r}
@@ -149,6 +165,7 @@ The exported API is grouped into five families:
 - **Fetcher** — `cvm_fetch()` is the single function for every
   dataset and table; the groups still on the roadmap (funds, agents,
   offerings, events) will extend it through their schemas.
+  `cvm_versions()` returns every known version of a filing.
   `issuer_fetch()`, the entry point of earlier releases, is
   deprecated and will be removed in a later release.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,

@@ -310,14 +310,18 @@ fetch_via_mirror <- function(schema, dataset, year, issuer, report_type) {
 }
 
 # Fetch + transform + filter for a single year (or a non-yearly
-# table, when year is NULL). Returns the post-filter tibble.
+# table, when year is NULL). Returns the post-filter tibble. With
+# `keep_versions = TRUE` (only `cvm_versions()` asks for it) the
+# `keep_latest_version` transformation is skipped, so every filing the
+# CSV carries survives.
 fetch_one_year <- function(
   schema,
   year,
   issuer,
   report_type,
   validate,
-  strict_text = TRUE
+  strict_text = TRUE,
+  keep_versions = FALSE
 ) {
   path <- source_cvm_http_get(
     schema,
@@ -325,7 +329,11 @@ fetch_one_year <- function(
     report_type = report_type
   )
   raw <- read_cvm_csv(path, schema, validate = validate)
-  transformed <- apply_schema_transformations(raw, schema)
+  transformed <- apply_schema_transformations(
+    raw,
+    schema,
+    skip = if (keep_versions) "keep_latest_version" else NULL
+  )
   if (!is.null(issuer)) {
     transformed <- filter_by_issuer(
       transformed,
@@ -356,7 +364,8 @@ fetch_yearly_partitioned <- function(
   issuer,
   report_type,
   validate,
-  on_error = "abort"
+  on_error = "abort",
+  keep_versions = FALSE
 ) {
   if (!is.null(year)) {
     return(fetch_explicit_years(
@@ -365,7 +374,8 @@ fetch_yearly_partitioned <- function(
       issuer,
       report_type,
       validate,
-      on_error
+      on_error,
+      keep_versions = keep_versions
     ))
   }
 
@@ -381,7 +391,8 @@ fetch_yearly_partitioned <- function(
       candidates[1L],
       issuer = NULL,
       report_type = report_type,
-      validate = validate
+      validate = validate,
+      keep_versions = keep_versions
     ))
   }
 
@@ -401,7 +412,8 @@ fetch_yearly_partitioned <- function(
       issuer,
       report_type,
       validate,
-      strict_text = i == length(candidates)
+      strict_text = i == length(candidates),
+      keep_versions = keep_versions
     )
     if (nrow(out) > 0L) {
       if (length(tried) > 1L) {
@@ -481,7 +493,8 @@ fetch_explicit_years <- function(
   issuer,
   report_type,
   validate,
-  on_error
+  on_error,
+  keep_versions = FALSE
 ) {
   year <- as.integer(year)
   # A free-text issuer absent from one requested year must not abort the
@@ -497,7 +510,8 @@ fetch_explicit_years <- function(
         issuer,
         report_type,
         validate,
-        strict_text = FALSE
+        strict_text = FALSE,
+        keep_versions = keep_versions
       )
     })
     out <- do.call(rbind, parts)
@@ -515,7 +529,8 @@ fetch_explicit_years <- function(
           issuer,
           report_type,
           validate,
-          strict_text = FALSE
+          strict_text = FALSE,
+          keep_versions = keep_versions
         )
       ),
       cvmdata_error_http = function(e) {
