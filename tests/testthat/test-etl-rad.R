@@ -1224,3 +1224,76 @@ test_that("the reader's failures stop the run, but only past the floor", {
   expect_identical(run$stopped, "failure-rate")
   expect_identical(run$attempted, 1L)
 })
+
+test_that("old layout: a template consolidated DMPL is not a statement", {
+  load_etl_rad()
+  # Ferrovia Centro-Atlântica DFP 2020 v2 (id 100464), set aside on
+  # 2026-10-24 as "no column list for dmpl/con": the company does not
+  # consolidate, every consolidated statement is empty and the document
+  # keeps the TEMPLATE of the consolidated DMPL (28 records, all period
+  # 0, some with leftover values) with no column list for it. The DFP
+  # CSV has no consolidated DMPL row for it (nor for Sabesp 2019, Banese
+  # 2019, Newtel 2018 and Bradesco 2019 v1, the same class). Nothing to
+  # read, nothing wrong; the individual DMPL reads as before.
+  f <- filing_row(
+    "00.924.429/0001-75",
+    "2020-12-31",
+    "2",
+    "FERROVIA CENTRO-ATLANTICA S.A.",
+    "015369",
+    "100464"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2020_100464"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  expect_null(r$tables[["dmpl/con"]])
+  ind <- r$tables[["dmpl/ind"]]
+  expect_identical(unique(ind$coluna_df), rad_dmpl_labels[1:6])
+  expect_setequal(unique(ind$ordem_exerc), c(ultimo, penultimo))
+  expect_true(all(c("bpa/ind", "dre/ind") %in% names(r$tables)))
+})
+
+test_that("a year closing on 29 February: previous exercise on the 28th", {
+  load_etl_rad()
+  expect_identical(
+    rad_year_before(as.Date("2020-02-29")),
+    as.Date("2019-02-28")
+  )
+  expect_identical(
+    rad_year_before(as.Date("2020-12-31")),
+    as.Date("2019-12-31")
+  )
+  expect_identical(
+    rad_year_before(as.Date(c("2024-02-29", "2024-03-31", NA))),
+    as.Date(c("2023-02-28", "2023-03-31", NA))
+  )
+  # Camil Alimentos DFP 2020-02-29 v1 (id 93001), set aside on 2026-10-24
+  # with "character string is not in a standard unambiguous format":
+  # periods 2019-03-01..2020-02-29 and 2018-03-01..2019-02-28; the DFP
+  # CSV writes the second as PENÚLTIMO.
+  f <- filing_row(
+    "64.904.295/0001-03",
+    "2020-02-29",
+    "1",
+    "CAMIL ALIMENTOS S.A.",
+    "024228",
+    "93001"
+  )
+  r <- rad_read_zip(rad_fx("rad_dfp_2020_93001"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  bpa <- r$tables[["bpa/ind"]]
+  expect_setequal(
+    unique(format(bpa$dt_fim_exerc)),
+    c("2020-02-29", "2019-02-28")
+  )
+  expect_identical(
+    unique(bpa$ordem_exerc[format(bpa$dt_fim_exerc) == "2019-02-28"]),
+    penultimo
+  )
+  expect_identical(
+    unique(bpa$ordem_exerc[format(bpa$dt_fim_exerc) == "2020-02-29"]),
+    ultimo
+  )
+  expect_true(all(c("dmpl/ind", "dmpl/con") %in% names(r$tables)))
+})

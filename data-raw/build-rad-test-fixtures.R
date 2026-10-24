@@ -53,6 +53,18 @@
 #       already in the CSV's order), the ninth without label; the
 #       individual has seven. BRB DFP 2020 (ids 104653, 102706) is the
 #       same class and was measured, not kept.
+#   tests/testthat/fixtures/rad_dfp_2020_100464.zip
+#     - old layout, DFP 2020, Ferrovia Centro-Atlântica v2 (set aside on
+#       2026-10-24 as "no column list for dmpl/con"): a company that does
+#       not consolidate, whose document keeps the TEMPLATE of the
+#       consolidated DMPL (28 records, all period 0) with no column list
+#       for it; the DFP CSV has no consolidated DMPL row for it. Same
+#       class: Sabesp 2019, Banese 2019, Newtel 2018, Bradesco 2019 v1.
+#   tests/testthat/fixtures/rad_dfp_2020_93001.zip
+#     - old layout, DFP 2020-02-29, Camil Alimentos v1 (set aside on
+#       2026-10-24): a fiscal year closing on 29 February; the previous
+#       exercise closes on 2019-02-28, and "one year before" the reference
+#       date is not a calendar date.
 #   tests/testthat/fixtures/rad_ipe_2023_132214.zip
 #     - NOT a DFP/ITR: the ITR 2023 index lists id 132214 as one of two
 #       deliveries of Dibens Leasing for 2023-09-30 (the other, 132223,
@@ -90,7 +102,9 @@ docs <- list(
   list(id = "154641", name = "rad_dfp_2025_154641", layout = "new"),
   list(id = "111777", name = "rad_dfp_2021_111777", layout = "old"),
   list(id = "132214", name = "rad_ipe_2023_132214", layout = "new"),
-  list(id = "113859", name = "rad_dfp_2021_113859", layout = "new")
+  list(id = "113859", name = "rad_dfp_2021_113859", layout = "new"),
+  list(id = "100464", name = "rad_dfp_2020_100464", layout = "old"),
+  list(id = "93001", name = "rad_dfp_2020_93001", layout = "old")
 )
 
 keep_conta <- function(codes) {
