@@ -370,7 +370,16 @@
   either way); and the download gives up only when the connection stalls
   (below 1 KB/s for 60 s) or past 15 min, instead of 180 s of total
   time, which no document with a huge embedded PDF ever fitted (NEXPE
-  DFP 2021, 59 MB in 180 s; Orizon DFP 2020, 126 MB).
+  DFP 2021, 59 MB in 180 s; Orizon DFP 2020, 126 MB). Two classes the
+  first full round under that policy (2026-10-24) left aside, both of
+  the old layout: a company that does not consolidate keeps the TEMPLATE
+  of the consolidated DMPL in the document (records without a period and
+  no column list: Ferrovia Centro-Atlântica DFP 2018 and 2020, Sabesp
+  2019, Banese 2019, Newtel 2018, Bradesco 2019 v1), which is an unfiled
+  statement, not a defect — the CSV has no consolidated DMPL row for any
+  of them; and a fiscal year closing on 29 February (Camil DFP
+  2020-02-29) has its previous exercise closing on the 28th, as the CSV
+  writes it, instead of crashing the date arithmetic.
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
