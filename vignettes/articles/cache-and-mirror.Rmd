@@ -33,6 +33,36 @@ explicit `source = ...` argument to `cvm_fetch()` wins over the option
 `cvmdata.source` (set via `cvm_source_set()`), which in turn wins over
 the built-in default returned by `cvm_source_get()`.
 
+The mirror is maintained by the package author, not by the CVM. Its
+content is the CVM's, re-encoded to UTF-8, typed according to the CVM
+data dictionary and partitioned by year; no value is altered. Two
+consequences are worth knowing before you rely on the default. First,
+the mirror can lag the portal by up to the weekly refresh window.
+Second, the ETL skips a year whose CSV the CVM publishes with no data
+rows, so the mirror's inventory for a table may end earlier than the
+portal's list of years (the `cvm` backend returns such a year as zero
+rows instead).
+
+### Data licence and attribution
+
+The CVM publishes every dataset covered by the package under the
+[Open Data Commons Open Database License (ODbL)
+v1.0](https://opendatacommons.org/licenses/odbl/1-0/), declared on
+each dataset page of the portal. The mirror is a *derivative database*
+in the terms of that licence and is redistributed under the ODbL as
+well; the release notes of every `mirror-*-latest` release carry the
+notice. When you redistribute data obtained through `cvmdata`, or a
+database derived from it, keep the attribution:
+
+> Contains data from the Comissão de Valores Mobiliários (CVM) Open
+> Data Portal, <https://dados.cvm.gov.br/>, made available under the
+> Open Data Commons Open Database License (ODbL) v1.0.
+
+The full notice, with what the licence asks of you, is in the
+repository's
+[`DATA-LICENSE.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md).
+The package code is MIT licensed; the data is not.
+
 ### Cache layers
 
 | Layer | Location                                                         | Content                                          | Invalidation        |
