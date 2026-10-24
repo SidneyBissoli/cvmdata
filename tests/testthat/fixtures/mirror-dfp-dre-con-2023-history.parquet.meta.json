@@ -1,0 +1,18 @@
+{
+  "source_url": "https://github.com/SidneyBissoli/cvmdata/releases/download/mirror-companhias-dfp-latest/dre__report_type.con__year.2023__history.parquet",
+  "fetched_at": "2026-10-24",
+  "companies_included": [
+    {
+      "cd_cvm": "009512",
+      "cnpj_cia": "33.000.167/0001-01",
+      "denom_cia": "PETROLEO BRASILEIRO S.A. PETROBRAS"
+    },
+    {
+      "cd_cvm": "004820",
+      "cnpj_cia": "42.150.391/0001-70",
+      "denom_cia": "BRASKEM S.A."
+    }
+  ],
+  "accounts_included": ["3.01", "3.03", "3.05", "3.11"],
+  "notes": "Subset of the mirror asset filtered by cnpj_cia (PETROBRAS + BRASKEM) and cd_conta, columns as published. Built for the cvm_versions() tests: PETROBRAS DFP 2023 has versions 1 and 2 (same net income); BRASKEM has versions 1 (R$ units), 2 (R$ thousand, with motivo_reapresentacao) and 3. Every row is history_source = 'rad' (recovered from the RAD)."
+}

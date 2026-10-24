@@ -15,6 +15,15 @@
 # Both encodings need to round-trip through the parser below. The
 # parser is pure (no I/O); the inventory helper hits the GitHub REST
 # API and caches the result for the duration of the R session.
+#
+# Since the filing history shipped (Parte 3 of the versions work,
+# 2026-10), a partition of a table that keeps the current filing may
+# carry a second asset next to its `part-N`:
+#   dre__report_type.con__year.2023__history.parquet
+# with the rows of the superseded filings. The parser tags every asset
+# with a `kind` ("current" or "history"); `filter_mirror_assets()`
+# keeps only the current ones unless asked otherwise, so the readers
+# of the current table never see the history.
 
 # Repo coordinates. Single source of truth on the consumer side; the
 # producer side (inst/etl/00-config.R) carries the same constant.
@@ -210,10 +219,12 @@ mirror_extract_source_hash <- function(assets) {
 }
 
 # Pure parser: decode an asset filename into a (table, report_type,
-# year) tuple. Handles both raw (`=`) and GitHub-sanitised (`.`)
-# separators in the key/value segments. Returns `NULL` when the asset
-# is the `__source_hash.json` sidecar (not a data asset). Aborts with
-# `cvmdata_error_parse` for malformed names.
+# year, kind) tuple. Handles both raw (`=`) and GitHub-sanitised (`.`)
+# separators in the key/value segments. `kind` is "current" for a
+# `part-N.parquet` asset and "history" for a `history.parquet` one.
+# Returns `NULL` when the asset is the `__source_hash.json` sidecar
+# (not a data asset). Aborts with `cvmdata_error_parse` for malformed
+# names.
 parse_mirror_asset_name <- function(name) {
   if (identical(name, "__source_hash.json")) {
     return(NULL)
@@ -244,12 +255,16 @@ parse_mirror_asset_name <- function(name) {
   }
   table <- parts[[1L]]
   last <- parts[[length(parts)]]
-  if (!grepl("^part-[0-9]+\\.parquet$", last)) {
+  kind <- if (grepl("^part-[0-9]+\\.parquet$", last)) {
+    "current"
+  } else if (identical(last, "history.parquet")) {
+    "history"
+  } else {
     cvmdata_abort(
       c(
         paste(
           "Asset name {.val {name}} does not end in",
-          "{.code part-N.parquet}."
+          "{.code part-N.parquet} or {.code history.parquet}."
         )
       ),
       class = "cvmdata_error_parse"
@@ -294,7 +309,7 @@ parse_mirror_asset_name <- function(name) {
       )
     }
   }
-  list(table = table, report_type = report_type, year = year)
+  list(table = table, report_type = report_type, year = year, kind = kind)
 }
 
 # Split a single `<key>(=|.)<value>` segment. Both separators are
@@ -322,19 +337,23 @@ parse_mirror_partition_segment <- function(seg, asset_name) {
   list(key = m[[2L]], value = m[[3L]])
 }
 
-# Filter an asset inventory by (table, year, report_type). Returns a
-# tibble subset of the input with the parsed `table`, `year`, and
-# `report_type` columns attached, ready for the DuckDB reader.
+# Filter an asset inventory by (table, year, report_type, kind).
+# Returns a tibble subset of the input with the parsed `table`, `year`,
+# `report_type` and `kind` columns attached, ready for the DuckDB
+# reader.
 #
 # - `year = NULL` keeps every year present in the inventory.
 # - `report_type = NULL` keeps every variant (no filter); for tables
 #   that publish variants the caller is expected to pass either `"ind"`
 #   or `"con"`, otherwise the result mixes both.
+# - `kind` defaults to the current assets only; `cvm_versions()` asks
+#   for `c("current", "history")`.
 filter_mirror_assets <- function(
   assets,
   table,
   year = NULL,
-  report_type = NULL
+  report_type = NULL,
+  kind = "current"
 ) {
   if (!nrow(assets)) {
     return(annotate_mirror_assets(assets))
@@ -348,11 +367,13 @@ filter_mirror_assets <- function(
   tbl <- vapply(parsed, `[[`, character(1L), "table")
   rt <- vapply(parsed, `[[`, character(1L), "report_type")
   yr <- vapply(parsed, `[[`, integer(1L), "year")
+  kd <- vapply(parsed, `[[`, character(1L), "kind")
   assets$table <- tbl
   assets$report_type <- rt
   assets$year <- yr
+  assets$kind <- kd
 
-  mask <- assets$table == table
+  mask <- assets$table == table & assets$kind %in% kind
   if (!is.null(year)) {
     mask <- mask & assets$year %in% as.integer(year)
   }
@@ -368,5 +389,6 @@ annotate_mirror_assets <- function(assets) {
   assets$table <- character(0L)
   assets$report_type <- character(0L)
   assets$year <- integer(0L)
+  assets$kind <- character(0L)
   assets
 }

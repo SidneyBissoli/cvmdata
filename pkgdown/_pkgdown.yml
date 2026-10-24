@@ -24,10 +24,12 @@ reference:
   - title: Fetcher
     desc: >
       One function retrieves any CVM open-data table covered by the
-      package. `issuer_fetch()` is its deprecated predecessor and
-      will be removed in a later release.
+      package; `cvm_versions()` returns every known version of a
+      filing. `issuer_fetch()` is the deprecated predecessor of
+      `cvm_fetch()` and will be removed in a later release.
     contents:
       - cvm_fetch
+      - cvm_versions
       - issuer_fetch
   - title: Cache
     desc: >
