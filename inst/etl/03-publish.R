@@ -364,12 +364,26 @@ if (dry_run) {
 # Publish ---------------------------------------------------------------
 
 title <- sprintf("Mirror: %s/%s (latest)", group, dataset)
+# The notes carry the data licence: the CVM publishes these datasets
+# under the ODbL v1.0 and the mirror is a derivative database, so the
+# notice must travel with it (ODbL 4.2). It goes in the notes, not in
+# an asset: parse_mirror_asset_name() aborts on any asset other than
+# parquets and `__source_hash.json`, so a new asset would break every
+# installed client. Keep this text in step with DATA-LICENSE.md.
 notes <- sprintf(
   paste0(
     "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
     "Updated: %s\n\n",
     "See https://sidneybissoli.github.io/cvmdata/articles/",
-    "cache-and-mirror.html for client usage."
+    "cache-and-mirror.html for client usage.\n\n",
+    "**Data licence.** Contains data from the Comissao de Valores ",
+    "Mobiliarios (CVM) Open Data Portal, https://dados.cvm.gov.br/, ",
+    "made available under the Open Data Commons Open Database License ",
+    "(ODbL) v1.0, https://opendatacommons.org/licenses/odbl/1-0/. ",
+    "The parquet files in this release are a derivative database of ",
+    "that portal, converted by the cvmdata ETL, and are redistributed ",
+    "under the same licence. Attribution and terms: ",
+    "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md"
   ),
   group,
   dataset,

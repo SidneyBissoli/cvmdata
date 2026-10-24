@@ -19,9 +19,11 @@ Description: Provides a tidy API to the open data published by the
     tables). Column names, table names, categorical values and free
     text are preserved in Portuguese as published by 'CVM'; function
     names, arguments and metadata attributes are in English following
-    the rOpenSci and tidyverse conventions. Future releases will
-    expand coverage to investment funds and other regulated entity
-    classes.
+    the rOpenSci and tidyverse conventions. By default data is read
+    from a weekly refreshed 'Parquet' mirror of the portal maintained
+    by the package author in 'GitHub' Releases; the official portal
+    can be read directly instead. Future releases will expand coverage
+    to investment funds and other regulated entity classes.
 License: MIT + file LICENSE
 URL: https://github.com/SidneyBissoli/cvmdata,
     https://sidneybissoli.github.io/cvmdata/

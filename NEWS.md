@@ -297,6 +297,25 @@
   failure. A parquet that is missing without a recorded reason still
   hard-fails. Fixes the red `dfp`/`itr`/`fre` mirror jobs.
 
+## Documentation
+
+* The data licence is now stated. The CVM publishes every dataset the
+  package covers under the Open Data Commons Open Database License
+  (ODbL) v1.0; the parquet mirror is a derivative database and is
+  redistributed under the same licence. The new `DATA-LICENSE.md`
+  carries the notice and the attribution, the README (both languages)
+  and the *Cache and mirror backend* article summarise it, and the
+  notes of every `mirror-*-latest` release carry the notice from the
+  next publish on. The package code remains MIT.
+
+* The README (both languages), the DESCRIPTION and the introduction
+  vignette now say up front that the default backend is a parquet
+  mirror of the CVM portal maintained by the package author in GitHub
+  Releases, refreshed weekly, and that `source = "cvm"` reads the
+  official portal directly. The vignette no longer claims that the
+  package "hits the CVM portal on every invocation", which has been
+  false since v0.1.0 made the mirror the default.
+
 ## Internal
 
 * The two ETL workflows that append to the history assets
