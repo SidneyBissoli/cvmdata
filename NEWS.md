@@ -46,6 +46,30 @@
 
 ## New features
 
+* `cvm_versions()` returns every known version of a filing, the current
+  one included: `cvm_versions(dataset, table, cnpj, ticker, year,
+  basis, ...)`, the identifying part of `cvm_fetch()`'s signature,
+  without its row filters (`reading`, `from`/`to` and `as_of` are
+  refused by name). The result has the columns of the table plus
+  `superseded_at`, `superseded_by_versao`, `history_source`, `id_doc`
+  and `motivo_reapresentacao`; the rows of the current version carry
+  `history_source = "current"` and no supersession. Only the tables
+  that keep a single filing per document (`keep_latest_version` in
+  their schema) have a history; asking for another aborts. On the
+  mirror (the default) the call reads the `history` asset the ETL
+  keeps next to each partition: the filings replaced since 2026-10 and,
+  for the DFP and ITR statements, the ones recovered from the CVM's
+  filing system back to 2010 (`history_source = "rad"`). With
+  `source = "cvm"` it reads the yearly CSV without collapsing it, which
+  keeps only the versions the CVM still publishes, usually just the
+  current one, with no dates; the call says so. Measured on the
+  consolidated DFP income statements of 2023: Petrobras filed twice
+  with the same net income; Braskem three times, version 1 in R$ units
+  (a loss of R$ 4.5 million) and version 2 "to reflect the R$ thousand
+  scale" (R$ 4.89 billion); 108 issuers of the 2024 statement had a
+  version superseded, 14 of them with a different net income.
+  `cvm_fetch()` is unchanged and keeps ignoring the history assets.
+
 * `cvm_fetch()` is the single public fetcher, built on the same pipeline
   as `issuer_fetch()`:
   `cvm_fetch(dataset, table, cnpj, ticker, year, from, to, basis, ...)`.

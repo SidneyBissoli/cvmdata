@@ -192,6 +192,22 @@ bpa_2022 <- cvm_fetch(
 )
 ```
 
+Um documento pode ser reapresentado, e `cvm_fetch()` devolve a versão
+vigente. `cvm_versions()` devolve todas as versões conhecidas, a
+vigente incluída, cada versão substituída datada e apontando para a
+que a substituiu (a Braskem entregou a DRE de 2023 três vezes; a
+versão 1 estava em R$ unidades por engano):
+
+``` r
+brkm <- cvm_versions(
+  dataset = "dfp",
+  table   = "dre",
+  cnpj    = "42.150.391/0001-70",
+  year    = 2023,
+  basis   = "con"
+)
+```
+
 Limpe e formate CNPJs:
 
 
@@ -210,7 +226,8 @@ agrupada em cinco famílias:
 
 - **Fetcher** — `cvm_fetch()` é a função única para qualquer dataset
   e tabela; os grupos ainda no roadmap (fundos, agentes, ofertas,
-  eventos) vão estendê-la pelos seus schemas. `issuer_fetch()`, o
+  eventos) vão estendê-la pelos seus schemas. `cvm_versions()` devolve
+  todas as versões conhecidas de um documento. `issuer_fetch()`, o
   entry point das versões anteriores, está depreciada e será removida
   em uma release futura.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,

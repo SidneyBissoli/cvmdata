@@ -169,7 +169,7 @@ test_that("the schema says which tables are versioned", {
   expect_false(mirror_table_versioning("dfp", "no_such_table")$versioned)
 })
 
-test_that("history assets are named so that clients ignore them", {
+test_that("history assets are named so that the current readers skip them", {
   load_etl_history()
   rel <- "bpa/report_type=ind/year=2024/part-0.parquet"
   hist <- mirror_history_rel(rel)
@@ -178,10 +178,16 @@ test_that("history assets are named so that clients ignore them", {
   expect_true(mirror_is_history_asset(name))
   expect_false(mirror_is_history_asset(gsub("/", "__", rel, fixed = TRUE)))
   expect_identical(mirror_partition_table(rel), "bpa")
-  # The client parser rejects the name, so filter_mirror_assets() drops
-  # it silently and cvm_fetch() never reads history rows as current.
-  expect_error(
-    cvmdata:::parse_mirror_asset_name(gsub("=", ".", name, fixed = TRUE)),
-    class = "cvmdata_error_parse"
+  # The client parser tags the name as history, and
+  # filter_mirror_assets() keeps only the current assets unless asked,
+  # so cvm_fetch() never reads history rows as current.
+  public <- gsub("=", ".", name, fixed = TRUE)
+  expect_identical(cvmdata:::parse_mirror_asset_name(public)$kind, "history")
+  assets <- tibble::tibble(
+    name = c(gsub("=", ".", gsub("/", "__", rel, fixed = TRUE)), public),
+    url = paste0("https://example.test/", name),
+    size_bytes = c(1L, 2L)
   )
+  kept <- cvmdata:::filter_mirror_assets(assets, "bpa", 2024L, "ind")
+  expect_identical(kept$kind, "current")
 })

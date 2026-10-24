@@ -62,6 +62,24 @@ test_that("parse_mirror_asset_name aborts on missing part-N suffix", {
   )
 })
 
+test_that("parse_mirror_asset_name tags current and history assets", {
+  current <- cvmdata:::parse_mirror_asset_name(
+    "dre__report_type.con__year.2023__part-0.parquet"
+  )
+  expect_identical(current$kind, "current")
+  history <- cvmdata:::parse_mirror_asset_name(
+    "dre__report_type.con__year.2023__history.parquet"
+  )
+  expect_identical(
+    history,
+    list(table = "dre", report_type = "con", year = 2023L, kind = "history")
+  )
+  raw <- cvmdata:::parse_mirror_asset_name(
+    "dre__report_type=con__year=2023__history.parquet"
+  )
+  expect_identical(raw$kind, "history")
+})
+
 test_that("parse_mirror_asset_name aborts on unknown partition key", {
   expect_error(
     cvmdata:::parse_mirror_asset_name(
@@ -187,6 +205,43 @@ test_that("filter_mirror_assets returns 0 rows when no match", {
     report_type = "ind"
   )
   expect_equal(nrow(out), 0L)
+})
+
+test_that("filter_mirror_assets keeps the history assets only on request", {
+  assets <- tibble::tibble(
+    name = c(
+      "dre__report_type.con__year.2023__part-0.parquet",
+      "dre__report_type.con__year.2023__history.parquet",
+      "dre__report_type.ind__year.2023__part-0.parquet"
+    ),
+    url = paste0("https://example.test/", name),
+    size_bytes = c(10L, 20L, 30L)
+  )
+  current <- cvmdata:::filter_mirror_assets(
+    assets,
+    table = "dre",
+    year = 2023L,
+    report_type = "con"
+  )
+  expect_identical(current$kind, "current")
+  both <- cvmdata:::filter_mirror_assets(
+    assets,
+    table = "dre",
+    year = 2023L,
+    report_type = "con",
+    kind = c("current", "history")
+  )
+  expect_identical(both$kind, c("current", "history"))
+  expect_identical(both$year, c(2023L, 2023L))
+})
+
+test_that("mirror_l3_path places the history asset next to the current one", {
+  withr::local_options(cvmdata.cache_dir = withr::local_tempdir())
+  current <- cvmdata:::mirror_l3_path("dfp", "dre", 2023L, "con")
+  history <- cvmdata:::mirror_l3_path("dfp", "dre", 2023L, "con", "history")
+  expect_identical(dirname(current), dirname(history))
+  expect_identical(basename(current), "part-0.parquet")
+  expect_identical(basename(history), "history.parquet")
 })
 
 test_that("filter_mirror_assets handles empty inventory", {

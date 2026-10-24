@@ -18,14 +18,19 @@
 #
 # Unknown actions abort with cvmdata_error_internal.
 
-# Apply every transformation declared in a schema to a tibble.
-# Returns the transformed tibble.
-apply_schema_transformations <- function(df, schema) {
+# Apply every transformation declared in a schema to a tibble, except
+# the actions named in `skip` (`cvm_versions()` skips
+# `keep_latest_version` to see every filing the CSV carries). Returns
+# the transformed tibble.
+apply_schema_transformations <- function(df, schema, skip = NULL) {
   transforms <- schema$transformations
   if (is.null(transforms) || !length(transforms)) {
     return(df)
   }
   for (tx in transforms) {
+    if (!is.null(skip) && isTRUE(tx$action %in% skip)) {
+      next
+    }
     df <- apply_one_transformation(df, tx, schema)
   }
   df

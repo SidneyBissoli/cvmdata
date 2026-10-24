@@ -27,10 +27,18 @@
 # - `report_type` is required for tables with `cvm_file_pattern_variants`
 #   and forbidden for the rest, with the same validation rules as the
 #   CVM-HTTP path (enforced one level up by `issuer_fetch_internal()`).
+# - `history = TRUE` (only `cvm_versions()` asks for it) also reads the
+#   `history` asset of every matched partition, when one exists: the
+#   rows of the superseded filings, with the five columns the current
+#   asset lacks (`superseded_at`, `superseded_by_versao`,
+#   `history_source`, `id_doc`, `motivo_reapresentacao`). The two are
+#   read in one query, by column name, so the current rows carry those
+#   columns as NA.
 source_mirror_duckdb_get <- function(
   schema,
   year = NULL,
   report_type = NULL,
+  history = FALSE,
   ...
 ) {
   cache_migrate_v0_1_to_v0_2()
@@ -55,7 +63,8 @@ source_mirror_duckdb_get <- function(
     inventory,
     table = table,
     year = resolved_years,
-    report_type = report_type
+    report_type = report_type,
+    kind = if (isTRUE(history)) c("current", "history") else "current"
   )
   if (!nrow(matches)) {
     cvmdata_abort(
@@ -171,24 +180,43 @@ resolve_mirror_years <- function(
 }
 
 # Materialise every matched asset under the L3 parquet cache and read
-# them via DuckDB, stitching the per-asset results into a single
-# tibble. The partition columns (year, report_type) are reattached from
-# the parsed asset name (Decision 2 = Alt 1).
+# them via DuckDB, stitching the per-partition results into a single
+# tibble. The assets of one partition (its `part-N`, plus its `history`
+# when the caller asked for it) are read in one query, by column name
+# (`union_by_name`), the current asset first so its columns lead. The
+# partition columns (year, report_type) are reattached from the parsed
+# asset name (Decision 2 = Alt 1). Partitions are bound by name as
+# well: one may have a history asset while another has none.
 read_mirror_assets <- function(matches, dataset, table) {
   con <- mirror_duckdb_connect()
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
-  parts <- vector("list", nrow(matches))
-  for (i in seq_len(nrow(matches))) {
-    local_path <- mirror_fetch_to_l3(
-      url = matches$url[[i]],
-      dataset = dataset,
-      table = table,
-      year = matches$year[[i]],
-      report_type = matches$report_type[[i]]
+  if (is.null(matches$kind)) {
+    matches$kind <- rep("current", nrow(matches))
+  }
+  matches <- matches[order(matches$kind != "current"), , drop = FALSE]
+  partition <- paste(matches$year, matches$report_type, sep = "|")
+  groups <- split(seq_len(nrow(matches)), factor(partition, unique(partition)))
+  parts <- lapply(groups, function(rows) {
+    local_paths <- vapply(
+      rows,
+      function(i) {
+        mirror_fetch_to_l3(
+          url = matches$url[[i]],
+          dataset = dataset,
+          table = table,
+          year = matches$year[[i]],
+          report_type = matches$report_type[[i]],
+          kind = matches$kind[[i]]
+        )
+      },
+      character(1L)
     )
     sql <- sprintf(
-      "SELECT * FROM read_parquet(%s)",
-      mirror_quote_sql(local_path)
+      "SELECT * FROM read_parquet([%s], union_by_name = true)",
+      paste(
+        vapply(local_paths, mirror_quote_sql, character(1L)),
+        collapse = ", "
+      )
     )
     df <- tryCatch(
       tibble::as_tibble(DBI::dbGetQuery(con, sql)),
@@ -196,8 +224,8 @@ read_mirror_assets <- function(matches, dataset, table) {
         cvmdata_abort(
           c(
             paste(
-              "Failed to read parquet asset",
-              "{.val {basename(local_path)}}."
+              "Failed to read parquet asset{?s}",
+              "{.val {basename(local_paths)}}."
             ),
             "x" = "{conditionMessage(e)}"
           ),
@@ -205,18 +233,19 @@ read_mirror_assets <- function(matches, dataset, table) {
         )
       }
     )
-    if (!is.na(matches$year[[i]])) {
-      df$year <- matches$year[[i]]
+    first <- rows[[1L]]
+    if (!is.na(matches$year[[first]])) {
+      df$year <- matches$year[[first]]
     }
-    if (!is.na(matches$report_type[[i]])) {
-      df$report_type <- matches$report_type[[i]]
+    if (!is.na(matches$report_type[[first]])) {
+      df$report_type <- matches$report_type[[first]]
     }
-    parts[[i]] <- df
-  }
+    df
+  })
   if (length(parts) == 1L) {
     return(parts[[1L]])
   }
-  do.call(rbind, parts)
+  vctrs::vec_rbind(!!!unname(parts))
 }
 
 # Open a single in-memory DuckDB connection per call. Each
@@ -243,13 +272,22 @@ mirror_duckdb_connect <- function() {
 # partition tree (CLAUDE.md §10):
 #   <cache>/parquet/<dataset>/<table>/[report_type=<X>/][year=<YYYY>/]
 #                     part-0.parquet
+# with the history asset of the partition, when read, as
+# `history.parquet` next to it.
 #
 # Commit 4 of Sessao 3.13 layers hash-based invalidation on top; for
 # now an existing file is reused as-is. A future iteration may add
 # TTL / etag handling analogous to `download_with_etag()` in
 # R/source-cvm-http.R.
-mirror_fetch_to_l3 <- function(url, dataset, table, year, report_type) {
-  dest <- mirror_l3_path(dataset, table, year, report_type)
+mirror_fetch_to_l3 <- function(
+  url,
+  dataset,
+  table,
+  year,
+  report_type,
+  kind = "current"
+) {
+  dest <- mirror_l3_path(dataset, table, year, report_type, kind)
   ensure_dir(dirname(dest))
   if (file.exists(dest)) {
     return(dest)
@@ -288,7 +326,13 @@ mirror_fetch_to_l3 <- function(url, dataset, table, year, report_type) {
 # "report_type=R") so a future migration to `arrow::open_dataset()`
 # can pick the tree up natively. The `<group>` segment was introduced
 # in v0.1.0.9000; see `R/util-group-lookup.R`.
-mirror_l3_path <- function(dataset, table, year, report_type) {
+mirror_l3_path <- function(
+  dataset,
+  table,
+  year,
+  report_type,
+  kind = "current"
+) {
   parts <- c(
     cvm_cache_path(),
     "parquet",
@@ -302,8 +346,13 @@ mirror_l3_path <- function(dataset, table, year, report_type) {
   if (!is.na(year)) {
     parts <- c(parts, sprintf("year=%d", as.integer(year)))
   }
+  file_name <- if (identical(kind, "history")) {
+    "history.parquet"
+  } else {
+    "part-0.parquet"
+  }
   do.call(file.path, as.list(parts)) |>
-    file.path("part-0.parquet")
+    file.path(file_name)
 }
 
 # Escape a path for inclusion as a SQL string literal. DuckDB uses
