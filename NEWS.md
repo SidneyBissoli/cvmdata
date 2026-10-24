@@ -348,8 +348,10 @@
   abroad) is checked by the CVM code of the index instead of being
   refused as a different CNPJ (the rows carry the index's identity
   either way); and the download gives up only when the connection
-  stalls (below 1 KB/s for 60 s) or past 15 min, instead of 180 s of
-  total time, which no document with a huge embedded PDF ever fitted
+  stalls (below 1 KB/s for 180 s; 60 s on the first round, which cut 29
+  downloads in a day that the next attempt completed) or past 15 min,
+  instead of 180 s of total time, which no document with a huge
+  embedded PDF ever fitted
   (NEXPE DFP 2021, 59 MB in 180 s; Orizon DFP 2020, 126 MB). Two
   classes the first full round under that policy (2026-10-24) left
   aside, both of the old layout: a company that does not consolidate

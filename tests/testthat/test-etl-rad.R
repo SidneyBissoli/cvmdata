@@ -1119,6 +1119,9 @@ test_that("the download gives up on a stalled connection, not on size", {
   expect_match(req$url, "NumeroSequencialDocumento=113859")
   expect_identical(req$options$low_speed_limit, rad_download_stall_bps)
   expect_identical(req$options$low_speed_time, rad_download_stall_secs)
+  # 60 s on the first full round (2026-10-24) cut 29 downloads in a day
+  # that the next attempt completed whole; decision of the owner: 180 s
+  expect_identical(rad_download_stall_secs, 180)
   expect_identical(req$options$timeout_ms, rad_download_timeout * 1000)
   expect_identical(rad_download_timeout, 900)
 })
