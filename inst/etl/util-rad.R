@@ -546,14 +546,19 @@ rad_date_iso <- function(x) {
 }
 
 # `d` one year earlier. Statement dates are month starts and month
-# ends, so no Feb 29 cases arise.
+# ends; the one date without a counterpart is 29 February, the close of
+# a fiscal year in a leap year (Camil DFP 2020-02-29, set aside on
+# 2026-10-24: `as.Date("2019-02-29")` without a format ERRORS instead of
+# returning NA). Its previous exercise closes on the 28th, as the CSV
+# writes it (ordem_exerc PENÚLTIMO on 2019-02-28).
 rad_year_before <- function(d) {
-  as.Date(sprintf(
-    "%04d-%02d-%02d",
-    as.integer(format(d, "%Y")) - 1L,
-    as.integer(format(d, "%m")),
-    as.integer(format(d, "%d"))
-  ))
+  y <- as.integer(format(d, "%Y")) - 1L
+  m <- as.integer(format(d, "%m"))
+  dd <- as.integer(format(d, "%d"))
+  out <- as.Date(sprintf("%04d-%02d-%02d", y, m, dd), format = "%Y-%m-%d")
+  feb29 <- !is.na(d) & is.na(out) & m == 2L & dd == 29L
+  out[feb29] <- as.Date(sprintf("%04d-02-28", y[feb29]), format = "%Y-%m-%d")
+  out
 }
 
 # ordem_exerc from the end date of a period: the reference date is
@@ -1162,6 +1167,19 @@ rad_old_statement <- function(parts, sub, colset, periods, dt_refer) {
     )))
   }
   if (is.null(colset) || nrow(colset) == 0L) {
+    # A statement with no column list whose records are ALL template
+    # rows (period 0) was not filed: the old layout keeps the template
+    # of the consolidated DMPL in a company that does not consolidate
+    # (Ferrovia Centro-Atlântica DFP 2018 and 2020, Sabesp 2019, Banese
+    # 2019, Newtel 2018, Bradesco 2019 v1 — set aside on 2026-10-24 as
+    # "no column list for dmpl/con"; measured against the DFP CSVs: no
+    # consolidated DMPL row for any of them, 28-33 template records in
+    # every document). Nothing to read, nothing wrong. A record with a
+    # real period and no column list is still a problem: the reader
+    # would not know which column is which.
+    if (all(sub$period == "0")) {
+      return(list(rows = list(), problems = character()))
+    }
     return(none(paste0("no column list for ", table, "/", basis)))
   }
   if (table == "dmpl") {
