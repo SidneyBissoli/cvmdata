@@ -190,6 +190,12 @@ test_that("migrate is idempotent across repeated calls", {
 
 test_that("migrate aborts with cvmdata_error_internal on read-only root", {
   skip_on_os("windows") # POSIX chmod semantics are not portable
+  # root ignores file permissions: in the CI container (r-ci) the job runs
+  # as root and the read-only root is writable, so nothing can abort
+  skip_if(
+    identical(Sys.info()[["effective_user"]], "root"),
+    "running as root: a read-only directory is writable"
+  )
   cache_root <- local_migrate_env()
   plant_v0_1_raw_artifact(cache_root, "cad")
   Sys.chmod(cache_root, "0555")
