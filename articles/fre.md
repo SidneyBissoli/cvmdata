@@ -19,10 +19,8 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
   `meta_status: missing` and requires `validate = "warn"` or `"skip"` to
   read them.
 
-``` r
-
-library(cvmdata)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
 
 ## Reference: 36 tables, by theme
 
@@ -55,44 +53,42 @@ reference year 2024.
 
 ### The audit firm
 
-``` r
-
-auditor <- cvm_fetch(
-  "fre", "auditor",
-  cnpj = "00.000.000/0001-91",
-  year = 2024
-)
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-auditor
-#> ℹ source: "mirror" | fetched_at: 2026-10-24 00:21:00.678978
-#> ℹ group: "companhias" | dataset: "fre" | table: "auditor"
-#> # A tibble: 2 × 19
-#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor
-#>   <chr>            <date>          <chr>  <chr>        <chr>          <chr>     
-#> 1 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131376    
-#> 2 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131377    
-#> # ℹ 13 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,
-#> #   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,
-#> #   data_inicio_contratacao <date>, data_fim_contratacao <date>,
-#> #   data_inicio_prestacao_servico <date>, servico_contratado <chr>,
-#> #   remuneracao_auditor <chr>, justificativa_substituicao <chr>,
-#> #   razao_apresentada <chr>, year <int>
-```
+\
+`auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"auditor"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`auditor`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-24 10:16:29.663275`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
+`#> ``# A tibble: 2 × 19`\
+`#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
+`#>   ``<chr>``            ``<date>``          ``<chr>``  ``<chr>``        ``<chr>``          ``<chr>``     `\
+`#> ``1`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131376    `\
+`#> ``2`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131377    `\
+`#> ``# ℹ 13 more variables: auditor <chr>, cpf_auditor <chr>, cnpj_auditor <chr>,`\
+`#> ``#   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,`\
+`#> ``#   data_inicio_contratacao <date>, data_fim_contratacao <date>,`\
+`#> ``#   data_inicio_prestacao_servico <date>, servico_contratado <chr>,`\
+`#> ``#   remuneracao_auditor <chr>, justificativa_substituicao <chr>,`\
+`#> ``#   razao_apresentada <chr>, year <int>`
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
 `nome_companhia` (no `cd_cvm`). The `cnpj` filter matched
@@ -105,56 +101,52 @@ de-duplicated re-filings.
 dictionary for. With the default `validate = "strict"` the package
 refuses to read it:
 
-``` r
-
-cvm_fetch("fre", "empregado_PCD",
-          cnpj = "00.000.000/0001-91", year = 2024)
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-#> ℹ source: "mirror" | fetched_at: 2026-10-24 00:21:00.880244
-#> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 11
-#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
-#> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,
-#> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>, year <int>
-```
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"empregado_PCD"``,`\
+`          cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-24 10:16:29.87946`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
+`#> ``# A tibble: 0 × 11`\
+`#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
+`#> ``#   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,`\
+`#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
+`#> ``#   quantidade_sem_resposta <dbl>, year <int>`
 
 The reader expects the user to opt in by relaxing validation. With
 `validate = "warn"` the package emits `cvmdata_warn_meta_unavailable`
 and returns the tibble; with `validate = "skip"` it runs silently:
 
-``` r
-
-pcd <- cvm_fetch(
-  "fre", "empregado_PCD",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  validate  = "warn"
-)
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-pcd
-#> ℹ source: "mirror" | fetched_at: 2026-10-24 00:21:01.039178
-#> ℹ group: "companhias" | dataset: "fre" | table: "empregado_PCD"
-#> # A tibble: 0 × 11
-#> # ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,
-#> #   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,
-#> #   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,
-#> #   quantidade_sem_resposta <dbl>, year <int>
-```
+\
+`pcd`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"empregado_PCD"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  validate  ``=`` ``"warn"`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`pcd`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-24 10:16:30.085714`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
+`#> ``# A tibble: 0 × 11`\
+`#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
+`#> ``#   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,`\
+`#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
+`#> ``#   quantidade_sem_resposta <dbl>, year <int>`
 
 `cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
 the YAML’s `expected_field_names`) with `NA` in every metadata column —
@@ -166,51 +158,49 @@ publish.
 Goal: extract the top shareholders of BCO BRASIL recorded in the 2024
 FRE filing.
 
-``` r
-
-posicao <- cvm_fetch(
-  "fre", "posicao_acionaria",
-  cnpj = "00.000.000/0001-91",
-  year = 2024
-)
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpiJ0JHI/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
-
-# Columns covering shareholder identity and stake:
-cols <- intersect(
-  c("acionista", "cpf_cnpj_acionista",
-    "percentual_total_acoes_circulacao",
-    "percentual_acao_ordinaria_circulacao"),
-  names(posicao)
-)
-posicao[, c("nome_companhia", "data_referencia", cols)]
-#> ℹ source: "mirror" | fetched_at: 2026-10-24 00:21:01.619202
-#> ℹ group: "companhias" | dataset: "fre" | table: "posicao_acionaria"
-#> # A tibble: 5 × 6
-#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista
-#>   <chr>           <date>          <chr>                       <chr>             
-#> 1 BCO BRASIL S.A. 2024-12-31      Ministério da Economia / S… 00.394.460/0001-41
-#> 2 BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            NA                
-#> 3 BCO BRASIL S.A. 2024-12-31      Outros                      NA                
-#> 4 BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            NA                
-#> 5 BCO BRASIL S.A. 2024-12-31      Outros                      NA                
-#> # ℹ 2 more variables: percentual_total_acoes_circulacao <dbl>,
-#> #   percentual_acao_ordinaria_circulacao <dbl>
-```
+\
+`posicao`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"posicao_acionaria"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp65dROr/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+\
+`# Columns covering shareholder identity and stake:`\
+`cols`` ``<-`` `[`intersect`](https://rdrr.io/r/base/sets.html)`(`\
+`  `[`c`](https://rdrr.io/r/base/c.html)`(``"acionista"``, ``"cpf_cnpj_acionista"``,`\
+`    ``"percentual_total_acoes_circulacao"``,`\
+`    ``"percentual_acao_ordinaria_circulacao"``)``,`\
+`  `[`names`](https://rdrr.io/r/base/names.html)`(``posicao``)`\
+`)`\
+`posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-24 10:16:30.669278`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
+`#> ``# A tibble: 5 × 6`\
+`#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\
+`#>   ``<chr>``           ``<date>``          ``<chr>``                       ``<chr>``             `\
+`#> ``1`` BCO BRASIL S.A. 2024-12-31      Ministério da Economia / S… 00.394.460/0001-41`\
+`#> ``2`` BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            ``NA``                `\
+`#> ``3`` BCO BRASIL S.A. 2024-12-31      Outros                      ``NA``                `\
+`#> ``4`` BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            ``NA``                `\
+`#> ``5`` BCO BRASIL S.A. 2024-12-31      Outros                      ``NA``                `\
+`#> ``# ℹ 2 more variables: percentual_total_acoes_circulacao <dbl>,`\
+`#> ``#   percentual_acao_ordinaria_circulacao <dbl>`
 
 The same approach works for `posicao_acionaria_classe_acao` (one row per
 share class held), `capital_social` (issued and paid-in capital totals),

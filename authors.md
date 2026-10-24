@@ -13,10 +13,10 @@ Source:
 Bissoli S (2026). *cvmdata: Tidy Access to Brazilian CVM Open Data*. R
 package version 0.2.0.9000, <https://sidneybissoli.github.io/cvmdata/>.
 
-    @Manual{,
-      title = {{cvmdata}: Tidy Access to Brazilian CVM Open Data},
-      author = {Sidney da Silva Pereira Bissoli},
-      year = {2026},
-      note = {R package version 0.2.0.9000},
-      url = {https://sidneybissoli.github.io/cvmdata/},
-    }
+@Manual{,\
+  title = {{cvmdata}: Tidy Access to Brazilian CVM Open Data},\
+  author = {Sidney da Silva Pereira Bissoli},\
+  year = {2026},\
+  note = {R package version 0.2.0.9000},\
+  url = {https://sidneybissoli.github.io/cvmdata/},\
+}

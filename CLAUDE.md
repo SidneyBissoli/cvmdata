@@ -84,61 +84,59 @@ segue exportada como wrapper DEPRECADO
 com o comportamento antigo intacto (`issuer` aceita CNPJ / CD_CVM /
 texto / ticker; `report_type`), até ser removida.
 
-``` r
-
-# Função única — qualquer conjunto coberto (hoje: grupo "companhias").
-# Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.
-cvm_fetch(dataset, table,
-          cnpj     = NULL,      # SÓ CNPJ (com ou sem pontuação); código CVM
-                                # e nome são recusados (cvmdata_error_input)
-          ticker   = NULL,      # código B3; resolvido via fca/valor_mobiliario
-                                # no mesmo `source`, contra a UNIÃO dos anos
-                                # com ticker (2018→último; deslistadas
-                                # resolvem); soma-se a `cnpj`
-          year     = NULL,      # anos inteiros, NULL → último; OU
-          from     = NULL,      # janela de datas COMPLETAS ("YYYY-MM-DD"),
-          to       = NULL,      #   os dois juntos; filtra pela data de
-                                #   REFERÊNCIA (dt_refer/data_referencia);
-                                #   com `year` = erro; em cad = erro
-          as_of    = NULL,      # data COMPLETA; só em tabela-registro com
-                                #   `as_of:` no YAML (cad/companhias):
-                                #   registros vigentes na data, linhas de HOJE
-          basis    = NULL,      # "ind" / "con" / c("ind","con") — ver abaixo
-          reading  = NULL,      # "original" / "restated" / os dois — só nas
-                                #   16 tabelas com ordem_exerc; ver abaixo
-          source   = NULL,      # via cvm_source_get()
-          on_error = "abort",
-          validate = "strict",
-          ...)                  # reservado: qualquer extra aborta
-
-# Deprecada (wrapper com aviso; remoção em release futura)
-issuer_fetch(dataset, table, issuer = NULL, year = NULL, source = NULL,
-             report_type = NULL, on_error = "abort", validate = "strict", ...)
-
-# Descoberta
-cvm_groups()                                          # 18 grupos + contrato
-cvm_datasets(group = NULL)                            # datasets disponíveis
-cvm_tables(dataset, group = NULL)                     # tabelas de um dataset
-cvm_dictionary(dataset, table, group = NULL)          # dicionário do snapshot
-cvm_codelist(dataset, table, column, group = NULL)    # valores categóricos
-cvm_dataset_years(dataset, group = NULL)              # range de anos publicados
-
-# Cache
-cvm_cache_path()
-cvm_cache_set_path(path)
-cvm_cache_clear(what = c("all", "raw", "parquet"),
-                group = NULL, dataset = NULL, year = NULL,
-                confirm = interactive())
-cvm_cache_info()
-
-# Source
-cvm_source_get()
-cvm_source_set(source)
-
-# Utilidades
-cnpj_clean(x)
-cnpj_format(x)                # inverso de cnpj_clean
-```
+\
+`# Função única — qualquer conjunto coberto (hoje: grupo "companhias").`\
+`# Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``dataset``, ``table``,`\
+`          cnpj     ``=`` ``NULL``,      ``# SÓ CNPJ (com ou sem pontuação); código CVM`\
+`                                ``# e nome são recusados (cvmdata_error_input)`\
+`          ticker   ``=`` ``NULL``,      ``# código B3; resolvido via fca/valor_mobiliario`\
+`                                ``` # no mesmo `source`, contra a UNIÃO dos anos ``\
+`                                ``# com ticker (2018→último; deslistadas`\
+`                                ``` # resolvem); soma-se a `cnpj` ``\
+`          year     ``=`` ``NULL``,      ``# anos inteiros, NULL → último; OU`\
+`          from     ``=`` ``NULL``,      ``# janela de datas COMPLETAS ("YYYY-MM-DD"),`\
+`          to       ``=`` ``NULL``,      ``#   os dois juntos; filtra pela data de`\
+`                                ``#   REFERÊNCIA (dt_refer/data_referencia);`\
+`                                ``` #   com `year` = erro; em cad = erro ``\
+`          as_of    ``=`` ``NULL``,      ``# data COMPLETA; só em tabela-registro com`\
+`                                ``` #   `as_of:` no YAML (cad/companhias): ``\
+`                                ``#   registros vigentes na data, linhas de HOJE`\
+`          basis    ``=`` ``NULL``,      ``# "ind" / "con" / c("ind","con") — ver abaixo`\
+`          reading  ``=`` ``NULL``,      ``# "original" / "restated" / os dois — só nas`\
+`                                ``#   16 tabelas com ordem_exerc; ver abaixo`\
+`          source   ``=`` ``NULL``,      ``# via cvm_source_get()`\
+`          on_error ``=`` ``"abort"``,`\
+`          validate ``=`` ``"strict"``,`\
+`          ``...``)``                  ``# reservado: qualquer extra aborta`\
+\
+`# Deprecada (wrapper com aviso; remoção em release futura)`\
+[`issuer_fetch`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)`(``dataset``, ``table``, issuer ``=`` ``NULL``, year ``=`` ``NULL``, source ``=`` ``NULL``,`\
+`             report_type ``=`` ``NULL``, on_error ``=`` ``"abort"``, validate ``=`` ``"strict"``, ``...``)`\
+\
+`# Descoberta`\
+[`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)``                                          ``# 18 grupos + contrato`\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``group ``=`` ``NULL``)``                            ``# datasets disponíveis`\
+[`cvm_tables`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)`(``dataset``, group ``=`` ``NULL``)``                     ``# tabelas de um dataset`\
+[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``dataset``, ``table``, group ``=`` ``NULL``)``          ``# dicionário do snapshot`\
+[`cvm_codelist`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)`(``dataset``, ``table``, ``column``, group ``=`` ``NULL``)``    ``# valores categóricos`\
+[`cvm_dataset_years`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)`(``dataset``, group ``=`` ``NULL``)``              ``# range de anos publicados`\
+\
+`# Cache`\
+[`cvm_cache_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)`(``)`\
+[`cvm_cache_set_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)`(``path``)`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"all"``, ``"raw"``, ``"parquet"``)``,`\
+`                group ``=`` ``NULL``, dataset ``=`` ``NULL``, year ``=`` ``NULL``,`\
+`                confirm ``=`` `[`interactive`](https://rdrr.io/r/base/interactive.html)`(``)``)`\
+[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)`\
+\
+`# Source`\
+[`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
+[`cvm_source_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)`(``source``)`\
+\
+`# Utilidades`\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``x``)`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``x``)``                ``# inverso de cnpj_clean`
 
 Argumento `group` nas funções de descoberta resolve por unicidade quando
 omitido (`NULL`); a partir de v0.4, quando um slug de dataset puder
@@ -187,9 +185,9 @@ Domínio dos argumentos enumerados (validados via
   ao `first_year` da TABELA (medido no espelho em 2026-10-21; uma tabela
   pode começar depois do dataset: `composicao_capital` 2020, 14 do FRE
 
-  2023. = `cvmdata_error_input` antes de baixar
-        (`check_published_years()`); em janela `from`/`to`, os anos
-        inexistentes caem com `cli_inform`.
+  2023\) = `cvmdata_error_input` antes de baixar
+  (`check_published_years()`); em janela `from`/`to`, os anos
+  inexistentes caem com `cli_inform`.
 
 - `from`/`to` (só em
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):

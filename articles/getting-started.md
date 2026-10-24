@@ -9,10 +9,8 @@ Live chunks use the default mirror backend (GitHub Releases + DuckDB);
 the CVM Open Data Portal backend is documented alongside the mirror in
 its own article.
 
-``` r
-
-library(cvmdata)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
 
 ## The 30-second pitch
 
@@ -21,13 +19,11 @@ library(cvmdata)
 unified dictionary, `VL_CONTA × ESCALA_MOEDA` arithmetic, one issuer id
 per table convention) behind one function:
 
-``` r
-
-cvm_fetch(dataset, table,
-          cnpj = NULL, ticker = NULL,
-          year = NULL, from = NULL, to = NULL,
-          basis = NULL, ...)
-```
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``dataset``, ``table``,`\
+`          cnpj ``=`` ``NULL``, ticker ``=`` ``NULL``,`\
+`          year ``=`` ``NULL``, from ``=`` ``NULL``, to ``=`` ``NULL``,`\
+`          basis ``=`` ``NULL``, ``...``)`
 
 Column names, table names and categorical values arrive in Portuguese
 exactly as CVM publishes them. Function names, arguments and metadata
@@ -46,31 +42,29 @@ CVM publishes data in **18 thematic groups** on its CKAN portal.
 each dataset’s schema declares which columns identify the entity (issuer
 / fund / agent / offering / event):
 
-``` r
-
-cvm_groups()
-#> # A tibble: 18 × 3
-#>    group                               n_datasets contract
-#>    <chr>                                    <int> <chr>   
-#>  1 administradores                              2 agent   
-#>  2 agentes-autonomos                            1 agent   
-#>  3 agentes-fiduciarios                          1 agent   
-#>  4 atividade-sancionadora                       1 event   
-#>  5 atos-declaratorios                           1 event   
-#>  6 auditores                                    1 agent   
-#>  7 companhias                                  12 issuer  
-#>  8 consultores-de-valores-mobiliarios           1 agent   
-#>  9 coordenadores-de-ofertas                     1 agent   
-#> 10 emissores-de-cepac                           1 issuer  
-#> 11 fundos-de-investimento                      22 fund    
-#> 12 fundos-de-investimento-imobiliarios          4 fund    
-#> 13 fundos-estruturados                         10 fund    
-#> 14 investidores-nao-residentes                  1 agent   
-#> 15 ofertas-publicas                             2 offering
-#> 16 participantes-intermediarios                 1 agent   
-#> 17 plataformas-de-crowdfunding                  1 offering
-#> 18 securitizadoras                              4 issuer
-```
+\
+[`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)`\
+`#> ``# A tibble: 18 × 3`\
+`#>    group                               n_datasets contract`\
+`#>    ``<chr>``                                    ``<int>`` ``<chr>``   `\
+`#> `` 1`` administradores                              2 agent   `\
+`#> `` 2`` agentes-autonomos                            1 agent   `\
+`#> `` 3`` agentes-fiduciarios                          1 agent   `\
+`#> `` 4`` atividade-sancionadora                       1 event   `\
+`#> `` 5`` atos-declaratorios                           1 event   `\
+`#> `` 6`` auditores                                    1 agent   `\
+`#> `` 7`` companhias                                  12 issuer  `\
+`#> `` 8`` consultores-de-valores-mobiliarios           1 agent   `\
+`#> `` 9`` coordenadores-de-ofertas                     1 agent   `\
+`#> ``10`` emissores-de-cepac                           1 issuer  `\
+`#> ``11`` fundos-de-investimento                      22 fund    `\
+`#> ``12`` fundos-de-investimento-imobiliarios          4 fund    `\
+`#> ``13`` fundos-estruturados                         10 fund    `\
+`#> ``14`` investidores-nao-residentes                  1 agent   `\
+`#> ``15`` ofertas-publicas                             2 offering`\
+`#> ``16`` participantes-intermediarios                 1 agent   `\
+`#> ``17`` plataformas-de-crowdfunding                  1 offering`\
+`#> ``18`` securitizadoras                              4 issuer`
 
 The `contract` column is a planning map naming the kind of entity each
 group is keyed on; the `groups-overview` article expands on the
@@ -78,47 +72,41 @@ rationale and on which groups are implemented today.
 
 ### Datasets, tables, and years
 
-``` r
-
-cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
-cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
-cvm_tables("dfp")
-#>  [1] "bpa"                "bpp"                "composicao_capital"
-#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              
-#>  [7] "dra"                "dre"                "dva"               
-#> [10] "parecer"            "submissao"
-```
+\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
+`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``group ``=`` ``"companhias"``)`\
+`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`\
+[`cvm_tables`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)`(``"dfp"``)`\
+`#>  [1] "bpa"                "bpp"                "composicao_capital"`\
+`#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              `\
+`#>  [7] "dra"                "dre"                "dva"               `\
+`#> [10] "parecer"            "submissao"`
 
 For yearly-partitioned datasets,
 [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
 discovers the years currently published upstream (a tiny HTTP probe of
 the CVM directory listing, cached for the session):
 
-``` r
-
-cvm_dataset_years("dfp")
-#> [1] 2010 2011 2012 ... 2024 2025
-```
+\
+[`cvm_dataset_years`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)`(``"dfp"``)`\
+`#> [1] 2010 2011 2012 ... 2024 2025`
 
 ### Dictionary and codelists
 
 `cvm_dictionary(dataset, table)` returns the field descriptions, types
 and domains as published in the CVM META files:
 
-``` r
-
-head(cvm_dictionary("dfp", "bpa"), 5)
-#> # A tibble: 5 × 8
-#>   campo     campo_original descricao   dominio tipo_dados tamanho precisao scale
-#>   <chr>     <chr>          <chr>       <chr>   <chr>        <int>    <int> <int>
-#> 1 cd_conta  CD_CONTA       Código da … Numéri… varchar         18       NA    NA
-#> 2 cd_cvm    CD_CVM         Código CVM  Numéri… char             6       NA    NA
-#> 3 cnpj_cia  CNPJ_CIA       CNPJ da co… Alfanu… varchar         20       NA    NA
-#> 4 denom_cia DENOM_CIA      Nome empre… Alfanu… varchar        100       NA    NA
-#> 5 ds_conta  DS_CONTA       Descrição … Alfanu… varchar        100       NA    NA
-```
+\
+[`head`](https://rdrr.io/r/utils/head.html)`(`[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``"dfp"``, ``"bpa"``)``, ``5``)`\
+`#> ``# A tibble: 5 × 8`\
+`#>   campo     campo_original descricao   dominio tipo_dados tamanho precisao scale`\
+`#>   ``<chr>``     ``<chr>``          ``<chr>``       ``<chr>``   ``<chr>``        ``<int>``    ``<int>`` ``<int>`\
+`#> ``1`` cd_conta  CD_CONTA       Código da … Numéri… varchar         18       ``NA``    ``NA`\
+`#> ``2`` cd_cvm    CD_CVM         Código CVM  Numéri… char             6       ``NA``    ``NA`\
+`#> ``3`` cnpj_cia  CNPJ_CIA       CNPJ da co… Alfanu… varchar         20       ``NA``    ``NA`\
+`#> ``4`` denom_cia DENOM_CIA      Nome empre… Alfanu… varchar        100       ``NA``    ``NA`\
+`#> ``5`` ds_conta  DS_CONTA       Descrição … Alfanu… varchar        100       ``NA``    ``NA`
 
 `cvm_codelist(dataset, table, column)` returns the enumerated values for
 categorical columns. Inclusion is automatic: either the META declares an
@@ -126,17 +114,15 @@ enumerated domain (e.g. `S/N`), or the column is a `varchar` with
 `tamanho < 200` and at most 50 distinct values observed in the latest
 year.
 
-``` r
-
-cvm_codelist("cgvn", "praticas", "pratica_adotada")
-#> # A tibble: 4 × 1
-#>   value
-#>   <chr>
-#> 1 Não
-#> 2 Não se Aplica
-#> 3 Parcialmente
-#> 4 Sim
-```
+\
+[`cvm_codelist`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)`(``"cgvn"``, ``"praticas"``, ``"pratica_adotada"``)`\
+`#> # A tibble: 4 × 1`\
+`#>   value`\
+`#>   <chr>`\
+`#> 1 Não`\
+`#> 2 Não se Aplica`\
+`#> 3 Parcialmente`\
+`#> 4 Sim`
 
 ## One fetcher
 
@@ -167,11 +153,9 @@ A single, time-less snapshot. No `year`, no `basis`. It is also where a
 CVM code or a company name resolves to a CNPJ: `cd_cvm`, `denom_social`
 and `cnpj_cia` sit side by side.
 
-``` r
-
-companies <- cvm_fetch("cad", "companhias")
-companies
-```
+\
+`companies`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``)`\
+`companies`
 
 ### `dfp` and `itr` — financial statements
 
@@ -182,32 +166,30 @@ Accounting tables that publish individual and consolidated variants —
 `basis`: `"ind"`, `"con"` or `c("ind", "con")` to stack both. Those
 tables always carry a `basis` column in the result.
 
-``` r
-
-# BCO BRASIL individual balance sheet, 2024
-bb <- cvm_fetch(
-  "dfp", "bpa",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  basis = "ind"
-)
-
-# Two companies across three years, both bases stacked
-two <- cvm_fetch(
-  "dfp", "dre",
-  cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
-  year = 2022:2024,
-  basis = c("ind", "con")
-)
-
-# ITR balance sheets referenced in the first half of 2024
-h1 <- cvm_fetch(
-  "itr", "bpa",
-  ticker = "PETR4",
-  from = "2024-01-01", to = "2024-06-30",
-  basis = "con"
-)
-```
+\
+`# BCO BRASIL individual balance sheet, 2024`\
+`bb`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`\
+\
+`# Two companies across three years, both bases stacked`\
+`two`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"dre"``,`\
+`  cnpj ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"00.000.000/0001-91"``, ``"47.960.950/0001-21"``)``,`\
+`  year ``=`` ``2022``:``2024``,`\
+`  basis ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"ind"``, ``"con"``)`\
+`)`\
+\
+`# ITR balance sheets referenced in the first half of 2024`\
+`h1`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"itr"``, ``"bpa"``,`\
+`  ticker ``=`` ``"PETR4"``,`\
+`  from ``=`` ``"2024-01-01"``, to ``=`` ``"2024-06-30"``,`\
+`  basis ``=`` ``"con"`\
+`)`
 
 `vl_conta` is already in absolute reais: `cvmdata` multiplies by
 `ESCALA_MOEDA` (`UNIDADE`=1, `MIL`=1e3, etc.) and drops the scale
@@ -223,21 +205,19 @@ ship without a CVM-published META (`meta_status: missing`); their
 parsing uses the `expected_field_names` declared in the schema YAML as a
 defense-in-depth check.
 
-``` r
-
-auditor <- cvm_fetch(
-  "fre", "auditor",
-  cnpj = "00.000.000/0001-91",
-  year = 2024
-)
-
-# Genuine empty table is fine — FRE/empregado_PCD has meta_status: missing
-pcd <- cvm_fetch(
-  "fre", "empregado_PCD",
-  year = 2024,
-  validate = "warn"  # or "strict" / "skip"
-)
-```
+\
+`auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"auditor"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+\
+`# Genuine empty table is fine — FRE/empregado_PCD has meta_status: missing`\
+`pcd`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"empregado_PCD"``,`\
+`  year ``=`` ``2024``,`\
+`  validate ``=`` ``"warn"``  ``# or "strict" / "skip"`\
+`)`
 
 FRE detail tables use a different naming convention: `cnpj_companhia`,
 `data_referencia`, `nome_companhia`, `versao`, `id_documento`. There is
@@ -252,18 +232,16 @@ delivery of the ICBGC informe, re-filings included) and `praticas`
 (“comply or explain” detail with 54 recommended practices per filing,
 last delivery only).
 
-``` r
-
-praticas <- cvm_fetch(
-  "cgvn", "praticas",
-  cnpj = "00.000.000/0001-91",
-  year = 2024
-)
-# Columns include: cnpj_companhia, data_referencia, versao,
-# id_item ("N.N.N"), capitulo, principio, pratica_recomendada,
-# pratica_adotada ∈ {Sim, Não, Parcialmente, Não se Aplica},
-# explicacao.
-```
+\
+`praticas`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"cgvn"``, ``"praticas"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`# Columns include: cnpj_companhia, data_referencia, versao,`\
+`# id_item ("N.N.N"), capitulo, principio, pratica_recomendada,`\
+`# pratica_adotada ∈ {Sim, Não, Parcialmente, Não se Aplica},`\
+`# explicacao.`
 
 CGVN follows a third naming convention (`codigo_cvm` instead of `cd_cvm`
 in the submissao table). The CNPJ column is what `cnpj` matches, so the
@@ -276,18 +254,16 @@ delivery, re-filings included) and `consolidado` (one row per security
 movement). The package table is named `consolidado` — the CVM file token
 is `con`, a reserved device name on Windows.
 
-``` r
-
-movements <- cvm_fetch(
-  "vlmo", "consolidado",
-  cnpj = "00.000.000/0001-91",
-  year = 2024
-)
-# Columns include: cnpj_companhia, data_referencia, versao,
-# tipo_empresa, empresa, tipo_cargo, tipo_movimentacao,
-# tipo_operacao, tipo_ativo, data_movimentacao, quantidade,
-# preco_unitario, volume.
-```
+\
+`movements`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"vlmo"``, ``"consolidado"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`# Columns include: cnpj_companhia, data_referencia, versao,`\
+`# tipo_empresa, empresa, tipo_cargo, tipo_movimentacao,`\
+`# tipo_operacao, tipo_ativo, data_movimentacao, quantidade,`\
+`# preco_unitario, volume.`
 
 Two things set `vlmo/consolidado` apart. First, it is **event-per-row**:
 unlike every other detail table, it declares no `keep_latest_version`,
@@ -308,17 +284,15 @@ to ITR/DFP/FRE) plus nine FRE-detail tables — `auditor`,
 `escriturador`, `geral`, `pais_estrangeiro_negociacao` and
 `valor_mobiliario`.
 
-``` r
-
-# Current registration state, latest year
-geral <- cvm_fetch("fca", "geral", cnpj = "00.000.000/0001-91")
-
-# Securities and their B3 trading tickers
-vm <- cvm_fetch("fca", "valor_mobiliario", year = 2024)
-
-# A ticker selects the issuer (see "Selecting issuers" below)
-petr <- cvm_fetch("fca", "geral", ticker = "PETR4")
-```
+\
+`# Current registration state, latest year`\
+`geral`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fca"``, ``"geral"``, cnpj ``=`` ``"00.000.000/0001-91"``)`\
+\
+`# Securities and their B3 trading tickers`\
+`vm`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fca"``, ``"valor_mobiliario"``, year ``=`` ``2024``)`\
+\
+`# A ticker selects the issuer (see "Selecting issuers" below)`\
+`petr`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fca"``, ``"geral"``, ticker ``=`` ``"PETR4"``)`
 
 `submissao` is classic (`cnpj_cia` + `cd_cvm`) while the nine detail
 tables are FRE-detail (`cnpj_companhia`, no `cd_cvm`); `cnpj` matches
@@ -353,15 +327,13 @@ Eventuais) is a **single-table manifest**: one row per document a
 company filed with the CVM — roughly 50,000 documents a year, across
 every category (Fato Relevante, Comunicado ao Mercado, Assembleia, …).
 
-``` r
-
-# Everything Banco do Brasil filed in 2024
-docs <- cvm_fetch("ipe", "ipe", ticker = "BBAS3", year = 2024)
-
-# Slice the manifest by document class — a plain dplyr step
-library(dplyr)
-fatos <- docs |> filter(categoria == "Fato Relevante")
-```
+\
+`# Everything Banco do Brasil filed in 2024`\
+`docs`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"ipe"``, ``"ipe"``, ticker ``=`` ``"BBAS3"``, year ``=`` ``2024``)`\
+\
+`# Slice the manifest by document class — a plain dplyr step`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`dplyr`](https://dplyr.tidyverse.org)`)`\
+`fatos`` ``<-`` ``docs`` ``|>`` `[`filter`](https://dplyr.tidyverse.org/reference/filter.html)`(``categoria`` ``==`` ``"Fato Relevante"``)`
 
 The manifest is **event-per-row**: it declares no `keep_latest_version`,
 so re-submissions and every `versao` of a document survive verbatim
@@ -399,13 +371,11 @@ An unknown ticker aborts with `cvmdata_error_input` (tickers cover only
 exchange-listed securities — debentures and private placements have
 none). A CNPJ absent from the table yields zero rows, silently.
 
-``` r
-
-cvm_fetch("dfp", "bpa",
-          cnpj = c("00.000.000/0001-91", "47.960.950/0001-21"),
-          ticker = "PETR4",
-          year = 2024, basis = "ind")
-```
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``,`\
+`          cnpj ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"00.000.000/0001-91"``, ``"47.960.950/0001-21"``)``,`\
+`          ticker ``=`` ``"PETR4"``,`\
+`          year ``=`` ``2024``, basis ``=`` ``"ind"``)`
 
 ## Period semantics
 
@@ -419,13 +389,11 @@ the fetcher walks down up to three years and emits a
 An explicit vector fetches each year and binds the result. For
 historical reach, just pass a longer vector:
 
-``` r
-
-hist <- cvm_fetch("dfp", "dre",
-                  cnpj = "00.000.000/0001-91",
-                  year = 2012:2024,
-                  basis = "ind")
-```
+\
+`hist`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"dre"``,`\
+`                  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`                  year ``=`` ``2012``:``2024``,`\
+`                  basis ``=`` ``"ind"``)`
 
 CVM publishes only `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV
 (i.e. the declared year and its N-1).
@@ -450,15 +418,13 @@ Every tibble returned by
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 is of class `cvm_tbl` and carries six provenance attributes:
 
-``` r
-
-attr(out, "source")           #  "mirror" or "cvm"
-attr(out, "fetched_at")       #  POSIXct, set at download time
-attr(out, "group")            #  CKAN group slug, e.g. "companhias"
-attr(out, "dataset")          #  "dfp"
-attr(out, "table")            #  "bpa"
-attr(out, "package_version")  #  packageVersion("cvmdata")
-```
+\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"source"``)``           ``#  "mirror" or "cvm"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"fetched_at"``)``       ``#  POSIXct, set at download time`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"group"``)``            ``#  CKAN group slug, e.g. "companhias"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"dataset"``)``          ``#  "dfp"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"table"``)``            ``#  "bpa"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"package_version"``)``  ``#  packageVersion("cvmdata")`
 
 `print.cvm_tbl()` renders the five header attributes before delegating
 to the standard tibble print, so a snapshot taken at the REPL is
@@ -469,12 +435,10 @@ self-describing.
 The cache lives under `tools::R_user_dir("cvmdata", "cache")` by
 default. Two functions inspect and reset it:
 
-``` r
-
-cvm_cache_path()
-cvm_cache_info()                # current size + unit breakdown
-cvm_cache_clear()               # interactive prompt by default
-```
+\
+[`cvm_cache_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)`(``)`\
+[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)``                ``# current size + unit breakdown`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``)``               ``# interactive prompt by default`
 
 Knobs:
 
@@ -497,13 +461,11 @@ the layout, refresh cadence and equivalence guarantees in detail.
 
 Two CNPJ helpers, deliberately small:
 
-``` r
-
-cnpj_clean("00.000.000/0001-91")
-#> [1] "00000000000191"
-cnpj_format("00000000000191")
-#> [1] "00.000.000/0001-91"
-```
+\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``"00.000.000/0001-91"``)`\
+`#> [1] "00000000000191"`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``"00000000000191"``)`\
+`#> [1] "00.000.000/0001-91"`
 
 [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
 strips everything that is not a digit and zero-pads to 14;
@@ -534,18 +496,16 @@ Catch them with [`tryCatch()`](https://rdrr.io/r/base/conditions.html)
 or [`withCallingHandlers()`](https://rdrr.io/r/base/conditions.html)
 keyed on the class string, e.g.:
 
-``` r
-
-out <- tryCatch(
-  cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
-            year = 2024, basis = "ind", source = "cvm"),
-  cvmdata_error_http = function(e) {
-    message("Portal indisponivel, tentando mirror.")
-    cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
-              year = 2024, basis = "ind", source = "mirror")
-  }
-)
-```
+\
+`out`` ``<-`` `[`tryCatch`](https://rdrr.io/r/base/conditions.html)`(`\
+`  `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`            year ``=`` ``2024``, basis ``=`` ``"ind"``, source ``=`` ``"cvm"``)``,`\
+`  cvmdata_error_http ``=`` ``function``(``e``)`` ``{`\
+`    `[`message`](https://rdrr.io/r/base/message.html)`(``"Portal indisponivel, tentando mirror."``)`\
+`    `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`              year ``=`` ``2024``, basis ``=`` ``"ind"``, source ``=`` ``"mirror"``)`\
+`  ``}`\
+`)`
 
 ## Where to read next
 

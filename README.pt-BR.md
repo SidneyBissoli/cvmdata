@@ -59,37 +59,31 @@ em tempo de execução).
 `cvmdata` exige R ≥ 4.1 (pipe nativo) e ainda não está no CRAN. A versão
 de desenvolvimento pode ser instalada do GitHub:
 
-``` r
-
-# install.packages("pak")
-pak::pak("SidneyBissoli/cvmdata")
-```
+\
+`# install.packages("pak")`\
+`pak``::`[`pak`](https://pak.r-lib.org/reference/pak.html)`(``"SidneyBissoli/cvmdata"``)`
 
 ## Início rápido
 
 Descubra o que está coberto (offline — a descoberta lê de snapshots
 embarcados):
 
-``` r
-
-library(cvmdata)
-
-cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`\
+\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
+`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`
 
 O dicionário embarcado expõe os tipos e descrições que a CVM publica
 para cada coluna:
 
-``` r
-
-dict <- cvm_dictionary("dfp", "bpa")
-tbl <- knitr::kable(
-  dict[1:8, c("campo", "descricao", "tipo_dados", "tamanho")],
-  format = "html"
-)
-cat('<div align="center">', tbl, '</div>', sep = "\n")
-```
+\
+`dict`` ``<-`` `[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``"dfp"``, ``"bpa"``)`\
+`tbl`` ``<-`` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`\
+`  ``dict``[``1``:``8``, `[`c`](https://rdrr.io/r/base/c.html)`(``"campo"``, ``"descricao"``, ``"tipo_dados"``, ``"tamanho"``)``]``,`\
+`  format ``=`` ``"html"`\
+`)`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``'<div align="center">'``, ``tbl``, ``'</div>'``, sep ``=`` ``"\n"``)`
 
 | campo        | descricao                       | tipo_dados | tamanho |
 |:-------------|:--------------------------------|:-----------|--------:|
@@ -107,43 +101,37 @@ para duas companhias em anos recentes. Companhias são identificadas por
 CNPJ (com ou sem pontuação) ou por ticker da B3; `basis` escolhe as
 demonstrações individuais, consolidadas ou ambas:
 
-``` r
-
-bpa <- cvm_fetch(
-  dataset = "dfp",
-  table   = "bpa",
-  cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
-  year    = 2022:2024,
-  basis   = "ind"
-)
-```
+\
+`bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  cnpj    ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"00.000.000/0001-91"``, ``"47.960.950/0001-21"``)``,`\
+`  year    ``=`` ``2022``:``2024``,`\
+`  basis   ``=`` ``"ind"`\
+`)`
 
 Cada arquivo anual traz também o comparativo que a companhia apresentou
 para o exercício anterior, muitas vezes reexpresso. `reading` coloca as
 duas leituras de um exercício lado a lado, rotuladas: os números
 entregues originalmente e o comparativo do arquivo do ano seguinte:
 
-``` r
-
-bpa_2022 <- cvm_fetch(
-  dataset = "dfp",
-  table   = "bpa",
-  ticker  = "PSSA3",
-  year    = 2022,
-  basis   = "con",
-  reading = c("original", "restated")
-)
-```
+\
+`bpa_2022`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  ticker  ``=`` ``"PSSA3"``,`\
+`  year    ``=`` ``2022``,`\
+`  basis   ``=`` ``"con"``,`\
+`  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)`\
+`)`
 
 Limpe e formate CNPJs:
 
-``` r
-
-cnpj_clean("00.000.000/0001-91")
-#> [1] "00000000000191"
-cnpj_format("00000000000191")
-#> [1] "00.000.000/0001-91"
-```
+\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``"00.000.000/0001-91"``)`\
+`#> [1] "00000000000191"`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``"00000000000191"``)`\
+`#> [1] "00.000.000/0001-91"`
 
 ## Documentação
 

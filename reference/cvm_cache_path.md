@@ -53,5 +53,5 @@ Other cache:
 
 ``` r
 cvm_cache_path()
-#> [1] "/home/runner/.cache/R/cvmdata"
+#> [1] "/github/home/.cache/R/cvmdata"
 ```

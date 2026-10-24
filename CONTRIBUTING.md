@@ -48,14 +48,12 @@ an issue first.
 
 Clone your fork, then from the package root:
 
-``` r
-
-# install dependencies (Imports + Suggests)
-devtools::install_dev_deps()
-
-# load the package without installing
-devtools::load_all()
-```
+\
+`# install dependencies (Imports + Suggests)`\
+`devtools``::`[`install_dev_deps`](https://devtools.r-lib.org/reference/install_deps.html)`(``)`\
+\
+`# load the package without installing`\
+`devtools``::`[`load_all`](https://devtools.r-lib.org/reference/load_all.html)`(``)`
 
 The package targets R (\>= 4.1) and uses `testthat` 3.x with edition 3.
 A C/C++ toolchain is **not** required.
@@ -70,28 +68,26 @@ tests are gated by `Sys.getenv("CVMDATA_RUN_INTEGRATION") == "true"`.
 Every commit on `main` (and every PR) must pass the following checks
 locally before review:
 
-``` r
-
-# 0 errors, 0 warnings, 0 notes (a single "unable to verify current
-# time" note is tolerated)
-devtools::check()
-
-# all tests must pass (487+ as of v0.0.0.9000)
-devtools::test()
-
-# Air must leave every file unchanged (run in a terminal)
-# air format --check .
-
-# lintr must return character(0)
-lintr::lint_package()
-
-# coverage target is >= 90%
-covr::package_coverage()
-
-# pkgdown site must build cleanly; deep-dive articles call the CVM
-# portal and need network access
-pkgdown::build_site()
-```
+\
+`# 0 errors, 0 warnings, 0 notes (a single "unable to verify current`\
+`# time" note is tolerated)`\
+`devtools``::`[`check`](https://devtools.r-lib.org/reference/check.html)`(``)`\
+\
+`# all tests must pass (487+ as of v0.0.0.9000)`\
+`devtools``::`[`test`](https://devtools.r-lib.org/reference/test.html)`(``)`\
+\
+`# Air must leave every file unchanged (run in a terminal)`\
+`# air format --check .`\
+\
+`# lintr must return character(0)`\
+`lintr``::`[`lint_package`](https://lintr.r-lib.org/reference/lint.html)`(``)`\
+\
+`# coverage target is >= 90%`\
+`covr``::`[`package_coverage`](http://covr.r-lib.org/reference/package_coverage.md)`(``)`\
+\
+`# pkgdown site must build cleanly; deep-dive articles call the CVM`\
+`# portal and need network access`\
+`pkgdown``::`[`build_site`](https://pkgdown.r-lib.org/reference/build_site.html)`(``)`
 
 These commands are also enforced in CI (`R-CMD-check.yaml`, `lint.yaml`,
 `test-coverage.yaml`, `pkgdown.yaml` under `.github/workflows/`). PRs

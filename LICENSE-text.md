@@ -1,4 +1,4 @@
 # License
 
-    YEAR: 2026
-    COPYRIGHT HOLDER: Sidney da Silva Pereira Bissoli
+YEAR: 2026\
+COPYRIGHT HOLDER: Sidney da Silva Pereira Bissoli\

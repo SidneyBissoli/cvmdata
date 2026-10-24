@@ -1,9 +1,7 @@
 # IPE and VLMO: the document index vs. the structured data
 
-``` r
-
-library(cvmdata)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
 
 Two `companhias` datasets describe the same regulatory event from
 opposite ends, and it is easy to reach for the wrong one. This article
@@ -32,22 +30,20 @@ negociados e detidos (art. 11 …)”** — the *same filing* VLMO structures.
 So the very document IPE points at with a `link_download` URL is the one
 VLMO has already parsed into rows and columns.
 
-``` r
-
-# IPE: the index entry for the art. 11 filing (a PDF link)
-idx <- cvm_fetch("ipe", "ipe", ticker = "BBAS3", year = 2024)
-art11 <- subset(
-  idx,
-  grepl("Valores Mobili", categoria, fixed = FALSE)
-)
-art11$link_download   # URL of the filed PDF on the CVM portal
-
-# VLMO: the structured movements from that same filing
-mov <- cvm_fetch("vlmo", "consolidado", ticker = "BBAS3",
-                 year = 2024)
-mov[, c("tipo_cargo", "data_movimentacao", "quantidade",
-        "preco_unitario", "volume")]
-```
+\
+`# IPE: the index entry for the art. 11 filing (a PDF link)`\
+`idx`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"ipe"``, ``"ipe"``, ticker ``=`` ``"BBAS3"``, year ``=`` ``2024``)`\
+`art11`` ``<-`` `[`subset`](https://rdrr.io/r/base/subset.html)`(`\
+`  ``idx``,`\
+`  `[`grepl`](https://rdrr.io/r/base/grep.html)`(``"Valores Mobili"``, ``categoria``, fixed ``=`` ``FALSE``)`\
+`)`\
+`art11``$``link_download``   ``# URL of the filed PDF on the CVM portal`\
+\
+`# VLMO: the structured movements from that same filing`\
+`mov`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"vlmo"``, ``"consolidado"``, ticker ``=`` ``"BBAS3"``,`\
+`                 year ``=`` ``2024``)`\
+`mov``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"tipo_cargo"``, ``"data_movimentacao"``, ``"quantidade"``,`\
+`        ``"preco_unitario"``, ``"volume"``)``]`
 
 ## Which one to use
 

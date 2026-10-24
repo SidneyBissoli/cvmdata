@@ -21,38 +21,34 @@ in v0.7, regulatory events in v0.8) and will extend
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 through their own schemas, not through new fetchers.
 
-``` r
-
-library(cvmdata)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
 
 ## The 18 groups
 
-``` r
-
-cvm_groups()
-#> # A tibble: 18 × 3
-#>    group                               n_datasets contract
-#>    <chr>                                    <int> <chr>   
-#>  1 administradores                              2 agent   
-#>  2 agentes-autonomos                            1 agent   
-#>  3 agentes-fiduciarios                          1 agent   
-#>  4 atividade-sancionadora                       1 event   
-#>  5 atos-declaratorios                           1 event   
-#>  6 auditores                                    1 agent   
-#>  7 companhias                                  12 issuer  
-#>  8 consultores-de-valores-mobiliarios           1 agent   
-#>  9 coordenadores-de-ofertas                     1 agent   
-#> 10 emissores-de-cepac                           1 issuer  
-#> 11 fundos-de-investimento                      22 fund    
-#> 12 fundos-de-investimento-imobiliarios          4 fund    
-#> 13 fundos-estruturados                         10 fund    
-#> 14 investidores-nao-residentes                  1 agent   
-#> 15 ofertas-publicas                             2 offering
-#> 16 participantes-intermediarios                 1 agent   
-#> 17 plataformas-de-crowdfunding                  1 offering
-#> 18 securitizadoras                              4 issuer
-```
+\
+[`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)`\
+`#> ``# A tibble: 18 × 3`\
+`#>    group                               n_datasets contract`\
+`#>    ``<chr>``                                    ``<int>`` ``<chr>``   `\
+`#> `` 1`` administradores                              2 agent   `\
+`#> `` 2`` agentes-autonomos                            1 agent   `\
+`#> `` 3`` agentes-fiduciarios                          1 agent   `\
+`#> `` 4`` atividade-sancionadora                       1 event   `\
+`#> `` 5`` atos-declaratorios                           1 event   `\
+`#> `` 6`` auditores                                    1 agent   `\
+`#> `` 7`` companhias                                  12 issuer  `\
+`#> `` 8`` consultores-de-valores-mobiliarios           1 agent   `\
+`#> `` 9`` coordenadores-de-ofertas                     1 agent   `\
+`#> ``10`` emissores-de-cepac                           1 issuer  `\
+`#> ``11`` fundos-de-investimento                      22 fund    `\
+`#> ``12`` fundos-de-investimento-imobiliarios          4 fund    `\
+`#> ``13`` fundos-estruturados                         10 fund    `\
+`#> ``14`` investidores-nao-residentes                  1 agent   `\
+`#> ``15`` ofertas-publicas                             2 offering`\
+`#> ``16`` participantes-intermediarios                 1 agent   `\
+`#> ``17`` plataformas-de-crowdfunding                  1 offering`\
+`#> ``18`` securitizadoras                              4 issuer`
 
 The `n_datasets` column counts datasets published by CVM, not the count
 currently implemented in the package. The `contract` column is a
@@ -62,29 +58,27 @@ how
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 will identify rows once the group ships.
 
-``` r
-
-g <- cvm_groups()
-split(g$group, g$contract)
-#> $agent
-#> [1] "administradores"                    "agentes-autonomos"                 
-#> [3] "agentes-fiduciarios"                "auditores"                         
-#> [5] "consultores-de-valores-mobiliarios" "coordenadores-de-ofertas"          
-#> [7] "investidores-nao-residentes"        "participantes-intermediarios"      
-#> 
-#> $event
-#> [1] "atividade-sancionadora" "atos-declaratorios"    
-#> 
-#> $fund
-#> [1] "fundos-de-investimento"              "fundos-de-investimento-imobiliarios"
-#> [3] "fundos-estruturados"                
-#> 
-#> $issuer
-#> [1] "companhias"         "emissores-de-cepac" "securitizadoras"   
-#> 
-#> $offering
-#> [1] "ofertas-publicas"            "plataformas-de-crowdfunding"
-```
+\
+`g`` ``<-`` `[`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)`\
+[`split`](https://rdrr.io/r/base/split.html)`(``g``$``group``, ``g``$``contract``)`\
+`#> $agent`\
+`#> [1] "administradores"                    "agentes-autonomos"                 `\
+`#> [3] "agentes-fiduciarios"                "auditores"                         `\
+`#> [5] "consultores-de-valores-mobiliarios" "coordenadores-de-ofertas"          `\
+`#> [7] "investidores-nao-residentes"        "participantes-intermediarios"      `\
+`#> `\
+`#> $event`\
+`#> [1] "atividade-sancionadora" "atos-declaratorios"    `\
+`#> `\
+`#> $fund`\
+`#> [1] "fundos-de-investimento"              "fundos-de-investimento-imobiliarios"`\
+`#> [3] "fundos-estruturados"                `\
+`#> `\
+`#> $issuer`\
+`#> [1] "companhias"         "emissores-de-cepac" "securitizadoras"   `\
+`#> `\
+`#> $offering`\
+`#> [1] "ofertas-publicas"            "plataformas-de-crowdfunding"`
 
 ## Issuers — implemented
 
@@ -103,19 +97,17 @@ the registration form, with a B3 `ticker`. The temporal axis is annual
 on the reference date, and the `basis` argument selects
 individual/consolidated variants for accounting tables.
 
-``` r
-
-# Companies registry (no time partitioning, no basis)
-issuers <- cvm_fetch("cad", "companhias")
-
-# DFP balance sheet, individual, one year, one issuer
-bb <- cvm_fetch(
-  "dfp", "bpa",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  basis = "ind"
-)
-```
+\
+`# Companies registry (no time partitioning, no basis)`\
+`issuers`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``)`\
+\
+`# DFP balance sheet, individual, one year, one issuer`\
+`bb`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`
 
 ## Funds, agents, offerings, events — on the roadmap
 
@@ -146,16 +138,14 @@ resolve by uniqueness when `group` is omitted, and abort with
 `cvmdata_error_input_ambiguous` when it cannot disambiguate. Pass
 `group` explicitly to skip the lookup:
 
-``` r
-
-cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
-cvm_tables("dfp", group = "companhias")
-#>  [1] "bpa"                "bpp"                "composicao_capital"
-#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              
-#>  [7] "dra"                "dre"                "dva"               
-#> [10] "parecer"            "submissao"
-```
+\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``group ``=`` ``"companhias"``)`\
+`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`\
+[`cvm_tables`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)`(``"dfp"``, group ``=`` ``"companhias"``)`\
+`#>  [1] "bpa"                "bpp"                "composicao_capital"`\
+`#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              `\
+`#>  [7] "dra"                "dre"                "dva"               `\
+`#> [10] "parecer"            "submissao"`
 
 The `group` argument is optional on
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),

@@ -37,12 +37,10 @@
   matches every delivery; to get the current filing, keep the last row
   per key:
 
-  ``` r
-
-  sub |>
-    dplyr::arrange(dt_receb, as.integer(id_doc), as.integer(versao)) |>
-    dplyr::slice_tail(n = 1, by = c(cnpj_cia, dt_refer))
-  ```
+  \
+  `sub`` ``|>`\
+  `  ``dplyr``::`[`arrange`](https://dplyr.tidyverse.org/reference/arrange.html)`(``dt_receb``, `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``id_doc``)``, `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``versao``)``)`` ``|>`\
+  `  ``dplyr``::`[`slice_tail`](https://dplyr.tidyverse.org/reference/slice.html)`(``n ``=`` ``1``, by ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``cnpj_cia``, ``dt_refer``)``)`
 
   The fetch-time check that warns about a stale filing
   (`cvmdata_warn_stale_filing`) computes that row itself before
@@ -268,14 +266,13 @@
   with explicit years that precede a dataset’s first published year
   (e.g. `year = 2005:2024` for `dfp`, which starts in
 
-  2010. no longer fails with a raw HTTP 404. The years before
-        `first_year` are dropped before any request, with an
-        informational message listing them, and the remaining years are
-        fetched normally. When every requested year is too early the
-        call aborts with a clear `cvmdata_error_input` instead of a
-        network error. This applies to both the `"mirror"` and `"cvm"`
-        backends; genuine 404s on years that do exist remain governed by
-        `on_error`.
+  2010\) no longer fails with a raw HTTP 404. The years before
+  `first_year` are dropped before any request, with an informational
+  message listing them, and the remaining years are fetched normally.
+  When every requested year is too early the call aborts with a clear
+  `cvmdata_error_input` instead of a network error. This applies to both
+  the `"mirror"` and `"cvm"` backends; genuine 404s on years that do
+  exist remain governed by `on_error`.
 
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   on the current, not-yet-filed year of an annual financial table

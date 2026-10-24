@@ -119,19 +119,19 @@
 <span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">cvm_file_pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">"&lt;CSV filename inside the archive&gt;"</span></span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">cvm_dictionary_url</span><span class="kw">:</span><span class="at"> </span><span class="st">"&lt;META URL, or null when meta_status: missing&gt;"</span></span>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">meta_status</span><span class="kw">:</span><span class="at"> available</span><span class="co">     # or "missing" when CVM publishes no META</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">meta_status</span><span class="kw">:</span><span class="at"> available     # or "missing" when CVM publishes no META</span></span>
 <span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="fu">encoding</span><span class="kw">:</span><span class="at"> ISO-8859-1</span></span>
 <span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="fu">delimiter</span><span class="kw">:</span><span class="at"> </span><span class="st">";"</span></span>
 <span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">temporal_partitioning</span><span class="kw">:</span><span class="at"> none</span><span class="co">   # or "yearly"</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">temporal_partitioning</span><span class="kw">:</span><span class="at"> none   # or "yearly"</span></span>
 <span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">first_year</span><span class="kw">:</span><span class="at"> &lt;int when yearly&gt;</span></span>
 <span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a></span>
 <span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="fu">expected_field_count</span><span class="kw">:</span><span class="at"> &lt;int&gt;</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">expected_field_names</span><span class="kw">:</span><span class="co">         # mandatory when meta_status: missing</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> &lt;field 1&gt;</span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> &lt;field 2&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="fu">expected_field_names</span><span class="kw">:</span><span class="at">         </span><span class="co"># mandatory when meta_status: missing</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="at">  </span><span class="kw">- </span><span class="at">&lt;field 1&gt;</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="at">  </span><span class="kw">- </span><span class="at">&lt;field 2&gt;</span></span>
 <span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="fu">transformations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span><span class="co">           # see below</span></span></code></pre></div>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="fu">transformations</span><span class="kw">:</span><span class="at"> </span><span class="kw">[]</span><span class="at">           </span><span class="co"># see below</span></span></code></pre></div>
 <p>Accepted <code>action</code> values in <code>transformations</code>:</p>
 <ul><li>
 <code>multiply_by_scale</code> — multiply a column by a scale column (requires <code>scale_column:</code>).</li>

@@ -7,10 +7,8 @@ walks through the contract, the pipeline that keeps the mirror fresh,
 and the workflows for switching between backends, inspecting the cache,
 and tuning the TTL and eviction options.
 
-``` r
-
-library(cvmdata)
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
 
 ## Reference: backends and caches
 
@@ -52,13 +50,11 @@ lists every artifact with its size, ETag and timestamps;
 [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
 evicts (with `what` of `"all"`, `"raw"`, or `"parquet"`).
 
-``` r
-
-cvm_cache_path()
-#> [1] "/home/runner/.cache/R/cvmdata"
-cvm_source_get()
-#> [1] "mirror"
-```
+\
+[`cvm_cache_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)`(``)`\
+`#> [1] "/github/home/.cache/R/cvmdata"`\
+[`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
+`#> [1] "mirror"`
 
 ## Mirror pipeline validation
 
@@ -116,48 +112,44 @@ snippet below makes the choice explicit (helpful in scripts that may
 inherit a different session option) and exercises both the cold and warm
 cache paths:
 
-``` r
-
-# Make the choice explicit (a no-op when the option is already unset
-# from the built-in default).
-cvm_source_set("mirror")
-
-# First call: the mirror's release inventory is fetched once via the
-# GitHub REST API, parquet assets are downloaded into the L3 cache, and
-# DuckDB reads them from disk.
-bb_bpa_mirror <- cvm_fetch(
-  "dfp", "bpa",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  basis = "ind"
-)
-
-# Second call: the L3 cache short-circuits the download; the API
-# inventory is reused from the session cache; only DuckDB runs.
-cvm_fetch(
-  "dfp", "bpa",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  basis = "ind"
-)
-```
+\
+`# Make the choice explicit (a no-op when the option is already unset`\
+`# from the built-in default).`\
+[`cvm_source_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)`(``"mirror"``)`\
+\
+`# First call: the mirror's release inventory is fetched once via the`\
+`# GitHub REST API, parquet assets are downloaded into the L3 cache, and`\
+`# DuckDB reads them from disk.`\
+`bb_bpa_mirror`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`\
+\
+`# Second call: the L3 cache short-circuits the download; the API`\
+`# inventory is reused from the session cache; only DuckDB runs.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`
 
 The argument `source = ...` to
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 always overrides the option, so a single call can fall back to the CVM
 portal without disturbing the session-wide setting:
 
-``` r
-
-# Persisted setting is "mirror"; this one call still queries CVM live.
-cvm_fetch(
-  "dfp", "bpa",
-  cnpj = "00.000.000/0001-91",
-  year = 2024,
-  basis = "ind",
-  source = "cvm"
-)
-```
+\
+`# Persisted setting is "mirror"; this one call still queries CVM live.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"``,`\
+`  source ``=`` ``"cvm"`\
+`)`
 
 ## Workflow 2 — CVM vs Mirror equivalence
 
@@ -172,15 +164,13 @@ have the individual/consolidated split. The table below was captured by
 `data-raw/validate-mirror-end-to-end.R`, which runs the same four calls
 through both backends and compares schemas:
 
-``` r
-
-cmp <- readRDS(system.file(
-  "extdata", "vignette-data", "cache-and-mirror",
-  "cvm-vs-mirror.rds",
-  package = "cvmdata"
-))
-knitr::kable(cmp)
-```
+\
+`cmp`` ``<-`` `[`readRDS`](https://rdrr.io/r/base/readRDS.html)`(`[`system.file`](https://rdrr.io/r/base/system.file.html)`(`\
+`  ``"extdata"``, ``"vignette-data"``, ``"cache-and-mirror"``,`\
+`  ``"cvm-vs-mirror.rds"``,`\
+`  package ``=`` ``"cvmdata"`\
+`)``)`\
+`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(``cmp``)`
 
 | chamada | n_rows_cvm | n_rows_mirror | colunas_iguais | tipos_iguais | cvm_only | mirror_only |
 |:---|---:|---:|:---|:---|:---|:---|
@@ -200,14 +190,12 @@ not bug: the mirror is a snapshot.
 [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
 walks the cache and returns one row per artifact:
 
-``` r
-
-info <- cvm_cache_info()
-info
-
-# Total bytes across all listed artifacts:
-attr(info, "total_size_bytes")
-```
+\
+`info`` ``<-`` `[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)`\
+`info`\
+\
+`# Total bytes across all listed artifacts:`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``info``, ``"total_size_bytes"``)`
 
 The first column of
 [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
@@ -220,18 +208,16 @@ accepts a `what` argument scoping the eviction to L1 (`"raw"`), L3
 the eviction to a single CKAN group. The L3 mode evicts by dataset
 because the partition layout nests year under table:
 
-``` r
-
-# Drop the mirror's local parquet copy for DFP only.
-cvm_cache_clear(what = "parquet", dataset = "dfp", confirm = FALSE)
-
-# Drop every artifact belonging to the "companhias" CKAN group
-# (raw + parquet), leaving other groups intact.
-cvm_cache_clear(what = "all", group = "companhias", confirm = FALSE)
-
-# Reset everything (raw + parquet, all groups).
-cvm_cache_clear(what = "all", confirm = FALSE)
-```
+\
+`# Drop the mirror's local parquet copy for DFP only.`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"parquet"``, dataset ``=`` ``"dfp"``, confirm ``=`` ``FALSE``)`\
+\
+`# Drop every artifact belonging to the "companhias" CKAN group`\
+`# (raw + parquet), leaving other groups intact.`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"all"``, group ``=`` ``"companhias"``, confirm ``=`` ``FALSE``)`\
+\
+`# Reset everything (raw + parquet, all groups).`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"all"``, confirm ``=`` ``FALSE``)`
 
 In interactive sessions `confirm = TRUE` (the default) prompts via
 [`utils::askYesNo()`](https://rdrr.io/r/utils/askYesNo.html); batch
@@ -252,17 +238,15 @@ Two options shape the cache’s behaviour beyond explicit clears:
   engine. The L3 mirror cache is content-addressed and not subject to
   size-based eviction.
 
-``` r
-
-# Force revalidation on every L1 hit.
-options(cvmdata.cache_ttl_seconds = 0)
-
-# Cap L1 at 250 MiB; LRU kicks in past 225 MiB and stops at 200 MiB.
-options(cvmdata.cache_max_size_mb = 250)
-
-# Subscribe to eviction notifications even in non-interactive runs.
-options(cvmdata.cache_warn_evictions = TRUE)
-```
+\
+`# Force revalidation on every L1 hit.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_ttl_seconds ``=`` ``0``)`\
+\
+`# Cap L1 at 250 MiB; LRU kicks in past 225 MiB and stops at 200 MiB.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_max_size_mb ``=`` ``250``)`\
+\
+`# Subscribe to eviction notifications even in non-interactive runs.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_warn_evictions ``=`` ``TRUE``)`
 
 Eviction emits the `cvmdata_warn_eviction` warning class (interactive
 sessions get it for free; batch jobs honour the `cache_warn_evictions`

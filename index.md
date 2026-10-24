@@ -53,37 +53,31 @@ a runtime fetch).
 `cvmdata` requires R ≥ 4.1 (native pipe) and is not yet on CRAN. The
 development version can be installed from GitHub:
 
-``` r
-
-# install.packages("pak")
-pak::pak("SidneyBissoli/cvmdata")
-```
+\
+`# install.packages("pak")`\
+`pak``::`[`pak`](https://pak.r-lib.org/reference/pak.html)`(``"SidneyBissoli/cvmdata"``)`
 
 ## Quick start
 
 Browse what’s covered (offline — discovery reads from embedded
 snapshots):
 
-``` r
-
-library(cvmdata)
-
-cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
-```
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`\
+\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
+`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`
 
 The bundled dictionary surfaces the types and descriptions CVM publishes
 for every column:
 
-``` r
-
-dict <- cvm_dictionary("dfp", "bpa")
-tbl <- knitr::kable(
-  dict[1:8, c("campo", "descricao", "tipo_dados", "tamanho")],
-  format = "html"
-)
-cat('<div align="center">', tbl, '</div>', sep = "\n")
-```
+\
+`dict`` ``<-`` `[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``"dfp"``, ``"bpa"``)`\
+`tbl`` ``<-`` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`\
+`  ``dict``[``1``:``8``, `[`c`](https://rdrr.io/r/base/c.html)`(``"campo"``, ``"descricao"``, ``"tipo_dados"``, ``"tamanho"``)``]``,`\
+`  format ``=`` ``"html"`\
+`)`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``'<div align="center">'``, ``tbl``, ``'</div>'``, sep ``=`` ``"\n"``)`
 
 | campo        | descricao                       | tipo_dados | tamanho |
 |:-------------|:--------------------------------|:-----------|--------:|
@@ -101,43 +95,37 @@ companies across recent years. Companies are identified by CNPJ (with or
 without punctuation) or by B3 ticker; `basis` picks the individual or
 consolidated statements, or both:
 
-``` r
-
-bpa <- cvm_fetch(
-  dataset = "dfp",
-  table   = "bpa",
-  cnpj    = c("00.000.000/0001-91", "47.960.950/0001-21"),
-  year    = 2022:2024,
-  basis   = "ind"
-)
-```
+\
+`bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  cnpj    ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"00.000.000/0001-91"``, ``"47.960.950/0001-21"``)``,`\
+`  year    ``=`` ``2022``:``2024``,`\
+`  basis   ``=`` ``"ind"`\
+`)`
 
 Each yearly file also carries the comparative the issuer presented for
 the previous exercise, which is often restated. `reading` puts the two
 readings of an exercise side by side, labelled: the figures originally
 filed and the comparative in the following year’s file:
 
-``` r
-
-bpa_2022 <- cvm_fetch(
-  dataset = "dfp",
-  table   = "bpa",
-  ticker  = "PSSA3",
-  year    = 2022,
-  basis   = "con",
-  reading = c("original", "restated")
-)
-```
+\
+`bpa_2022`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  ticker  ``=`` ``"PSSA3"``,`\
+`  year    ``=`` ``2022``,`\
+`  basis   ``=`` ``"con"``,`\
+`  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)`\
+`)`
 
 Parse and format Brazilian corporate taxpayer IDs (CNPJ):
 
-``` r
-
-cnpj_clean("00.000.000/0001-91")
-#> [1] "00000000000191"
-cnpj_format("00000000000191")
-#> [1] "00.000.000/0001-91"
-```
+\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``"00.000.000/0001-91"``)`\
+`#> [1] "00000000000191"`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``"00000000000191"``)`\
+`#> [1] "00.000.000/0001-91"`
 
 ## Documentation
 
