@@ -18,13 +18,24 @@ knitr::opts_chunk$set(
 
 `cvmdata` provides a tidy R API to the open data published by the
 Brazilian Securities and Exchange Commission — *Comissão de Valores
-Mobiliários* (CVM). It fetches official CSV releases from the CVM
-portal at <https://dados.cvm.gov.br/>, parses them respecting the
-upstream encoding (`ISO-8859-1`) and the published field conventions,
-and returns tibbles whose **table names, column names and categorical
+Mobiliários* (CVM), published at <https://dados.cvm.gov.br/>. It
+returns tibbles whose **table names, column names and categorical
 values are preserved in Portuguese** exactly as published by CVM.
 Function names, arguments and metadata attributes are in English,
 following the rOpenSci and tidyverse conventions.
+
+By default the package does **not** read the CVM portal on each call.
+It reads a *mirror* of the portal: Parquet snapshots of the CVM files,
+converted by an automated pipeline and published weekly in the
+package's GitHub Releases by the package author (`source = "mirror"`).
+The official portal is one argument away — `source = "cvm"` on any
+call, or `cvm_source_set("cvm")` for the session — and is what the
+mirror itself is built from: the CSV files are parsed respecting the
+upstream encoding (`ISO-8859-1`) and the published field conventions.
+The CVM publishes these datasets under the Open Database License
+(ODbL) and the mirror is redistributed under the same licence; see the
+`DATA-LICENSE.md` file in the repository and the *Cache and mirror
+backend* article for details.
 
 The package's first release covers four core publicly-traded-company
 datasets:
@@ -46,7 +57,8 @@ cvm_datasets()
 The simplest entry point is `cvm_fetch("cad", "companhias")`. It
 returns the current snapshot of the open-company registry. The chunk
 below loads a small slice of a real call pre-computed for this
-vignette (the package itself hits the CVM portal on every invocation):
+vignette (a real call reads the mirror, or the CVM portal with
+`source = "cvm"`, so the vignette stays offline):
 
 ```{r}
 companies <- readRDS(system.file(

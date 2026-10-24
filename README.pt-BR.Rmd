@@ -36,6 +36,17 @@ preservados em português, exatamente como a CVM publica. Nomes de
 função, argumentos e atributos de metadado seguem o padrão
 inglês-tidyverse esperado pelo rOpenSci e CRAN.
 
+**De onde vêm os dados.** Por padrão, o `cvmdata` *não* lê o portal da
+CVM a cada chamada: lê um **espelho** do portal — snapshots em Parquet
+dos arquivos da CVM, mantidos pelo autor do pacote nos
+[GitHub Releases](https://github.com/SidneyBissoli/cvmdata/releases)
+deste repositório e atualizados toda semana por um pipeline
+automatizado. Passe `source = "cvm"` (ou chame `cvm_source_set("cvm")`)
+para ler o portal oficial diretamente. A CVM publica esses conjuntos
+sob a licença Open Database License (ODbL) e o espelho é redistribuído
+sob a mesma licença; veja [Proveniência e licença dos
+dados](#proveniência-e-licença-dos-dados) abaixo.
+
 ## Por que cvmdata
 
 A CVM publica os formulários em ZIPs anuais de CSVs com codificação
@@ -177,24 +188,39 @@ agrupada em cinco famílias:
 - **Source backend** — `cvm_source_get()`, `cvm_source_set()`.
 - **Utilidades** — `cnpj_clean()`, `cnpj_format()`.
 
-## Proveniência dos dados
+## Proveniência e licença dos dados
 
-Os dados vêm do Portal de Dados Abertos da CVM
-(<https://dados.cvm.gov.br/>). O backend ativo é selecionável via
-`cvm_source_set()` (ou pelo argumento `source` de `cvm_fetch()`):
+Todos os dados têm origem no Portal de Dados Abertos da CVM
+(<https://dados.cvm.gov.br/>). O pacote chega a eles por um de dois
+backends, selecionáveis via `cvm_source_set()` ou pelo argumento
+`source` de `cvm_fetch()`:
 
-- `"mirror"` (default a partir da v0.1.0) — snapshots em parquet
-  publicados em GitHub Releases e consultados via DuckDB com filter
-  pushdown por ano, atualizados semanalmente por um workflow de ETL
-  neste repositório.
-- `"cvm"` — HTTP direto ao Portal de Dados Abertos da CVM. Selecionável
-  por chamada quando se precisa de frescor byte a byte contra o
-  regulador.
+- `"mirror"` (**o padrão** desde a v0.1.0) — snapshots em Parquet dos
+  arquivos da CVM publicados nos GitHub Releases deste repositório
+  (`mirror-<group>-<dataset>-latest`) e consultados via DuckDB com
+  filter pushdown por ano. O espelho é produzido e atualizado toda
+  semana pelo ETL em `inst/etl/`, mantido pelo autor do pacote, não
+  pela CVM. Costuma ser ~30× mais rápido que o portal; sua defasagem é
+  limitada pela atualização semanal. O espelho omite um ano quando a
+  CVM publica o CSV daquele ano sem linhas de dados.
+- `"cvm"` — HTTP direto ao Portal de Dados Abertos da CVM. Use quando
+  precisar de frescor byte a byte contra o regulador, ou quando
+  preferir não depender de um espelho de terceiro.
 
 Todo tibble retornado carrega atributos de proveniência (`source`,
 `fetched_at`, `group`, `dataset`, `table`, `package_version`),
 permitindo a qualquer consumidor auditar qual backend serviu os
 dados.
+
+**Licença dos dados.** A CVM publica todos os conjuntos cobertos pelo
+`cvmdata` sob a [Open Data Commons Open Database License (ODbL)
+v1.0](https://opendatacommons.org/licenses/odbl/1-0/). O espelho é um
+banco de dados derivado nos termos dessa licença e é redistribuído
+também sob a ODbL. Atribuição dos dados: *"Contém dados do Portal de
+Dados Abertos da Comissão de Valores Mobiliários (CVM),
+<https://dados.cvm.gov.br/>, sob a ODbL v1.0."* Os detalhes, inclusive
+o que a licença pede de quem redistribui os dados, estão em
+[`DATA-LICENSE.md`](DATA-LICENSE.md). O **código** do pacote é MIT.
 
 ## Trabalhos relacionados
 
