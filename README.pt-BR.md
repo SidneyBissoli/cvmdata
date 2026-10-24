@@ -125,6 +125,24 @@ entregues originalmente e o comparativo do arquivo do ano seguinte:
 `  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)`\
 `)`
 
+Um documento pode ser reapresentado, e
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+devolve a versão vigente.
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+devolve todas as versões conhecidas, a vigente incluída, cada versão
+substituída datada e apontando para a que a substituiu (a Braskem
+entregou a DRE de 2023 três vezes; a versão 1 estava em R\$ unidades por
+engano):
+
+\
+`brkm`` ``<-`` `[`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"dre"``,`\
+`  cnpj    ``=`` ``"42.150.391/0001-70"``,`\
+`  year    ``=`` ``2023``,`\
+`  basis   ``=`` ``"con"`\
+`)`
+
 Limpe e formate CNPJs:
 
 \
@@ -143,6 +161,8 @@ API exportada está agrupada em cinco famílias:
   é a função única para qualquer dataset e tabela; os grupos ainda no
   roadmap (fundos, agentes, ofertas, eventos) vão estendê-la pelos seus
   schemas.
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  devolve todas as versões conhecidas de um documento.
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
   o entry point das versões anteriores, está depreciada e será removida
   em uma release futura.

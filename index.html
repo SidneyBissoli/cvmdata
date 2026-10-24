@@ -259,8 +259,17 @@ varchar
 <span>  basis   <span class="op">=</span> <span class="st">"con"</span>,</span>
 <span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
+<p>A filing may be re-filed, and <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> returns the current version. <code><a href="reference/cvm_versions.html">cvm_versions()</a></code> returns every known version, the current one included, each superseded version dated and pointing at the version that replaced it (Braskem filed its 2023 income statement three times; version 1 was in R$ units by mistake):</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">brkm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_versions.html">cvm_versions</a></span><span class="op">(</span></span>
+<span>  dataset <span class="op">=</span> <span class="st">"dfp"</span>,</span>
+<span>  table   <span class="op">=</span> <span class="st">"dre"</span>,</span>
+<span>  cnpj    <span class="op">=</span> <span class="st">"42.150.391/0001-70"</span>,</span>
+<span>  year    <span class="op">=</span> <span class="fl">2023</span>,</span>
+<span>  basis   <span class="op">=</span> <span class="st">"con"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Parse and format Brazilian corporate taxpayer IDs (CNPJ):</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
@@ -272,7 +281,7 @@ varchar
 <p>Reference and articles at <a href="https://sidneybissoli.github.io/cvmdata/" class="uri">https://sidneybissoli.github.io/cvmdata/</a>. The exported API is grouped into five families:</p>
 <ul>
 <li>
-<strong>Fetcher</strong> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> is the single function for every dataset and table; the groups still on the roadmap (funds, agents, offerings, events) will extend it through their schemas. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>, the entry point of earlier releases, is deprecated and will be removed in a later release.</li>
+<strong>Fetcher</strong> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> is the single function for every dataset and table; the groups still on the roadmap (funds, agents, offerings, events) will extend it through their schemas. <code><a href="reference/cvm_versions.html">cvm_versions()</a></code> returns every known version of a filing. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>, the entry point of earlier releases, is deprecated and will be removed in a later release.</li>
 <li>
 <strong>Discovery</strong> — <code><a href="reference/cvm_groups.html">cvm_groups()</a></code>, <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="reference/cvm_tables.html">cvm_tables()</a></code>, <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code>, <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code>.</li>
 <li>

@@ -135,6 +135,21 @@
 <span>          validate <span class="op">=</span> <span class="st">"strict"</span>,</span>
 <span>          <span class="va">...</span><span class="op">)</span>                  <span class="co"># reservado: qualquer extra aborta</span></span>
 <span></span>
+<span><span class="co"># Todas as versões de um documento (Parte 3 das versões, 2026-10-24,</span></span>
+<span><span class="co"># Forma B: função separada; cvm_fetch() segue devolvendo só a vigente).</span></span>
+<span><span class="co"># Assinatura = a parte de cvm_fetch() que IDENTIFICA o documento; recusa</span></span>
+<span><span class="co"># por nome reading / from / to / as_of (filtros da leitura vigente).</span></span>
+<span><span class="co"># Só tabelas com `keep_latest_version` no YAML; outra = cvmdata_error_input.</span></span>
+<span><span class="co"># Colunas da tabela (+ year, basis) + superseded_at (Date),</span></span>
+<span><span class="co"># superseded_by_versao, history_source ("current" na vigente; "rad" /</span></span>
+<span><span class="co"># "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao.</span></span>
+<span><span class="co"># source = "mirror": part-N ∪ __history por union_by_name (DuckDB);</span></span>
+<span><span class="co"># source = "cvm": CSV anual SEM keep_latest_version + cli_inform de que</span></span>
+<span><span class="co"># o CSV guarda só parte das versões (completo só no espelho/RAD).</span></span>
+<span><span class="fu"><a href="reference/cvm_versions.html">cvm_versions</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, cnpj <span class="op">=</span> <span class="cn">NULL</span>, ticker <span class="op">=</span> <span class="cn">NULL</span>, year <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>             basis <span class="op">=</span> <span class="cn">NULL</span>, source <span class="op">=</span> <span class="cn">NULL</span>, on_error <span class="op">=</span> <span class="st">"abort"</span>,</span>
+<span>             validate <span class="op">=</span> <span class="st">"strict"</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># Deprecada (wrapper com aviso; remoção em release futura)</span></span>
 <span><span class="fu"><a href="reference/issuer_fetch.html">issuer_fetch</a></span><span class="op">(</span><span class="va">dataset</span>, <span class="va">table</span>, issuer <span class="op">=</span> <span class="cn">NULL</span>, year <span class="op">=</span> <span class="cn">NULL</span>, source <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>             report_type <span class="op">=</span> <span class="cn">NULL</span>, on_error <span class="op">=</span> <span class="st">"abort"</span>, validate <span class="op">=</span> <span class="st">"strict"</span>, <span class="va">...</span><span class="op">)</span></span>

@@ -110,6 +110,21 @@ texto / ticker; `report_type`), até ser removida.
 `          validate ``=`` ``"strict"``,`\
 `          ``...``)``                  ``# reservado: qualquer extra aborta`\
 \
+`# Todas as versões de um documento (Parte 3 das versões, 2026-10-24,`\
+`# Forma B: função separada; cvm_fetch() segue devolvendo só a vigente).`\
+`# Assinatura = a parte de cvm_fetch() que IDENTIFICA o documento; recusa`\
+`# por nome reading / from / to / as_of (filtros da leitura vigente).`\
+`` # Só tabelas com `keep_latest_version` no YAML; outra = cvmdata_error_input. ``\
+`# Colunas da tabela (+ year, basis) + superseded_at (Date),`\
+`# superseded_by_versao, history_source ("current" na vigente; "rad" /`\
+`# "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao.`\
+`# source = "mirror": part-N ∪ __history por union_by_name (DuckDB);`\
+`# source = "cvm": CSV anual SEM keep_latest_version + cli_inform de que`\
+`# o CSV guarda só parte das versões (completo só no espelho/RAD).`\
+[`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(``dataset``, ``table``, cnpj ``=`` ``NULL``, ticker ``=`` ``NULL``, year ``=`` ``NULL``,`\
+`             basis ``=`` ``NULL``, source ``=`` ``NULL``, on_error ``=`` ``"abort"``,`\
+`             validate ``=`` ``"strict"``, ``...``)`\
+\
 `# Deprecada (wrapper com aviso; remoção em release futura)`\
 [`issuer_fetch`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)`(``dataset``, ``table``, issuer ``=`` ``NULL``, year ``=`` ``NULL``, source ``=`` ``NULL``,`\
 `             report_type ``=`` ``NULL``, on_error ``=`` ``"abort"``, validate ``=`` ``"strict"``, ``...``)`\

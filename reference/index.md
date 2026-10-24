@@ -2,12 +2,18 @@
 
 ## Fetcher
 
-One function retrieves any CVM open-data table covered by the package.
+One function retrieves any CVM open-data table covered by the package;
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+returns every known version of a filing.
 [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-is its deprecated predecessor and will be removed in a later release.
+is the deprecated predecessor of
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+and will be removed in a later release.
 
 - [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   : Fetch a CVM open-data table
+- [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  : Every known version of a filing
 - [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
   : Fetch a CVM open-data table for an issuer dataset (deprecated)
 

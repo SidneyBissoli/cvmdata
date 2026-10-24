@@ -119,6 +119,24 @@ filed and the comparative in the following year’s file:
 `  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)`\
 `)`
 
+A filing may be re-filed, and
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+returns the current version.
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+returns every known version, the current one included, each superseded
+version dated and pointing at the version that replaced it (Braskem
+filed its 2023 income statement three times; version 1 was in R\$ units
+by mistake):
+
+\
+`brkm`` ``<-`` `[`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"dre"``,`\
+`  cnpj    ``=`` ``"42.150.391/0001-70"``,`\
+`  year    ``=`` ``2023``,`\
+`  basis   ``=`` ``"con"`\
+`)`
+
 Parse and format Brazilian corporate taxpayer IDs (CNPJ):
 
 \
@@ -137,6 +155,8 @@ The exported API is grouped into five families:
   is the single function for every dataset and table; the groups still
   on the roadmap (funds, agents, offerings, events) will extend it
   through their schemas.
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  returns every known version of a filing.
   [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
   the entry point of earlier releases, is deprecated and will be removed
   in a later release.

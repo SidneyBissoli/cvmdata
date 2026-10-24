@@ -216,8 +216,17 @@ varchar
 <span>  basis   <span class="op">=</span> <span class="st">"con"</span>,</span>
 <span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Limpe e formate CNPJs:</p>
+<p>Um documento pode ser reapresentado, e <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> devolve a versão vigente. <code><a href="reference/cvm_versions.html">cvm_versions()</a></code> devolve todas as versões conhecidas, a vigente incluída, cada versão substituída datada e apontando para a que a substituiu (a Braskem entregou a DRE de 2023 três vezes; a versão 1 estava em R$ unidades por engano):</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">brkm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_versions.html">cvm_versions</a></span><span class="op">(</span></span>
+<span>  dataset <span class="op">=</span> <span class="st">"dfp"</span>,</span>
+<span>  table   <span class="op">=</span> <span class="st">"dre"</span>,</span>
+<span>  cnpj    <span class="op">=</span> <span class="st">"42.150.391/0001-70"</span>,</span>
+<span>  year    <span class="op">=</span> <span class="fl">2023</span>,</span>
+<span>  basis   <span class="op">=</span> <span class="st">"con"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Limpe e formate CNPJs:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
@@ -227,7 +236,7 @@ varchar
 <h2 id="documentação">Documentação<a class="anchor" aria-label="anchor" href="#documenta%C3%A7%C3%A3o"></a></h2>
 <p>Referência e artigos em <a href="https://sidneybissoli.github.io/cvmdata/" class="uri">https://sidneybissoli.github.io/cvmdata/</a>. A API exportada está agrupada em cinco famílias:</p>
 <ul><li>
-<strong>Fetcher</strong> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> é a função única para qualquer dataset e tabela; os grupos ainda no roadmap (fundos, agentes, ofertas, eventos) vão estendê-la pelos seus schemas. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>, o entry point das versões anteriores, está depreciada e será removida em uma release futura.</li>
+<strong>Fetcher</strong> — <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code> é a função única para qualquer dataset e tabela; os grupos ainda no roadmap (fundos, agentes, ofertas, eventos) vão estendê-la pelos seus schemas. <code><a href="reference/cvm_versions.html">cvm_versions()</a></code> devolve todas as versões conhecidas de um documento. <code><a href="reference/issuer_fetch.html">issuer_fetch()</a></code>, o entry point das versões anteriores, está depreciada e será removida em uma release futura.</li>
 <li>
 <strong>Discovery</strong> — <code><a href="reference/cvm_groups.html">cvm_groups()</a></code>, <code><a href="reference/cvm_datasets.html">cvm_datasets()</a></code>, <code><a href="reference/cvm_tables.html">cvm_tables()</a></code>, <code><a href="reference/cvm_dictionary.html">cvm_dictionary()</a></code>, <code><a href="reference/cvm_codelist.html">cvm_codelist()</a></code>, <code><a href="reference/cvm_dataset_years.html">cvm_dataset_years()</a></code>.</li>
 <li>

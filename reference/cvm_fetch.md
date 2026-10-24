@@ -241,6 +241,11 @@ an earlier filing than the last delivery keeps the CVM numbers and warns
 (`cvmdata_warn_stale_filing`). Set
 `options(cvmdata.check_filings = FALSE)` to skip these checks.
 
+## See also
+
+Other fetchers:
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+
 ## Examples
 
 ``` r
