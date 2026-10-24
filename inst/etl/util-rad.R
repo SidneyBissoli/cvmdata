@@ -228,9 +228,13 @@ rad_document_url <- function(id_doc) {
 # time, and a document with a huge embedded PDF never fitted: NEXPE DFP
 # 2021 (59 MB received in 180 s) and Orizon DFP 2020 (126 MB) failed on
 # every attempt. Decision of 2026-10-23: a stalled connection is the
-# failure, size is not.
+# failure, size is not. The window was 60 s on the first full round
+# (2026-10-24): 29 downloads died of it in one day (16 dfp, 13 itr) and
+# 14 of the 16 dfp passed whole on the next attempt — the RAD stops
+# sending for more than a minute and resumes. Decision of 2026-10-24:
+# 180 s, the ceiling unchanged.
 rad_download_stall_bps <- 1024
-rad_download_stall_secs <- 60
+rad_download_stall_secs <- 180
 rad_download_timeout <- 900
 
 rad_download_request <- function(id_doc, timeout = rad_download_timeout) {
