@@ -9,8 +9,11 @@ and 'fre' (reference form, including ESG/governance tables). Column
 names, table names, categorical values and free text are preserved in
 Portuguese as published by 'CVM'; function names, arguments and metadata
 attributes are in English following the rOpenSci and tidyverse
-conventions. Future releases will expand coverage to investment funds
-and other regulated entity classes.
+conventions. By default data is read from a weekly refreshed 'Parquet'
+mirror of the portal maintained by the package author in 'GitHub'
+Releases; the official portal can be read directly instead. Future
+releases will expand coverage to investment funds and other regulated
+entity classes.
 
 ## See also
 

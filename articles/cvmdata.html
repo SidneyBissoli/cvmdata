@@ -80,13 +80,24 @@
 </h2>
 <p><code>cvmdata</code> provides a tidy R API to the open data published
 by the Brazilian Securities and Exchange Commission — <em>Comissão de
-Valores Mobiliários</em> (CVM). It fetches official CSV releases from
-the CVM portal at <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>, parses them respecting the
+Valores Mobiliários</em> (CVM), published at <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>. It returns tibbles whose
+<strong>table names, column names and categorical values are preserved
+in Portuguese</strong> exactly as published by CVM. Function names,
+arguments and metadata attributes are in English, following the rOpenSci
+and tidyverse conventions.</p>
+<p>By default the package does <strong>not</strong> read the CVM portal
+on each call. It reads a <em>mirror</em> of the portal: Parquet
+snapshots of the CVM files, converted by an automated pipeline and
+published weekly in the package’s GitHub Releases by the package author
+(<code>source = "mirror"</code>). The official portal is one argument
+away — <code>source = "cvm"</code> on any call, or
+<code>cvm_source_set("cvm")</code> for the session — and is what the
+mirror itself is built from: the CSV files are parsed respecting the
 upstream encoding (<code>ISO-8859-1</code>) and the published field
-conventions, and returns tibbles whose <strong>table names, column names
-and categorical values are preserved in Portuguese</strong> exactly as
-published by CVM. Function names, arguments and metadata attributes are
-in English, following the rOpenSci and tidyverse conventions.</p>
+conventions. The CVM publishes these datasets under the Open Database
+License (ODbL) and the mirror is redistributed under the same licence;
+see the <code>DATA-LICENSE.md</code> file in the repository and the
+<em>Cache and mirror backend</em> article for details.</p>
 <p>The package’s first release covers four core publicly-traded-company
 datasets:</p>
 <table class="table">
@@ -131,8 +142,9 @@ datasets:</p>
 <p>The simplest entry point is
 <code>cvm_fetch("cad", "companhias")</code>. It returns the current
 snapshot of the open-company registry. The chunk below loads a small
-slice of a real call pre-computed for this vignette (the package itself
-hits the CVM portal on every invocation):</p>
+slice of a real call pre-computed for this vignette (a real call reads
+the mirror, or the CVM portal with <code>source = "cvm"</code>, so the
+vignette stays offline):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">companies</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
 <span>  <span class="st">"extdata"</span>, <span class="st">"vignette-data"</span>, <span class="st">"cad_companhias_sample.rds"</span>,</span>

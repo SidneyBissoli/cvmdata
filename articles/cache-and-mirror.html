@@ -122,6 +122,34 @@ explicit <code>source = ...</code> argument to <code><a href="../reference/cvm_f
 wins over the option <code>cvmdata.source</code> (set via
 <code><a href="../reference/cvm_source_set.html">cvm_source_set()</a></code>), which in turn wins over the built-in
 default returned by <code><a href="../reference/cvm_source_get.html">cvm_source_get()</a></code>.</p>
+<p>The mirror is maintained by the package author, not by the CVM. Its
+content is the CVM’s, re-encoded to UTF-8, typed according to the CVM
+data dictionary and partitioned by year; no value is altered. Two
+consequences are worth knowing before you rely on the default. First,
+the mirror can lag the portal by up to the weekly refresh window.
+Second, the ETL skips a year whose CSV the CVM publishes with no data
+rows, so the mirror’s inventory for a table may end earlier than the
+portal’s list of years (the <code>cvm</code> backend returns such a year
+as zero rows instead).</p>
+</div>
+<div class="section level3">
+<h3 id="data-licence-and-attribution">Data licence and attribution<a class="anchor" aria-label="anchor" href="#data-licence-and-attribution"></a>
+</h3>
+<p>The CVM publishes every dataset covered by the package under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" class="external-link">Open Data Commons
+Open Database License (ODbL) v1.0</a>, declared on each dataset page of
+the portal. The mirror is a <em>derivative database</em> in the terms of
+that licence and is redistributed under the ODbL as well; the release
+notes of every <code>mirror-*-latest</code> release carry the notice.
+When you redistribute data obtained through <code>cvmdata</code>, or a
+database derived from it, keep the attribution:</p>
+<blockquote>
+<p>Contains data from the Comissão de Valores Mobiliários (CVM) Open
+Data Portal, <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>, made available under the Open
+Data Commons Open Database License (ODbL) v1.0.</p>
+</blockquote>
+<p>The full notice, with what the licence asks of you, is in the
+repository’s <a href="https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md" class="external-link"><code>DATA-LICENSE.md</code></a>.
+The package code is MIT licensed; the data is not.</p>
 </div>
 <div class="section level3">
 <h3 id="cache-layers">Cache layers<a class="anchor" aria-label="anchor" href="#cache-layers"></a>

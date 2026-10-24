@@ -16,6 +16,17 @@ free text in Portuguese exactly as CVM publishes them. Function names,
 arguments and metadata attributes follow English-language rOpenSci and
 tidyverse conventions.
 
+**Where the data comes from.** By default, `cvmdata` does *not* read the
+CVM portal on every call: it reads a **mirror** of the portal — Parquet
+snapshots of the CVM files, maintained by the package author in this
+repository’s [GitHub
+Releases](https://github.com/SidneyBissoli/cvmdata/releases) and
+refreshed weekly by an automated pipeline. Pass `source = "cvm"` (or
+call `cvm_source_set("cvm")`) to read the official portal directly. The
+CVM publishes these datasets under the Open Database License (ODbL) and
+the mirror is redistributed under the same licence; see [Data provenance
+and licence](#data-provenance-and-licence) below.
+
 ## Why cvmdata
 
 CVM publishes filings as yearly ZIPs of CSVs with mixed encodings,
@@ -184,23 +195,41 @@ The exported API is grouped into five families:
   [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
   [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
 
-## Data provenance
+## Data provenance and licence
 
-Data is fetched from the official CVM Open Data Portal
-(<https://dados.cvm.gov.br/>). The active backend is selectable via
+All data originates from the official CVM Open Data Portal
+(<https://dados.cvm.gov.br/>). The package reaches it through one of two
+backends, selectable via
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
-(or the `source` argument of
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
+or the `source` argument of
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md):
 
-- `"mirror"` (default from v0.1.0) — parquet snapshots in GitHub
-  Releases queried via DuckDB with year-partition filter pushdown,
-  refreshed weekly by an ETL workflow in this repo.
+- `"mirror"` (**the default** since v0.1.0) — Parquet snapshots of the
+  CVM files published in this repository’s GitHub Releases
+  (`mirror-<group>-<dataset>-latest`) and queried via DuckDB with
+  year-partition filter pushdown. The mirror is produced and refreshed
+  weekly by the ETL under `inst/etl/`, maintained by the package author,
+  not by the CVM. It is typically ~30× faster than the portal; its
+  staleness is bounded by the weekly refresh. The mirror omits a year
+  when the CVM publishes that year’s CSV with no data rows.
 - `"cvm"` — HTTP directly to the CVM Open Data Portal. Opt in when
-  byte-level freshness against the regulator is required.
+  byte-level freshness against the regulator is required, or when you
+  prefer not to depend on a third-party mirror.
 
 Every returned tibble carries provenance attributes (`source`,
 `fetched_at`, `group`, `dataset`, `table`, `package_version`) so a
 downstream caller can audit which backend served the data.
+
+**Licence of the data.** The CVM publishes every dataset covered by
+`cvmdata` under the [Open Data Commons Open Database License (ODbL)
+v1.0](https://opendatacommons.org/licenses/odbl/1-0/). The mirror is a
+derivative database in the terms of that licence and is redistributed
+under the ODbL as well. Attribution for the data: *“Contains data from
+the Comissão de Valores Mobiliários (CVM) Open Data Portal,
+<https://dados.cvm.gov.br/>, under the ODbL v1.0.”* Details, including
+what the licence asks of you when you redistribute the data, are in
+[`DATA-LICENSE.md`](https://sidneybissoli.github.io/cvmdata/DATA-LICENSE.md).
+The package **code** is MIT licensed.
 
 ## Related work
 
