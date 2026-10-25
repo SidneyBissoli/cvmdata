@@ -505,3 +505,39 @@ test_that("a verified inventory evicts only the history copies", {
     "h2"
   )
 })
+
+# The sidecar as GitHub serves it ------------------------------------------
+
+test_that("the sidecar is parsed when served as application/octet-stream", {
+  skip_if_not_installed("jsonlite")
+  # GitHub release assets come with this content type; httr2 refuses to
+  # parse JSON under it by default, and until 2026-10-25 the refusal was
+  # swallowed into `hash = NA`, so no client ever read the sidecar.
+  payload <- jsonlite::toJSON(
+    list(
+      hash = "h25",
+      snapshot = "2026-10-25",
+      snapshots = "2026-10-25",
+      releases = stats::setNames(list(s27), bpa_rel),
+      files = stats::setNames(list(list(sha256 = "abc", size = 10)), bpa_rel)
+    ),
+    auto_unbox = TRUE
+  )
+  mock <- function(req) {
+    httr2::response(
+      status_code = 200L,
+      headers = list("Content-Type" = "application/octet-stream"),
+      body = charToRaw(as.character(payload))
+    )
+  }
+  sidecar <- httr2::with_mocked_responses(
+    mock,
+    cvmdata:::mirror_read_sidecar("https://example.test/__source_hash.json")
+  )
+  expect_identical(sidecar$hash, "h25")
+  expect_identical(sidecar$snapshot, "2026-10-25")
+  # A single date is written by jsonlite as a scalar.
+  expect_identical(sidecar$snapshots, "2026-10-25")
+  expect_identical(sidecar$releases[[bpa_rel]], s27)
+  expect_identical(sidecar$files[[bpa_rel]]$sha256, "abc")
+})
