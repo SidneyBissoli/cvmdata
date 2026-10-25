@@ -130,7 +130,11 @@ the mirror can lag the portal by up to the weekly refresh window.
 Second, the ETL skips a year whose CSV the CVM publishes with no data
 rows, so the mirror’s inventory for a table may end earlier than the
 portal’s list of years (the <code>cvm</code> backend returns such a year
-as zero rows instead).</p>
+as zero rows instead). Every skip is recorded, with its reason, in the
+<code>__source_hash.json</code> sidecar of the release, and the error
+you get when asking the mirror for a missing year quotes it: whether the
+CVM published the CSV with the header only, or did not include it in the
+yearly ZIP at all.</p>
 </div>
 <div class="section level3">
 <h3 id="data-licence-and-attribution">Data licence and attribution<a class="anchor" aria-label="anchor" href="#data-licence-and-attribution"></a>

@@ -649,13 +649,18 @@ acumulativo `<table>__report_type=R__year=Y__history.parquet`, que nunca
 é apagado como stale. Só tabelas com `keep_latest_version` têm
 histórico; o `-latest` não muda; o cliente ignora o asset (o parser
 recusa o nome); o JSON ganha o mapa `history` (partição → sha256),
-`hash` mantém o significado. `03-publish.R --dry-run` = smoke local sem
-tocar o release. Fora do repo, o portfolio-monitor
-(`R/collect_vigia_mirror_cvm.R`) confere toda semana, sem credencial, a
-última entrega de cada dataset na CVM contra a do espelho, e abre o item
-`cvmdata:mirror-atrasado` no painel quando falta entrega há mais de 7
-dias ou o release não abre anônimo — é o alarme que faltou de junho a
-outubro/2026. Encoding dos asset names:
+`hash` mantém o significado. Desde 2026-10-25 o JSON leva também `skips`
+(manifesto de pulos do stage 02: table/year/report_type/reason ∈ {empty,
+absent}); `mirror_fetch_sidecar()` lê, `attr(inventory, "skips")`
+guarda, e `mirror_skip_bullets()` cita no erro “No parquet assets
+match”. NUNCA asset novo no release: `parse_mirror_asset_name()` aborta
+em qualquer nome que não seja parquet ou `__source_hash.json`.
+`03-publish.R --dry-run` = smoke local sem tocar o release. Fora do
+repo, o portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere toda
+semana, sem credencial, a última entrega de cada dataset na CVM contra a
+do espelho, e abre o item `cvmdata:mirror-atrasado` no painel quando
+falta entrega há mais de 7 dias ou o release não abre anônimo — é o
+alarme que faltou de junho a outubro/2026. Encoding dos asset names:
 `<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
 GitHub Releases sanitiza `=` → `.` no URL público;
 `parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.
