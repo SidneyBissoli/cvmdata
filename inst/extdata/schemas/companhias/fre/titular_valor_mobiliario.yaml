@@ -2,6 +2,15 @@
 # FRE detail table. Detail tables usam convencao cnpj_companhia /
 # data_referencia / nome_companhia (CLAUDE.md Sec.2.2).
 # Empirical verification: 2024 snapshot.
+#
+# 2026: the CSV is NOT in fre_cia_aberta_2026.zip (34 CSVs; the other
+# 34 package tables are there), while the CVM's data dictionary still
+# lists it and Res. CVM 80, Anexo C, item 12.4 (ex-18.5 A) still asks
+# for the data. Rows had already thinned: 540 (446 companies) in 2024,
+# 163 (138 companies) in 2025, against ~700 filers. Read as a CVM export
+# failure, not a rule change, so no `empty_from` here (measured
+# 2026-10-25; reported to the CVM). The mirror's skip manifest records
+# 2026 as "absent".
 
 dataset: fre
 table: titular_valor_mobiliario

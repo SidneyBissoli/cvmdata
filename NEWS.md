@@ -314,6 +314,18 @@
   Until now `year = NULL` returned 2023 from the mirror and zero rows
   from the portal with no explanation.
 
+* The mirror now says why a partition is missing. The ETL already
+  recorded every (table, year, basis) it wrote no parquet for, with the
+  reason — `empty` when the CVM publishes the CSV with the header only,
+  `absent` when the CSV is not in the yearly ZIP — but kept the record
+  to itself. It now travels inside the `__source_hash.json` sidecar of
+  each release (no new asset, so existing installations keep working),
+  and the "no parquet assets match" error quotes it for the years it
+  covers. First case it explains: `fre/mercado_estrangeiro` and
+  `fre/titular_valor_mobiliario` have no CSV in the CVM's 2026 ZIP,
+  although the dictionary still lists them and Resolução CVM 80 still
+  asks for the data (items 12.6 and 12.4 of Anexo C).
+
 ## Documentation
 
 * The data licence is now stated. The CVM publishes every dataset the

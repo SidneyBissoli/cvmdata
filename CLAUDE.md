@@ -611,7 +611,12 @@ versão); as linhas das entregas trocadas ou sumidas vão, com
 como stale. Só tabelas com `keep_latest_version` têm histórico; o
 `-latest` não muda; o cliente ignora o asset (o parser recusa o nome);
 o JSON ganha o mapa `history` (partição → sha256), `hash` mantém o
-significado. `03-publish.R --dry-run` = smoke local sem tocar o release.
+significado. Desde 2026-10-25 o JSON leva também `skips` (manifesto de
+pulos do stage 02: table/year/report_type/reason ∈ {empty, absent});
+`mirror_fetch_sidecar()` lê, `attr(inventory, "skips")` guarda, e
+`mirror_skip_bullets()` cita no erro "No parquet assets match". NUNCA
+asset novo no release: `parse_mirror_asset_name()` aborta em qualquer
+nome que não seja parquet ou `__source_hash.json`. `03-publish.R --dry-run` = smoke local sem tocar o release.
 Fora do repo, o portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere
 toda semana, sem credencial, a última entrega de cada dataset na CVM
 contra a do espelho, e abre o item `cvmdata:mirror-atrasado` no painel

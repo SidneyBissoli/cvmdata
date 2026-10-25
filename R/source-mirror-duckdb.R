@@ -67,6 +67,15 @@ source_mirror_duckdb_get <- function(
     kind = if (isTRUE(history)) c("current", "history") else "current"
   )
   if (!nrow(matches)) {
+    # The release's skip manifest, when it covers the request, says
+    # exactly what the ETL found in the CVM's ZIP; the generic bullet
+    # stays for years the manifest does not cover.
+    recorded <- mirror_skip_bullets(
+      inventory,
+      table,
+      resolved_years,
+      report_type
+    )
     cvmdata_abort(
       c(
         paste(
@@ -78,8 +87,10 @@ source_mirror_duckdb_get <- function(
           "for {.code year = {format_years(resolved_years)}}",
           "{.code report_type = {format_chr(report_type)}}."
         ),
+        recorded,
         "i" = paste(
-          "The CVM may not publish the table for that year (a table",
+          if (length(recorded)) "Otherwise," else "",
+          "the CVM may not publish the table for that year (a table",
           "can start later or stop earlier than its dataset), or the",
           "mirror may not have it yet; {.code source = \"cvm\"} reads",
           "the portal directly."

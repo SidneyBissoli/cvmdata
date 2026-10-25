@@ -26,10 +26,13 @@ fake_release <- function(entries, base = "https://example.test") {
 #   - Returns the fake release JSON for the API URL.
 #   - Returns parquet bytes (or 404) for asset GETs.
 #   - Returns a fake __source_hash.json body when one is requested.
+#   - `skips`: optional data frame (table, year, report_type, reason)
+#     carried by the fake `__source_hash.json` as the ETL's skip manifest.
 build_mock <- function(
   entries,
   hash = NA_character_,
-  base = "https://example.test"
+  base = "https://example.test",
+  skips = NULL
 ) {
   body <- fake_release(entries, base = base)
   function(req) {
@@ -41,10 +44,11 @@ build_mock <- function(
       if (is.na(hash)) {
         return(httr2::response(404L))
       }
-      return(httr2::response_json(
-        status_code = 200L,
-        body = list(hash = hash, components = list())
-      ))
+      sidecar <- list(hash = hash, components = list())
+      if (!is.null(skips)) {
+        sidecar$skips <- skips
+      }
+      return(httr2::response_json(status_code = 200L, body = sidecar))
     }
     hit <- NULL
     for (e in entries) {
