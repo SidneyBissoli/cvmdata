@@ -1372,13 +1372,13 @@ test_that("per-share values in scientific notation read as the CSV has them", {
   expect_equal(got("3.99.01.01", "2020-01-01"), 2400)
 })
 
-test_that("a document under a branch's CNPJ is set aside (for now)", {
+test_that("a document under a branch's CNPJ is the company's", {
   load_etl_rad()
   # Pacaembu Construtora, ITR 2020-09-30 v1 (id 98410): the index lists
   # the head office (0001-68), the document carries a branch (0002-49),
   # same root and same CVM code. The CSV keeps v2 (id 98861) under the
-  # head office. Pinned as it is until the owner decides whether the
-  # root of the CNPJ is enough.
+  # head office. Decision of 2026-10-25: same root and same CVM code is
+  # the same company; the rows carry the index's identity.
   f <- filing_row(
     "96.298.013/0001-68",
     "2020-09-30",
@@ -1388,9 +1388,25 @@ test_that("a document under a branch's CNPJ is set aside (for now)", {
     "98410"
   )
   r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  expect_true("bpa/ind" %in% names(r$tables))
+  expect_identical(
+    unique(r$tables[["bpa/ind"]]$cnpj_cia),
+    "96.298.013/0001-68"
+  )
+  # the same root with another CVM code is another document
+  other <- f
+  other$cd_cvm <- "099999"
+  r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), other)
   expect_match(
     r$problems,
     "cnpj in the document \\(96298013000249\\) differs from the index"
   )
+  expect_true(r$index_mismatch)
+  # and another root is another company, whatever the CVM code
+  other <- f
+  other$cnpj_cia <- "11.222.333/0001-81"
+  r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), other)
   expect_true(r$index_mismatch)
 })
