@@ -64,7 +64,13 @@ cvm_fetch(
   Integer vector of years to fetch, as the CVM publishes them (one file
   per year). `NULL` (default) fetches the latest available year. Must be
   `NULL` for datasets with `temporal_partitioning: none` (e.g. CAD), and
-  cannot be combined with `from`/`to`.
+  cannot be combined with `from`/`to`. Years the table is not published
+  for are refused before any download: years before the table's first
+  year, and years from which the CVM publishes its CSV with the header
+  only (`fca/departamento_acionistas` from 2024, after Resolução CVM
+  59/2021 revoked the block). For such a table, `year = NULL` warns
+  (`cvmdata_warn_empty_upstream`): the mirror returns the last year with
+  content, the portal returns the latest file, which has zero rows.
 
 - from, to:
 

@@ -319,6 +319,23 @@
   failure. A parquet that is missing without a recorded reason still
   hard-fails. Fixes the red `dfp`/`itr`/`fre` mirror jobs.
 
+### New features
+
+- A table the CVM publishes without content from some year on is now
+  handled like a table that starts late. The schema records the year
+  (`empty_from`) and the reason (`empty_reason`); today only
+  `fca/departamento_acionistas`, whose CSV has the header only since
+  2024 because Resolução CVM 59/2021 revoked item 6 of the Formulário
+  Cadastral (in force since 2023-01-02; 546 rows in 2023, zero from 2024
+  on). An explicit `year` from that year on is refused before any
+  download (`cvmdata_error_input`, as for a year before `first_year`), a
+  `from`/`to` window drops those years with a message, and `year = NULL`
+  warns (`cvmdata_warn_empty_upstream`) that the latest year has no
+  content: the mirror returns the last year with content, the portal
+  returns the latest file as published, with zero rows. Until now
+  `year = NULL` returned 2023 from the mirror and zero rows from the
+  portal with no explanation.
+
 ### Documentation
 
 - The data licence is now stated. The CVM publishes every dataset the

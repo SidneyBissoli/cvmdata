@@ -202,7 +202,14 @@ Domínio dos argumentos enumerados (validados via
 
   2023\) = `cvmdata_error_input` antes de baixar
   (`check_published_years()`); em janela `from`/`to`, os anos
-  inexistentes caem com `cli_inform`.
+  inexistentes caem com `cli_inform`. Simétrico (decisão A do dono,
+  2026-10-24): `empty_from`/`empty_reason` no YAML marcam a tabela que a
+  CVM publica só com cabeçalho desde um ano (hoje só
+  `fca/departamento_acionistas`: 2024, item 6 do Formulário Cadastral
+  revogado pela Res. CVM 59/2021); anos ≥ `empty_from` são recusados do
+  mesmo jeito, janela corta com aviso, e `year = NULL` emite
+  `cvmdata_warn_empty_upstream` — espelho devolve o último ano com dado,
+  portal devolve o arquivo mais recente com zero linhas.
 
 - `from`/`to` (só em
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
@@ -521,6 +528,11 @@ depois delega a [`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
     │                                       cópias idênticas removidas)
     ├── cvmdata_warn_conflicting_filing    (DFP/ITR: cópias da mesma entrega
     │                                       com vl_conta diferente; mantidas)
+    ├── cvmdata_warn_empty_upstream        (year = NULL em tabela com
+    │                                       `empty_from` no YAML: a CVM publica
+    │                                       o CSV só com cabeçalho desde esse
+    │                                       ano; espelho devolve o último ano
+    │                                       com dado, portal devolve zero linhas)
     └── cvmdata_warn_stale_filing          (a tabela traz entrega anterior à
                                             última do índice submissao)
 
@@ -557,12 +569,14 @@ Schema do YAML por tabela: campos canônicos (`dataset`, `table`,
 `cvm_archive_url_pattern` xor `cvm_file_url_pattern`,
 `cvm_file_pattern`, `cvm_dictionary_url`, `meta_status`, `encoding`,
 `delimiter`, `temporal_partitioning ∈ {none, yearly}`, `first_year`,
-`expected_field_count`, `expected_field_names`, `transformations`).
-Domínio de `action` em `transformations`: `multiply_by_scale` (requer
-`scale_column:`), `drop`, `keep_latest_version` (aceita `keys: [...]`
-opcional para compor chaves extras com a dupla implícita `(cnpj, data)`
-— usado em `cgvn/praticas` com `keys: [id_item]`). Detalhes no naming
-doc v03 e no loader (`R/schema-load.R`).
+`empty_from` + `empty_reason` (opcionais; ano a partir do qual o CSV vem
+só com cabeçalho, e por quê), `expected_field_count`,
+`expected_field_names`, `transformations`). Domínio de `action` em
+`transformations`: `multiply_by_scale` (requer `scale_column:`), `drop`,
+`keep_latest_version` (aceita `keys: [...]` opcional para compor chaves
+extras com a dupla implícita `(cnpj, data)` — usado em `cgvn/praticas`
+com `keys: [id_item]`). Detalhes no naming doc v03 e no loader
+(`R/schema-load.R`).
 
 ------------------------------------------------------------------------
 
