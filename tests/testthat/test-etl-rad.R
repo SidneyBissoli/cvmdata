@@ -704,6 +704,13 @@ test_that("the queue holds the superseded deliveries, newest year first", {
     rad_queue(index, rad_empty_state("dfp"), year = 2023)$id_doc,
     "30"
   )
+  # `reread` takes only the listed documents, done or spent alike, with
+  # the supersession of the index; a current delivery never enters
+  state$unread[["10"]]$reader <- rad_reader_id
+  q <- rad_queue(index, state, reread = c("11", "10"))
+  expect_identical(q$id_doc, c("11", "10"))
+  expect_identical(q$superseded_at, c("2025-08-01", "2025-03-10"))
+  expect_identical(nrow(rad_queue(index, state, reread = "999")), 0L)
 })
 
 test_that("history rows carry the RAD columns and merge once per version", {
@@ -750,6 +757,28 @@ test_that("history rows carry the RAD columns and merge once per version", {
   m4 <- rad_merge_history(prev, other)
   expect_identical(m4$n_added, nrow(bpa))
   expect_setequal(unique(m4$history$history_source), c("mirror", "rad"))
+  # a document read again REPLACES its own RAD rows: the old ones go, the
+  # new ones come in, the other documents' and the mirror's stay
+  good <- bpa
+  good$versao <- "2"
+  wrong <- good
+  wrong$vl_conta <- wrong$vl_conta * 1000
+  h <- rad_merge_history(m4$history, wrong)$history
+  expect_identical(nrow(h), 3L * nrow(bpa))
+  r <- rad_merge_history(h, good, replace = "15513")
+  expect_identical(nrow(r$history), nrow(h))
+  expect_identical(r$n_added, nrow(bpa))
+  mine <- r$history[r$history$id_doc %in% "15513", ]
+  expect_equal(sort(mine$vl_conta), sort(good$vl_conta))
+  expect_identical(sum(r$history$id_doc %in% "99"), nrow(bpa))
+  expect_identical(sum(r$history$history_source == "mirror"), nrow(bpa))
+  # without `replace` the same document is still skipped
+  expect_identical(rad_merge_history(h, good)$n_added, 0L)
+  # a history without id_doc loses nothing
+  expect_identical(
+    nrow(rad_merge_history(prev, other, replace = "99")$history),
+    2L * nrow(bpa)
+  )
 })
 
 test_that("the state round-trips and the unread list is legible", {
@@ -806,6 +835,11 @@ test_that("the command line of stage 04 parses", {
   expect_true(opts$dry_run)
   expect_identical(opts$group, "companhias")
   expect_identical(rad_parse_args(character())$limit, 300L)
+  expect_null(rad_parse_args(character())$reread)
+  expect_identical(
+    rad_parse_args(c("--dataset", "dfp", "--reread", "113302, 145564"))$reread,
+    c("113302", "145564")
+  )
 })
 
 test_that("plain integers parse and free text follows the CVM converter", {

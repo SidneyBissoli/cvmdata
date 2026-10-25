@@ -51,10 +51,15 @@
 # Usage:
 #   Rscript inst/etl/04-rad-fetch.R --group companhias --dataset dfp \
 #     [--limit 300] [--minutes 260] [--year 2024] [--dry-run]
+#     [--reread 113302]
 #
 # `--dry-run` reads and writes the parquets under
 # <workspace>/out/rad/<group>/<dataset>/ without touching the release.
 # `--year` restricts the queue to one reference year (smoke test).
+# `--reread` reads the listed documents again, done or not, and their
+# new rows REPLACE their RAD rows in the history (a document the reader
+# read wrong before a fix: Dommo DFP 2021 v1, id 113302, per-share
+# values with the decimal point lost, read before PR #42).
 #
 # Requires `gh` on PATH with a token (GITHUB_TOKEN on Actions). Setting
 # `options(cvmdata.etl_testing = TRUE)` loads the helpers and skips the
@@ -140,7 +145,8 @@ rad_queue <- function(
   index,
   state,
   year = NULL,
-  max_attempts = rad_max_attempts
+  max_attempts = rad_max_attempts,
+  reread = NULL
 ) {
   idx <- index[
     order(
@@ -175,7 +181,13 @@ rad_queue <- function(
     },
     logical(1)
   )]
-  keep <- !idx$id_doc %in% c(names(state$done), spent)
+  # `reread`: only these documents, done or not (a document the reader
+  # read WRONG before a fix; decision of 2026-10-25)
+  keep <- if (is.null(reread)) {
+    !idx$id_doc %in% c(names(state$done), spent)
+  } else {
+    idx$id_doc %in% reread
+  }
   idx <- idx[keep, , drop = FALSE]
   refer_year <- refer_year[keep]
   idx[order(refer_year, idx$dt_receb, decreasing = TRUE), , drop = FALSE]
@@ -297,7 +309,16 @@ rad_history_rel <- function(key, dt_refer) {
 # version: rows of an id_doc already there, or of a (cnpj, dt_refer,
 # versao) the mirror path already holds, are dropped. Returns
 # list(history, n_added, n_skipped).
-rad_merge_history <- function(previous, rows) {
+rad_merge_history <- function(previous, rows, replace = character()) {
+  if (
+    !is.null(previous) &&
+      length(replace) &&
+      all(c("id_doc", "history_source") %in% names(previous))
+  ) {
+    # a document read again replaces its own RAD rows, nothing else
+    old <- previous$id_doc %in% replace & previous$history_source %in% "rad"
+    previous <- previous[!old, , drop = FALSE]
+  }
   if (!is.null(previous)) {
     if (!"history_source" %in% names(previous)) {
       previous$history_source <- "mirror"
@@ -587,7 +608,14 @@ rad_fetch_one <- function(
 
 # Merges the rows of a checkpoint into the history assets. Returns
 # list(uploads, n_added, n_skipped, source_hash).
-rad_build_history <- function(by_rel, tag, prev_dir, hist_dir, source_hash) {
+rad_build_history <- function(
+  by_rel,
+  tag,
+  prev_dir,
+  hist_dir,
+  source_hash,
+  replace = character()
+) {
   uploads <- character()
   n_added <- 0L
   n_skipped <- 0L
@@ -601,7 +629,7 @@ rad_build_history <- function(by_rel, tag, prev_dir, hist_dir, source_hash) {
         call. = FALSE
       )
     }
-    merged <- rad_merge_history(previous, new_rows)
+    merged <- rad_merge_history(previous, new_rows, replace = replace)
     n_added <- n_added + merged$n_added
     n_skipped <- n_skipped + merged$n_skipped
     if (merged$n_added == 0L) {
@@ -684,7 +712,15 @@ rad_publish <- function(built, state, index, out_dir, tag, dry_run) {
   invisible(length(assets))
 }
 
-rad_main <- function(group, dataset, limit, minutes, year, dry_run) {
+rad_main <- function(
+  group,
+  dataset,
+  limit,
+  minutes,
+  year,
+  dry_run,
+  reread = NULL
+) {
   t_start <- Sys.time()
   tag <- mirror_tag_latest(group, dataset)
   work <- file.path(mirror_workspace(), "rad", group, dataset)
@@ -719,7 +755,7 @@ rad_main <- function(group, dataset, limit, minutes, year, dry_run) {
   if (is.null(index)) {
     stop("could not read the submissao index from the mirror", call. = FALSE)
   }
-  queue <- rad_queue(index, state, year = year)
+  queue <- rad_queue(index, state, year = year, reread = reread)
   message(sprintf(
     "[04-rad] index: %d deliveries; queue: %d (%d done, %d set aside)",
     nrow(index),
@@ -738,7 +774,8 @@ rad_main <- function(group, dataset, limit, minutes, year, dry_run) {
     limit = limit,
     minutes = minutes,
     t_start = t_start,
-    dry_run = dry_run
+    dry_run = dry_run,
+    reread = reread
   )
   res <- rad_run_checkpoints(queue, state, source_hash, ctx)
   tally <- res$tally
@@ -798,7 +835,8 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
       ctx$tag,
       ctx$prev_dir,
       ctx$hist_dir,
-      source_hash
+      source_hash,
+      replace = ctx$reread %||% character()
     )
     source_hash <- built$source_hash
     tally$rows <- tally$rows + built$n_added
@@ -846,7 +884,8 @@ rad_parse_args <- function(args) {
     limit = 300L,
     minutes = 260,
     year = NULL,
-    dry_run = FALSE
+    dry_run = FALSE,
+    reread = NULL
   )
   i <- 1L
   while (i <= length(args)) {
@@ -867,6 +906,8 @@ rad_parse_args <- function(args) {
       opts$minutes <- as.numeric(value)
     } else if (key == "--year") {
       opts$year <- as.integer(value)
+    } else if (key == "--reread") {
+      opts$reread <- trimws(strsplit(value, ",", fixed = TRUE)[[1L]])
     } else {
       i <- i + 1L
       next
@@ -893,6 +934,7 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
     opts$limit,
     opts$minutes,
     opts$year,
-    opts$dry_run
+    opts$dry_run,
+    opts$reread
   )
 }
