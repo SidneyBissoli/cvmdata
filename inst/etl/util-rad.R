@@ -427,6 +427,24 @@ rad_finish <- function(res, filing) {
   )
 }
 
+# A document filed under a BRANCH's CNPJ is the company's: the first
+# eight digits (the root, which identifies the company) and the CVM code
+# both match the index. Pacaembu Construtora, ITR 2020-09-30 v1 (id
+# 98410): the document carries 96.298.013/0002-49, the index and the CSV
+# the head office 0001-68, CVM code 025143 on both. Decision of the
+# owner, 2026-10-25: accepted; the rows carry the index's identity, as
+# every row does. A different root, or the same root with another CVM
+# code, is still another document.
+rad_same_company <- function(doc_cnpj, idx_cnpj, doc_cd, idx_cd) {
+  doc_cd <- rad_format_cd_cvm(doc_cd)
+  idx_cd <- rad_format_cd_cvm(idx_cd)
+  nchar(doc_cnpj) == 14L &&
+    nchar(idx_cnpj) == 14L &&
+    identical(substr(doc_cnpj, 1L, 8L), substr(idx_cnpj, 1L, 8L)) &&
+    !is.na(doc_cd) &&
+    identical(doc_cd, idx_cd)
+}
+
 # The identity of the filing comes from the index; the document is
 # checked against it. The version inside the document can differ from
 # the index (Travessia VI, DFP 2024: the index says 2, the XML says 1);
@@ -455,7 +473,11 @@ rad_apply_filing <- function(meta, filing) {
         )
       )
     }
-  } else if (nzchar(doc_cnpj) && doc_cnpj != idx_cnpj) {
+  } else if (
+    nzchar(doc_cnpj) &&
+      doc_cnpj != idx_cnpj &&
+      !rad_same_company(doc_cnpj, idx_cnpj, meta$cd_cvm, filing$cd_cvm)
+  ) {
     problems <- c(
       problems,
       sprintf(
