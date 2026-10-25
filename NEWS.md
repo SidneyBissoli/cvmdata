@@ -515,7 +515,13 @@
   filed under a branch's CNPJ (Pacaembu Construtora, ITR 2020-09-30 v1:
   0002-49 in the document, the head office 0001-68 in the index) is read
   when the CNPJ root and the CVM code both match the index; the rows
-  carry the index's identity.
+  carry the index's identity. Stage 04 gains `--reread <id_doc>` (and
+  the `reread` input of `etl-rad.yaml`): the listed documents are read
+  again, done or not, and their new rows replace their RAD rows in the
+  history. A sweep of the published history (2,953 documents with
+  per-share values) found one document read before the per-share fix
+  with the point lost: Dommo Energia DFP 2021 v1, stored at -1.2e19 per
+  share.
 
 * New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
