@@ -550,7 +550,15 @@
   the CSV has no consolidated DMPL row for any of them; and a fiscal
   year closing on 29 February (Camil DFP 2020-02-29) has its previous
   exercise closing on the 28th, as the CSV writes it, instead of
-  crashing the date arithmetic.
+  crashing the date arithmetic. Two ITR 2021-06-30 documents (Magazine
+  Luiza and Méliuz v1, set aside on 2026-10-25) write per-share values
+  whose decimal point was lost: `55E-2`, `-50000000000000001E-3`,
+  `-002`, `123`, where the CSV has 0.055, -0.005, -0.02 and 1.23. The
+  reader now reads scientific notation, a dot after a lone zero
+  (`-0.05`), and, in the per-share accounts (`3.99*`) only, puts the
+  lost point back after the first digit, as the CVM converter does;
+  measured against 15 other RAD documents, whose digits-only per-share
+  values are all `0`.
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
