@@ -503,8 +503,10 @@ rad_split <- function(rows) {
 # --- values -----------------------------------------------------------
 
 # Parses the three spellings. NA for anything else; "" is 0.
-rad_parse_number <- function(x) {
+# `per_share` flags the per-share accounts (3.99*), see the end.
+rad_parse_number <- function(x, per_share = FALSE) {
   x <- trimws(x)
+  per_share <- rep_len(per_share, length(x))
   out <- rep(NA_real_, length(x))
   out[!nzchar(x)] <- 0
   comma <- grepl("^-?[0-9]{1,3}(\\.[0-9]{3})*,[0-9]+$", x) |
@@ -516,6 +518,36 @@ rad_parse_number <- function(x) {
   # `1.461.169` and `1461169` are both integers in thousands
   grouped <- grepl("^-?[0-9]+$", x) | grepl("^-?[0-9]{1,3}(\\.[0-9]{3})+$", x)
   out[grouped] <- as.numeric(gsub(".", "", x[grouped], fixed = TRUE))
+  # `-0.05`: a dot after a lone zero is a decimal point, whatever the
+  # number of digits (no thousands group starts with 0). Meliuz, ITR
+  # 2021-06-30 v1 (id 107950), per-share accounts; the CSV has -0.05.
+  zero_dot <- grepl("^-?0\\.[0-9]+$", x)
+  out[zero_dot] <- as.numeric(x[zero_dot])
+  # Scientific notation, as a serializer of some filer wrote the
+  # per-share accounts (Magazine Luiza, ITR 2021-06-30 v1, id 107658,
+  # set aside on 2026-10-25). The mantissa sometimes lost its decimal
+  # point: `55E-2`, `53999999999999999E-2`, `-50000000000000001E-3`
+  # next to `1.4999999999999999E-2` in the same document. The CVM
+  # converter reads them as 5.5E-2, 5.3999...E-2 and -5.0...E-3 (the
+  # CSV has 0.055, 0.054 and -0.005 there, measured on 2026-10-25), so
+  # a mantissa without a point gets it after its first digit.
+  sci <- grepl("^-?[0-9]+(\\.[0-9]+)?[Ee][-+]?[0-9]+$", x)
+  if (any(sci)) {
+    mant <- sub("[Ee].*$", "", x[sci])
+    expo <- sub("^[^Ee]*[Ee]", "", x[sci])
+    no_point <- !grepl(".", mant, fixed = TRUE)
+    mant[no_point] <- sub("^(-?[0-9])", "\\1.", mant[no_point])
+    out[sci] <- as.numeric(paste0(mant, "e", expo))
+  }
+  # The same lost point without an exponent, in the per-share accounts
+  # of the same two documents: `-002`, `-001`, `123`, `24` where the CSV
+  # has -0.02, -0.01, 1.23 and 2.4. A per-share value written in digits
+  # only, with more than one digit, gets the point after its first
+  # digit. Measured on 2026-10-25 against 15 other RAD documents (both
+  # layouts, 2011-2025): their digits-only per-share values are all `0`,
+  # which the rule leaves alone.
+  lost <- per_share & grepl("^-?[0-9]{2,}$", x)
+  out[lost] <- as.numeric(sub("^(-?[0-9])", "\\1.", x[lost]))
   out
 }
 
@@ -641,7 +673,10 @@ rad_rows <- function(table, report_type, contas, cols, dt_refer) {
   out <- out[order(out$rank), , drop = FALSE]
   dup_key <- paste(out$seq, out$col, out$dt_ini_exerc, out$dt_fim_exerc)
   out <- out[!duplicated(dup_key, fromLast = TRUE), , drop = FALSE]
-  out$vl_conta <- rad_parse_number(out$raw)
+  out$vl_conta <- rad_parse_number(
+    out$raw,
+    per_share = grepl("^3\\.99", out$cd_conta)
+  )
   out
 }
 

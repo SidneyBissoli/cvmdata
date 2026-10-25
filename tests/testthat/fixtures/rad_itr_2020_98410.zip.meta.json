@@ -1,0 +1,7 @@
+{
+  "source_url": "https://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=98410",
+  "fetched_at": "2026-10-25",
+  "id_doc": "98410",
+  "layout": "old",
+  "notes": "RAD document trimmed by data-raw/build-rad-test-fixtures.R: PDF, annexes and opinions removed; each statement keeps its first 6 accounts and the per-share accounts (3.99*)."
+}

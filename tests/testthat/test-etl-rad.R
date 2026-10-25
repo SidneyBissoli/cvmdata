@@ -92,6 +92,31 @@ test_that("the three number spellings parse; anything else is NA", {
       NA
     )
   )
+  # the dot after a lone zero, and scientific notation whose mantissa
+  # lost its point (the CVM converter reads `55E-2` as 5.5E-2)
+  expect_equal(
+    rad_parse_number(c(
+      "-0.05",
+      "0.5",
+      "1.4999999999999999E-2",
+      "55E-2",
+      "53999999999999999E-2",
+      "-50000000000000001E-3",
+      "5E-2",
+      "1.5E+3",
+      "E-2",
+      "1,5E-2"
+    )),
+    c(-0.05, 0.5, 0.015, 0.055, 0.054, -0.005, 0.05, 1500, NA, NA)
+  )
+  # a per-share value in digits only lost its point too; other accounts
+  # are integers in thousands
+  x <- c("-002", "123", "24", "0", "7", "1.461.169")
+  expect_equal(
+    rad_parse_number(x, per_share = TRUE),
+    c(-0.02, 1.23, 2.4, 0, 7, 1461169)
+  )
+  expect_equal(rad_parse_number(x), c(-2, 123, 24, 0, 7, 1461169))
   expect_identical(rad_scale_factor("2"), 1e3)
   expect_identical(rad_scale_factor("1"), 1)
   expect_true(is.na(rad_scale_factor("7")))
@@ -1299,4 +1324,73 @@ test_that("a year closing on 29 February: previous exercise on the 28th", {
     ultimo
   )
   expect_true(all(c("dmpl/ind", "dmpl/con") %in% names(r$tables)))
+})
+
+test_that("per-share values in scientific notation read as the CSV has them", {
+  load_etl_rad()
+  # Magazine Luiza, ITR 2021-06-30 v1 (id 107658), set aside on
+  # 2026-10-25 with "6 values could not be parsed". Expected values are
+  # the ITR 2021 CSV's for the same accounts and periods (v2 there, the
+  # same numbers), scaled by the document's MIL like every value.
+  f <- filing_row(
+    "47.960.950/0001-21",
+    "2021-06-30",
+    "1",
+    "MAGAZINE LUIZA S.A.",
+    "022470",
+    "107658"
+  )
+  r <- rad_read_zip(rad_fx("rad_itr_2021_107658"), f)
+  expect_identical(r$problems, character())
+  dre <- r$tables[["dre/ind"]]
+  got <- function(code, ini) {
+    dre$vl_conta[dre$cd_conta == code & dre$dt_ini_exerc == as.Date(ini)]
+  }
+  expect_equal(got("3.99.01.01", "2021-04-01"), 15)
+  expect_equal(got("3.99.01.01", "2021-01-01"), 55)
+  expect_equal(got("3.99.01.01", "2020-01-01"), -5)
+  expect_equal(got("3.99.01.01", "2020-04-01"), -10)
+  expect_equal(got("3.99.02.01", "2021-01-01"), 54)
+  expect_equal(got("3.99.02.01", "2020-01-01"), -5)
+  # Meliuz, ITR 2021-06-30 v1 (id 107950): `-0.05`, the dot after a
+  # zero, and `-002`, `123`, `24` (digits only, the point lost)
+  f <- filing_row(
+    "14.110.585/0001-07",
+    "2021-06-30",
+    "1",
+    "MÉLIUZ S.A.",
+    "025232",
+    "107950"
+  )
+  r <- rad_read_zip(rad_fx("rad_itr_2021_107950"), f)
+  expect_identical(r$problems, character())
+  dre <- r$tables[["dre/ind"]]
+  expect_equal(got("3.99.01.01", "2021-04-01"), -50)
+  expect_equal(got("3.99.02.01", "2021-04-01"), -50)
+  expect_equal(got("3.99.01.01", "2021-01-01"), -20)
+  expect_equal(got("3.99.01.01", "2020-04-01"), 1230)
+  expect_equal(got("3.99.01.01", "2020-01-01"), 2400)
+})
+
+test_that("a document under a branch's CNPJ is set aside (for now)", {
+  load_etl_rad()
+  # Pacaembu Construtora, ITR 2020-09-30 v1 (id 98410): the index lists
+  # the head office (0001-68), the document carries a branch (0002-49),
+  # same root and same CVM code. The CSV keeps v2 (id 98861) under the
+  # head office. Pinned as it is until the owner decides whether the
+  # root of the CNPJ is enough.
+  f <- filing_row(
+    "96.298.013/0001-68",
+    "2020-09-30",
+    "1",
+    "PACAEMBU CONSTRUTORA S.A.",
+    "025143",
+    "98410"
+  )
+  r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), f)
+  expect_match(
+    r$problems,
+    "cnpj in the document \\(96298013000249\\) differs from the index"
+  )
+  expect_true(r$index_mismatch)
 })

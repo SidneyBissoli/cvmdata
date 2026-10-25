@@ -78,6 +78,19 @@
 #       former name (Inter Platform, Inc.); the CVM code (057886) is the
 #       one the index lists for this delivery. Consolidated statements
 #       only.
+#   tests/testthat/fixtures/rad_itr_2021_107658.zip
+#     - new layout, ITR 2Q2021, Magazine Luiza v1 (set aside on
+#       2026-10-25): per-share values in scientific notation whose
+#       mantissa lost its decimal point (`55E-2` for 5.5E-2) next to
+#       `1.4999999999999999E-2`, and `-001` for -0.01.
+#   tests/testthat/fixtures/rad_itr_2021_107950.zip
+#     - new layout, ITR 2Q2021, Meliuz v1 (set aside on 2026-10-25):
+#       per-share `-0.05` and digits-only `-002`, `123`, `24` (the CSV
+#       has -0.02, 1.23, 2.4).
+#   tests/testthat/fixtures/rad_itr_2020_98410.zip
+#     - old layout, ITR 3Q2020, Pacaembu Construtora v1 (set aside on
+#       2026-10-25): the document carries a branch's CNPJ (0002-49), the
+#       index the head office's (0001-68), same root and CVM code.
 #
 # Usage, from the package root, with the original ZIPs (as downloaded
 # from the RAD, named `<id_doc>.zip`) in one directory; a fixture whose
@@ -104,7 +117,10 @@ docs <- list(
   list(id = "132214", name = "rad_ipe_2023_132214", layout = "new"),
   list(id = "113859", name = "rad_dfp_2021_113859", layout = "new"),
   list(id = "100464", name = "rad_dfp_2020_100464", layout = "old"),
-  list(id = "93001", name = "rad_dfp_2020_93001", layout = "old")
+  list(id = "93001", name = "rad_dfp_2020_93001", layout = "old"),
+  list(id = "107950", name = "rad_itr_2021_107950", layout = "new"),
+  list(id = "107658", name = "rad_itr_2021_107658", layout = "new"),
+  list(id = "98410", name = "rad_itr_2020_98410", layout = "old")
 )
 
 keep_conta <- function(codes) {
