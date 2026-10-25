@@ -349,6 +349,54 @@ message(sprintf(
   length(history$files)
 ))
 
+# Skip manifest ---------------------------------------------------------
+# Stage 02 records every (table, year, report_type) it produced no
+# parquet for, with the reason: "empty" (the CVM publishes the CSV with
+# the header only) or "absent" (the CSV is not in the yearly ZIP). It
+# travels inside `__source_hash.json`, which clients already fetch, so
+# the package can say why a partition is missing instead of guessing
+# (fre/mercado_estrangeiro 2026: CSV absent from the CVM's ZIP although
+# the dictionary still lists it, measured 2026-10-25). Not a separate
+# asset: parse_mirror_asset_name() aborts on any asset other than the
+# parquets and this sidecar, so a new asset would break every installed
+# client. The hash excludes the manifest: a skip is derived from the
+# data, not data.
+read_skip_manifest <- function(path) {
+  empty <- data.frame(
+    table = character(0L),
+    year = integer(0L),
+    report_type = character(0L),
+    reason = character(0L),
+    stringsAsFactors = FALSE
+  )
+  if (!file.exists(path)) {
+    return(empty)
+  }
+  manifest <- tryCatch(
+    jsonlite::read_json(path, simplifyVector = TRUE),
+    error = function(e) NULL
+  )
+  if (!is.data.frame(manifest) || !nrow(manifest)) {
+    return(empty)
+  }
+  data.frame(
+    table = as.character(manifest$table),
+    year = as.integer(manifest$year),
+    report_type = as.character(manifest$report_type),
+    reason = as.character(manifest$reason),
+    stringsAsFactors = FALSE
+  )
+}
+source_hash$skips <- read_skip_manifest(
+  file.path(workspace, "out", "skip", sprintf("%s.json", dataset))
+)
+message(sprintf(
+  "[03-publish] skip manifest: %d tuple(s) (%d empty, %d absent)",
+  nrow(source_hash$skips),
+  sum(source_hash$skips$reason == "empty"),
+  sum(source_hash$skips$reason == "absent")
+))
+
 if (dry_run) {
   message("[03-publish] dry run: would upload")
   for (p in parquets) {
@@ -357,7 +405,10 @@ if (dry_run) {
   for (p in history$files) {
     message("  ", asset_name_of(substring(p, nchar(history_dir) + 2L)))
   }
-  message("  __source_hash.json")
+  message(sprintf(
+    "  __source_hash.json (%d skip tuple(s))",
+    nrow(source_hash$skips)
+  ))
   quit(status = 0L)
 }
 
@@ -438,7 +489,16 @@ on.exit(unlink(stage_dir, recursive = TRUE), add = TRUE)
 # It goes LAST: the client keys its parquet cache on this hash, so a
 # client reading mid-upload must still see the old hash.
 hash_asset <- file.path(stage_dir, "__source_hash.json")
-jsonlite::write_json(source_hash, hash_asset, auto_unbox = TRUE, pretty = TRUE)
+# `na = "null"`: the skip manifest has NA report_type / year for tables
+# without variants or partitions; jsonlite would otherwise write the
+# string "NA" for character columns.
+jsonlite::write_json(
+  source_hash,
+  hash_asset,
+  auto_unbox = TRUE,
+  pretty = TRUE,
+  na = "null"
+)
 
 stage_assets <- function(paths, root) {
   staged <- character(length(paths))

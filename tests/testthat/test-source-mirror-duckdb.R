@@ -793,3 +793,131 @@ test_that("cvm_cache_clear rejects year with what = parquet", {
     class = "cvmdata_error_input"
   )
 })
+
+# Skip manifest in the sidecar ---------------------------------------------
+
+# Since 2026-10-25 the ETL publishes its skip manifest inside
+# `__source_hash.json`: one row per (table, year, report_type) it wrote
+# no parquet for, with the reason. The no-match error quotes it.
+
+skip_rows <- function(...) {
+  data.frame(..., stringsAsFactors = FALSE)
+}
+
+test_that("no-match error quotes the skip manifest when it covers the year", {
+  cvmdata:::mirror_assets_cache_clear()
+  cache_root <- withr::local_tempdir()
+  withr::local_options(
+    cvmdata.cache_dir = cache_root,
+    lifecycle_verbosity = "quiet"
+  )
+  entries <- list(
+    list(
+      name = "bpa__report_type.ind__year.2024__part-0.parquet",
+      parquet = dfp_fx()
+    ),
+    list(name = "__source_hash.json", parquet = NULL)
+  )
+  skips <- skip_rows(
+    table = c("bpa", "bpa", "dre"),
+    year = c(2025L, 2025L, 2025L),
+    report_type = c("ind", "con", "ind"),
+    reason = c("empty", "empty", "absent")
+  )
+  mock <- build_mock(entries, hash = "h1", skips = skips)
+  expect_snapshot(
+    error = TRUE,
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2025L,
+        source = "mirror"
+      )
+    )
+  )
+  cvmdata:::mirror_assets_cache_clear()
+  expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch(
+        "dfp",
+        "dre",
+        report_type = "ind",
+        year = 2025L,
+        source = "mirror"
+      )
+    ),
+    regexp = "not in the CVM's yearly ZIP.*absent",
+    class = "cvmdata_error_input"
+  )
+  # A year the manifest does not cover keeps the generic explanation only.
+  cvmdata:::mirror_assets_cache_clear()
+  cnd <- expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      issuer_fetch(
+        "dfp",
+        "bpa",
+        report_type = "ind",
+        year = 2023L,
+        source = "mirror"
+      )
+    ),
+    class = "cvmdata_error_input"
+  )
+  msg <- conditionMessage(cnd)
+  expect_false(grepl("recorded by the mirror ETL", msg, fixed = TRUE))
+  expect_false(grepl("Otherwise,", msg, fixed = TRUE))
+  expect_match(msg, "mirror may not have it yet", fixed = TRUE)
+})
+
+test_that("mirror_normalise_skips accepts only the ETL's four columns", {
+  norm <- cvmdata:::mirror_normalise_skips
+  expect_null(norm(NULL))
+  expect_null(norm(list()))
+  expect_null(norm(data.frame(table = "bpa", reason = "empty")))
+  expect_null(norm(data.frame()))
+  out <- norm(data.frame(
+    table = "companhias",
+    year = NA,
+    report_type = NA,
+    reason = "empty",
+    extra = 1
+  ))
+  expect_identical(names(out), c("table", "year", "report_type", "reason"))
+  expect_identical(out$year, NA_integer_)
+  expect_identical(out$report_type, NA_character_)
+})
+
+test_that("mirror_skip_bullets filters by table, year and report_type", {
+  bullets <- cvmdata:::mirror_skip_bullets
+  inventory <- tibble::tibble(name = character(0L))
+  expect_identical(bullets(inventory, "bpa", 2025L, "ind"), character(0L))
+  attr(inventory, "skips") <- skip_rows(
+    table = c("bpa", "bpa", "dre", "companhias"),
+    year = c(2025L, 2026L, 2025L, NA),
+    report_type = c("ind", "ind", NA, NA),
+    reason = c("empty", "absent", "absent", "odd")
+  )
+  out <- bullets(inventory, "bpa", 2025:2026, "ind")
+  expect_identical(unname(names(out)), c("i", "i"))
+  expect_match(
+    out[[1]],
+    "2025 (ind): the CVM publishes the CSV with the header only",
+    fixed = TRUE
+  )
+  expect_match(
+    out[[2]],
+    "2026 (ind): the CSV is not in the CVM's yearly ZIP",
+    fixed = TRUE
+  )
+  expect_identical(bullets(inventory, "bpa", 2025L, "con"), character(0L))
+  # NA report_type in the manifest matches any requested variant.
+  expect_length(bullets(inventory, "dre", 2025L, "ind"), 1L)
+  # A static table (NA year) is named by its table, with the raw reason.
+  static <- bullets(inventory, "companhias", NULL, NULL)
+  expect_match(static, "^companhias: recorded by the mirror ETL as odd")
+})

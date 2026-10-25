@@ -137,7 +137,9 @@ mirror_list_assets <- function(
   )
   assets <- body$assets %||% list()
   parsed <- mirror_assets_to_tibble(assets)
-  attr(parsed, "source_hash") <- mirror_extract_source_hash(assets)
+  sidecar <- mirror_fetch_sidecar(assets)
+  attr(parsed, "source_hash") <- sidecar$hash
+  attr(parsed, "skips") <- sidecar$skips
   attr(parsed, "release_tag") <- tag
   .mirror_assets_cache[[key]] <- parsed
   parsed
@@ -179,12 +181,16 @@ mirror_assets_to_tibble <- function(assets) {
   )
 }
 
-# Pluck the SHA-256 carried by the `__source_hash.json` asset. The asset
-# itself is fetched only when present (one extra GET on first call).
-# Returns NA_character_ when the release has none — happens for fresh
-# releases that have not been republished since the hash-detection
-# feature shipped.
-mirror_extract_source_hash <- function(assets) {
+# Read the `__source_hash.json` sidecar of the release: the SHA-256 of
+# the mirror's content (`hash`) and, since 2026-10-25, the ETL's skip
+# manifest (`skips`: one row per (table, year, report_type) the ETL
+# produced no parquet for, with `reason` "empty" — the CVM publishes the
+# CSV with the header only — or "absent" — the CSV is not in the yearly
+# ZIP). The asset is fetched only when present (one extra GET on first
+# call). `hash` is NA_character_ and `skips` NULL when the release has
+# no sidecar, when it cannot be read, or when it predates the field.
+mirror_fetch_sidecar <- function(assets) {
+  none <- list(hash = NA_character_, skips = NULL)
   hit <- NULL
   for (a in assets) {
     if (identical(a$name, "__source_hash.json")) {
@@ -193,11 +199,11 @@ mirror_extract_source_hash <- function(assets) {
     }
   }
   if (is.null(hit)) {
-    return(NA_character_)
+    return(none)
   }
   url <- hit$browser_download_url %||% ""
   if (!nzchar(url)) {
-    return(NA_character_)
+    return(none)
   }
   resp <- tryCatch(
     httr2::req_perform(
@@ -206,16 +212,93 @@ mirror_extract_source_hash <- function(assets) {
     error = function(e) NULL
   )
   if (is.null(resp) || httr2::resp_status(resp) >= 400L) {
-    return(NA_character_)
+    return(none)
   }
   body <- tryCatch(
     httr2::resp_body_json(resp, simplifyVector = TRUE),
     error = function(e) NULL
   )
   if (is.null(body)) {
-    return(NA_character_)
+    return(none)
   }
-  body$hash %||% NA_character_
+  list(
+    hash = body$hash %||% NA_character_,
+    skips = mirror_normalise_skips(body$skips)
+  )
+}
+
+# The skip manifest as a data frame with exactly the four columns the
+# ETL writes, or NULL when the sidecar carries none (older release,
+# empty array, or an unexpected shape). `year` and `report_type` are NA
+# for tables without yearly partitions or ind/con variants.
+mirror_normalise_skips <- function(x) {
+  needed <- c("table", "year", "report_type", "reason")
+  if (!is.data.frame(x) || !nrow(x) || !all(needed %in% names(x))) {
+    return(NULL)
+  }
+  data.frame(
+    table = as.character(x$table),
+    year = suppressWarnings(as.integer(x$year)),
+    report_type = as.character(x$report_type),
+    reason = as.character(x$reason),
+    stringsAsFactors = FALSE
+  )
+}
+
+# cli bullets explaining, from the release's skip manifest, why the
+# mirror has no partition for `table` in `years` (and `report_type`,
+# when the table has variants). One bullet per recorded year, in the
+# ETL's own words; character(0) when the manifest has nothing to say,
+# so callers can splice the result into a message unconditionally.
+mirror_skip_bullets <- function(inventory, table, years, report_type) {
+  skips <- attr(inventory, "skips")
+  if (is.null(skips)) {
+    return(character(0L))
+  }
+  rows <- skips[skips$table == table, , drop = FALSE]
+  if (!is.null(years)) {
+    rows <- rows[
+      !is.na(rows$year) & rows$year %in% as.integer(years),
+      ,
+      drop = FALSE
+    ]
+  }
+  if (!is.null(report_type)) {
+    rows <- rows[
+      is.na(rows$report_type) | rows$report_type %in% report_type,
+      ,
+      drop = FALSE
+    ]
+  }
+  if (!nrow(rows)) {
+    return(character(0L))
+  }
+  rows <- rows[order(rows$year, rows$report_type), , drop = FALSE]
+  text <- vapply(
+    seq_len(nrow(rows)),
+    function(i) {
+      what <- switch(
+        rows$reason[i],
+        empty = "the CVM publishes the CSV with the header only",
+        absent = "the CSV is not in the CVM's yearly ZIP",
+        sprintf("recorded by the mirror ETL as %s", rows$reason[i])
+      )
+      variant <- if (is.na(rows$report_type[i])) {
+        ""
+      } else {
+        sprintf(" (%s)", rows$report_type[i])
+      }
+      sprintf(
+        "%s%s: %s (recorded by the mirror ETL as \"%s\").",
+        if (is.na(rows$year[i])) table else rows$year[i],
+        variant,
+        what,
+        rows$reason[i]
+      )
+    },
+    character(1L)
+  )
+  stats::setNames(text, rep("i", length(text)))
 }
 
 # Pure parser: decode an asset filename into a (table, report_type,
