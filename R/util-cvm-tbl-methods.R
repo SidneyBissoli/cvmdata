@@ -1,4 +1,4 @@
-# Methods that keep the `cvm_tbl` class and its six provenance
+# Methods that keep the `cvm_tbl` class and its seven provenance
 # attributes alive across dplyr verbs and vctrs operations.
 #
 # Background (measured 2026-10-25, dplyr 1.2.1 / vctrs 0.7.3 / tibble
@@ -24,10 +24,11 @@ cvm_tbl_attr_names <- c(
   "group",
   "dataset",
   "table",
-  "package_version"
+  "package_version",
+  "release"
 )
 
-# Read the six provenance attributes of `x` as a named list (absent
+# Read the seven provenance attributes of `x` as a named list (absent
 # attributes come back as NULL entries).
 #
 # @noRd
@@ -38,7 +39,7 @@ cvm_tbl_attrs <- function(x) {
 }
 
 # Put the `cvm_tbl` class in front of `out`'s class vector and copy the
-# six provenance attributes from `attrs` (a list as returned by
+# seven provenance attributes from `attrs` (a list as returned by
 # `cvm_tbl_attrs()`). `out` keeps whatever else it is (grouped_df,
 # tbl_df).
 #
@@ -76,11 +77,15 @@ cvm_tbl_merge_attrs <- function(x, y) {
 #' @description
 #' Every tibble returned by [cvm_fetch()], [cvm_versions()] and the
 #' other public fetchers has the S3 class `cvm_tbl`, a subclass of
-#' [tibble::tibble()], and carries six provenance attributes:
-#' `source` (`"mirror"`, `"portal"` or `"cache"`), `fetched_at`
-#' (a `POSIXct` timestamp), `group`, `dataset`, `table` and
-#' `package_version`. [print()] shows them above the tibble; read one
-#' with `attr(x, "source")`.
+#' [tibble::tibble()], and carries seven provenance attributes:
+#' `source` (`"mirror"` or `"cvm"`), `fetched_at` (a `POSIXct`
+#' timestamp), `group`, `dataset`, `table`, `package_version` and
+#' `release` (the GitHub release the rows were read from when
+#' `source = "mirror"`: `mirror-<group>-<dataset>-snapshot-<date>`, the
+#' dated snapshot resolved by [cvm_release_get()], or the `-latest` tag
+#' for a release older than the snapshots; `NA` for `source = "cvm"`).
+#' [print()] shows them above the tibble; read one with
+#' `attr(x, "source")`.
 #'
 #' The class and the attributes travel with the data through these
 #' operations:
