@@ -31,6 +31,7 @@ cnpj_clean(c("12.345.678/0001-90", NA, "99999999000191"))
 }
 \seealso{
 Other utilities:
-\code{\link[=cnpj_format]{cnpj_format()}}
+\code{\link[=cnpj_format]{cnpj_format()}},
+\code{\link{cvm_tbl}}
 }
 \concept{utilities}
