@@ -9,6 +9,17 @@ print.cvm_tbl <- function(x, ...) {
   grp <- attr(x, "group", exact = TRUE)
   ds <- attr(x, "dataset", exact = TRUE)
   tbl <- attr(x, "table", exact = TRUE)
+  if (
+    is.null(src) &&
+      is.null(fetched) &&
+      is.null(grp) &&
+      is.null(ds) &&
+      is.null(tbl)
+  ) {
+    # Provenance stripped by the caller: print as a plain tibble rather
+    # than a header of empty fields.
+    return(NextMethod())
+  }
   cli::cli_inform(c(
     "i" = paste0(
       "{.field source}: {.val {src}}  |  ",

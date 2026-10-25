@@ -46,6 +46,24 @@
 
 ## New features
 
+* The `cvm_tbl` class and its six provenance attributes now survive
+  `group_by()` and every verb after it (`summarise()`, `mutate()`,
+  `filter()`, `select()`, `ungroup()`, `[`), and `rbind()` /
+  `vctrs::vec_rbind()` of several `cvm_tbl`s (`dplyr_reconstruct()`,
+  `dplyr_row_slice()`, `dplyr_col_modify()`, `group_by()`,
+  `ungroup()`, `summarise()`, `[`, `names<-`, `rbind()`,
+  `vec_ptype2()` and `vec_cast()` methods). Before, `group_by()`
+  dropped the class and the next verb dropped the attributes without a
+  word, and `vec_rbind()` returned a plain tibble. When the inputs of
+  `rbind()`/`vec_rbind()` differ in `source`, `group`, `dataset`,
+  `table` or `package_version`, the result says `"mixed"` and
+  `fetched_at` keeps the oldest timestamp. `dplyr::bind_rows()` keeps
+  the first input's provenance, dplyr's rule for every data frame
+  subclass, and `?cvm_tbl` says so. `?cvm_tbl` also lists which
+  operations keep the provenance and which drop it by design; printing
+  a `cvm_tbl` whose attributes were stripped no longer shows a header
+  of empty fields.
+
 * `cvm_versions()` returns every known version of a filing, the current
   one included: `cvm_versions(dataset, table, cnpj, ticker, year,
   basis, ...)`, the identifying part of `cvm_fetch()`'s signature,
