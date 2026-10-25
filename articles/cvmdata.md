@@ -279,7 +279,7 @@ vignette stays offline):
 `#> 15                   WALTER HEUER AUDITORES INDEPENDENTES`
 
 Every tibble returned by a `cvmdata` fetcher has the class `cvm_tbl` and
-carries six provenance attributes:
+carries seven provenance attributes:
 
 \
 [`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"source"``)`\
@@ -292,7 +292,8 @@ carries six provenance attributes:
 `#> [1] "companhias"`\
 [`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"package_version"``)`\
 `#> [1] "0.0.0.9000"`\
-`` # `fetched_at` is a POSIXct timestamp set at download time. ``
+`` # `fetched_at` is a POSIXct timestamp set at download time; `release` ``\
+`# is the mirror release the rows were read from (NA for source "cvm").`
 
 They are displayed at the top of the print output and travel with the
 data through subsetting (`[`,

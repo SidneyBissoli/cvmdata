@@ -137,6 +137,41 @@ CVM published the CSV with the header only, or did not include it in the
 yearly ZIP at all.</p>
 </div>
 <div class="section level3">
+<h3 id="dated-snapshots">Dated snapshots<a class="anchor" aria-label="anchor" href="#dated-snapshots"></a>
+</h3>
+<p>The <code>-latest</code> release is rewritten in place every week, so
+by itself it cannot answer “what did the mirror hold on 1 September?”.
+Since 2026-10-27 every weekly run that changes something also publishes
+a dated release,
+<code>mirror-&lt;group&gt;-&lt;dataset&gt;-snapshot-&lt;YYYY-MM-DD&gt;</code>,
+with the partitions whose content changed that week and a complete
+<code>__source_hash.json</code> that lists every partition of the day’s
+mirror and, for each one, the snapshot release that holds its bytes. A
+snapshot is never deleted, so a date keeps resolving to the same
+bytes.</p>
+<p>The option <code>cvmdata.mirror_release</code> chooses the copy the
+package reads. <code><a href="../reference/cvm_release_get.html">cvm_release_get()</a></code> returns it
+(<code>"latest"</code> by default) and <code><a href="../reference/cvm_release_set.html">cvm_release_set()</a></code>
+changes it: pass a complete date and the package resolves it to the most
+recent snapshot on or before that date, reads each partition from the
+release that holds it, and records the resolved tag in the
+<code>release</code> attribute of every tibble. Like
+<code>cvmdata.source</code>, the pin is a property of the session: set
+it once at the top of a script and every <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> and
+<code><a href="../reference/cvm_versions.html">cvm_versions()</a></code> below it reads the same retrato. A date
+before the first snapshot of a dataset is an error that names the
+earliest date available.</p>
+<p>Two details follow from the design. The weekly snapshot carries only
+what changed (about 60 MB a week over the eight datasets, measured in
+October 2026), so pinning costs the mirror little; and the local cache
+holds one copy of each partition, verified against the SHA-256 the
+sidecar publishes, so switching between dates re-downloads only the
+partitions whose bytes differ. The history assets read by
+<code><a href="../reference/cvm_versions.html">cvm_versions()</a></code> live on <code>-latest</code> only; under a
+pin the rows superseded after the pinned date are dropped, so the result
+is the set of versions known on that day.</p>
+</div>
+<div class="section level3">
 <h3 id="data-licence-and-attribution">Data licence and attribution<a class="anchor" aria-label="anchor" href="#data-licence-and-attribution"></a>
 </h3>
 <p>The CVM publishes every dataset covered by the package under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" class="external-link">Open Data Commons
@@ -363,6 +398,32 @@ portal without disturbing the session-wide setting:</p>
 <span>  basis <span class="op">=</span> <span class="st">"ind"</span>,</span>
 <span>  source <span class="op">=</span> <span class="st">"cvm"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="pinning-a-script-to-a-date">Pinning a script to a date<a class="anchor" aria-label="anchor" href="#pinning-a-script-to-a-date"></a>
+</h3>
+<p>A script meant to reproduce a result months later should not depend
+on whatever the mirror holds when it runs again. Pin the session to the
+snapshot of the day the result was produced:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Every mirror read below comes from the snapshot on or before this date.</span></span>
+<span><span class="fu"><a href="../reference/cvm_release_set.html">cvm_release_set</a></span><span class="op">(</span><span class="st">"2026-11-01"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bb_bpa_pinned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
+<span>  <span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
+<span>  cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
+<span>  basis <span class="op">=</span> <span class="st">"ind"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">bb_bpa_pinned</span>, <span class="st">"release"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "mirror-companhias-dfp-snapshot-2026-10-27"</span></span>
+<span></span>
+<span><span class="co"># Back to the weekly refresh.</span></span>
+<span><span class="fu"><a href="../reference/cvm_release_set.html">cvm_release_set</a></span><span class="op">(</span><span class="st">"latest"</span><span class="op">)</span></span></code></pre></div>
+<p>The sidecar of every <code>-latest</code> release lists, under
+<code>snapshots</code>, the dates that can be pinned; the release notes
+of each snapshot say how many partitions it carries and how to read
+it.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="workflow-2-cvm-vs-mirror-equivalence">Workflow 2 — CVM vs Mirror equivalence<a class="anchor" aria-label="anchor" href="#workflow-2-cvm-vs-mirror-equivalence"></a>
@@ -377,7 +438,7 @@ public name <code>basis</code>, on both backends, for the tables that
 have the individual/consolidated split. The table below was captured by
 <code>data-raw/validate-mirror-end-to-end.R</code>, which runs the same
 four calls through both backends and compares schemas:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span></span>
 <span>  <span class="st">"extdata"</span>, <span class="st">"vignette-data"</span>, <span class="st">"cache-and-mirror"</span>,</span>
 <span>  <span class="st">"cvm-vs-mirror.rds"</span>,</span>
@@ -453,7 +514,7 @@ snapshotted. This is feature, not bug: the mirror is a snapshot.</p>
 </h2>
 <p><code><a href="../reference/cvm_cache_info.html">cvm_cache_info()</a></code> walks the cache and returns one row per
 artifact:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_cache_info.html">cvm_cache_info</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">info</span></span>
 <span></span>
@@ -469,7 +530,7 @@ scoping the eviction to L1 (<code>"raw"</code>), L3
 <code>group</code> to restrict the eviction to a single CKAN group. The
 L3 mode evicts by dataset because the partition layout nests year under
 table:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Drop the mirror's local parquet copy for DFP only.</span></span>
 <span><span class="fu"><a href="../reference/cvm_cache_clear.html">cvm_cache_clear</a></span><span class="op">(</span>what <span class="op">=</span> <span class="st">"parquet"</span>, dataset <span class="op">=</span> <span class="st">"dfp"</span>, confirm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -502,7 +563,7 @@ limit. Setting the option to <code>0</code>, a negative value, or
 <code>Inf</code> disables the eviction engine. The L3 mirror cache is
 content-addressed and not subject to size-based eviction.</li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Force revalidation on every L1 hit.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>cvmdata.cache_ttl_seconds <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>

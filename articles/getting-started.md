@@ -416,7 +416,7 @@ exclusive, and neither applies to the `cad` snapshot.
 
 Every tibble returned by
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-is of class `cvm_tbl` and carries six provenance attributes:
+is of class `cvm_tbl` and carries seven provenance attributes:
 
 \
 [`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"source"``)``           ``#  "mirror" or "cvm"`\
@@ -424,7 +424,10 @@ is of class `cvm_tbl` and carries six provenance attributes:
 [`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"group"``)``            ``#  CKAN group slug, e.g. "companhias"`\
 [`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"dataset"``)``          ``#  "dfp"`\
 [`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"table"``)``            ``#  "bpa"`\
-[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"package_version"``)``  ``#  packageVersion("cvmdata")`
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"package_version"``)``  ``#  packageVersion("cvmdata")`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``out``, ``"release"``)``          ``#  mirror release read, e.g.`\
+`                              ``#  "mirror-companhias-dfp-snapshot-2026-10-27";`\
+`                              ``#  NA when source is "cvm"`
 
 `print.cvm_tbl()` renders the five header attributes before delegating
 to the standard tibble print, so a snapshot taken at the REPL is

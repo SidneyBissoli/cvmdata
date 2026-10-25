@@ -529,14 +529,17 @@ applies to the <code>cad</code> snapshot.</p>
 <h2 id="provenance-what-every-tibble-carries">Provenance — what every tibble carries<a class="anchor" aria-label="anchor" href="#provenance-what-every-tibble-carries"></a>
 </h2>
 <p>Every tibble returned by <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> is of class
-<code>cvm_tbl</code> and carries six provenance attributes:</p>
+<code>cvm_tbl</code> and carries seven provenance attributes:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"source"</span><span class="op">)</span>           <span class="co">#  "mirror" or "cvm"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"fetched_at"</span><span class="op">)</span>       <span class="co">#  POSIXct, set at download time</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"group"</span><span class="op">)</span>            <span class="co">#  CKAN group slug, e.g. "companhias"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"dataset"</span><span class="op">)</span>          <span class="co">#  "dfp"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"table"</span><span class="op">)</span>            <span class="co">#  "bpa"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"package_version"</span><span class="op">)</span>  <span class="co">#  packageVersion("cvmdata")</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"package_version"</span><span class="op">)</span>  <span class="co">#  packageVersion("cvmdata")</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"release"</span><span class="op">)</span>          <span class="co">#  mirror release read, e.g.</span></span>
+<span>                              <span class="co">#  "mirror-companhias-dfp-snapshot-2026-10-27";</span></span>
+<span>                              <span class="co">#  NA when source is "cvm"</span></span></code></pre></div>
 <p><code>print.cvm_tbl()</code> renders the five header attributes
 before delegating to the standard tibble print, so a snapshot taken at
 the REPL is self-describing.</p>

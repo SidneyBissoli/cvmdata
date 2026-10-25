@@ -115,7 +115,7 @@
       </dl></div><div class="section level2">
       <h2 id="source-backend">Source backend<a class="anchor" aria-label="anchor" href="#source-backend"></a></h2>
 
-      <div class="section-desc"><p>Configure which backend <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> queries (direct CVM portal or the parquet mirror published in GitHub Releases).</p></div>
+      <div class="section-desc"><p>Configure which backend <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> queries (direct CVM portal or the parquet mirror published in GitHub Releases) and, for the mirror, which dated snapshot it reads.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -135,6 +135,20 @@
 
         </dt>
         <dd>Set the active cvmdata source backend</dd>
+
+        <dt>
+
+          <code><a href="cvm_release_get.html">cvm_release_get()</a></code>
+
+        </dt>
+        <dd>Get the mirror snapshot the package reads</dd>
+
+        <dt>
+
+          <code><a href="cvm_release_set.html">cvm_release_set()</a></code>
+
+        </dt>
+        <dd>Pin the mirror to a dated snapshot</dd>
       </dl></div><div class="section level2">
       <h2 id="discovery">Discovery<a class="anchor" aria-label="anchor" href="#discovery"></a></h2>
 

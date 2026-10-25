@@ -5,11 +5,16 @@ Every tibble returned by
 [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
 and the other public fetchers has the S3 class `cvm_tbl`, a subclass of
 [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html),
-and carries six provenance attributes: `source` (`"mirror"`, `"portal"`
-or `"cache"`), `fetched_at` (a `POSIXct` timestamp), `group`, `dataset`,
-`table` and `package_version`.
-[`print()`](https://rdrr.io/r/base/print.html) shows them above the
-tibble; read one with `attr(x, "source")`.
+and carries seven provenance attributes: `source` (`"mirror"` or
+`"cvm"`), `fetched_at` (a `POSIXct` timestamp), `group`, `dataset`,
+`table`, `package_version` and `release` (the GitHub release the rows
+were read from when `source = "mirror"`:
+`mirror-<group>-<dataset>-snapshot-<date>`, the dated snapshot resolved
+by
+[`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md),
+or the `-latest` tag for a release older than the snapshots; `NA` for
+`source = "cvm"`). [`print()`](https://rdrr.io/r/base/print.html) shows
+them above the tibble; read one with `attr(x, "source")`.
 
 The class and the attributes travel with the data through these
 operations:

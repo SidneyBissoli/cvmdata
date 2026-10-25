@@ -211,14 +211,19 @@ or the `source` argument of
   weekly by the ETL under `inst/etl/`, maintained by the package author,
   not by the CVM. It is typically ~30× faster than the portal; its
   staleness is bounded by the weekly refresh. The mirror omits a year
-  when the CVM publishes that year’s CSV with no data rows.
+  when the CVM publishes that year’s CSV with no data rows. Every weekly
+  run also keeps a dated snapshot
+  (`mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`), so
+  `cvm_release_set("2026-11-01")` pins a session to the mirror as it was
+  on that day; the default `"latest"` follows the weekly refresh.
 - `"cvm"` — HTTP directly to the CVM Open Data Portal. Opt in when
   byte-level freshness against the regulator is required, or when you
   prefer not to depend on a third-party mirror.
 
 Every returned tibble carries provenance attributes (`source`,
-`fetched_at`, `group`, `dataset`, `table`, `package_version`) so a
-downstream caller can audit which backend served the data.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`, `release`)
+so a downstream caller can audit which backend, and which mirror
+release, served the data.
 
 **Licence of the data.** The CVM publishes every dataset covered by
 `cvmdata` under the [Open Data Commons Open Database License (ODbL)
@@ -303,12 +308,16 @@ window for HTTP revalidation is configurable via the
 Configure which backend
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 queries (direct CVM portal or the parquet mirror published in GitHub
-Releases).
+Releases) and, for the mirror, which dated snapshot it reads.
 
 - [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
   : Get the active cvmdata source backend
 - [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
   : Set the active cvmdata source backend
+- [`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md)
+  : Get the mirror snapshot the package reads
+- [`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)
+  : Pin the mirror to a dated snapshot
 
 ## Discovery
 

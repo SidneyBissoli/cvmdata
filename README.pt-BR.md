@@ -214,14 +214,20 @@ ou pelo argumento `source` de
   semana pelo ETL em `inst/etl/`, mantido pelo autor do pacote, não pela
   CVM. Costuma ser ~30× mais rápido que o portal; sua defasagem é
   limitada pela atualização semanal. O espelho omite um ano quando a CVM
-  publica o CSV daquele ano sem linhas de dados.
+  publica o CSV daquele ano sem linhas de dados. Cada rodada semanal
+  também guarda um retrato datado
+  (`mirror-<group>-<dataset>-snapshot-<AAAA-MM-DD>`), de modo que
+  `cvm_release_set("2026-11-01")` fixa a sessão no espelho como ele
+  estava naquele dia; o padrão `"latest"` acompanha a atualização
+  semanal.
 - `"cvm"` — HTTP direto ao Portal de Dados Abertos da CVM. Use quando
   precisar de frescor byte a byte contra o regulador, ou quando preferir
   não depender de um espelho de terceiro.
 
 Todo tibble retornado carrega atributos de proveniência (`source`,
-`fetched_at`, `group`, `dataset`, `table`, `package_version`),
-permitindo a qualquer consumidor auditar qual backend serviu os dados.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`,
+`release`), permitindo a qualquer consumidor auditar qual backend, e
+qual release do espelho, serviu os dados.
 
 **Licença dos dados.** A CVM publica todos os conjuntos cobertos pelo
 `cvmdata` sob a [Open Data Commons Open Database License (ODbL)

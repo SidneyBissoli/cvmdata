@@ -27,6 +27,8 @@ per call or persisted with
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
 
 Other source:
+[`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md),
+[`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md),
 [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
 
 ## Examples

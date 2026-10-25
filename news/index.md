@@ -51,7 +51,56 @@
 
 ### New features
 
-- The `cvm_tbl` class and its six provenance attributes now survive
+- **Dated snapshots of the mirror.** Every weekly ETL run that changes
+  something now also publishes the release
+  `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`, carrying the
+  partitions whose content changed (the first one carries every
+  partition) and a complete `__source_hash.json` that says, for each
+  partition of that day’s mirror, which snapshot release holds its
+  bytes. Snapshots are never deleted; `-latest` keeps being rewritten in
+  place, so older clients work unchanged. Measured in October 2026 over
+  144 weeks of CVM deliveries, a weekly round changes about 60 MB (11%
+  of the partitions), so the snapshots cost about 3.5 GB a year against
+  32 GB for a full copy per week.
+
+- [`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)
+  /
+  [`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md)
+  and the option `cvmdata.mirror_release` pin a session to the mirror as
+  it was on a date: `cvm_release_set("2026-11-01")` resolves to the most
+  recent snapshot on or before that day and every
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  call with `source = "mirror"` reads from it, so a script reproduces
+  the same bytes months later. `"latest"` (the default) follows the
+  weekly refresh. A date before the first snapshot of a dataset is an
+  error that names the earliest date available. Under a pin,
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  drops the history rows superseded after the pinned date.
+
+- Every `cvm_tbl` carries a seventh provenance attribute, `release`: the
+  GitHub release the rows were read from when `source = "mirror"` (the
+  snapshot tag, or the `-latest` tag for a release older than the
+  snapshots), `NA` for `source = "cvm"`.
+  [`print()`](https://rdrr.io/r/base/print.html) shows it next to
+  `source`; [`rbind()`](https://rdrr.io/r/base/cbind.html) /
+  [`vctrs::vec_rbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
+  reconcile different releases to `"mixed"` like the other attributes.
+
+- **Integrity of mirror downloads.** The sidecar now publishes the
+  SHA-256 and size of every parquet, and the client checks both: a
+  cached copy that does not match (a truncated download, or the same
+  partition from another snapshot) is replaced, and a download that does
+  not match is discarded and aborts with the new condition class
+  `cvmdata_error_http_integrity` (a subclass of `cvmdata_error_http`). A
+  parquet DuckDB cannot open is removed from the cache so the next call
+  downloads it again. Before this, a corrupt parquet was a cache hit for
+  ever. As a consequence, a weekly change of the mirror no longer evicts
+  the whole dataset from the local cache: only the partitions whose
+  bytes changed are downloaded again.
+
+- The `cvm_tbl` class and its provenance attributes now survive
   [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
   and every verb after it
   ([`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html),

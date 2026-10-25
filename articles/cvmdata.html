@@ -378,7 +378,7 @@ vignette stays offline):</p>
 <span><span class="co">#&gt; 14   PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA.</span></span>
 <span><span class="co">#&gt; 15                   WALTER HEUER AUDITORES INDEPENDENTES</span></span></code></pre></div>
 <p>Every tibble returned by a <code>cvmdata</code> fetcher has the class
-<code>cvm_tbl</code> and carries six provenance attributes:</p>
+<code>cvm_tbl</code> and carries seven provenance attributes:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"source"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "cvm"</span></span>
@@ -390,7 +390,8 @@ vignette stays offline):</p>
 <span><span class="co">#&gt; [1] "companhias"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"package_version"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "0.0.0.9000"</span></span>
-<span><span class="co"># `fetched_at` is a POSIXct timestamp set at download time.</span></span></code></pre></div>
+<span><span class="co"># `fetched_at` is a POSIXct timestamp set at download time; `release`</span></span>
+<span><span class="co"># is the mirror release the rows were read from (NA for source "cvm").</span></span></code></pre></div>
 <p>They are displayed at the top of the print output and travel with the
 data through subsetting (<code>[</code>, <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code>), the dplyr
 verbs that work on one table (<code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code>,

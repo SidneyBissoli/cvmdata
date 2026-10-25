@@ -37,12 +37,16 @@ window for HTTP revalidation is configurable via the
 Configure which backend
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 queries (direct CVM portal or the parquet mirror published in GitHub
-Releases).
+Releases) and, for the mirror, which dated snapshot it reads.
 
 - [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
   : Get the active cvmdata source backend
 - [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
   : Set the active cvmdata source backend
+- [`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md)
+  : Get the mirror snapshot the package reads
+- [`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)
+  : Pin the mirror to a dated snapshot
 
 ## Discovery
 

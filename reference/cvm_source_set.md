@@ -29,6 +29,8 @@ The chosen source, invisibly.
 [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
 
 Other source:
+[`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md),
+[`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md),
 [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
 
 ## Examples

@@ -211,14 +211,19 @@ or the `source` argument of
   weekly by the ETL under `inst/etl/`, maintained by the package author,
   not by the CVM. It is typically ~30× faster than the portal; its
   staleness is bounded by the weekly refresh. The mirror omits a year
-  when the CVM publishes that year’s CSV with no data rows.
+  when the CVM publishes that year’s CSV with no data rows. Every weekly
+  run also keeps a dated snapshot
+  (`mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`), so
+  `cvm_release_set("2026-11-01")` pins a session to the mirror as it was
+  on that day; the default `"latest"` follows the weekly refresh.
 - `"cvm"` — HTTP directly to the CVM Open Data Portal. Opt in when
   byte-level freshness against the regulator is required, or when you
   prefer not to depend on a third-party mirror.
 
 Every returned tibble carries provenance attributes (`source`,
-`fetched_at`, `group`, `dataset`, `table`, `package_version`) so a
-downstream caller can audit which backend served the data.
+`fetched_at`, `group`, `dataset`, `table`, `package_version`, `release`)
+so a downstream caller can audit which backend, and which mirror
+release, served the data.
 
 **Licence of the data.** The CVM publishes every dataset covered by
 `cvmdata` under the [Open Data Commons Open Database License (ODbL)
