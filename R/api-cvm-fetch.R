@@ -32,7 +32,14 @@
 #'   them (one file per year). `NULL` (default) fetches the latest
 #'   available year. Must be `NULL` for datasets with
 #'   `temporal_partitioning: none` (e.g. CAD), and cannot be combined
-#'   with `from`/`to`.
+#'   with `from`/`to`. Years the table is not published for are refused
+#'   before any download: years before the table's first year, and
+#'   years from which the CVM publishes its CSV with the header only
+#'   (`fca/departamento_acionistas` from 2024, after Resolução CVM
+#'   59/2021 revoked the block). For such a table, `year = NULL` warns
+#'   (`cvmdata_warn_empty_upstream`): the mirror returns the last year
+#'   with content, the portal returns the latest file, which has zero
+#'   rows.
 #' @param from,to Optional period bounds, both required together, as
 #'   complete dates (`"YYYY-MM-DD"` strings or `Date` scalars). Rows
 #'   are kept when the document's reference date (`dt_refer` or
@@ -244,6 +251,7 @@ cvm_fetch <- function(
   reading <- check_reading(reading, schema)
   period <- check_period(year, from, to, schema)
   period <- check_published_years(period, schema)
+  warn_empty_latest(period, schema, source)
   as_of <- check_as_of(as_of, schema)
   cnpj <- check_cnpj(cnpj)
   if (!is.null(ticker)) {
@@ -777,9 +785,26 @@ check_ticker <- function(ticker) {
 # than failing deep in the backend with a message about ZIP members:
 # an explicit `year` aborts; a `from`/`to` window drops the years the
 # table does not exist for and says so, unless nothing is left.
+#
+# The symmetric case: a table can stop carrying content before its
+# dataset does. The CVM then still publishes the CSV every year, header
+# only, so the portal returns zero rows and the mirror (which skips an
+# empty year) has no partition (fca/departamento_acionistas from 2024,
+# after Res. CVM 59/2021 revoked the block; measured 2026-10-24). The
+# schema's `empty_from` records that, with `empty_reason`. Years from
+# it on are handled like the years before `first_year`: refused when
+# asked for explicitly, dropped with a message inside a window.
 check_published_years <- function(period, schema) {
+  if (is.null(period$year)) {
+    return(period)
+  }
+  period <- check_first_year(period, schema)
+  check_empty_from(period, schema)
+}
+
+check_first_year <- function(period, schema) {
   first <- schema$first_year
-  if (is.null(period$year) || is.null(first)) {
+  if (is.null(first)) {
     return(period)
   }
   first <- as.integer(first)
@@ -812,6 +837,90 @@ check_published_years <- function(period, schema) {
   ))
   period$year <- kept
   period
+}
+
+check_empty_from <- function(period, schema) {
+  empty <- schema$empty_from
+  if (is.null(empty)) {
+    return(period)
+  }
+  empty <- as.integer(empty)
+  years <- as.integer(period$year)
+  late <- years[years >= empty]
+  if (!length(late)) {
+    return(period)
+  }
+  last <- empty - 1L
+  if (is.null(period$from) || length(late) == length(years)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} is",
+          "published without content from {.val {empty}} on."
+        ),
+        "x" = "Requested: {.val {late}}.",
+        "i" = empty_reason_bullet(schema),
+        "i" = "The last year with content is {.val {last}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  kept <- years[years < empty]
+  cli::cli_inform(c(
+    "i" = paste(
+      "Table {.val {schema$dataset}}/{.val {schema$table}} has no",
+      "content from {.val {empty}} on; reading {.val {kept}}."
+    )
+  ))
+  period$year <- kept
+  period
+}
+
+# `year = NULL` on a table with `empty_from`: the user asked for the
+# latest year and the latest year the CVM publishes has no content.
+# Say so before the backend runs. The two backends then differ, by
+# design (decision of 2026-10-24): the mirror has no partition for the
+# empty years, so it returns the last year with content; the portal
+# reads the latest file as published and returns zero rows. Called by
+# cvm_fetch() and cvm_versions() after check_published_years().
+warn_empty_latest <- function(period, schema, source) {
+  empty <- schema$empty_from
+  if (!is.null(period$year) || is.null(empty)) {
+    return(invisible(NULL))
+  }
+  empty <- as.integer(empty)
+  last <- empty - 1L
+  outcome <- if (identical(source, "mirror")) {
+    "Returning {.val {last}}, the last year with content."
+  } else {
+    paste(
+      "The CVM's latest file has no rows; pass {.code year = {last}}",
+      "for the last year with content."
+    )
+  }
+  cvmdata_warn(
+    c(
+      paste(
+        "{.code year = NULL}: table",
+        "{.val {schema$dataset}}/{.val {schema$table}} is published",
+        "without content from {.val {empty}} on."
+      ),
+      "i" = empty_reason_bullet(schema),
+      "i" = outcome
+    ),
+    class = "cvmdata_warn_empty_upstream"
+  )
+  invisible(NULL)
+}
+
+# The schema's `empty_reason` as a cli bullet, or a neutral sentence
+# when the schema has none.
+empty_reason_bullet <- function(schema) {
+  reason <- schema$empty_reason
+  if (is.null(reason)) {
+    return("The CVM publishes the CSV for those years with the header only.")
+  }
+  paste0("Why: ", reason, ".")
 }
 
 # `as_of`: registrations in force on a date -------------------------------

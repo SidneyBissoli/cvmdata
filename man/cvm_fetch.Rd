@@ -49,7 +49,14 @@ that maps to more than one issuer (pass \code{cnpj} instead).}
 them (one file per year). \code{NULL} (default) fetches the latest
 available year. Must be \code{NULL} for datasets with
 \code{temporal_partitioning: none} (e.g. CAD), and cannot be combined
-with \code{from}/\code{to}.}
+with \code{from}/\code{to}. Years the table is not published for are refused
+before any download: years before the table's first year, and
+years from which the CVM publishes its CSV with the header only
+(\code{fca/departamento_acionistas} from 2024, after Resolução CVM
+59/2021 revoked the block). For such a table, \code{year = NULL} warns
+(\code{cvmdata_warn_empty_upstream}): the mirror returns the last year
+with content, the portal returns the latest file, which has zero
+rows.}
 
 \item{from, to}{Optional period bounds, both required together, as
 complete dates (\code{"YYYY-MM-DD"} strings or \code{Date} scalars). Rows

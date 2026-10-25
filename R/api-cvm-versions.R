@@ -125,6 +125,7 @@ cvm_versions <- function(
     list(year = year, from = NULL, to = NULL),
     schema
   )
+  warn_empty_latest(period, schema, source)
   cnpj <- check_cnpj(cnpj)
   if (!is.null(ticker)) {
     resolved <- resolve_ticker_all_years(check_ticker(ticker), source = source)
