@@ -479,8 +479,14 @@ mirror_read_sidecar <- function(url) {
   if (is.null(resp) || httr2::resp_status(resp) >= 400L) {
     return(none)
   }
+  # GitHub serves release assets as `application/octet-stream`, and
+  # httr2 refuses to parse JSON under that type unless told otherwise.
+  # Until 2026-10-25 this call ran with the default check, the error was
+  # swallowed into `hash = NA`, and no client ever read the sidecar in
+  # production: the L3 eviction by hash and the skip manifest never
+  # worked outside the tests, whose mock answered `application/json`.
   body <- tryCatch(
-    httr2::resp_body_json(resp, simplifyVector = TRUE),
+    httr2::resp_body_json(resp, simplifyVector = TRUE, check_type = FALSE),
     error = function(e) NULL
   )
   if (is.null(body)) {

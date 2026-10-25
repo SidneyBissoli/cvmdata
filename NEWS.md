@@ -239,6 +239,16 @@
 
 ## Bug fixes
 
+* The mirror's `__source_hash.json` sidecar is now actually read in
+  production. GitHub serves release assets as
+  `application/octet-stream`, httr2 refuses to parse JSON under that
+  type by default, and the refusal was swallowed into "no hash", so
+  since the sidecar shipped no installed client had ever evicted a
+  stale L3 copy by hash or quoted the skip manifest in the "No parquet
+  assets match" error (the tests' mock answered `application/json`).
+  Found on 2026-10-25 when the first pinned read of a dated snapshot
+  said the mirror had none.
+
 * The parquet mirror (`source = "mirror"`, the default) had stopped
   updating in June 2026. The weekly ETL skipped a publish whenever the
   CVM dictionary files were unchanged, and they rarely change, so new
