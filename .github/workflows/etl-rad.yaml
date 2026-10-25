@@ -13,7 +13,9 @@ name: ETL RAD history
 #     (12:00 UTC), past the Tuesday 07:00 UTC run of the mirror.
 #   - workflow_dispatch: `dataset` (empty = dfp then itr, as the cron),
 #     `limit` (documents per dataset, default 300), `year` (one
-#     reference year, smoke test), `dry_run` (read, do not publish).
+#     reference year, smoke test), `reread` (id_doc to read again, their
+#     history rows replaced: a document read wrong before a reader fix),
+#     `dry_run` (read, do not publish).
 #
 # One job per dataset, DFP first (decision 3: most recent year first,
 # DFP before ITR). Each document costs ~40–50 s (download, reading and
@@ -48,6 +50,10 @@ on:
         type: string
       year:
         description: Reference year (optional; smoke test, one year only)
+        required: false
+        type: string
+      reread:
+        description: Read these id_doc again and replace their history rows (comma-separated; one dataset)
         required: false
         type: string
       dry_run:
@@ -109,6 +115,9 @@ jobs:
           args="$args --limit ${{ inputs.limit || '300' }}"
           if [ -n "${{ inputs.year }}" ]; then
             args="$args --year ${{ inputs.year }}"
+          fi
+          if [ -n "${{ inputs.reread }}" ]; then
+            args="$args --reread ${{ inputs.reread }}"
           fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             args="$args --dry-run"
