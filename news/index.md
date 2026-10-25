@@ -558,7 +558,10 @@
   (`-0.05`), and, in the per-share accounts (`3.99*`) only, puts the
   lost point back after the first digit, as the CVM converter does;
   measured against 15 other RAD documents, whose digits-only per-share
-  values are all `0`.
+  values are all `0`. A document filed under a branch’s CNPJ (Pacaembu
+  Construtora, ITR 2020-09-30 v1: 0002-49 in the document, the head
+  office 0001-68 in the index) is read when the CNPJ root and the CVM
+  code both match the index; the rows carry the index’s identity.
 
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
