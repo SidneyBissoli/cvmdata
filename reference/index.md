@@ -69,9 +69,11 @@ disambiguates when a dataset slug occurs in more than one group.
 
 ## Utilities
 
-CNPJ formatting helpers.
+CNPJ formatting helpers and the provenance-carrying tibble.
 
 - [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
   : Strip punctuation from a CNPJ vector
 - [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)
   : Format a CNPJ vector with the canonical punctuation
+- [`cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
+  : Provenance-carrying tibbles

@@ -152,7 +152,7 @@ vignette stays offline):</p>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">companies</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"cvm"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-05-23 13:06:15.690987</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"cad"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"companhias"</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"cad"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"companhias"</span></span></span>
 <span><span class="co">#&gt;              cnpj_cia                                         denom_social</span></span>
 <span><span class="co">#&gt; 1  08.773.135/0001-00            2W ECOBANK S.A. - EM RECUPERAÇÃO JUDICIAL</span></span>
 <span><span class="co">#&gt; 2  11.396.633/0001-87                          3A COMPANHIA SECURITIZADORA</span></span>
@@ -377,11 +377,13 @@ vignette stays offline):</p>
 <span><span class="co">#&gt; 13      TERCO AUDITORES INDEPENDENTES - SOCIEDADE SIMPLES</span></span>
 <span><span class="co">#&gt; 14   PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA.</span></span>
 <span><span class="co">#&gt; 15                   WALTER HEUER AUDITORES INDEPENDENTES</span></span></code></pre></div>
-<p>Every tibble returned by a <code>cvmdata</code> fetcher carries five
-provenance attributes:</p>
+<p>Every tibble returned by a <code>cvmdata</code> fetcher has the class
+<code>cvm_tbl</code> and carries six provenance attributes:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"source"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "cvm"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"group"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "companhias"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"dataset"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "cad"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"table"</span><span class="op">)</span></span>
@@ -389,9 +391,20 @@ provenance attributes:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">companies</span>, <span class="st">"package_version"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "0.0.0.9000"</span></span>
 <span><span class="co"># `fetched_at` is a POSIXct timestamp set at download time.</span></span></code></pre></div>
-<p>These attributes survive subsetting via standard tibble operations
-and are displayed at the top of the print output, so the dataset’s
-origin and freshness travel with the data.</p>
+<p>They are displayed at the top of the print output and travel with the
+data through subsetting (<code>[</code>, <code><a href="https://rdrr.io/r/utils/head.html" class="external-link">head()</a></code>), the dplyr
+verbs that work on one table (<code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code>,
+<code>mutate()</code>, <code>select()</code>, <code>arrange()</code>,
+<code>group_by()</code>, <code>summarise()</code>), joins where the
+<code>cvm_tbl</code> is the first argument, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> or
+<code><a href="https://vctrs.r-lib.org/reference/vec_bind.html" class="external-link">vctrs::vec_rbind()</a></code> of several <code>cvm_tbl</code>s (an
+attribute that differs between the inputs becomes <code>"mixed"</code>;
+<code><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">dplyr::bind_rows()</a></code> instead keeps the first input’s
+provenance, as it does for every data frame subclass). They are dropped
+when the result is no longer a CVM table: a vector (<code>pull()</code>,
+<code>$</code>), a reshaped table (<code><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">tidyr::pivot_longer()</a></code>)
+or a join or bind whose first input is a plain tibble. See
+<code><a href="../reference/cvm_tbl.html">?cvm_tbl</a></code> for the full list.</p>
 </div>
 <div class="section level2">
 <h2 id="the-general-api-cvm_fetch">The general API — <code>cvm_fetch()</code><a class="anchor" aria-label="anchor" href="#the-general-api-cvm_fetch"></a>

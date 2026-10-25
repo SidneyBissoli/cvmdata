@@ -57,7 +57,7 @@ selected by CNPJ in both, shows the two forms:
 `a`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
 `               year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -65,7 +65,7 @@ selected by CNPJ in both, shows the two forms:
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -74,7 +74,7 @@ selected by CNPJ in both, shows the two forms:
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `b`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``, cnpj ``=`` ``"00.000.000/0001-91"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -113,7 +113,7 @@ declares the transformation, and the package returns absolute reais with
 `bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
 `                 year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -121,7 +121,7 @@ declares the transformation, and the package returns absolute reais with
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -131,7 +131,7 @@ declares the transformation, and the package returns absolute reais with
 \
 `# Total assets reported by BCO BRASIL in 2024 (reais):`\
 `bpa``[``bpa``$``cd_conta`` ``==`` ``"1"`` ``&`` ``bpa``$``ordem_exerc`` ``==`` ``"ÚLTIMO"``, ``"vl_conta"``]`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-25 03:23:22.028383`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-25 12:22:56.023324`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"dfp"`` | ``table``: ``"bpa"`\
 `#> ``# A tibble: 1 × 1`\
 `#>        vl_conta`\
@@ -150,14 +150,14 @@ dictionary. The default `validate = "strict"` refuses to read them:
 [`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"empregado_PCD"``,`\
 `          cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
 `#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-25 03:23:22.949818`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``fetched_at``: ``2026-10-25 12:22:56.992985`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``# A tibble: 0 × 11`\
 `#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
@@ -198,7 +198,7 @@ index and returns every delivery, with its receipt date and document id
 `auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"auditor"``,`\
 `                     cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -206,7 +206,7 @@ index and returns every delivery, with its receipt date and document id
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -231,7 +231,7 @@ matches whichever CNPJ column the table carries:
 `auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"auditor"``,`\
 `                     cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -239,7 +239,7 @@ matches whichever CNPJ column the table carries:
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpsVikxC/duckdb`\
+`#> ``ℹ`` /tmp/RtmpXrDGFq/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\

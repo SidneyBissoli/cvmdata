@@ -51,6 +51,41 @@
 
 ### New features
 
+- The `cvm_tbl` class and its six provenance attributes now survive
+  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  and every verb after it
+  ([`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html),
+  [`mutate()`](https://dplyr.tidyverse.org/reference/mutate.html),
+  [`filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`select()`](https://dplyr.tidyverse.org/reference/select.html),
+  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  `[`), and [`rbind()`](https://rdrr.io/r/base/cbind.html) /
+  [`vctrs::vec_rbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
+  of several `cvm_tbl`s
+  ([`dplyr_reconstruct()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html),
+  [`dplyr_row_slice()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html),
+  [`dplyr_col_modify()`](https://dplyr.tidyverse.org/reference/dplyr_extending.html),
+  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  [`ungroup()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  [`summarise()`](https://dplyr.tidyverse.org/reference/summarise.html),
+  `[`, `names<-`, [`rbind()`](https://rdrr.io/r/base/cbind.html),
+  `vec_ptype2()` and `vec_cast()` methods). Before,
+  [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
+  dropped the class and the next verb dropped the attributes without a
+  word, and `vec_rbind()` returned a plain tibble. When the inputs of
+  [`rbind()`](https://rdrr.io/r/base/cbind.html)/`vec_rbind()` differ in
+  `source`, `group`, `dataset`, `table` or `package_version`, the result
+  says `"mixed"` and `fetched_at` keeps the oldest timestamp.
+  [`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+  keeps the first input’s provenance, dplyr’s rule for every data frame
+  subclass, and
+  [`?cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
+  says so.
+  [`?cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
+  also lists which operations keep the provenance and which drop it by
+  design; printing a `cvm_tbl` whose attributes were stripped no longer
+  shows a header of empty fields.
+
 - [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
   returns every known version of a filing, the current one included:
   `cvm_versions(dataset, table, cnpj, ticker, year, basis, ...)`, the

@@ -38,7 +38,8 @@ decide whether to filter the NAs or escalate.
 [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
 
 Other utilities:
-[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
+[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
+[`cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
 
 ## Examples
 

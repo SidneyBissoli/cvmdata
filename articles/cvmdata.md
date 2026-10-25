@@ -52,7 +52,7 @@ vignette stays offline):
 `)``)`\
 `companies`\
 `#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-05-23 13:06:15.690987`\
-`#> ``ℹ`` ``group``: | ``dataset``: ``"cad"`` | ``table``: ``"companhias"`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"cad"`` | ``table``: ``"companhias"`\
 `#>              cnpj_cia                                         denom_social`\
 `#> 1  08.773.135/0001-00            2W ECOBANK S.A. - EM RECUPERAÇÃO JUDICIAL`\
 `#> 2  11.396.633/0001-87                          3A COMPANHIA SECURITIZADORA`\
@@ -278,12 +278,14 @@ vignette stays offline):
 `#> 14   PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA.`\
 `#> 15                   WALTER HEUER AUDITORES INDEPENDENTES`
 
-Every tibble returned by a `cvmdata` fetcher carries five provenance
-attributes:
+Every tibble returned by a `cvmdata` fetcher has the class `cvm_tbl` and
+carries six provenance attributes:
 
 \
 [`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"source"``)`\
 `#> [1] "cvm"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"group"``)`\
+`#> [1] "companhias"`\
 [`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"dataset"``)`\
 `#> [1] "cad"`\
 [`attr`](https://rdrr.io/r/base/attr.html)`(``companies``, ``"table"``)`\
@@ -292,9 +294,24 @@ attributes:
 `#> [1] "0.0.0.9000"`\
 `` # `fetched_at` is a POSIXct timestamp set at download time. ``
 
-These attributes survive subsetting via standard tibble operations and
-are displayed at the top of the print output, so the dataset’s origin
-and freshness travel with the data.
+They are displayed at the top of the print output and travel with the
+data through subsetting (`[`,
+[`head()`](https://rdrr.io/r/utils/head.html)), the dplyr verbs that
+work on one table ([`filter()`](https://rdrr.io/r/stats/filter.html),
+`mutate()`, `select()`, `arrange()`, `group_by()`, `summarise()`), joins
+where the `cvm_tbl` is the first argument, and
+[`rbind()`](https://rdrr.io/r/base/cbind.html) or
+[`vctrs::vec_rbind()`](https://vctrs.r-lib.org/reference/vec_bind.html)
+of several `cvm_tbl`s (an attribute that differs between the inputs
+becomes `"mixed"`;
+[`dplyr::bind_rows()`](https://dplyr.tidyverse.org/reference/bind_rows.html)
+instead keeps the first input’s provenance, as it does for every data
+frame subclass). They are dropped when the result is no longer a CVM
+table: a vector (`pull()`, `$`), a reshaped table
+([`tidyr::pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html))
+or a join or bind whose first input is a plain tibble. See
+[`?cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
+for the full list.
 
 ## The general API — `cvm_fetch()`
 

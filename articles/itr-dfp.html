@@ -212,7 +212,7 @@ individual balance sheet (<code>dfp/bpa</code>).</p>
 <span>  basis <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -220,7 +220,7 @@ individual balance sheet (<code>dfp/bpa</code>).</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -228,7 +228,7 @@ individual balance sheet (<code>dfp/bpa</code>).</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="va">bpa</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:53.85769</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:26.210272</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 226 × 15</span></span></span>
 <span><span class="co">#&gt;    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc</span></span>
@@ -266,7 +266,7 @@ lists every delivery, with its receipt date.</li>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cnpj_cia"</span>, <span class="st">"denom_cia"</span>, <span class="st">"dt_fim_exerc"</span>, <span class="st">"vl_conta"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span><span class="va">ativo_total</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:53.85769</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:26.210272</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   cnpj_cia           denom_cia           dt_fim_exerc      vl_conta</span></span>
@@ -285,7 +285,7 @@ older comparative, request the matching upstream year explicitly:</p>
 <span>  basis <span class="op">=</span> <span class="st">"ind"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -293,7 +293,7 @@ older comparative, request the matching upstream year explicitly:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -305,7 +305,7 @@ older comparative, request the matching upstream year explicitly:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dt_fim_exerc"</span>, <span class="st">"vl_conta"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
 <span><span class="va">ativo_history</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">ativo_history</span><span class="op">$</span><span class="va">dt_fim_exerc</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:54.993234</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:27.401755</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 2</span></span></span>
 <span><span class="co">#&gt;   dt_fim_exerc      vl_conta</span></span>
@@ -328,7 +328,7 @@ there):</p>
 <span>  reading <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"original"</span>, <span class="st">"restated"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -336,7 +336,7 @@ there):</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -344,7 +344,7 @@ there):</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -352,7 +352,7 @@ there):</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -364,7 +364,7 @@ there):</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dt_refer"</span>, <span class="st">"ordem_exerc"</span>, <span class="st">"dt_fim_exerc"</span>, <span class="st">"cd_conta"</span>, <span class="st">"vl_conta"</span>,</span>
 <span>    <span class="st">"reading"</span><span class="op">)</span></span>
 <span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:56.161519</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:28.50901</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"bpa"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
 <span><span class="co">#&gt;   dt_refer   ordem_exerc dt_fim_exerc cd_conta      vl_conta reading </span></span>
@@ -388,7 +388,7 @@ table:</p>
 <span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -396,7 +396,7 @@ table:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -404,7 +404,7 @@ table:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="va">cap</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:56.651464</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:28.989769</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"composicao_capital"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 11</span></span></span>
 <span><span class="co">#&gt;   cnpj_cia           dt_refer   versao denom_cia          qt_acao_ordin_cap_in…¹</span></span>
@@ -428,7 +428,7 @@ where a CVM code (<code>cd_cvm</code>) meets its CNPJ:</p>
 <span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -436,7 +436,7 @@ where a CVM code (<code>cd_cvm</code>) meets its CNPJ:</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="va">sub</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cd_cvm"</span>, <span class="st">"denom_cia"</span>, <span class="st">"dt_refer"</span>, <span class="st">"id_doc"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 03:23:56.901377</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">source</span>: <span style="color: #0000BB;">"mirror"</span> | <span style="color: #00BB00;">fetched_at</span>: <span style="color: #0000BB;">2026-10-25 12:23:29.229535</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> <span style="color: #00BB00;">group</span>: <span style="color: #0000BB;">"companhias"</span> | <span style="color: #00BB00;">dataset</span>: <span style="color: #0000BB;">"dfp"</span> | <span style="color: #00BB00;">table</span>: <span style="color: #0000BB;">"submissao"</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 4</span></span></span>
 <span><span class="co">#&gt;   cd_cvm denom_cia           dt_refer   id_doc</span></span>
@@ -459,7 +459,7 @@ are shared. To pick quarters rather than whole years, pass a
 <span>  basis <span class="op">=</span> <span class="st">"con"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -467,7 +467,7 @@ are shared. To pick quarters rather than whole years, pass a
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpNOBwYu/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpGJagYa/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
