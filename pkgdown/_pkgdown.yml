@@ -65,7 +65,8 @@ reference:
       - cvm_codelist
       - cvm_dataset_years
   - title: Utilities
-    desc: CNPJ formatting helpers.
+    desc: CNPJ formatting helpers and the provenance-carrying tibble.
     contents:
       - cnpj_clean
       - cnpj_format
+      - cvm_tbl
