@@ -460,6 +460,93 @@ test_that("check_published_years clips a window to the published years", {
   expect_identical(cvmdata:::check_published_years(latest, schema), latest)
 })
 
+# Table published without content from a year on (schema `empty_from`):
+# fca/departamento_acionistas carries 546 rows in 2023 and the header
+# only from 2024, after Res. CVM 59/2021 revoked the block.
+
+test_that("cvm_fetch refuses a year the table has no content for", {
+  expect_snapshot(
+    error = TRUE,
+    cvm_fetch("fca", "departamento_acionistas", year = 2025, source = "cvm")
+  )
+  expect_error(
+    cvm_fetch(
+      "fca",
+      "departamento_acionistas",
+      year = 2024:2026,
+      source = "mirror"
+    ),
+    regexp = "without content from.*2024",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("check_published_years clips a window at empty_from", {
+  schema <- cvmdata:::load_schema("fca", "departamento_acionistas")
+  window <- cvmdata:::check_period(NULL, "2022-01-01", "2025-12-31", schema)
+  expect_message(
+    clipped <- cvmdata:::check_published_years(window, schema),
+    regexp = "no content from.*2024.*reading"
+  )
+  expect_identical(clipped$year, 2022:2023)
+  expect_error(
+    cvmdata:::check_published_years(
+      cvmdata:::check_period(NULL, "2024-01-01", "2025-12-31", schema),
+      schema
+    ),
+    regexp = "without content from",
+    class = "cvmdata_error_input"
+  )
+  # A mixed explicit vector is refused outright: only a window clips.
+  expect_error(
+    cvmdata:::check_published_years(
+      cvmdata:::check_period(2023:2024, NULL, NULL, schema),
+      schema
+    ),
+    regexp = "Requested: 2024",
+    class = "cvmdata_error_input"
+  )
+  plain <- cvmdata:::check_period(2020:2023, NULL, NULL, schema)
+  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
+})
+
+test_that("warn_empty_latest says what each backend returns", {
+  schema <- cvmdata:::load_schema("fca", "departamento_acionistas")
+  latest <- cvmdata:::check_period(NULL, NULL, NULL, schema)
+  expect_snapshot({
+    cvmdata:::warn_empty_latest(latest, schema, "mirror")
+    cvmdata:::warn_empty_latest(latest, schema, "cvm")
+  })
+  # Silent with an explicit year, and on tables without empty_from.
+  explicit <- cvmdata:::check_period(2023L, NULL, NULL, schema)
+  expect_no_warning(cvmdata:::warn_empty_latest(explicit, schema, "cvm"))
+  plain <- cvmdata:::load_schema("fca", "geral")
+  expect_no_warning(cvmdata:::warn_empty_latest(latest, plain, "mirror"))
+  # Without a reason the bullet falls back to a neutral sentence.
+  schema$empty_reason <- NULL
+  expect_warning(
+    cvmdata:::warn_empty_latest(latest, schema, "cvm"),
+    regexp = "header only",
+    class = "cvmdata_warn_empty_upstream"
+  )
+})
+
+test_that("cvm_fetch year = NULL on an emptied table warns, portal path", {
+  skip_if_not_installed("httptest2")
+  local_prepare_cvm_cache("fca")
+  local_published_years(2024L)
+  expect_warning(
+    result <- with_fixture_http(
+      cvm_fetch("fca", "departamento_acionistas", source = "cvm")
+    ),
+    regexp = "without content from.*2024",
+    class = "cvmdata_warn_empty_upstream"
+  )
+  expect_s3_class(result, "cvm_tbl")
+  expect_identical(nrow(result), 0L)
+  expect_identical(ncol(result), 23L)
+})
+
 # as_of ----------------------------------------------------------------
 
 # cad_sample.csv: 50 rows, 41 cancelled, 3 CNPJs repeated by tp_merc;

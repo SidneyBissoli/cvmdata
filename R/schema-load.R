@@ -294,6 +294,47 @@ validate_temporal_partitioning <- function(s, dataset, table) {
       class = "cvmdata_error_internal"
     )
   }
+  validate_empty_from(s, dataset, table, fy)
+}
+
+# `empty_from` (optional): the year from which the CVM publishes the
+# table's CSV with the header only, so the mirror has no partition and
+# the portal returns zero rows (fca/departamento_acionistas from 2024,
+# after Res. CVM 59/2021 revoked the block). Must be an integer after
+# `first_year`; `empty_reason`, when present, is a string quoted in the
+# messages that `check_published_years()` and `warn_empty_latest()`
+# emit.
+validate_empty_from <- function(s, dataset, table, first_year) {
+  ef <- s$empty_from
+  if (is.null(ef)) {
+    return(invisible(NULL))
+  }
+  ok <- is.numeric(ef) &&
+    length(ef) == 1L &&
+    is.finite(ef) &&
+    ef == as.integer(ef) &&
+    ef > first_year
+  if (!ok) {
+    cvmdata_abort(
+      c(paste(
+        "Schema for {.val {dataset}}/{.val {table}} declares an invalid",
+        "{.field empty_from}: must be an integer year after",
+        "{.field first_year} ({.val {first_year}})."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  reason <- s$empty_reason
+  if (!is.null(reason) && !(is.character(reason) && length(reason) == 1L)) {
+    cvmdata_abort(
+      c(paste(
+        "Schema for {.val {dataset}}/{.val {table}} declares an invalid",
+        "{.field empty_reason}: must be a single string."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  invisible(NULL)
 }
 
 # Resolve the CSV pattern from a schema given a report_type. Returns the

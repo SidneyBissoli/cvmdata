@@ -4,13 +4,16 @@
 # data_referencia / nome_empresarial).
 #
 # IMPORTANT: this table is published with a valid 23-field header but
-# ZERO data rows from 2024 onward (it carried 546 rows in 2023, then
-# zeroed). Reflects a regulatory change — the "Departamento de
-# Acionistas" section of the FCA annex was consolidated elsewhere
-# (likely `endereco` / `dri`). The reader must tolerate a header-only
-# CSV without aborting (nrow == 0L is valid). Empirical verification:
-# 2024 snapshot + 2023/2025 cross-check (verificacao empirica v0.2
-# §2.1 e §12.1).
+# ZERO data rows from 2024 onward (546 rows in 2023, 721 in 2022). The
+# block was not moved elsewhere: item 6 of the Formulario Cadastral
+# ("Departamento de acionistas") was REVOKED by Resolucao CVM 59/2021,
+# art. 8, II (with items 1.28, 1.29, 5.8 and 5.9), in force since
+# 2023-01-02 (art. 9). The 2023 filings still carried it in part (64%
+# of the companies, old template); from the 2024 cycle on, none. The
+# CVM keeps publishing the CSV every year, header only. The reader must
+# tolerate a header-only CSV without aborting (nrow == 0L is valid);
+# `empty_from` below lets the package say why (measured 2026-10-24 on
+# the 2020-2026 ZIPs and on the consolidated text of Res. CVM 59).
 
 dataset: fca
 table: departamento_acionistas
@@ -30,6 +33,14 @@ delimiter: ";"
 # Temporal coverage -----------------------------------------------------
 temporal_partitioning: yearly
 first_year: 2010
+# The CVM publishes this table's CSV every year but, from `empty_from`
+# on, with the header only. The package refuses those years (as it
+# refuses years before `first_year`) and warns when `year = NULL`
+# resolves against them. `empty_reason` is quoted in those messages.
+empty_from: 2024
+empty_reason: >-
+  item 6 of the Formulario Cadastral (shareholders department) was
+  revoked by Resolucao CVM 59/2021, in force since 2023-01-02
 
 # Field count (validation aid) -----------------------------------------
 # 23 fields are declared by the META and present in the CSV header even

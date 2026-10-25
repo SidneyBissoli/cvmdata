@@ -132,6 +132,56 @@ test_that("invalid meta_status value is rejected", {
   )
 })
 
+test_that("empty_from must be an integer year after first_year", {
+  raw <- list(
+    dataset = "x",
+    table = "y",
+    cvm_archive_url_pattern = NULL,
+    cvm_file_url_pattern = "https://example.com/x_{year}.csv",
+    cvm_file_pattern = "x_{year}.csv",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
+    temporal_partitioning = "yearly",
+    first_year = 2010L,
+    expected_field_count = 1L,
+    transformations = list()
+  )
+  ok <- raw
+  ok$empty_from <- 2024L
+  ok$empty_reason <- "the block was revoked"
+  expect_no_error(validate_schema(ok, "x", "y"))
+
+  before_first <- raw
+  before_first$empty_from <- 2010L
+  expect_error(
+    validate_schema(before_first, "x", "y"),
+    regexp = "empty_from",
+    class = "cvmdata_error_internal"
+  )
+
+  not_a_year <- raw
+  not_a_year$empty_from <- "2024"
+  expect_error(
+    validate_schema(not_a_year, "x", "y"),
+    regexp = "empty_from",
+    class = "cvmdata_error_internal"
+  )
+
+  bad_reason <- ok
+  bad_reason$empty_reason <- c("two", "strings")
+  expect_error(
+    validate_schema(bad_reason, "x", "y"),
+    regexp = "empty_reason",
+    class = "cvmdata_error_internal"
+  )
+})
+
+test_that("fca/departamento_acionistas declares empty_from 2024", {
+  schema <- load_schema("fca", "departamento_acionistas")
+  expect_identical(as.integer(schema$empty_from), 2024L)
+  expect_match(schema$empty_reason, "Resolucao CVM 59/2021")
+})
+
 test_that("invalid temporal_partitioning is rejected", {
   raw <- list(
     dataset = "x",
