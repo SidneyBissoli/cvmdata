@@ -999,14 +999,7 @@ as_date_column <- function(x) {
 # Drop the `cvm_tbl` class and provenance attributes from a fetched part
 # so the parts can be bound with vctrs and re-stamped once.
 strip_cvm_tbl <- function(df) {
-  for (a in c(
-    "source",
-    "fetched_at",
-    "group",
-    "dataset",
-    "table",
-    "package_version"
-  )) {
+  for (a in cvm_tbl_attr_names) {
     attr(df, a) <- NULL
   }
   class(df) <- setdiff(class(df), "cvm_tbl")

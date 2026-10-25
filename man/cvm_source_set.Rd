@@ -28,6 +28,8 @@ cvm_source_set("cvm")
 \code{\link[=cvm_source_get]{cvm_source_get()}}
 
 Other source:
+\code{\link[=cvm_release_get]{cvm_release_get()}},
+\code{\link[=cvm_release_set]{cvm_release_set()}},
 \code{\link[=cvm_source_get]{cvm_source_get()}}
 }
 \concept{source}

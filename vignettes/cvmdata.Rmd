@@ -69,7 +69,7 @@ companies
 ```
 
 Every tibble returned by a `cvmdata` fetcher has the class `cvm_tbl`
-and carries six provenance attributes:
+and carries seven provenance attributes:
 
 ```{r}
 attr(companies, "source")
@@ -77,7 +77,8 @@ attr(companies, "group")
 attr(companies, "dataset")
 attr(companies, "table")
 attr(companies, "package_version")
-# `fetched_at` is a POSIXct timestamp set at download time.
+# `fetched_at` is a POSIXct timestamp set at download time; `release`
+# is the mirror release the rows were read from (NA for source "cvm").
 ```
 
 They are displayed at the top of the print output and travel with the

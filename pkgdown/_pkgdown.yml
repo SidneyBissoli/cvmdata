@@ -44,10 +44,13 @@ reference:
   - title: Source backend
     desc: >
       Configure which backend `cvm_fetch()` queries (direct CVM
-      portal or the parquet mirror published in GitHub Releases).
+      portal or the parquet mirror published in GitHub Releases) and,
+      for the mirror, which dated snapshot it reads.
     contents:
       - cvm_source_get
       - cvm_source_set
+      - cvm_release_get
+      - cvm_release_set
   - title: Discovery
     desc: >
       Browse the CKAN groups, datasets, tables, dictionaries and

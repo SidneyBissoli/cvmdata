@@ -47,6 +47,38 @@ asking the mirror for a missing year quotes it: whether the CVM
 published the CSV with the header only, or did not include it in the
 yearly ZIP at all.
 
+### Dated snapshots
+
+The `-latest` release is rewritten in place every week, so by itself
+it cannot answer "what did the mirror hold on 1 September?". Since
+2026-10-27 every weekly run that changes something also publishes a
+dated release, `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`, with
+the partitions whose content changed that week and a complete
+`__source_hash.json` that lists every partition of the day's mirror
+and, for each one, the snapshot release that holds its bytes. A
+snapshot is never deleted, so a date keeps resolving to the same bytes.
+
+The option `cvmdata.mirror_release` chooses the copy the package
+reads. `cvm_release_get()` returns it (`"latest"` by default) and
+`cvm_release_set()` changes it: pass a complete date and the package
+resolves it to the most recent snapshot on or before that date, reads
+each partition from the release that holds it, and records the
+resolved tag in the `release` attribute of every tibble. Like
+`cvmdata.source`, the pin is a property of the session: set it once at
+the top of a script and every `cvm_fetch()` and `cvm_versions()` below
+it reads the same retrato. A date before the first snapshot of a
+dataset is an error that names the earliest date available.
+
+Two details follow from the design. The weekly snapshot carries only
+what changed (about 60 MB a week over the eight datasets, measured in
+October 2026), so pinning costs the mirror little; and the local cache
+holds one copy of each partition, verified against the SHA-256 the
+sidecar publishes, so switching between dates re-downloads only the
+partitions whose bytes differ. The history assets read by
+`cvm_versions()` live on `-latest` only; under a pin the rows
+superseded after the pinned date are dropped, so the result is the set
+of versions known on that day.
+
 ### Data licence and attribution
 
 The CVM publishes every dataset covered by the package under the
@@ -184,6 +216,33 @@ cvm_fetch(
   source = "cvm"
 )
 ```
+
+### Pinning a script to a date
+
+A script meant to reproduce a result months later should not depend on
+whatever the mirror holds when it runs again. Pin the session to the
+snapshot of the day the result was produced:
+
+```{r workflow-1-pin, eval = FALSE}
+# Every mirror read below comes from the snapshot on or before this date.
+cvm_release_set("2026-11-01")
+
+bb_bpa_pinned <- cvm_fetch(
+  "dfp", "bpa",
+  cnpj = "00.000.000/0001-91",
+  year = 2024,
+  basis = "ind"
+)
+attr(bb_bpa_pinned, "release")
+#> [1] "mirror-companhias-dfp-snapshot-2026-10-27"
+
+# Back to the weekly refresh.
+cvm_release_set("latest")
+```
+
+The sidecar of every `-latest` release lists, under `snapshots`, the
+dates that can be pinned; the release notes of each snapshot say how
+many partitions it carries and how to read it.
 
 ## Workflow 2 — CVM vs Mirror equivalence
 

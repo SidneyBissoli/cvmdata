@@ -37,13 +37,25 @@
 # `history` map ({partition: content sha256}) that the next run uses to
 # know which history assets exist; the `hash` field keeps its meaning.
 #
-# After the upload the release is forced out of draft and checked
+# Dated snapshots (since 2026-10-25, util-snapshot.R): every run that
+# publishes also writes the release
+# `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>` with ONLY the
+# partitions whose content changed (every partition on the first run)
+# and the complete `__source_hash.json`, whose `releases` map says, for
+# each partition, which snapshot release holds its bytes; `snapshots`
+# lists every date published and `files` carries the sha256 and size of
+# each parquet. `-latest` is still rewritten whole, so installed clients
+# keep working; a client pinned to a date reads the snapshot sidecar and
+# follows the pointers. Snapshot releases are never deleted. A sidecar
+# without `releases` (written before this feature) forces a publish even
+# when the hash is unchanged, so the first snapshot gets created.
+#
+# After the upload each release is forced out of draft and checked
 # without credentials: on 2026-10-19 the vlmo release had been a draft
 # since June, so it answered 404 to every user while the job was green.
 #
-# The future R/source-mirror-duckdb.R consumer reconstructs the
-# partition tree client-side from the encoded names and feeds the
-# resulting URL list to arrow::open_dataset().
+# R/source-mirror-duckdb.R reconstructs the partition tree client-side
+# from the encoded names and reads the parquets with DuckDB.
 #
 # Requires `gh` CLI on PATH and an authenticated token (built-in on
 # GitHub Actions via GITHUB_TOKEN; locally via `gh auth login`).
@@ -59,6 +71,7 @@
 source("inst/etl/00-config.R")
 source("inst/etl/util-hash.R")
 source("inst/etl/util-history.R")
+source("inst/etl/util-snapshot.R")
 
 args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
@@ -218,23 +231,27 @@ if (!is.null(prev_hash_file)) {
     jsonlite::read_json(prev_hash_file),
     error = function(e) NULL
   )
-  if (
-    !is.null(prev) &&
-      identical(prev$hash, source_hash$hash) &&
-      !is.na(source_hash$hash) &&
-      release_public_status(tag) == 200L
-  ) {
+  unchanged <- !is.null(prev) &&
+    identical(prev$hash, source_hash$hash) &&
+    !is.na(source_hash$hash)
+  if (unchanged && is.null(prev$releases)) {
+    message(paste(
+      "[03-publish] content unchanged but the sidecar predates the dated",
+      "snapshots; publishing to create the first one"
+    ))
+  } else if (unchanged && release_public_status(tag) == 200L) {
     message(sprintf(
       "[03-publish] content unchanged (sha256=%s..); skipping publish",
       short_hash(source_hash$hash)
     ))
     quit(status = 0L)
+  } else {
+    message(sprintf(
+      "[03-publish] content changed (prev=%s.., cur=%s..); republishing",
+      short_hash(prev$hash %||% NA_character_),
+      short_hash(source_hash$hash)
+    ))
   }
-  message(sprintf(
-    "[03-publish] content changed (prev=%s.., cur=%s..); republishing",
-    short_hash(prev$hash %||% NA_character_),
-    short_hash(source_hash$hash)
-  ))
 } else {
   message("[03-publish] no previous __source_hash.json; publishing fresh")
 }
@@ -397,8 +414,40 @@ message(sprintf(
   sum(source_hash$skips$reason == "absent")
 ))
 
+# Dated snapshot ----------------------------------------------------------
+# The partitions whose bytes change today go into the snapshot release of
+# the day (the first snapshot takes every partition); the sidecar records
+# where every partition lives, the dates published so far and the file
+# digests. A second run on the same day lands on the same tag and
+# `--clobber`s the same assets, so a retry is safe.
+snapshot_date <- as.Date(format(Sys.time(), "%Y-%m-%d", tz = "UTC"))
+snapshot_tag <- mirror_tag_snapshot(group, dataset, snapshot_date)
+changed_rels <- snapshot_changed_partitions(prev, source_hash$data)
+source_hash$snapshot <- format(snapshot_date, "%Y-%m-%d")
+source_hash$snapshots <- snapshot_dates(prev, snapshot_date)
+source_hash$releases <- snapshot_releases_map(
+  prev,
+  source_hash$data,
+  changed_rels,
+  snapshot_tag
+)
+source_hash$files <- snapshot_file_digests(parquets, dataset_dir)
+message(sprintf(
+  "[03-publish] snapshot %s: %d of %d partition(s)%s; %d snapshot date(s)",
+  snapshot_tag,
+  length(changed_rels),
+  length(parquets),
+  if (length(changed_rels) == length(parquets)) " (complete baseline)" else "",
+  length(source_hash$snapshots)
+))
+
 if (dry_run) {
-  message("[03-publish] dry run: would upload")
+  message(sprintf("[03-publish] dry run: would upload to %s", snapshot_tag))
+  for (rel in changed_rels) {
+    message("  ", asset_name_of(rel))
+  }
+  message("  __source_hash.json")
+  message(sprintf("[03-publish] dry run: would upload to %s", tag))
   for (p in parquets) {
     message("  ", asset_name_of(substring(p, nchar(dataset_dir) + 2L)))
   }
@@ -406,78 +455,183 @@ if (dry_run) {
     message("  ", asset_name_of(substring(p, nchar(history_dir) + 2L)))
   }
   message(sprintf(
-    "  __source_hash.json (%d skip tuple(s))",
-    nrow(source_hash$skips)
+    "  __source_hash.json (%d skip tuple(s), %d release pointer(s))",
+    nrow(source_hash$skips),
+    length(source_hash$releases)
   ))
   quit(status = 0L)
 }
 
 # Publish ---------------------------------------------------------------
 
-title <- sprintf("Mirror: %s/%s (latest)", group, dataset)
 # The notes carry the data licence: the CVM publishes these datasets
 # under the ODbL v1.0 and the mirror is a derivative database, so the
 # notice must travel with it (ODbL 4.2). It goes in the notes, not in
 # an asset: parse_mirror_asset_name() aborts on any asset other than
 # parquets and `__source_hash.json`, so a new asset would break every
 # installed client. Keep this text in step with DATA-LICENSE.md.
-notes <- sprintf(
+licence_notes <- paste0(
+  "**Data licence.** Contains data from the Comissao de Valores ",
+  "Mobiliarios (CVM) Open Data Portal, https://dados.cvm.gov.br/, ",
+  "made available under the Open Data Commons Open Database License ",
+  "(ODbL) v1.0, https://opendatacommons.org/licenses/odbl/1-0/. ",
+  "The parquet files in this release are a derivative database of ",
+  "that portal, converted by the cvmdata ETL, and are redistributed ",
+  "under the same licence. Attribution and terms: ",
+  "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md"
+)
+updated_at <- format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC", tz = "UTC")
+latest_notes <- sprintf(
   paste0(
     "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
     "Updated: %s\n\n",
+    "Rewritten in place on every run. The same content is kept for good ",
+    "in the dated release `%s`; `__source_hash.json` lists, under ",
+    "`snapshots`, every date that can be pinned with ",
+    "`options(cvmdata.mirror_release = \"YYYY-MM-DD\")`.\n\n",
     "See https://sidneybissoli.github.io/cvmdata/articles/",
-    "cache-and-mirror.html for client usage.\n\n",
-    "**Data licence.** Contains data from the Comissao de Valores ",
-    "Mobiliarios (CVM) Open Data Portal, https://dados.cvm.gov.br/, ",
-    "made available under the Open Data Commons Open Database License ",
-    "(ODbL) v1.0, https://opendatacommons.org/licenses/odbl/1-0/. ",
-    "The parquet files in this release are a derivative database of ",
-    "that portal, converted by the cvmdata ETL, and are redistributed ",
-    "under the same licence. Attribution and terms: ",
-    "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md"
+    "cache-and-mirror.html for client usage.\n\n%s"
   ),
   group,
   dataset,
-  format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC")
+  updated_at,
+  snapshot_tag,
+  licence_notes
+)
+snapshot_notes <- sprintf(
+  paste0(
+    "Dated snapshot of the parquet mirror for group '%s', dataset '%s', ",
+    "as of %s (published %s).\n\n",
+    "Carries the %d partition(s) whose content changed since the previous ",
+    "snapshot, out of %d in the mirror. `__source_hash.json` lists every ",
+    "partition of this snapshot and, under `releases`, the snapshot ",
+    "release that holds its bytes. Read it from R with ",
+    "`options(cvmdata.mirror_release = \"%s\")`. Snapshot releases are ",
+    "never deleted: later snapshots point into this one.\n\n%s"
+  ),
+  group,
+  dataset,
+  source_hash$snapshot,
+  updated_at,
+  length(changed_rels),
+  length(parquets),
+  source_hash$snapshot,
+  licence_notes
 )
 
-# Update the release in place: overwrite the assets, then remove the
-# ones the new tree no longer has. Until 2026-10-19 the release was
-# deleted and recreated, which left the mirror empty for the length of
-# the upload (up to ~15 min) and, on 19/10, failed for fre and itr: the
-# delete did not happen, its error was discarded, and the create hit
-# "tag_name already exists" while the June release stayed live.
-notes_file <- tempfile(fileext = ".md")
-writeLines(notes, notes_file)
 # system2 on Windows does not auto-quote vector args, so any string
 # with spaces, parens or other shell metacharacters must be shQuote()d
 # explicitly. Otherwise gh re-parses them as positional args (e.g. a
 # title "Mirror: cad (latest)" becomes 3 file-pattern args).
-release_exists <- system2(
-  "gh",
-  c("release", "view", tag, "--repo", mirror_repo, "--json", "tagName"),
-  stdout = NULL,
-  stderr = NULL
-) ==
-  0L
-verb <- if (release_exists) "edit" else "create"
-message(sprintf("[03-publish] %s release %s", verb, tag))
-status <- system2(
-  "gh",
-  c(
-    "release",
-    verb,
-    tag,
-    "--repo",
-    mirror_repo,
-    "--title",
-    shQuote(title),
-    "--notes-file",
-    shQuote(notes_file)
+write_notes <- function(text) {
+  path <- tempfile(fileext = ".md")
+  writeLines(text, path)
+  path
+}
+
+# Create the release, or update its title and notes in place. Until
+# 2026-10-19 `-latest` was deleted and recreated, which left the mirror
+# empty for the length of the upload (up to ~15 min) and, on 19/10,
+# failed for fre and itr: the delete did not happen, its error was
+# discarded, and the create hit "tag_name already exists" while the June
+# release stayed live. A snapshot release is created with
+# `--latest=false` so the repository's "Latest release" badge does not
+# move to a data snapshot.
+ensure_release <- function(tag, title, notes, snapshot = FALSE) {
+  release_exists <- system2(
+    "gh",
+    c("release", "view", tag, "--repo", mirror_repo, "--json", "tagName"),
+    stdout = NULL,
+    stderr = NULL
+  ) ==
+    0L
+  verb <- if (release_exists) "edit" else "create"
+  message(sprintf("[03-publish] %s release %s", verb, tag))
+  status <- system2(
+    "gh",
+    c(
+      "release",
+      verb,
+      tag,
+      "--repo",
+      mirror_repo,
+      "--title",
+      shQuote(title),
+      "--notes-file",
+      shQuote(write_notes(notes)),
+      if (snapshot && !release_exists) "--latest=false"
+    )
   )
-)
-if (status != 0L) {
-  stop(sprintf("gh release %s failed", verb), call. = FALSE)
+  if (status != 0L) {
+    stop(sprintf("gh release %s %s failed", verb, tag), call. = FALSE)
+  }
+}
+
+# GitHub answers an occasional HTTP 500 on one of the hundreds of uploads
+# (19/10: fre failed at asset 216 of ~400). --clobber makes a retry safe
+# whether or not the failed attempt already removed the old asset.
+upload_assets <- function(tag, assets) {
+  message(sprintf(
+    "[03-publish] uploading %d asset(s) to %s",
+    length(assets),
+    tag
+  ))
+  upload_attempts <- 4L
+  for (asset in assets) {
+    message("  ", basename(asset))
+    for (attempt in seq_len(upload_attempts)) {
+      status <- system2(
+        "gh",
+        c(
+          "release",
+          "upload",
+          tag,
+          shQuote(asset),
+          "--repo",
+          mirror_repo,
+          "--clobber"
+        )
+      )
+      if (status == 0L) {
+        break
+      }
+      if (attempt < upload_attempts) {
+        wait <- 10 * 2^(attempt - 1L)
+        message(sprintf("    upload failed; retry %d in %ds", attempt, wait))
+        Sys.sleep(wait)
+      }
+    }
+    if (status != 0L) {
+      stop(
+        sprintf("upload to %s failed for %s", tag, basename(asset)),
+        call. = FALSE
+      )
+    }
+  }
+}
+
+# A draft release answers 404 to anyone without push access, which is
+# every user of source = "mirror". Publish it explicitly, then prove it
+# from the outside with an anonymous request.
+finalize_release <- function(tag) {
+  status <- system2(
+    "gh",
+    c("release", "edit", tag, "--repo", mirror_repo, "--draft=false")
+  )
+  if (status != 0L) {
+    stop(
+      sprintf("gh release edit --draft=false failed for %s", tag),
+      call. = FALSE
+    )
+  }
+  public_status <- release_public_status(tag)
+  if (public_status != 200L) {
+    stop(
+      sprintf("release %s answers %d without credentials", tag, public_status),
+      call. = FALSE
+    )
+  }
+  message(sprintf("[03-publish] release %s ready and public.", tag))
 }
 
 stage_dir <- tempfile("cvmdata-mirror-stage-")
@@ -517,40 +671,34 @@ assets <- c(
   stage_assets(history$files, history_dir),
   hash_asset
 )
+# The snapshot carries the changed partitions and the complete sidecar;
+# the history assets stay on `-latest` only (cumulative; `cvm_versions()`
+# under a pinned date drops the rows superseded after it).
+snapshot_assets <- c(
+  file.path(stage_dir, asset_name_of(changed_rels)),
+  hash_asset
+)
 
-message(sprintf("[03-publish] uploading %d asset(s)", length(assets)))
-# GitHub answers an occasional HTTP 500 on one of the hundreds of uploads
-# (19/10: fre failed at asset 216 of ~400). --clobber makes a retry safe
-# whether or not the failed attempt already removed the old asset.
-upload_attempts <- 4L
-for (asset in assets) {
-  message("  ", basename(asset))
-  for (attempt in seq_len(upload_attempts)) {
-    status <- system2(
-      "gh",
-      c(
-        "release",
-        "upload",
-        tag,
-        shQuote(asset),
-        "--repo",
-        mirror_repo,
-        "--clobber"
-      )
-    )
-    if (status == 0L) {
-      break
-    }
-    if (attempt < upload_attempts) {
-      wait <- 10 * 2^(attempt - 1L)
-      message(sprintf("    upload failed; retry %d in %ds", attempt, wait))
-      Sys.sleep(wait)
-    }
-  }
-  if (status != 0L) {
-    stop(sprintf("upload failed for %s", basename(asset)), call. = FALSE)
-  }
-}
+# The snapshot goes first. If its upload dies half-way, `-latest` still
+# has the previous sidecar, so the next run recomputes the same changed
+# set, lands on the same dated tag and `--clobber`s the same assets. If
+# `-latest` dies after the snapshot is complete, the same holds: nothing
+# in the snapshot depends on `-latest` having been rewritten.
+ensure_release(
+  snapshot_tag,
+  sprintf("Mirror: %s/%s (snapshot %s)", group, dataset, source_hash$snapshot),
+  snapshot_notes,
+  snapshot = TRUE
+)
+upload_assets(snapshot_tag, snapshot_assets)
+finalize_release(snapshot_tag)
+
+ensure_release(
+  tag,
+  sprintf("Mirror: %s/%s (latest)", group, dataset),
+  latest_notes
+)
+upload_assets(tag, assets)
 
 # Remove the assets of the previous tree that the new one does not have
 # (a partition that vanished upstream). Done after the upload, so the
@@ -604,21 +752,4 @@ for (name in stale) {
   }
 }
 
-# A draft release answers 404 to anyone without push access, which is
-# every user of source = "mirror". Publish it explicitly, then prove it
-# from the outside with an anonymous request.
-status <- system2(
-  "gh",
-  c("release", "edit", tag, "--repo", mirror_repo, "--draft=false")
-)
-if (status != 0L) {
-  stop("gh release edit --draft=false failed", call. = FALSE)
-}
-public_status <- release_public_status(tag)
-if (public_status != 200L) {
-  stop(
-    sprintf("release %s answers %d without credentials", tag, public_status),
-    call. = FALSE
-  )
-}
-message(sprintf("[03-publish] release %s ready and public.", tag))
+finalize_release(tag)

@@ -20,10 +20,19 @@ print.cvm_tbl <- function(x, ...) {
     # than a header of empty fields.
     return(NextMethod())
   }
+  release <- attr(x, "release", exact = TRUE)
+  # The release is shown only when it says something: the mirror tag the
+  # rows came from. `source = "cvm"` has none (NA).
+  release_field <- if (!is.null(release) && !is.na(release)) {
+    "  |  {.field release}: {.val {release}}"
+  } else {
+    ""
+  }
   cli::cli_inform(c(
     "i" = paste0(
-      "{.field source}: {.val {src}}  |  ",
-      "{.field fetched_at}: {.val {fetched}}"
+      "{.field source}: {.val {src}}",
+      release_field,
+      "  |  {.field fetched_at}: {.val {fetched}}"
     ),
     "i" = paste0(
       "{.field group}: {.val {grp}}  |  ",
