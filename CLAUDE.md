@@ -142,6 +142,12 @@ cvm_cache_info()
 # Source
 cvm_source_get()
 cvm_source_set(source)
+# Retrato do espelho (decisão 2026-10-25): option `cvmdata.mirror_release`,
+# "latest" (padrão) ou data completa "YYYY-MM-DD" → snapshot datado mais
+# recente até a data. Propriedade da SESSÃO, não da chamada (sem argumento
+# novo em cvm_fetch()). Resultado leva o atributo `release`.
+cvm_release_get()
+cvm_release_set(release)
 
 # Utilidades
 cnpj_clean(x)
@@ -462,11 +468,14 @@ cvmdata_error                          (pai genérico de erros)
 │                                       de um group; passar group explícito)
 │       (cvmdata_error_input_group saiu na v0.3 com os skeletons)
 ├── cvmdata_error_http                 (falha de rede / HTTP)
-│   └── cvmdata_error_http_transport   (o portal não respondeu: DNS,
-│                                       connect TCP, TLS, timeout de
-│                                       leitura — distinto de um status
-│                                       HTTP como 404; o ETL usa a
-│                                       distinção no disjuntor do stage 01)
+│   ├── cvmdata_error_http_transport   (o portal não respondeu: DNS,
+│   │                                   connect TCP, TLS, timeout de
+│   │                                   leitura — distinto de um status
+│   │                                   HTTP como 404; o ETL usa a
+│   │                                   distinção no disjuntor do stage 01)
+│   └── cvmdata_error_http_integrity   (parquet baixado do espelho não
+│                                       bate com sha256/tamanho do
+│                                       sidecar; arquivo descartado)
 ├── cvmdata_error_parse                (falha de parse ou validação)
 │   └── cvmdata_error_zip_member_missing (CSV da tabela-detalhe ausente
 │                                       no ZIP anual — tabela não existia
@@ -617,6 +626,27 @@ pulos do stage 02: table/year/report_type/reason ∈ {empty, absent});
 `mirror_skip_bullets()` cita no erro "No parquet assets match". NUNCA
 asset novo no release: `parse_mirror_asset_name()` aborta em qualquer
 nome que não seja parquet ou `__source_hash.json`. `03-publish.R --dry-run` = smoke local sem tocar o release.
+**Snapshots datados** (decisão A do dono, 2026-10-25; medido: 624 MB em
+8 releases, ~60 MB/semana mudam = 11% das partições; cópia integral
+seria 32 GB/ano, só-mudadas 3,5 GB/ano): toda rodada que publica cria
+também `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`
+(`inst/etl/util-snapshot.R`) só com as partições cujo hash de conteúdo
+mudou (a primeira leva todas = baseline) e o sidecar completo, que ganha
+`snapshot` (data), `snapshots` (todas as datas), `releases` (partição →
+tag do snapshot que guarda os bytes) e `files` (partição → sha256 +
+tamanho do arquivo). Snapshot NUNCA é apagado (os ponteiros dos
+seguintes dependem dele); `-latest` continua inteiro para o cliente
+antigo; os `__history` ficam só no `-latest`. Snapshot sobe ANTES do
+`-latest` (retry no mesmo dia cai na mesma tag com `--clobber`); criado
+com `--latest=false`. Sidecar sem `releases` força publish mesmo com hash
+igual (cria o primeiro snapshot). Cliente: `mirror_list_assets(release=)`
+monta o inventário pelo sidecar do snapshot ≤ data (`mirror_pick_snapshot()`,
+URL direta `releases/download/<tag>/<asset>`, sem API) + histórico do
+`-latest`; `mirror_fetch_to_l3()` confere tamanho e sha256 de todo
+parquet (cache de outro snapshot é trocado; download divergente =
+`cvmdata_error_http_integrity`); com `files` presente, mudança de hash
+do dataset NÃO despeja a árvore L3 inteira (só os `history.parquet`);
+`cvm_versions()` sob pin descarta história com `superseded_at` > data.
 Fora do repo, o portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere
 toda semana, sem credencial, a última entrega de cada dataset na CVM
 contra a do espelho, e abre o item `cvmdata:mirror-atrasado` no painel

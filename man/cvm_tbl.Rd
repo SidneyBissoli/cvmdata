@@ -6,11 +6,15 @@
 \description{
 Every tibble returned by \code{\link[=cvm_fetch]{cvm_fetch()}}, \code{\link[=cvm_versions]{cvm_versions()}} and the
 other public fetchers has the S3 class \code{cvm_tbl}, a subclass of
-\code{\link[tibble:tibble]{tibble::tibble()}}, and carries six provenance attributes:
-\code{source} (\code{"mirror"}, \code{"portal"} or \code{"cache"}), \code{fetched_at}
-(a \code{POSIXct} timestamp), \code{group}, \code{dataset}, \code{table} and
-\code{package_version}. \code{\link[=print]{print()}} shows them above the tibble; read one
-with \code{attr(x, "source")}.
+\code{\link[tibble:tibble]{tibble::tibble()}}, and carries seven provenance attributes:
+\code{source} (\code{"mirror"} or \code{"cvm"}), \code{fetched_at} (a \code{POSIXct}
+timestamp), \code{group}, \code{dataset}, \code{table}, \code{package_version} and
+\code{release} (the GitHub release the rows were read from when
+\code{source = "mirror"}: \verb{mirror-<group>-<dataset>-snapshot-<date>}, the
+dated snapshot resolved by \code{\link[=cvm_release_get]{cvm_release_get()}}, or the \code{-latest} tag
+for a release older than the snapshots; \code{NA} for \code{source = "cvm"}).
+\code{\link[=print]{print()}} shows them above the tibble; read one with
+\code{attr(x, "source")}.
 
 The class and the attributes travel with the data through these
 operations:

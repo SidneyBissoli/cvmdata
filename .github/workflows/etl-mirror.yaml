@@ -21,7 +21,11 @@ name: ETL mirror
 #
 # 03-publish.R compares the SHA-256 of the CVM META files and of the
 # parquet content against the `__source_hash.json` asset of the previous
-# release and skips publishing when nothing would change.
+# release and skips publishing when nothing would change. When something
+# did, it publishes twice: the dated release
+# `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>` with the partitions
+# that changed (never deleted; the client pins a date with
+# `cvm_release_set()`), then `-latest` whole (inst/etl/util-snapshot.R).
 #
 # A run scoped to one `year` is a smoke test and never publishes: the
 # publish makes the release match the local parquets, so it would

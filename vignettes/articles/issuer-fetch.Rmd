@@ -45,9 +45,9 @@ cvm_fetch(
 )
 ```
 
-Returns a tibble of subclass `cvm_tbl` carrying six provenance
+Returns a tibble of subclass `cvm_tbl` carrying seven provenance
 attributes (`source`, `fetched_at`, `group`, `dataset`, `table`,
-`package_version`). Column names, table names and categorical values
+`package_version`, `release`). Column names, table names and categorical values
 are preserved in Portuguese as published by CVM; the API surface is
 in English.
 

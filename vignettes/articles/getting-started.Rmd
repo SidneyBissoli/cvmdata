@@ -403,7 +403,7 @@ mutually exclusive, and neither applies to the `cad` snapshot.
 ## Provenance — what every tibble carries
 
 Every tibble returned by `cvm_fetch()` is of class `cvm_tbl` and
-carries six provenance attributes:
+carries seven provenance attributes:
 
 ```r
 attr(out, "source")           #  "mirror" or "cvm"
@@ -412,6 +412,9 @@ attr(out, "group")            #  CKAN group slug, e.g. "companhias"
 attr(out, "dataset")          #  "dfp"
 attr(out, "table")            #  "bpa"
 attr(out, "package_version")  #  packageVersion("cvmdata")
+attr(out, "release")          #  mirror release read, e.g.
+                              #  "mirror-companhias-dfp-snapshot-2026-10-27";
+                              #  NA when source is "cvm"
 ```
 
 `print.cvm_tbl()` renders the five header attributes before delegating
