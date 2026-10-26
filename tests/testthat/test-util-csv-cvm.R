@@ -180,3 +180,63 @@ test_that("synthetic schema without dataset/table uses heuristic", {
   df <- read_cvm_csv(path, minimal_schema(3L), validate = "skip")
   expect_s3_class(df$dt_synthetic, "Date")
 })
+
+test_that("a table with META takes its column names from the dictionary", {
+  # Until 2026-10-25 only the 8 META-less tables had their names checked.
+  schema <- load_schema("dfp", "bpa")
+  expect_null(schema$expected_field_names)
+  expect_setequal(
+    expected_field_names(schema),
+    c(
+      "CD_CONTA",
+      "CD_CVM",
+      "CNPJ_CIA",
+      "DENOM_CIA",
+      "DS_CONTA",
+      "DT_FIM_EXERC",
+      "DT_REFER",
+      "ESCALA_MOEDA",
+      "GRUPO_DFP",
+      "MOEDA",
+      "ORDEM_EXERC",
+      "ST_CONTA_FIXA",
+      "VERSAO",
+      "VL_CONTA"
+    )
+  )
+  # a META-less table keeps the names of its YAML
+  fre <- load_schema("fre", "empregado_PCD")
+  expect_identical(
+    expected_field_names(fre),
+    as.character(fre$expected_field_names)
+  )
+  # a synthetic schema names no table: nothing to compare
+  expect_null(expected_field_names(minimal_schema(3L)))
+})
+
+test_that("a column renamed at the same count is refused, in any order", {
+  schema <- load_schema("dfp", "bpa")
+  names <- expected_field_names(schema)
+  row <- paste(rep("", length(names)), collapse = ";")
+  # the dictionary's names in another order: accepted
+  ok <- write_csv_iso(paste(paste(rev(names), collapse = ";"), row, sep = "\n"))
+  expect_no_error(read_cvm_csv(ok, schema, validate = "strict"))
+  # one renamed, same count: refused in strict, warned in warn
+  renamed <- sub("VL_CONTA", "VALOR_CONTA", names, fixed = TRUE)
+  bad <- write_csv_iso(paste(paste(renamed, collapse = ";"), row, sep = "\n"))
+  expect_error(
+    read_cvm_csv(bad, schema, validate = "strict"),
+    class = "cvmdata_error_parse"
+  )
+  err <- tryCatch(
+    read_cvm_csv(bad, schema, validate = "strict"),
+    cvmdata_error_parse = conditionMessage
+  )
+  expect_match(err, "vl_conta", fixed = TRUE)
+  expect_match(err, "valor_conta", fixed = TRUE)
+  expect_warning(
+    read_cvm_csv(bad, schema, validate = "warn"),
+    class = "cvmdata_warn_validation"
+  )
+  expect_no_warning(read_cvm_csv(bad, schema, validate = "skip"))
+})
