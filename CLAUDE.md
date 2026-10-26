@@ -526,9 +526,16 @@ automaticamente. Análogo `cvmdata_warn()` para warnings.
 | `"skip"` | Pula validação | Pula validação (silencioso) |
 
 Mensagens em inglês, via `cli::cli_abort()` / `cli::cli_warn()`. Símbolo
-`x` para erro, `!` para warning, `i` para info. Sob `meta_status: missing`
-em modo `"warn"`, o reader valida `expected_field_names` do YAML contra
-o cabeçalho do CSV (defesa em profundidade).
+`x` para erro, `!` para warning, `i` para info. "Valida" = contagem E
+NOMES de coluna do cabeçalho do CSV (conjunto, sem ordem; desde
+2026-10-25 — antes só a contagem, salvo nas 8 sem META). Os nomes vêm de
+`expected_field_names()` (`R/util-csv-cvm.R`): o `expected_field_names`
+do YAML nas tabelas sem META; nas outras 66, o `campo_original` do
+snapshot do dicionário (o META), NUNCA copiado para o YAML. Medido
+2026-10-25: 1.244 cabeçalhos (todos os CSV de todos os ZIPs anuais,
+2003–2026) com exatamente os nomes do snapshot nas 74 tabelas. O robô do
+espelho lê por `issuer_fetch(source = "cvm")` em `strict`: coluna
+renomeada pela CVM derruba a rodada (alarme), não entra calada.
 
 8 tabelas FRE têm `meta_status: missing` (sem META oficial CVM):
 `administrador_PCD`, `empregado_PCD`,

@@ -144,9 +144,7 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
   csv_names <- colnames(header)
 
   validate_field_count(csv_names, schema, validate, path)
-  if (identical(schema$meta_status %||% "available", "missing")) {
-    validate_field_names(csv_names, schema, validate, path)
-  }
+  validate_field_names(csv_names, schema, validate, path)
 
   df <- readr::read_delim(
     path,
@@ -188,8 +186,43 @@ validate_field_count <- function(csv_names, schema, validate, path) {
   )
 }
 
+# The column names a table's CSV must carry. A META-less table declares
+# them in its YAML (`expected_field_names`); every other table takes them
+# from the dictionary snapshot, which is the CVM's META (`campo_original`)
+# -- not copied into the YAMLs, so there is one source. Until 2026-10-25
+# only the 8 META-less tables had their names checked: the other 66
+# compared the COUNT alone, and a column renamed or swapped by the CVM at
+# the same count passed silently into the package and the mirror.
+# Measured that day against the header of every CSV of every yearly ZIP
+# (1,244 headers, 2003-2026): all 74 tables carry exactly the snapshot's
+# names in every year (the order differs: the snapshot is alphabetical,
+# so the check compares the set). NULL when nothing names the table (a
+# synthetic schema).
+expected_field_names <- function(schema) {
+  if (length(schema$expected_field_names)) {
+    return(as.character(schema$expected_field_names))
+  }
+  if (is.null(schema$dataset) || is.null(schema$table)) {
+    return(NULL)
+  }
+  snapshot <- .read_dictionary_snapshot(require_snapshot_path(
+    "cvm_dictionary_snapshot.csv",
+    "build-dictionary-snapshot.R"
+  ))
+  hit <- snapshot$dataset == schema$dataset & snapshot$table == schema$table
+  if (!is.null(schema$group)) {
+    hit <- hit & snapshot$group == schema$group
+  }
+  out <- snapshot$campo_original[hit]
+  if (length(out)) out else NULL
+}
+
 validate_field_names <- function(csv_names, schema, validate, path) {
-  expected_norm <- tolower(schema$expected_field_names)
+  expected <- expected_field_names(schema)
+  if (is.null(expected)) {
+    return(invisible(NULL))
+  }
+  expected_norm <- tolower(expected)
   csv_norm <- tolower(csv_names)
   missing_fields <- setdiff(expected_norm, csv_norm)
   extra_fields <- setdiff(csv_norm, expected_norm)
