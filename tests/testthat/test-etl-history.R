@@ -191,3 +191,59 @@ test_that("history assets are named so that the current readers skip them", {
   kept <- cvmdata:::filter_mirror_assets(assets, "bpa", 2024L, "ind")
   expect_identical(kept$kind, "current")
 })
+
+test_that("after a reader change only a new delivery is a replacement", {
+  load_etl_history()
+  keys <- c("cnpj_cia", "dt_refer")
+  # A: same delivery (versao 1), rows the old reader lost -> the reader's
+  # B: a re-filing (versao 1 -> 2) with new numbers -> the CVM's
+  # C: vanished -> still history
+  old <- rbind(
+    dre_rows("A", "1", 10)[1, ],
+    dre_rows("B", "1", 5),
+    dre_rows("C", "1", 7)
+  )
+  new <- rbind(dre_rows("A", "1", 10), dre_rows("B", "2", 6))
+  all <- mirror_superseded_rows(old, new, keys, stamp)
+  expect_identical(all$n_replaced, 2L)
+  only <- mirror_superseded_rows(old, new, keys, stamp, identity_only = TRUE)
+  expect_identical(only$n_replaced, 1L)
+  expect_identical(only$n_removed, 1L)
+  expect_setequal(unique(only$rows$cnpj_cia), c("B", "C"))
+  # a table without delivery columns cannot tell: nothing is replaced
+  bare <- function(df) df[, setdiff(names(df), "versao")]
+  none <- mirror_superseded_rows(
+    bare(old),
+    bare(new),
+    keys,
+    stamp,
+    identity_only = TRUE
+  )
+  expect_identical(none$n_replaced, 0L)
+  expect_identical(none$n_removed, 1L)
+})
+
+test_that("the reader fingerprint follows the reader's code", {
+  load_etl_history()
+  id <- mirror_reader_id()
+  expect_match(id, "^[0-9a-f]{12}$")
+  expect_identical(mirror_reader_id(), id)
+  ns <- new.env()
+  for (o in intersect(
+    mirror_reader_objects,
+    ls(asNamespace("cvmdata"), all.names = TRUE)
+  )) {
+    assign(o, get(o, envir = asNamespace("cvmdata")), envir = ns)
+  }
+  expect_identical(mirror_reader_id(ns), id)
+  assign(".text_types", c("varchar"), envir = ns)
+  expect_false(identical(mirror_reader_id(ns), id))
+  # every object of the list exists in the package
+  expect_true(all(vapply(
+    mirror_reader_objects,
+    exists,
+    logical(1L),
+    envir = asNamespace("cvmdata"),
+    inherits = FALSE
+  )))
+})

@@ -310,7 +310,13 @@ build_history <- function(prev, source_hash) {
       message("  ", rel, ": no filing keys; no history kept")
       next
     }
-    diff <- mirror_superseded_rows(old, new, keys, source_hash$computed_at)
+    diff <- mirror_superseded_rows(
+      old,
+      new,
+      keys,
+      source_hash$computed_at,
+      identity_only = reader_changed
+    )
     if (length(diff$columns_added) || length(diff$columns_dropped)) {
       message(sprintf(
         "  %s: columns added [%s], dropped [%s]; compared on the rest",
@@ -358,6 +364,19 @@ build_history <- function(prev, source_hash) {
   list(map = map, files = files)
 }
 
+source_hash$reader <- mirror_reader_id()
+reader_changed <- !is.null(prev) &&
+  !identical(prev$reader %||% "", source_hash$reader)
+if (reader_changed) {
+  message(sprintf(
+    paste0(
+      "[03-publish] the CSV reader changed (%s -> %s): history counts ",
+      "a filing as replaced only when its delivery changed"
+    ),
+    prev$reader %||% "none",
+    source_hash$reader
+  ))
+}
 history <- build_history(prev, source_hash)
 source_hash$history <- history$map
 message(sprintf(

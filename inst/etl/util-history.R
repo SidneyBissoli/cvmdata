@@ -123,7 +123,22 @@ mirror_filing_signatures <- function(df, keys, cols) {
 #
 # Returns list(rows, n_replaced, n_removed, columns_added,
 # columns_dropped). `rows` has zero rows when nothing was superseded.
-mirror_superseded_rows <- function(old, new, keys, stamp) {
+#
+# `identity_only` (the run in which the package's CSV reader changed, see
+# `mirror_reader_id()`): a filing counts as replaced only when its
+# DELIVERY changed too (`versao`, `id_doc`, `dt_receb` and spellings). A
+# change of content under the same delivery is the reader's, not the
+# CVM's: on 2026-10-25 the reader stopped losing rows to quote handling
+# (2,803 rows of FRE 2024 alone), and comparing contents would have filed
+# every such filing as superseded by itself. A real re-filing always
+# brings a new delivery, so nothing the CVM did is missed.
+mirror_superseded_rows <- function(
+  old,
+  new,
+  keys,
+  stamp,
+  identity_only = FALSE
+) {
   cols <- intersect(names(old), names(new))
   cols <- setdiff(cols, c(mirror_history_cols, mirror_delivery_cols))
   stopifnot(all(keys %in% cols))
@@ -132,6 +147,26 @@ mirror_superseded_rows <- function(old, new, keys, stamp) {
   new_sig <- n$sig[names(o$sig)]
   removed <- names(o$sig)[is.na(new_sig)]
   replaced <- names(o$sig)[!is.na(new_sig) & new_sig != o$sig]
+  if (identity_only && length(replaced)) {
+    ident <- intersect(intersect(names(old), names(new)), mirror_delivery_cols)
+    if (!length(ident)) {
+      replaced <- character()
+    } else {
+      # the set of DISTINCT deliveries of each filing: recovered rows of
+      # the same delivery repeat it, they do not make another one
+      oi <- mirror_filing_signatures(
+        unique(old[c(keys, ident)]),
+        keys,
+        ident
+      )$sig
+      ni <- mirror_filing_signatures(
+        unique(new[c(keys, ident)]),
+        keys,
+        ident
+      )$sig
+      replaced <- replaced[oi[replaced] != ni[replaced]]
+    }
+  }
   rows <- old[o$key %in% c(removed, replaced), , drop = FALSE]
   rows$superseded_at <- rep(stamp, nrow(rows))
   rows$superseded_by_versao <- mirror_replacing_versao(
@@ -149,6 +184,52 @@ mirror_superseded_rows <- function(old, new, keys, stamp) {
     columns_added = setdiff(names(new), names(old)),
     columns_dropped = setdiff(names(old), names(new))
   )
+}
+
+# Fingerprint of the package code that turns a CVM CSV into a parquet:
+# the reader (R/util-csv-cvm.R) and the schema transformations
+# (R/transform-schema.R), digested from the installed namespace. The
+# publish stores it in `__source_hash.json` (`reader`); when it differs
+# from the previous release's, the history of that run compares
+# deliveries, not contents (`identity_only` above). A sidecar without the
+# field (every release before 2026-10-25) counts as a different reader.
+mirror_reader_objects <- c(
+  ".identifier_prefixes",
+  ".identifier_exact",
+  ".text_types",
+  "identifier_columns",
+  "resolve_dict_columns",
+  "build_col_types",
+  "classify_date",
+  "read_cvm_csv",
+  "validate_field_count",
+  "expected_field_names",
+  "validate_field_names",
+  "emit_validation",
+  "apply_schema_transformations",
+  "apply_one_transformation",
+  "tx_multiply_by_scale",
+  "scale_factor",
+  "tx_drop",
+  "tx_keep_latest_version",
+  ".filing_receipt_cols",
+  ".filing_id_cols",
+  "first_present",
+  "filing_rank",
+  "as_sortable_time",
+  "as_sortable_id"
+)
+
+mirror_reader_id <- function(ns = asNamespace("cvmdata")) {
+  present <- mirror_reader_objects[vapply(
+    mirror_reader_objects,
+    exists,
+    logical(1L),
+    envir = ns,
+    inherits = FALSE
+  )]
+  objs <- mget(present, envir = ns)
+  substr(digest::digest(lapply(objs, deparse)), 1L, 12L)
 }
 
 # `versao` of the filing `new` holds for each key of `old_keys`; NA when

@@ -75,9 +75,20 @@ resolve_dict_columns <- function(schema) {
     known = dict$campo,
     date = dict$campo[
       !is.na(dict$tipo_dados) & dict$tipo_dados == "date"
+    ],
+    text = dict$campo[
+      !is.na(dict$tipo_dados) & dict$tipo_dados %in% .text_types
     ]
   )
 }
+
+# META types that hold text. A column of these is read as character
+# whatever its values look like: guessed, a telephone became a number
+# (losing its leading zeros) and an empty-headed text column a logical.
+# Measured on 2026-10-25 on the mirror: 32 text columns (fca telephone
+# and fax, fre UF, municipality, CNPJ...) stored as logical or double in
+# some year.
+.text_types <- c("varchar", "char", "nvarchar")
 
 # Build a `readr::cols()` specification: force identifiers to
 # character, parse date columns per the dictionary snapshot (with a
@@ -94,11 +105,12 @@ build_col_types <- function(csv_names, schema = NULL) {
     logical(1L)
   )
   is_date <- is_date & !is_identifier
+  is_text <- csv_lower %in% (dict_info$text %||% character())
 
   spec_list <- vector("list", length(csv_names))
   names(spec_list) <- csv_names
   for (i in seq_along(csv_names)) {
-    if (is_identifier[i]) {
+    if (is_identifier[i] || (is_text[i] && !is_date[i])) {
       spec_list[[i]] <- readr::col_character()
     } else if (is_date[i]) {
       spec_list[[i]] <- readr::col_date(format = "%Y-%m-%d")
@@ -133,9 +145,18 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
   delim <- schema$delimiter %||% ";"
   encoding <- schema$encoding %||% "ISO-8859-1"
 
+  # The CVM does not quote: a `"` in its CSVs is a character of the text
+  # (`Banco "X" S.A.`), and no field holds the delimiter or a line break
+  # (every physical line has the header's field count). Read with the
+  # default `quote = '"'`, a text starting with a quote swallowed the
+  # following lines into one field until the next quote: on 2026-10-25,
+  # 2,803 of 30,679 rows of five FRE 2024 tables (9% of
+  # transacao_parte_relacionada) vanished, two of the five tables
+  # without a single warning.
   header <- readr::read_delim(
     path,
     delim = delim,
+    quote = "",
     locale = readr::locale(encoding = encoding),
     n_max = 0,
     show_col_types = FALSE,
@@ -146,11 +167,18 @@ read_cvm_csv <- function(path, schema, validate = "strict") {
   validate_field_count(csv_names, schema, validate, path)
   validate_field_names(csv_names, schema, validate, path)
 
+  # `guess_max = Inf`: a column the type is guessed for is guessed over
+  # every row. With readr's default of 1,000, a column empty in its first
+  # rows was guessed logical and every later value became NA (the CNPJ
+  # of `fre/transacao_parte_relacionada.documento_parte_relacionada`,
+  # 2010-2026); over every row a late value can only widen the type.
   df <- readr::read_delim(
     path,
     delim = delim,
+    quote = "",
     locale = readr::locale(encoding = encoding),
     col_types = build_col_types(csv_names, schema),
+    guess_max = Inf,
     show_col_types = FALSE,
     progress = FALSE
   )

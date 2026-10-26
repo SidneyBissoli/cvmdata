@@ -240,3 +240,70 @@ test_that("a column renamed at the same count is refused, in any order", {
   )
   expect_no_warning(read_cvm_csv(bad, schema, validate = "skip"))
 })
+
+test_that("a quote in the text is a character, not a field delimiter", {
+  # FRE 2024 (2026-10-25): a text starting with `"` swallowed the next
+  # lines into one field; five tables lost 2,803 rows, two silently.
+  csv <- paste(
+    "ID_X;TEXTO;OUTRO",
+    "1;\"Banco X\" S.A. assina o contrato;a",
+    "2;texto comum;b",
+    "3;outro \"trecho;c",
+    "4;fim;d",
+    sep = "\n"
+  )
+  df <- read_cvm_csv(write_csv_iso(csv), minimal_schema(3L), "strict")
+  expect_identical(nrow(df), 4L)
+  expect_identical(df$id_x, c("1", "2", "3", "4"))
+  expect_identical(df$texto[1], "\"Banco X\" S.A. assina o contrato")
+  expect_identical(df$outro, c("a", "b", "c", "d"))
+})
+
+test_that("a column guessed over every row keeps a late value", {
+  # readr guessed over 1,000 rows: a column empty there became logical
+  # and a later value NA (fre/transacao_parte_relacionada, 2010-2026)
+  n <- 1500L
+  vals <- c(rep("", n - 1L), "42.5")
+  csv <- paste(c("A;B", paste(seq_len(n), vals, sep = ";")), collapse = "\n")
+  df <- expect_no_warning(
+    read_cvm_csv(write_csv_iso(csv), minimal_schema(2L), "strict")
+  )
+  expect_identical(nrow(df), n)
+  expect_identical(df$b[n], 42.5)
+})
+
+test_that("a text column of the dictionary is read as character", {
+  fake_dict <- tibble::tibble(
+    campo = c("documento", "telefone", "valor"),
+    campo_original = c("DOCUMENTO", "TELEFONE", "VALOR"),
+    descricao = NA_character_,
+    dominio = NA_character_,
+    tipo_dados = c("varchar", "char", "decimal"),
+    tamanho = NA_integer_,
+    precisao = NA_integer_,
+    scale = NA_integer_
+  )
+  local_mocked_bindings(
+    cvm_dictionary = function(dataset, table) fake_dict,
+    .package = "cvmdata"
+  )
+  csv <- paste(
+    "DOCUMENTO;TELEFONE;VALOR",
+    ";0113333444;1.5",
+    "11.442.516/0001-02;;2",
+    sep = "\n"
+  )
+  schema <- list(
+    dataset = "stub",
+    table = "stub",
+    delimiter = ";",
+    encoding = "ISO-8859-1",
+    expected_field_count = 3L,
+    meta_status = "available"
+  )
+  df <- read_cvm_csv(write_csv_iso(csv), schema, validate = "strict")
+  expect_type(df$documento, "character")
+  expect_identical(df$documento[2], "11.442.516/0001-02")
+  expect_identical(df$telefone[1], "0113333444")
+  expect_type(df$valor, "double")
+})
