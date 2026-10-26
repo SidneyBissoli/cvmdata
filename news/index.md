@@ -276,6 +276,17 @@
 
 ### Bug fixes
 
+- Every table now checks the column NAMES of the CVM CSV, not only their
+  count. Until now only the 8 FRE tables without a CVM dictionary had
+  their names checked; in the other 66 a column the CVM renamed or
+  swapped at the same count went silently into the result and into the
+  mirror. The expected names come from the embedded dictionary snapshot
+  (the CVM’s META), compared as a set. Measured before switching it on:
+  the header of every CSV of every yearly ZIP (1,244 headers, 2003-2026)
+  carries exactly the dictionary’s names in all 74 tables. A mismatch is
+  `cvmdata_error_parse` under `validate = "strict"` and
+  `cvmdata_warn_validation` under `"warn"`.
+
 - The mirror’s `__source_hash.json` sidecar is now actually read in
   production. GitHub serves release assets as
   `application/octet-stream`, httr2 refuses to parse JSON under that
