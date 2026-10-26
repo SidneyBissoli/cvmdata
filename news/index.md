@@ -51,6 +51,20 @@
 
 ### New features
 
+- The help of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  gains a section *Arguments by table* that states, in one place, which
+  tables take `year` and `from`/`to`, which require `basis`, which
+  accept `reading` and `as_of`, the tables that start after their
+  dataset or are published empty from a year, and the tables
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  covers. The section is generated from the table schemas when the
+  documentation is built, by the same predicates the argument checks
+  call (`R/util-table-arguments.R`), so it cannot drift from what the
+  checks enforce; a test holds the two together for every table and pins
+  the rendered text. Measured on the 74 tables: no argument is refused
+  after a download, every refusal happens before.
+
 - **Dated snapshots of the mirror.** Every weekly ETL run that changes
   something now also publishes the release
   `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`, carrying the

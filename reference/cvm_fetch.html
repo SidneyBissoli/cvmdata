@@ -286,6 +286,17 @@ when the current value of each field started). The yearly
 year (name, registration situation, category, issuer situation).</p>
     </div>
     <div class="section level2">
+    <h2 id="arguments-by-table">Arguments by table<a class="anchor" aria-label="anchor" href="#arguments-by-table"></a></h2>
+
+
+<p>Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 74 tables in 8 datasets. An argument passed to a table it does not apply to aborts with <code>cvmdata_error_input</code> before anything is downloaded; nothing is silently ignored.</p><ul><li><p><code>year</code> and <code>from</code>/<code>to</code>: every table published one file per year. Not for <code>cad</code>: <code>companhias</code>, a single snapshot. A <code>year</code> before the table's first year is refused (a <code>from</code>/<code>to</code> window is cut to it instead). Most tables start with their dataset; these start later: <code>dfp/composicao_capital</code> (2020), <code>fre/acao_entregue</code> (2023), <code>fre/administrador_PCD</code> (2023), <code>fre/administrador_declaracao_genero</code> (2023), <code>fre/administrador_declaracao_raca</code> (2023), <code>fre/empregado_PCD</code> (2023), <code>fre/empregado_local_declaracao_genero</code> (2023), <code>fre/empregado_local_declaracao_raca</code> (2023), <code>fre/empregado_local_faixa_etaria</code> (2023), <code>fre/empregado_posicao_declaracao_genero</code> (2023), <code>fre/empregado_posicao_declaracao_raca</code> (2023), <code>fre/empregado_posicao_faixa_etaria</code> (2023), <code>fre/empregado_posicao_local</code> (2023), <code>fre/mercado_estrangeiro</code> (2019), <code>fre/remuneracao_acao</code> (2023), <code>fre/remuneracao_variavel</code> (2023), <code>fre/titular_valor_mobiliario</code> (2018), <code>fre/titulo_exterior</code> (2016), <code>itr/composicao_capital</code> (2020).</p></li>
+<li><p>Years from which the CVM publishes the file with its header only are refused too: <code>fca/departamento_acionistas</code> (2024).</p></li>
+<li><p><code>basis</code>: required, with no default, in <code>dfp</code> and <code>itr</code>: <code>bpa</code>, <code>bpp</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dra</code>, <code>dre</code>, <code>dva</code>. Refused in every other table.</p></li>
+<li><p><code>reading</code>: only in <code>dfp</code> and <code>itr</code>: <code>bpa</code>, <code>bpp</code>, <code>dfc_md</code>, <code>dfc_mi</code>, <code>dmpl</code>, <code>dra</code>, <code>dre</code>, <code>dva</code> (the tables with <code>ordem_exerc</code>).</p></li>
+<li><p><code>as_of</code>: only in <code>cad</code>: <code>companhias</code>.</p></li>
+<li><p><code><a href="cvm_versions.html">cvm_versions()</a></code>: every table except <code>cad</code>: <code>companhias</code>; <code>cgvn</code>, <code>dfp</code>, <code>fca</code>, <code>fre</code> and <code>itr</code>: <code>submissao</code>; <code>ipe</code>: <code>ipe</code>; <code>vlmo</code>: <code>consolidado</code>, <code>submissao</code>, which already return every row the CVM publishes.</p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
 
 
