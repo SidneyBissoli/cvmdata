@@ -276,6 +276,34 @@
 
 ### Bug fixes
 
+- The CSV reader lost whole rows and values without a word, and now
+  keeps them. Three defects, measured on 2026-10-25:
+
+  - **Quotes.** The CVM does not quote: a `"` in its files is a
+    character of the text, and no field holds the delimiter or a line
+    break. Read with readr’s default quote, a text starting with `"`
+    swallowed the following lines into one field. In FRE 2024 alone five
+    tables lost 2,803 of 30,679 rows (`transacao_parte_relacionada`
+    1,820, `administrador_membro_conselho_fiscal` 548,
+    `remuneracao_total_orgao` 206, `outro_valor_mobiliario` 145,
+    `auditor` 84), two of them without any warning. The reader now reads
+    with `quote = ""`.
+  - **Types guessed from the first 1,000 rows.** A column empty there
+    was guessed logical and every later value became `NA` (the CNPJ of
+    `fre/transacao_parte_relacionada.documento_parte_relacionada` in
+    every year). Columns are now guessed over every row.
+  - **Text columns read as numbers or logicals.** A column the CVM
+    dictionary declares as text (`varchar`, `char`) is now always
+    character: 32 such columns came out as logical or double in some
+    year (telephone and fax lost their leading zeros).
+
+  The mirror is rebuilt by the next weekly run. Code that relied on
+  those columns being numeric or logical (e.g. `fca` `telefone`/`fax`)
+  now gets character. The publish keeps a fingerprint of the reader in
+  `__source_hash.json` (`reader`); in the run where it changes, the
+  history counts a filing as superseded only when its delivery changed,
+  so rows the old reader lost are not filed as re-filings.
+
 - Every table now checks the column NAMES of the CVM CSV, not only their
   count. Until now only the 8 FRE tables without a CVM dictionary had
   their names checked; in the other 66 a column the CVM renamed or
