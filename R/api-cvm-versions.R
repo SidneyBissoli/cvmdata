@@ -16,7 +16,8 @@
 #' schema declares `keep_latest_version`: the DFP, ITR and FRE detail
 #' tables, among others) have a version history. Asking for another
 #' table, such as a dataset's `submissao` index or the CAD register,
-#' aborts: those already return every row the CVM publishes.
+#' aborts: those already return every row the CVM publishes. The list
+#' of tables is in the section *Arguments by table* of [cvm_fetch()].
 #'
 #' @section Where the versions come from:
 #' The two backends know different parts of the history.
@@ -217,10 +218,9 @@ check_versions_dots <- function(dots) {
 # superseded versions to show. Returns the `keep_latest_version`
 # transformation entry (its optional `keys` compose the document key).
 check_versioned_table <- function(schema) {
-  for (tx in schema$transformations) {
-    if (identical(tx$action, "keep_latest_version")) {
-      return(tx)
-    }
+  tx <- table_version_tx(schema)
+  if (!is.null(tx)) {
+    return(tx)
   }
   cvmdata_abort(
     c(

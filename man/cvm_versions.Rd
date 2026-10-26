@@ -94,7 +94,8 @@ Only the tables that keep a single filing per document (those whose
 schema declares \code{keep_latest_version}: the DFP, ITR and FRE detail
 tables, among others) have a version history. Asking for another
 table, such as a dataset's \code{submissao} index or the CAD register,
-aborts: those already return every row the CVM publishes.
+aborts: those already return every row the CVM publishes. The list
+of tables is in the section \emph{Arguments by table} of \code{\link[=cvm_fetch]{cvm_fetch()}}.
 }
 \section{Where the versions come from}{
 

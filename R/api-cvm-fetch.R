@@ -161,6 +161,9 @@
 #' `fca/geral` file is the CVM's own picture of a company in a given
 #' year (name, registration situation, category, issuer situation).
 #'
+#' @section Arguments by table:
+#' `r paste(doc_arguments_by_table(), collapse = "\n")`
+#'
 #' @return A tibble of class `cvm_tbl` carrying the provenance
 #'   attributes `source`, `fetched_at`, `group`, `dataset`, `table`
 #'   and `package_version`.
@@ -324,8 +327,7 @@ cvm_fetch <- function(
 # other table rejects it. Returns the unique requested values, or NULL
 # for tables without the split.
 check_basis <- function(basis, schema) {
-  has_variants <- !is.null(schema$cvm_file_pattern_variants)
-  if (!has_variants) {
+  if (!table_has_basis(schema)) {
     if (!is.null(basis)) {
       cvmdata_abort(
         c(
@@ -404,7 +406,7 @@ check_reading <- function(reading, schema) {
   if (is.null(reading)) {
     return(NULL)
   }
-  if (!"ordem_exerc" %in% dictionary_fields(schema)) {
+  if (!table_has_readings(schema)) {
     cvmdata_abort(
       c(
         paste(
@@ -611,8 +613,7 @@ check_period <- function(year, from, to, schema) {
       class = "cvmdata_error_input"
     )
   }
-  partitioning <- schema$temporal_partitioning %||% "none"
-  if (!identical(partitioning, "yearly")) {
+  if (!table_is_yearly(schema)) {
     cvmdata_abort(
       c(
         paste(
@@ -934,8 +935,7 @@ check_as_of <- function(as_of, schema) {
   if (is.null(as_of)) {
     return(NULL)
   }
-  spec <- schema$as_of
-  if (is.null(spec$registered) || is.null(spec$cancelled)) {
+  if (!table_is_registry(schema)) {
     cvmdata_abort(
       c(
         paste(
