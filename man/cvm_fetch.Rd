@@ -206,6 +206,19 @@ when the current value of each field started). The yearly
 year (name, registration situation, category, issuer situation).
 }
 
+\section{Arguments by table}{
+
+Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 74 tables in 8 datasets. An argument passed to a table it does not apply to aborts with \code{cvmdata_error_input} before anything is downloaded; nothing is silently ignored.
+\itemize{
+\item \code{year} and \code{from}/\code{to}: every table published one file per year. Not for \code{cad}: \code{companhias}, a single snapshot. A \code{year} before the table's first year is refused (a \code{from}/\code{to} window is cut to it instead). Most tables start with their dataset; these start later: \code{dfp/composicao_capital} (2020), \code{fre/acao_entregue} (2023), \code{fre/administrador_PCD} (2023), \code{fre/administrador_declaracao_genero} (2023), \code{fre/administrador_declaracao_raca} (2023), \code{fre/empregado_PCD} (2023), \code{fre/empregado_local_declaracao_genero} (2023), \code{fre/empregado_local_declaracao_raca} (2023), \code{fre/empregado_local_faixa_etaria} (2023), \code{fre/empregado_posicao_declaracao_genero} (2023), \code{fre/empregado_posicao_declaracao_raca} (2023), \code{fre/empregado_posicao_faixa_etaria} (2023), \code{fre/empregado_posicao_local} (2023), \code{fre/mercado_estrangeiro} (2019), \code{fre/remuneracao_acao} (2023), \code{fre/remuneracao_variavel} (2023), \code{fre/titular_valor_mobiliario} (2018), \code{fre/titulo_exterior} (2016), \code{itr/composicao_capital} (2020).
+\item Years from which the CVM publishes the file with its header only are refused too: \code{fca/departamento_acionistas} (2024).
+\item \code{basis}: required, with no default, in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva}. Refused in every other table.
+\item \code{reading}: only in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva} (the tables with \code{ordem_exerc}).
+\item \code{as_of}: only in \code{cad}: \code{companhias}.
+\item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
+}
+}
+
 \section{Filing versions}{
 
 When a detail table carries several filings for the same issuer and
