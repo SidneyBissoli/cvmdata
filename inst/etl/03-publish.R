@@ -72,6 +72,7 @@ source("inst/etl/00-config.R")
 source("inst/etl/util-hash.R")
 source("inst/etl/util-history.R")
 source("inst/etl/util-snapshot.R")
+source("inst/etl/util-gh.R")
 
 args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
@@ -557,8 +558,9 @@ write_notes <- function(text) {
 # `--latest=false` so the repository's "Latest release" badge does not
 # move to a data snapshot.
 ensure_release <- function(tag, title, notes, snapshot = FALSE) {
-  release_exists <- system2(
-    "gh",
+  # Quota-aware too: with the quota spent, `view` fails like a missing
+  # release would, and the create that followed would hit "already exists".
+  release_exists <- gh_quota_aware(
     c("release", "view", tag, "--repo", mirror_repo, "--json", "tagName"),
     stdout = NULL,
     stderr = NULL
@@ -566,8 +568,7 @@ ensure_release <- function(tag, title, notes, snapshot = FALSE) {
     0L
   verb <- if (release_exists) "edit" else "create"
   message(sprintf("[03-publish] %s release %s", verb, tag))
-  status <- system2(
-    "gh",
+  status <- gh_quota_aware(
     c(
       "release",
       verb,
@@ -599,8 +600,7 @@ upload_assets <- function(tag, assets) {
   for (asset in assets) {
     message("  ", basename(asset))
     for (attempt in seq_len(upload_attempts)) {
-      status <- system2(
-        "gh",
+      status <- gh_quota_aware(
         c(
           "release",
           "upload",
@@ -633,8 +633,7 @@ upload_assets <- function(tag, assets) {
 # every user of source = "mirror". Publish it explicitly, then prove it
 # from the outside with an anonymous request.
 finalize_release <- function(tag) {
-  status <- system2(
-    "gh",
+  status <- gh_quota_aware(
     c("release", "edit", tag, "--repo", mirror_repo, "--draft=false")
   )
   if (status != 0L) {
@@ -722,21 +721,27 @@ upload_assets(tag, assets)
 # Remove the assets of the previous tree that the new one does not have
 # (a partition that vanished upstream). Done after the upload, so the
 # release is never missing a partition that still exists.
-current <- system2(
-  "gh",
-  c(
-    "release",
-    "view",
-    tag,
-    "--repo",
-    mirror_repo,
-    "--json",
-    "assets",
-    "--jq",
-    shQuote(".assets[].name")
-  ),
-  stdout = TRUE
-)
+list_release_assets <- function(tag) {
+  system2(
+    "gh",
+    c(
+      "release",
+      "view",
+      tag,
+      "--repo",
+      mirror_repo,
+      "--json",
+      "assets",
+      "--jq",
+      shQuote(".assets[].name")
+    ),
+    stdout = TRUE
+  )
+}
+current <- list_release_assets(tag)
+if (!is.null(attr(current, "status")) && wait_for_api_quota()) {
+  current <- list_release_assets(tag)
+}
 if (!is.null(attr(current, "status"))) {
   stop("gh release view failed while listing assets", call. = FALSE)
 }
@@ -754,8 +759,7 @@ if (length(stale) == length(current) && length(current) > 0L) {
 }
 for (name in stale) {
   message("  removing stale asset ", name)
-  status <- system2(
-    "gh",
+  status <- gh_quota_aware(
     c(
       "release",
       "delete-asset",
