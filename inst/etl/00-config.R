@@ -148,3 +148,24 @@ mirror_variant_tables <- c(
 mirror_variants_for <- function(tbl) {
   if (tbl %in% mirror_variant_tables) c("ind", "con") else list(NULL)
 }
+
+# Years of `years` the table can have, dropping those before the table's
+# own `first_year` (schema). The stages enumerate the dataset's years for
+# every table, but CVM detail tables were born at different times (dfp
+# composicao_capital in 2020, a dozen fre tables in 2023). Since #24 the
+# schemas carry each table's first year and issuer_fetch() refuses an
+# earlier one with cvmdata_error_input before any download — a class
+# stage 02 does not read as "absent", so those tuples hard-failed 02b
+# and turned the dfp/fre publish red. A year the table never had is not
+# a skip: it is not scheduled, written nor expected. NA (non-yearly)
+# passes through.
+mirror_table_years <- function(dataset, tbl, years) {
+  if (all(is.na(years))) {
+    return(years)
+  }
+  first_year <- cvmdata:::load_schema(dataset, tbl)$first_year
+  if (is.null(first_year) || is.na(first_year)) {
+    return(years)
+  }
+  years[years >= as.integer(first_year)]
+}

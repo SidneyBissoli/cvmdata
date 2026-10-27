@@ -127,7 +127,7 @@ test_that("fetch_all stops the walk once the breaker trips", {
     list(ok = FALSE, transport = TRUE)
   }
   out <- suppressMessages(
-    fetch_all("fre", "acao_entregue", 2010:2025)
+    fetch_all("fre", "administrador_membro_conselho_fiscal", 2010:2025)
   )
   expect_true(out$tripped)
   # 16 years were on offer; the breaker cut the walk at the third.
@@ -142,7 +142,9 @@ test_that("fetch_all walks every pair when the portal answers", {
   fetch_one <- function(dataset, tbl, year, report_type) {
     list(ok = TRUE, transport = FALSE)
   }
-  out <- suppressMessages(fetch_all("fre", "acao_entregue", 2010:2025))
+  out <- suppressMessages(
+    fetch_all("fre", "administrador_membro_conselho_fiscal", 2010:2025)
+  )
   expect_false(out$tripped)
   expect_identical(out$n_ok, 16L)
   expect_identical(out$n_fail, 0L)
@@ -163,10 +165,28 @@ test_that("fetch_all never trips after something has come through", {
       list(ok = FALSE, transport = TRUE)
     }
   }
-  out <- suppressMessages(fetch_all("fre", "acao_entregue", 2010:2025))
+  out <- suppressMessages(
+    fetch_all("fre", "administrador_membro_conselho_fiscal", 2010:2025)
+  )
   expect_false(out$tripped)
   expect_identical(out$n_ok, 1L)
   expect_identical(out$n_fail, 15L)
+})
+
+test_that("fetch_all skips the years before the table's first_year", {
+  # fre/acao_entregue starts in 2023: the 13 earlier dataset years are
+  # not requested at all (they were 13 of the 205 fre hard fails of the
+  # 2026-10-27 run).
+  load_etl_fetcher()
+  years_seen <- integer()
+  fetch_one <- function(dataset, tbl, year, report_type) {
+    years_seen <<- c(years_seen, year)
+    list(ok = TRUE, transport = FALSE)
+  }
+  out <- suppressMessages(fetch_all("fre", "acao_entregue", 2010:2025))
+  expect_identical(years_seen, 2023:2025)
+  expect_identical(out$n_ok, 3L)
+  expect_identical(out$n_fail, 0L)
 })
 
 test_that("fetch_all counts both report_type variants of a table", {

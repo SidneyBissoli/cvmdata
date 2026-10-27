@@ -222,6 +222,44 @@ test_that("missing parquet stays a hard fail when not skipped", {
   expect_identical(result$status, "fail")
 })
 
+# --- years before a table's first_year ---------------------------------
+
+test_that("mirror_table_years drops years before the table's first_year", {
+  # dfp/composicao_capital starts in 2020 and fre/remuneracao_acao in
+  # 2023 (schema first_year), later than their datasets. The ETL used to
+  # schedule them from the dataset's first year; issuer_fetch() refuses
+  # those years with cvmdata_error_input, stage 02 counted them as
+  # "fail" and 02b hard-failed 10 dfp and 205 fre tuples (2026-10-27).
+  load_etl_validator()
+  expect_identical(
+    mirror_table_years("dfp", "composicao_capital", 2018:2021),
+    2020:2021
+  )
+  expect_identical(
+    mirror_table_years("fre", "remuneracao_acao", 2010:2026),
+    2023:2026
+  )
+  expect_identical(mirror_table_years("dfp", "bpa", 2018:2021), 2018:2021)
+  expect_identical(
+    mirror_table_years("cad", "companhias", NA_integer_),
+    NA_integer_
+  )
+})
+
+test_that("validate_expected_tuples never expects a year the table lacks", {
+  load_etl_validator()
+  tuples <- validate_expected_tuples("dfp", years_arg = 2018:2021)
+  years_of <- function(tbl) {
+    unique(vapply(
+      Filter(function(t) identical(t$table, tbl), tuples),
+      function(t) t$year,
+      integer(1L)
+    ))
+  }
+  expect_identical(years_of("composicao_capital"), 2020:2021)
+  expect_identical(years_of("bpa"), 2018:2021)
+})
+
 # --- validate_dataset end-to-end ---------------------------------------
 
 test_that("validate_dataset reports pass for a clean CAD workspace", {

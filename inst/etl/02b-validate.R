@@ -174,7 +174,7 @@ validate_expected_tuples <- function(dataset, years_arg = NULL) {
   }
   out <- list()
   for (tbl in tables) {
-    for (y in years) {
+    for (y in mirror_table_years(dataset, tbl, years)) {
       for (rt in mirror_variants_for(tbl)) {
         out[[length(out) + 1L]] <- list(
           table = tbl,
