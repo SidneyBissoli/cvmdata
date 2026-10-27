@@ -23,13 +23,16 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-24.04,    r: 'devel', http-user-agent: 'release'}
           # the current release on ubuntu runs in the portfolio's CI image
           # (SidneyBissoli/r-ci): R, pandoc and every dependency already
           # there, nothing installed through the apt mirror at job time.
-          # devel and oldrel-1 are other R versions and keep setup-r.
+          # devel and oldrel-1 are other R versions and keep setup-r, pinned
+          # to ubuntu-24.04: on 26.04 (ubuntu-latest since ~2026-10-26)
+          # setup-r apt-installs 175 packages from a slow mirror and blows
+          # its 10-min limit (see etl-mirror.yaml).
           - {os: ubuntu-latest,   r: 'release', container: 'ghcr.io/sidneybissoli/r-ci:latest'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          - {os: ubuntu-24.04,    r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
