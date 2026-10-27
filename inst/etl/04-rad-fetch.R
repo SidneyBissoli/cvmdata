@@ -205,6 +205,31 @@ rad_empty_state <- function(dataset) {
   )
 }
 
+# A missing `__rad_state.json` reads as an empty state, which is right
+# only before the first run. Once the release has history assets the
+# robot has run, and an empty state would queue again every document
+# already read (thousands; ~16 rounds) and append their rows to the
+# history a second time. On 2026-10-27 the mirror publish deleted the
+# state of dfp and itr (its stale sweep; fixed in 03-publish.R): stop
+# instead, so the state is restored before the robot runs again.
+rad_check_state_present <- function(state_file, source_hash, tag) {
+  has_history <- length(source_hash$history %||% list()) > 0L
+  if (is.null(state_file) && has_history) {
+    stop(
+      sprintf(
+        paste(
+          "release %s has history assets but no __rad_state.json;",
+          "refusing to start the RAD queue from scratch. Restore the",
+          "state first."
+        ),
+        tag
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(TRUE)
+}
+
 rad_read_state <- function(path, dataset) {
   if (is.null(path) || !file.exists(path)) {
     return(rad_empty_state(dataset))
@@ -738,10 +763,9 @@ rad_main <- function(
   }
   source_hash <- jsonlite::read_json(hash_file)
   source_hash$history <- source_hash$history %||% list()
-  state <- rad_read_state(
-    download_release_asset(tag, "__rad_state.json", prev_dir),
-    dataset
-  )
+  state_file <- download_release_asset(tag, "__rad_state.json", prev_dir)
+  rad_check_state_present(state_file, source_hash, tag)
+  state <- rad_read_state(state_file, dataset)
 
   schema <- yaml::read_yaml(file.path(
     mirror_schema_dir(dataset),
