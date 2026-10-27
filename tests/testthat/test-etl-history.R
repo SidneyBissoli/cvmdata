@@ -247,3 +247,23 @@ test_that("the reader fingerprint follows the reader's code", {
     inherits = FALSE
   )))
 })
+
+test_that("only the partition parquets of the release can be stale", {
+  # 2026-10-27: the stale sweep of 03-publish.R kept only history assets
+  # out of the deletion and removed the RAD robot's files from
+  # dfp-latest and itr-latest.
+  load_etl_history()
+  names <- c(
+    "bpa__report_type.ind__year.2024__part-0.parquet",
+    "bpa__report_type=ind__year=2024__part-0.parquet",
+    "companhias__part-0.parquet",
+    "bpa__report_type.ind__year.2024__history.parquet",
+    "__source_hash.json",
+    "__rad_state.json",
+    "__rad_unread.csv"
+  )
+  expect_identical(
+    mirror_is_partition_asset(names),
+    c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
+  )
+})

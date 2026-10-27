@@ -267,6 +267,17 @@ mirror_is_history_asset <- function(name) {
   grepl("__history\\.parquet$", name)
 }
 
+# Whether a release asset is a partition parquet written by 03-publish.R
+# (`<table>__[report_type=R__][year=Y__]part-0.parquet`, `=` possibly
+# stored as `.`). Only these may be removed as stale: the release also
+# holds assets other robots own, and on 2026-10-27 the stale sweep
+# deleted the RAD robot's `__rad_state.json` and `__rad_unread.csv` from
+# dfp-latest and itr-latest, the first publish of those datasets since
+# the RAD state existed.
+mirror_is_partition_asset <- function(name) {
+  grepl("__part-[0-9]+\\.parquet$", name) & !mirror_is_history_asset(name)
+}
+
 # Table of a partition path: its first segment.
 mirror_partition_table <- function(rel) {
   strsplit(rel, "/", fixed = TRUE)[[1L]][[1L]]

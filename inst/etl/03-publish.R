@@ -747,9 +747,13 @@ if (!is.null(attr(current, "status"))) {
 }
 # GitHub stores "year=2024" as "year.2024" (see parse_mirror_asset_name()),
 # so compare in its spelling; comparing the local names would mark every
-# asset stale and delete the release just uploaded. History assets are
-# cumulative and most of them are not re-uploaded: never stale.
-current <- current[!mirror_is_history_asset(current)]
+# asset stale and delete the release just uploaded. Only the partition
+# parquets this script writes can be stale: history assets are
+# cumulative and most of them are not re-uploaded, and the RAD robot's
+# `__rad_state.json` / `__rad_unread.csv` live here too (both deleted on
+# 2026-10-27 by the old "everything but history" sweep). The sidecar is
+# re-uploaded on every publish.
+current <- current[mirror_is_partition_asset(current)]
 stale <- setdiff(current, gsub("=", ".", basename(assets), fixed = TRUE))
 if (length(stale) == length(current) && length(current) > 0L) {
   stop(

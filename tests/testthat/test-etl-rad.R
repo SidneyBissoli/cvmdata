@@ -1444,3 +1444,20 @@ test_that("a document under a branch's CNPJ is the company's", {
   r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), other)
   expect_true(r$index_mismatch)
 })
+
+test_that("a missing state stops the robot once the release has history", {
+  # 2026-10-27: the mirror publish deleted __rad_state.json of dfp and
+  # itr; read as an empty state, the next run would have queued every
+  # document again and duplicated their history rows.
+  load_etl_rad()
+  with_history <- list(history = list("bpa/year=2024/history.parquet" = "h"))
+  expect_error(
+    rad_check_state_present(NULL, with_history, "mirror-companhias-dfp-latest"),
+    "no __rad_state.json"
+  )
+  # First run ever: no state and no history is the empty start.
+  expect_true(rad_check_state_present(NULL, list(), "t"))
+  expect_true(rad_check_state_present(NULL, list(history = list()), "t"))
+  # State present: nothing to check.
+  expect_true(rad_check_state_present(tempfile(), with_history, "t"))
+})
