@@ -122,7 +122,7 @@ fetch_all <- function(dataset, tables, years_to_fetch) {
   transport_streak <- 0L
   tripped <- FALSE
   for (tbl in tables) {
-    for (y in years_to_fetch) {
+    for (y in mirror_table_years(dataset, tbl, years_to_fetch)) {
       for (rt in mirror_variants_for(tbl)) {
         rt_label <- if (is.null(rt)) "" else sprintf("/%s", rt)
         label <- if (is.na(y)) {

@@ -179,7 +179,7 @@ message(sprintf(
 # manifest afterwards so the loop itself stays simple (lint budget).
 outcomes <- list()
 for (tbl in tables) {
-  for (y in years_to_process) {
+  for (y in mirror_table_years(dataset, tbl, years_to_process)) {
     for (rt in mirror_variants_for(tbl)) {
       outcomes[[length(outcomes) + 1L]] <- list(
         tbl = tbl,
