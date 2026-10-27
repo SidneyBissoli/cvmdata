@@ -72,7 +72,12 @@ concurrency:
 
 jobs:
   rad:
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: by 2026-10-27 ubuntu-latest became
+    # Ubuntu 26.04, where setup-r apt-installs 175 system packages from a
+    # slow Azure mirror and blew its 10-min step limit in 3 of 3 jobs that
+    # day (itr, dfp, fca); on 24.04, where every run was green until
+    # 2026-10-25, the step takes seconds. Move on deliberately.
+    runs-on: ubuntu-24.04
     # The script stops starting new downloads after --minutes (default
     # 260) and publishes what it has; the 40 min on top cover the R
     # setup, the last document (up to two 90 s WAF pauses) and the last
