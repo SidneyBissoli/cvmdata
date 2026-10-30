@@ -29,8 +29,10 @@
 #   middle of a good run of 74 turned the job red, and the document
 #   downloaded whole hours later). Only a document refused every time
 #   stops the run. Every failure is recorded with its `kind`:
-#   `download` (the RAD did not deliver: transport error or an HTTP
-#   status other than 403), `document` (the ZIP is not the document the
+#   `download` (the RAD did not deliver: transport error, an HTTP
+#   status other than 403, or its own error text in plain text instead
+#   of the ZIP — not markup, so not the WAF; ITR 67723, 2026-10-30),
+#   `document` (the ZIP is not the document the
 #   index describes, is not a DFP/ITR at all, or carries no statement
 #   with rows), `reader` (the reader could not make sense of it) and
 #   `waf`. The failure rate that
