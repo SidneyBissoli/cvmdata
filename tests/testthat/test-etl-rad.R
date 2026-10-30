@@ -985,6 +985,46 @@ test_that("a document refused every time stops the run as WAF", {
   expect_match(got$note, "refused 3 times")
 })
 
+test_that("the RAD's own error text is not taken for the WAF", {
+  load_etl_rad()
+  # the body ITR 67723 answers on every request (measured 2026-10-30)
+  net <- paste(
+    "Index was out of range. Must be non-negative and less than the",
+    "size of the collection.\r\nParameter name: index"
+  )
+  expect_false(rad_looks_like_html(net))
+  expect_true(rad_looks_like_html("<!DOCTYPE html><html><body>x</body>"))
+  expect_true(rad_looks_like_html("<HTML><HEAD><TITLE>Request Rejected"))
+  expect_identical(
+    rad_snippet(net, 40L),
+    "Index was out of range. Must be non-nega..."
+  )
+  path <- withr::local_tempfile()
+  writeBin(charToRaw(net), path)
+  expect_identical(rad_body_head(path), net)
+  expect_identical(rad_body_head(file.path(path, "missing")), "")
+
+  fake <- function(id_doc, dest, timeout = 180) {
+    list(
+      ok = FALSE,
+      status = 200L,
+      bytes = 109,
+      seconds = 1,
+      error = paste0(
+        "the RAD answered an error instead of the ZIP: ",
+        rad_snippet(net)
+      )
+    )
+  }
+  rad_download <- fake
+  f <- filing_row("A", "2017-06-30", "1", "A", "1", "67723")
+  got <- rad_fetch_one(f, withr::local_tempdir(), pause = 0)
+  expect_false(got$ok)
+  expect_false(got$waf)
+  expect_identical(got$kind, "download")
+  expect_match(got$note, "Index was out of range", fixed = TRUE)
+})
+
 test_that("a failure that is not a refusal is not retried", {
   load_etl_rad()
   fake <- waf_download("500", "rad_dfp_2024_151243")

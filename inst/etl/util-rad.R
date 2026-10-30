@@ -279,7 +279,16 @@ rad_download <- function(id_doc, dest, timeout = rad_download_timeout) {
   }
   out$bytes <- file.size(dest)
   if (!rad_is_zip(dest)) {
-    out$error <- "body is not a ZIP (WAF page?)"
+    head <- rad_body_head(dest)
+    # an empty body says nothing: it stays a refusal, the cautious side
+    out$error <- if (!nzchar(trimws(head)) || rad_looks_like_html(head)) {
+      paste0("body is not a ZIP (WAF page?): ", rad_snippet(head))
+    } else {
+      paste0(
+        "the RAD answered an error instead of the ZIP: ",
+        rad_snippet(head)
+      )
+    }
     unlink(dest)
     return(out)
   }
@@ -294,6 +303,36 @@ rad_is_zip <- function(path) {
   con <- file(path, "rb")
   on.exit(close(con))
   identical(readBin(con, "raw", 2L), as.raw(c(0x50, 0x4b)))
+}
+
+# A body that is not a ZIP is either a page (the WAF refusing) or the
+# RAD's own error text in plain `text/html`. Measured 2026-10-30: ITR
+# 67723 (Autopista Planalto Sul, 2017-06-30) answers 200 with the .NET
+# message "Index was out of range. Must be non-negative and less than
+# the size of the collection." on every request, from any network; the
+# robot took it for the WAF, retried it and stopped the whole itr round
+# of 2026-10-29. Only markup is a refusal now: plain text is a document
+# the RAD cannot serve, set aside like any download failure. The head of
+# the body goes into the note either way, so the WAF page gets measured.
+rad_body_head <- function(path, n = 2048L) {
+  if (!file.exists(path)) {
+    return("")
+  }
+  con <- file(path, "rb")
+  on.exit(close(con))
+  raw <- readBin(con, "raw", n)
+  raw <- raw[raw != as.raw(0)]
+  iconv(rawToChar(raw), "UTF-8", "UTF-8", sub = "?")
+}
+
+rad_looks_like_html <- function(head) {
+  grepl("<\\s*(!doctype|html|head|body|script|meta|title)\\b", head,
+        ignore.case = TRUE)
+}
+
+rad_snippet <- function(head, n = 120L) {
+  s <- trimws(gsub("\\s+", " ", head))
+  if (nchar(s) > n) paste0(substr(s, 1L, n), "...") else s
 }
 
 # --- reading: entry point ---------------------------------------------
