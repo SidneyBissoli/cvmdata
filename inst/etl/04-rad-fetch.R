@@ -35,13 +35,22 @@
 #   `document` (the ZIP is not the document the
 #   index describes, is not a DFP/ITR at all, or carries no statement
 #   with rows), `reader` (the reader could not make sense of it) and
-#   `waf`. The failure rate that
+#   `waf`. A `download` failure says something about the document only
+#   when the RAD serves the others: `rad_outage_streak` of them in a row
+#   is the RAD down (2026-10-31: from 11:20 to about 12:30 UTC every
+#   request got "The requested service ... could not be activated", 48
+#   DFP and 69 ITR documents in a row; the ITR round read 179 more after
+#   it). The documents of the streak go back to how they were before it
+#   (an outage does not spend their attempts) and the run pauses
+#   `rad_outage_pause` seconds, then goes on with the next documents;
+#   past `rad_outage_pauses` pauses in one run it stops as `rad-down`.
+#   The streak is counted within a checkpoint. The failure rate that
 #   also stops the run (more than `rad_failure_rate` of the attempts)
 #   counts ONLY the `reader` kind, and only after `rad_failure_floor`
 #   attempts (decision of 2026-10-23: a run of 16 stopped with one
 #   connection reset and one document whose cnpj differed from the
 #   index — neither says anything about the reader, which is what the
-#   rate guards). Both stops exit with status 2 after publishing what
+#   rate guards). The three stops exit with status 2 after publishing what
 #   was read. A run publishes in checkpoints of `rad_checkpoint_docs`
 #   documents, so a job killed later keeps what it had published.
 # * State lives in the release as `__rad_state.json` (documents done, by
@@ -97,6 +106,9 @@ rad_max_attempts <- 3L # tries per unread document, across runs
 rad_failure_rate <- 0.10 # reader failures over the attempts of the run
 rad_failure_floor <- 50L # attempts before the rate is judged
 rad_checkpoint_docs <- 50L # documents between two publications of a run
+rad_outage_streak <- 5L # download failures in a row that mean the RAD is down
+rad_outage_pause <- 900 # seconds of pause when the RAD is down
+rad_outage_pauses <- 5L # pauses of one run before it stops as `rad-down`
 
 utc_now <- function(t = Sys.time()) {
   format(t, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
@@ -442,14 +454,16 @@ upload_release_asset <- function(tag, path, attempts = 4L) {
 # --- the run ----------------------------------------------------------
 
 # Downloads and reads the queue until `limit` documents, `minutes` of
-# wall clock (counted from `t_start`), a refusal by the RAD or too many
-# failures of the reader. `tally` carries the counts of the earlier
-# checkpoints of the same run, so the failure rate is judged over the
+# wall clock (counted from `t_start`), a refusal by the RAD, the RAD down
+# for longer than `rad_outage_pauses` pauses (each one after
+# `rad_outage_streak` download failures in a row) or too many failures
+# of the reader. `tally` carries the counts of the earlier checkpoints of
+# the same run, so the pauses and the failure rate are judged over the
 # whole run: `reader_failed` of the attempts, only once `attempted`
 # reached `rad_failure_floor`; failures of the other kinds (download,
 # document) are set aside without weighing on the rate. Returns
-# list(by_rel, state, attempted, n_read, failed, reader_failed, stopped,
-# time_out).
+# list(by_rel, state, attempted, n_read, failed, reader_failed, outages,
+# stopped, time_out).
 rad_run_queue <- function(
   queue,
   state,
@@ -467,6 +481,10 @@ rad_run_queue <- function(
   n_read <- 0L
   before <- tally %||% list(attempted = 0L, reader_failed = 0L)
   by_rel <- list()
+  # the download failures in a row, with each document's entry in
+  # `unread` before the failure (NULL when it had none)
+  streak <- list()
+  outages <- 0L
   last_request <- Sys.time() - rad_crawl_delay
   for (i in seq_len(min(limit, nrow(queue)))) {
     if (as.numeric(difftime(Sys.time(), t_start, units = "mins")) > minutes) {
@@ -490,10 +508,29 @@ rad_run_queue <- function(
       f$dt_refer,
       got$note
     ))
+    kind <- rad_failure_kind(got)
+    streak <- rad_extend_streak(streak, kind, f$id_doc, state)
     if (!got$ok) {
       failed <- failed + 1L
-      kind <- got$kind %||% if (got$waf) "waf" else "reader"
       state <- rad_mark_unread(state, f$id_doc, got$note, kind)
+      if (length(streak) >= rad_outage_streak) {
+        state <- rad_undo_streak(state, streak)
+        failed <- failed - length(streak)
+        streak <- list()
+        outages <- outages + 1L
+        if ((before$outages %||% 0L) + outages > rad_outage_pauses) {
+          stopped <- "rad-down"
+          message("[04-rad] the RAD is still down: stopping")
+          break
+        }
+        message(sprintf(
+          "[04-rad] %d downloads failed in a row: the RAD is down, pausing %ds",
+          rad_outage_streak,
+          as.integer(rad_outage_pause)
+        ))
+        Sys.sleep(rad_outage_pause)
+        next
+      }
       if (got$waf) {
         stopped <- "waf"
         message("[04-rad] the RAD refused the request (WAF): stopping")
@@ -505,10 +542,7 @@ rad_run_queue <- function(
       reader_failed <- reader_failed + 1L
       all_attempted <- before$attempted + attempted
       all_failed <- (before$reader_failed %||% 0L) + reader_failed
-      if (
-        all_attempted >= rad_failure_floor &&
-          all_failed / all_attempted > rad_failure_rate
-      ) {
+      if (rad_rate_exceeded(all_failed, all_attempted)) {
         stopped <- "failure-rate"
         message(sprintf(
           "[04-rad] the reader failed on %d of %d documents: stopping",
@@ -534,9 +568,46 @@ rad_run_queue <- function(
     n_read = n_read,
     failed = failed,
     reader_failed = reader_failed,
+    outages = outages,
     stopped = stopped,
     time_out = time_out
   )
+}
+
+# Whether the reader's failures stop the run: more than
+# `rad_failure_rate` of the attempts, once `rad_failure_floor` is reached.
+rad_rate_exceeded <- function(n_failed, n_attempted) {
+  n_attempted >= rad_failure_floor &&
+    n_failed / n_attempted > rad_failure_rate
+}
+
+# The kind of failure of a `rad_fetch_one()` result; NA when it read.
+rad_failure_kind <- function(got) {
+  if (got$ok) {
+    return(NA_character_)
+  }
+  got$kind %||% if (got$waf) "waf" else "reader"
+}
+
+# The download streak after one more document: a download failure joins
+# it, keeping the document's `unread` entry from before (call it BEFORE
+# `rad_mark_unread()`); anything else ends it.
+rad_extend_streak <- function(streak, kind, id_doc, state) {
+  if (!identical(kind, "download")) {
+    return(list())
+  }
+  streak[[id_doc]] <- list(prev = state$unread[[id_doc]])
+  streak
+}
+
+# Puts back the `unread` entries the documents of a download streak had
+# before it (`streak`: id_doc -> list(prev)); a document without one
+# leaves the list (assigning NULL drops the entry).
+rad_undo_streak <- function(state, streak) {
+  for (id in names(streak)) {
+    state$unread[[id]] <- streak[[id]]$prev
+  }
+  state
 }
 
 # Downloads and reads one document. Returns list(ok, waf, kind, note,
@@ -829,6 +900,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
     attempted = 0L,
     failed = 0L,
     reader_failed = 0L,
+    outages = 0L,
     read = 0L,
     rows = 0L,
     checkpoints = 0L
@@ -854,6 +926,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
     tally$attempted <- tally$attempted + run$attempted
     tally$failed <- tally$failed + run$failed
     tally$reader_failed <- tally$reader_failed + run$reader_failed
+    tally$outages <- tally$outages + run$outages
     tally$read <- tally$read + run$n_read
     stopped <- run$stopped
     built <- rad_build_history(
@@ -885,6 +958,7 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
         read = tally$read,
         failed = tally$failed,
         reader_failed = tally$reader_failed,
+        outages = tally$outages,
         rows = tally$rows,
         checkpoints = tally$checkpoints,
         stopped = if (is.na(stopped)) NULL else stopped,

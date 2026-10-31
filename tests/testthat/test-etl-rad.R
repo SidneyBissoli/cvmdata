@@ -1273,6 +1273,100 @@ test_that("download and document failures do not weigh on the failure rate", {
   expect_identical(tab$kind, c("download", "document"))
 })
 
+test_that("the RAD down pauses the run without spending attempts", {
+  load_etl_rad()
+  rad_crawl_delay <- 0
+  rad_outage_streak <- 3L
+  rad_outage_pause <- 0
+  rad_outage_pauses <- 1L
+  # 2 fails alone (a document of its own); 4, 5 and 6 in a row: the RAD
+  # down (2026-10-31), a pause; 7 reads; 8, 9 and 10 in a row: still
+  # down past the pauses, the run stops. 5 had an attempt from an
+  # earlier run
+  rad_fetch_one <- fetch_by_kind(list(
+    "2" = "download",
+    "4" = "download",
+    "5" = "download",
+    "6" = "download",
+    "8" = "download",
+    "9" = "download",
+    "10" = "download"
+  ))
+  state <- rad_mark_unread(rad_empty_state("dfp"), "5", "earlier", "download")
+  msgs <- character()
+  run <- withCallingHandlers(
+    rad_run_queue(
+      queue_of(12),
+      state,
+      withr::local_tempdir(),
+      limit = 12L,
+      minutes = 10,
+      Sys.time()
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  )
+  expect_match(msgs, "3 downloads failed in a row", all = FALSE)
+  expect_match(msgs, "the RAD is still down: stopping", all = FALSE)
+  expect_identical(run$stopped, "rad-down")
+  expect_identical(run$outages, 2L)
+  expect_identical(run$attempted, 10L)
+  expect_identical(run$n_read, 3L)
+  expect_identical(run$failed, 1L)
+  # the lone failure keeps its attempt; the streaks go back as they were
+  expect_identical(run$state$unread[["2"]]$attempts, 1L)
+  expect_identical(run$state$unread[["5"]]$reason, "earlier")
+  expect_identical(run$state$unread[["5"]]$attempts, 1L)
+  expect_named(run$state$unread, c("2", "5"), ignore.order = TRUE)
+})
+
+test_that("the pauses of earlier checkpoints count toward the stop", {
+  load_etl_rad()
+  rad_crawl_delay <- 0
+  rad_outage_streak <- 2L
+  rad_outage_pause <- 0
+  rad_outage_pauses <- 1L
+  rad_fetch_one <- fetch_by_kind(list("1" = "download", "2" = "download"))
+  run <- suppressMessages(rad_run_queue(
+    queue_of(4),
+    rad_empty_state("dfp"),
+    withr::local_tempdir(),
+    limit = 4L,
+    minutes = 10,
+    Sys.time(),
+    tally = list(attempted = 50L, reader_failed = 0L, outages = 1L)
+  ))
+  expect_identical(run$stopped, "rad-down")
+  expect_identical(run$attempted, 2L)
+  expect_length(run$state$unread, 0L)
+})
+
+test_that("a read or another kind of failure breaks the download streak", {
+  load_etl_rad()
+  rad_crawl_delay <- 0
+  rad_outage_streak <- 3L
+  rad_fetch_one <- fetch_by_kind(list(
+    "1" = "download",
+    "2" = "download",
+    "3" = "document",
+    "4" = "download",
+    "5" = "download",
+    "7" = "download"
+  ))
+  run <- suppressMessages(rad_run_queue(
+    queue_of(8),
+    rad_empty_state("dfp"),
+    withr::local_tempdir(),
+    limit = 8L,
+    minutes = 10,
+    Sys.time()
+  ))
+  expect_identical(run$stopped, NA_character_)
+  expect_identical(run$failed, 6L)
+})
+
 test_that("the reader's failures stop the run, but only past the floor", {
   load_etl_rad()
   rad_crawl_delay <- 0
