@@ -510,6 +510,71 @@ test_that("check_published_years clips a window at empty_from", {
   expect_identical(cvmdata:::check_published_years(plain, schema), plain)
 })
 
+# Table the CVM stopped publishing (schema `last_year`): the 25 legacy
+# FRE tables. fre/endividamento is in the ZIPs 2010-2023 only.
+
+test_that("cvm_fetch refuses year = NULL on a table that ended", {
+  expect_snapshot(
+    error = TRUE,
+    cvm_fetch("fre", "endividamento", source = "mirror")
+  )
+  expect_error(
+    cvm_versions("fre", "endividamento", source = "cvm"),
+    regexp = "no longer.*published",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("cvm_fetch refuses a year after the table ended", {
+  expect_error(
+    cvm_fetch("fre", "endividamento", year = 2024, source = "cvm"),
+    regexp = "not published for.*2024",
+    class = "cvmdata_error_input"
+  )
+  # A mixed explicit vector is refused outright: only a window clips.
+  expect_error(
+    cvm_fetch("fre", "endividamento", year = 2023:2024, source = "cvm"),
+    regexp = "stopped carrying it",
+    class = "cvmdata_error_input"
+  )
+})
+
+test_that("check_published_years clips a window at last_year", {
+  schema <- cvmdata:::load_schema("fre", "grupo_economico_reestruturacao")
+  window <- cvmdata:::check_period(NULL, "2015-01-01", "2018-12-31", schema)
+  expect_message(
+    clipped <- cvmdata:::check_published_years(window, schema),
+    regexp = "not published after.*2016.*reading"
+  )
+  expect_identical(clipped$year, 2015:2016)
+  expect_error(
+    cvmdata:::check_published_years(
+      cvmdata:::check_period(NULL, "2017-01-01", "2018-12-31", schema),
+      schema
+    ),
+    regexp = "not published for",
+    class = "cvmdata_error_input"
+  )
+  plain <- cvmdata:::check_period(2010:2016, NULL, NULL, schema)
+  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
+})
+
+test_that("clamp_years_to_last drops later years for issuer_fetch", {
+  schema <- cvmdata:::load_schema("fre", "endividamento")
+  expect_message(
+    kept <- cvmdata:::clamp_years_to_last(2022:2025, schema),
+    regexp = "ends at.*2023"
+  )
+  expect_identical(kept, 2022:2023)
+  expect_error(
+    cvmdata:::clamp_years_to_last(2024:2025, schema),
+    regexp = "ends at",
+    class = "cvmdata_error_input"
+  )
+  open <- cvmdata:::load_schema("fre", "auditor")
+  expect_identical(cvmdata:::clamp_years_to_last(2024L, open), 2024L)
+})
+
 test_that("warn_empty_latest says what each backend returns", {
   schema <- cvmdata:::load_schema("fca", "departamento_acionistas")
   latest <- cvmdata:::check_period(NULL, NULL, NULL, schema)

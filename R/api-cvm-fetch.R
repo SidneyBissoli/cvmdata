@@ -795,12 +795,84 @@ check_ticker <- function(ticker) {
 # schema's `empty_from` records that, with `empty_reason`. Years from
 # it on are handled like the years before `first_year`: refused when
 # asked for explicitly, dropped with a message inside a window.
+#
+# A table can also stop being published while its dataset goes on: the
+# later ZIPs lack its CSV (the 25 legacy FRE tables, last published in
+# 2016, 2022 or 2023). The schema's `last_year` records that. Years
+# after it are handled like the years before `first_year`; `year =
+# NULL` aborts (decision of the owner, 2026-10-31): "the latest year"
+# of a table that ended is not the latest year of the dataset, and
+# returning the table's last year would pass old data as current.
 check_published_years <- function(period, schema) {
   if (is.null(period$year)) {
+    check_ended_latest(schema)
     return(period)
   }
   period <- check_first_year(period, schema)
+  period <- check_last_year(period, schema)
   check_empty_from(period, schema)
+}
+
+check_last_year <- function(period, schema) {
+  last <- schema$last_year
+  if (is.null(last)) {
+    return(period)
+  }
+  last <- as.integer(last)
+  years <- as.integer(period$year)
+  late <- years[years > last]
+  if (!length(late)) {
+    return(period)
+  }
+  if (is.null(period$from) || length(late) == length(years)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+          "published for {.val {late}}."
+        ),
+        "i" = paste(
+          "The CVM's {.val {schema$dataset}} files stopped carrying it",
+          "after {.val {last}}."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  kept <- years[years <= last]
+  cli::cli_inform(c(
+    "i" = paste(
+      "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+      "published after {.val {last}}; reading {.val {kept}}."
+    )
+  ))
+  period$year <- kept
+  period
+}
+
+# `year = NULL` on a table with `last_year`: refuse before any download
+# rather than resolve to the dataset's latest year, whose ZIP lacks the
+# table's CSV.
+check_ended_latest <- function(schema) {
+  last <- schema$last_year
+  if (is.null(last)) {
+    return(invisible(NULL))
+  }
+  last <- as.integer(last)
+  cvmdata_abort(
+    c(
+      paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}} is no longer",
+        "published: the CVM's files stopped carrying it after",
+        "{.val {last}}."
+      ),
+      "i" = paste(
+        "Pass {.arg year} explicitly, e.g. {.code year = {last}};",
+        "it is published for {.val {schema$first_year}}-{.val {last}}."
+      )
+    ),
+    class = "cvmdata_error_input"
+  )
 }
 
 check_first_year <- function(period, schema) {

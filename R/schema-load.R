@@ -295,6 +295,37 @@ validate_temporal_partitioning <- function(s, dataset, table) {
     )
   }
   validate_empty_from(s, dataset, table, fy)
+  validate_last_year(s, dataset, table, fy)
+}
+
+# `last_year` (optional): the last year whose yearly ZIP carries the
+# table's CSV. Later ZIPs lack the member altogether (unlike
+# `empty_from`, where the CSV stays, header only): the 25 legacy FRE
+# tables, last published in 2016, 2022 or 2023 (measured 2026-10-31 on
+# every ZIP 2010-2024). Must be an integer year not before
+# `first_year`, and not before `empty_from` when both are declared.
+validate_last_year <- function(s, dataset, table, first_year) {
+  ly <- s$last_year
+  if (is.null(ly)) {
+    return(invisible(NULL))
+  }
+  ok <- is.numeric(ly) &&
+    length(ly) == 1L &&
+    is.finite(ly) &&
+    ly == as.integer(ly) &&
+    ly >= first_year &&
+    (is.null(s$empty_from) || ly >= s$empty_from)
+  if (!ok) {
+    cvmdata_abort(
+      c(paste(
+        "Schema for {.val {dataset}}/{.val {table}} declares an invalid",
+        "{.field last_year}: must be an integer year not before",
+        "{.field first_year} ({.val {first_year}}) nor {.field empty_from}."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  invisible(NULL)
 }
 
 # `empty_from` (optional): the year from which the CVM publishes the

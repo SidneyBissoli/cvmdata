@@ -1474,9 +1474,9 @@ test_that("cvm_datasets includes fre", {
   expect_true("fre" %in% ds)
 })
 
-test_that("cvm_tables('fre') lists 36 conceptual tables", {
+test_that("cvm_tables('fre') lists 61 conceptual tables", {
   tabs <- cvm_tables("fre")
-  expect_length(tabs, 36L)
+  expect_length(tabs, 61L)
   expected_subset <- c(
     "submissao",
     "auditor",

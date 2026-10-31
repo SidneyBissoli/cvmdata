@@ -189,11 +189,15 @@ issuer_fetch_internal <- function(
   # request is a clean user-input concern rather than a backend HTTP 404
   # (source = "cvm") or a silent empty read (source = "mirror"). Genuine
   # network 404s on years that do exist stay governed by `on_error`.
-  if (
-    !is.null(year) &&
-      identical(schema$temporal_partitioning %||% "none", "yearly")
-  ) {
-    year <- clamp_years_to_first(year, schema)
+  # Same for years after a table stopped being published (`last_year`);
+  # `year = NULL` on such a table aborts (see check_ended_latest()).
+  if (identical(schema$temporal_partitioning %||% "none", "yearly")) {
+    if (is.null(year)) {
+      check_ended_latest(schema)
+    } else {
+      year <- clamp_years_to_first(year, schema)
+      year <- clamp_years_to_last(year, schema)
+    }
   }
 
   if (identical(source, "mirror")) {
@@ -472,6 +476,41 @@ clamp_years_to_first <- function(year, schema) {
     "i" = paste(
       "{.val {schema$dataset}}/{.val {schema$table}} starts at",
       "{.val {first_year}}; ignoring {length(dropped)} earlier",
+      "year{?s}: {.val {dropped}}."
+    )
+  ))
+  kept
+}
+
+# Mirror of clamp_years_to_first() for tables with `last_year`.
+clamp_years_to_last <- function(year, schema) {
+  if (is.null(schema$last_year)) {
+    return(year)
+  }
+  last_year <- as.integer(schema$last_year)
+  too_late <- year > last_year
+  if (!any(too_late)) {
+    return(year)
+  }
+  kept <- year[!too_late]
+  dropped <- sort(unique(year[too_late]))
+  if (!length(kept)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "No requested year exists for",
+          "{.val {schema$dataset}}/{.val {schema$table}}."
+        ),
+        "x" = "Requested: {.val {sort(unique(year))}}.",
+        "i" = "This table ends at {.val {last_year}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  cli::cli_inform(c(
+    "i" = paste(
+      "{.val {schema$dataset}}/{.val {schema$table}} ends at",
+      "{.val {last_year}}; ignoring {length(dropped)} later",
       "year{?s}: {.val {dropped}}."
     )
   ))

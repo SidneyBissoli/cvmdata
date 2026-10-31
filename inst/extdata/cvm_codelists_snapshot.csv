@@ -412,6 +412,35 @@ companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Conselho
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas ao Conselho de Administração
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas à Diretoria
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence à Diretoria e ao Conselho de Administração
+companhias,fre,ativo_imobilizado,pais,Brasil
+companhias,fre,ativo_imobilizado,pais,Chile
+companhias,fre,ativo_imobilizado,pais,El Salvador
+companhias,fre,ativo_imobilizado,pais,Peru
+companhias,fre,ativo_imobilizado,pais,Uruguai
+companhias,fre,ativo_imobilizado,tipo_propriedade,Alugada
+companhias,fre,ativo_imobilizado,tipo_propriedade,Arrendada
+companhias,fre,ativo_imobilizado,tipo_propriedade,Própria
+companhias,fre,ativo_imobilizado,uf,BA
+companhias,fre,ativo_imobilizado,uf,CE
+companhias,fre,ativo_imobilizado,uf,DF
+companhias,fre,ativo_imobilizado,uf,ES
+companhias,fre,ativo_imobilizado,uf,GO
+companhias,fre,ativo_imobilizado,uf,MA
+companhias,fre,ativo_imobilizado,uf,MG
+companhias,fre,ativo_imobilizado,uf,MS
+companhias,fre,ativo_imobilizado,uf,MT
+companhias,fre,ativo_imobilizado,uf,PB
+companhias,fre,ativo_imobilizado,uf,PE
+companhias,fre,ativo_imobilizado,uf,PI
+companhias,fre,ativo_imobilizado,uf,PR
+companhias,fre,ativo_imobilizado,uf,RJ
+companhias,fre,ativo_imobilizado,uf,RS
+companhias,fre,ativo_imobilizado,uf,SC
+companhias,fre,ativo_imobilizado,uf,SP
+companhias,fre,ativo_imobilizado,uf,TO
+companhias,fre,ativo_intangivel,tipo_ativo,Concessões
+companhias,fre,ativo_intangivel,tipo_ativo,Marcas
+companhias,fre,ativo_intangivel,tipo_ativo,Patentes
 companhias,fre,auditor,auditor,AUDITÓR - AUDITORES INDEPENDENTES LTDA
 companhias,fre,auditor,auditor,BAKER TILLY BRASIL RJ AUDITORES INDEPENDENTES LTDA
 companhias,fre,auditor,auditor,BDO RCS Auditores Independentes - Sociedade Simples Limitada
@@ -435,6 +464,32 @@ companhias,fre,auditor,auditor,TATICCA AUDITORES INDEPENDENTES S.S. - EPP
 companhias,fre,auditor,auditor,UHY BENDORAYTES & CIA AUDITORES INDEPENDENTES
 companhias,fre,auditor,auditor,VILLELA E ASSOCIADOS AUDITORIA E CONSULTORIA S/S
 companhias,fre,auditor,tipo_origem_auditor,Nacional
+companhias,fre,auditor_responsavel,cidade,Campinas
+companhias,fre,auditor_responsavel,cidade,Porto Alegre
+companhias,fre,auditor_responsavel,cidade,Ribeirão Preto
+companhias,fre,auditor_responsavel,cidade,São Paulo
+companhias,fre,auditor_responsavel,pais,Brasil
+companhias,fre,auditor_responsavel,responsavel_tecnico,Bruno M. Galvão
+companhias,fre,auditor_responsavel,responsavel_tecnico,Bruno Mattar Galvão
+companhias,fre,auditor_responsavel,responsavel_tecnico,EMERSON LIMA DE MACEDO
+companhias,fre,auditor_responsavel,responsavel_tecnico,Fabio Rodrigo Muralo
+companhias,fre,auditor_responsavel,responsavel_tecnico,Giovani Ricardo Pigatto
+companhias,fre,auditor_responsavel,responsavel_tecnico,Jose Antonio Navarrete
+companhias,fre,auditor_responsavel,responsavel_tecnico,José Antonio de A. Navarrete
+companhias,fre,auditor_responsavel,responsavel_tecnico,Luis Claudio de Oliveira Guerreiro
+companhias,fre,auditor_responsavel,responsavel_tecnico,MAURICIO CARDOSO DE MORAES
+companhias,fre,auditor_responsavel,responsavel_tecnico,Marcos Alexandre Silveira Pupo
+companhias,fre,auditor_responsavel,responsavel_tecnico,Marcos Roberto Bassi
+companhias,fre,auditor_responsavel,responsavel_tecnico,Otávio Ramos Pereira
+companhias,fre,auditor_responsavel,responsavel_tecnico,Rafael Klug
+companhias,fre,auditor_responsavel,responsavel_tecnico,Renato Barbosa Postal
+companhias,fre,auditor_responsavel,responsavel_tecnico,Rodrigo de Camargo
+companhias,fre,auditor_responsavel,responsavel_tecnico,Uilian Dias Castro de Oliveira
+companhias,fre,auditor_responsavel,responsavel_tecnico,Ulysses Duarte Marcelo Magalhaes
+companhias,fre,auditor_responsavel,sigla_uf,RS
+companhias,fre,auditor_responsavel,sigla_uf,SP
+companhias,fre,auditor_responsavel,uf,Rio Grande do Sul
+companhias,fre,auditor_responsavel,uf,São Paulo
 companhias,fre,capital_social,prazo_integralizacao,-
 companhias,fre,capital_social,prazo_integralizacao,07/10/2019
 companhias,fre,capital_social,prazo_integralizacao,10/09/1997
@@ -457,12 +512,47 @@ companhias,fre,capital_social,tipo_capital,Capital Autorizado
 companhias,fre,capital_social,tipo_capital,Capital Emitido
 companhias,fre,capital_social,tipo_capital,Capital Integralizado
 companhias,fre,capital_social,tipo_capital,Capital Subscrito
+companhias,fre,capital_social_aumento,fator_cotacao,R$ por Lote de Mil
+companhias,fre,capital_social_aumento,fator_cotacao,R$ por Unidade
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,AGE
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,AGOE
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Assembleia Geral
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Assembleia Geral Extraordinária
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Assembleia Geral Ordinária
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Assembléia Geral Extraordinária
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Conselho de Administração
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,RCA
+companhias,fre,capital_social_aumento,orgao_deliberacao_aumento,Reunião do Conselho de Administração
+companhias,fre,capital_social_aumento,tipo_subscricao,Sem emissão de ações
+companhias,fre,capital_social_aumento,tipo_subscricao,Subscrição particular
+companhias,fre,capital_social_aumento,tipo_subscricao,Subscrição pública
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe D
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E
+companhias,fre,capital_social_desdobramento,tipo_evento,Desdobramento
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
 companhias,fre,capital_social_titulo_conversivel,titulo_conversivel_acao,NÃO HÁ CONVERSÕES EM AÇÕES
+companhias,fre,direito_acao,conversibilidade,N
+companhias,fre,direito_acao,conversibilidade,S
+companhias,fre,direito_acao,direito_reembolso_capital,S
+companhias,fre,direito_acao,direito_voto,Pleno
+companhias,fre,direito_acao,direito_voto,Restrito
+companhias,fre,direito_acao,direito_voto,Sem Direito
+companhias,fre,direito_acao,especie_acao,Ordinária
+companhias,fre,direito_acao,especie_acao,Preferencial
+companhias,fre,direito_acao,restricao_circulacao,N
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe A
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe A
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe B
@@ -479,6 +569,20 @@ companhias,fre,empregado_local_faixa_etaria,local,Nordeste
 companhias,fre,empregado_local_faixa_etaria,local,Norte
 companhias,fre,empregado_local_faixa_etaria,local,Sudeste
 companhias,fre,empregado_local_faixa_etaria,local,Sul
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Alienação e aquisição de controle societário
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Aquisição de Ações
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Aumento de Capital Social
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Cisão
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Incorporação
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Integralizou
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Reorganização Societára
+companhias,fre,grupo_economico_reestruturacao,evento_societario,Transferência de participação societária
+companhias,fre,grupo_economico_reestruturacao,evento_societario,transferência das ações da Companhia
+companhias,fre,historico_emissor,pais_constituicao_emissor,Brasil
+companhias,fre,historico_emissor,pais_constituicao_emissor,"Grã-Bretanha (Reino Unido, UK)"
+companhias,fre,historico_emissor,requisicao_registro_emissor,N
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,BR
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,GB
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Coordenador)
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Efetivo)
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Suplente)
@@ -510,6 +614,11 @@ companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures
 companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis
 companhias,fre,outro_valor_mobiliario,valor_mobiliario,Letras Financeiras
 companhias,fre,outro_valor_mobiliario,valor_mobiliario,Nota Comercial
+companhias,fre,plano_recompra_classe_acao,escala_cotacao,R$ por Unidade
+companhias,fre,plano_recompra_classe_acao,especie_acao,Ordinária
+companhias,fre,plano_recompra_classe_acao,especie_acao,Preferencial
+companhias,fre,politica_negociacao,orgao_aprovacao,Conselho de Administração
+companhias,fre,politica_negociacao,orgao_aprovacao,Conselho de Administração.
 companhias,fre,posicao_acionaria,acionista_controlador,N
 companhias,fre,posicao_acionaria,acionista_controlador,S
 companhias,fre,posicao_acionaria,nacionalidade,Argentina
@@ -645,6 +754,21 @@ companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor
 companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PF
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PJ
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,escala_cotacao,R$ por Unidade
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,especie_acao,Ordinária
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,especie_acao,Preferencial
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Ações
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,escala_cotacao,R$ por Unidade
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,especie_acao,Ordinária
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Ações
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe A
+companhias,fre,volume_valor_mobiliario,entidade_administradora_mercado,"BM&FBOVESPA S.A. - Bolsa de Valores, Mercadorias e Futuros"
+companhias,fre,volume_valor_mobiliario,escala_cotacao,Reais por ação
+companhias,fre,volume_valor_mobiliario,especie_acao,Ordinária
+companhias,fre,volume_valor_mobiliario,especie_acao,Preferencial
+companhias,fre,volume_valor_mobiliario,mercado_valor_mobiliario,Balcão Organizado
+companhias,fre,volume_valor_mobiliario,mercado_valor_mobiliario,Bolsa
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Ações
 companhias,ipe,ipe,especie,Ata
 companhias,ipe,ipe,especie,Balanço Social
 companhias,ipe,ipe,especie,Boletim de voto a distância

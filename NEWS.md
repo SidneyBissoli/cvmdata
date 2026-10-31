@@ -234,6 +234,29 @@
 
 ## Data coverage
 
+* The 25 legacy `fre` tables are covered: tables the CVM published in
+  the yearly FRE ZIPs from 2010 and then dropped (`endividamento`,
+  `obrigacao`, `distribuicao_dividendos`, `historico_emissor`,
+  `plano_recompra`, `ativo_imobilizado` and 19 more), measured on every
+  ZIP 2010-2024. Twenty end in 2023, the three
+  `capital_social_*_classe_acao` in 2022, and
+  `grupo_economico_reestruturacao` and
+  `valor_mobiliario_tesouraria_ultimo_exercicio` in 2016. Each has a
+  single header across its years. Five have no CVM-published META
+  (`distribuicao_dividendos`, `distribuicao_dividendos_classe_acao`,
+  `endividamento`, `informacao_financeira`, `obrigacao`) and follow the
+  `meta_status: missing` path of the eight current ones. They are read
+  with the corrected reader of this release from the start.
+
+* New schema field `last_year`: the last year whose ZIP carries the
+  table. `cvm_fetch()`, `cvm_versions()` and `issuer_fetch()` refuse a
+  later `year` with `cvmdata_error_input` before downloading, a
+  `from`/`to` window is cut at it with a message, and `year = NULL` on
+  such a table aborts asking for an explicit `year`, rather than
+  resolving to the dataset's latest year (where the table does not
+  exist) or silently to the table's last year (old data passed as
+  current). The mirror ETL no longer schedules the later years.
+
 * Corrected the declared `first_year` for the v0.2 datasets, which had
   been set to 2021 — the year they were first verified — rather than the
   earliest year the CVM directory listing actually serves. `first_year`

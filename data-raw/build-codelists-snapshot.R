@@ -134,6 +134,11 @@ resolve_csv_path <- function(dataset, table, year_lookup) {
       )
       return(NULL)
     }
+    # A table that stopped being published (`last_year`, the legacy FRE
+    # tables) is sampled in its own last year: later ZIPs lack its CSV.
+    if (!is.null(schema$last_year)) {
+      year <- min(year, as.integer(schema$last_year))
+    }
     rt <- if (length(schema$cvm_file_pattern_variants %||% list())) {
       "ind"
     } else {
