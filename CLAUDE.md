@@ -763,7 +763,10 @@ o gerador for revisitado:
 - **Pelo dicionário**: colunas onde `dominio` enumera valores com
   separador `/` ou `|` (capta `S/N`, `PF/PJ`).
 - **Por cardinalidade observada**: colunas `tipo_dados = "varchar"`
-  com `tamanho < 200` e ≤ 50 valores distintos no último ano,
+  com `tamanho < 200` e ≤ 50 valores distintos no último ano (se o ZIP
+  desse ano não traz o CSV — FRE 2026 sem `mercado_estrangeiro` e
+  `titular_valor_mobiliario` —, no último anterior que traz, até 3 anos
+  atrás; desde 2026-10-31),
   EXCLUINDO prefixos: identificadores (`cnpj`, `cd_cvm`, `codigo_cvm`,
   `cep`, `tel`, `ddd`, `cpf`, `id_doc`, `id_documento`, `versao`),
   `^cd_` (códigos contábeis), `^nome_`/`^denom_` (nomes próprios),
@@ -771,6 +774,15 @@ o gerador for revisitado:
   `^bairro`/`^mun($|_)`/`^municipio_` (endereço).
 - **Tabelas `meta_status: missing`**: excluídas (declarar codelist sem
   ancoragem CVM violaria "se vem da CVM, fica como na CVM").
+- **Guarda do `--write`** (2026-10-31): recusa gravar se alguma coluna
+  do snapshot commitado perderia a codelist; `--allow-drop` só quando a
+  CVM aposentou a coluna. Medido no mesmo dia: 5 colunas promovidas por
+  cardinalidade num ano antigo passam de 50 em 2026 (53 a 120 valores:
+  `fca/geral/setor_atividade`, `fre/auditor/auditor`,
+  `fre/capital_social/prazo_integralizacao`,
+  `fre/posicao_acionaria/nacionalidade`,
+  `fre/titulo_exterior/identificacao_valor_mobiliario`) — a regra de um
+  ano só é instável; decisão adiada (amostra em vários anos, §9.2).
 
 ---
 

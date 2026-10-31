@@ -28,7 +28,13 @@
 #
 # Sampling scope: latest year only per dataset. v0.2 may revisit with
 # multi-year coverage; that decision is deferred together with the
-# `first_seen_year` column (CLAUDE.md §9.2).
+# `first_seen_year` column (CLAUDE.md §9.2). A table whose CSV is
+# missing from that year's ZIP is sampled in the latest earlier ZIP
+# that carries it (up to `.MAX_YEARS_BACK` years back).
+#
+# `--write` refuses to drop a (group, dataset, table, campo) present in
+# the committed snapshot; pass `--allow-drop` when the CVM really
+# retired the column.
 
 suppressPackageStartupMessages({
   devtools::load_all(quiet = TRUE)
@@ -44,6 +50,7 @@ suppressPackageStartupMessages({
 
 .MAX_TAMANHO <- 200L # varchar fields wider than this are free text
 .MAX_CARDINALITY <- 50L # hard cap on distinct values for a codelist
+.MAX_YEARS_BACK <- 3L # earlier ZIPs tried when the latest lacks a CSV
 .FREE_TEXT_DOMAINS <- c(
   "Alfanumérico",
   "Numérico",
@@ -146,6 +153,38 @@ resolve_csv_path <- function(dataset, table, year_lookup) {
     ))
   }
   cvmdata:::source_cvm_http_get(schema)
+}
+
+# The CVM sometimes leaves a table's CSV out of the latest yearly ZIP
+# (FRE 2026 lacks mercado_estrangeiro and titular_valor_mobiliario, an
+# export failure). Sampling only that year erased the table's codelists
+# on regeneration, so step back one ZIP at a time while the CSV is
+# missing. Other failures (HTTP, parse) are not retried: retrying would
+# quietly sample a different year for a reason unrelated to the table.
+resolve_csv_path_back <- function(dataset, table, year_lookup) {
+  start <- year_lookup[[dataset]]
+  if (is.null(start) || is.na(start)) {
+    return(resolve_csv_path(dataset, table, year_lookup))
+  }
+  for (back in 0:.MAX_YEARS_BACK) {
+    year_lookup[[dataset]] <- start - back
+    path <- tryCatch(
+      resolve_csv_path(dataset, table, year_lookup),
+      cvmdata_error_zip_member_missing = function(e) "missing"
+    )
+    if (!identical(path, "missing")) {
+      if (back > 0L && !is.null(path)) {
+        cli::cli_alert_warning(
+          "{dataset}/{table}: CSV missing from the {start} ZIP; sampled {start - back}."
+        )
+      }
+      return(path)
+    }
+  }
+  cli::cli_alert_warning(
+    "{dataset}/{table}: CSV missing from the {start - .MAX_YEARS_BACK}-{start} ZIPs."
+  )
+  NULL
 }
 
 # Distinct values for one column in a CSV, ignoring NA / blank tokens.
@@ -302,7 +341,7 @@ build_codelists_snapshot <- function() {
       "Downloading {.val {grp}}/{.val {dataset}}/{.val {table}}..."
     )
     csv_path <- tryCatch(
-      quietly(resolve_csv_path(dataset, table, year_lookup)),
+      quietly(resolve_csv_path_back(dataset, table, year_lookup)),
       error = function(e) {
         cli::cli_alert_warning(
           "Skip {dataset}/{table}: {conditionMessage(e)}"
@@ -403,8 +442,39 @@ cli::cli_bullets(c(
   "*" = "From observed cardinality: {result$card_n}"
 ))
 
+# A regeneration must not erase codelists silently: list every column
+# of the committed snapshot that the new build lacks.
+out <- file.path("inst", "extdata", "cvm_codelists_snapshot.csv")
+codelist_keys <- function(d) {
+  unique(paste(d$group, d$dataset, d$table, d$campo, sep = "/"))
+}
+lost <- if (file.exists(out)) {
+  committed <- readr::read_csv(
+    out,
+    col_types = readr::cols(.default = readr::col_character())
+  )
+  setdiff(codelist_keys(committed), codelist_keys(df))
+} else {
+  character(0L)
+}
+if (length(lost)) {
+  cli::cli_alert_warning(
+    "{length(lost)} column{?s} of the committed snapshot lost {?its/their} codelist:"
+  )
+  cli::cli_bullets(stats::setNames(lost, rep("*", length(lost))))
+} else {
+  cli::cli_alert_success(
+    "No column of the committed snapshot lost its codelist."
+  )
+}
+
 if (write_mode) {
-  out <- file.path("inst", "extdata", "cvm_codelists_snapshot.csv")
+  if (length(lost) && !("--allow-drop" %in% args)) {
+    cli::cli_abort(c(
+      "Refusing to write: {length(lost)} codelist column{?s} would be dropped.",
+      "i" = "A CSV missing upstream is the usual cause; pass {.code --allow-drop} only if the CVM retired the column."
+    ))
+  }
   readr::write_csv(df, out, na = "")
   cli::cli_alert_success("Wrote {.path {out}} ({nrow(df)} rows)")
 } else {
