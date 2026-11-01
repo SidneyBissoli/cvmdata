@@ -132,6 +132,15 @@ test_that("year and from/to are refused on the non-yearly tables", {
   )
 })
 
+test_that("the static ZIP path refuses report_type", {
+  local_prepare_recompra_cache()
+  schema <- cvmdata:::load_schema("recompra_acoes", "quantidades")
+  expect_error(
+    cvmdata:::source_cvm_http_get(schema, report_type = "ind"),
+    class = "cvmdata_error_input"
+  )
+})
+
 test_that("a member missing from the static ZIP raises zip_member_missing", {
   local_prepare_recompra_cache()
   schema <- cvmdata:::load_schema("recompra_acoes", "quantidades")
