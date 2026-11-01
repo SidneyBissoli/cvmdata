@@ -21,20 +21,25 @@ than one group; in that case omitting \code{group} aborts with
 }
 \value{
 A tibble with one row per categorical value, sorted
-alphabetically. Column: \code{value} (character).
+alphabetically. Columns: \code{value} (character), \code{first_seen_year}
+and \code{last_seen_year} (integer): the first and last year the value
+appears in the data. \code{NA} for a value the dictionary enumerates but
+the data never uses, and for tables without yearly files (\code{cad}).
 }
 \description{
 Returns the set of categorical values observed for a single
 \verb{(dataset, table, column)} triple, sourced from the snapshot
 embedded under \code{inst/extdata/cvm_codelists_snapshot.csv}. The
 snapshot is built offline by \code{data-raw/build-codelists-snapshot.R}
-from the CVM open-data CSVs.
+from every published year of the CVM open-data CSVs.
 }
 \details{
 Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
 columns whose dictionary \code{dominio} enumerates values (e.g. \code{S/N},
 \code{PF/PJ}), and \code{varchar} columns with \code{tamanho < 200} and at most
-50 distinct values observed in the latest available year.
+50 distinct values over every published year. The CVM's sector
+classification (\code{fca}/\code{geral}/\code{setor_atividade}, 66 values) is kept
+above that cap on purpose.
 }
 \examples{
 cvm_codelist("cad", "companhias", "sit")
