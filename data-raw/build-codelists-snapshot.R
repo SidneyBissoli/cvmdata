@@ -227,6 +227,14 @@ observe_cvm <- function(dataset, table, columns) {
   schema <- load_schema(dataset, table)
   yearly <- identical(schema$temporal_partitioning %||% "none", "yearly")
   years <- if (yearly) cvm_dataset_years(dataset) else NA_integer_
+  # A table published only in part of its dataset's span (`first_year`;
+  # `last_year`, the legacy FRE tables) is read only in its own years.
+  if (yearly) {
+    years <- years[
+      years >= as.numeric(schema$first_year %||% -Inf) &
+        years <= as.numeric(schema$last_year %||% Inf)
+    ]
+  }
   report_types <- if (length(schema$cvm_file_pattern_variants %||% list())) {
     list("ind", "con")
   } else {

@@ -8,8 +8,8 @@ test_that("cvm_datasets returns every covered dataset", {
   )
 })
 
-test_that("cvm_tables('fre') returns 36 tables", {
-  expect_length(cvm_tables("fre"), 36L)
+test_that("cvm_tables('fre') returns 61 tables (36 current + 25 legacy)", {
+  expect_length(cvm_tables("fre"), 61L)
 })
 
 test_that("cvm_tables errors on non-string dataset arg", {

@@ -49,6 +49,7 @@ table_arguments <- function() {
       yearly = table_is_yearly(s),
       first_year = as.integer(s$first_year %||% NA_integer_),
       empty_from = as.integer(s$empty_from %||% NA_integer_),
+      last_year = as.integer(s$last_year %||% NA_integer_),
       basis = table_has_basis(s),
       reading = table_has_readings(s),
       as_of = table_is_registry(s),
@@ -107,6 +108,7 @@ doc_arguments_by_table <- function() {
   ds_first <- tapply(yearly$first_year, yearly$dataset, min)
   late <- yearly[yearly$first_year > ds_first[yearly$dataset], , drop = FALSE]
   empty <- a[!is.na(a$empty_from), , drop = FALSE]
+  ended <- a[!is.na(a$last_year), , drop = FALSE]
   c(
     paste0(
       "Which arguments apply depends on the table. The rules below are ",
@@ -136,6 +138,15 @@ doc_arguments_by_table <- function() {
         "* Years from which the CVM publishes the file with its header ",
         "only are refused too: ",
         doc_table_years(empty, "empty_from"),
+        "."
+      )
+    },
+    if (nrow(ended)) {
+      paste0(
+        "* Tables the CVM stopped publishing (last year in parentheses) ",
+        "refuse later years and require an explicit `year`, since ",
+        "`year = NULL` would mean the dataset's latest year: ",
+        doc_table_years(ended, "last_year"),
         "."
       )
     },

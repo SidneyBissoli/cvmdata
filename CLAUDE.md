@@ -537,19 +537,30 @@ snapshot do dicionário (o META), NUNCA copiado para o YAML. Medido
 espelho lê por `issuer_fetch(source = "cvm")` em `strict`: coluna
 renomeada pela CVM derruba a rodada (alarme), não entra calada.
 
-8 tabelas FRE têm `meta_status: missing` (sem META oficial CVM):
-`administrador_PCD`, `empregado_PCD`,
+13 tabelas FRE têm `meta_status: missing` (sem META oficial CVM):
+8 vigentes — `administrador_PCD`, `empregado_PCD`,
 `empregado_local_declaracao_genero`, `empregado_local_declaracao_raca`,
 `empregado_posicao_declaracao_genero`,
 `empregado_posicao_declaracao_raca`, `empregado_posicao_faixa_etaria`,
-`empregado_posicao_local`.
+`empregado_posicao_local` — e 5 legadas (até 2023):
+`distribuicao_dividendos`, `distribuicao_dividendos_classe_acao`,
+`endividamento`, `informacao_financeira`, `obrigacao`.
+
+**Tabelas legadas do FRE** (25, desde 2026-10-31): `last_year` no YAML
+= último ZIP anual que traz o CSV (2016, 2022 ou 2023; medido em todos
+os ZIPs 2010–2024, um cabeçalho por tabela). Ano depois dele =
+`cvmdata_error_input`; janela corta com aviso; `year = NULL` = ERRO
+pedindo `year` explícito (decisão do dono 2026-10-31; NÃO devolve o
+último ano da tabela). O ETL não agenda os anos seguintes
+(`mirror_table_years()`).
 
 Schema do YAML por tabela: campos canônicos (`dataset`, `table`,
 `cvm_archive_url_pattern` xor `cvm_file_url_pattern`, `cvm_file_pattern`,
 `cvm_dictionary_url`, `meta_status`, `encoding`, `delimiter`,
 `temporal_partitioning ∈ {none, yearly}`, `first_year`, `empty_from` +
 `empty_reason` (opcionais; ano a partir do qual o CSV vem só com
-cabeçalho, e por quê), `expected_field_count`, `expected_field_names`,
+cabeçalho, e por quê), `last_year` (opcional; último ano cujo ZIP traz
+o CSV — tabelas legadas), `expected_field_count`, `expected_field_names`,
 `transformations`).
 Domínio de `action` em `transformations`: `multiply_by_scale` (requer
 `scale_column:`), `drop`, `keep_latest_version` (aceita `keys: [...]`
