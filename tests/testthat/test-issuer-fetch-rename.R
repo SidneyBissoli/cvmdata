@@ -85,3 +85,29 @@ test_that("fetch engine accepts a vector via the singular `issuer` arg", {
   expect_true(all(filtered$cnpj_cia %in% picks))
   expect_gte(nrow(filtered), length(picks))
 })
+
+test_that("filter_by_issuer matches CNPJ only, in either CNPJ column", {
+  cia <- data.frame(
+    cnpj_cia = c("00.000.000/0001-91", "33.000.167/0001-01"),
+    cd_cvm = c("001023", "009512")
+  )
+  # Punctuated or digits only; a CVM code is not a CNPJ and matches nothing.
+  expect_identical(
+    cvmdata:::filter_by_issuer(cia, "00000000000191")$cd_cvm,
+    "001023"
+  )
+  expect_identical(
+    cvmdata:::filter_by_issuer(cia, "33.000.167/0001-01")$cd_cvm,
+    "009512"
+  )
+  expect_identical(nrow(cvmdata:::filter_by_issuer(cia, "001023")), 0L)
+
+  fre <- data.frame(cnpj_companhia = "00.000.000/0001-91", x = 1L)
+  expect_identical(nrow(cvmdata:::filter_by_issuer(fre, "00000000000191")), 1L)
+
+  # A table without an issuer CNPJ column keeps no row.
+  sem <- data.frame(x = 1:2)
+  out <- cvmdata:::filter_by_issuer(sem, "00000000000191")
+  expect_identical(nrow(out), 0L)
+  expect_identical(names(out), "x")
+})
