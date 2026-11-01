@@ -463,6 +463,17 @@
 
 ## Documentation
 
+* The `itr-dfp` article shows how to compare companies on the CVM's
+  fixed accounts (`st_conta_fixa == "S"`), with what a measurement over
+  every DFP and ITR statement found on 2026-11-01. Within one standard
+  chart, the fixed accounts carry the same name in 99.2% of the
+  companies, and the flag of a company's account changes between years
+  in 0.3-0.4% of cases. Banks and insurers follow other charts, where
+  the same fixed code means something else (`3.01` is revenue from
+  sales for Petrobras and revenue from financial intermediation for
+  Itaú). No argument is added, because the column is already in every
+  statement.
+
 * The data licence is now stated. The CVM publishes every dataset the
   package covers under the Open Data Commons Open Database License
   (ODbL) v1.0; the parquet mirror is a derivative database and is
