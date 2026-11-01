@@ -409,7 +409,12 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 
 Layout dos schemas: `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`
 (`<group>` é o slug CKAN; `"companhias"` na cobertura atual). Datasets
-cobertos vivem no `ROADMAP.md`.
+cobertos vivem no `ROADMAP.md`. Três topologias de download: CSV avulso
+(`none` + `cvm_file_url_pattern`, CAD), ZIP único sem ano (`none` +
+`cvm_archive_url_pattern` sem `{year}`, recompra_acoes) e ZIP anual
+(`yearly` + `{year}`); o `schema-load` recusa `{year}` fora do anual.
+Tabela sem coluna de emissor declara `issuer_via: {table, key}` e é
+filtrada por `cnpj`/`ticker` através da tabela-mãe.
 Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R`.
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para

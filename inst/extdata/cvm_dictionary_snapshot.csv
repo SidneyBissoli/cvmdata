@@ -1076,6 +1076,25 @@ companhias,itr,submissao,dt_refer,DT_REFER,Data de referência do documento,AAAA
 companhias,itr,submissao,id_doc,ID_DOC,Identificador do documento,Numérico,int,,10,0,available
 companhias,itr,submissao,link_doc,LINK_DOC,Endereço para download do documento,Alfanumérico,varchar,121,,,available
 companhias,itr,submissao,versao,VERSAO,Versão do documento,Numérico,smallint,,5,0,available
+companhias,recompra_acoes,intermediarios,id_programa,ID_Programa,,,numeric,,15,0,available
+companhias,recompra_acoes,intermediarios,intermediario,Intermediario,,,varchar,100,,,available
+companhias,recompra_acoes,intermediarios,cnpj_intermediario,CNPJ_Intermediario,,,varchar,18,,,available
+companhias,recompra_acoes,quantidades,classe_acao,Classe_Acao,,,varchar,5,,,available
+companhias,recompra_acoes,quantidades,id_programa,ID_Programa,,,numeric,,15,0,available
+companhias,recompra_acoes,quantidades,quantidade_circulacao,Quantidade_Circulacao,,,numeric,,18,0,available
+companhias,recompra_acoes,quantidades,tipo_acao,Tipo_Acao,,,varchar,13,,,available
+companhias,recompra_acoes,quantidades,quantidade_operacao,Quantidade_Operacao,,,numeric,,18,0,available
+companhias,recompra_acoes,recompra_acoes,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,18,,,available
+companhias,recompra_acoes,recompra_acoes,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available
+companhias,recompra_acoes,recompra_acoes,id_programa,ID_Programa,,,numeric,,15,0,available
+companhias,recompra_acoes,recompra_acoes,quantidade_acoes_ordinarias,Quantidade_Acoes_Ordinarias,,,numeric,,38,0,available
+companhias,recompra_acoes,recompra_acoes,quantidade_acoes_preferenciais,Quantidade_Acoes_Preferenciais,,,numeric,,38,0,available
+companhias,recompra_acoes,recompra_acoes,finalidade_compra,Finalidade_Compra,,,varchar,33,,,available
+companhias,recompra_acoes,recompra_acoes,data_deliberacao,Data_Deliberacao,,,date,10,,,available
+companhias,recompra_acoes,recompra_acoes,motivo,Motivo,,,varchar,250,,,available
+companhias,recompra_acoes,recompra_acoes,data_final_prazo,Data_Final_Prazo,,,date,10,,,available
+companhias,recompra_acoes,recompra_acoes,situacao,Situacao,,,varchar,12,,,available
+companhias,recompra_acoes,recompra_acoes,tipo_operacao,Tipo_Operacao,,,varchar,6,,,available
 companhias,vlmo,consolidado,cnpj_companhia,CNPJ_Companhia,CNPJ da companhia,Alfanumérico,varchar,20,,,available
 companhias,vlmo,consolidado,data_referencia,Data_Referencia,Data de referência do documento,AAAA-MM-DD,date,10,,,available
 companhias,vlmo,consolidado,nome_companhia,Nome_Companhia,Nome da Companhia,Alfanumérico,varchar,100,,,available

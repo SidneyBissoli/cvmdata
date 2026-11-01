@@ -1,0 +1,39 @@
+# Schema: recompra_acoes / intermediarios
+# Brokers (intermediarios) of each buyback program: one row per
+# (ID_Programa, CNPJ_Intermediario), a key unique in the file. No issuer
+# column: a cnpj/ticker filter resolves ID_Programa through
+# recompra_acoes/recompra_acoes.
+#
+# Measured 2026-11-01 on the ZIP of 2026-10-31: 4319 rows, every
+# ID_Programa present in recompra_acoes.
+
+dataset: recompra_acoes
+table: intermediarios
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/DADOS/cia_aberta_recompra_acoes.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "cia_aberta_recompra_acoes_intermediarios.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/META/meta_cia_aberta_recompra_acoes.zip#meta_cia_aberta_recompra_acoes_intermediarios.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: none
+
+# Issuer filter -----------------------------------------------------------
+# No issuer column: cnpj/ticker select the programs in recompra_acoes,
+# and this table keeps the rows of those programs.
+issuer_via:
+  table: recompra_acoes
+  key: id_programa
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 3
+
+# Transformations ------------------------------------------------------
+transformations: []

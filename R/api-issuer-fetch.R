@@ -156,6 +156,53 @@ issuer_fetch <- function(
   )
 }
 
+# A table without an issuer column (`issuer_via` in its YAML) reaches
+# the issuer through a parent table of the same dataset that has one:
+# the issuer selects the parent's rows, and the child keeps the rows
+# whose `key` is among them. Without this, the issuer filter finds no
+# column in the child and returns zero rows (recompra_acoes:
+# intermediarios and quantidades carry only id_programa).
+fetch_via_parent <- function(
+  schema,
+  dataset,
+  table,
+  issuer,
+  year,
+  source,
+  report_type,
+  on_error,
+  validate
+) {
+  via <- schema$issuer_via
+  parent <- issuer_fetch_internal(
+    dataset = dataset,
+    table = via$table,
+    issuer = issuer,
+    year = year,
+    source = source,
+    on_error = on_error,
+    validate = validate
+  )
+  out <- issuer_fetch_internal(
+    dataset = dataset,
+    table = table,
+    issuer = NULL,
+    year = year,
+    source = source,
+    report_type = report_type,
+    on_error = on_error,
+    validate = validate
+  )
+  keep <- out[[via$key]] %in% parent[[via$key]]
+  cvm_attach_metadata(
+    strip_cvm_tbl(out)[keep, , drop = FALSE],
+    source = source,
+    group = schema$group,
+    dataset = dataset,
+    table = table
+  )
+}
+
 # Internal orchestrator. Validates arguments, dispatches per
 # temporal_partitioning, applies schema-declared transformations,
 # filters by issuer, and attaches provenance metadata.
@@ -183,6 +230,20 @@ issuer_fetch_internal <- function(
   }
 
   schema <- load_schema(dataset, table)
+
+  if (!is.null(issuer) && !is.null(schema$issuer_via)) {
+    return(fetch_via_parent(
+      schema,
+      dataset,
+      table,
+      issuer,
+      year = year,
+      source = source,
+      report_type = report_type,
+      on_error = on_error,
+      validate = validate
+    ))
+  }
 
   # Drop explicitly-requested years before the dataset's first published
   # year, for both backends, so a "year before the dataset existed"

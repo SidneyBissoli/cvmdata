@@ -524,7 +524,10 @@ read_cache_max_size <- function() {
 #     `<cache>/raw/<group>/<dataset>/<YYYY>/`, which holds the ZIP,
 #     the sidecar, and any CSV(s) extracted via `unzip()`. mtime
 #     anchor is the upstream ZIP itself.
-#   - Non-partitioned (CAD): the unit is the pair
+#   - Non-partitioned ZIP (recompra_acoes): the unit is the dataset
+#     directory `<cache>/raw/<group>/<dataset>/`, which holds the ZIP,
+#     the sidecar and the CSVs extracted from it.
+#   - Non-partitioned CSV (CAD): the unit is the pair
 #     `{anchor, anchor.etag.rds}`. mtime anchor is the artifact.
 #
 # The `<group>` segment is detected implicitly via the parent-dir
@@ -592,11 +595,15 @@ build_cache_units <- function(raw_root) {
 # Map an anchor path to the unit key under which `build_cache_units()`
 # groups files. For yearly partitionings the key is the year directory
 # (parent of the anchor when that parent's basename looks like a
-# 4-digit year). For non-partitioned datasets the key is the anchor
-# path itself.
+# 4-digit year). For a non-partitioned ZIP the key is its directory,
+# so the extracted CSVs count and go with it. For a non-partitioned CSV
+# the key is the anchor path itself.
 .cache_unit_key <- function(anchor) {
   parent <- dirname(anchor)
-  if (grepl("^[0-9]{4}$", basename(parent))) {
+  if (
+    grepl("^[0-9]{4}$", basename(parent)) ||
+      grepl("\\.zip$", anchor, ignore.case = TRUE)
+  ) {
     parent
   } else {
     anchor

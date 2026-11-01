@@ -117,11 +117,11 @@ schemas behind the same function, not as new fetchers.
 still works and emits a lifecycle warning pointing to `cvm_fetch()`;
 it will be removed in a later release.
 
-## Fetching data — a tour of the 8 issuer datasets
+## Fetching data — a tour of the 9 issuer datasets
 
-The package implements eight datasets in the `companhias` group:
-`cad`, `dfp`, `itr`, `fre` (v0.1) and `cgvn`, `vlmo`, `fca`, `ipe`
-(v0.2). The examples below are marked `eval = FALSE` to keep the
+The package implements nine datasets in the `companhias` group:
+`cad`, `dfp`, `itr`, `fre` (v0.1), `cgvn`, `vlmo`, `fca`, `ipe`
+(v0.2) and `recompra_acoes`. The examples below are marked `eval = FALSE` to keep the
 article fast; copy any of them into your R session as-is.
 
 ### `cad` — company registry
@@ -335,6 +335,23 @@ structures. Use `vlmo` for the **structured** insider movements and
 `ipe` to **discover and locate** the filed documents (and their
 PDFs) in any category. The `ipe-vlmo` article works the overlap
 through end to end.
+
+### `recompra_acoes` — share buyback programs
+
+One row per buyback program a company approved, from 1997 on, in a
+single file without a year: no `year`, no `from`/`to`, no `basis`.
+
+```{r recompra, eval = FALSE}
+programs <- cvm_fetch("recompra_acoes", "recompra_acoes", ticker = "MGLU3")
+brokers <- cvm_fetch("recompra_acoes", "intermediarios", ticker = "MGLU3")
+```
+
+`intermediarios` (the brokers of each program) and `quantidades`
+(share quantities by type and class) have no issuer column, only
+`id_programa`. A `cnpj` or `ticker` on them selects the issuer's
+programs in `recompra_acoes` and keeps the rows of those programs, so
+both calls above describe the same programs. `cnpj_intermediario` is
+the broker's CNPJ, not the issuer's.
 
 ## Selecting issuers
 
