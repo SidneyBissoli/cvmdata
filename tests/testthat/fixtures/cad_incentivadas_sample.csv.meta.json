@@ -2,5 +2,5 @@
   "source_url": "https://dados.cvm.gov.br/dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv",
   "fetched_at": "2026-11-01",
   "files_included": ["cad_cia_incent.csv"],
-  "notes": "35 of the 3570 rows of the file published on 2026-10-31, lines copied byte for byte (ISO-8859-1, original line endings). Picked to cover: every row whose SIT is not CANCELADA (18 ATIVO, 3 FASE OPERACIONAL, 1 empty; 4 of them have DT_CANCEL), the rows of three re-registered companies (04.132.437/0001-30, 46.892.592/0001-02, 16.933.590/0001-45), the first 3 rows with a double quote in a cell and 4 cancelled rows without CD_CVM."
+  "notes": "35 of the 3570 rows of the file published on 2026-10-31, lines copied byte for byte (ISO-8859-1; the CVM's CRLF line endings are stored as LF by git, like cad_sample.csv). Picked to cover: every row whose SIT is not CANCELADA (18 ATIVO, 3 FASE OPERACIONAL, 1 empty; 4 of them have DT_CANCEL), the rows of three re-registered companies (04.132.437/0001-30, 46.892.592/0001-02, 16.933.590/0001-45), the first 3 rows with a double quote in a cell and 4 cancelled rows without CD_CVM."
 }
