@@ -1,8 +1,8 @@
 # Stage 2 — Convert CVM tables to parquet snappy.
 #
 # For each (table, year) pair of the requested dataset, fetches the
-# tibble via cvmdata::issuer_fetch() (warm cache from stage 01) and writes
-# parquet snappy to the ETL workspace, partitioned Hive-style.
+# tibble via cvmdata:::issuer_fetch_internal() (warm cache from stage 01)
+# and writes parquet snappy to the ETL workspace, partitioned Hive-style.
 #
 # Output layout (Sessao 08 of v0.1.0.9000 added `<group>`):
 #   <workspace>/out/parquet/<group>/<dataset>/<table>/year=<YYYY>/part-0.parquet
@@ -59,7 +59,7 @@ workspace <- mirror_workspace()
 options(
   cvmdata.cache_dir = file.path(workspace, "cache"),
   cvmdata.source = "cvm",
-  # The mirror keeps the CVM rows as published; issuer_fetch() runs
+  # The mirror keeps the CVM rows as published; cvm_fetch() runs
   # the filing checks at read time, so mirror users get the warnings.
   cvmdata.check_filings = FALSE
 )
@@ -97,7 +97,7 @@ write_one <- function(tbl, y, rtype) {
   years_arg <- if (is.na(y)) NULL else y
   rt_arg <- if (is.null(rtype)) NULL else rtype
   res <- tryCatch(
-    cvmdata::issuer_fetch(
+    cvmdata:::issuer_fetch_internal(
       dataset,
       tbl,
       year = years_arg,

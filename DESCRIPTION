@@ -35,7 +35,6 @@ Imports:
     DBI,
     duckdb,
     httr2,
-    lifecycle,
     readr,
     rlang,
     tibble,
