@@ -175,6 +175,60 @@ h1 <- cvm_fetch(
 unique(h1$dt_refer)
 ```
 
+## Workflow 3 — Comparing companies: the CVM's fixed accounts
+
+Each statement row carries `st_conta_fixa`. `"S"` marks an account of
+the CVM's standard chart, the same in every company that follows the
+chart. `"N"` marks an account the company opened under it. To compare
+companies, keep the fixed accounts. The package adds no argument for
+this, because the column is already there:
+
+```{r workflow-3-fetch}
+dre <- cvm_fetch(
+  "dfp", "dre",
+  cnpj = c("33.000.167/0001-01", "47.960.950/0001-21", "60.872.504/0001-23"),
+  year = 2024,
+  basis = "con"
+)
+fixas <- dre[dre$st_conta_fixa == "S" & dre$ordem_exerc == "ÚLTIMO", ]
+fixas[fixas$cd_conta == "3.01", c("denom_cia", "cd_conta", "ds_conta")]
+```
+
+The output shows the caveat. The CVM has more than one standard chart:
+one for companies in general, others for banks and for insurers. Under
+`3.01`, Petrobras and Magazine Luiza report the revenue from sales and
+Itaú Unibanco reports the revenue from financial intermediation. The
+code is fixed in all three charts, but it does not mean the same thing
+in all of them. The CVM does not publish which chart a company follows.
+`setor_ativ` in `cvm_fetch("cad", "companhias")` tells banks and
+insurers apart.
+
+What the fixed accounts are worth, measured on 2026-11-01 on the
+mirror. The measurement covered every DFP (2010-2025) and ITR
+(2011-2025) statement table, both bases and the current-exercise
+column, about 21 million rows from about 1,200 companies:
+
+* **Comparable within a chart.** A fixed account used by 20 or more
+  companies carries one name for 99.2% of them on average (DFP
+  consolidated 2024). Where the names differ, the minority is a bank
+  or an insurer: `1.02.03` is *Imobilizado* for 450 companies and a
+  class of financial assets for 17. A non-fixed code carries a median
+  of 45 different names across companies. It is not a basis for
+  comparison.
+* **Stable within a company.** For the same company and account the
+  flag changes between years in 0.3% of the pairs (DFP) and 0.4%
+  (ITR). The changes cluster in a few years (2018, 2020, 2023), when
+  the chart itself was revised.
+* **Small.** Accounts fixed for at least 95% of the companies that
+  use them number about 51-72 in the consolidated balance sheet
+  assets (`bpa`), 100-130 in liabilities (`bpp`), 25-28 in the income
+  statement (`dre`) and 10 in the cash flow (`dfc_mi`). Of the 467
+  companies in the 2024 consolidated DFP, 448 carry every one of them.
+  The 19 that do not are 15 banks, 2 insurers and 2 holding companies.
+* **The top of the tree.** Every level-1 account (`1`, `2`, `3`...)
+  is fixed, and 97.5% of level-2 rows are. The share falls to about
+  70% from level 4 down, where companies open their own accounts.
+
 ## Where to read next
 
 * **issuer-fetch** — argument reference and the full `cnpj` /
