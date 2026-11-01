@@ -346,7 +346,7 @@ many units were removed and how much disk it freed.
   serves them, and which datasets each `cvmdata` release unlocks.
 * **issuer-fetch** — argument-level deep dive on `cvm_fetch()`,
   including `cnpj` / `ticker` / `year` / `from` / `to` / `basis` /
-  `validate` / `on_error`.
+  `on_error`.
 * **itr-dfp** — end-to-end workflows on annual and quarterly
   financial statements.
 * **data-defects** — known CVM publication quirks (and other source

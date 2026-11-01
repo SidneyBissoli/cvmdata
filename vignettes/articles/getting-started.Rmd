@@ -188,11 +188,10 @@ auditor <- cvm_fetch(
   year = 2024
 )
 
-# Genuine empty table is fine — FRE/empregado_PCD has meta_status: missing
+# A table without published META reads like any other
 pcd <- cvm_fetch(
   "fre", "empregado_PCD",
-  year = 2024,
-  validate = "warn"  # or "strict" / "skip"
+  year = 2024
 )
 ```
 
@@ -469,12 +468,10 @@ ones most likely to appear in user code:
 | `cvmdata_error_input`                   | User-supplied argument failed validation.                |
 | `cvmdata_error_input_ambiguous`         | A `(dataset, table)` slug exists in more than one group; pass `group =`. |
 | `cvmdata_error_http`                    | HTTP fetch failed.                                       |
-| `cvmdata_error_parse`                   | Field-count or field-name validation failed under `validate = "strict"`. |
-| `cvmdata_error_meta_unavailable`        | `meta_status: missing` table called under `validate = "strict"`. |
+| `cvmdata_error_parse`                   | A file departs from its schema (field count or names) under `on_error = "abort"`. |
 | `cvmdata_warn_year_fallback`            | `year = NULL` fell back to an earlier year (issuer absent in the latest). |
 | `cvmdata_warn_partial_failure`          | Multi-year batch under `on_error = "warn"` had some years fail. |
-| `cvmdata_warn_validation`               | Validation divergence under `validate = "warn"`.         |
-| `cvmdata_warn_meta_unavailable`         | `meta_status: missing` table under `validate = "warn"`.  |
+| `cvmdata_warn_validation`               | A file departs from its schema, read under `on_error = "warn"`. |
 | `cvmdata_warn_eviction`                 | LRU eviction removed cache units to honour the size limit. |
 
 Catch them with `tryCatch()` or `withCallingHandlers()` keyed on the

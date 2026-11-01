@@ -77,15 +77,15 @@
 #' @param source One of `"mirror"` (parquet via DuckDB) or `"cvm"`
 #'   (CVM Open Data Portal). `NULL` (default) resolves to the active
 #'   backend via [cvm_source_get()].
-#' @param on_error One of `"abort"` (default), `"warn"` or `"silent"`.
-#'   Controls behaviour on HTTP failures when several yearly files are
-#'   read (`year` with more than one element, or a `from`/`to` window
-#'   spanning several years). With `"warn"`, the failed years are
-#'   skipped and a `cvmdata_warn_partial_failure` warning lists them;
-#'   with `"silent"`, they are skipped silently; with `"abort"`, the
-#'   first failure aborts the call. Total failure always aborts.
-#' @param validate One of `"strict"` (default), `"warn"` or `"skip"`.
-#'   Controls schema validation strictness at parse time.
+#' @param on_error `"abort"` (default) or `"warn"`: what to do when a
+#'   CVM file departs from the table's schema (field count or names) or
+#'   one of several yearly files fails to download. `"abort"` stops with
+#'   a classed error (`cvmdata_error_parse` or `cvmdata_error_http`)
+#'   for `tryCatch()`. `"warn"` reads the file anyway, skips the failed
+#'   years and returns the rest, with a `cvmdata_warn_validation` or
+#'   `cvmdata_warn_partial_failure` warning; wrap the call in
+#'   `suppressWarnings()` to silence them. A call where nothing could be
+#'   read always aborts.
 #' @param ... Reserved for forward compatibility. Currently no extra
 #'   arguments are accepted; passing any aborts with
 #'   `cvmdata_error_input`.
@@ -245,13 +245,13 @@ cvm_fetch <- function(
   reading = NULL,
   source = NULL,
   on_error = "abort",
-  validate = "strict",
   ...
 ) {
   dots <- list(...)
   if (length(dots) > 0L) {
     nms <- names(dots) %||% rep("", length(dots))
     nms[!nzchar(nms)] <- "<unnamed>"
+    abort_if_validate_arg(nms, "cvm_fetch")
     cvmdata_abort(
       c(
         "Unknown argument{?s}: {.arg {nms}}.",
@@ -269,6 +269,7 @@ cvm_fetch <- function(
     source <- cvm_source_get()
   }
   source <- rlang::arg_match0(source, c("mirror", "cvm"))
+  modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
   basis <- check_basis(basis, schema)
@@ -294,8 +295,8 @@ cvm_fetch <- function(
       year = years,
       source = source,
       report_type = b,
-      on_error = on_error,
-      validate = validate
+      on_error = modes$on_error,
+      validate = modes$validate
     )
     strip_cvm_tbl(out)
   }
@@ -341,6 +342,38 @@ cvm_fetch <- function(
 # `basis` ---------------------------------------------------------------
 
 .basis_values <- c("ind", "con")
+
+# `on_error` is the single error strategy of the public fetchers
+# (owner's decision, 2026-11-01: it absorbed `validate`; the silent modes
+# are gone). Returns the two modes the engine takes: "abort" stops on a
+# schema mismatch (`validate = "strict"`) and on a failed yearly file;
+# "warn" warns on both and returns what was read.
+error_modes <- function(on_error) {
+  on_error <- rlang::arg_match0(on_error, c("abort", "warn"))
+  list(
+    on_error = on_error,
+    validate = if (identical(on_error, "abort")) "strict" else "warn"
+  )
+}
+
+# `validate` was merged into `on_error` (2026-11-01). A call that still
+# passes it gets the migration, not the generic unknown-argument error.
+abort_if_validate_arg <- function(nms, fn) {
+  if (!"validate" %in% nms) {
+    return(invisible())
+  }
+  cvmdata_abort(
+    c(
+      "{.fn {fn}} no longer takes {.arg validate}.",
+      "i" = paste(
+        "It was merged into {.arg on_error}: {.code \"abort\"} (default)",
+        "stops on a file that departs from the schema, {.code \"warn\"}",
+        "reads it with a warning."
+      )
+    ),
+    class = "cvmdata_error_input"
+  )
+}
 
 # Validate `basis` against the table. Tables with ind/con variants
 # require it (no default: many issuers file only individual
