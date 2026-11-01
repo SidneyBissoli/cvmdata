@@ -28,7 +28,17 @@
   "^id_",
   "^protocolo"
 )
-.identifier_exact <- c("caixa_postal", "tel", "versao")
+# `fax`, `fax_resp` and `tel_resp` are the cad phone numbers the META
+# declares numeric (measured on 2026-11-01: the only phone columns of
+# the dictionary not read as character).
+.identifier_exact <- c(
+  "caixa_postal",
+  "fax",
+  "fax_resp",
+  "tel",
+  "tel_resp",
+  "versao"
+)
 
 # Classify CSV column names as identifiers (forced to character).
 # `csv_names` may be in any case; matching is on tolower(.) against the
