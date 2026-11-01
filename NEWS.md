@@ -262,6 +262,22 @@
 
 ## Bug fixes
 
+* `cvm_codelist()` listed free text as categories and missed values in
+  use. The codelists were sampled from the latest year alone, and in
+  May that was a 2026 with five months of filings (one DFP). Measured
+  on 2026-11-01 over every year: 13 of the 178 columns were free text
+  (auditor names, hand-written nationalities, download links; 66 to
+  14,013 distinct values) and 49 lacked values (the foreign market
+  country listed 5 of its 31). The snapshot now spans every published
+  year: 12 free-text columns and the `escala_moeda` columns (dropped by
+  the scale transformation, never returned) leave, 10 columns enter, and
+  the 49 are complete. The CVM's sector classification
+  (`fca`/`geral`/`setor_atividade`, 66 values) stays a codelist above
+  the 50-value cap on purpose. `cvm_codelist()` gains `first_seen_year`
+  and `last_seen_year`, the first and last year each value appears in.
+  A rate that a quoting defect had filed as a contractual position
+  ("5,13% a.a.") is gone.
+
 * The CSV reader lost whole rows and values without a word, and now
   keeps them. Three defects, measured on 2026-10-25:
   - **Quotes.** The CVM does not quote: a `"` in its files is a

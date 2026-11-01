@@ -1,823 +1,1054 @@
-group,dataset,table,campo,value
-companhias,cad,companhias,categ_reg,Categoria A
-companhias,cad,companhias,categ_reg,Categoria B
-companhias,cad,companhias,controle_acionario,ESTATAL
-companhias,cad,companhias,controle_acionario,ESTATAL HOLDING
-companhias,cad,companhias,controle_acionario,ESTRANGEIRO
-companhias,cad,companhias,controle_acionario,ESTRANGEIRO HOLDING
-companhias,cad,companhias,controle_acionario,PRIVADO
-companhias,cad,companhias,controle_acionario,PRIVADO HOLDING
-companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 03/78
-companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 229/95
-companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTRUÇÃO CVM Nº 361/02
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO (Cia Incentivada)
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO C/BASE INSTR. CVM 287/98
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO OFICIO COM BASE INSTR. CVM 29/84
-companhias,cad,companhias,motivo_cancel,CANCELAMENTO VOLUNTÁRIO
-companhias,cad,companhias,motivo_cancel,ELISÃO DEVIDO A CANCELAMENTO DO RPJ PELO BACEN
-companhias,cad,companhias,motivo_cancel,ELISÃO POR EXTINÇÃO DA CIA
-companhias,cad,companhias,motivo_cancel,ELISÃO POR INCORPORAÇÃO
-companhias,cad,companhias,motivo_cancel,ELISÃO POR LIQUIDAÇÃO
-companhias,cad,companhias,motivo_cancel,ELISÃO POR TRANSFORMAÇÃO
-companhias,cad,companhias,motivo_cancel,ENQUADRAMENTO EXCEÇÕES DA INSTR. CVM 03/78
-companhias,cad,companhias,motivo_cancel,ENQUADRAMENTO HIPÓTESE ESTAB P/ COML EM 29/10/79
-companhias,cad,companhias,motivo_cancel,INCORPORAÇÃO
-companhias,cad,companhias,motivo_cancel,LIQUIDAÇÃO EXTRAJUDICIAL
-companhias,cad,companhias,motivo_cancel,Migração de Registro (Resolução n° 60)
-companhias,cad,companhias,pais,BRASIL
-companhias,cad,companhias,pais,EGITO
-companhias,cad,companhias,pais_resp,BRASIL
-companhias,cad,companhias,sit,ATIVO
-companhias,cad,companhias,sit,CANCELADA
-companhias,cad,companhias,sit,SUSPENSO(A) - DECISÃO ADM
-companhias,cad,companhias,tp_merc,BALCÃO NÃO ORGANIZADO
-companhias,cad,companhias,tp_merc,BALCÃO ORGANIZADO
-companhias,cad,companhias,tp_merc,BOLSA
-companhias,cad,companhias,tp_resp,DIRETOR DE RELAÇÕES COM INVESTIDORES
-companhias,cgvn,praticas,capitulo,Acionistas
-companhias,cgvn,praticas,capitulo,Conselho de Administração
-companhias,cgvn,praticas,capitulo,Diretoria
-companhias,cgvn,praticas,capitulo,Ética e Conflito de Interesses
-companhias,cgvn,praticas,capitulo,Órgãos de Fiscalização e Controle
-companhias,cgvn,praticas,pratica_adotada,Não
-companhias,cgvn,praticas,pratica_adotada,Não se Aplica
-companhias,cgvn,praticas,pratica_adotada,Parcialmente
-companhias,cgvn,praticas,pratica_adotada,Sim
-companhias,cgvn,praticas,principio,Acordos de Acionistas
-companhias,cgvn,praticas,principio,Assembleia Geral
-companhias,cgvn,praticas,principio,Atribuições
-companhias,cgvn,praticas,principio,Auditoria Independente
-companhias,cgvn,praticas,principio,Auditoria Interna
-companhias,cgvn,praticas,principio,Avaliação do Conselho e dos Conselheiros
-companhias,cgvn,praticas,principio,Avaliação do Diretor-Presidente e da Diretoria
-companhias,cgvn,praticas,principio,Comitê de Auditoria
-companhias,cgvn,praticas,principio,Composição do Conselho de Administração
-companhias,cgvn,praticas,principio,Conflito de Interesses
-companhias,cgvn,praticas,principio,Conselho Fiscal
-companhias,cgvn,praticas,principio,Código de Conduta e Canal de Denúncias
-companhias,cgvn,praticas,principio,Estrutura Acionária
-companhias,cgvn,praticas,principio,"Gerenciamento de Riscos, Controles Internos e Integridade/Conformidade (Compliance)"
-companhias,cgvn,praticas,principio,Indicação dos Diretores
-companhias,cgvn,praticas,principio,Integração de Novos Conselheiros
-companhias,cgvn,praticas,principio,Manifestação da Administração nas OPAs
-companhias,cgvn,praticas,principio,Medidas de Defesa
-companhias,cgvn,praticas,principio,Mudança de Controle
-companhias,cgvn,praticas,principio,Planejamento da Sucessão
-companhias,cgvn,praticas,principio,Política de Destinação de Resultados
-companhias,cgvn,praticas,principio,Política de Negociação de Valores Mobiliários
-companhias,cgvn,praticas,principio,Política sobre Contribuições e Doações
-companhias,cgvn,praticas,principio,Presidente do Conselho
-companhias,cgvn,praticas,principio,Regimento Interno do Conselho de Administração
-companhias,cgvn,praticas,principio,Remuneração da Diretoria
-companhias,cgvn,praticas,principio,Remuneração dos Conselheiros de Administração
-companhias,cgvn,praticas,principio,Reuniões do Conselho de Administração
-companhias,cgvn,praticas,principio,Sociedades de Economia Mista
-companhias,cgvn,praticas,principio,Transações com Partes Relacionadas
-companhias,cgvn,submissao,categoria,Código de Governança
-companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152086
-companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152549
-companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152593
-companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152596
-companhias,cgvn,submissao,link_download,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=152598
-companhias,dfp,bpa,escala_moeda,MIL
-companhias,dfp,bpa,moeda,REAL
-companhias,dfp,bpa,ordem_exerc,PENÚLTIMO
-companhias,dfp,bpa,ordem_exerc,ÚLTIMO
-companhias,dfp,bpa,st_conta_fixa,N
-companhias,dfp,bpa,st_conta_fixa,S
-companhias,dfp,bpp,escala_moeda,MIL
-companhias,dfp,bpp,moeda,REAL
-companhias,dfp,bpp,ordem_exerc,PENÚLTIMO
-companhias,dfp,bpp,ordem_exerc,ÚLTIMO
-companhias,dfp,bpp,st_conta_fixa,N
-companhias,dfp,bpp,st_conta_fixa,S
-companhias,dfp,dfc_md,st_conta_fixa,N
-companhias,dfp,dfc_md,st_conta_fixa,S
-companhias,dfp,dfc_mi,escala_moeda,MIL
-companhias,dfp,dfc_mi,moeda,REAL
-companhias,dfp,dfc_mi,ordem_exerc,PENÚLTIMO
-companhias,dfp,dfc_mi,ordem_exerc,ÚLTIMO
-companhias,dfp,dfc_mi,st_conta_fixa,N
-companhias,dfp,dfc_mi,st_conta_fixa,S
-companhias,dfp,dmpl,coluna_df,Capital Social Integralizado
-companhias,dfp,dmpl,coluna_df,Lucros ou Prejuízos Acumulados
-companhias,dfp,dmpl,coluna_df,Outros Resultados Abrangentes
-companhias,dfp,dmpl,coluna_df,Patrimônio Líquido
-companhias,dfp,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria"
-companhias,dfp,dmpl,coluna_df,Reservas de Lucro
-companhias,dfp,dmpl,escala_moeda,MIL
-companhias,dfp,dmpl,moeda,REAL
-companhias,dfp,dmpl,ordem_exerc,PENÚLTIMO
-companhias,dfp,dmpl,ordem_exerc,ÚLTIMO
-companhias,dfp,dmpl,st_conta_fixa,N
-companhias,dfp,dmpl,st_conta_fixa,S
-companhias,dfp,dra,escala_moeda,MIL
-companhias,dfp,dra,moeda,REAL
-companhias,dfp,dra,ordem_exerc,PENÚLTIMO
-companhias,dfp,dra,ordem_exerc,ÚLTIMO
-companhias,dfp,dra,st_conta_fixa,N
-companhias,dfp,dra,st_conta_fixa,S
-companhias,dfp,dre,escala_moeda,MIL
-companhias,dfp,dre,moeda,REAL
-companhias,dfp,dre,ordem_exerc,PENÚLTIMO
-companhias,dfp,dre,ordem_exerc,ÚLTIMO
-companhias,dfp,dre,st_conta_fixa,N
-companhias,dfp,dre,st_conta_fixa,S
-companhias,dfp,dva,escala_moeda,MIL
-companhias,dfp,dva,moeda,REAL
-companhias,dfp,dva,ordem_exerc,PENÚLTIMO
-companhias,dfp,dva,ordem_exerc,ÚLTIMO
-companhias,dfp,dva,st_conta_fixa,N
-companhias,dfp,dva,st_conta_fixa,S
-companhias,dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras
-companhias,dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente
-companhias,dfp,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente
-companhias,dfp,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)"
-companhias,dfp,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)"
-companhias,dfp,parecer,tp_parecer_decl,Relatório do Auditor Independente
-companhias,dfp,parecer,tp_relat_aud,Sem Ressalva
-companhias,dfp,submissao,categ_doc,DFP
-companhias,dfp,submissao,link_doc,http://www.rad.cvm.gov.br/ENETCONSULTA/frmDownloadDocumento.aspx?CodigoInstituicao=1&NumeroSequencialDocumento=156875
-companhias,fca,auditor,origem_auditor,Nacional
-companhias,fca,canal_divulgacao,sigla_uf,BA
-companhias,fca,canal_divulgacao,sigla_uf,BR
-companhias,fca,canal_divulgacao,sigla_uf,CE
-companhias,fca,canal_divulgacao,sigla_uf,DF
-companhias,fca,canal_divulgacao,sigla_uf,ES
-companhias,fca,canal_divulgacao,sigla_uf,GO
-companhias,fca,canal_divulgacao,sigla_uf,MA
-companhias,fca,canal_divulgacao,sigla_uf,MG
-companhias,fca,canal_divulgacao,sigla_uf,MS
-companhias,fca,canal_divulgacao,sigla_uf,MT
-companhias,fca,canal_divulgacao,sigla_uf,PA
-companhias,fca,canal_divulgacao,sigla_uf,PE
-companhias,fca,canal_divulgacao,sigla_uf,PI
-companhias,fca,canal_divulgacao,sigla_uf,PR
-companhias,fca,canal_divulgacao,sigla_uf,RJ
-companhias,fca,canal_divulgacao,sigla_uf,RN
-companhias,fca,canal_divulgacao,sigla_uf,RS
-companhias,fca,canal_divulgacao,sigla_uf,SC
-companhias,fca,canal_divulgacao,sigla_uf,SE
-companhias,fca,canal_divulgacao,sigla_uf,SP
-companhias,fca,canal_divulgacao,sigla_uf,TO
-companhias,fca,dri,pais,Brasil
-companhias,fca,dri,sigla_uf,BA
-companhias,fca,dri,sigla_uf,CE
-companhias,fca,dri,sigla_uf,DF
-companhias,fca,dri,sigla_uf,ES
-companhias,fca,dri,sigla_uf,GO
-companhias,fca,dri,sigla_uf,MG
-companhias,fca,dri,sigla_uf,MT
-companhias,fca,dri,sigla_uf,PA
-companhias,fca,dri,sigla_uf,PE
-companhias,fca,dri,sigla_uf,PR
-companhias,fca,dri,sigla_uf,RJ
-companhias,fca,dri,sigla_uf,RS
-companhias,fca,dri,sigla_uf,SC
-companhias,fca,dri,sigla_uf,SE
-companhias,fca,dri,sigla_uf,SP
-companhias,fca,dri,tipo_responsavel,Administrador Especial Temporário
-companhias,fca,dri,tipo_responsavel,Administrador Judicial
-companhias,fca,dri,tipo_responsavel,Diretor de Relações com Investidores
-companhias,fca,dri,tipo_responsavel,Liquidante
-companhias,fca,dri,tipo_responsavel,Representante Legal (para emissores estrangeiros)
-companhias,fca,dri,uf,Bahia
-companhias,fca,dri,uf,Ceará
-companhias,fca,dri,uf,Distrito Federal
-companhias,fca,dri,uf,Espírito Santo
-companhias,fca,dri,uf,Goiás
-companhias,fca,dri,uf,Mato Grosso
-companhias,fca,dri,uf,Minas Gerais
-companhias,fca,dri,uf,Paraná
-companhias,fca,dri,uf,Pará
-companhias,fca,dri,uf,Pernambuco
-companhias,fca,dri,uf,Rio Grande do Sul
-companhias,fca,dri,uf,Rio de Janeiro
-companhias,fca,dri,uf,Santa Catarina
-companhias,fca,dri,uf,Sergipe
-companhias,fca,dri,uf,São Paulo
-companhias,fca,endereco,pais,Bermudas
-companhias,fca,endereco,pais,Brasil
-companhias,fca,endereco,pais,Holanda
-companhias,fca,endereco,sigla_uf,BA
-companhias,fca,endereco,sigla_uf,CE
-companhias,fca,endereco,sigla_uf,DF
-companhias,fca,endereco,sigla_uf,ES
-companhias,fca,endereco,sigla_uf,GO
-companhias,fca,endereco,sigla_uf,MA
-companhias,fca,endereco,sigla_uf,MG
-companhias,fca,endereco,sigla_uf,MS
-companhias,fca,endereco,sigla_uf,MT
-companhias,fca,endereco,sigla_uf,PA
-companhias,fca,endereco,sigla_uf,PE
-companhias,fca,endereco,sigla_uf,PI
-companhias,fca,endereco,sigla_uf,PR
-companhias,fca,endereco,sigla_uf,RJ
-companhias,fca,endereco,sigla_uf,RN
-companhias,fca,endereco,sigla_uf,RS
-companhias,fca,endereco,sigla_uf,SC
-companhias,fca,endereco,sigla_uf,SE
-companhias,fca,endereco,sigla_uf,SP
-companhias,fca,endereco,sigla_uf,TO
-companhias,fca,endereco,tipo_endereco,Endereço da Sede
-companhias,fca,endereco,tipo_endereco,Endereço no Exterior
-companhias,fca,endereco,tipo_endereco,Endereço para Correspondência
-companhias,fca,escriturador,cidade,Belo Horizonte
-companhias,fca,escriturador,cidade,Fortaleza
-companhias,fca,escriturador,cidade,Osasco
-companhias,fca,escriturador,cidade,Rio de Janeiro
-companhias,fca,escriturador,cidade,SAO PAULO
-companhias,fca,escriturador,cidade,São Paulo
-companhias,fca,escriturador,pais,Antígua e Barbuda
-companhias,fca,escriturador,pais,Brasil
-companhias,fca,escriturador,sigla_uf,CE
-companhias,fca,escriturador,sigla_uf,MG
-companhias,fca,escriturador,sigla_uf,RJ
-companhias,fca,escriturador,sigla_uf,SP
-companhias,fca,geral,categoria_registro_cvm,Categoria A
-companhias,fca,geral,categoria_registro_cvm,Categoria B
-companhias,fca,geral,especie_controle_acionario,Estatal
-companhias,fca,geral,especie_controle_acionario,Estatal Holding
-companhias,fca,geral,especie_controle_acionario,Estrangeiro
-companhias,fca,geral,especie_controle_acionario,Estrangeiro Holding
-companhias,fca,geral,especie_controle_acionario,Privado
-companhias,fca,geral,especie_controle_acionario,Privado Holding
-companhias,fca,geral,pais_custodia_valores_mobiliarios,Bermudas
-companhias,fca,geral,pais_custodia_valores_mobiliarios,Brasil
-companhias,fca,geral,pais_custodia_valores_mobiliarios,Estados Unidos
-companhias,fca,geral,pais_custodia_valores_mobiliarios,Samoa Ocidental
-companhias,fca,geral,pais_origem,Bermudas
-companhias,fca,geral,pais_origem,Brasil
-companhias,fca,geral,pais_origem,Holanda
-companhias,fca,geral,setor_atividade,"Agricultura (Açúcar, Álcool e Cana)"
-companhias,fca,geral,setor_atividade,Alimentos
-companhias,fca,geral,setor_atividade,Arrendamento Mercantil
-companhias,fca,geral,setor_atividade,Bancos
-companhias,fca,geral,setor_atividade,Bolsas de Valores/Mercadorias e Futuros
-companhias,fca,geral,setor_atividade,Brinquedos e Lazer
-companhias,fca,geral,setor_atividade,Comunicação e Informática
-companhias,fca,geral,setor_atividade,Comércio (Atacado e Varejo)
-companhias,fca,geral,setor_atividade,"Construção Civil, Mat. Constr. e Decoração"
-companhias,fca,geral,setor_atividade,Educação
-companhias,fca,geral,setor_atividade,Embalagens
-companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Agricultura (Açúcar, Álcool e Cana)"
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Alimentos
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Bancos
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Brinquedos e Lazer
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comunicação e Informática
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comércio (Atacado e Varejo)
-companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração"
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Crédito Imobiliário
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Educação
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Energia Elétrica
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Extração Mineral
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Intermediação Financeira
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Metalurgia e Siderurgia
-companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Máqs., Equip., Veíc. e Peças"
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Petróleo e Gás
-companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Saneamento, Serv. Água e Gás"
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Sem Setor Principal
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Serviços Transporte e Logística
-companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Telecomunicações
-companhias,fca,geral,setor_atividade,Energia Elétrica
-companhias,fca,geral,setor_atividade,Extração Mineral
-companhias,fca,geral,setor_atividade,Farmacêutico e Higiene
-companhias,fca,geral,setor_atividade,Hospedagem e Turismo
-companhias,fca,geral,setor_atividade,Intermediação Financeira
-companhias,fca,geral,setor_atividade,Metalurgia e Siderurgia
-companhias,fca,geral,setor_atividade,"Máquinas, Equipamentos, Veículos e Peças"
-companhias,fca,geral,setor_atividade,Papel e Celulose
-companhias,fca,geral,setor_atividade,Petroquímicos e Borracha
-companhias,fca,geral,setor_atividade,Petróleo e Gás
-companhias,fca,geral,setor_atividade,"Saneamento, Serv. Água e Gás"
-companhias,fca,geral,setor_atividade,Securitização de Recebíveis
-companhias,fca,geral,setor_atividade,Seguradoras e Corretoras
-companhias,fca,geral,setor_atividade,Serviços Transporte e Logística
-companhias,fca,geral,setor_atividade,Serviços médicos
-companhias,fca,geral,setor_atividade,Telecomunicações
-companhias,fca,geral,setor_atividade,Têxtil e Vestuário
-companhias,fca,geral,situacao_emissor,Em Falência
-companhias,fca,geral,situacao_emissor,Em Liquidação Extrajudicial
-companhias,fca,geral,situacao_emissor,Em Recuperação Extrajudicial
-companhias,fca,geral,situacao_emissor,Em Recuperação Judicial ou Equivalente
-companhias,fca,geral,situacao_emissor,Fase Operacional
-companhias,fca,geral,situacao_emissor,Fase Pré-Operacional
-companhias,fca,geral,situacao_emissor,Paralisada
-companhias,fca,geral,situacao_registro_cvm,Ativo
-companhias,fca,geral,situacao_registro_cvm,Cancelado
-companhias,fca,geral,situacao_registro_cvm,Suspenso
-companhias,fca,pais_estrangeiro_negociacao,pais,Brasil
-companhias,fca,pais_estrangeiro_negociacao,pais,Espanha
-companhias,fca,pais_estrangeiro_negociacao,pais,Estados Unidos
-companhias,fca,pais_estrangeiro_negociacao,pais,Holanda
-companhias,fca,pais_estrangeiro_negociacao,pais,Luxemburgo
-companhias,fca,submissao,categ_doc,FCA
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Ordinária Classe A
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe A
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe B
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe C
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe R
-companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe U
-companhias,fca,valor_mobiliario,composicao_bdr_unit,"0,555556"
-companhias,fca,valor_mobiliario,composicao_bdr_unit,04 Ações Ordinárias
-companhias,fca,valor_mobiliario,composicao_bdr_unit,"1 (um)  Bônus de Subscrição para cada 3 (três) novas Ações subscritas, totalizando a emissão de até  83.333.333"
-companhias,fca,valor_mobiliario,composicao_bdr_unit,1 KLBN3 + 4 KLBN4
-companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 1 PN
-companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON E 2 PN
-companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 2PNs
-companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 4 PN
-companhias,fca,valor_mobiliario,composicao_bdr_unit,2 ações preferenciais e 1 ação ordinária
-companhias,fca,valor_mobiliario,entidade_administradora,"B3 S.A. - Brasil, Bolsa, Balcão."
-companhias,fca,valor_mobiliario,mercado,Balcão Não-Organizado
-companhias,fca,valor_mobiliario,mercado,Balcão Organizado
-companhias,fca,valor_mobiliario,mercado,Bolsa
-companhias,fca,valor_mobiliario,segmento,Bovespa Mais
-companhias,fca,valor_mobiliario,segmento,Básico
-companhias,fca,valor_mobiliario,segmento,Novo Mercado
-companhias,fca,valor_mobiliario,segmento,Nível 1 de Governança Corporativa
-companhias,fca,valor_mobiliario,segmento,Nível 2 de Governança Corporativa
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,ONA
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNA
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNB
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNC
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNR
-companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNU
-companhias,fca,valor_mobiliario,sigla_entidade_administradora,B3
-companhias,fca,valor_mobiliario,valor_mobiliario,Ações Ordinárias
-companhias,fca,valor_mobiliario,valor_mobiliario,Ações Preferenciais
-companhias,fca,valor_mobiliario,valor_mobiliario,Bônus de Subscrição
-companhias,fca,valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio
-companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários
-companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários
-companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários
-companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures
-companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures Conversíveis
-companhias,fca,valor_mobiliario,valor_mobiliario,Letras Financeiras
-companhias,fca,valor_mobiliario,valor_mobiliario,Nota Comercial
-companhias,fca,valor_mobiliario,valor_mobiliario,Units
-companhias,fca,valor_mobiliario,valor_mobiliario,Valor Mobiliário Não Registrado
-companhias,fre,acao_entregue,orgao_administracao,Conselho Fiscal
-companhias,fre,acao_entregue,orgao_administracao,Conselho de Administração
-companhias,fre,acao_entregue,orgao_administracao,Diretoria Estatutária
-companhias,fre,administrador_declaracao_genero,nao_aplicavel,N
-companhias,fre,administrador_declaracao_genero,nao_aplicavel,S
-companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Efetivos
-companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Suplentes
-companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Efetivos
-companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Suplentes
-companhias,fre,administrador_declaracao_genero,orgao_administracao,Diretoria
-companhias,fre,administrador_declaracao_raca,nao_aplicavel,N
-companhias,fre,administrador_declaracao_raca,nao_aplicavel,S
-companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Efetivos
-companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Suplentes
-companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Efetivos
-companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Suplentes
-companhias,fre,administrador_declaracao_raca,orgao_administracao,Diretoria
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,10 - Diretor Presidente / Superintendente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,11 - Diretor Vice Presidente/ Superintendente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,12 - Diretor de Relações com Investidores
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,13 - Diretor Presidente / Diretor de Relações com Investidores
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,14 - Diretor Financeiro
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,15 - Diretor Financeiro / Diretor de Relações com Investidores
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,19 - Outros Diretores
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,20 - Presidente do Conselho de Administração
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,21 - Vice Presidente Cons. de Administração
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,22 - Conselho de Administração (Efetivo)
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,23 - Conselho de Administração (Suplente)
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,24 - Presidente do Conselho de Administração Independente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,25 - Vice Presidente Cons. de Administração Independente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,27 - Conselho de Adm. Independente (Efetivo)
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,28 - Conselho de Adm. Independente (Suplente)
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,29 - Outros Conselheiros
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,30 - Presidente do C.A. e Diretor Presidente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,31 - Vice Pres. C.A. e Diretor Presidente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,33 - Conselheiro(Efetivo) e Dir. Presidente
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,35 - Conselheiro(Efetivo) e Dir. Rel. Invest.
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,38 - Conselheiro(Suplente)/ Dir. Rel. Invest.
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,39 - Outros Conselheiros / Diretores
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,40 - Pres. C.F.Eleito p/Controlador
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,41 - Pres. C.F.Eleito p/Preferencialistas
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,42 - Pres. C.F.Eleito p/Minor.Ordinaristas
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,43 - C.F.(Efetivo)Eleito p/Controlador
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,44 - C.F.(Efetivo)Eleito p/preferencialistas
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,45 - C.F.(Efetivo)Eleito p/Minor.Ordinaristas
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,46 - C.F.(Suplent)Eleito p/Controlador
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,47 - C.F.(Suplent)Eleito p/preferencialistas
-companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,48 - C.F.(Suplent)Eleito p/Minor.Ordinaristas
-companhias,fre,administrador_membro_conselho_fiscal,eleito_controlador,N
-companhias,fre,administrador_membro_conselho_fiscal,eleito_controlador,S
-companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Conselho Fiscal
-companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas ao Conselho de Administração
-companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas à Diretoria
-companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence à Diretoria e ao Conselho de Administração
-companhias,fre,auditor,auditor,AUDITÓR - AUDITORES INDEPENDENTES LTDA
-companhias,fre,auditor,auditor,BAKER TILLY BRASIL RJ AUDITORES INDEPENDENTES LTDA
-companhias,fre,auditor,auditor,BDO RCS Auditores Independentes - Sociedade Simples Limitada
-companhias,fre,auditor,auditor,CLA CLIFTON LARSON ALLEN BRASIL AUDITORES INDEPENDENTE S/S
-companhias,fre,auditor,auditor,DELOITTE TOUCHE TOHMATSU AUDITORES INDEPENDENTES LTDA
-companhias,fre,auditor,auditor,ERNST & YOUNG AUDITORES INDEPENDENTES S/S Ltda
-companhias,fre,auditor,auditor,FORVIS MAZARS AUDITORES INDEPENDENTES - SOCIEDADE SIMPLES LTDA.
-companhias,fre,auditor,auditor,Grant Thornton Auditores Independentes Ltda
-companhias,fre,auditor,auditor,KPMG AUDITORES INDEPENDENTES LTDA
-companhias,fre,auditor,auditor,MCS MARKUP AUDITORES INDEPENDENTES S/S
-companhias,fre,auditor,auditor,MOREIRA ASSOCIADOS AUDITORES INDEPENDENTES S/S
-companhias,fre,auditor,auditor,MÜLLER & PREI AUDITORES INDEPENDENTES S/S
-companhias,fre,auditor,auditor,MÜLLER & PREI AUDITORES INDEPENDENTES S/S - BLUMENAU
-companhias,fre,auditor,auditor,P & L AUDITORES INDEPENDENTES S/S
-companhias,fre,auditor,auditor,PRICEWATERHOUSECOOPERS AUDITORES INDEPENDENTES LTDA
-companhias,fre,auditor,auditor,PSW Brasil Auditores Independentes
-companhias,fre,auditor,auditor,RUSSELL BEDFORD GM AUDITORES INDEPENDENTES S/S
-companhias,fre,auditor,auditor,STEINBACH & AUDITORES ASSOCIADOS
-companhias,fre,auditor,auditor,TADEU MANOEL RODRIGUES DE ARAÚJO
-companhias,fre,auditor,auditor,TATICCA AUDITORES INDEPENDENTES S.S. - EPP
-companhias,fre,auditor,auditor,UHY BENDORAYTES & CIA AUDITORES INDEPENDENTES
-companhias,fre,auditor,auditor,VILLELA E ASSOCIADOS AUDITORIA E CONSULTORIA S/S
-companhias,fre,auditor,tipo_origem_auditor,Nacional
-companhias,fre,capital_social,prazo_integralizacao,-
-companhias,fre,capital_social,prazo_integralizacao,07/10/2019
-companhias,fre,capital_social,prazo_integralizacao,10/09/1997
-companhias,fre,capital_social,prazo_integralizacao,13/05/2024 a 12/06/2024
-companhias,fre,capital_social,prazo_integralizacao,24 meses
-companhias,fre,capital_social,prazo_integralizacao,30/04/2026
-companhias,fre,capital_social,prazo_integralizacao,31/12/2026
-companhias,fre,capital_social,prazo_integralizacao,360 dias
-companhias,fre,capital_social,prazo_integralizacao,"704.798.668,00"
-companhias,fre,capital_social,prazo_integralizacao,A ser fixado pelo Cons de Adm
-companhias,fre,capital_social,prazo_integralizacao,Imediato
-companhias,fre,capital_social,prazo_integralizacao,N.A
-companhias,fre,capital_social,prazo_integralizacao,N/A
-companhias,fre,capital_social,prazo_integralizacao,Não aplicável
-companhias,fre,capital_social,prazo_integralizacao,Não aplicável.
-companhias,fre,capital_social,prazo_integralizacao,Totalmente integralizado
-companhias,fre,capital_social,prazo_integralizacao,n/a
-companhias,fre,capital_social,prazo_integralizacao,não aplicável
-companhias,fre,capital_social,tipo_capital,Capital Autorizado
-companhias,fre,capital_social,tipo_capital,Capital Emitido
-companhias,fre,capital_social,tipo_capital,Capital Integralizado
-companhias,fre,capital_social,tipo_capital,Capital Subscrito
-companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A
-companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
-companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
-companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
-companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E
-companhias,fre,capital_social_titulo_conversivel,titulo_conversivel_acao,NÃO HÁ CONVERSÕES EM AÇÕES
-companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe A
-companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe A
-companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe B
-companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe C
-companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe E
-companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,ONA
-companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNA
-companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNB
-companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNC
-companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNE
-companhias,fre,empregado_local_faixa_etaria,local,Centro-Oeste
-companhias,fre,empregado_local_faixa_etaria,local,Exterior
-companhias,fre,empregado_local_faixa_etaria,local,Nordeste
-companhias,fre,empregado_local_faixa_etaria,local,Norte
-companhias,fre,empregado_local_faixa_etaria,local,Sudeste
-companhias,fre,empregado_local_faixa_etaria,local,Sul
-companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Coordenador)
-companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Efetivo)
-companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Suplente)
-companhias,fre,membro_comite,cargo_ocupado,Outros
-companhias,fre,membro_comite,cargo_ocupado,Presidente do Comitê
-companhias,fre,membro_comite,cargo_ocupado,Vice Presidente do Comitê
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Membro do Comitê (Coordenador)
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Membro do Comitê (Efetivo)
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Membro do Comitê (Suplente)
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Outros
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Presidente do Comitê
-companhias,fre,membro_comite,descricao_outro_cargo_ocupado,Vice Presidente do Comitê
-companhias,fre,membro_comite,tipo_comite,Comitê Financeiro
-companhias,fre,membro_comite,tipo_comite,Comitê de Auditoria
-companhias,fre,membro_comite,tipo_comite,Comitê de Remuneração
-companhias,fre,membro_comite,tipo_comite,Comitê de Risco
-companhias,fre,membro_comite,tipo_comite,Outros Comitês
-companhias,fre,mercado_estrangeiro,administradora,Nasdaq Stock Market
-companhias,fre,mercado_estrangeiro,identificacao_valor_mobiliario,INTR
-companhias,fre,mercado_estrangeiro,mercado,Nasdaq Stock Market
-companhias,fre,mercado_estrangeiro,pais_negociacao,Estados Unidos
-companhias,fre,mercado_estrangeiro,valor_mobiliario,Ações Ordinárias Classe A
-companhias,fre,outro_valor_mobiliario,conversibilidade,Sim
-companhias,fre,outro_valor_mobiliario,resgatavel,Sim
-companhias,fre,outro_valor_mobiliario,restricao_circulacao,Sim
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Bônus de Subscrição
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Letras Financeiras
-companhias,fre,outro_valor_mobiliario,valor_mobiliario,Nota Comercial
-companhias,fre,posicao_acionaria,acionista_controlador,N
-companhias,fre,posicao_acionaria,acionista_controlador,S
-companhias,fre,posicao_acionaria,nacionalidade,Argentina
-companhias,fre,posicao_acionaria,nacionalidade,Barbados
-companhias,fre,posicao_acionaria,nacionalidade,Bermudas
-companhias,fre,posicao_acionaria,nacionalidade,Brasil
-companhias,fre,posicao_acionaria,nacionalidade,Bélgica
-companhias,fre,posicao_acionaria,nacionalidade,Canadá
-companhias,fre,posicao_acionaria,nacionalidade,Cingapura
-companhias,fre,posicao_acionaria,nacionalidade,Colômbia
-companhias,fre,posicao_acionaria,nacionalidade,Escócia
-companhias,fre,posicao_acionaria,nacionalidade,Espanha
-companhias,fre,posicao_acionaria,nacionalidade,Espanhola
-companhias,fre,posicao_acionaria,nacionalidade,Estados Unidos
-companhias,fre,posicao_acionaria,nacionalidade,França
-companhias,fre,posicao_acionaria,nacionalidade,"Gr?-Bretanha (Reino Unido, UK)"
-companhias,fre,posicao_acionaria,nacionalidade,"Grã-Bretanha (Reino Unido, UK)"
-companhias,fre,posicao_acionaria,nacionalidade,Holanda
-companhias,fre,posicao_acionaria,nacionalidade,Ilhas Cayman
-companhias,fre,posicao_acionaria,nacionalidade,Ilhas Virgens (Britânicas)
-companhias,fre,posicao_acionaria,nacionalidade,Inglesa
-companhias,fre,posicao_acionaria,nacionalidade,Japão
-companhias,fre,posicao_acionaria,nacionalidade,Luxemburgo
-companhias,fre,posicao_acionaria,nacionalidade,Noruega
-companhias,fre,posicao_acionaria,participante_acordo_acionistas,N
-companhias,fre,posicao_acionaria,participante_acordo_acionistas,S
-companhias,fre,posicao_acionaria,residente_exterior,N
-companhias,fre,posicao_acionaria,residente_exterior,S
-companhias,fre,posicao_acionaria,tipo_pessoa_acionista,PF
-companhias,fre,posicao_acionaria,tipo_pessoa_acionista,PJ
-companhias,fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PF
-companhias,fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PJ
-companhias,fre,posicao_acionaria,tipo_pessoa_representante_legal,PF
-companhias,fre,posicao_acionaria,tipo_pessoa_representante_legal,PJ
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe B
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe F
-companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe S
-companhias,fre,relacao_familiar,tipo_parentesco,Avô ou Avó (2º grau por consangüinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Filho ou Filha (1º grau por consangüinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Genro ou Nora (2º grau por afinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Irmão ou Irmã (1º grau por consangüinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Marido ou Esposa (1º grau por afinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Padrasto e Madrasta (2º grau por afinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Pai ou Mãe (1º grau por consangüinidade)
-companhias,fre,relacao_familiar,tipo_parentesco,Sogra ou Sogro (2º grau por afinidade)
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Cliente
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Direta
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Indireta
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Direto
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Indireto
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Credor
-companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Fornecedor
-companhias,fre,relacao_subordinacao,tipo_pessoa_relacionada,PF
-companhias,fre,relacao_subordinacao,tipo_pessoa_relacionada,PJ
-companhias,fre,relacao_subordinacao,tipo_relacao,Controle
-companhias,fre,relacao_subordinacao,tipo_relacao,Prestação de serviço
-companhias,fre,relacao_subordinacao,tipo_relacao,Subordinação
-companhias,fre,remuneracao_acao,orgao_administracao,Conselho Fiscal
-companhias,fre,remuneracao_acao,orgao_administracao,Conselho de Administração
-companhias,fre,remuneracao_acao,orgao_administracao,Diretoria Estatutária
-companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho Fiscal
-companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho de Administração
-companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Diretoria Estatutária
-companhias,fre,remuneracao_total_orgao,orgao_administracao,Conselho Fiscal
-companhias,fre,remuneracao_total_orgao,orgao_administracao,Conselho de Administração
-companhias,fre,remuneracao_total_orgao,orgao_administracao,Diretoria Estatutária
-companhias,fre,remuneracao_variavel,orgao_administracao,Conselho Fiscal
-companhias,fre,remuneracao_variavel,orgao_administracao,Conselho de Administração
-companhias,fre,remuneracao_variavel,orgao_administracao,Diretoria Estatutária
-companhias,fre,responsavel,cargo_responsavel,Diretor Presidente
-companhias,fre,responsavel,cargo_responsavel,Diretor Presidente/Relações com Investidores
-companhias,fre,responsavel,cargo_responsavel,Diretor de Relações com Investidores
-companhias,fre,submissao,categ_doc,FRE WEB
-companhias,fre,titular_valor_mobiliario,valor_mobiliario,Debêntures
-companhias,fre,titulo_exterior,conversibilidade,S
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,ADS (American Depositary Shares) VALE
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2027 (ISIN USL7909CAA55)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2032 (ISIN USL7909CAJ64)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2034 (ISIN USL7909CAC12)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2035 (ISIN USL7909CAE77)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2037 (ISIN USL7909CAG26)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2054 (ISIN USL7909CAD94)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond 2056
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5 1/2 06/10/51
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5 1/8 09/10/30
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5 3/4 02/01/29
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5 3/8 10/01/29
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5 5/8 05/20/43
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5.093 01/15/30
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5.6 01/03/31
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 5.999 01/27/28
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6 01/13/35
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6 3/4  06/03/50
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6 3/4 01/27/41
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6 5/8 01/16/34
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6 7/8 01/20/40
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,"Bond PETBRA 6,9 03/19/2049"
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6.5 07/03/33
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 6.85 06/05/15
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 7 1/4 03/17/44
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETBRA 7 3/8 01/17/27
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Bond PETRBRA 6 1/2 01/10/2036
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,"CUSIP - A35155 AA7 (""Notas 10 Anos"")"
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,"CUSIP - A35155 AB5 (""Notas 30 Anos"")"
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,CUSIP - A35155 AE9
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,CVRD34
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,CVRD34B (reabertura)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,CVRD36
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,CVRD39
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,N/A
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Unsecured Senior Notes
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE30
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE33
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE39 (reabertura)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE42
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE54
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,VALE54 (reabertura)
-companhias,fre,titulo_exterior,identificacao_valor_mobiliario,Vale Canada2032
-companhias,fre,titulo_exterior,possibilidade_resgate,S
-companhias,fre,titulo_exterior,restricao_circulacao,S
-companhias,fre,titulo_exterior,valor_mobiliario,Debêntures
-companhias,fre,titulo_exterior,valor_mobiliario,Outros
-companhias,fre,transacao_parte_relacionada,emprestimo_divida,N
-companhias,fre,transacao_parte_relacionada,emprestimo_divida,S
-companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor," 5,13% a.a."
-companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Credor
-companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor
-companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra
-companhias,fre,transacao_parte_relacionada,tipo_pessoa,PF
-companhias,fre,transacao_parte_relacionada,tipo_pessoa,PJ
-companhias,ipe,ipe,especie,Ata
-companhias,ipe,ipe,especie,Balanço Social
-companhias,ipe,ipe,especie,Boletim de voto a distância
-companhias,ipe,ipe,especie,Combinadas
-companhias,ipe,ipe,especie,Condensadas
-companhias,ipe,ipe,especie,"Declaração de Alienação de Participação Acionária Relevante - Art.12, §4º, da Instrução CVM nº358/02"
-companhias,ipe,ipe,especie,Declaração de Aquisição de Participação Acionária Relevante - Art.12 da Instrução CVM nº358/02
-companhias,ipe,ipe,especie,Demonstrações Financeiras em Padrões Internacionais
-companhias,ipe,ipe,especie,Edital de Convocação
-companhias,ipe,ipe,especie,Especialmente preparadas para Registro Inicial
-companhias,ipe,ipe,especie,Instrução de voto
-companhias,ipe,ipe,especie,Manual para participação
-companhias,ipe,ipe,especie,Mapa Final de Votação Resumido
-companhias,ipe,ipe,especie,Mapa Sintético dos votos enviados diretamente à Companhia
-companhias,ipe,ipe,especie,Mapa consolidado de voto a distância
-companhias,ipe,ipe,especie,Mapa do Depositário Central
-companhias,ipe,ipe,especie,Mapa do Escriturador
-companhias,ipe,ipe,especie,Mapa final de votação detalhado
-companhias,ipe,ipe,especie,Material referente a pedidos públicos de procuração
-companhias,ipe,ipe,especie,Proposta da Administração
-companhias,ipe,ipe,especie,Prospecto Definitivo
-companhias,ipe,ipe,especie,Prospecto Preliminar
-companhias,ipe,ipe,especie,"Protocolo e Justificação de Incorporação, Fusão ou Cisão"
-companhias,ipe,ipe,especie,Pró-forma
-companhias,ipe,ipe,especie,Regulatórias
-companhias,ipe,ipe,especie,Sumário das Decisões
-companhias,ipe,ipe,tipo_apresentacao,AP - Apresentação
-companhias,ipe,ipe,tipo_apresentacao,RC - Reapresentação por Exigência
-companhias,ipe,ipe,tipo_apresentacao,RE - Reapresentação Espontânea
-companhias,itr,bpa,escala_moeda,MIL
-companhias,itr,bpa,escala_moeda,UNIDADE
-companhias,itr,bpa,moeda,REAL
-companhias,itr,bpa,ordem_exerc,PENÚLTIMO
-companhias,itr,bpa,ordem_exerc,ÚLTIMO
-companhias,itr,bpa,st_conta_fixa,N
-companhias,itr,bpa,st_conta_fixa,S
-companhias,itr,bpp,escala_moeda,MIL
-companhias,itr,bpp,escala_moeda,UNIDADE
-companhias,itr,bpp,moeda,REAL
-companhias,itr,bpp,ordem_exerc,PENÚLTIMO
-companhias,itr,bpp,ordem_exerc,ÚLTIMO
-companhias,itr,bpp,st_conta_fixa,N
-companhias,itr,bpp,st_conta_fixa,S
-companhias,itr,dfc_md,escala_moeda,MIL
-companhias,itr,dfc_md,escala_moeda,UNIDADE
-companhias,itr,dfc_md,moeda,REAL
-companhias,itr,dfc_md,ordem_exerc,PENÚLTIMO
-companhias,itr,dfc_md,ordem_exerc,ÚLTIMO
-companhias,itr,dfc_md,st_conta_fixa,N
-companhias,itr,dfc_md,st_conta_fixa,S
-companhias,itr,dfc_mi,escala_moeda,MIL
-companhias,itr,dfc_mi,escala_moeda,UNIDADE
-companhias,itr,dfc_mi,moeda,REAL
-companhias,itr,dfc_mi,ordem_exerc,PENÚLTIMO
-companhias,itr,dfc_mi,ordem_exerc,ÚLTIMO
-companhias,itr,dfc_mi,st_conta_fixa,N
-companhias,itr,dfc_mi,st_conta_fixa,S
-companhias,itr,dmpl,coluna_df,Capital Social Integralizado
-companhias,itr,dmpl,coluna_df,Lucros ou Prejuízos Acumulados
-companhias,itr,dmpl,coluna_df,Outros Resultados Abrangentes
-companhias,itr,dmpl,coluna_df,Participação dos Não Controladores
-companhias,itr,dmpl,coluna_df,Patrimônio Líquido
-companhias,itr,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria"
-companhias,itr,dmpl,coluna_df,Reservas de Lucro
-companhias,itr,dmpl,escala_moeda,MIL
-companhias,itr,dmpl,escala_moeda,UNIDADE
-companhias,itr,dmpl,moeda,REAL
-companhias,itr,dmpl,ordem_exerc,PENÚLTIMO
-companhias,itr,dmpl,ordem_exerc,ÚLTIMO
-companhias,itr,dmpl,st_conta_fixa,N
-companhias,itr,dmpl,st_conta_fixa,S
-companhias,itr,dra,escala_moeda,MIL
-companhias,itr,dra,escala_moeda,UNIDADE
-companhias,itr,dra,moeda,REAL
-companhias,itr,dra,ordem_exerc,PENÚLTIMO
-companhias,itr,dra,ordem_exerc,ÚLTIMO
-companhias,itr,dra,st_conta_fixa,N
-companhias,itr,dra,st_conta_fixa,S
-companhias,itr,dre,escala_moeda,MIL
-companhias,itr,dre,escala_moeda,UNIDADE
-companhias,itr,dre,moeda,REAL
-companhias,itr,dre,ordem_exerc,PENÚLTIMO
-companhias,itr,dre,ordem_exerc,ÚLTIMO
-companhias,itr,dre,st_conta_fixa,N
-companhias,itr,dre,st_conta_fixa,S
-companhias,itr,dva,escala_moeda,MIL
-companhias,itr,dva,escala_moeda,UNIDADE
-companhias,itr,dva,moeda,REAL
-companhias,itr,dva,ordem_exerc,PENÚLTIMO
-companhias,itr,dva,ordem_exerc,ÚLTIMO
-companhias,itr,dva,st_conta_fixa,N
-companhias,itr,dva,st_conta_fixa,S
-companhias,itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras
-companhias,itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente
-companhias,itr,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente
-companhias,itr,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)"
-companhias,itr,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)"
-companhias,itr,parecer,tp_parecer_decl,Relatório da Revisão Especial
-companhias,itr,parecer,tp_relat_esp,Com Ressalva
-companhias,itr,parecer,tp_relat_esp,Negativa de Opinião
-companhias,itr,parecer,tp_relat_esp,Sem Ressalva
-companhias,itr,submissao,categ_doc,ITR
-companhias,recompra_acoes,quantidades,classe_acao,A
-companhias,recompra_acoes,quantidades,classe_acao,B
-companhias,recompra_acoes,quantidades,classe_acao,B1
-companhias,recompra_acoes,quantidades,classe_acao,C
-companhias,recompra_acoes,quantidades,classe_acao,D
-companhias,recompra_acoes,quantidades,classe_acao,F
-companhias,recompra_acoes,quantidades,classe_acao,PNA
-companhias,recompra_acoes,quantidades,classe_acao,PNB
-companhias,recompra_acoes,quantidades,classe_acao,PNC
-companhias,recompra_acoes,quantidades,classe_acao,units
-companhias,recompra_acoes,quantidades,tipo_acao,ORDINÁRIAS
-companhias,recompra_acoes,quantidades,tipo_acao,PREFERENCIAIS
-companhias,recompra_acoes,recompra_acoes,finalidade_compra,AS AÇÕES PODERÃO SER CANCELADAS.
-companhias,recompra_acoes,recompra_acoes,finalidade_compra,AS AÇÕES VÃO FICAR EM TESOURARIA.
-companhias,recompra_acoes,recompra_acoes,situacao,Em Andamento
-companhias,recompra_acoes,recompra_acoes,situacao,Encerrado
-companhias,recompra_acoes,recompra_acoes,tipo_operacao,Compra
-companhias,recompra_acoes,recompra_acoes,tipo_operacao,Venda
-companhias,vlmo,consolidado,tipo_ativo,Ações
-companhias,vlmo,consolidado,tipo_ativo,BDR Patrocinados
-companhias,vlmo,consolidado,tipo_ativo,Bônus de Subscrição
-companhias,vlmo,consolidado,tipo_ativo,Debêntures
-companhias,vlmo,consolidado,tipo_ativo,Derivativos
-companhias,vlmo,consolidado,tipo_ativo,Opção de Compra
-companhias,vlmo,consolidado,tipo_ativo,Opção de Venda
-companhias,vlmo,consolidado,tipo_ativo,Opções de Plano de Remuneração
-companhias,vlmo,consolidado,tipo_ativo,Outros
-companhias,vlmo,consolidado,tipo_ativo,Recibo de Subscrição
-companhias,vlmo,consolidado,tipo_ativo,Units
-companhias,vlmo,consolidado,tipo_cargo,Conselho Fiscal ou Vinculado
-companhias,vlmo,consolidado,tipo_cargo,Conselho de Administração ou Vinculado
-companhias,vlmo,consolidado,tipo_cargo,Controlador ou Vinculado
-companhias,vlmo,consolidado,tipo_cargo,Diretor ou Vinculado
-companhias,vlmo,consolidado,tipo_cargo,Órgão Estatutário ou Vinculado
-companhias,vlmo,consolidado,tipo_empresa,Companhia
-companhias,vlmo,consolidado,tipo_empresa,Controlada
-companhias,vlmo,consolidado,tipo_empresa,Controladora
-companhias,vlmo,consolidado,tipo_movimentacao,Ações de exercício de bônus de subscrição
-companhias,vlmo,consolidado,tipo_movimentacao,Ações de plano de remuneração
-companhias,vlmo,consolidado,tipo_movimentacao,Ações decorrentes de exercício de opção de compra
-companhias,vlmo,consolidado,tipo_movimentacao,Ações resultantes de conversão de debêntures
-companhias,vlmo,consolidado,tipo_movimentacao,Bônus de subscrição exercido
-companhias,vlmo,consolidado,tipo_movimentacao,Compra
-companhias,vlmo,consolidado,tipo_movimentacao,Compra à termo
-companhias,vlmo,consolidado,tipo_movimentacao,Compra à vista
-companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (locador)
-companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (tomador)
-companhias,vlmo,consolidado,tipo_movimentacao,Desdobramento/bonificação
-companhias,vlmo,consolidado,tipo_movimentacao,Desligamento/saída
-companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (locador)
-companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (tomador)
-companhias,vlmo,consolidado,tipo_movimentacao,Doação (doador)
-companhias,vlmo,consolidado,tipo_movimentacao,Doação (donatário)
-companhias,vlmo,consolidado,tipo_movimentacao,Exercício de opção de Plano de Remuneração
-companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de compra
-companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de venda
-companhias,vlmo,consolidado,tipo_movimentacao,Grupamento
-companhias,vlmo,consolidado,tipo_movimentacao,Homologação de subscrição
-companhias,vlmo,consolidado,tipo_movimentacao,Outras Entradas
-companhias,vlmo,consolidado,tipo_movimentacao,Outras Saídas
-companhias,vlmo,consolidado,tipo_movimentacao,Posse
-companhias,vlmo,consolidado,tipo_movimentacao,Recebimento de opção de Plano de Remuneração
-companhias,vlmo,consolidado,tipo_movimentacao,Saldo Inicial
-companhias,vlmo,consolidado,tipo_movimentacao,Subscrição
-companhias,vlmo,consolidado,tipo_movimentacao,Units de plano de remuneração
-companhias,vlmo,consolidado,tipo_movimentacao,Venda
-companhias,vlmo,consolidado,tipo_movimentacao,Venda à termo
-companhias,vlmo,consolidado,tipo_movimentacao,Venda à vista
-companhias,vlmo,consolidado,tipo_operacao,Crédito
-companhias,vlmo,consolidado,tipo_operacao,Débito
-companhias,vlmo,submissao,categoria,Valores Mobiliários negociados e detidos (art. 11 da Instr. CVM nº 358)
-companhias,vlmo,submissao,tipo,Posição Consolidada
-companhias,vlmo,submissao,tipo_apresentacao,AP - Apresentação
-companhias,vlmo,submissao,tipo_apresentacao,RE - Reapresentação Espontânea
+group,dataset,table,campo,value,first_seen_year,last_seen_year
+companhias,cad,companhias,categ_reg,Categoria A,,
+companhias,cad,companhias,categ_reg,Categoria B,,
+companhias,cad,companhias,controle_acionario,ESTATAL,,
+companhias,cad,companhias,controle_acionario,ESTATAL HOLDING,,
+companhias,cad,companhias,controle_acionario,ESTRANGEIRO,,
+companhias,cad,companhias,controle_acionario,ESTRANGEIRO HOLDING,,
+companhias,cad,companhias,controle_acionario,PRIVADO,,
+companhias,cad,companhias,controle_acionario,PRIVADO HOLDING,,
+companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 03/78,,
+companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTR CVM 229/95,,
+companhias,cad,companhias,motivo_cancel,ATENDIMENTO AS NORMAS DA INSTRUÇÃO CVM Nº 361/02,,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO,,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO A PEDIDO (Cia Incentivada),,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO,,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO DE OFÍCIO C/BASE INSTR. CVM 287/98,,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO OFICIO COM BASE INSTR. CVM 29/84,,
+companhias,cad,companhias,motivo_cancel,CANCELAMENTO VOLUNTÁRIO,,
+companhias,cad,companhias,motivo_cancel,ELISÃO DEVIDO A CANCELAMENTO DO RPJ PELO BACEN,,
+companhias,cad,companhias,motivo_cancel,ELISÃO POR EXTINÇÃO DA CIA,,
+companhias,cad,companhias,motivo_cancel,ELISÃO POR INCORPORAÇÃO,,
+companhias,cad,companhias,motivo_cancel,ELISÃO POR LIQUIDAÇÃO,,
+companhias,cad,companhias,motivo_cancel,ELISÃO POR TRANSFORMAÇÃO,,
+companhias,cad,companhias,motivo_cancel,ENQUADRAMENTO EXCEÇÕES DA INSTR. CVM 03/78,,
+companhias,cad,companhias,motivo_cancel,ENQUADRAMENTO HIPÓTESE ESTAB P/ COML EM 29/10/79,,
+companhias,cad,companhias,motivo_cancel,INCORPORAÇÃO,,
+companhias,cad,companhias,motivo_cancel,LIQUIDAÇÃO EXTRAJUDICIAL,,
+companhias,cad,companhias,motivo_cancel,Migração de Registro (Resolução n° 60),,
+companhias,cad,companhias,pais,BRASIL,,
+companhias,cad,companhias,pais,EGITO,,
+companhias,cad,companhias,pais_resp,BRASIL,,
+companhias,cad,companhias,sit,ATIVO,,
+companhias,cad,companhias,sit,CANCELADA,,
+companhias,cad,companhias,sit,SUSPENSO(A) - DECISÃO ADM,,
+companhias,cad,companhias,tp_merc,BALCÃO NÃO ORGANIZADO,,
+companhias,cad,companhias,tp_merc,BALCÃO ORGANIZADO,,
+companhias,cad,companhias,tp_merc,BOLSA,,
+companhias,cad,companhias,tp_resp,DIRETOR DE RELAÇÕES COM INVESTIDORES,,
+companhias,cgvn,praticas,capitulo,Acionistas,2018,2026
+companhias,cgvn,praticas,capitulo,Conselho de Administração,2018,2026
+companhias,cgvn,praticas,capitulo,Diretoria,2018,2026
+companhias,cgvn,praticas,capitulo,Ética e Conflito de Interesses,2018,2026
+companhias,cgvn,praticas,capitulo,Órgãos de Fiscalização e Controle,2018,2026
+companhias,cgvn,praticas,pratica_adotada,Não,2018,2026
+companhias,cgvn,praticas,pratica_adotada,Não se Aplica,2018,2026
+companhias,cgvn,praticas,pratica_adotada,Parcialmente,2018,2026
+companhias,cgvn,praticas,pratica_adotada,Sim,2018,2026
+companhias,cgvn,praticas,principio,Acordos de Acionistas,2018,2026
+companhias,cgvn,praticas,principio,Assembleia Geral,2018,2026
+companhias,cgvn,praticas,principio,Atribuições,2018,2026
+companhias,cgvn,praticas,principio,Auditoria Independente,2018,2026
+companhias,cgvn,praticas,principio,Auditoria Interna,2018,2026
+companhias,cgvn,praticas,principio,Avaliação do Conselho e dos Conselheiros,2018,2026
+companhias,cgvn,praticas,principio,Avaliação do Diretor-Presidente e da Diretoria,2018,2026
+companhias,cgvn,praticas,principio,Comitê de Auditoria,2018,2026
+companhias,cgvn,praticas,principio,Composição do Conselho de Administração,2018,2026
+companhias,cgvn,praticas,principio,Conflito de Interesses,2018,2026
+companhias,cgvn,praticas,principio,Conselho Fiscal,2018,2026
+companhias,cgvn,praticas,principio,Código de Conduta e Canal de Denúncias,2018,2026
+companhias,cgvn,praticas,principio,Estrutura Acionária,2018,2026
+companhias,cgvn,praticas,principio,"Gerenciamento de Riscos, Controles Internos e Integridade/Conformidade (Compliance)",2018,2026
+companhias,cgvn,praticas,principio,Indicação dos Diretores,2018,2026
+companhias,cgvn,praticas,principio,Integração de Novos Conselheiros,2018,2026
+companhias,cgvn,praticas,principio,Manifestação da Administração nas OPAs,2018,2026
+companhias,cgvn,praticas,principio,Medidas de Defesa,2018,2026
+companhias,cgvn,praticas,principio,Mudança de Controle,2018,2026
+companhias,cgvn,praticas,principio,Planejamento da Sucessão,2018,2026
+companhias,cgvn,praticas,principio,Política de Destinação de Resultados,2018,2026
+companhias,cgvn,praticas,principio,Política de Negociação de Valores Mobiliários,2018,2026
+companhias,cgvn,praticas,principio,Política sobre Contribuições e Doações,2018,2026
+companhias,cgvn,praticas,principio,Presidente do Conselho,2018,2026
+companhias,cgvn,praticas,principio,Regimento Interno do Conselho de Administração,2018,2026
+companhias,cgvn,praticas,principio,Remuneração da Diretoria,2018,2026
+companhias,cgvn,praticas,principio,Remuneração dos Conselheiros de Administração,2018,2026
+companhias,cgvn,praticas,principio,Reuniões do Conselho de Administração,2018,2026
+companhias,cgvn,praticas,principio,Sociedades de Economia Mista,2018,2026
+companhias,cgvn,praticas,principio,Transações com Partes Relacionadas,2018,2026
+companhias,cgvn,submissao,categoria,Código de Governança,2018,2026
+companhias,dfp,bpa,moeda,REAL,2010,2026
+companhias,dfp,bpa,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,bpa,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,bpa,st_conta_fixa,N,2010,2026
+companhias,dfp,bpa,st_conta_fixa,S,2010,2026
+companhias,dfp,bpp,moeda,REAL,2010,2026
+companhias,dfp,bpp,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,bpp,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,bpp,st_conta_fixa,N,2010,2026
+companhias,dfp,bpp,st_conta_fixa,S,2010,2026
+companhias,dfp,dfc_md,moeda,REAL,2010,2025
+companhias,dfp,dfc_md,ordem_exerc,PENÚLTIMO,2010,2025
+companhias,dfp,dfc_md,ordem_exerc,ÚLTIMO,2010,2025
+companhias,dfp,dfc_md,st_conta_fixa,N,2010,2025
+companhias,dfp,dfc_md,st_conta_fixa,S,2010,2025
+companhias,dfp,dfc_mi,moeda,REAL,2010,2026
+companhias,dfp,dfc_mi,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,dfc_mi,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,dfc_mi,st_conta_fixa,N,2010,2026
+companhias,dfp,dfc_mi,st_conta_fixa,S,2010,2026
+companhias,dfp,dmpl,coluna_df,Capital Social Integralizado,2010,2026
+companhias,dfp,dmpl,coluna_df,Lucros ou Prejuízos Acumulados,2010,2026
+companhias,dfp,dmpl,coluna_df,Outros Resultados Abrangentes,2010,2026
+companhias,dfp,dmpl,coluna_df,Participação dos Não Controladores,2010,2026
+companhias,dfp,dmpl,coluna_df,Patrimônio Líquido,2010,2026
+companhias,dfp,dmpl,coluna_df,Patrimônio Líquido Consolidado,2010,2026
+companhias,dfp,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria",2010,2026
+companhias,dfp,dmpl,coluna_df,Reservas de Lucro,2010,2026
+companhias,dfp,dmpl,moeda,REAL,2010,2026
+companhias,dfp,dmpl,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,dmpl,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,dmpl,st_conta_fixa,N,2010,2026
+companhias,dfp,dmpl,st_conta_fixa,S,2010,2026
+companhias,dfp,dra,moeda,REAL,2010,2026
+companhias,dfp,dra,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,dra,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,dra,st_conta_fixa,N,2010,2026
+companhias,dfp,dra,st_conta_fixa,S,2010,2026
+companhias,dfp,dre,moeda,REAL,2010,2026
+companhias,dfp,dre,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,dre,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,dre,st_conta_fixa,N,2010,2026
+companhias,dfp,dre,st_conta_fixa,S,2010,2026
+companhias,dfp,dva,moeda,REAL,2010,2026
+companhias,dfp,dva,ordem_exerc,PENÚLTIMO,2010,2026
+companhias,dfp,dva,ordem_exerc,ÚLTIMO,2010,2026
+companhias,dfp,dva,st_conta_fixa,N,2010,2026
+companhias,dfp,dva,st_conta_fixa,S,2010,2026
+companhias,dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras,2010,2026
+companhias,dfp,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente,2010,2026
+companhias,dfp,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente,2010,2026
+companhias,dfp,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)",2017,2026
+companhias,dfp,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)",2017,2026
+companhias,dfp,parecer,tp_parecer_decl,Relatório do Auditor Independente,2010,2026
+companhias,dfp,parecer,tp_relat_aud,Adverso,2012,2025
+companhias,dfp,parecer,tp_relat_aud,Com Ressalva,2010,2025
+companhias,dfp,parecer,tp_relat_aud,Negativa de Opinião,2010,2025
+companhias,dfp,parecer,tp_relat_aud,Sem Ressalva,2010,2026
+companhias,dfp,submissao,categ_doc,DFP,2010,2026
+companhias,fca,auditor,origem_auditor,Estrangeiro,2011,2021
+companhias,fca,auditor,origem_auditor,Nacional,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,AL,2022,2026
+companhias,fca,canal_divulgacao,sigla_uf,AM,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,BA,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,BR,2014,2026
+companhias,fca,canal_divulgacao,sigla_uf,CE,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,DF,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,ES,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,GO,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,MA,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,MG,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,MS,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,MT,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,PA,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,PB,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,PE,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,PI,2020,2026
+companhias,fca,canal_divulgacao,sigla_uf,PR,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,RJ,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,RN,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,RR,2023,2025
+companhias,fca,canal_divulgacao,sigla_uf,RS,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,SC,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,SE,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,SP,2010,2026
+companhias,fca,canal_divulgacao,sigla_uf,TO,2010,2026
+companhias,fca,departamento_acionistas,pais,Bermudas,2010,2010
+companhias,fca,departamento_acionistas,pais,Brasil,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,AC,2021,2023
+companhias,fca,departamento_acionistas,sigla_uf,AL,2022,2023
+companhias,fca,departamento_acionistas,sigla_uf,BA,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,BR,2018,2018
+companhias,fca,departamento_acionistas,sigla_uf,CE,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,DF,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,ES,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,GO,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,HM,2010,2010
+companhias,fca,departamento_acionistas,sigla_uf,MA,2020,2022
+companhias,fca,departamento_acionistas,sigla_uf,MG,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,MS,2011,2023
+companhias,fca,departamento_acionistas,sigla_uf,MT,2013,2023
+companhias,fca,departamento_acionistas,sigla_uf,PA,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,PB,2017,2023
+companhias,fca,departamento_acionistas,sigla_uf,PE,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,PR,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,RJ,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,RN,2010,2017
+companhias,fca,departamento_acionistas,sigla_uf,RS,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,SC,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,SE,2010,2022
+companhias,fca,departamento_acionistas,sigla_uf,SP,2010,2023
+companhias,fca,departamento_acionistas,sigla_uf,TO,2015,2022
+companhias,fca,departamento_acionistas,tipo_endereco,Endereço da Sede,2011,2021
+companhias,fca,departamento_acionistas,tipo_endereco,Endereço para Correspondência,2010,2021
+companhias,fca,dri,pais,Brasil,2010,2026
+companhias,fca,dri,pais,Brunei,2011,2013
+companhias,fca,dri,pais,Desconhecido,2013,2013
+companhias,fca,dri,pais,São Paulo,2018,2019
+companhias,fca,dri,sigla_uf,AC,2013,2013
+companhias,fca,dri,sigla_uf,AL,2022,2026
+companhias,fca,dri,sigla_uf,AM,2020,2026
+companhias,fca,dri,sigla_uf,BA,2010,2026
+companhias,fca,dri,sigla_uf,BR,2016,2018
+companhias,fca,dri,sigla_uf,CE,2010,2026
+companhias,fca,dri,sigla_uf,DF,2010,2026
+companhias,fca,dri,sigla_uf,ES,2010,2026
+companhias,fca,dri,sigla_uf,GO,2010,2026
+companhias,fca,dri,sigla_uf,MA,2010,2026
+companhias,fca,dri,sigla_uf,MG,2010,2026
+companhias,fca,dri,sigla_uf,MS,2011,2026
+companhias,fca,dri,sigla_uf,MT,2013,2026
+companhias,fca,dri,sigla_uf,PA,2010,2026
+companhias,fca,dri,sigla_uf,PB,2010,2025
+companhias,fca,dri,sigla_uf,PE,2010,2026
+companhias,fca,dri,sigla_uf,PR,2010,2026
+companhias,fca,dri,sigla_uf,RJ,2010,2026
+companhias,fca,dri,sigla_uf,RN,2010,2022
+companhias,fca,dri,sigla_uf,RS,2010,2026
+companhias,fca,dri,sigla_uf,SC,2010,2026
+companhias,fca,dri,sigla_uf,SE,2010,2026
+companhias,fca,dri,sigla_uf,SP,2010,2026
+companhias,fca,dri,sigla_uf,TO,2015,2024
+companhias,fca,dri,tipo_endereco,Endereço para Correspondência,2010,2021
+companhias,fca,dri,tipo_responsavel,Administrador Especial Temporário,2012,2026
+companhias,fca,dri,tipo_responsavel,Administrador Judicial,2010,2026
+companhias,fca,dri,tipo_responsavel,Cargo Vago,2015,2019
+companhias,fca,dri,tipo_responsavel,Diretor de Relações com Investidores,2010,2026
+companhias,fca,dri,tipo_responsavel,Gestor Judicial,2018,2026
+companhias,fca,dri,tipo_responsavel,Interventor,2012,2013
+companhias,fca,dri,tipo_responsavel,Liquidante,2010,2026
+companhias,fca,dri,tipo_responsavel,Representante Legal (para emissores estrangeiros),2010,2026
+companhias,fca,dri,tipo_responsavel,Síndico,2010,2025
+companhias,fca,dri,uf,Acre,2013,2013
+companhias,fca,dri,uf,Alagoas,2022,2026
+companhias,fca,dri,uf,Amazonas,2020,2026
+companhias,fca,dri,uf,Bahia,2010,2026
+companhias,fca,dri,uf,Brasil,2016,2018
+companhias,fca,dri,uf,Ceará,2010,2026
+companhias,fca,dri,uf,Distrito Federal,2010,2026
+companhias,fca,dri,uf,Espírito Santo,2010,2026
+companhias,fca,dri,uf,Goiás,2010,2026
+companhias,fca,dri,uf,Maranhão,2010,2026
+companhias,fca,dri,uf,Mato Grosso,2013,2026
+companhias,fca,dri,uf,Mato Grosso do Sul,2011,2026
+companhias,fca,dri,uf,Minas Gerais,2010,2026
+companhias,fca,dri,uf,Paraná,2010,2026
+companhias,fca,dri,uf,Paraíba,2010,2025
+companhias,fca,dri,uf,Pará,2010,2026
+companhias,fca,dri,uf,Pernambuco,2010,2026
+companhias,fca,dri,uf,Rio Grande do Norte,2010,2022
+companhias,fca,dri,uf,Rio Grande do Sul,2010,2026
+companhias,fca,dri,uf,Rio de Janeiro,2010,2026
+companhias,fca,dri,uf,Santa Catarina,2010,2026
+companhias,fca,dri,uf,Sergipe,2010,2026
+companhias,fca,dri,uf,São Paulo,2010,2026
+companhias,fca,dri,uf,Tocantins,2015,2024
+companhias,fca,endereco,pais,Argentina,2010,2019
+companhias,fca,endereco,pais,Bermudas,2010,2026
+companhias,fca,endereco,pais,Brasi,2016,2017
+companhias,fca,endereco,pais,Brasil,2010,2026
+companhias,fca,endereco,pais,Brunei,2010,2010
+companhias,fca,endereco,pais,Canadá,2011,2014
+companhias,fca,endereco,pais,Chile,2011,2016
+companhias,fca,endereco,pais,Colômbia,2022,2025
+companhias,fca,endereco,pais,Espanha,2010,2011
+companhias,fca,endereco,pais,Espanhã,2014,2018
+companhias,fca,endereco,pais,Holanda,2024,2026
+companhias,fca,endereco,pais,Ilhas Cayman,2021,2026
+companhias,fca,endereco,pais,Ilhas Virgens (Britânicas),2020,2026
+companhias,fca,endereco,pais,Luxemburgo,2017,2020
+companhias,fca,endereco,pais,Suíça,2010,2025
+companhias,fca,endereco,sigla_uf,AC,2010,2019
+companhias,fca,endereco,sigla_uf,AL,2022,2026
+companhias,fca,endereco,sigla_uf,AM,2010,2026
+companhias,fca,endereco,sigla_uf,BA,2010,2026
+companhias,fca,endereco,sigla_uf,BR,2018,2018
+companhias,fca,endereco,sigla_uf,CE,2010,2026
+companhias,fca,endereco,sigla_uf,DF,2010,2026
+companhias,fca,endereco,sigla_uf,ES,2010,2026
+companhias,fca,endereco,sigla_uf,GO,2010,2026
+companhias,fca,endereco,sigla_uf,HM,2010,2018
+companhias,fca,endereco,sigla_uf,MA,2010,2026
+companhias,fca,endereco,sigla_uf,MG,2010,2026
+companhias,fca,endereco,sigla_uf,MS,2011,2026
+companhias,fca,endereco,sigla_uf,MT,2010,2026
+companhias,fca,endereco,sigla_uf,PA,2010,2026
+companhias,fca,endereco,sigla_uf,PB,2010,2026
+companhias,fca,endereco,sigla_uf,PE,2010,2026
+companhias,fca,endereco,sigla_uf,PI,2020,2026
+companhias,fca,endereco,sigla_uf,PR,2010,2026
+companhias,fca,endereco,sigla_uf,RJ,2010,2026
+companhias,fca,endereco,sigla_uf,RN,2010,2026
+companhias,fca,endereco,sigla_uf,RO,2016,2016
+companhias,fca,endereco,sigla_uf,RR,2022,2025
+companhias,fca,endereco,sigla_uf,RS,2010,2026
+companhias,fca,endereco,sigla_uf,SC,2010,2026
+companhias,fca,endereco,sigla_uf,SE,2010,2026
+companhias,fca,endereco,sigla_uf,SP,2010,2026
+companhias,fca,endereco,sigla_uf,TO,2010,2026
+companhias,fca,endereco,tipo_endereco,Endereço da Sede,2010,2026
+companhias,fca,endereco,tipo_endereco,Endereço no Exterior,2010,2026
+companhias,fca,endereco,tipo_endereco,Endereço para Correspondência,2010,2026
+companhias,fca,escriturador,cidade,Aracaju,2010,2024
+companhias,fca,escriturador,cidade,BRASIL,2010,2012
+companhias,fca,escriturador,cidade,Barueri,2010,2012
+companhias,fca,escriturador,cidade,Belo Horizonte,2010,2026
+companhias,fca,escriturador,cidade,Belém,2011,2018
+companhias,fca,escriturador,cidade,Brasília,2010,2024
+companhias,fca,escriturador,cidade,Caxias do Sul,2012,2021
+companhias,fca,escriturador,cidade,Cruzeiro do Sul,2010,2019
+companhias,fca,escriturador,cidade,Fortaleza,2010,2026
+companhias,fca,escriturador,cidade,Itaim Bibi,2010,2015
+companhias,fca,escriturador,cidade,Osaco,2010,2017
+companhias,fca,escriturador,cidade,Osasco,2010,2026
+companhias,fca,escriturador,cidade,Porto Alegre,2010,2026
+companhias,fca,escriturador,cidade,Rio de Janeiro,2010,2026
+companhias,fca,escriturador,cidade,SAO PAULO,2010,2026
+companhias,fca,escriturador,cidade,SP,2016,2018
+companhias,fca,escriturador,cidade,Salvador,2014,2017
+companhias,fca,escriturador,cidade,SÃO PAULO,2010,2018
+companhias,fca,escriturador,cidade,São Bento do Sul,2010,2010
+companhias,fca,escriturador,cidade,São Paulo,2010,2026
+companhias,fca,escriturador,cidade,São Paulo-SP,2010,2013
+companhias,fca,escriturador,cidade,Viana,2011,2012
+companhias,fca,escriturador,pais,Antígua e Barbuda,2021,2025
+companhias,fca,escriturador,pais,Brasil,2010,2026
+companhias,fca,escriturador,sigla_uf,BA,2014,2017
+companhias,fca,escriturador,sigla_uf,CE,2010,2026
+companhias,fca,escriturador,sigla_uf,DF,2010,2024
+companhias,fca,escriturador,sigla_uf,ES,2011,2012
+companhias,fca,escriturador,sigla_uf,MG,2010,2026
+companhias,fca,escriturador,sigla_uf,PA,2011,2018
+companhias,fca,escriturador,sigla_uf,RJ,2010,2026
+companhias,fca,escriturador,sigla_uf,RS,2010,2026
+companhias,fca,escriturador,sigla_uf,SC,2010,2010
+companhias,fca,escriturador,sigla_uf,SE,2010,2024
+companhias,fca,escriturador,sigla_uf,SP,2010,2026
+companhias,fca,escriturador,tipo_endereco,Endereço da Sede,2011,2021
+companhias,fca,escriturador,tipo_endereco,Endereço para Correspondência,2010,2021
+companhias,fca,geral,categoria_registro_cvm,Categoria A,2010,2026
+companhias,fca,geral,categoria_registro_cvm,Categoria B,2010,2026
+companhias,fca,geral,categoria_registro_cvm,Não Identificado,2022,2022
+companhias,fca,geral,especie_controle_acionario,Estatal,2010,2026
+companhias,fca,geral,especie_controle_acionario,Estatal Holding,2010,2026
+companhias,fca,geral,especie_controle_acionario,Estrangeiro,2010,2026
+companhias,fca,geral,especie_controle_acionario,Estrangeiro Holding,2010,2026
+companhias,fca,geral,especie_controle_acionario,Privado,2010,2026
+companhias,fca,geral,especie_controle_acionario,Privado Holding,2010,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,...............,2011,2017
+companhias,fca,geral,pais_custodia_valores_mobiliarios,A companhia não possui valores mobiliários sob custódia.,2010,2013
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Argentina,2010,2016
+companhias,fca,geral,pais_custodia_valores_mobiliarios,BR,2011,2017
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Bermudas,2012,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Brasil,2010,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Brunei,2010,2010
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Canadá,2011,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Chile,2011,2016
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Colômbia,2022,2025
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Espanha,2014,2018
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Estados Unidos,2010,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Luxemburgo,2010,2021
+companhias,fca,geral,pais_custodia_valores_mobiliarios,N/A,2014,2021
+companhias,fca,geral,pais_custodia_valores_mobiliarios,NÃO APLICAVEL,2019,2020
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Não aplicável,2010,2021
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Samoa Ocidental,2023,2026
+companhias,fca,geral,pais_custodia_valores_mobiliarios,Suíça,2010,2018
+companhias,fca,geral,pais_custodia_valores_mobiliarios,não se aplica,2010,2015
+companhias,fca,geral,pais_origem,Argentina,2010,2019
+companhias,fca,geral,pais_origem,Ativo,2019,2020
+companhias,fca,geral,pais_origem,Bermudas,2010,2026
+companhias,fca,geral,pais_origem,Brasil,2010,2026
+companhias,fca,geral,pais_origem,Canadá,2011,2014
+companhias,fca,geral,pais_origem,Cancelado,2020,2020
+companhias,fca,geral,pais_origem,Chile,2011,2016
+companhias,fca,geral,pais_origem,Colômbia,2022,2025
+companhias,fca,geral,pais_origem,Em análise,2019,2019
+companhias,fca,geral,pais_origem,Espanha,2010,2018
+companhias,fca,geral,pais_origem,Holanda,2024,2026
+companhias,fca,geral,pais_origem,Ilhas Cayman,2021,2026
+companhias,fca,geral,pais_origem,Ilhas Virgens (Britânicas),2020,2026
+companhias,fca,geral,pais_origem,Luxemburgo,2017,2020
+companhias,fca,geral,pais_origem,Suíça,2010,2018
+companhias,fca,geral,setor_atividade,"Agricultura (Açúcar, Álcool e Cana)",2010,2026
+companhias,fca,geral,setor_atividade,Alimentos,2010,2026
+companhias,fca,geral,setor_atividade,Arrendamento Mercantil,2010,2026
+companhias,fca,geral,setor_atividade,Bancos,2010,2026
+companhias,fca,geral,setor_atividade,Bebidas e Fumo,2010,2026
+companhias,fca,geral,setor_atividade,Bolsas de Valores/Mercadorias e Futuros,2010,2026
+companhias,fca,geral,setor_atividade,Brinquedos e Lazer,2010,2026
+companhias,fca,geral,setor_atividade,Comunicação e Informática,2010,2026
+companhias,fca,geral,setor_atividade,Comércio (Atacado e Varejo),2010,2026
+companhias,fca,geral,setor_atividade,"Construção Civil, Mat. Constr. e Decoração",2010,2026
+companhias,fca,geral,setor_atividade,Cooperativas,2010,2010
+companhias,fca,geral,setor_atividade,Crédito Imobiliário,2011,2024
+companhias,fca,geral,setor_atividade,Educação,2010,2026
+companhias,fca,geral,setor_atividade,Embalagens,2010,2026
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Agricultura (Açúcar, Álcool e Cana)",2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Alimentos,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Arrendamento Mercantil,2010,2016
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Bancos,2013,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Brinquedos e Lazer,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comunicação e Informática,2013,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Comércio (Atacado e Varejo),2010,2026
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Const. Civil, Mat. Const. e Decoração",2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Crédito Imobiliário,2012,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Educação,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Embalagens,2010,2016
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Energia Elétrica,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Extração Mineral,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Farmacêutico e Higiene,2010,2020
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Gráficas e Editoras,2012,2016
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Hospedagem e Turismo,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Intermediação Financeira,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Metalurgia e Siderurgia,2010,2026
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Máqs., Equip., Veíc. e Peças",2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Papel e Celulose,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Petroquímicos e Borracha,2010,2023
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Petróleo e Gás,2010,2026
+companhias,fca,geral,setor_atividade,"Emp. Adm. Part. - Saneamento, Serv. Água e Gás",2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Securitização de Recebíveis,2010,2024
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Seguradoras e Corretoras,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Sem Setor Principal,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Serviços Transporte e Logística,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Serviços médicos,2016,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Telecomunicações,2010,2026
+companhias,fca,geral,setor_atividade,Emp. Adm. Part. - Têxtil e Vestuário,2010,2025
+companhias,fca,geral,setor_atividade,Emp. Adm. Part.-Bolsas de Valores/Mercadorias e Futuros,2010,2011
+companhias,fca,geral,setor_atividade,Energia Elétrica,2010,2026
+companhias,fca,geral,setor_atividade,Extração Mineral,2010,2026
+companhias,fca,geral,setor_atividade,Factoring,2010,2011
+companhias,fca,geral,setor_atividade,Farmacêutico e Higiene,2010,2026
+companhias,fca,geral,setor_atividade,Gráficas e Editoras,2010,2023
+companhias,fca,geral,setor_atividade,Hospedagem e Turismo,2010,2026
+companhias,fca,geral,setor_atividade,Intermediação Financeira,2010,2026
+companhias,fca,geral,setor_atividade,Metalurgia e Siderurgia,2010,2026
+companhias,fca,geral,setor_atividade,"Máquinas, Equipamentos, Veículos e Peças",2010,2026
+companhias,fca,geral,setor_atividade,Papel e Celulose,2010,2026
+companhias,fca,geral,setor_atividade,Pesca,2020,2020
+companhias,fca,geral,setor_atividade,Petroquímicos e Borracha,2010,2026
+companhias,fca,geral,setor_atividade,Petróleo e Gás,2010,2026
+companhias,fca,geral,setor_atividade,Reflorestamento,2010,2026
+companhias,fca,geral,setor_atividade,"Saneamento, Serv. Água e Gás",2010,2026
+companhias,fca,geral,setor_atividade,Securitização de Recebíveis,2010,2026
+companhias,fca,geral,setor_atividade,Seguradoras e Corretoras,2010,2026
+companhias,fca,geral,setor_atividade,Serviços Transporte e Logística,2010,2026
+companhias,fca,geral,setor_atividade,Serviços médicos,2010,2026
+companhias,fca,geral,setor_atividade,Telecomunicações,2010,2026
+companhias,fca,geral,setor_atividade,Têxtil e Vestuário,2010,2026
+companhias,fca,geral,situacao_emissor,Em Falência,2015,2026
+companhias,fca,geral,situacao_emissor,Em Liquidação Extrajudicial,2011,2026
+companhias,fca,geral,situacao_emissor,Em Recuperação Extrajudicial,2011,2026
+companhias,fca,geral,situacao_emissor,Em Recuperação Judicial ou Equivalente,2010,2026
+companhias,fca,geral,situacao_emissor,Em liquidação judicial,2010,2015
+companhias,fca,geral,situacao_emissor,Fase Operacional,2010,2026
+companhias,fca,geral,situacao_emissor,Fase Pré-Operacional,2010,2026
+companhias,fca,geral,situacao_emissor,Paralisada,2010,2026
+companhias,fca,geral,situacao_registro_cvm,Ativo,2010,2026
+companhias,fca,geral,situacao_registro_cvm,Cancelado,2020,2026
+companhias,fca,geral,situacao_registro_cvm,Em análise,2010,2025
+companhias,fca,geral,situacao_registro_cvm,Não concedido,2018,2018
+companhias,fca,geral,situacao_registro_cvm,Suspenso,2015,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Alemanha,2022,2022
+companhias,fca,pais_estrangeiro_negociacao,pais,Argentina,2010,2019
+companhias,fca,pais_estrangeiro_negociacao,pais,Bermudas,2010,2013
+companhias,fca,pais_estrangeiro_negociacao,pais,Brasil,2010,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Canadá,2011,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Canadá Toronto Stock Exchange Venture (TSX-V),2014,2014
+companhias,fca,pais_estrangeiro_negociacao,pais,Chile,2011,2016
+companhias,fca,pais_estrangeiro_negociacao,pais,China,2010,2010
+companhias,fca,pais_estrangeiro_negociacao,pais,Colômbia,2011,2025
+companhias,fca,pais_estrangeiro_negociacao,pais,EUA,2010,2021
+companhias,fca,pais_estrangeiro_negociacao,pais,Espanha,2010,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Estados Unidos,2010,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Estados Unidos da América,2011,2014
+companhias,fca,pais_estrangeiro_negociacao,pais,França,2010,2019
+companhias,fca,pais_estrangeiro_negociacao,pais,"Grã-Bretanha (Reino Unido, UK)",2023,2023
+companhias,fca,pais_estrangeiro_negociacao,pais,Holanda,2012,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Hong Kong,2011,2015
+companhias,fca,pais_estrangeiro_negociacao,pais,Ilhas Cayman,2010,2010
+companhias,fca,pais_estrangeiro_negociacao,pais,Inglaterra,2010,2021
+companhias,fca,pais_estrangeiro_negociacao,pais,Irlanda,2010,2018
+companhias,fca,pais_estrangeiro_negociacao,pais,Japão,2010,2011
+companhias,fca,pais_estrangeiro_negociacao,pais,Luxemburgo,2010,2026
+companhias,fca,pais_estrangeiro_negociacao,pais,Luxemburgo.,2010,2013
+companhias,fca,pais_estrangeiro_negociacao,pais,Nova Iorque,2010,2011
+companhias,fca,pais_estrangeiro_negociacao,pais,Não aplicável,2018,2021
+companhias,fca,pais_estrangeiro_negociacao,pais,Paraguai,2010,2010
+companhias,fca,pais_estrangeiro_negociacao,pais,Peru,2010,2011
+companhias,fca,pais_estrangeiro_negociacao,pais,Reino Unido,2010,2011
+companhias,fca,pais_estrangeiro_negociacao,pais,Singapura,2011,2011
+companhias,fca,pais_estrangeiro_negociacao,pais,Suiça,2021,2021
+companhias,fca,pais_estrangeiro_negociacao,pais,Suíça,2010,2018
+companhias,fca,submissao,categ_doc,FCA,2010,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Ordinária Classe A,2023,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Ordinária Classe B,2023,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe A,2018,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe B,2018,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe C,2018,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe D,2018,2025
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe E,2018,2024
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe F,2018,2024
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe G,2018,2019
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe R,2018,2026
+companhias,fca,valor_mobiliario,classe_acao_preferencial,Preferencial Classe U,2018,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,0,2023,2025
+companhias,fca,valor_mobiliario,composicao_bdr_unit,"0,555556",2024,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,04 Ações Ordinárias,2026,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,"1 (um)  Bônus de Subscrição para cada 3 (três) novas Ações subscritas, totalizando a emissão de até  83.333.333",2023,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ENG3 e 4 ENGI4,2018,2018
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 KLBN3 + 4 KLBN4,2018,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 1 PN,2019,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 2 PN,2019,2022
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 2 PNs,2021,2022
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 4 PN,2019,2024
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON + 4 PNs,2018,2018
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON / 2 PN,2018,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON E 2 PN,2019,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON E 2 PNA,2020,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 2 PN,2021,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 2PNs,2022,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON e 4 PN,2018,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ON+ 2PN,2021,2025
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 PN + 3 Recibos de Subscrição,2018,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 PN + 3 recibos de subscrição,2021,2022
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 VVAR3 + 2 VVAR4,2018,2018
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ação,2023,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ação ON + 2 ações PN,2018,2020
+companhias,fca,valor_mobiliario,composicao_bdr_unit,1 ação ordinária e 4 ações preferenciais,2019,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,2 ações preferenciais e 1 ação ordinária,2022,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,3.720.752,2024,2024
+companhias,fca,valor_mobiliario,composicao_bdr_unit,383.768,2025,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,4 ações,2022,2023
+companhias,fca,valor_mobiliario,composicao_bdr_unit,4(quatro) Bônus de Subscrição para cada lote de 5(cinco) ações ordinárias da Companhia subscritas no Aumento de Capital,2023,2024
+companhias,fca,valor_mobiliario,composicao_bdr_unit,Bônus conversíveis em ações KEPL3,2022,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,Class A Shares,2022,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,N/A,2023,2026
+companhias,fca,valor_mobiliario,composicao_bdr_unit,Não Aplicável,2025,2025
+companhias,fca,valor_mobiliario,entidade_administradora,"B3 S.A. - Brasil, Bolsa, Balcão.",2018,2026
+companhias,fca,valor_mobiliario,entidade_administradora,"BM&FBOVESPA S.A. - Bolsa de Valores, Mercadorias e Futuros",2010,2018
+companhias,fca,valor_mobiliario,entidade_administradora,CETIP,2010,2018
+companhias,fca,valor_mobiliario,mercado,Balcão Não-Organizado,2010,2026
+companhias,fca,valor_mobiliario,mercado,Balcão Organizado,2010,2026
+companhias,fca,valor_mobiliario,mercado,Bolsa,2010,2026
+companhias,fca,valor_mobiliario,segmento,Bovespa Mais,2010,2026
+companhias,fca,valor_mobiliario,segmento,Bovespa Mais N2,2010,2025
+companhias,fca,valor_mobiliario,segmento,Básico,2018,2026
+companhias,fca,valor_mobiliario,segmento,Novo Mercado,2018,2026
+companhias,fca,valor_mobiliario,segmento,Nível 1 de Governança Corporativa,2010,2026
+companhias,fca,valor_mobiliario,segmento,Nível 2 de Governança Corporativa,2010,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,ONA,2023,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,ONB,2023,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNA,2018,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNB,2018,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNC,2018,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PND,2018,2025
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNE,2018,2024
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNF,2018,2024
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNG,2018,2019
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNR,2018,2026
+companhias,fca,valor_mobiliario,sigla_classe_acao_preferencial,PNU,2018,2026
+companhias,fca,valor_mobiliario,sigla_entidade_administradora,B3,2018,2026
+companhias,fca,valor_mobiliario,sigla_entidade_administradora,BM&FBOVESPA,2010,2018
+companhias,fca,valor_mobiliario,sigla_entidade_administradora,CETIP,2010,2018
+companhias,fca,valor_mobiliario,valor_mobiliario,Ações Ordinárias,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Ações Preferenciais,2018,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,BDRs,2022,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Bônus de Subscrição,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Contrato de Investimento Coletivo,2010,2014
+companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Debêntures Conversíveis,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Letras Financeiras,2011,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Nota Comercial,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Título de Investimento Coletivo,2010,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Units,2018,2026
+companhias,fca,valor_mobiliario,valor_mobiliario,Valor Mobiliário Não Registrado,2015,2026
+companhias,fre,acao_entregue,orgao_administracao,Conselho Fiscal,2023,2026
+companhias,fre,acao_entregue,orgao_administracao,Conselho de Administração,2023,2026
+companhias,fre,acao_entregue,orgao_administracao,Diretoria Estatutária,2023,2026
+companhias,fre,administrador_declaracao_genero,nao_aplicavel,N,2023,2026
+companhias,fre,administrador_declaracao_genero,nao_aplicavel,S,2023,2026
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Efetivos,2023,2026
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho Fiscal - Suplentes,2023,2026
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Efetivos,2023,2026
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Conselho de Administração - Suplentes,2023,2026
+companhias,fre,administrador_declaracao_genero,orgao_administracao,Diretoria,2023,2026
+companhias,fre,administrador_declaracao_raca,nao_aplicavel,N,2023,2026
+companhias,fre,administrador_declaracao_raca,nao_aplicavel,S,2023,2026
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Efetivos,2023,2026
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho Fiscal - Suplentes,2023,2026
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Efetivos,2023,2026
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Conselho de Administração - Suplentes,2023,2026
+companhias,fre,administrador_declaracao_raca,orgao_administracao,Diretoria,2023,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,10 - Diretor Presidente / Superintendente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,11 - Diretor Vice Presidente/ Superintendente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,12 - Diretor de Relações com Investidores,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,13 - Diretor Presidente / Diretor de Relações com Investidores,2015,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,14 - Diretor Financeiro,2024,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,15 - Diretor Financeiro / Diretor de Relações com Investidores,2024,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,19 - Outros Diretores,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,20 - Presidente do Conselho de Administração,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,21 - Vice Presidente Cons. de Administração,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,22 - Conselho de Administração (Efetivo),2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,23 - Conselho de Administração (Suplente),2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,24 - Presidente do Conselho de Administração Independente,2013,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,25 - Vice Presidente Cons. de Administração Independente,2013,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,27 - Conselho de Adm. Independente (Efetivo),2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,28 - Conselho de Adm. Independente (Suplente),2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,29 - Outros Conselheiros,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,30 - Presidente do C.A. e Diretor Presidente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,31 - Vice Pres. C.A. e Diretor Presidente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,32 - Vice Pres. C.A. e Vice Dir. Presidente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,33 - Conselheiro(Efetivo) e Dir. Presidente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,34 - Conselheiro(Efetivo) e Dir. Vice Pres.,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,35 - Conselheiro(Efetivo) e Dir. Rel. Invest.,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,36 - Conselheiro(Suplente) e Dir. Presidente,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,37 - Conselheiro(Suplente) e Dir. Vice Pres.,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,38 - Conselheiro(Suplente)/ Dir. Rel. Invest.,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,39 - Outros Conselheiros / Diretores,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,40 - Pres. C.F.Eleito p/Controlador,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,41 - Pres. C.F.Eleito p/Preferencialistas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,42 - Pres. C.F.Eleito p/Minor.Ordinaristas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,43 - C.F.(Efetivo)Eleito p/Controlador,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,44 - C.F.(Efetivo)Eleito p/preferencialistas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,45 - C.F.(Efetivo)Eleito p/Minor.Ordinaristas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,46 - C.F.(Suplent)Eleito p/Controlador,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,47 - C.F.(Suplent)Eleito p/preferencialistas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,cargo_eletivo_ocupado,48 - C.F.(Suplent)Eleito p/Minor.Ordinaristas,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,eleito_controlador,N,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,eleito_controlador,S,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Conselho Fiscal,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas ao Conselho de Administração,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas à Diretoria,2010,2026
+companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence à Diretoria e ao Conselho de Administração,2010,2026
+companhias,fre,auditor,tipo_origem_auditor,Estrangeiro,2010,2022
+companhias,fre,auditor,tipo_origem_auditor,Nacional,2010,2026
+companhias,fre,capital_social,tipo_capital,Capital Autorizado,2010,2026
+companhias,fre,capital_social,tipo_capital,Capital Emitido,2010,2026
+companhias,fre,capital_social,tipo_capital,Capital Integralizado,2010,2026
+companhias,fre,capital_social,tipo_capital,Capital Subscrito,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A,2023,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe B,2023,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe O,2026,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe BR,2013,2022
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe D,2010,2025
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe F,2010,2023
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe R,2010,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe S,2025,2026
+companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe A,2023,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe O,2025,2025
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe OR,2024,2024
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe A,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe B,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe C,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe CR,2010,2011
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe D,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe DR,2010,2010
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe E,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe F,2010,2023
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe KR,2021,2022
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe N,2013,2014
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe OR,2014,2015
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe R,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe S,2025,2025
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe U,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Preferencial Classe ZR,2017,2018
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,ONA,2023,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,ONO,2025,2025
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,ONOR,2024,2024
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNA,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNB,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNC,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNCR,2010,2011
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PND,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNDR,2010,2010
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNE,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNF,2010,2023
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNKR,2021,2022
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNN,2013,2014
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNOR,2014,2015
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNR,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNS,2025,2025
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNU,2010,2026
+companhias,fre,distribuicao_capital_classe_acao,sigla_classe_acoes_preferenciais,PNZR,2017,2018
+companhias,fre,empregado_local_faixa_etaria,local,Centro-Oeste,2023,2026
+companhias,fre,empregado_local_faixa_etaria,local,Exterior,2023,2026
+companhias,fre,empregado_local_faixa_etaria,local,Nordeste,2023,2026
+companhias,fre,empregado_local_faixa_etaria,local,Norte,2023,2026
+companhias,fre,empregado_local_faixa_etaria,local,Sudeste,2023,2026
+companhias,fre,empregado_local_faixa_etaria,local,Sul,2023,2026
+companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Coordenador),2025,2026
+companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Efetivo),2010,2026
+companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Suplente),2010,2026
+companhias,fre,membro_comite,cargo_ocupado,Outros,2010,2026
+companhias,fre,membro_comite,cargo_ocupado,Presidente do Comitê,2010,2026
+companhias,fre,membro_comite,cargo_ocupado,Vice Presidente do Comitê,2010,2026
+companhias,fre,membro_comite,tipo_comite,Comitê Financeiro,2010,2026
+companhias,fre,membro_comite,tipo_comite,Comitê de Auditoria,2010,2026
+companhias,fre,membro_comite,tipo_comite,Comitê de Estrutura Organizacional,2010,2024
+companhias,fre,membro_comite,tipo_comite,Comitê de Remuneração,2010,2026
+companhias,fre,membro_comite,tipo_comite,Comitê de Risco,2010,2026
+companhias,fre,membro_comite,tipo_comite,Outros Comitês,2010,2026
+companhias,fre,mercado_estrangeiro,pais_negociacao,Afeganistão,2023,2025
+companhias,fre,mercado_estrangeiro,pais_negociacao,Argentina,2019,2019
+companhias,fre,mercado_estrangeiro,pais_negociacao,Bermudas,2021,2024
+companhias,fre,mercado_estrangeiro,pais_negociacao,Brasil,2019,2025
+companhias,fre,mercado_estrangeiro,pais_negociacao,Canadá,2020,2024
+companhias,fre,mercado_estrangeiro,pais_negociacao,Cingapura,2019,2024
+companhias,fre,mercado_estrangeiro,pais_negociacao,Colômbia,2019,2025
+companhias,fre,mercado_estrangeiro,pais_negociacao,Espanha,2019,2024
+companhias,fre,mercado_estrangeiro,pais_negociacao,Estados Unidos,2019,2025
+companhias,fre,mercado_estrangeiro,pais_negociacao,França,2019,2019
+companhias,fre,mercado_estrangeiro,pais_negociacao,Irlanda,2019,2025
+companhias,fre,mercado_estrangeiro,pais_negociacao,Luxemburgo,2019,2024
+companhias,fre,outro_valor_mobiliario,conversibilidade,Não,2010,2023
+companhias,fre,outro_valor_mobiliario,conversibilidade,Sim,2010,2026
+companhias,fre,outro_valor_mobiliario,resgatavel,Não,2010,2023
+companhias,fre,outro_valor_mobiliario,resgatavel,Sim,2010,2026
+companhias,fre,outro_valor_mobiliario,restricao_circulacao,Não,2010,2023
+companhias,fre,outro_valor_mobiliario,restricao_circulacao,Sim,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Ações,2023,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Bônus de Subscrição,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2010,2022
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários,2010,2018
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Contrato de Investimento Coletivo,2010,2025
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Letras Financeiras,2011,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Nota Comercial,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Título de Investimento Coletivo,2010,2026
+companhias,fre,outro_valor_mobiliario,valor_mobiliario,Valor Mobiliário Não Registrado,2010,2023
+companhias,fre,participacao_sociedade,possui_registro_cvm,N,2010,2023
+companhias,fre,participacao_sociedade,possui_registro_cvm,S,2010,2022
+companhias,fre,participacao_sociedade,tipo_sociedade,Coligada,2010,2023
+companhias,fre,participacao_sociedade,tipo_sociedade,Controlada,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,AC,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,AL,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,AM,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,AP,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,BA,2010,2016
+companhias,fre,participacao_sociedade,uf_sede,CE,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,DF,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,ES,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,GO,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,MA,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,MG,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,MS,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,MT,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,PA,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,PB,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,PE,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,PI,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,PR,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,RJ,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,RN,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,RO,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,RR,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,RS,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,SC,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,SE,2010,2022
+companhias,fre,participacao_sociedade,uf_sede,SP,2010,2023
+companhias,fre,participacao_sociedade,uf_sede,TO,2010,2022
+companhias,fre,posicao_acionaria,acionista_controlador,N,2010,2026
+companhias,fre,posicao_acionaria,acionista_controlador,S,2010,2026
+companhias,fre,posicao_acionaria,participante_acordo_acionistas,N,2010,2026
+companhias,fre,posicao_acionaria,participante_acordo_acionistas,S,2010,2026
+companhias,fre,posicao_acionaria,residente_exterior,N,2010,2026
+companhias,fre,posicao_acionaria,residente_exterior,S,2016,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista,PF,2010,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista,PJ,2010,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PF,2010,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_acionista_relacionado,PJ,2010,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_representante_legal,PF,2016,2026
+companhias,fre,posicao_acionaria,tipo_pessoa_representante_legal,PJ,2016,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe B,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe C,2025,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe N,2024,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe O,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe OR,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe PR,2023,2023
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe AR,2022,2023
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe D,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe F,2010,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe J,2025,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe N,2025,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe OR,2017,2017
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe PR,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe R,2023,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe S,2025,2026
+companhias,fre,posicao_acionaria_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Avô ou Avó (2º grau por consangüinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Cunhado e Cunhada (2º grau por afinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Enteado e Enteada (2º grau por afinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Filho ou Filha (1º grau por consangüinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Genro ou Nora (2º grau por afinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Irmão ou Irmã (1º grau por consangüinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Marido ou Esposa (1º grau por afinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Padrasto e Madrasta (2º grau por afinidade),2011,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Pai ou Mãe (1º grau por consangüinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,Sogra ou Sogro (2º grau por afinidade),2010,2026
+companhias,fre,relacao_familiar,tipo_parentesco,União estável,2010,2018
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Cliente,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Direta,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlada Indireta,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Direto,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Controlador Indireto,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Credor,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Devedor,2010,2026
+companhias,fre,relacao_subordinacao,categoria_pessoa_relacionada,Fornecedor,2010,2026
+companhias,fre,relacao_subordinacao,tipo_pessoa_relacionada,PF,2010,2026
+companhias,fre,relacao_subordinacao,tipo_pessoa_relacionada,PJ,2010,2026
+companhias,fre,relacao_subordinacao,tipo_relacao,Controle,2010,2026
+companhias,fre,relacao_subordinacao,tipo_relacao,Prestação de serviço,2010,2026
+companhias,fre,relacao_subordinacao,tipo_relacao,Subordinação,2010,2026
+companhias,fre,remuneracao_acao,orgao_administracao,Conselho Fiscal,2023,2026
+companhias,fre,remuneracao_acao,orgao_administracao,Conselho de Administração,2023,2026
+companhias,fre,remuneracao_acao,orgao_administracao,Diretoria Estatutária,2023,2026
+companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho Fiscal,2010,2026
+companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Conselho de Administração,2010,2026
+companhias,fre,remuneracao_maxima_minima_media,orgao_administracao,Diretoria Estatutária,2010,2026
+companhias,fre,remuneracao_total_orgao,orgao_administracao,Conselho Fiscal,2010,2026
+companhias,fre,remuneracao_total_orgao,orgao_administracao,Conselho de Administração,2010,2026
+companhias,fre,remuneracao_total_orgao,orgao_administracao,Diretoria Estatutária,2010,2026
+companhias,fre,remuneracao_variavel,orgao_administracao,Conselho Fiscal,2023,2026
+companhias,fre,remuneracao_variavel,orgao_administracao,Conselho de Administração,2023,2026
+companhias,fre,remuneracao_variavel,orgao_administracao,Diretoria Estatutária,2023,2026
+companhias,fre,responsavel,cargo_responsavel,Diretor Presidente,2010,2026
+companhias,fre,responsavel,cargo_responsavel,Diretor Presidente/Relações com Investidores,2010,2026
+companhias,fre,responsavel,cargo_responsavel,Diretor de Relações com Investidores,2010,2026
+companhias,fre,submissao,categ_doc,FRE,2010,2016
+companhias,fre,submissao,categ_doc,FRE NOVO,2016,2023
+companhias,fre,submissao,categ_doc,FRE WEB,2023,2026
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Ações,2023,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Bônus de Subscrição,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2019,2022
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários,2019,2022
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Contrato de Investimento Coletivo,2019,2022
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Debêntures,2018,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis,2019,2024
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Letras Financeiras,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Nota Comercial,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Outros,2025,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Título de Investimento Coletivo,2019,2025
+companhias,fre,titular_valor_mobiliario,valor_mobiliario,Valor Mobiliário Não Registrado,2020,2023
+companhias,fre,titulo_exterior,conversibilidade,N,2016,2022
+companhias,fre,titulo_exterior,conversibilidade,S,2016,2026
+companhias,fre,titulo_exterior,possibilidade_resgate,N,2016,2022
+companhias,fre,titulo_exterior,possibilidade_resgate,S,2016,2026
+companhias,fre,titulo_exterior,restricao_circulacao,N,2016,2022
+companhias,fre,titulo_exterior,restricao_circulacao,S,2016,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Ações,2023,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Bônus de Subscrição,2016,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2016,2024
+companhias,fre,titulo_exterior,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2016,2022
+companhias,fre,titulo_exterior,valor_mobiliario,Certificados de Recebíveis Imobiliários,2016,2022
+companhias,fre,titulo_exterior,valor_mobiliario,Certificados de depósito de valores mobiliários,2016,2025
+companhias,fre,titulo_exterior,valor_mobiliario,Contrato de Investimento Coletivo,2016,2019
+companhias,fre,titulo_exterior,valor_mobiliario,Debêntures,2016,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Letras Financeiras,2016,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Nota Comercial,2016,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Outros,2024,2026
+companhias,fre,titulo_exterior,valor_mobiliario,Título de Investimento Coletivo,2016,2023
+companhias,fre,titulo_exterior,valor_mobiliario,Valor Mobiliário Não Registrado,2018,2018
+companhias,fre,transacao_parte_relacionada,emprestimo_divida,N,2010,2023
+companhias,fre,transacao_parte_relacionada,emprestimo_divida,S,2010,2023
+companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Credor,2016,2026
+companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor,2016,2026
+companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra,2016,2026
+companhias,fre,transacao_parte_relacionada,tipo_pessoa,PF,2017,2024
+companhias,fre,transacao_parte_relacionada,tipo_pessoa,PJ,2013,2024
+companhias,ipe,ipe,especie,Ata,2003,2026
+companhias,ipe,ipe,especie,Balanço Social,2025,2026
+companhias,ipe,ipe,especie,Boletim de voto a distância,2016,2026
+companhias,ipe,ipe,especie,Combinadas,2026,2026
+companhias,ipe,ipe,especie,Condensadas,2025,2026
+companhias,ipe,ipe,especie,DFs Mercosul com reconciliação para IFRS,2011,2024
+companhias,ipe,ipe,especie,"Declaração de Alienação de Participação Acionária Relevante - Art.12, §4º, da Instrução CVM nº358/02",2005,2026
+companhias,ipe,ipe,especie,Declaração de Aquisição de Participação Acionária Relevante - Art.12 da Instrução CVM nº358/02,2005,2026
+companhias,ipe,ipe,especie,Demonstrações Financeiras com reconciliação para IFRS,2007,2024
+companhias,ipe,ipe,especie,Demonstrações Financeiras com reconciliação para US GAAP,2007,2023
+companhias,ipe,ipe,especie,Demonstrações Financeiras em IFRS,2007,2024
+companhias,ipe,ipe,especie,Demonstrações Financeiras em Padrões Internacionais,2024,2026
+companhias,ipe,ipe,especie,Demonstrações Financeiras em US GAAP,2007,2022
+companhias,ipe,ipe,especie,Edital de Convocação,2003,2026
+companhias,ipe,ipe,especie,Especialmente preparadas para Registro Inicial,2024,2026
+companhias,ipe,ipe,especie,Instrução de voto,2023,2026
+companhias,ipe,ipe,especie,"Justificação de Incorporação, Cisão ou Fusão",2003,2016
+companhias,ipe,ipe,especie,Manual para participação,2014,2026
+companhias,ipe,ipe,especie,Mapa Final de Votação Resumido,2025,2026
+companhias,ipe,ipe,especie,Mapa Final de Votação Sintético,2018,2025
+companhias,ipe,ipe,especie,Mapa Sintético dos votos enviados diretamente à Companhia,2025,2026
+companhias,ipe,ipe,especie,Mapa consolidado de voto a distância,2016,2026
+companhias,ipe,ipe,especie,Mapa do Depositário Central,2016,2026
+companhias,ipe,ipe,especie,Mapa do Escriturador,2017,2026
+companhias,ipe,ipe,especie,Mapa final de votação,2016,2024
+companhias,ipe,ipe,especie,Mapa final de votação detalhado,2018,2026
+companhias,ipe,ipe,especie,Material referente a pedidos públicos de procuração,2010,2026
+companhias,ipe,ipe,especie,Minuta de Prospecto Definitivo,2014,2023
+companhias,ipe,ipe,especie,Minuta de Prospecto Preliminar,2014,2026
+companhias,ipe,ipe,especie,Outros,2007,2024
+companhias,ipe,ipe,especie,Proposta da Administração,2003,2026
+companhias,ipe,ipe,especie,Proposta para a assembleia,2013,2020
+companhias,ipe,ipe,especie,Prospecto Definitivo,2014,2026
+companhias,ipe,ipe,especie,Prospecto Preliminar,2014,2026
+companhias,ipe,ipe,especie,"Protocolo de Incorporação, Cisão ou Fusão",2003,2016
+companhias,ipe,ipe,especie,"Protocolo e Justificação de Incorporação, Fusão ou Cisão",2016,2026
+companhias,ipe,ipe,especie,Pró-forma,2024,2026
+companhias,ipe,ipe,especie,Regulatórias,2025,2026
+companhias,ipe,ipe,especie,Sumário das Decisões,2003,2026
+companhias,ipe,ipe,especie,Suplemento de Prospecto,2019,2021
+companhias,ipe,ipe,tipo_apresentacao,AP - Apresentação,2003,2026
+companhias,ipe,ipe,tipo_apresentacao,RC - Reapresentação por Exigência,2003,2026
+companhias,ipe,ipe,tipo_apresentacao,RE - Reapresentação Espontânea,2003,2026
+companhias,itr,bpa,moeda,REAL,2011,2026
+companhias,itr,bpa,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,bpa,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,bpa,st_conta_fixa,N,2011,2026
+companhias,itr,bpa,st_conta_fixa,S,2011,2026
+companhias,itr,bpp,moeda,REAL,2011,2026
+companhias,itr,bpp,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,bpp,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,bpp,st_conta_fixa,N,2011,2026
+companhias,itr,bpp,st_conta_fixa,S,2011,2026
+companhias,itr,dfc_md,moeda,REAL,2011,2026
+companhias,itr,dfc_md,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dfc_md,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dfc_md,st_conta_fixa,N,2011,2026
+companhias,itr,dfc_md,st_conta_fixa,S,2011,2026
+companhias,itr,dfc_mi,moeda,REAL,2011,2026
+companhias,itr,dfc_mi,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dfc_mi,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dfc_mi,st_conta_fixa,N,2011,2026
+companhias,itr,dfc_mi,st_conta_fixa,S,2011,2026
+companhias,itr,dmpl,coluna_df,Capital Social Integralizado,2011,2026
+companhias,itr,dmpl,coluna_df,Lucros ou Prejuízos Acumulados,2011,2026
+companhias,itr,dmpl,coluna_df,Outros Resultados Abrangentes,2011,2026
+companhias,itr,dmpl,coluna_df,Participação dos Não Controladores,2011,2026
+companhias,itr,dmpl,coluna_df,Patrimônio Líquido,2011,2026
+companhias,itr,dmpl,coluna_df,Patrimônio Líquido Consolidado,2011,2026
+companhias,itr,dmpl,coluna_df,"Reservas de Capital, Opções Outorgadas e Ações em Tesouraria",2011,2026
+companhias,itr,dmpl,coluna_df,Reservas de Lucro,2011,2026
+companhias,itr,dmpl,moeda,REAL,2011,2026
+companhias,itr,dmpl,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dmpl,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dmpl,st_conta_fixa,N,2011,2026
+companhias,itr,dmpl,st_conta_fixa,S,2011,2026
+companhias,itr,dra,moeda,REAL,2011,2026
+companhias,itr,dra,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dra,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dra,st_conta_fixa,N,2011,2026
+companhias,itr,dra,st_conta_fixa,S,2011,2026
+companhias,itr,dre,moeda,REAL,2011,2026
+companhias,itr,dre,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dre,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dre,st_conta_fixa,N,2011,2026
+companhias,itr,dre,st_conta_fixa,S,2011,2026
+companhias,itr,dva,moeda,REAL,2011,2026
+companhias,itr,dva,ordem_exerc,PENÚLTIMO,2011,2026
+companhias,itr,dva,ordem_exerc,ÚLTIMO,2011,2026
+companhias,itr,dva,st_conta_fixa,N,2011,2026
+companhias,itr,dva,st_conta_fixa,S,2011,2026
+companhias,itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre as Demonstrações Financeiras,2011,2026
+companhias,itr,parecer,tp_parecer_decl,Declaração dos Diretores sobre o Relatório do Auditor Independente,2011,2026
+companhias,itr,parecer,tp_parecer_decl,Parecer do Conselho Fiscal ou Órgão Equivalente,2011,2026
+companhias,itr,parecer,tp_parecer_decl,"Parecer ou Relatório Resumido, se houver, do Comitê de Auditoria (estatutário ou não)",2018,2026
+companhias,itr,parecer,tp_parecer_decl,"Relatório Resumido do Comitê de Auditoria (estatutário, previsto em regulamentação específica da CVM)",2018,2026
+companhias,itr,parecer,tp_parecer_decl,Relatório da Revisão Especial,2011,2026
+companhias,itr,parecer,tp_relat_esp,Adverso,2012,2026
+companhias,itr,parecer,tp_relat_esp,Com Ressalva,2011,2026
+companhias,itr,parecer,tp_relat_esp,Negativa de Opinião,2011,2026
+companhias,itr,parecer,tp_relat_esp,Sem Ressalva,2011,2026
+companhias,itr,submissao,categ_doc,ITR,2011,2026
+companhias,vlmo,consolidado,tipo_ativo,Ações,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,BDR Patrocinados,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Bônus de Subscrição,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Debêntures,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Derivativos,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Opção de Compra,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Opção de Venda,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Opções de Plano de Remuneração,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Outros,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Recibo de Subscrição,2018,2026
+companhias,vlmo,consolidado,tipo_ativo,Units,2018,2026
+companhias,vlmo,consolidado,tipo_cargo,Conselho Fiscal ou Vinculado,2018,2026
+companhias,vlmo,consolidado,tipo_cargo,Conselho de Administração ou Vinculado,2018,2026
+companhias,vlmo,consolidado,tipo_cargo,Controlador ou Vinculado,2018,2026
+companhias,vlmo,consolidado,tipo_cargo,Diretor ou Vinculado,2018,2026
+companhias,vlmo,consolidado,tipo_cargo,Órgão Estatutário ou Vinculado,2018,2026
+companhias,vlmo,consolidado,tipo_empresa,Companhia,2018,2026
+companhias,vlmo,consolidado,tipo_empresa,Controlada,2018,2026
+companhias,vlmo,consolidado,tipo_empresa,Controladora,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Ações de exercício de bônus de subscrição,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Ações de plano de remuneração,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Ações decorrentes de exercício de opção de compra,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Ações reduzidas (exercício de opção de venda),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Ações resultantes de conversão de debêntures,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Bônus de subscrição exercido,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Compra,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Compra à termo,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Compra à venda,2020,2024
+companhias,vlmo,consolidado,tipo_movimentacao,Compra à vista,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (locador),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Contratação de empréstimo (tomador),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Debêntures convertidas,2018,2024
+companhias,vlmo,consolidado,tipo_movimentacao,Desdobramento/bonificação,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Desligamento/saída,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (locador),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Devolução de empréstimo (tomador),2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Doação (doador),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Doação (donatário),2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício de opção de Plano de Remuneração,2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de compra,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Exercício opção de venda,2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Grupamento,2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Herança (doador),2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Herança (donatário),2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Homologação de subscrição,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Opção vencida e não exercida,2020,2024
+companhias,vlmo,consolidado,tipo_movimentacao,Outras Entradas,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Outras Saídas,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Permuta (entrega),2019,2025
+companhias,vlmo,consolidado,tipo_movimentacao,Permuta (recebimento),2019,2025
+companhias,vlmo,consolidado,tipo_movimentacao,Posse,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Recebimento como vantagem adicional em subscrição,2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Recebimento de opção de Plano de Remuneração,2019,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Saldo Inicial,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Subscrição,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Units de plano de remuneração,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Units decorrentes de exercício de opção de compra,2019,2021
+companhias,vlmo,consolidado,tipo_movimentacao,Units reduzidas (exercício de opção de venda),2019,2024
+companhias,vlmo,consolidado,tipo_movimentacao,Venda,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Venda à termo,2018,2026
+companhias,vlmo,consolidado,tipo_movimentacao,Venda à vista,2018,2026
+companhias,vlmo,consolidado,tipo_operacao,Crédito,2018,2026
+companhias,vlmo,consolidado,tipo_operacao,Débito,2018,2026
+companhias,vlmo,submissao,categoria,Valores Mobiliários negociados e detidos (art. 11 da Instr. CVM nº 358),2018,2026
+companhias,vlmo,submissao,tipo,Posição Consolidada,2018,2026
+companhias,vlmo,submissao,tipo_apresentacao,AP - Apresentação,2018,2026
+companhias,vlmo,submissao,tipo_apresentacao,RE - Reapresentação Espontânea,2018,2026

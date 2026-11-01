@@ -98,10 +98,29 @@ test_that("cvm_dictionary errors on non-string arguments", {
 test_that("cvm_codelist returns categorical values for cad/companhias/sit", {
   cl <- cvm_codelist("cad", "companhias", "sit")
   expect_s3_class(cl, "tbl_df")
-  expect_named(cl, "value")
+  expect_named(cl, c("value", "first_seen_year", "last_seen_year"))
+  expect_type(cl$first_seen_year, "integer")
   expect_gte(nrow(cl), 2L)
   expect_true("ATIVO" %in% cl$value)
   expect_true("CANCELADA" %in% cl$value)
+})
+
+test_that("codelists span every year and date each value", {
+  # 2026-11-01: sampled from the latest year alone (a 2026 with five
+  # months of filings), the foreign market country listed 5 of its 31
+  # values.
+  pais <- cvm_codelist("fca", "pais_estrangeiro_negociacao", "pais")
+  expect_gt(nrow(pais), 5L)
+  expect_true(all(pais$first_seen_year <= pais$last_seen_year))
+  expect_true(all(pais$first_seen_year >= 2010L))
+  # the CVM's sector classification stays a codelist above the cap
+  setor <- cvm_codelist("fca", "geral", "setor_atividade")
+  expect_gt(nrow(setor), 50L)
+  # free text is not a codelist, whatever one partial year suggested
+  expect_error(
+    cvm_codelist("fre", "auditor", "auditor"),
+    class = "cvmdata_error_input"
+  )
 })
 
 test_that("cvm_codelist returns S/N for dfp/bpa/st_conta_fixa", {
@@ -233,7 +252,7 @@ test_that("cvm_dictionary rejects malformed group arg", {
 test_that("cvm_codelist accepts explicit group = 'companhias'", {
   cl <- cvm_codelist("cad", "companhias", "sit", group = "companhias")
   expect_s3_class(cl, "tbl_df")
-  expect_named(cl, "value")
+  expect_named(cl, c("value", "first_seen_year", "last_seen_year"))
   expect_gte(nrow(cl), 2L)
 })
 
