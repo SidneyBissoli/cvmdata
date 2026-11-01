@@ -108,7 +108,6 @@ cvm_versions <- function(
   basis = NULL,
   source = NULL,
   on_error = "abort",
-  validate = "strict",
   ...
 ) {
   check_versions_dots(list(...))
@@ -116,8 +115,7 @@ cvm_versions <- function(
     source <- cvm_source_get()
   }
   source <- rlang::arg_match0(source, c("mirror", "cvm"))
-  validate <- rlang::arg_match0(validate, c("strict", "warn", "skip"))
-  on_error <- rlang::arg_match0(on_error, c("abort", "warn", "silent"))
+  modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
   version_tx <- check_versioned_table(schema)
@@ -138,7 +136,14 @@ cvm_versions <- function(
     out <- if (identical(source, "mirror")) {
       fetch_versions_mirror(schema, cnpj, period$year, b)
     } else {
-      fetch_versions_cvm(schema, cnpj, period$year, b, validate, on_error)
+      fetch_versions_cvm(
+        schema,
+        cnpj,
+        period$year,
+        b,
+        modes$validate,
+        modes$on_error
+      )
     }
     out <- mark_versions(out, version_tx, source)
     if (!is.null(b)) {
@@ -186,6 +191,7 @@ check_versions_dots <- function(dots) {
   }
   nms <- names(dots) %||% rep("", length(dots))
   nms[!nzchar(nms)] <- "<unnamed>"
+  abort_if_validate_arg(nms, "cvm_versions")
   filters <- intersect(nms, .current_reading_args)
   if (length(filters)) {
     cvmdata_abort(

@@ -1153,3 +1153,60 @@ test_that("cvm_fetch rejects unknown arguments", {
     class = "cvmdata_error_input"
   )
 })
+
+# on_error ------------------------------------------------------------
+
+test_that("validate was merged into on_error", {
+  expect_error(
+    cvm_fetch("cad", "companhias", validate = "warn"),
+    regexp = "merged into",
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_versions("dfp", "bpa", basis = "ind", validate = "skip"),
+    regexp = "merged into",
+    class = "cvmdata_error_input"
+  )
+  # The silent modes are gone from the public API.
+  expect_error(cvm_fetch("cad", "companhias", on_error = "silent"))
+  expect_error(cvm_versions("dfp", "bpa", basis = "ind", on_error = "silent"))
+})
+
+test_that("error_modes maps on_error onto the two engine modes", {
+  expect_identical(
+    cvmdata:::error_modes("abort"),
+    list(on_error = "abort", validate = "strict")
+  )
+  expect_identical(
+    cvmdata:::error_modes("warn"),
+    list(on_error = "warn", validate = "warn")
+  )
+})
+
+test_that("on_error = 'warn' reads a file that departs from its schema", {
+  skip_if_not_installed("httptest2")
+  local_prepare_cad_cache()
+  # Pretend the schema expects one field more than the CVM file holds.
+  real <- load_schema("cad", "companhias")
+  local_mocked_bindings(
+    load_schema = function(dataset, table, ...) {
+      real$expected_field_count <- real$expected_field_count + 1L
+      real
+    }
+  )
+  expect_error(
+    httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("cad", "companhias", source = "cvm")
+    ),
+    class = "cvmdata_error_parse"
+  )
+  expect_warning(
+    out <- httr2::with_mocked_responses(
+      function(req) fresh_head_response(),
+      cvm_fetch("cad", "companhias", source = "cvm", on_error = "warn")
+    ),
+    class = "cvmdata_warn_validation"
+  )
+  expect_gt(nrow(out), 0L)
+})

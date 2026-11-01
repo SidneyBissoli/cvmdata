@@ -100,8 +100,7 @@ cvm_fetch(dataset, table,
           reading  = NULL,      # "original" / "restated" / os dois — só nas
                                 #   16 tabelas com ordem_exerc; ver abaixo
           source   = NULL,      # via cvm_source_get()
-          on_error = "abort",
-          validate = "strict",
+          on_error = "abort",     # "abort" / "warn" — ver abaixo
           ...)                  # reservado: qualquer extra aborta
 
 # Todas as versões de um documento (Parte 3 das versões, 2026-10-24,
@@ -116,8 +115,7 @@ cvm_fetch(dataset, table,
 # source = "cvm": CSV anual SEM keep_latest_version + cli_inform de que
 # o CSV guarda só parte das versões (completo só no espelho/RAD).
 cvm_versions(dataset, table, cnpj = NULL, ticker = NULL, year = NULL,
-             basis = NULL, source = NULL, on_error = "abort",
-             validate = "strict", ...)
+             basis = NULL, source = NULL, on_error = "abort", ...)
 
 # Descoberta
 cvm_groups()                                          # 18 grupos + contrato
@@ -165,8 +163,16 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
   a byte. Precedência: arg explícito > `getOption("cvmdata.source")` >
   default. A assinatura declara `source = NULL` para consulta dinâmica
   do option (mesmo padrão de `cvm_cache_path()` ↔ `cvm_cache_set_path()`).
-- `validate ∈ c("strict", "warn", "skip")`, default `"strict"`.
-- `on_error ∈ c("abort", "warn", "silent")`, default `"abort"`.
+- `on_error ∈ c("abort", "warn")`, default `"abort"` (decisão do dono,
+  2026-11-01: absorveu o antigo `validate`; os modos calados `"skip"` e
+  `"silent"` saíram da API). Cobre as duas falhas: arquivo que diverge do
+  esquema e ano que não baixou num lote. `"abort"` = erro com classe
+  (`cvmdata_error_parse` / `cvmdata_error_http`); `"warn"` = lê/pula e
+  avisa (`cvmdata_warn_validation` / `cvmdata_warn_partial_failure`).
+  `error_modes()` (`R/api-cvm-fetch.R`) traduz para os dois modos do
+  motor, que segue com `validate`/`on_error` internos (o `"skip"` e o
+  `"silent"` ficam só para leituras internas, como a `submissao` da
+  checagem de entregas). Passar `validate =` aborta com a migração.
 - `basis` (Sidney, 2026-10-19; nome escolhido contra `report_type`,
   `type_format`, `scope`, `report`, `type`, `view`): `"ind"`, `"con"`
   ou `c("ind", "con")` (empilha as duas). **Obrigatório, sem padrão**,
@@ -495,13 +501,19 @@ automaticamente. Análogo `cvmdata_warn()` para warnings.
 
 ---
 
-## 7. Política do reader em três modos validate
+## 7. Política do reader: validação do cabeçalho
 
-| `validate` | Tabela com META | Tabela sem META |
-|---|---|---|
-| `"strict"` (default) | Valida; divergência → `cvmdata_error_parse` | Aborta com `cvmdata_error_meta_unavailable` |
-| `"warn"` | Valida; divergência → `cvmdata_warn_validation` | Emite `cvmdata_warn_meta_unavailable` e entrega tibble |
-| `"skip"` | Pula validação | Pula validação (silencioso) |
+Modo interno `validate` do motor, escolhido pelo `on_error` público
+(`"abort"` → `"strict"`, `"warn"` → `"warn"`); `"skip"` só em leitura
+interna. Tabela com e sem META seguem a mesma regra (corrigido em
+2026-11-01: a tabela antiga dizia que sem META o `strict` abortava com
+`cvmdata_error_meta_unavailable`, classe que nunca existiu no código).
+
+| `validate` | Divergência do cabeçalho |
+|---|---|
+| `"strict"` (default) | `cvmdata_error_parse` |
+| `"warn"` | `cvmdata_warn_validation` e entrega tibble |
+| `"skip"` | Pula validação (só interno) |
 
 Mensagens em inglês, via `cli::cli_abort()` / `cli::cli_warn()`. Símbolo
 `x` para erro, `!` para warning, `i` para info. "Valida" = contagem E
@@ -727,7 +739,7 @@ Diretório `schemas_proto/` na raiz (excluído da tarball via
 `.Rbuildignore`) é a área de stage para YAMLs antes da promoção para
 `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. Workflow:
 escrever o YAML em stage, validar contra dados reais com
-`cvm_fetch(..., source = "cvm", validate = "warn")`,
+`cvm_fetch(..., source = "cvm", on_error = "warn")`,
 ajustar `expected_field_count`/`expected_field_names`/
 `transformations` até zero divergência, então mover para
 `inst/extdata/schemas/`. Conteúdo atual de `schemas_proto/` é rascunho

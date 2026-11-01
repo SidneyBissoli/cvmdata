@@ -178,7 +178,7 @@ unique(h1$dt_refer)
 ## Where to read next
 
 * **issuer-fetch** — argument reference and the full `cnpj` /
-  `ticker` / `year` / `from` / `to` / `basis` / `validate` /
+  `ticker` / `year` / `from` / `to` / `basis` /
   `on_error` semantics.
 * **fre** — reference form. Same package, different table semantics.
 * **cvm-defects** — known publication quirks behind the
