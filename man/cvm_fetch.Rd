@@ -17,7 +17,6 @@ cvm_fetch(
   reading = NULL,
   source = NULL,
   on_error = "abort",
-  validate = "strict",
   ...
 )
 }
@@ -100,16 +99,15 @@ aborts.}
 (CVM Open Data Portal). \code{NULL} (default) resolves to the active
 backend via \code{\link[=cvm_source_get]{cvm_source_get()}}.}
 
-\item{on_error}{One of \code{"abort"} (default), \code{"warn"} or \code{"silent"}.
-Controls behaviour on HTTP failures when several yearly files are
-read (\code{year} with more than one element, or a \code{from}/\code{to} window
-spanning several years). With \code{"warn"}, the failed years are
-skipped and a \code{cvmdata_warn_partial_failure} warning lists them;
-with \code{"silent"}, they are skipped silently; with \code{"abort"}, the
-first failure aborts the call. Total failure always aborts.}
-
-\item{validate}{One of \code{"strict"} (default), \code{"warn"} or \code{"skip"}.
-Controls schema validation strictness at parse time.}
+\item{on_error}{\code{"abort"} (default) or \code{"warn"}: what to do when a
+CVM file departs from the table's schema (field count or names) or
+one of several yearly files fails to download. \code{"abort"} stops with
+a classed error (\code{cvmdata_error_parse} or \code{cvmdata_error_http})
+for \code{tryCatch()}. \code{"warn"} reads the file anyway, skips the failed
+years and returns the rest, with a \code{cvmdata_warn_validation} or
+\code{cvmdata_warn_partial_failure} warning; wrap the call in
+\code{suppressWarnings()} to silence them. A call where nothing could be
+read always aborts.}
 
 \item{...}{Reserved for forward compatibility. Currently no extra
 arguments are accepted; passing any aborts with

@@ -23,6 +23,21 @@
   carries `cd_cvm`, `denom_social` and `cnpj_cia` side by side. The
   package no longer imports `lifecycle`.
 
+* `cvm_fetch()` and `cvm_versions()` lose `validate`: `on_error` is now
+  the single error strategy, with two modes. `"abort"` (default) stops
+  with a classed error when a CVM file departs from its schema
+  (`cvmdata_error_parse`, what `validate = "strict"` did) or when one of
+  several yearly files fails to download (`cvmdata_error_http`).
+  `"warn"` reads the file anyway (`cvmdata_warn_validation`) and returns
+  the years that downloaded (`cvmdata_warn_partial_failure`). The two
+  arguments answered the same question with two vocabularies, and the
+  silent modes (`validate = "skip"`, `on_error = "silent"`) hid the
+  problem with no trace; `suppressWarnings()` around a `"warn"` call
+  does that on purpose. Passing `validate` aborts with this migration.
+  The articles also said the eight FRE tables without a published META
+  could only be read with `validate = "warn"`; they always read under
+  the default, checked against the header their schema declares.
+
 * The `submissao` table of every dataset (`dfp`, `itr`, `fre`, `fca`,
   `cgvn`, `vlmo`) now returns the complete filing history: one row per
   delivery, re-filings included, each with its receipt date
