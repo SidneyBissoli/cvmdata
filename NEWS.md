@@ -46,6 +46,18 @@
 
 ## New features
 
+* New dataset `recompra_acoes` (programas de recompra de ações) in the
+  `companhias` group, with three tables: `recompra_acoes` (one row per
+  buyback program, with the issuer's CNPJ), `intermediarios` (the
+  brokers of each program) and `quantidades` (share quantities by type
+  and class). The CVM publishes the whole history, since 1997, as one
+  ZIP without a year, so the tables take no `year` or `from`/`to`, like
+  `cad`. The two child tables carry only `id_programa`: `cnpj` and
+  `ticker` select the issuer's programs in `recompra_acoes` and keep
+  the child rows of those programs, declared in their schemas as
+  `issuer_via`. The mirror publishes the dataset from the first run of
+  its weekly ETL.
+
 * The help of `cvm_fetch()` gains a section *Arguments by table* that
   states, in one place, which tables take `year` and `from`/`to`, which
   require `basis`, which accept `reading` and `as_of`, the tables that

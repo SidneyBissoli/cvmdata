@@ -1,0 +1,7 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/DADOS/cia_aberta_recompra_acoes.zip",
+  "fetched_at": "2026-11-01",
+  "companies_included": ["00.000.000/0001-91", "47.960.950/0001-21"],
+  "files_included": ["cia_aberta_recompra_acoes.csv", "cia_aberta_recompra_acoes_intermediarios.csv", "cia_aberta_recompra_acoes_quantidades.csv"],
+  "notes": "Main table subset by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA); intermediarios and quantidades subset by the ID_Programa of the programs kept (they carry no issuer column). ISO-8859-1 encoding preserved. The CVM ZIP has no year."
+}

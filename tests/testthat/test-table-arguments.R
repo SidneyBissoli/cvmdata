@@ -59,7 +59,20 @@ test_that("the rule follows the measured coverage", {
   )
   expect_identical(a$reading, a$basis)
   expect_identical(paste(a$dataset, a$table)[a$as_of], "cad companhias")
-  expect_identical(paste(a$dataset, a$table)[!a$yearly], "cad companhias")
+  expect_identical(
+    paste(a$dataset, a$table)[!a$yearly],
+    c(
+      "cad companhias",
+      paste(
+        "recompra_acoes",
+        c("intermediarios", "quantidades", "recompra_acoes")
+      )
+    )
+  )
+  expect_identical(
+    paste(a$dataset, a$table)[!is.na(a$issuer_via)],
+    paste("recompra_acoes", c("intermediarios", "quantidades"))
+  )
 })
 
 test_that("dataset lists join with commas and a final 'and'", {

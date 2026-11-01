@@ -747,6 +747,24 @@ companhias,itr,parecer,tp_relat_esp,Com Ressalva
 companhias,itr,parecer,tp_relat_esp,Negativa de Opinião
 companhias,itr,parecer,tp_relat_esp,Sem Ressalva
 companhias,itr,submissao,categ_doc,ITR
+companhias,recompra_acoes,quantidades,classe_acao,A
+companhias,recompra_acoes,quantidades,classe_acao,B
+companhias,recompra_acoes,quantidades,classe_acao,B1
+companhias,recompra_acoes,quantidades,classe_acao,C
+companhias,recompra_acoes,quantidades,classe_acao,D
+companhias,recompra_acoes,quantidades,classe_acao,F
+companhias,recompra_acoes,quantidades,classe_acao,PNA
+companhias,recompra_acoes,quantidades,classe_acao,PNB
+companhias,recompra_acoes,quantidades,classe_acao,PNC
+companhias,recompra_acoes,quantidades,classe_acao,units
+companhias,recompra_acoes,quantidades,tipo_acao,ORDINÁRIAS
+companhias,recompra_acoes,quantidades,tipo_acao,PREFERENCIAIS
+companhias,recompra_acoes,recompra_acoes,finalidade_compra,AS AÇÕES PODERÃO SER CANCELADAS.
+companhias,recompra_acoes,recompra_acoes,finalidade_compra,AS AÇÕES VÃO FICAR EM TESOURARIA.
+companhias,recompra_acoes,recompra_acoes,situacao,Em Andamento
+companhias,recompra_acoes,recompra_acoes,situacao,Encerrado
+companhias,recompra_acoes,recompra_acoes,tipo_operacao,Compra
+companhias,recompra_acoes,recompra_acoes,tipo_operacao,Venda
 companhias,vlmo,consolidado,tipo_ativo,Ações
 companhias,vlmo,consolidado,tipo_ativo,BDR Patrocinados
 companhias,vlmo,consolidado,tipo_ativo,Bônus de Subscrição

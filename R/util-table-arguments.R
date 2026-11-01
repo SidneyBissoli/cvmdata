@@ -53,6 +53,7 @@ table_arguments <- function() {
       reading = table_has_readings(s),
       as_of = table_is_registry(s),
       versions = !is.null(table_version_tx(s)),
+      issuer_via = s$issuer_via$table %||% NA_character_,
       stringsAsFactors = FALSE
     )
   })
@@ -154,6 +155,22 @@ doc_arguments_by_table <- function() {
       doc_table_list(a[a$as_of, , drop = FALSE]),
       "."
     ),
+    if (any(!is.na(a$issuer_via))) {
+      via <- a[!is.na(a$issuer_via), , drop = FALSE]
+      paste0(
+        "* `cnpj`/`ticker` in a table without an issuer column: ",
+        doc_table_list(via),
+        " keep the rows linked to the issuer's rows in ",
+        doc_join_and(paste0(
+          "`",
+          unique(via$dataset),
+          "/",
+          unique(via$issuer_via),
+          "`"
+        )),
+        "."
+      )
+    },
     paste0(
       "* [cvm_versions()]: every table except ",
       doc_table_list(a[!a$versions, , drop = FALSE]),

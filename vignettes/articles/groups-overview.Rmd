@@ -58,7 +58,8 @@ datasets: `cad`, `dfp`, `itr`, `fre`. v0.2 added `cgvn` (Brazilian
 Corporate Governance Code informe), `vlmo` (securities traded and
 held by insiders), `fca` (registration form, which also backs the
 B3 ticker lookup) and `ipe` (manifest of periodic and eventual
-documents) — eight `companhias` datasets in all.
+documents). `recompra_acoes` (share buyback programs) followed — nine
+`companhias` datasets in all.
 
 The identity key is the issuer's CNPJ, selected with `cnpj` or,
 through the registration form, with a B3 `ticker`. The temporal axis
