@@ -3,8 +3,8 @@
 Returns the set of categorical values observed for a single
 `(dataset, table, column)` triple, sourced from the snapshot embedded
 under `inst/extdata/cvm_codelists_snapshot.csv`. The snapshot is built
-offline by `data-raw/build-codelists-snapshot.R` from the CVM open-data
-CSVs.
+offline by `data-raw/build-codelists-snapshot.R` from every published
+year of the CVM open-data CSVs.
 
 ## Usage
 
@@ -36,14 +36,19 @@ cvm_codelist(dataset, table, column, group = NULL)
 ## Value
 
 A tibble with one row per categorical value, sorted alphabetically.
-Column: `value` (character).
+Columns: `value` (character), `first_seen_year` and `last_seen_year`
+(integer): the first and last year the value appears in the data. `NA`
+for a value the dictionary enumerates but the data never uses, and for
+tables without yearly files (`cad`).
 
 ## Details
 
 Inclusion criteria for the snapshot (see CLAUDE.md §9.2): columns whose
 dictionary `dominio` enumerates values (e.g. `S/N`, `PF/PJ`), and
 `varchar` columns with `tamanho < 200` and at most 50 distinct values
-observed in the latest available year.
+over every published year. The CVM's sector classification
+(`fca`/`geral`/`setor_atividade`, 66 values) is kept above that cap on
+purpose.
 
 ## See also
 
@@ -60,10 +65,10 @@ Other discovery:
 
 ``` r
 cvm_codelist("cad", "companhias", "sit")
-#> # A tibble: 3 × 1
-#>   value                    
-#>   <chr>                    
-#> 1 ATIVO                    
-#> 2 CANCELADA                
-#> 3 SUSPENSO(A) - DECISÃO ADM
+#> # A tibble: 3 × 3
+#>   value                     first_seen_year last_seen_year
+#>   <chr>                               <int>          <int>
+#> 1 ATIVO                                  NA             NA
+#> 2 CANCELADA                              NA             NA
+#> 3 SUSPENSO(A) - DECISÃO ADM              NA             NA
 ```

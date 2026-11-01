@@ -180,8 +180,9 @@ descriptions, types and domains as published in the CVM META files:</p>
 enumerated values for categorical columns. Inclusion is automatic:
 either the META declares an enumerated domain (e.g. <code>S/N</code>),
 or the column is a <code>varchar</code> with
-<code>tamanho &lt; 200</code> and at most 50 distinct values observed in
-the latest year.</p>
+<code>tamanho &lt; 200</code> and at most 50 distinct values over every
+published year. Each value comes with the first and last year it appears
+in the data.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_codelist.html">cvm_codelist</a></span><span class="op">(</span><span class="st">"cgvn"</span>, <span class="st">"praticas"</span>, <span class="st">"pratica_adotada"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 4 × 1</span></span>

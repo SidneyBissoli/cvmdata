@@ -111,8 +111,9 @@ and domains as published in the CVM META files:
 `cvm_codelist(dataset, table, column)` returns the enumerated values for
 categorical columns. Inclusion is automatic: either the META declares an
 enumerated domain (e.g. `S/N`), or the column is a `varchar` with
-`tamanho < 200` and at most 50 distinct values observed in the latest
-year.
+`tamanho < 200` and at most 50 distinct values over every published
+year. Each value comes with the first and last year it appears in the
+data.
 
 \
 [`cvm_codelist`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)`(``"cgvn"``, ``"praticas"``, ``"pratica_adotada"``)`\

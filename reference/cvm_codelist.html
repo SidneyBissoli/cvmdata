@@ -3,11 +3,11 @@
 (dataset, table, column) triple, sourced from the snapshot
 embedded under inst/extdata/cvm_codelists_snapshot.csv. The
 snapshot is built offline by data-raw/build-codelists-snapshot.R
-from the CVM open-data CSVs."><meta property="og:description" content="Returns the set of categorical values observed for a single
+from every published year of the CVM open-data CSVs."><meta property="og:description" content="Returns the set of categorical values observed for a single
 (dataset, table, column) triple, sourced from the snapshot
 embedded under inst/extdata/cvm_codelists_snapshot.csv. The
 snapshot is built offline by data-raw/build-codelists-snapshot.R
-from the CVM open-data CSVs."></head><body>
+from every published year of the CVM open-data CSVs."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -60,7 +60,7 @@ from the CVM open-data CSVs."></head><body>
 <code>(dataset, table, column)</code> triple, sourced from the snapshot
 embedded under <code>inst/extdata/cvm_codelists_snapshot.csv</code>. The
 snapshot is built offline by <code>data-raw/build-codelists-snapshot.R</code>
-from the CVM open-data CSVs.</p>
+from every published year of the CVM open-data CSVs.</p>
     </div>
 
     <div class="section level2">
@@ -95,14 +95,19 @@ than one group; in that case omitting <code>group</code> aborts with
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A tibble with one row per categorical value, sorted
-alphabetically. Column: <code>value</code> (character).</p>
+alphabetically. Columns: <code>value</code> (character), <code>first_seen_year</code>
+and <code>last_seen_year</code> (integer): the first and last year the value
+appears in the data. <code>NA</code> for a value the dictionary enumerates but
+the data never uses, and for tables without yearly files (<code>cad</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
 columns whose dictionary <code>dominio</code> enumerates values (e.g. <code>S/N</code>,
 <code>PF/PJ</code>), and <code>varchar</code> columns with <code>tamanho &lt; 200</code> and at most
-50 distinct values observed in the latest available year.</p>
+50 distinct values over every published year. The CVM's sector
+classification (<code>fca</code>/<code>geral</code>/<code>setor_atividade</code>, 66 values) is kept
+above that cap on purpose.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -118,12 +123,12 @@ columns whose dictionary <code>dominio</code> enumerates values (e.g. <code>S/N<
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">cvm_codelist</span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span>, <span class="st">"sit"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 1</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   value                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> ATIVO                    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> CANCELADA                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SUSPENSO(A) - DECISÃO ADM</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   value                     first_seen_year last_seen_year</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> ATIVO                                  <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> CANCELADA                              <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> SUSPENSO(A) - DECISÃO ADM              <span style="color: #BB0000;">NA</span>             <span style="color: #BB0000;">NA</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
