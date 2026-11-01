@@ -268,12 +268,14 @@ handle_dictionary_miss <- function(dataset, table, group) {
 #' `(dataset, table, column)` triple, sourced from the snapshot
 #' embedded under `inst/extdata/cvm_codelists_snapshot.csv`. The
 #' snapshot is built offline by `data-raw/build-codelists-snapshot.R`
-#' from the CVM open-data CSVs.
+#' from every published year of the CVM open-data CSVs.
 #'
 #' Inclusion criteria for the snapshot (see CLAUDE.md §9.2):
 #' columns whose dictionary `dominio` enumerates values (e.g. `S/N`,
 #' `PF/PJ`), and `varchar` columns with `tamanho < 200` and at most
-#' 50 distinct values observed in the latest available year.
+#' 50 distinct values over every published year. The CVM's sector
+#' classification (`fca`/`geral`/`setor_atividade`, 66 values) is kept
+#' above that cap on purpose.
 #'
 #' @param dataset Short dataset id (e.g. `"cad"`).
 #' @param table Table name within the dataset (e.g. `"companhias"`).
@@ -285,7 +287,10 @@ handle_dictionary_miss <- function(dataset, table, group) {
 #'   `cvmdata_error_input_ambiguous`.
 #'
 #' @return A tibble with one row per categorical value, sorted
-#'   alphabetically. Column: `value` (character).
+#'   alphabetically. Columns: `value` (character), `first_seen_year`
+#'   and `last_seen_year` (integer): the first and last year the value
+#'   appears in the data. `NA` for a value the dictionary enumerates but
+#'   the data never uses, and for tables without yearly files (`cad`).
 #'
 #' @examples
 #' cvm_codelist("cad", "companhias", "sit")
@@ -314,7 +319,11 @@ cvm_codelist <- function(dataset, table, column, group = NULL) {
   }
   if (nrow(hit)) {
     abort_if_ambiguous(hit$group, dataset, table, group)
-    return(tibble::tibble(value = hit$value))
+    return(tibble::tibble(
+      value = hit$value,
+      first_seen_year = hit$first_seen_year,
+      last_seen_year = hit$last_seen_year
+    ))
   }
   handle_codelist_miss(snapshot, dataset, table, column, group)
 }
@@ -420,8 +429,11 @@ abort_known_or_unknown_column <- function(
       dataset = readr::col_character(),
       table = readr::col_character(),
       campo = readr::col_character(),
-      value = readr::col_character()
+      value = readr::col_character(),
+      first_seen_year = readr::col_integer(),
+      last_seen_year = readr::col_integer()
     ),
+    na = "",
     progress = FALSE
   )
   .codelists_snapshot_cache[[path]] <- df
