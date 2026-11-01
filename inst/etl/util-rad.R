@@ -326,8 +326,11 @@ rad_body_head <- function(path, n = 2048L) {
 }
 
 rad_looks_like_html <- function(head) {
-  grepl("<\\s*(!doctype|html|head|body|script|meta|title)\\b", head,
-        ignore.case = TRUE)
+  grepl(
+    "<\\s*(!doctype|html|head|body|script|meta|title)\\b",
+    head,
+    ignore.case = TRUE
+  )
 }
 
 rad_snippet <- function(head, n = 120L) {

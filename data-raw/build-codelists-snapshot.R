@@ -14,8 +14,8 @@
 #   1. Dictionary-driven: columns whose `dominio` enumerates values
 #      via `/` or `|` separators (captures S/N, PF/PJ).
 #   2. Cardinality-driven: columns with `tipo_dados = varchar` and
-#      `tamanho < 200` whose observed distinct count in the latest
-#      available year is ≤ 50, EXCLUDING:
+#      `tamanho < 200` whose distinct count over EVERY published year
+#      is ≤ 50 (or listed in `.CARDINALITY_EXCEPTIONS`), EXCLUDING:
 #        - identifier columns matching the reader's
 #          `.identifier_patterns` (cnpj, cd_cvm, codigo_cvm, cep,
 #          tel, ddd, cpf, id_doc, id_documento, versao);
@@ -26,9 +26,21 @@
 #          PII or free text, not categorical).
 # Tables with `meta_status: missing` are excluded.
 #
-# Sampling scope: latest year only per dataset. v0.2 may revisit with
-# multi-year coverage; that decision is deferred together with the
-# `first_seen_year` column (CLAUDE.md §9.2).
+# Sampling scope: every published year (owner's decision, 2026-11-01).
+# Until then the latest year alone was sampled, and on 2026-05-29 that
+# was a 2026 with five months of filings (the DFP had one): measured on
+# 2026-11-01 over every year, 13 of the 178 columns were free text
+# (auditor names, download links; 66 to 14,013 values) and 49 more
+# lacked values (fca/pais_estrangeiro_negociacao/pais: 5 of 31).
+# Values are read from the mirror, the package's own reading of the
+# CVM CSVs; a table the mirror does not carry yet is read from the CVM
+# ZIPs. Each value carries the
+# first and last year it was observed in (NA: a dominio value never
+# observed, or a non-yearly table).
+#
+# `--write` refuses to drop a (group, dataset, table, campo) present in
+# the committed snapshot; pass `--allow-drop` when the CVM really
+# retired the column.
 
 suppressPackageStartupMessages({
   devtools::load_all(quiet = TRUE)
@@ -44,6 +56,11 @@ suppressPackageStartupMessages({
 
 .MAX_TAMANHO <- 200L # varchar fields wider than this are free text
 .MAX_CARDINALITY <- 50L # hard cap on distinct values for a codelist
+# Closed classifications above the cap, kept on purpose. Measured on
+# 2026-11-01 over every year: fca/geral/setor_atividade is the CVM's
+# sector classification, 66 values (53 to 60 a year); the 12 other
+# columns above 50 were free text (owner's decision, 2026-11-01).
+.CARDINALITY_EXCEPTIONS <- c("companhias/fca/geral/setor_atividade")
 .FREE_TEXT_DOMAINS <- c(
   "Alfanumérico",
   "Numérico",
@@ -117,72 +134,6 @@ parse_enum_values <- function(dominio) {
   unique(parts[nzchar(parts)])
 }
 
-# Resolve the CSV path for one (dataset, table). For yearly datasets
-# uses report_type = "ind" when the schema has variants (codelists are
-# the same across ind/con). Returns NULL on failure (logged via cli).
-resolve_csv_path <- function(dataset, table, year_lookup) {
-  schema <- load_schema(dataset, table)
-  if (identical(schema$meta_status %||% "available", "missing")) {
-    return(NULL)
-  }
-  partitioning <- schema$temporal_partitioning %||% "none"
-  if (identical(partitioning, "yearly")) {
-    year <- year_lookup[[dataset]]
-    if (is.null(year) || is.na(year)) {
-      cli::cli_alert_warning(
-        "No year resolved for dataset {.val {dataset}}; skipping."
-      )
-      return(NULL)
-    }
-    # A table that stopped being published (`last_year`, the legacy FRE
-    # tables) is sampled in its own last year: later ZIPs lack its CSV.
-    if (!is.null(schema$last_year)) {
-      year <- min(year, as.integer(schema$last_year))
-    }
-    rt <- if (length(schema$cvm_file_pattern_variants %||% list())) {
-      "ind"
-    } else {
-      NULL
-    }
-    return(cvmdata:::source_cvm_http_get(
-      schema,
-      year = year,
-      report_type = rt
-    ))
-  }
-  cvmdata:::source_cvm_http_get(schema)
-}
-
-# Distinct values for one column in a CSV, ignoring NA / blank tokens.
-distinct_values <- function(csv_path, encoding, delim, column_lower) {
-  header <- readr::read_delim(
-    csv_path,
-    delim = delim,
-    locale = readr::locale(encoding = encoding),
-    n_max = 0L,
-    show_col_types = FALSE,
-    progress = FALSE
-  )
-  csv_names <- colnames(header)
-  csv_lower <- tolower(csv_names)
-  idx <- which(csv_lower == column_lower)
-  if (!length(idx)) {
-    return(character(0L))
-  }
-  csv_name <- csv_names[idx[1L]]
-  df <- readr::read_delim(
-    csv_path,
-    delim = delim,
-    locale = readr::locale(encoding = encoding),
-    col_types = readr::cols(.default = readr::col_character()),
-    show_col_types = FALSE,
-    progress = FALSE
-  )
-  vals <- df[[csv_name]]
-  vals <- vals[!is.na(vals) & nzchar(vals)]
-  sort(unique(vals))
-}
-
 # Wrap a noisy operation so readr's parsing-warning chatter does not
 # clutter the dry-run log. Genuine errors still propagate.
 quietly <- function(expr) {
@@ -190,6 +141,197 @@ quietly <- function(expr) {
     expr,
     warning = function(w) invokeRestart("muffleWarning")
   )
+}
+
+# --- observations: every year ------------------------------------------
+
+# Distinct values of `columns` in every published year of one table, as
+# a tibble (campo, value, year). Read from the mirror, which is the
+# package's own reading of the CVM CSVs (both report types). A table the
+# mirror does not carry yet (a schema added on a branch) is read from
+# the CVM ZIPs year by year. Non-yearly tables give year = NA.
+observe_table <- function(dataset, table, columns) {
+  obs <- observe_mirror(dataset, table, columns)
+  if (is.null(obs)) {
+    cli::cli_alert_info(
+      "{dataset}/{table}: not in the mirror; reading the CVM ZIPs."
+    )
+    obs <- observe_cvm(dataset, table, columns)
+  }
+  clean_observations(obs)
+}
+
+observe_mirror <- function(dataset, table, columns) {
+  schema <- load_schema(dataset, table)
+  # A dataset added on a branch has no release yet: the GitHub API
+  # answers 404 for its tag, and the table is read from the CVM. Any
+  # other failure stops the table, not silently swapped for the CVM.
+  inventory <- tryCatch(
+    cvmdata:::mirror_list_assets(
+      schema$group,
+      dataset,
+      release = cvm_release_get()
+    ),
+    cvmdata_error_http = function(e) {
+      if (!grepl("HTTP 404", conditionMessage(e), fixed = TRUE)) {
+        stop(e)
+      }
+      NULL
+    }
+  )
+  if (is.null(inventory)) {
+    return(NULL)
+  }
+  assets <- cvmdata:::filter_mirror_assets(inventory, table, kind = "current")
+  if (!nrow(assets)) {
+    return(NULL)
+  }
+  con <- DBI::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
+  parts <- lapply(seq_len(nrow(assets)), function(i) {
+    path <- cvmdata:::mirror_fetch_to_l3(
+      url = assets$url[[i]],
+      dataset = dataset,
+      table = table,
+      year = assets$year[[i]],
+      report_type = assets$report_type[[i]],
+      sha256 = assets$sha256[[i]] %||% NA_character_,
+      size = assets$size_bytes[[i]] %||% NA_integer_
+    )
+    src <- sprintf("read_parquet(%s)", cvmdata:::mirror_quote_sql(path))
+    have <- DBI::dbGetQuery(
+      con,
+      sprintf("DESCRIBE SELECT * FROM %s", src)
+    )$column_name
+    cols <- intersect(columns, have)
+    if (!length(cols)) {
+      return(NULL)
+    }
+    sql <- paste(
+      sprintf(
+        "SELECT DISTINCT '%s' AS campo, CAST(\"%s\" AS VARCHAR) AS value FROM %s",
+        cols,
+        cols,
+        src
+      ),
+      collapse = " UNION ALL "
+    )
+    out <- DBI::dbGetQuery(con, sql)
+    out$year <- rep(assets$year[[i]], nrow(out))
+    out
+  })
+  dplyr::bind_rows(parts)
+}
+
+observe_cvm <- function(dataset, table, columns) {
+  schema <- load_schema(dataset, table)
+  yearly <- identical(schema$temporal_partitioning %||% "none", "yearly")
+  years <- if (yearly) cvm_dataset_years(dataset) else NA_integer_
+  # A table published only in part of its dataset's span (`first_year`;
+  # `last_year`, the legacy FRE tables) is read only in its own years.
+  if (yearly) {
+    years <- years[
+      years >= as.numeric(schema$first_year %||% -Inf) &
+        years <= as.numeric(schema$last_year %||% Inf)
+    ]
+  }
+  report_types <- if (length(schema$cvm_file_pattern_variants %||% list())) {
+    list("ind", "con")
+  } else {
+    list(NULL)
+  }
+  parts <- list()
+  for (year in years) {
+    for (rt in report_types) {
+      # A year outside the table's span or a CSV the ZIP lacks is a
+      # cvmdata_error: that year has nothing to observe. Said out loud,
+      # so an HTTP failure is not mistaken for an absent year.
+      path <- tryCatch(
+        quietly(
+          if (yearly) {
+            cvmdata:::source_cvm_http_get(schema, year = year, report_type = rt)
+          } else {
+            cvmdata:::source_cvm_http_get(schema)
+          }
+        ),
+        cvmdata_error = function(e) {
+          cli::cli_alert_warning(
+            "{dataset}/{table} {year} {rt %||% ''}: {conditionMessage(e)}"
+          )
+          NULL
+        }
+      )
+      if (is.null(path)) {
+        next
+      }
+      obs <- read_csv_values(path, schema, columns)
+      obs$year <- rep(if (yearly) year else NA_integer_, nrow(obs))
+      parts[[length(parts) + 1L]] <- obs
+    }
+  }
+  dplyr::bind_rows(parts)
+}
+
+# Distinct values of `columns` in one CVM CSV, every field as text. The
+# CVM does not quote: a `"` is a character of the text, read with
+# quote = "" as the package reader does (with readr's default quote a
+# text starting with `"` swallowed the following lines, and a rate,
+# "5,13% a.a.", reached the codelist of posicao_contratual_emissor).
+read_csv_values <- function(csv_path, schema, columns) {
+  df <- quietly(readr::read_delim(
+    csv_path,
+    delim = schema$delimiter %||% ";",
+    locale = readr::locale(encoding = schema$encoding %||% "ISO-8859-1"),
+    quote = "",
+    col_types = readr::cols(.default = readr::col_character()),
+    show_col_types = FALSE,
+    progress = FALSE
+  ))
+  names(df) <- tolower(names(df))
+  cols <- intersect(columns, names(df))
+  dplyr::bind_rows(lapply(cols, function(col) {
+    tibble::tibble(campo = col, value = unique(df[[col]]))
+  }))
+}
+
+clean_observations <- function(obs) {
+  if (is.null(obs) || !nrow(obs)) {
+    return(tibble::tibble(
+      campo = character(),
+      value = character(),
+      year = integer()
+    ))
+  }
+  obs <- tibble::as_tibble(obs)
+  obs$year <- as.integer(obs$year)
+  obs[!is.na(obs$value) & nzchar(trimws(obs$value)), , drop = FALSE]
+}
+
+# First and last year each value of each column was observed in.
+value_spans <- function(obs) {
+  if (!nrow(obs)) {
+    return(tibble::tibble(
+      campo = character(),
+      value = character(),
+      first_seen_year = integer(),
+      last_seen_year = integer()
+    ))
+  }
+  obs |>
+    dplyr::group_by(campo, value) |>
+    dplyr::summarise(
+      first_seen_year = if (all(is.na(year))) {
+        NA_integer_
+      } else {
+        min(year, na.rm = TRUE)
+      },
+      last_seen_year = if (all(is.na(year))) {
+        NA_integer_
+      } else {
+        max(year, na.rm = TRUE)
+      },
+      .groups = "drop"
+    )
 }
 
 # --- build ------------------------------------------------------------
@@ -209,9 +351,10 @@ build_codelists_snapshot <- function() {
 
   # Drop meta_status: missing rows.
   dict <- dict[!(dict$meta_status %in% "missing"), , drop = FALSE]
+  key_of <- function(d) paste(d$group, d$dataset, d$table, d$campo, sep = "/")
 
-  # --- Branch 1: enumerated dominio (no download required) ----------
-  cli::cli_h2("Branch 1 — enumerated dominio (no download)")
+  # --- Branch 1: enumerated dominio ----------------------------------
+  cli::cli_h2("Branch 1 — enumerated dominio")
   enum_rows <- list()
   for (i in seq_len(nrow(dict))) {
     if (!is_enumerated_domain(dict$dominio[i])) {
@@ -226,21 +369,16 @@ build_codelists_snapshot <- function() {
       dataset = dict$dataset[i],
       table = dict$table[i],
       campo = dict$campo[i],
-      value = values,
-      source = "dominio"
+      value = values
     )
   }
   enum_df <- dplyr::bind_rows(enum_rows)
+  enum_keys <- if (nrow(enum_df)) unique(key_of(enum_df)) else character()
   cli::cli_alert_info(
-    "Enumerated columns: {.val {dplyr::n_distinct(paste(enum_df$group, enum_df$dataset, enum_df$table, enum_df$campo))}}; ",
-    "values: {.val {nrow(enum_df)}}."
+    "Enumerated columns: {.val {length(enum_keys)}}; values: {.val {nrow(enum_df)}}."
   )
 
-  # --- Branch 2: cardinality-driven (per-dataset CSV downloads) -----
-  cli::cli_h2("Branch 2 — observed cardinality (downloads latest year)")
-
-  # Candidate columns: varchar with tamanho < .MAX_TAMANHO AND not
-  # excluded by name AND not in the enumerated set.
+  # --- Branch 2 candidates: varchar, narrow, not excluded --------------
   candidates <- dict[
     dict$tipo_dados == "varchar" &
       !is.na(dict$tipo_dados) &
@@ -251,123 +389,114 @@ build_codelists_snapshot <- function() {
   ]
   excluded <- vapply(candidates$campo, is_excluded_column, logical(1L))
   candidates <- candidates[!excluded, , drop = FALSE]
-  enum_keys <- if (!is.null(enum_df) && nrow(enum_df)) {
-    paste(enum_df$group, enum_df$dataset, enum_df$table, enum_df$campo)
-  } else {
-    character(0L)
-  }
-  candidates <- candidates[
-    !(paste(
-      candidates$group,
-      candidates$dataset,
-      candidates$table,
-      candidates$campo
-    ) %in%
-      enum_keys),
-    ,
-    drop = FALSE
-  ]
+  candidates <- candidates[!(key_of(candidates) %in% enum_keys), , drop = FALSE]
   cli::cli_alert_info(
-    "Candidate (group,dataset,table,campo) for cardinality test: {.val {nrow(candidates)}}."
+    "Candidate columns for the cardinality test: {.val {nrow(candidates)}}."
   )
 
-  # Resolve latest year per dataset (only for yearly-partitioned ones).
-  datasets <- sort(unique(candidates$dataset))
-  year_lookup <- list()
-  for (ds in datasets) {
-    tabs <- cvm_tables(ds)
-    if (!length(tabs)) {
-      next
+  # --- Observe every year of every table involved ----------------------
+  # The enumerated columns are observed too, for the years their values
+  # appear in.
+  cli::cli_h2("Observations — every published year")
+  wanted <- dplyr::bind_rows(
+    candidates[c("group", "dataset", "table", "campo")],
+    if (nrow(enum_df)) {
+      dplyr::distinct(enum_df, group, dataset, table, campo)
     }
-    s <- load_schema(ds, tabs[1L])
-    if (identical(s$temporal_partitioning %||% "none", "yearly")) {
-      yrs <- cvm_dataset_years(ds)
-      year_lookup[[ds]] <- max(yrs)
-      cli::cli_alert_info(
-        "Latest year for {.val {ds}}: {.val {max(yrs)}}."
-      )
-    }
-  }
-
-  # Group candidates by (group, dataset, table); fetch CSV once per
-  # bucket. `bucket_key` avoids the variable name `groups`, which would
-  # shadow the group-dimension concept.
+  )
   buckets <- split(
-    candidates,
-    paste(candidates$group, candidates$dataset, candidates$table, sep = "/")
+    wanted,
+    paste(wanted$group, wanted$dataset, wanted$table, sep = "/")
   )
-
-  card_rows <- list()
-  for (gkey in names(buckets)) {
-    b <- buckets[[gkey]]
+  enum_out <- list()
+  card_out <- list()
+  for (bkey in names(buckets)) {
+    b <- buckets[[bkey]]
     grp <- b$group[1L]
     dataset <- b$dataset[1L]
     table <- b$table[1L]
-    cli::cli_alert_info(
-      "Downloading {.val {grp}}/{.val {dataset}}/{.val {table}}..."
-    )
-    csv_path <- tryCatch(
-      quietly(resolve_csv_path(dataset, table, year_lookup)),
+    cli::cli_alert_info("Observing {.val {bkey}}...")
+    obs <- tryCatch(
+      observe_table(dataset, table, unique(b$campo)),
       error = function(e) {
-        cli::cli_alert_warning(
-          "Skip {dataset}/{table}: {conditionMessage(e)}"
-        )
+        cli::cli_alert_warning("Skip {bkey}: {conditionMessage(e)}")
         NULL
       }
     )
-    if (is.null(csv_path) || !file.exists(csv_path %||% "")) {
-      cli::cli_alert_warning(
-        "Skip {.val {dataset}}/{.val {table}}: CSV not found in archive."
-      )
+    if (is.null(obs)) {
       next
     }
-    schema <- load_schema(dataset, table)
-    delim <- schema$delimiter %||% ";"
-    enc <- schema$encoding %||% "ISO-8859-1"
-    for (i in seq_len(nrow(b))) {
-      col_lower <- b$campo[i]
-      vals <- tryCatch(
-        quietly(distinct_values(csv_path, enc, delim, col_lower)),
-        error = function(e) {
-          cli::cli_alert_warning(
-            "Read failed for {dataset}/{table}/{col_lower}: ",
-            "{conditionMessage(e)}"
-          )
-          character(0L)
-        }
-      )
-      if (!length(vals)) {
+    spans <- value_spans(obs)
+    for (col in unique(b$campo)) {
+      key <- paste(bkey, col, sep = "/")
+      col_spans <- spans[spans$campo == col, , drop = FALSE]
+      if (key %in% enum_keys) {
+        # the dominio lists the values; the data only dates them
+        values <- enum_df$value[key_of(enum_df) == key]
+        hit <- match(values, col_spans$value)
+        enum_out[[key]] <- tibble::tibble(
+          group = grp,
+          dataset = dataset,
+          table = table,
+          campo = col,
+          value = values,
+          first_seen_year = col_spans$first_seen_year[hit],
+          last_seen_year = col_spans$last_seen_year[hit]
+        )
         next
       }
-      if (length(vals) > .MAX_CARDINALITY) {
+      if (!nrow(col_spans)) {
         next
       }
-      card_rows[[length(card_rows) + 1L]] <- tibble::tibble(
+      if (
+        nrow(col_spans) > .MAX_CARDINALITY &&
+          !(key %in% .CARDINALITY_EXCEPTIONS)
+      ) {
+        next
+      }
+      card_out[[key]] <- tibble::tibble(
         group = grp,
         dataset = dataset,
         table = table,
-        campo = col_lower,
-        value = vals,
-        source = "cardinality"
+        campo = col,
+        value = col_spans$value,
+        first_seen_year = col_spans$first_seen_year,
+        last_seen_year = col_spans$last_seen_year
       )
     }
   }
-  card_df <- dplyr::bind_rows(card_rows)
+  # An enumerated column whose table could not be observed keeps its
+  # values, undated.
+  for (key in setdiff(enum_keys, names(enum_out))) {
+    rows <- enum_df[key_of(enum_df) == key, , drop = FALSE]
+    rows$first_seen_year <- NA_integer_
+    rows$last_seen_year <- NA_integer_
+    enum_out[[key]] <- rows
+  }
+  enum_df <- dplyr::bind_rows(enum_out)
+  card_df <- dplyr::bind_rows(card_out)
   cli::cli_alert_info(
-    "Cardinality-promoted columns: {.val {dplyr::n_distinct(paste(card_df$group, card_df$dataset, card_df$table, card_df$campo))}}; ",
-    "values: {.val {nrow(card_df)}}."
+    "Cardinality-promoted columns: {.val {length(card_out)}}; values: {.val {nrow(card_df)}}."
   )
 
   # --- Merge --------------------------------------------------------
   all_df <- dplyr::bind_rows(enum_df, card_df) |>
     dplyr::distinct(group, dataset, table, campo, value, .keep_all = TRUE) |>
     dplyr::arrange(group, dataset, table, campo, value) |>
-    dplyr::select(group, dataset, table, campo, value)
+    dplyr::select(
+      group,
+      dataset,
+      table,
+      campo,
+      value,
+      first_seen_year,
+      last_seen_year
+    )
 
   list(
     rows = all_df,
-    enum_n = if (is.null(enum_df) || !nrow(enum_df)) 0L else nrow(enum_df),
-    card_n = if (is.null(card_df) || !nrow(card_df)) 0L else nrow(card_df)
+    enum_n = nrow(enum_df),
+    card_n = nrow(card_df)
   )
 }
 
@@ -408,8 +537,39 @@ cli::cli_bullets(c(
   "*" = "From observed cardinality: {result$card_n}"
 ))
 
+# A regeneration must not erase codelists silently: list every column
+# of the committed snapshot that the new build lacks.
+out <- file.path("inst", "extdata", "cvm_codelists_snapshot.csv")
+codelist_keys <- function(d) {
+  unique(paste(d$group, d$dataset, d$table, d$campo, sep = "/"))
+}
+lost <- if (file.exists(out)) {
+  committed <- readr::read_csv(
+    out,
+    col_types = readr::cols(.default = readr::col_character())
+  )
+  setdiff(codelist_keys(committed), codelist_keys(df))
+} else {
+  character(0L)
+}
+if (length(lost)) {
+  cli::cli_alert_warning(
+    "{length(lost)} column{?s} of the committed snapshot lost {?its/their} codelist:"
+  )
+  cli::cli_bullets(stats::setNames(lost, rep("*", length(lost))))
+} else {
+  cli::cli_alert_success(
+    "No column of the committed snapshot lost its codelist."
+  )
+}
+
 if (write_mode) {
-  out <- file.path("inst", "extdata", "cvm_codelists_snapshot.csv")
+  if (length(lost) && !("--allow-drop" %in% args)) {
+    cli::cli_abort(c(
+      "Refusing to write: {length(lost)} codelist column{?s} would be dropped.",
+      "i" = "A CSV missing upstream is the usual cause; pass {.code --allow-drop} only if the CVM retired the column."
+    ))
+  }
   readr::write_csv(df, out, na = "")
   cli::cli_alert_success("Wrote {.path {out}} ({nrow(df)} rows)")
 } else {

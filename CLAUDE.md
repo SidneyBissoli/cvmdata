@@ -774,7 +774,13 @@ o gerador for revisitado:
 - **Pelo dicionário**: colunas onde `dominio` enumera valores com
   separador `/` ou `|` (capta `S/N`, `PF/PJ`).
 - **Por cardinalidade observada**: colunas `tipo_dados = "varchar"`
-  com `tamanho < 200` e ≤ 50 valores distintos no último ano,
+  com `tamanho < 200` e ≤ 50 valores distintos SOMANDO TODOS OS ANOS
+  publicados (decisão do dono, 2026-11-01; lidos do espelho, e da CVM
+  quando o espelho ainda não tem a tabela). Exceção escrita em
+  `.CARDINALITY_EXCEPTIONS`: `fca/geral/setor_atividade` (classificação
+  setorial da CVM, 66 valores). Cada valor leva `first_seen_year` e
+  `last_seen_year` (NA: valor do `dominio` nunca observado, ou tabela
+  sem ano, o `cad`),
   EXCLUINDO prefixos: identificadores (`cnpj`, `cd_cvm`, `codigo_cvm`,
   `cep`, `tel`, `ddd`, `cpf`, `id_doc`, `id_documento`, `versao`),
   `^cd_` (códigos contábeis), `^nome_`/`^denom_` (nomes próprios),
@@ -782,6 +788,20 @@ o gerador for revisitado:
   `^bairro`/`^mun($|_)`/`^municipio_` (endereço).
 - **Tabelas `meta_status: missing`**: excluídas (declarar codelist sem
   ancoragem CVM violaria "se vem da CVM, fica como na CVM").
+- **Guarda do `--write`** (2026-10-31): recusa gravar se alguma coluna
+  do snapshot commitado perderia a codelist; `--allow-drop` só quando a
+  CVM aposentou a coluna. Medido no mesmo dia: 5 colunas promovidas por
+  cardinalidade num ano antigo passam de 50 em 2026 (53 a 120 valores:
+  `fca/geral/setor_atividade`, `fre/auditor/auditor`,
+  `fre/capital_social/prazo_integralizacao`,
+  `fre/posicao_acionaria/nacionalidade`,
+  `fre/titulo_exterior/identificacao_valor_mobiliario`) — a regra de um
+  ano só é instável. **Resolvido 2026-11-01:** o snapshot de 29/05
+  amostrou um 2026 de cinco meses; medido em todos os anos, 13 das 178
+  colunas eram texto livre e 49 estavam incompletas. Com todos os anos
+  saíram 27 colunas (12 de texto livre e 15 `escala_moeda`, que a
+  transformação apaga) e entraram 10. O gerador lê com `quote = ""`,
+  como o leitor (o valor "5,13% a.a." vinha das aspas).
 
 ---
 
