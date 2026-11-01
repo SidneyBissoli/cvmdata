@@ -250,6 +250,19 @@
 
 ## Bug fixes
 
+* `cvm_fetch("fre", "transacao_parte_relacionada", year = 2022:2023)`
+  failed with "Can't combine `taxa_juros` <double> and <character>":
+  the CVM publishes the interest rate as free text since the 2023 FRE
+  ("CDI + 1,50% a.a.", "N/A"), and the dictionary still declared it
+  numeric, so each year was guessed on its own. The dictionary snapshot
+  is rebuilt from the CVM META of 2026-11-01, which declares it varchar:
+  `taxa_juros` is now character in every year, with the value as
+  published (`"0.000000"`, no longer `0`). The same refresh brings 81
+  declared sizes up to date (`cvm_dictionary()`'s `tamanho`: CNPJ and
+  CPF columns 20 -> 18, among others); sizes do not change the reading.
+  The mirror's history treats a change of declared types as a change of
+  reader, so re-reading the old years does not file them as re-filings.
+
 * `cvm_codelist()` listed free text as categories and missed values in
   use. The codelists were sampled from the latest year alone, and in
   May that was a 2026 with five months of filings (one DFP). Measured
