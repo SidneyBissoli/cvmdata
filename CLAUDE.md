@@ -209,7 +209,11 @@ Domínio dos argumentos enumerados (validados via `rlang::arg_match0()`):
 
 - `as_of` (Sidney, 2026-10-21; frente Deslistadas): data completa, só
   em tabela-registro cujo YAML declara `as_of: {registered, cancelled}`
-  (hoje `cad/companhias`: `dt_reg`/`dt_cancel`); outra tabela = erro.
+  (hoje as três do `cad`: `dt_reg`/`dt_cancel`); outra tabela = erro.
+  `cad/estrangeiras` e `cad/incentivadas` (2026-11-01) têm a coluna
+  `cnpj` (não `cnpj_cia`), que `cnpj_col()` reconhece por último
+  (`fre/participacao_sociedade` tem `cnpj` da investida E
+  `cnpj_companhia`), e não têm `tp_merc`.
   Mantém os REGISTROS vigentes na data (`dt_reg <= X` e `dt_cancel`
   vazia ou `> X`), olhando cada `(cnpj_cia, cd_cvm)` — 34 CNPJ têm dois
   registros. As linhas são as de HOJE (a CVM não publica o cadastro do
@@ -767,7 +771,12 @@ o gerador for revisitado:
   publicados (decisão do dono, 2026-11-01; lidos do espelho, e da CVM
   quando o espelho ainda não tem a tabela). Exceção escrita em
   `.CARDINALITY_EXCEPTIONS`: `fca/geral/setor_atividade` (classificação
-  setorial da CVM, 66 valores). Cada valor leva `first_seen_year` e
+  setorial da CVM, 66 valores). Exclusão escrita em `.FREE_TEXT_COLUMNS`
+  (chave completa, não prefixo; decisão do dono, 2026-11-01): texto
+  livre de tabela pequena demais para o teste de cardinalidade —
+  `cad/estrangeiras` (27 linhas) `resp`, `auditor`, `cidade`, `estado`
+  (`fca/escriturador/cidade` é lista curta legítima, por isso não é
+  prefixo). Cada valor leva `first_seen_year` e
   `last_seen_year` (NA: valor do `dominio` nunca observado, ou tabela
   sem ano, o `cad`),
   EXCLUINDO prefixos: identificadores (`cnpj`, `cd_cvm`, `codigo_cvm`,

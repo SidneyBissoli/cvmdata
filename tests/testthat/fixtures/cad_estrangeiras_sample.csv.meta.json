@@ -1,0 +1,6 @@
+{
+  "source_url": "https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv",
+  "fetched_at": "2026-11-01",
+  "files_included": ["cad_cia_estrang.csv"],
+  "notes": "The whole file as published on 2026-10-31 (27 rows, 49 columns), byte for byte, ISO-8859-1. Includes the CVM's own repetitions: one row twice verbatim and one company with two rows that differ only in the phone."
+}

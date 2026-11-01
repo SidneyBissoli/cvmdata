@@ -48,7 +48,7 @@
 #'   (`"2024"`, `"2024-06"`) are rejected. Cannot be combined with
 #'   `year`, and do not apply to snapshot tables such as CAD.
 #' @param as_of Optional complete date (`"YYYY-MM-DD"` or `Date`) for
-#'   registry tables only (`cad/companhias`): keeps the registrations
+#'   registry tables only (the three `cad` tables): keeps the registrations
 #'   in force on that date, i.e. registered on or before it and not
 #'   cancelled by it. The rows are the register as the CVM publishes it
 #'   today, not a reconstruction of the past. See the section *Company
@@ -161,6 +161,17 @@
 #' `fca/geral` file is the CVM's own picture of a company in a given
 #' year (name, registration situation, category, issuer situation).
 #'
+#' The CVM keeps two more registers in the same shape, also in `cad`:
+#' `cad/estrangeiras` (foreign companies) and `cad/incentivadas`
+#' (companies registered under the tax-incentive regime). Their issuer
+#' column is `cnpj`, not `cnpj_cia`, and they have no `tp_merc`; `cnpj`
+#' and `as_of` work as in `cad/companhias`. In
+#' `cad/incentivadas` most companies never got a CVM code (`cd_cvm` is
+#' `NA` in about 40% of the rows), several CNPJs were cancelled and
+#' registered again, and a few rows carry a cancellation date with a
+#' situation other than `"CANCELADA"`; `as_of` reads the dates as the
+#' CVM published them.
+#'
 #' @section Arguments by table:
 #' `r paste(doc_arguments_by_table(), collapse = "\n")`
 #'
@@ -176,6 +187,10 @@
 #' # universe), one row per registration
 #' u2015 <- cvm_fetch("cad", "companhias", as_of = "2015-12-31")
 #' u2015 <- dplyr::distinct(u2015, cnpj_cia, cd_cvm, .keep_all = TRUE)
+#'
+#' # The registers of foreign and of tax-incentive companies
+#' foreign <- cvm_fetch("cad", "estrangeiras")
+#' incentive <- cvm_fetch("cad", "incentivadas", as_of = "2015-12-31")
 #'
 #' # A delisted company by its former ticker
 #' gol <- cvm_fetch("dfp", "dre", ticker = "GOLL4", year = 2019, basis = "con")
@@ -928,8 +943,8 @@ empty_reason_bullet <- function(schema) {
 
 # Validate `as_of` against the table. Only registry tables declare in
 # their schema which columns hold the registration and cancellation
-# dates (`as_of: {registered: ..., cancelled: ...}`; today
-# cad/companhias), and only they accept the argument. Returns the
+# dates (`as_of: {registered: ..., cancelled: ...}`; today the three
+# cad tables), and only they accept the argument. Returns the
 # parsed Date, or NULL.
 check_as_of <- function(as_of, schema) {
   if (is.null(as_of)) {

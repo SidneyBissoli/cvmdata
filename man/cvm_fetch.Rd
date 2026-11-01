@@ -67,7 +67,7 @@ read are the years spanned by the interval. Incomplete dates
 \code{year}, and do not apply to snapshot tables such as CAD.}
 
 \item{as_of}{Optional complete date (\code{"YYYY-MM-DD"} or \code{Date}) for
-registry tables only (\code{cad/companhias}): keeps the registrations
+registry tables only (the three \code{cad} tables): keeps the registrations
 in force on that date, i.e. registered on or before it and not
 cancelled by it. The rows are the register as the CVM publishes it
 today, not a reconstruction of the past. See the section \emph{Company
@@ -204,18 +204,29 @@ does not publish past states of the register (the file only records
 when the current value of each field started). The yearly
 \code{fca/geral} file is the CVM's own picture of a company in a given
 year (name, registration situation, category, issuer situation).
+
+The CVM keeps two more registers in the same shape, also in \code{cad}:
+\code{cad/estrangeiras} (foreign companies) and \code{cad/incentivadas}
+(companies registered under the tax-incentive regime). Their issuer
+column is \code{cnpj}, not \code{cnpj_cia}, and they have no \code{tp_merc}; \code{cnpj}
+and \code{as_of} work as in \code{cad/companhias}. In
+\code{cad/incentivadas} most companies never got a CVM code (\code{cd_cvm} is
+\code{NA} in about 40\% of the rows), several CNPJs were cancelled and
+registered again, and a few rows carry a cancellation date with a
+situation other than \code{"CANCELADA"}; \code{as_of} reads the dates as the
+CVM published them.
 }
 
 \section{Arguments by table}{
 
-Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 74 tables in 8 datasets. An argument passed to a table it does not apply to aborts with \code{cvmdata_error_input} before anything is downloaded; nothing is silently ignored.
+Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 76 tables in 8 datasets. An argument passed to a table it does not apply to aborts with \code{cvmdata_error_input} before anything is downloaded; nothing is silently ignored.
 \itemize{
-\item \code{year} and \code{from}/\code{to}: every table published one file per year. Not for \code{cad}: \code{companhias}, a single snapshot. A \code{year} before the table's first year is refused (a \code{from}/\code{to} window is cut to it instead). Most tables start with their dataset; these start later: \code{dfp/composicao_capital} (2020), \code{fre/acao_entregue} (2023), \code{fre/administrador_PCD} (2023), \code{fre/administrador_declaracao_genero} (2023), \code{fre/administrador_declaracao_raca} (2023), \code{fre/empregado_PCD} (2023), \code{fre/empregado_local_declaracao_genero} (2023), \code{fre/empregado_local_declaracao_raca} (2023), \code{fre/empregado_local_faixa_etaria} (2023), \code{fre/empregado_posicao_declaracao_genero} (2023), \code{fre/empregado_posicao_declaracao_raca} (2023), \code{fre/empregado_posicao_faixa_etaria} (2023), \code{fre/empregado_posicao_local} (2023), \code{fre/mercado_estrangeiro} (2019), \code{fre/remuneracao_acao} (2023), \code{fre/remuneracao_variavel} (2023), \code{fre/titular_valor_mobiliario} (2018), \code{fre/titulo_exterior} (2016), \code{itr/composicao_capital} (2020).
+\item \code{year} and \code{from}/\code{to}: every table published one file per year. Not for \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}, a single snapshot. A \code{year} before the table's first year is refused (a \code{from}/\code{to} window is cut to it instead). Most tables start with their dataset; these start later: \code{dfp/composicao_capital} (2020), \code{fre/acao_entregue} (2023), \code{fre/administrador_PCD} (2023), \code{fre/administrador_declaracao_genero} (2023), \code{fre/administrador_declaracao_raca} (2023), \code{fre/empregado_PCD} (2023), \code{fre/empregado_local_declaracao_genero} (2023), \code{fre/empregado_local_declaracao_raca} (2023), \code{fre/empregado_local_faixa_etaria} (2023), \code{fre/empregado_posicao_declaracao_genero} (2023), \code{fre/empregado_posicao_declaracao_raca} (2023), \code{fre/empregado_posicao_faixa_etaria} (2023), \code{fre/empregado_posicao_local} (2023), \code{fre/mercado_estrangeiro} (2019), \code{fre/remuneracao_acao} (2023), \code{fre/remuneracao_variavel} (2023), \code{fre/titular_valor_mobiliario} (2018), \code{fre/titulo_exterior} (2016), \code{itr/composicao_capital} (2020).
 \item Years from which the CVM publishes the file with its header only are refused too: \code{fca/departamento_acionistas} (2024).
 \item \code{basis}: required, with no default, in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva}. Refused in every other table.
 \item \code{reading}: only in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva} (the tables with \code{ordem_exerc}).
-\item \code{as_of}: only in \code{cad}: \code{companhias}.
-\item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
+\item \code{as_of}: only in \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}.
+\item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
 }
 }
 
@@ -253,6 +264,10 @@ issuers <- cvm_fetch("cad", "companhias")
 # universe), one row per registration
 u2015 <- cvm_fetch("cad", "companhias", as_of = "2015-12-31")
 u2015 <- dplyr::distinct(u2015, cnpj_cia, cd_cvm, .keep_all = TRUE)
+
+# The registers of foreign and of tax-incentive companies
+foreign <- cvm_fetch("cad", "estrangeiras")
+incentive <- cvm_fetch("cad", "incentivadas", as_of = "2015-12-31")
 
 # A delisted company by its former ticker
 gol <- cvm_fetch("dfp", "dre", ticker = "GOLL4", year = 2019, basis = "con")

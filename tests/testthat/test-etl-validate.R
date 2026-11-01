@@ -262,49 +262,54 @@ test_that("validate_expected_tuples never expects a year the table lacks", {
 
 # --- validate_dataset end-to-end ---------------------------------------
 
+# Stage the parquet of every cad table (companhias, estrangeiras,
+# incentivadas) the way stage 02 writes them.
+stage_cad_workspace <- function(workspace, tables = cad_tables) {
+  for (tbl in tables) {
+    dest_dir <- file.path(workspace, "out", "parquet", "companhias", "cad", tbl)
+    dir.create(dest_dir, recursive = TRUE)
+    file.copy(
+      test_path("fixtures", sprintf("mirror-cad-%s.parquet", tbl)),
+      file.path(dest_dir, "part-0.parquet")
+    )
+  }
+  invisible(workspace)
+}
+cad_tables <- c("companhias", "estrangeiras", "incentivadas")
+
 test_that("validate_dataset reports pass for a clean CAD workspace", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  dest_dir <- file.path(
-    workspace,
-    "out",
-    "parquet",
-    "companhias",
-    "cad",
-    "companhias"
-  )
-  dir.create(dest_dir, recursive = TRUE)
-  file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
+  stage_cad_workspace(workspace)
 
   results <- validate_dataset("companhias", "cad", workspace)
-  expect_equal(nrow(results), 1L)
-  expect_identical(results$status, "pass")
-  expect_equal(results$hard_failed, 0L)
-  expect_equal(results$soft_failed, 0L)
+  expect_equal(nrow(results), 3L)
+  expect_identical(results$status, rep("pass", 3L))
+  expect_equal(results$hard_failed, rep(0L, 3L))
+  expect_equal(results$soft_failed, rep(0L, 3L))
 })
 
 test_that("validate_dataset reports hard_fail for missing parquet", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  # Note: nothing copied; validate_dataset expects companhias to be present.
+  # Nothing copied: every cad table is expected.
   results <- validate_dataset("companhias", "cad", workspace)
-  expect_identical(results$status, "hard_fail")
-  expect_true(results$hard_failed >= 1L)
+  expect_identical(results$status, rep("hard_fail", 3L))
+  expect_true(all(results$hard_failed >= 1L))
+  # One table missing fails that table only.
+  workspace2 <- withr::local_tempdir()
+  stage_cad_workspace(workspace2, c("companhias", "estrangeiras"))
+  results2 <- validate_dataset("companhias", "cad", workspace2)
+  expect_identical(
+    results2$status[order(results2$table)],
+    c("pass", "pass", "hard_fail")
+  )
 })
 
 test_that("validate_write_report writes a markdown summary", {
   load_etl_validator()
   workspace <- withr::local_tempdir()
-  dest_dir <- file.path(
-    workspace,
-    "out",
-    "parquet",
-    "companhias",
-    "cad",
-    "companhias"
-  )
-  dir.create(dest_dir, recursive = TRUE)
-  file.copy(cad_fx(), file.path(dest_dir, "part-0.parquet"))
+  stage_cad_workspace(workspace)
 
   results <- validate_dataset("companhias", "cad", workspace)
   report_dir <- file.path(workspace, "out", "validation")

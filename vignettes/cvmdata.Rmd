@@ -42,7 +42,7 @@ datasets:
 
 | Dataset id | Coverage                                                  |
 |------------|-----------------------------------------------------------|
-| `cad`      | Company registry (`Cadastro de Companhias Abertas`).      |
+| `cad`      | Company registers: open (`companhias`), foreign (`estrangeiras`) and tax-incentive (`incentivadas`) companies. |
 | `itr`      | Quarterly financial statements (`Informações Trimestrais`).|
 | `dfp`      | Annual financial statements (`Demonstrações Financeiras Padronizadas`). |
 | `fre`      | Reference form, including ESG/governance tables (`Formulário de Referência`). |
