@@ -105,6 +105,18 @@ suppressPackageStartupMessages({
   "^mun($|_)",
   "^municipio_"
 )
+# Free-text columns of a table too small for the cardinality test
+# (owner's decision, 2026-11-01): cad/estrangeiras has 27 rows, so the
+# responsible person's name, the auditor and the foreign city and state
+# stay under the cap. Listed by full key, not by name: a column of the
+# same name can be a genuine short list elsewhere (fca/escriturador/
+# cidade, a handful of registrar cities).
+.FREE_TEXT_COLUMNS <- c(
+  "companhias/cad/estrangeiras/resp",
+  "companhias/cad/estrangeiras/auditor",
+  "companhias/cad/estrangeiras/cidade",
+  "companhias/cad/estrangeiras/estado"
+)
 
 is_excluded_column <- function(col) {
   any(vapply(
@@ -382,6 +394,11 @@ build_codelists_snapshot <- function() {
   excluded <- vapply(candidates$campo, is_excluded_column, logical(1L))
   candidates <- candidates[!excluded, , drop = FALSE]
   candidates <- candidates[!(key_of(candidates) %in% enum_keys), , drop = FALSE]
+  candidates <- candidates[
+    !(key_of(candidates) %in% .FREE_TEXT_COLUMNS),
+    ,
+    drop = FALSE
+  ]
   cli::cli_alert_info(
     "Candidate columns for the cardinality test: {.val {nrow(candidates)}}."
   )

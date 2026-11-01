@@ -66,6 +66,7 @@ options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
 # Target selection: default to all; CLI args restrict to a subset.
 .all_targets <- c(
   "parquet",
+  "cad_registries",
   "cgvn",
   "vlmo",
   "fca",
@@ -98,6 +99,29 @@ write_parquet_via_duckdb <- function(df, path) {
     )
   )
   invisible(path)
+}
+
+# The two other cad registers (cad/estrangeiras, cad/incentivadas), from
+# their CSV samples, as the ETL would publish them. Callable on its own
+# so adding them did not rewrite the other fixtures.
+build_cad_registry_fixtures <- function() {
+  samples <- c(
+    estrangeiras = "tests/testthat/fixtures/cad_estrangeiras_sample.csv",
+    incentivadas = "tests/testthat/fixtures/cad_incentivadas_sample.csv"
+  )
+  for (tbl in names(samples)) {
+    schema <- cvmdata:::load_schema("cad", tbl)
+    df <- cvmdata:::read_cvm_csv(samples[[tbl]], schema, validate = "skip")
+    df <- cvmdata:::apply_schema_transformations(df, schema)
+    out <- sprintf("tests/testthat/fixtures/mirror-cad-%s.parquet", tbl)
+    write_parquet_via_duckdb(df, out)
+    cat(sprintf(
+      "[fixture] %s  %d rows, %s bytes\n",
+      out,
+      nrow(df),
+      format(file.info(out)$size)
+    ))
+  }
 }
 
 build_parquet_fixtures <- function() {
@@ -1103,6 +1127,9 @@ build_dre_2023_fixtures <- function() {
 # --- dispatch --------------------------------------------------------
 if ("parquet" %in% .targets) {
   build_parquet_fixtures()
+}
+if ("cad_registries" %in% .targets) {
+  build_cad_registry_fixtures()
 }
 if ("dfp2025" %in% .targets) {
   build_dfp_2025_fixtures()
