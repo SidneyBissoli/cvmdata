@@ -248,7 +248,7 @@ fetch_versions_mirror <- function(schema, cnpj, years, report_type) {
     history = TRUE
   )
   if (!is.null(cnpj)) {
-    out <- filter_by_issuer(out, cnpj, schema = schema)
+    out <- filter_by_issuer(out, cnpj)
   }
   out
 }

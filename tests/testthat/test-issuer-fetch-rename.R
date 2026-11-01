@@ -1,8 +1,8 @@
 # Regression tests for the Session 06 rename (cad_fetch removed,
-# companies -> issuer, years -> year) and for the v0.3 deprecation of
-# issuer_fetch() in favour of cvm_fetch(). The orchestration paths are
-# covered by test-issuer-fetch-yearly.R and test-issuer-fetch-cad.R;
-# this file pins down the deprecation surface.
+# companies -> issuer, years -> year) and for the removal of
+# issuer_fetch() in favour of cvm_fetch() (2026-11-01). The
+# orchestration paths are covered by test-issuer-fetch-yearly.R and
+# test-issuer-fetch-cad.R; this file pins down the removed surface.
 
 # Setup -----------------------------------------------------------------
 
@@ -42,19 +42,6 @@ fresh_head_response <- function() {
 
 # Tests -----------------------------------------------------------------
 
-test_that("issuer_fetch is deprecated in favour of cvm_fetch", {
-  skip_if_not_installed("httptest2")
-  local_prepare_cad_cache()
-  withr::local_options(lifecycle_verbosity = "warning")
-  lifecycle::expect_deprecated(
-    httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      issuer_fetch("cad", "companhias", source = "cvm")
-    ),
-    regexp = "cvm_fetch"
-  )
-})
-
 test_that("cad_fetch is no longer exported", {
   expect_false(exists(
     "cad_fetch",
@@ -64,56 +51,37 @@ test_that("cad_fetch is no longer exported", {
   ))
 })
 
-test_that("issuer_fetch(years = ...) aborts with a migration hint", {
-  withr::local_options(lifecycle_verbosity = "quiet")
-  expect_error(
-    issuer_fetch("cad", "companhias", years = 2024),
-    class = "cvmdata_error_input"
-  )
-  expect_error(
-    issuer_fetch("cad", "companhias", years = 2024),
-    regexp = "year"
-  )
+test_that("issuer_fetch is gone, and so are its text and menu paths", {
+  ns <- asNamespace("cvmdata")
+  for (fn in c(
+    "issuer_fetch",
+    "disambiguate_text_match",
+    "prompt_for_issuer_choice",
+    "resolve_cd_cvm_via_submissao"
+  )) {
+    expect_false(exists(fn, mode = "function", envir = ns, inherits = FALSE))
+  }
+  expect_false("issuer_fetch" %in% getNamespaceExports(ns))
 })
 
-test_that("issuer_fetch(companies = ...) aborts with a migration hint", {
-  withr::local_options(lifecycle_verbosity = "quiet")
-  expect_error(
-    issuer_fetch("cad", "companhias", companies = "BCO BRASIL"),
-    class = "cvmdata_error_input"
-  )
-  expect_error(
-    issuer_fetch("cad", "companhias", companies = "BCO BRASIL"),
-    regexp = "issuer"
-  )
-})
-
-test_that("issuer_fetch rejects unknown extra arguments via ...", {
-  withr::local_options(lifecycle_verbosity = "quiet")
-  expect_error(
-    issuer_fetch("cad", "companhias", bogus = 1),
-    class = "cvmdata_error_input"
-  )
-})
-
-test_that("issuer_fetch accepts a vector via the singular `issuer` arg", {
+test_that("fetch engine accepts a vector via the singular `issuer` arg", {
   skip_if_not_installed("httptest2")
   local_prepare_cad_cache()
   full <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cad", "companhias", source = "cvm")
+    issuer_fetch_internal("cad", "companhias", source = "cvm")
   )
   skip_if(nrow(full) < 2L, "fixture too small for vector smoke test")
-  picks <- utils::head(full$cd_cvm, 2L)
+  picks <- utils::head(unique(full$cnpj_cia), 2L)
   filtered <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch(
+    issuer_fetch_internal(
       "cad",
       "companhias",
       issuer = picks,
       source = "cvm"
     )
   )
-  expect_true(all(filtered$cd_cvm %in% picks))
+  expect_true(all(filtered$cnpj_cia %in% picks))
   expect_gte(nrow(filtered), length(picks))
 })

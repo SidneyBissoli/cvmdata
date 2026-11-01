@@ -403,9 +403,7 @@ The exported API is grouped into five families:
 - **Fetcher** — `cvm_fetch()` is the single function for every dataset
   and table; the groups still on the roadmap (funds, agents, offerings,
   events) will extend it through their schemas. `cvm_versions()` returns
-  every known version of a filing. `issuer_fetch()`, the entry point of
-  earlier releases, is deprecated and will be removed in a later
-  release.
+  every known version of a filing.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
   `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,

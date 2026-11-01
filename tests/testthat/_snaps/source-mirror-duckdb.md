@@ -1,8 +1,8 @@
 # no-match error quotes the skip manifest when it covers the year
 
     Code
-      httr2::with_mocked_responses(mock, issuer_fetch("dfp", "bpa", report_type = "ind",
-        year = 2025L, source = "mirror"))
+      httr2::with_mocked_responses(mock, issuer_fetch_internal("dfp", "bpa",
+        report_type = "ind", year = 2025L, source = "mirror"))
     Condition
       Error in `source_mirror_duckdb_get()`:
       ! No parquet assets match "dfp"/"bpa" in the mirror.

@@ -15,7 +15,7 @@ schema tree; when a dataset slug occurs in more than one group,
 omitting \code{group} aborts with \code{cvmdata_error_input_ambiguous}.}
 
 \item{schema}{Optional already-loaded schema (used internally by
-\code{\link[=issuer_fetch]{issuer_fetch()}} to avoid double-load). Users typically omit.}
+\code{\link[=cvm_fetch]{cvm_fetch()}} to avoid double-load). Users typically omit.}
 }
 \value{
 An integer vector of available years, or \code{NA_integer_}.

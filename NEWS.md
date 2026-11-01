@@ -12,10 +12,16 @@
   instead of shipping new functions. `cvm_groups()` keeps its `contract`
   column as a planning map.
 
-* `issuer_fetch()` is deprecated in favour of `cvm_fetch()` and warns
-  once per session (`lifecycle`). It keeps its behaviour, including the
-  `issuer` argument's CVM-code and free-text forms, until it is removed
-  in a later release.
+* `issuer_fetch()` is removed; use `cvm_fetch()`. Select issuers with
+  `cnpj` or `ticker` instead of `issuer`, and the statement basis with
+  `basis` instead of `report_type`. The `issuer` argument guessed what
+  it was given (CNPJ, CVM code, ticker or company name) and, when a
+  name matched several companies in an interactive session, opened a
+  `utils::menu()`; a data function should take an input of a known
+  type and never stop to ask. Those paths are gone with it: look a CVM
+  code or a company name up in `cvm_fetch("cad", "companhias")`, which
+  carries `cd_cvm`, `denom_social` and `cnpj_cia` side by side. The
+  package no longer imports `lifecycle`.
 
 * The `submissao` table of every dataset (`dfp`, `itr`, `fre`, `fca`,
   `cgvn`, `vlmo`) now returns the complete filing history: one row per

@@ -227,7 +227,7 @@ test_that("missing parquet stays a hard fail when not skipped", {
 test_that("mirror_table_years drops years before the table's first_year", {
   # dfp/composicao_capital starts in 2020 and fre/remuneracao_acao in
   # 2023 (schema first_year), later than their datasets. The ETL used to
-  # schedule them from the dataset's first year; issuer_fetch() refuses
+  # schedule them from the dataset's first year; issuer_fetch_internal() refuses
   # those years with cvmdata_error_input, stage 02 counted them as
   # "fail" and 02b hard-failed 10 dfp and 205 fre tuples (2026-10-27).
   load_etl_validator()

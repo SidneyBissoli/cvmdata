@@ -5,11 +5,11 @@
 #
 # Invariant: `first_year` MUST equal min(cvm_dataset_years(dataset)) —
 # the earliest year the CVM directory listing serves. `first_year` is
-# load-bearing: issuer_fetch()'s year-clamp rejects requested years below
+# load-bearing: the fetch engine's year-clamp rejects requested years below
 # it, and the mirror ETL (stage 02b) enumerates expected (table, year)
 # tuples from cvm_dataset_years(). If first_year sits ABOVE the listing
 # minimum, the clamp drops years the portal publishes and the ETL hard-
-# fails on the missing parquets; if it sits BELOW, issuer_fetch() lets a
+# fails on the missing parquets; if it sits BELOW, the fetch engine lets a
 # year through that then 404s. Either way the two must agree.
 #
 # cvm_dataset_years() is the authoritative oracle here because it reads

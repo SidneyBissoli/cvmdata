@@ -17,10 +17,11 @@ This article walks through each argument: how issuers are selected
 `from`/`to`), the `basis` rule for financial statements, the
 `validate` and `on_error` modes, and the cache/source plumbing.
 
-`issuer_fetch()`, the entry point of v0.1 and v0.2, is deprecated: it
-still works, with a lifecycle warning, and will be removed in a later
-release. Its `issuer` argument (CNPJ, CD_CVM, free text or ticker)
-and `report_type` map onto the arguments described here.
+`issuer_fetch()`, the entry point of v0.1 and v0.2, was removed. Its
+`issuer` argument took a CNPJ, a CVM code, a ticker or a company name;
+`cvm_fetch()` takes `cnpj` or `ticker`, and the CVM code or name of a
+company is looked up in `cvm_fetch("cad", "companhias")`. Its
+`report_type` is `basis`.
 
 ```{r setup}
 library(cvmdata)
