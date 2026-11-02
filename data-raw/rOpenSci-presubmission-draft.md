@@ -288,11 +288,28 @@ maintainer runs the ETL. What limits it now:
   latest filing on the CVM portal is also in the mirror, and raises an
   alert after 7 days of lag or if a release stops opening anonymously.
 
-<!-- TODO (decisão do dono antes de postar): o que prometer além disso.
-Candidatos medidos em 2026-10-25 (ROADMAP, "Padrão source = mirror"):
-mover o repositório e os releases para uma organização no GitHub;
-segundo host para os parquets (como o geobr, com o servidor do IPEA);
-DOI por snapshot (Zenodo). Só escrever aqui o que estiver decidido. -->
+<!-- Decisões do dono, 2026-11-02: (1) sem organização no GitHub —
+projeto pessoal, nada a transferir por ora; (2) segundo host só se o
+tamanho inviabilizar o GitHub, e então Cloudflare; (3) DOI por
+snapshot datado: adotado (item no ROADMAP). Não prometer além disso. -->
+
+What we plan, and what we do not:
+
+- **A DOI for each dated snapshot.** Each snapshot will be deposited
+  in an archive that issues DOIs (Zenodo), so a paper can cite the
+  exact data it used and the data outlive the GitHub repository.
+  <!-- Reescrever no presente quando estiver implementado. -->
+- **No transfer to an organisation.** `cvmdata` is a personal
+  project, and we will not claim an institutional home it does not
+  have. The guarantees above are the ones that hold for a single
+  maintainer: the official source is always one argument away, and
+  anyone can rebuild the mirror.
+- **Storage stays on GitHub Releases** while the mirror fits there
+  (~3.5 GB/year of new partitions, measured). If its size ever made
+  GitHub impractical, the parquet files would move to Cloudflare
+  object storage. The client already locates every partition through
+  the sidecar, so the move would change how download URLs are built,
+  not the package API.
 
 **Precedent.** Data packages on CRAN already serve preprocessed data
 from GitHub Releases: `geobr` (v2) and `censobr` (IPEA) download
