@@ -236,6 +236,14 @@ test_that("the reader fingerprint follows the reader's code", {
     assign(o, get(o, envir = asNamespace("cvmdata")), envir = ns)
   }
   expect_identical(mirror_reader_id(ns), id)
+  # the declared types of the dictionary drive the reading too
+  dict <- mirror_reader_dictionary()
+  expect_true(
+    "fre|transacao_parte_relacionada|taxa_juros|varchar" %in%
+      sub("^[^|]*\\|", "", dict)
+  )
+  retyped <- sub("taxa_juros|varchar", "taxa_juros|numeric", dict, fixed = TRUE)
+  expect_false(identical(mirror_reader_id(ns, retyped), id))
   assign(".text_types", c("varchar"), envir = ns)
   expect_false(identical(mirror_reader_id(ns), id))
   # every object of the list exists in the package
