@@ -263,6 +263,15 @@
   The mirror's history treats a change of declared types as a change of
   reader, so re-reading the old years does not file them as re-filings.
 
+* `cvm_fetch("cad", "companhias")` returned the phone columns `fax`,
+  `fax_resp` and `tel_resp` as numbers, while `tel` and the other phone
+  columns of the package are text. The CVM's META declares the three
+  numeric; the reader now keeps them as character, so a number starting
+  with zero cannot lose it. Measured on 2026-11-01 over the 2,678 rows of
+  the register, no value had lost anything yet (the leading zeros were
+  only the CVM's `0` placeholders); these were the only phone columns of
+  the dictionary still read as numbers.
+
 * `cvm_codelist()` listed free text as categories and missed values in
   use. The codelists were sampled from the latest year alone, and in
   May that was a 2026 with five months of filings (one DFP). Measured

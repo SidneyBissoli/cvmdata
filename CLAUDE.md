@@ -287,7 +287,9 @@ ID_Item da CGVN é `N.N.N`, etc. Implementação em
 `R/util-csv-cvm.R::identifier_columns()`: classificação por **prefixos
 regex** (`^cnpj`, `^cpf`, `^codigo_`, `^cd_cvm`, `^cep`, `^ddi_`,
 `^ddd_`, `^id_`, `^protocolo`) **+ exact-match** para os esquisitos
-(`caixa_postal`, `tel`, `versao`). Refator de v0.2 — Sessão 10 —
+(`caixa_postal`, `fax`, `fax_resp`, `tel`, `tel_resp`, `versao`;
+os três do fax/tel_resp entraram em 2026-11-01, únicos telefones do
+dicionário que o META declara numeric). Refator de v0.2 — Sessão 10 —
 substituiu a lista monolítica de regex `.identifier_patterns` por
 duas listas planas + um helper testável.
 
