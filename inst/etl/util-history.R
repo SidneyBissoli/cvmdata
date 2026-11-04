@@ -220,7 +220,36 @@ mirror_reader_objects <- c(
   "as_sortable_id"
 )
 
-mirror_reader_id <- function(ns = asNamespace("cvmdata")) {
+#
+# The reader also follows the dictionary snapshot: a column declared
+# varchar/char/nvarchar is read as character, one declared date as Date
+# (`resolve_dict_columns()`). So the fingerprint covers the declared
+# type of every column too, and a snapshot refresh that changes one is a
+# reader change. Measured on 2026-11-01: the CVM META turned
+# fre/transacao_parte_relacionada.taxa_juros from numeric into varchar
+# (text since the 2023 FRE); with the reader id unchanged, the next run
+# would have filed all 616 filings of FRE 2022 (9,408 rows) as
+# superseded, "0" now reading "0.000000". The declared sizes do not
+# change the reading and stay out.
+mirror_reader_dictionary <- function(ns = asNamespace("cvmdata")) {
+  snap <- ns$.read_dictionary_snapshot(ns$require_snapshot_path(
+    "cvm_dictionary_snapshot.csv",
+    "build-dictionary-snapshot.R"
+  ))
+  rows <- do.call(
+    paste,
+    c(
+      unname(as.list(snap[c("group", "dataset", "table", "campo")])),
+      list(ifelse(is.na(snap$tipo_dados), "", snap$tipo_dados), sep = "|")
+    )
+  )
+  sort(rows, method = "radix")
+}
+
+mirror_reader_id <- function(
+  ns = asNamespace("cvmdata"),
+  dictionary = mirror_reader_dictionary()
+) {
   present <- mirror_reader_objects[vapply(
     mirror_reader_objects,
     exists,
@@ -229,7 +258,11 @@ mirror_reader_id <- function(ns = asNamespace("cvmdata")) {
     inherits = FALSE
   )]
   objs <- mget(present, envir = ns)
-  substr(digest::digest(lapply(objs, deparse)), 1L, 12L)
+  substr(
+    digest::digest(list(lapply(objs, deparse), dictionary)),
+    1L,
+    12L
+  )
 }
 
 # `versao` of the filing `new` holds for each key of `old_keys`; NA when

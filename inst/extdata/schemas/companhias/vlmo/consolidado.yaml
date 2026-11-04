@@ -1,8 +1,7 @@
 # Schema: vlmo / consolidado
 # Detalhe consolidado do VLMO: uma linha por movimentacao de valor
 # mobiliario por insider, agregada por categoria (Tipo_Cargo). NAO traz
-# Codigo_CVM — o filtro por CD_CVM resolve via vlmo/submissao
-# (cdcvm_col() + resolve_cd_cvm_via_submissao()). Identidade individual
+# Codigo_CVM (o filtro de emissor e por CNPJ). Identidade individual
 # do insider e opaca por design da CVM (sem CPF; quando o insider e PJ,
 # so o nome em Empresa + Tipo_Empresa). Convencao FRE-detail-like sem
 # Codigo_CVM. Empirical verification: 2024 snapshot (verificacao

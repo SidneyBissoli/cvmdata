@@ -1,4 +1,4 @@
-# End-to-end tests for issuer_fetch() against the v0.2 FCA dataset
+# End-to-end tests for issuer_fetch_internal() against the v0.2 FCA dataset
 # (Formulario Cadastral). Mocks the HTTP layer with
 # httr2::with_mocked_responses + a local fixture ZIP, matching the
 # pattern used for CGVN/VLMO/DFP/ITR/FRE.
@@ -49,13 +49,13 @@ fresh_head_response <- function() {
 
 # Tracer -------------------------------------------------------------
 
-test_that("issuer_fetch FCA submissao tracer returns cvm_tbl", {
+test_that("fetch engine FCA submissao tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_fca_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "submissao", year = 2024L, source = "cvm")
+    issuer_fetch_internal("fca", "submissao", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -74,14 +74,14 @@ test_that("issuer_fetch FCA submissao tracer returns cvm_tbl", {
   expect_s3_class(result$dt_refer, "Date")
 })
 
-test_that("issuer_fetch FCA detail tracers return FRE-detail shape", {
+test_that("fetch engine FCA detail tracers return FRE-detail shape", {
   skip_if_not_installed("httptest2")
   local_prepare_fca_cache()
 
   for (tb in c("geral", "valor_mobiliario", "endereco")) {
     result <- httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch("fca", tb, year = 2024L, source = "cvm")
+      issuer_fetch_internal("fca", tb, year = 2024L, source = "cvm")
     )
     expect_s3_class(result, "cvm_tbl")
     expect_identical(attr(result, "table"), tb)
@@ -103,7 +103,12 @@ test_that("FCA valor_mobiliario carries the ticker column", {
 
   vm <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("fca", "valor_mobiliario", year = 2024L, source = "cvm")
+    issuer_fetch_internal(
+      "fca",
+      "valor_mobiliario",
+      year = 2024L,
+      source = "cvm"
+    )
   )
   expect_identical(ncol(vm), 18L)
   expect_true("codigo_negociacao" %in% names(vm))
@@ -114,13 +119,13 @@ test_that("FCA valor_mobiliario carries the ticker column", {
 
 # Filtering by issuer -------------------------------------------------
 
-test_that("issuer_fetch FCA filters a detail by CNPJ", {
+test_that("fetch engine FCA filters a detail by CNPJ", {
   skip_if_not_installed("httptest2")
   local_prepare_fca_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch(
+    issuer_fetch_internal(
       "fca",
       "geral",
       issuer = "00.000.000/0001-91",
@@ -132,119 +137,9 @@ test_that("issuer_fetch FCA filters a detail by CNPJ", {
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
-test_that("FCA resolves CD_CVM via submissao for a detail table", {
-  # The bridge under test is new to FCA: submissao is CLASSIC
-  # (cnpj_cia) while the detail is FRE-detail (cnpj_companhia). The
-  # resolver must read fca/submissao, map CD_CVM -> cnpj_cia, and match
-  # that CNPJ against the detail's cnpj_companhia column.
-  skip_if_not_installed("httptest2")
-  local_prepare_fca_cache()
-
-  padded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "fca",
-      "endereco",
-      issuer = "001023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_true(nrow(padded) > 0L)
-  expect_true(all(padded$cnpj_companhia == "00.000.000/0001-91"))
-
-  unpadded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "fca",
-      "endereco",
-      issuer = "1023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_identical(nrow(unpadded), nrow(padded))
-})
-
 # Ticker lookup -------------------------------------------------------
 
-test_that("FCA resolves a B3 ticker to its issuer CNPJ", {
-  skip_if_not_installed("httptest2")
-  local_prepare_fca_cache()
-
-  # BBAS3 is BCO BRASIL's ticker in the fixture's valor_mobiliario.
-  result <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch("fca", "geral", issuer = "BBAS3", year = 2024L, source = "cvm")
-  )
-  expect_true(nrow(result) > 0L)
-  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("FCA ticker lookup is case-insensitive", {
-  skip_if_not_installed("httptest2")
-  local_prepare_fca_cache()
-
-  result <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch("fca", "geral", issuer = "bbas3", year = 2024L, source = "cvm")
-  )
-  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("unknown ticker aborts with cvmdata_error_input", {
-  skip_if_not_installed("httptest2")
-  local_prepare_fca_cache()
-
-  expect_error(
-    httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      issuer_fetch(
-        "fca",
-        "geral",
-        issuer = "ZZZZ9",
-        year = 2024L,
-        source = "cvm"
-      )
-    ),
-    class = "cvmdata_error_input"
-  )
-})
-
 # Issuer-token routing ------------------------------------------------
-
-test_that("classify_issuer_tokens routes ticker vs CD_CVM vs CNPJ", {
-  cls <- cvmdata:::classify_issuer_tokens(c(
-    "PETR4",
-    "BBDC11",
-    "ITSA4F", # tickers
-    "1023",
-    "001023", # CD_CVM
-    "00.000.000/0001-91", # CNPJ
-    "BCO BRASIL" # free text
-  ))
-  expect_identical(
-    cls$is_ticker,
-    c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
-  )
-  expect_identical(
-    cls$is_cdcvm,
-    c(FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE)
-  )
-  expect_identical(
-    cls$is_cnpj,
-    c(FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE)
-  )
-  expect_identical(
-    cls$is_text,
-    c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE)
-  )
-  # A numeric CD_CVM is never captured as a ticker, and a ticker is
-  # never captured as CD_CVM: the four masks partition the input.
-  expect_true(all(
-    cls$is_ticker + cls$is_cdcvm + cls$is_cnpj + cls$is_text == 1L
-  ))
-})
 
 # Empty table tolerance ----------------------------------------------
 
@@ -258,7 +153,7 @@ test_that("departamento_acionistas returns 0 rows without aborting", {
   for (mode in c("strict", "warn", "skip")) {
     result <- httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch(
+      issuer_fetch_internal(
         "fca",
         "departamento_acionistas",
         year = 2024L,
@@ -280,7 +175,7 @@ test_that("report_type aborts for FCA tables without variants", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch(
+      issuer_fetch_internal(
         "fca",
         "submissao",
         year = 2024L,

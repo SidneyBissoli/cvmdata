@@ -130,7 +130,39 @@ carrying provenance attributes.
 \details{
 Column names, categorical values and free-text fields are preserved
 in Portuguese exactly as published by CVM (snake_case minúsculo).
+Changes to the published rows are declared per table in its schema
+(latest filing, currency scale), with one deliberate exception: in
+DFP and ITR tables, rows the CVM file holds twice, identical in every
+column, are dropped with a warning, since a statement has one row per
+account and a sum over the copies counts twice. See the section
+\emph{Filing versions}; \code{options(cvmdata.check_filings = FALSE)} turns the
+check off.
 }
+\section{Filing versions}{
+
+When a detail table carries several filings for the same issuer and
+reference date, only the last one delivered is kept, ranked by
+receipt date, then CVM document id, then \code{versao}. The version number
+alone is not a filing key: the CVM index can list two filings under
+the same version, or a later filing under a lower one.
+
+The \code{submissao} table of each dataset is the filing index and is not
+collapsed: it returns one row per delivery, re-filings included, with
+the receipt date (\code{dt_receb} or \code{data_entrega}), the document id
+(\code{id_doc}, \code{id_documento} or \code{protocolo_entrega}) and \code{versao}. The
+current filing of an issuer and reference date is the last row by
+that order; joining \code{submissao} to a detail table on the issuer and
+reference date alone matches every delivery.
+
+Tables of datasets with a \code{submissao} index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (\code{cvmdata_warn_duplicate_filing}); copies that differ in
+\code{vl_conta} are kept (\code{cvmdata_warn_conflicting_filing}). A table
+holding an earlier filing than the last delivery keeps the CVM
+numbers and warns (\code{cvmdata_warn_stale_filing}). Set
+\code{options(cvmdata.check_filings = FALSE)} to skip these checks.
+}
+
 \section{Readings of an exercise}{
 
 Every yearly DFP and ITR statement file carries two columns of
@@ -204,6 +236,18 @@ does not publish past states of the register (the file only records
 when the current value of each field started). The yearly
 \code{fca/geral} file is the CVM's own picture of a company in a given
 year (name, registration situation, category, issuer situation).
+
+\code{as_of} is a filter on dates that are already in the file, so it
+could be written by hand; it is an argument because the obvious ways
+of writing it are wrong. Filtering on \code{sit = "ATIVO"} returns today's
+survivors, which is the bias a historical universe has to avoid. A
+condition on \code{dt_cancel} alone drops every active registration, whose
+cancellation date is empty. And a CNPJ that cancelled and registered
+again has two rows, each in force over its own period, so the test
+has to run on each registration rather than on the company. The
+argument applies the one rule (registered on or before the date,
+cancellation empty or after it) to each row, and refuses tables that
+do not declare registration and cancellation dates.
 }
 
 \section{Arguments by table}{
@@ -218,31 +262,6 @@ Which arguments apply depends on the table. The rules below are generated from t
 \item \code{cnpj}/\code{ticker} in a table without an issuer column: \code{recompra_acoes}: \code{intermediarios}, \code{quantidades} keep the rows linked to the issuer's rows in \code{recompra_acoes/recompra_acoes}.
 \item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{recompra_acoes}: \code{intermediarios}, \code{quantidades}, \code{recompra_acoes}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
 }
-}
-
-\section{Filing versions}{
-
-When a detail table carries several filings for the same issuer and
-reference date, only the last one delivered is kept, ranked by
-receipt date, then CVM document id, then \code{versao}. The version number
-alone is not a filing key: the CVM index can list two filings under
-the same version, or a later filing under a lower one.
-
-The \code{submissao} table of each dataset is the filing index and is not
-collapsed: it returns one row per delivery, re-filings included, with
-the receipt date (\code{dt_receb} or \code{data_entrega}), the document id
-(\code{id_doc}, \code{id_documento} or \code{protocolo_entrega}) and \code{versao}. The
-current filing of an issuer and reference date is the last row by
-that order; joining \code{submissao} to a detail table on the issuer and
-reference date alone matches every delivery.
-
-Tables of datasets with a \code{submissao} index are checked against it
-before returning. In DFP and ITR tables, rows the CVM file holds twice
-are dropped (\code{cvmdata_warn_duplicate_filing}); copies that differ in
-\code{vl_conta} are kept (\code{cvmdata_warn_conflicting_filing}). A table
-holding an earlier filing than the last delivery keeps the CVM
-numbers and warns (\code{cvmdata_warn_stale_filing}). Set
-\code{options(cvmdata.check_filings = FALSE)} to skip these checks.
 }
 
 \examples{

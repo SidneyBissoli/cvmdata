@@ -8,6 +8,13 @@
 #'
 #' Column names, categorical values and free-text fields are preserved
 #' in Portuguese exactly as published by CVM (snake_case minúsculo).
+#' Changes to the published rows are declared per table in its schema
+#' (latest filing, currency scale), with one deliberate exception: in
+#' DFP and ITR tables, rows the CVM file holds twice, identical in every
+#' column, are dropped with a warning, since a statement has one row per
+#' account and a sum over the copies counts twice. See the section
+#' *Filing versions*; `options(cvmdata.check_filings = FALSE)` turns the
+#' check off.
 #'
 #' @param dataset Short dataset id (e.g. `"cad"`, `"dfp"`).
 #' @param table Snake-case table name (e.g. `"companhias"`, `"bpa"`).
@@ -90,7 +97,28 @@
 #'   arguments are accepted; passing any aborts with
 #'   `cvmdata_error_input`.
 #'
-#' @inheritSection issuer_fetch Filing versions
+#' @section Filing versions:
+#' When a detail table carries several filings for the same issuer and
+#' reference date, only the last one delivered is kept, ranked by
+#' receipt date, then CVM document id, then `versao`. The version number
+#' alone is not a filing key: the CVM index can list two filings under
+#' the same version, or a later filing under a lower one.
+#'
+#' The `submissao` table of each dataset is the filing index and is not
+#' collapsed: it returns one row per delivery, re-filings included, with
+#' the receipt date (`dt_receb` or `data_entrega`), the document id
+#' (`id_doc`, `id_documento` or `protocolo_entrega`) and `versao`. The
+#' current filing of an issuer and reference date is the last row by
+#' that order; joining `submissao` to a detail table on the issuer and
+#' reference date alone matches every delivery.
+#'
+#' Tables of datasets with a `submissao` index are checked against it
+#' before returning. In DFP and ITR tables, rows the CVM file holds twice
+#' are dropped (`cvmdata_warn_duplicate_filing`); copies that differ in
+#' `vl_conta` are kept (`cvmdata_warn_conflicting_filing`). A table
+#' holding an earlier filing than the last delivery keeps the CVM
+#' numbers and warns (`cvmdata_warn_stale_filing`). Set
+#' `options(cvmdata.check_filings = FALSE)` to skip these checks.
 #'
 #' @section Readings of an exercise:
 #' Every yearly DFP and ITR statement file carries two columns of
@@ -160,6 +188,18 @@
 #' when the current value of each field started). The yearly
 #' `fca/geral` file is the CVM's own picture of a company in a given
 #' year (name, registration situation, category, issuer situation).
+#'
+#' `as_of` is a filter on dates that are already in the file, so it
+#' could be written by hand; it is an argument because the obvious ways
+#' of writing it are wrong. Filtering on `sit = "ATIVO"` returns today's
+#' survivors, which is the bias a historical universe has to avoid. A
+#' condition on `dt_cancel` alone drops every active registration, whose
+#' cancellation date is empty. And a CNPJ that cancelled and registered
+#' again has two rows, each in force over its own period, so the test
+#' has to run on each registration rather than on the company. The
+#' argument applies the one rule (registered on or before the date,
+#' cancellation empty or after it) to each row, and refuses tables that
+#' do not declare registration and cancellation dates.
 #'
 #' @section Arguments by table:
 #' `r paste(doc_arguments_by_table(), collapse = "\n")`

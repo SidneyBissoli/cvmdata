@@ -4,7 +4,7 @@
 # FRE-detail (cnpj_companhia / data_referencia / nome_empresarial).
 #
 # This is the source table for the B3 ticker -> CNPJ lookup
-# (resolve_ticker_via_fca() in R/api-issuer-fetch.R): column
+# (resolve_ticker_all_years() in R/api-issuer-fetch.R): column
 # Codigo_Negociacao holds the literal ticker (PETR4, VALE3, BBAS3...),
 # forced to character via the ^codigo_ identifier prefix. Multiple rows
 # per company (one per series/class: ON, PN, units, BDR). Active vs.
