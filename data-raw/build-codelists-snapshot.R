@@ -92,6 +92,9 @@ suppressPackageStartupMessages({
   # Reader-aligned identifier exact-match.
   "^versao$",
   "^tel$",
+  "^tel_resp$",
+  "^fax$",
+  "^fax_resp$",
   "^caixa_postal$",
   # Free-text prefixes the reader doesn't touch but that are not
   # codelists either.

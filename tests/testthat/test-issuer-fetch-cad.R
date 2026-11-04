@@ -80,6 +80,10 @@ test_that("issuer_fetch returns identifier columns as character", {
   expect_true("cd_cvm" %in% names(result))
   expect_type(result$cnpj_cia, "character")
   expect_type(result$cd_cvm, "character")
+  # Phone numbers the META declares numeric.
+  for (col in c("tel", "tel_resp", "fax", "fax_resp")) {
+    expect_type(result[[col]], "character")
+  }
   expect_true(any(grepl(
     "^[0-9]{2}\\.[0-9]{3}\\.[0-9]{3}/[0-9]{4}-[0-9]{2}$",
     result$cnpj_cia
