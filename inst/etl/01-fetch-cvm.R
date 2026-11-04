@@ -1,10 +1,10 @@
 # Stage 1 — Fetch raw CVM data into the ETL workspace.
 #
-# Calls cvmdata::issuer_fetch(source = "cvm") for each (table, year) of the
-# requested dataset. The package handles the HTTP transport, ETag-based
-# revalidation and schema validation; the only side effect this stage
-# needs is "warm cache populated" — the actual parquet conversion is
-# stage 02.
+# Calls cvmdata:::issuer_fetch_internal(source = "cvm"), the engine behind
+# cvm_fetch(), for each (table, year) of the requested dataset. The
+# package handles the HTTP transport, ETag-based revalidation and schema
+# validation; the only side effect this stage needs is "warm cache
+# populated" — the actual parquet conversion is stage 02.
 #
 # Usage:
 #   Rscript inst/etl/01-fetch-cvm.R \
@@ -88,7 +88,7 @@ fetch_breaker_tripped <- function(
 fetch_one <- function(dataset, tbl, year, report_type) {
   cond <- NULL
   res <- tryCatch(
-    cvmdata::issuer_fetch(
+    cvmdata:::issuer_fetch_internal(
       dataset,
       tbl,
       year = if (is.na(year)) NULL else year,
@@ -223,7 +223,7 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
   options(
     cvmdata.cache_dir = file.path(workspace, "cache"),
     cvmdata.source = "cvm",
-    # The mirror keeps the CVM rows as published; issuer_fetch() runs
+    # The mirror keeps the CVM rows as published; cvm_fetch() runs
     # the filing checks at read time, so mirror users get the warnings.
     cvmdata.check_filings = FALSE
   )

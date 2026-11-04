@@ -7,8 +7,7 @@
 # PDF download are out of scope: the package returns Link_Download as a
 # character URL and never fetches the PDF. FRE-detail-like convention
 # (cnpj_companhia / data_referencia / nome_companhia) with Codigo_CVM
-# native in the header (so CD_CVM filters match directly via
-# cdcvm_col(), without the submissao bridge). Empirical verification:
+# native in the header. Empirical verification:
 # 2024 snapshot + META TXT (verificacao empirica v0.2 §2.4),
 # re-confirmed on disk 2026-05-29.
 

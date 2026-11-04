@@ -119,7 +119,7 @@ cvm_tables <- function(dataset, group = NULL) {
 #'   `cvmdata_error_input_ambiguous`.
 #'
 #' @return A tibble with one row per column of the table, columns
-#'   `campo` (snake-case name matching [issuer_fetch()] output),
+#'   `campo` (snake-case name matching [cvm_fetch()] output),
 #'   `campo_original` (field name as published by CVM in the META,
 #'   preserving the original casing), `descricao`, `dominio`,
 #'   `tipo_dados`, `tamanho`, `precisao`, `scale`.
@@ -486,7 +486,7 @@ abort_known_or_unknown_column <- function(
 #'   schema tree; when a dataset slug occurs in more than one group,
 #'   omitting `group` aborts with `cvmdata_error_input_ambiguous`.
 #' @param schema Optional already-loaded schema (used internally by
-#'   [issuer_fetch()] to avoid double-load). Users typically omit.
+#'   [cvm_fetch()] to avoid double-load). Users typically omit.
 #'
 #' @return An integer vector of available years, or `NA_integer_`.
 #'

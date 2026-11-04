@@ -53,18 +53,20 @@ if (!dir.exists(out_dir)) {
 }
 
 cli::cli_h1("Fetching CAD registry (full snapshot)")
-cad_full <- issuer_fetch("cad", "companhias")
+cad_full <- issuer_fetch_internal("cad", "companhias")
 cli::cli_alert_info(
   "CAD: {nrow(cad_full)} rows, {ncol(cad_full)} cols"
 )
 cad_sample <- slice_cvm_tbl(cad_full, 15L)
 
-cli::cli_h1("Fetching DFP/BPA individual 2024 (BCO BRASIL, CD_CVM 1023)")
-bb_bpa <- issuer_fetch(
+cli::cli_h1(
+  "Fetching DFP/BPA individual 2024 (BCO BRASIL, CNPJ 00.000.000/0001-91)"
+)
+bb_bpa <- issuer_fetch_internal(
   "dfp",
   "bpa",
   report_type = "ind",
-  issuer = "1023",
+  issuer = "00.000.000/0001-91",
   year = 2024L
 )
 cli::cli_alert_info(

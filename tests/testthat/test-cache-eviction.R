@@ -388,7 +388,7 @@ test_that("download_with_etag triggers eviction after a real write", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch(
+    issuer_fetch_internal(
       "dfp",
       "bpa",
       report_type = "ind",

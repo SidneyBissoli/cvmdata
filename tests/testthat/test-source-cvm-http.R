@@ -82,7 +82,13 @@ test_that("download_with_etag fires GET when HEAD ETag mismatches", {
 
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
   expect_equal(file.info(zip_path)$size, length(fixture_body))
@@ -117,7 +123,13 @@ test_that("download_with_etag fires GET when HEAD lacks ETag/Last-Modified", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
   updated <- readRDS(paste0(zip_path, ".etag.rds"))
@@ -143,7 +155,7 @@ test_that("download_with_etag aborts (cvmdata_error_http) on HEAD failure", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch(
+      issuer_fetch_internal(
         "dfp",
         "bpa",
         report_type = "ind",
@@ -178,7 +190,7 @@ test_that("download_with_etag aborts (cvmdata_error_http) on GET failure", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch(
+      issuer_fetch_internal(
         "dfp",
         "bpa",
         report_type = "ind",
@@ -209,7 +221,7 @@ test_that("a transport failure is classed cvmdata_error_http_transport", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch(
+      issuer_fetch_internal(
         "dfp",
         "bpa",
         report_type = "ind",
@@ -227,7 +239,7 @@ test_that("an HTTP status failure is NOT classed as transport", {
   err <- tryCatch(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch(
+      issuer_fetch_internal(
         "dfp",
         "bpa",
         report_type = "ind",
@@ -261,7 +273,7 @@ test_that("absent CSV in the ZIP raises cvmdata_error_zip_member_missing", {
   err <- tryCatch(
     httr2::with_mocked_responses(
       mock,
-      issuer_fetch(
+      issuer_fetch_internal(
         "dfp",
         "bpp",
         report_type = "ind",
@@ -295,7 +307,13 @@ test_that("download_with_etag fetches via GET when cache is empty", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
   zip_path <- file.path(
@@ -362,7 +380,12 @@ test_that("get_simple_csv aborts when report_type is supplied", {
     lifecycle_verbosity = "quiet"
   )
   expect_error(
-    issuer_fetch("cad", "companhias", source = "cvm", report_type = "ind"),
+    issuer_fetch_internal(
+      "cad",
+      "companhias",
+      source = "cvm",
+      report_type = "ind"
+    ),
     class = "cvmdata_error_input"
   )
 })
@@ -393,7 +416,13 @@ test_that("download_with_etag skips HEAD when within TTL", {
 
   result <- httr2::with_mocked_responses(
     no_http_mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
 })
@@ -421,7 +450,13 @@ test_that("download_with_etag triggers HEAD when fetched_at older than TTL", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_true(head_called)
   expect_s3_class(result, "cvm_tbl")
@@ -454,7 +489,13 @@ test_that("cvmdata.cache_ttl_seconds = 0 forces HEAD on every call", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_true(head_called)
   expect_s3_class(result, "cvm_tbl")
@@ -472,7 +513,13 @@ test_that("cvmdata.cache_ttl_seconds = Inf disables HEAD with sidecar", {
 
   result <- httr2::with_mocked_responses(
     no_http_mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_s3_class(result, "cvm_tbl")
 })
@@ -500,7 +547,13 @@ test_that("sidecar without fetched_at triggers HEAD even when TTL = Inf", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_true(head_called)
   expect_s3_class(result, "cvm_tbl")
@@ -533,7 +586,13 @@ test_that("invalid cvmdata.cache_ttl_seconds falls back to HEAD", {
   }
   result <- httr2::with_mocked_responses(
     mock,
-    issuer_fetch("dfp", "bpa", report_type = "ind", year = 2024, source = "cvm")
+    issuer_fetch_internal(
+      "dfp",
+      "bpa",
+      report_type = "ind",
+      year = 2024,
+      source = "cvm"
+    )
   )
   expect_true(head_called)
   expect_s3_class(result, "cvm_tbl")
@@ -567,7 +626,7 @@ test_that("get_yearly_csv aborts with parse error when CSV missing in ZIP", {
     suppressWarnings(
       httr2::with_mocked_responses(
         mock,
-        issuer_fetch(
+        issuer_fetch_internal(
           "dfp",
           "dmpl",
           report_type = "con",

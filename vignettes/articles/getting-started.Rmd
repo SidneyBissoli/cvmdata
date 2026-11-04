@@ -113,10 +113,6 @@ each dataset's schema. Groups not yet implemented (funds, registered
 agents, public offerings, regulatory events) will arrive as new
 schemas behind the same function, not as new fetchers.
 
-`issuer_fetch()`, the entry point of v0.1 and v0.2, is deprecated. It
-still works and emits a lifecycle warning pointing to `cvm_fetch()`;
-it will be removed in a later release.
-
 ## Fetching data — a tour of the 8 issuer datasets
 
 The package implements eight datasets in the `companhias` group:
@@ -350,9 +346,7 @@ A CVM code or a company name passed as `cnpj` aborts with
 `cvmdata_error_input` — there is no free-text search. To find a
 CNPJ you know only by name or by CVM code, read the registry:
 `cvm_fetch("cad", "companhias")` carries `cd_cvm`, `denom_social` and
-`cnpj_cia` side by side. (The deprecated `issuer_fetch()` still
-accepts CD_CVM and free text through its `issuer` argument until it
-is removed.)
+`cnpj_cia` side by side.
 
 An unknown ticker aborts with `cvmdata_error_input` (tickers cover
 only exchange-listed securities — debentures and private placements
