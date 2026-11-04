@@ -163,11 +163,25 @@ observe_table <- function(dataset, table, columns) {
 
 observe_mirror <- function(dataset, table, columns) {
   schema <- load_schema(dataset, table)
-  inventory <- cvmdata:::mirror_list_assets(
-    schema$group,
-    dataset,
-    release = cvm_release_get()
+  # A dataset added on a branch has no release yet: the GitHub API
+  # answers 404 for its tag, and the table is read from the CVM. Any
+  # other failure stops the table, not silently swapped for the CVM.
+  inventory <- tryCatch(
+    cvmdata:::mirror_list_assets(
+      schema$group,
+      dataset,
+      release = cvm_release_get()
+    ),
+    cvmdata_error_http = function(e) {
+      if (!grepl("HTTP 404", conditionMessage(e), fixed = TRUE)) {
+        stop(e)
+      }
+      NULL
+    }
   )
+  if (is.null(inventory)) {
+    return(NULL)
+  }
   assets <- cvmdata:::filter_mirror_assets(inventory, table, kind = "current")
   if (!nrow(assets)) {
     return(NULL)
