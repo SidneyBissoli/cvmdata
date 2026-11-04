@@ -1,4 +1,4 @@
-# End-to-end tests for issuer_fetch() against the v0.2 IPE dataset
+# End-to-end tests for issuer_fetch_internal() against the v0.2 IPE dataset
 # (Informacoes Periodicas e Eventuais — the manifest of every periodic
 # and eventual document a company filed with the CVM). Mocks the HTTP
 # layer with httr2::with_mocked_responses + a local fixture ZIP,
@@ -71,13 +71,13 @@ fresh_head_response <- function() {
 
 # Tracer -------------------------------------------------------------
 
-test_that("issuer_fetch IPE tracer returns cvm_tbl", {
+test_that("fetch engine IPE tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_ipe_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", year = 2024L, source = "cvm")
+    issuer_fetch_internal("ipe", "ipe", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -110,13 +110,13 @@ test_that("issuer_fetch IPE tracer returns cvm_tbl", {
 
 # Filtering by issuer -------------------------------------------------
 
-test_that("issuer_fetch IPE filters by CNPJ via cnpj_companhia", {
+test_that("fetch engine IPE filters by CNPJ via cnpj_companhia", {
   skip_if_not_installed("httptest2")
   local_prepare_ipe_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch(
+    issuer_fetch_internal(
       "ipe",
       "ipe",
       issuer = "00.000.000/0001-91",
@@ -137,7 +137,7 @@ test_that("IPE supports slicing the returned tibble by Categoria", {
 
   out <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", year = 2024L, source = "cvm")
+    issuer_fetch_internal("ipe", "ipe", year = 2024L, source = "cvm")
   )
   fr <- dplyr::filter(out, categoria == "Fato Relevante")
   expect_true(nrow(fr) > 0L)
@@ -145,45 +145,6 @@ test_that("IPE supports slicing the returned tibble by Categoria", {
 })
 
 # CD_CVM lookup is direct (Codigo_CVM is native; no submissao) --------
-
-test_that("IPE resolves CD_CVM directly, padded and unpadded", {
-  skip_if_not_installed("httptest2")
-  local_prepare_ipe_cache()
-
-  padded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "001023", year = 2024L, source = "cvm")
-  )
-  expect_true(nrow(padded) > 0L)
-  expect_true(all(padded$cnpj_companhia == "00.000.000/0001-91"))
-
-  unpadded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "1023", year = 2024L, source = "cvm")
-  )
-  expect_identical(nrow(unpadded), nrow(padded))
-})
-
-test_that("IPE CD_CVM lookup does not go through submissao", {
-  # IPE carries codigo_cvm natively, so the resolver must NOT emit the
-  # "Resolving CD_CVM ... via submissao" message (IPE has no submissao).
-  skip_if_not_installed("httptest2")
-  local_prepare_ipe_cache()
-
-  expect_no_message(
-    httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      issuer_fetch(
-        "ipe",
-        "ipe",
-        issuer = "001023",
-        year = 2024L,
-        source = "cvm"
-      )
-    ),
-    message = "via .*submissao"
-  )
-})
 
 # No dedup by version (event-per-row manifest) ------------------------
 
@@ -222,21 +183,6 @@ test_that("ipe/ipe declares no keep_latest_version", {
 
 # Ticker lookup (bonus from Sessao 12: fires for any dataset) ---------
 
-test_that("IPE resolves a B3 ticker to its issuer via fca", {
-  skip_if_not_installed("httptest2")
-  cache_root <- local_prepare_ipe_cache()
-  stage_fca_into_cache(cache_root)
-
-  # BBAS3 is BCO BRASIL's ticker in the FCA fixture's valor_mobiliario;
-  # the lookup resolves it to the CNPJ, which then matches the IPE rows.
-  result <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch("ipe", "ipe", issuer = "BBAS3", year = 2024L, source = "cvm")
-  )
-  expect_true(nrow(result) > 0L)
-  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
 # report_type rejection ----------------------------------------------
 
 test_that("report_type aborts for ipe/ipe", {
@@ -245,7 +191,7 @@ test_that("report_type aborts for ipe/ipe", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch(
+      issuer_fetch_internal(
         "ipe",
         "ipe",
         year = 2024L,

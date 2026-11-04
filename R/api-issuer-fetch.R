@@ -1,164 +1,9 @@
-#' Fetch a CVM open-data table for an issuer dataset (deprecated)
-#'
-#' @description
-#' `issuer_fetch()` was superseded by [cvm_fetch()], the single public
-#' fetcher, and is deprecated: every call warns once per session and
-#' the function will be removed in a later release. Migrate by
-#' selecting issuers with `cnpj` (CNPJ only) or `ticker` (B3 code)
-#' instead of `issuer`, and the statement basis with `basis` instead
-#' of `report_type`. `cvm_fetch()` does not take CVM codes or company
-#' names; look them up in `cvm_fetch("cad", "companhias")`.
-#'
-#' Until removal the function keeps its original behaviour: it selects
-#' the right URL, downloads (or serves from cache), parses, applies
-#' schema-declared transformations, and returns a tibble carrying
-#' provenance attributes. Column names, categorical values and
-#' free-text fields are preserved in Portuguese exactly as published by
-#' CVM (snake_case minúsculo).
-#'
-#' @keywords internal
-#' @param dataset Short dataset id (e.g. `"cad"`, `"dfp"`).
-#' @param table Snake-case table name (e.g. `"companhias"`, `"bpa"`).
-#'   For datasets with conceptually paired tables (individual /
-#'   consolidated), `table` is the concept name and `report_type`
-#'   selects the variant.
-#' @param issuer Optional character vector identifying issuers to
-#'   include. Accepts CNPJ (with or without punctuation), CD_CVM (with
-#'   or without zero-padding), a B3 trading ticker (e.g. `"PETR4"`,
-#'   `"BBDC11"`), or free-text matched against `denom_cia`. Detection
-#'   is automatic per element; a ticker is resolved to its issuer CNPJ
-#'   via `fca/valor_mobiliario`. `NULL` (default) returns every issuer.
-#'   Singular naming follows tidyverse conventions; the argument still
-#'   accepts vectors of any length.
-#'   When the target table does not carry a `cd_cvm` column (e.g.
-#'   `composicao_capital`, `parecer`), CD_CVM tokens are resolved to
-#'   CNPJ via the dataset's `submissao` table for the same year — the
-#'   user-facing interface is identical regardless of which table
-#'   holds CD_CVM natively.
-#' @param year Integer vector of years to fetch. `NULL` (default)
-#'   fetches the latest available year. Ignored for datasets with
-#'   `temporal_partitioning: none` (e.g. CAD). Singular naming follows
-#'   tidyverse conventions; the argument still accepts vectors of any
-#'   length.
-#' @param source One of `"mirror"` (parquet via DuckDB) or `"cvm"`
-#'   (CVM Open Data Portal). `NULL` (default) resolves to the active
-#'   backend via [cvm_source_get()] — `"mirror"` from v0.1.0 onward
-#'   unless the user has flipped it via
-#'   `cvm_source_set("cvm")`.
-#' @param report_type One of `"ind"`, `"con"`, or `NULL`. Required for
-#'   tables that publish individual and consolidated variants
-#'   (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`).
-#'   Must be `NULL` for tables without that distinction
-#'   (`composicao_capital`, `submissao`, `parecer`, `companhias`).
-#' @param on_error One of `"abort"` (default), `"warn"` or `"silent"`.
-#'   Controls behaviour on HTTP failures for batches of yearly tables
-#'   (`year = c(...)` with more than one element). With `"warn"`, the
-#'   failed years are skipped and a `cvmdata_warn_partial_failure`
-#'   warning lists them; with `"silent"`, the failed years are skipped
-#'   silently; with `"abort"`, the first failure aborts the call. Total
-#'   batch failure (every year fails) always aborts regardless of the
-#'   setting — there is no partial result to return. Parse/validation
-#'   failures are governed by `validate`, not `on_error`. Single-year
-#'   calls, non-yearly tables, and the implicit fallback when
-#'   `year = NULL` always abort on HTTP failure.
-#' @param validate One of `"strict"` (default), `"warn"` or `"skip"`.
-#'   Controls schema validation strictness at parse time.
-#' @param ... Reserved for forward compatibility. Currently no extra
-#'   arguments are accepted; passing any aborts with
-#'   `cvmdata_error_input`.
-#'
-#' @section Filing versions:
-#' When a detail table carries several filings for the same issuer and
-#' reference date, only the last one delivered is kept, ranked by
-#' receipt date, then CVM document id, then `versao`. The version number
-#' alone is not a filing key: the CVM index can list two filings under
-#' the same version, or a later filing under a lower one.
-#'
-#' The `submissao` table of each dataset is the filing index and is not
-#' collapsed: it returns one row per delivery, re-filings included, with
-#' the receipt date (`dt_receb` or `data_entrega`), the document id
-#' (`id_doc`, `id_documento` or `protocolo_entrega`) and `versao`. The
-#' current filing of an issuer and reference date is the last row by
-#' that order; joining `submissao` to a detail table on the issuer and
-#' reference date alone matches every delivery.
-#'
-#' Tables of datasets with a `submissao` index are checked against it
-#' before returning. In DFP and ITR tables, rows the CVM file holds twice
-#' are dropped (`cvmdata_warn_duplicate_filing`); copies that differ in
-#' `vl_conta` are kept (`cvmdata_warn_conflicting_filing`). A table
-#' holding an earlier filing than the last delivery keeps the CVM
-#' numbers and warns (`cvmdata_warn_stale_filing`). Set
-#' `options(cvmdata.check_filings = FALSE)` to skip these checks.
-#'
-#' @return A tibble of class `cvm_tbl` carrying the five provenance
-#'   attributes `source`, `fetched_at`, `dataset`, `table` and
-#'   `package_version`.
-#'
-#' @examplesIf interactive()
-#' # CAD: single snapshot, no temporal partitioning, no report_type
-#' issuers <- issuer_fetch("cad", "companhias")
-#'
-#' # DFP BPA individual, latest year, single issuer
-#' bb <- issuer_fetch("dfp", "bpa",
-#'                    report_type = "ind",
-#'                    issuer = "BCO BRASIL",
-#'                    year = 2024)
-#'
-#' @seealso [cvm_fetch()]
-#' @export
-issuer_fetch <- function(
-  dataset,
-  table,
-  issuer = NULL,
-  year = NULL,
-  source = NULL,
-  report_type = NULL,
-  on_error = "abort",
-  validate = "strict",
-  ...
-) {
-  lifecycle::deprecate_warn(
-    when = "0.3.0",
-    what = "issuer_fetch()",
-    with = "cvm_fetch()",
-    details = paste(
-      "Select issuers with `cnpj` or `ticker` and the statement basis",
-      "with `basis`."
-    )
-  )
-  dots <- list(...)
-  if (length(dots) > 0L) {
-    nms <- names(dots) %||% rep("", length(dots))
-    nms[!nzchar(nms)] <- "<unnamed>"
-    cvmdata_abort(
-      c(
-        "Unknown argument{?s}: {.arg {nms}}.",
-        "i" = paste(
-          "Did you mean {.arg issuer} (was {.arg companies}) or",
-          "{.arg year} (was {.arg years})?"
-        )
-      ),
-      class = "cvmdata_error_input"
-    )
-  }
-  if (is.null(source)) {
-    source <- cvm_source_get()
-  }
-  issuer_fetch_internal(
-    dataset = dataset,
-    table = table,
-    issuer = issuer,
-    year = year,
-    source = source,
-    report_type = report_type,
-    on_error = on_error,
-    validate = validate
-  )
-}
+# Fetch engine behind `cvm_fetch()` (and the mirror ETL, which calls it
+# with `source = "cvm"`): validates arguments, dispatches per
+# temporal_partitioning, applies schema-declared transformations, filters
+# by issuer CNPJ, checks filings and attaches provenance metadata. The
+# exported `issuer_fetch()` that wrapped it was removed on 2026-11-01.
 
-# Internal orchestrator. Validates arguments, dispatches per
-# temporal_partitioning, applies schema-declared transformations,
-# filters by issuer, and attaches provenance metadata.
 issuer_fetch_internal <- function(
   dataset,
   table,
@@ -284,27 +129,7 @@ fetch_via_mirror <- function(schema, dataset, year, issuer, report_type) {
     report_type = report_type
   )
   if (!is.null(issuer)) {
-    # `filter_by_issuer()` may need the dataset's `submissao` table to
-    # resolve CD_CVM tokens when the target table lacks `cd_cvm`.
-    # `resolve_cd_cvm_via_submissao()` uses the CVM HTTP path because
-    # it loads the submissao via `source_cvm_http_get()`. That keeps
-    # the resolution self-consistent within v0.1; a future iteration
-    # may route the submissao lookup through the mirror as well.
-    resolved_year <- if (!is.null(year)) {
-      year[[1L]]
-    } else if (
-      "year" %in% names(transformed) && any(!is.na(transformed$year))
-    ) {
-      max(transformed$year, na.rm = TRUE)
-    } else {
-      NULL
-    }
-    transformed <- filter_by_issuer(
-      transformed,
-      issuer,
-      schema = schema,
-      year = resolved_year
-    )
+    transformed <- filter_by_issuer(transformed, issuer)
   }
   transformed
 }
@@ -320,7 +145,6 @@ fetch_one_year <- function(
   issuer,
   report_type,
   validate,
-  strict_text = TRUE,
   keep_versions = FALSE
 ) {
   path <- source_cvm_http_get(
@@ -335,13 +159,7 @@ fetch_one_year <- function(
     skip = if (keep_versions) "keep_latest_version" else NULL
   )
   if (!is.null(issuer)) {
-    transformed <- filter_by_issuer(
-      transformed,
-      issuer,
-      schema = schema,
-      year = year,
-      strict_text = strict_text
-    )
+    transformed <- filter_by_issuer(transformed, issuer)
   }
   transformed
 }
@@ -401,18 +219,12 @@ fetch_yearly_partitioned <- function(
   for (i in seq_along(candidates)) {
     yr <- candidates[[i]]
     tried <- c(tried, yr)
-    # Relax text matching for every candidate but the last: a text
-    # issuer absent from a header-only or not-yet-filed top year must
-    # not abort the loop before it reaches an earlier year that has the
-    # filer. The final candidate keeps strict matching so a genuine
-    # typo still surfaces the "verify the spelling" error (§2.7).
     out <- fetch_one_year(
       schema,
       yr,
       issuer,
       report_type,
       validate,
-      strict_text = i == length(candidates),
       keep_versions = keep_versions
     )
     if (nrow(out) > 0L) {
@@ -421,7 +233,7 @@ fetch_yearly_partitioned <- function(
         cvmdata_warn(
           c(
             paste(
-              "{.arg year = NULL}: no rows for {.arg issuer} in",
+              "{.arg year = NULL}: no rows for the requested issuer in",
               "{.val {skipped}}; returning {.val {yr}} instead."
             ),
             "i" = paste(
@@ -497,11 +309,6 @@ fetch_explicit_years <- function(
   keep_versions = FALSE
 ) {
   year <- as.integer(year)
-  # A free-text issuer absent from one requested year must not abort the
-  # whole span — it may be present in another. Filter each year
-  # non-strict; if nothing matched across the entire span the "verify the
-  # spelling" error surfaces once at the end (mirrors the year = NULL
-  # fallback). CNPJ / CD_CVM misses stay silent-empty, as before.
   if (identical(on_error, "abort")) {
     parts <- lapply(year, function(yr) {
       fetch_one_year(
@@ -510,13 +317,10 @@ fetch_explicit_years <- function(
         issuer,
         report_type,
         validate,
-        strict_text = FALSE,
         keep_versions = keep_versions
       )
     })
-    out <- do.call(rbind, parts)
-    abort_if_text_issuer_unmatched(out, issuer)
-    return(out)
+    return(do.call(rbind, parts))
   }
   attempts <- lapply(year, function(yr) {
     tryCatch(
@@ -529,7 +333,6 @@ fetch_explicit_years <- function(
           issuer,
           report_type,
           validate,
-          strict_text = FALSE,
           keep_versions = keep_versions
         )
       ),
@@ -572,84 +375,7 @@ fetch_explicit_years <- function(
       class = "cvmdata_warn_partial_failure"
     )
   }
-  out <- do.call(rbind, successes)
-  abort_if_text_issuer_unmatched(out, issuer)
-  out
-}
-
-# Return the free-text tokens of `issuer` (excludes CNPJ, CD_CVM and B3
-# ticker tokens, which fail loudly on their own resolution paths).
-text_issuer_terms <- function(issuer) {
-  if (is.null(issuer)) {
-    return(character(0L))
-  }
-  issuer_chr <- as.character(issuer)
-  cls <- classify_issuer_tokens(issuer_chr)
-  issuer_chr[cls$is_text]
-}
-
-# Across-the-span counterpart to match_by_text()'s per-year abort: when a
-# free-text issuer matched nothing in any requested year the assembled
-# tibble is empty, so raise the same "verify the spelling" error once
-# (naming doc 2.7). A CNPJ / CD_CVM miss is not text and stays
-# silent-empty, matching match_by_cnpj() / match_by_cd_cvm().
-abort_if_text_issuer_unmatched <- function(out, issuer) {
-  if (nrow(out) > 0L) {
-    return(invisible(NULL))
-  }
-  text_terms <- text_issuer_terms(issuer)
-  if (!length(text_terms)) {
-    return(invisible(NULL))
-  }
-  cvmdata_abort(
-    c(
-      "No issuers match {.val {text_terms}}.",
-      "i" = paste(
-        "Verify the spelling, or pass {.arg issuer} as CD_CVM",
-        "or CNPJ."
-      )
-    ),
-    class = "cvmdata_error_input"
-  )
-}
-
-# Classify each token in `issuer` as CNPJ (14 digits), CD_CVM
-# (1-6 digits), B3 ticker (4 letters + 1-2 digits + optional suffix
-# letter, e.g. PETR4, BBDC11, ITSA4F), or free-text. Returns a list
-# with parallel logical masks and the cleaned digits-only form (used
-# for CNPJ matching). Ticker detection runs after CNPJ and CD_CVM; the
-# four-letter prefix means it never collides with the pure-digit
-# CD_CVM pattern (CLAUDE.md §2.7, v0.2 decision §3.7).
-classify_issuer_tokens <- function(issuer_chr) {
-  digits_only <- gsub("[^0-9]", "", issuer_chr)
-  is_cnpj <- nchar(digits_only) == 14L &
-    nchar(issuer_chr) >= 14L
-  is_cdcvm <- !is_cnpj &
-    grepl("^[0-9]{1,6}$", issuer_chr)
-  is_ticker <- !is_cnpj &
-    !is_cdcvm &
-    grepl("^[A-Z]{4}[0-9]{1,2}[A-Z]?$", toupper(issuer_chr))
-  is_text <- !is_cnpj & !is_cdcvm & !is_ticker
-  list(
-    digits_only = digits_only,
-    is_cnpj = is_cnpj,
-    is_cdcvm = is_cdcvm,
-    is_ticker = is_ticker,
-    is_text = is_text
-  )
-}
-
-match_by_cnpj <- function(df, digits_only, mask) {
-  if (!any(mask)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  # CAD/ITR/DFP submissao use cnpj_cia; FRE-detail tables use
-  # cnpj_companhia (CLAUDE.md §2.2). Read whichever is present.
-  col <- cnpj_col(df)
-  if (is.null(col)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  cnpj_clean(df[[col]]) %in% digits_only[mask]
+  do.call(rbind, successes)
 }
 
 # Detect which CNPJ column the tibble uses. Returns NULL when neither
@@ -664,425 +390,27 @@ cnpj_col <- function(df) {
   NULL
 }
 
-# Detect which company-name column the tibble uses, analogous to
-# cnpj_col(). FRE-detail uses nome_companhia; everything else denom_cia.
-name_col <- function(df) {
-  if ("denom_cia" %in% names(df)) {
-    return("denom_cia")
+# Keep the rows whose issuer CNPJ is one of `issuer` (CNPJs with or
+# without punctuation; `cvm_fetch()` resolves tickers to CNPJs before
+# calling the engine). CAD/ITR/DFP use `cnpj_cia`, FRE-detail tables
+# `cnpj_companhia` (CLAUDE.md §2.2); a table with neither keeps no row.
+filter_by_issuer <- function(df, issuer) {
+  col <- cnpj_col(df)
+  if (is.null(col)) {
+    return(df[0L, , drop = FALSE])
   }
-  if ("nome_companhia" %in% names(df)) {
-    return("nome_companhia")
-  }
-  NULL
-}
-
-# Detect which CVM-code column the tibble uses, analogous to
-# cnpj_col(). Most schemas use `cd_cvm` (CAD/ITR/DFP/FRE submissao); v0.2
-# CGVN/VLMO/IPE expose the equivalent code under the literal CVM name
-# `codigo_cvm`. Returns NULL when neither is present.
-cdcvm_col <- function(df) {
-  if ("cd_cvm" %in% names(df)) {
-    return("cd_cvm")
-  }
-  if ("codigo_cvm" %in% names(df)) {
-    return("codigo_cvm")
-  }
-  NULL
-}
-
-match_by_cd_cvm <- function(df, issuer_chr, mask) {
-  col <- cdcvm_col(df)
-  if (!any(mask) || is.null(col)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  targets <- issuer_chr[mask]
-  # `%06s` pads with spaces, not zeros — must use formatC with a
-  # decimal format to get "9512" -> "009512".
-  df_padded <- formatC(
-    suppressWarnings(as.integer(df[[col]])),
-    width = 6,
-    flag = "0",
-    format = "d"
-  )
-  targets_padded <- formatC(
-    as.integer(targets),
-    width = 6,
-    flag = "0",
-    format = "d"
-  )
-  df[[col]] %in% targets | df_padded %in% targets_padded
-}
-
-# `strict` governs the zero-match behaviour. With TRUE (default, and the
-# spec of CLAUDE.md §2.7) a term that matches nothing aborts with a
-# "verify the spelling" hint. The `year = NULL` fallback loop passes
-# FALSE for every candidate year but the last, so a term that is simply
-# absent from a header-only or not-yet-filed top year degrades to an
-# all-FALSE mask (like match_by_cnpj/match_by_cd_cvm) and lets the loop
-# walk down to an earlier year instead of crashing.
-match_by_text <- function(df, issuer_chr, mask, strict = TRUE) {
-  if (!any(mask)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  ncol_name <- name_col(df)
-  if (is.null(ncol_name)) {
-    return(rep(FALSE, nrow(df)))
-  }
-  match_vec <- rep(FALSE, nrow(df))
-  for (term in issuer_chr[mask]) {
-    hits <- search_issuers_textual(df[[ncol_name]], term)
-    if (!any(hits)) {
-      if (!strict) {
-        next
-      }
-      cvmdata_abort(
-        c(
-          "No issuers match {.val {term}}.",
-          "i" = paste(
-            "Verify the spelling, or pass {.arg issuer} as CD_CVM",
-            "or CNPJ."
-          )
-        ),
-        class = "cvmdata_error_input"
-      )
-    }
-    hits <- disambiguate_text_match(df, hits, term)
-    match_vec <- match_vec | hits
-  }
-  match_vec
-}
-
-# Filter a tibble by automatic issuer-identifier detection.
-# Implements the rules of CLAUDE.md §2.7.
-#
-# When the target table does not carry a `cd_cvm` column (e.g.
-# composicao_capital, parecer in ITR/DFP) but the user supplied CD_CVM
-# identifiers, resolve them to CNPJs via the `submissao` table of the
-# same dataset/year. Requires `schema` and `year` to be passed by the
-# caller; without them the CD_CVM tokens silently fail to match.
-filter_by_issuer <- function(
-  df,
-  issuer,
-  schema = NULL,
-  year = NULL,
-  strict_text = TRUE
-) {
-  issuer_chr <- as.character(issuer)
-  cls <- classify_issuer_tokens(issuer_chr)
-
-  # Resolve B3 ticker tokens to issuer CNPJs via fca/valor_mobiliario.
-  # A ticker maps to exactly one company; the resolved CNPJs are then
-  # matched like any other CNPJ token. Independent of the target table
-  # (the lookup always lives in fca), so this fires for every dataset.
-  if (any(cls$is_ticker)) {
-    lookup_year <- if (!is.null(year)) as.integer(year)[[1L]] else NULL
-    resolved_cnpjs <- resolve_ticker_via_fca(
-      issuer_chr[cls$is_ticker],
-      year = lookup_year
-    )
-    issuer_chr <- c(issuer_chr[!cls$is_ticker], resolved_cnpjs)
-    cls <- classify_issuer_tokens(issuer_chr)
-  }
-
-  if (
-    any(cls$is_cdcvm) &&
-      is.null(cdcvm_col(df)) &&
-      !is.null(schema) &&
-      !is.null(year)
-  ) {
-    resolved <- resolve_cd_cvm_via_submissao(
-      issuer_chr[cls$is_cdcvm],
-      schema,
-      year
-    )
-    issuer_chr[cls$is_cdcvm] <- resolved
-    cls <- classify_issuer_tokens(issuer_chr)
-  }
-
-  match_vec <- match_by_cnpj(df, cls$digits_only, cls$is_cnpj) |
-    match_by_cd_cvm(df, issuer_chr, cls$is_cdcvm) |
-    match_by_text(df, issuer_chr, cls$is_text, strict = strict_text)
-
-  df[match_vec, , drop = FALSE]
-}
-
-# Resolve CD_CVM identifiers to CNPJs via the dataset's `submissao`
-# table for the given year. Used when the target table lacks `cd_cvm`
-# but the user supplied CD_CVM tokens (CLAUDE.md §2.7, Opção D).
-# Aborts with cvmdata_error_input if any CD_CVM is not present in
-# submissao for that year, or if the dataset lacks a submissao table.
-resolve_cd_cvm_via_submissao <- function(cd_cvm_targets, schema, year) {
-  dataset <- schema$dataset
-  available <- tryCatch(
-    cvm_tables(dataset),
-    error = function(e) character(0L)
-  )
-  if (!"submissao" %in% available) {
-    cvmdata_abort(
-      c(
-        paste(
-          "Table {.val {dataset}}/{.val {schema$table}} does not carry",
-          "{.code cd_cvm}, and dataset {.val {dataset}} has no",
-          "{.code submissao} table to resolve CD_CVM identifiers."
-        ),
-        "i" = paste(
-          "Pass {.arg issuer} as CNPJ (with or without punctuation)",
-          "or as free text matched against {.code denom_cia}."
-        )
-      ),
-      class = "cvmdata_error_input"
-    )
-  }
-
-  cli::cli_inform(c(
-    "i" = paste0(
-      "Resolving CD_CVM ",
-      paste(cd_cvm_targets, collapse = ", "),
-      " via {.val {dataset}}/submissao for {.val {year}}",
-      " (table {.val {schema$table}} does not carry {.code cd_cvm})."
-    )
-  ))
-
-  sub_schema <- load_schema(dataset, "submissao")
-  path <- source_cvm_http_get(
-    sub_schema,
-    year = year,
-    report_type = NULL
-  )
-  sub_df <- read_cvm_csv(path, sub_schema, validate = "skip")
-
-  # CGVN/VLMO/IPE submissao publish the CVM code as `codigo_cvm` and
-  # the issuer CNPJ as `cnpj_companhia`; CAD/ITR/DFP/FRE submissao use
-  # `cd_cvm` and `cnpj_cia`. Generalize the column lookup.
-  sub_cd_col <- cdcvm_col(sub_df)
-  sub_cnpj_col <- cnpj_col(sub_df)
-  if (is.null(sub_cd_col) || is.null(sub_cnpj_col)) {
-    cvmdata_abort(
-      c(
-        paste(
-          "Submissao of {.val {dataset}} lacks the columns needed to",
-          "resolve CD_CVM tokens (expected one of {.code cd_cvm} /",
-          "{.code codigo_cvm} and {.code cnpj_cia} /",
-          "{.code cnpj_companhia})."
-        )
-      ),
-      class = "cvmdata_error_internal"
-    )
-  }
-  sub_cd_padded <- formatC(
-    suppressWarnings(as.integer(sub_df[[sub_cd_col]])),
-    width = 6,
-    flag = "0",
-    format = "d"
-  )
-  targets_padded <- formatC(
-    as.integer(cd_cvm_targets),
-    width = 6,
-    flag = "0",
-    format = "d"
-  )
-
-  resolved <- vapply(
-    targets_padded,
-    function(tp) {
-      idx <- which(sub_cd_padded == tp)[1L]
-      if (is.na(idx)) NA_character_ else sub_df[[sub_cnpj_col]][idx]
-    },
-    character(1L),
-    USE.NAMES = FALSE
-  )
-
-  missing_mask <- is.na(resolved)
-  if (any(missing_mask)) {
-    not_found <- cd_cvm_targets[missing_mask]
-    cvmdata_abort(
-      c(
-        paste(
-          "CD_CVM not found in {.val {dataset}}/submissao for",
-          "{.val {year}}: {.val {not_found}}."
-        ),
-        "i" = paste(
-          "Confirm the issuer filed in that year or pass",
-          "{.arg issuer} as CNPJ."
-        )
-      ),
-      class = "cvmdata_error_input"
-    )
-  }
-
-  resolved
-}
-
-# Apply CLAUDE.md §2.7 policy when a textual `issuer` term matches
-# more than one issuer: interactive → utils::menu(); batch → abort.
-# Returns a logical vector aligned with `df` rows.
-#
-# `is_interactive` is injectable so tests can simulate both modes
-# without relying on testthat::local_mocked_bindings against the
-# `base::interactive` primitive (which isn't explicitly imported).
-disambiguate_text_match <- function(
-  df,
-  hits,
-  term,
-  is_interactive = interactive()
-) {
-  # Preferred id is cd_cvm (CAD/submissao); falls back to whichever
-  # CNPJ column the table carries (FRE-detail has only cnpj_companhia).
-  id_col <- if ("cd_cvm" %in% names(df)) "cd_cvm" else cnpj_col(df)
-  if (is.null(id_col)) {
-    return(hits)
-  }
-  label_col <- name_col(df)
-  matched <- df[hits, , drop = FALSE]
-  unique_keys <- unique(matched[[id_col]])
-  if (length(unique_keys) <= 1L) {
-    return(hits)
-  }
-  unique_rows <- !duplicated(matched[[id_col]])
-  matches_tbl <- matched[unique_rows, , drop = FALSE]
-  if (!is.null(label_col)) {
-    matches_tbl <- matches_tbl[order(matches_tbl[[label_col]]), , drop = FALSE]
-  }
-
-  if (!is_interactive) {
-    abort_on_multiple_matches(term, matches_tbl, id_col, label_col)
-  }
-  chosen <- prompt_for_issuer_choice(
-    term,
-    matches_tbl,
-    id_col,
-    label_col
-  )
-  hits & df[[id_col]] %in% chosen
-}
-
-abort_on_multiple_matches <- function(term, matches_tbl, id_col, label_col) {
-  ids <- matches_tbl[[id_col]]
-  labels <- if (!is.null(label_col)) {
-    paste0(ids, " : ", matches_tbl[[label_col]])
-  } else {
-    ids
-  }
-  bullets <- rlang::set_names(labels, rep("*", length(labels)))
-  cvmdata_abort(
-    c(
-      "Multiple issuers match {.val {term}}.",
-      "i" = paste(
-        "Pass {.arg issuer} as CD_CVM or CNPJ to disambiguate,",
-        "or run interactively to pick from a menu."
-      ),
-      bullets
-    ),
-    class = "cvmdata_error_input"
-  )
-}
-
-prompt_for_issuer_choice <- function(term, matches_tbl, id_col, label_col) {
-  ids <- matches_tbl[[id_col]]
-  labels <- if (!is.null(label_col)) {
-    paste(ids, "-", matches_tbl[[label_col]])
-  } else {
-    ids
-  }
-  n <- length(labels)
-  cli::cli_inform(c(
-    "i" = "Multiple issuers match {.val {term}}."
-  ))
-  choice <- utils::menu(
-    choices = c(labels, "All of the above"),
-    title = "Select an issuer (0 to cancel):"
-  )
-  if (identical(as.integer(choice), 0L)) {
-    cvmdata_abort(
-      c("Issuer selection cancelled by user."),
-      class = "cvmdata_error_input"
-    )
-  }
-  if (identical(as.integer(choice), as.integer(n + 1L))) {
-    return(matches_tbl[[id_col]])
-  }
-  matches_tbl[[id_col]][choice]
-}
-
-# Word-boundary substring matching with the abbreviation map of
-# CLAUDE.md §2.7. Returns a logical vector aligned with `names_vec`.
-search_issuers_textual <- function(names_vec, query) {
-  tokens <- strsplit(normalize_issuer_text(query), "\\s+")[[1L]]
-  tokens <- tokens[nzchar(tokens)]
-  if (!length(tokens)) {
-    return(rep(FALSE, length(names_vec)))
-  }
-  names_norm <- normalize_issuer_text(names_vec)
-
-  # All tokens must match (AND).
-  hits <- rep(TRUE, length(names_vec))
-  for (tok in tokens) {
-    alternatives <- expand_abbreviations(tok)
-    pattern <- paste0(
-      "\\b(",
-      paste(alternatives, collapse = "|"),
-      ")\\b"
-    )
-    hits <- hits & grepl(pattern, names_norm, perl = TRUE)
-  }
-  hits
-}
-
-normalize_issuer_text <- function(x) {
-  x <- toupper(as.character(x))
-  accented <- intToUtf8(c(
-    0x00C1,
-    0x00C2,
-    0x00C3,
-    0x00C0,
-    0x00C9,
-    0x00CA,
-    0x00CD,
-    0x00D3,
-    0x00D4,
-    0x00D5,
-    0x00DA,
-    0x00DC,
-    0x00C7
-  ))
-  plain <- "AAAAEEIOOOUUC"
-  x <- chartr(accented, plain, x)
-  x <- gsub("[^A-Z0-9 ]+", " ", x)
-  x <- gsub("\\s+", " ", x)
-  trimws(x)
-}
-
-# Companion to normalize_issuer_text(): given a single normalized
-# token, returns the set of alternative spellings to match (BANCO and
-# BCO both stand in for the user's "banco"). List minimal here; expand
-# empirically as needed.
-expand_abbreviations <- function(token) {
-  alt <- list(
-    BANCO = c("BANCO", "BCO"),
-    BCO = c("BANCO", "BCO"),
-    COMPANHIA = c("COMPANHIA", "CIA"),
-    CIA = c("COMPANHIA", "CIA"),
-    INDUSTRIA = c("INDUSTRIA", "IND"),
-    INDUSTRIAS = c("INDUSTRIAS", "INDS"),
-    PARTICIPACOES = c("PARTICIPACOES", "PART"),
-    PART = c("PARTICIPACOES", "PART")
-  )
-  alt[[token]] %||% token
+  df[cnpj_clean(df[[col]]) %in% cnpj_clean(issuer), , drop = FALSE]
 }
 
 # Ticker -> CNPJ lookup ------------------------------------------------
 #
 # B3 trading tickers (Codigo_Negociacao) are declared by issuers in the
 # Formulario Cadastral; fca/valor_mobiliario is the canonical source.
-# The resolver loads that table for the latest available year, keeps
-# only active securities, and maps each requested ticker to its issuer
-# CNPJ — analogous to the CD_CVM -> CNPJ lookup via submissao
-# (resolve_cd_cvm_via_submissao()). Decision §3.7 of the v0.2 planning
-# doc (alternative b: derive from a field already present in CVM data,
-# no external dependency).
+# Decision §3.7 of the v0.2 planning doc (alternative b: derive from a
+# field already present in CVM data, no external dependency).
 
 # Session cache for the ticker lookup table (mirrors the mirror
-# inventory cache). One entry, keyed by the literal "fca_valor_mobiliario".
+# inventory cache), one entry per source.
 .ticker_lookup_cache <- new.env(parent = emptyenv())
 
 # Reset the session cache. Test helper; never called from production
@@ -1090,104 +418,6 @@ expand_abbreviations <- function(token) {
 ticker_lookup_cache_clear <- function() {
   rm(list = ls(.ticker_lookup_cache), envir = .ticker_lookup_cache)
   invisible()
-}
-
-# Resolve B3 tickers to issuer CNPJs. Aborts with cvmdata_error_input
-# when a ticker is absent from fca/valor_mobiliario (no silent fail —
-# tickers cover only exchange-listed securities; debentures / private
-# placements legitimately have none). Returns the unique set of
-# resolved CNPJs across all requested tickers.
-resolve_ticker_via_fca <- function(tickers, year = NULL, source = "cvm") {
-  lut <- ticker_lookup_table(year = year, source = source)
-  year <- attr(lut, "year")
-  tickers_up <- toupper(trimws(tickers))
-  resolved <- character(0L)
-  for (tk in tickers_up) {
-    cnpjs <- unique(lut$cnpj_companhia[lut$ticker == tk])
-    cnpjs <- cnpjs[!is.na(cnpjs) & nzchar(cnpjs)]
-    if (!length(cnpjs)) {
-      cvmdata_abort(
-        c(
-          paste(
-            "Ticker {.val {tk}} not found in",
-            "{.val fca}/{.val valor_mobiliario} for {.val {year}}."
-          ),
-          "i" = paste(
-            "Check the spelling, or pass {.arg issuer} as CNPJ or",
-            "CD_CVM. Tickers cover only exchange-listed securities."
-          )
-        ),
-        class = "cvmdata_error_input"
-      )
-    }
-    resolved <- c(resolved, cnpjs)
-  }
-  unique(resolved)
-}
-
-# Build (and session-cache) the ticker -> CNPJ table from
-# fca/valor_mobiliario, read through the requested `source`. When
-# `year` is NULL the latest available fca year is used: discovered via
-# cvm_dataset_years() on the CVM path, resolved by the mirror itself on
-# the mirror path. Callers that already know the request year pass it
-# through to skip the discovery round-trip. Keeps only active tickers
-# (is_active_ticker()). Returns a data frame with `ticker` and
-# `cnpj_companhia` columns and a `year` attribute. Cached per
-# (source, year).
-ticker_lookup_table <- function(year = NULL, source = "cvm") {
-  source <- rlang::arg_match0(source, c("mirror", "cvm"))
-  schema <- load_schema("fca", "valor_mobiliario")
-  if (is.null(year) && identical(source, "cvm")) {
-    year <- max(cvm_dataset_years("fca", schema = schema))
-  }
-  if (!is.null(year)) {
-    year <- as.integer(year)
-  }
-  cache_key <- paste0(
-    "fca_valor_mobiliario_",
-    source,
-    "_",
-    if (is.null(year)) "latest" else year
-  )
-  cached <- .ticker_lookup_cache[[cache_key]]
-  if (!is.null(cached)) {
-    return(cached)
-  }
-  if (identical(source, "mirror")) {
-    df <- source_mirror_duckdb_get(schema, year = year, report_type = NULL)
-    if (is.null(year)) {
-      year <- if ("year" %in% names(df)) {
-        max(df$year, na.rm = TRUE)
-      } else {
-        NA_integer_
-      }
-    }
-  } else {
-    path <- source_cvm_http_get(schema, year = year, report_type = NULL)
-    raw <- read_cvm_csv(path, schema, validate = "skip")
-    df <- apply_schema_transformations(raw, schema)
-  }
-  cnpj_c <- cnpj_col(df)
-  if (is.null(cnpj_c) || !"codigo_negociacao" %in% names(df)) {
-    cvmdata_abort(
-      c(paste(
-        "{.val fca}/{.val valor_mobiliario} lacks the columns needed",
-        "for ticker resolution ({.code codigo_negociacao} +",
-        "{.code cnpj_companhia})."
-      )),
-      class = "cvmdata_error_internal"
-    )
-  }
-  active <- is_active_ticker(df)
-  lut <- data.frame(
-    ticker = toupper(trimws(df$codigo_negociacao[active])),
-    cnpj_companhia = df[[cnpj_c]][active],
-    stringsAsFactors = FALSE
-  )
-  lut <- lut[!is.na(lut$ticker) & nzchar(lut$ticker), , drop = FALSE]
-  attr(lut, "year") <- year
-  .ticker_lookup_cache[[cache_key]] <- lut
-  lut
 }
 
 # Ticker -> CNPJ across every fca/valor_mobiliario year that carries the
@@ -1307,20 +537,4 @@ resolve_ticker_all_years <- function(tickers, source = "cvm") {
     resolved <- c(resolved, cnpjs)
   }
   unique(resolved)
-}
-
-# A security is active when Data_Fim_Negociacao is unset (NA / empty)
-# or in the future. When the column is absent (older schema variant),
-# treat every row as active. Returns a logical vector aligned with df.
-is_active_ticker <- function(df) {
-  col <- "data_fim_negociacao"
-  if (!col %in% names(df)) {
-    return(rep(TRUE, nrow(df)))
-  }
-  fim <- df[[col]]
-  if (inherits(fim, "Date")) {
-    is.na(fim) | fim > Sys.Date()
-  } else {
-    is.na(fim) | !nzchar(trimws(as.character(fim)))
-  }
 }

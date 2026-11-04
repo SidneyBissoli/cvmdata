@@ -45,12 +45,12 @@ superseded by \code{cvm_fetch()}, decided in
 \examples{
 cvm_groups()
 
-# All groups served by issuer_fetch()
+# Groups under the issuer data contract
 g <- cvm_groups()
 g[g$contract == "issuer", ]
 }
 \seealso{
-\code{\link[=cvm_datasets]{cvm_datasets()}}, \code{\link[=issuer_fetch]{issuer_fetch()}}
+\code{\link[=cvm_datasets]{cvm_datasets()}}, \code{\link[=cvm_fetch]{cvm_fetch()}}
 
 Other discovery:
 \code{\link[=cvm_codelist]{cvm_codelist()}},

@@ -166,8 +166,7 @@ unique(auditor$nome_companhia)
 The interface is identical regardless of which table holds CD_CVM
 natively. A CVM code known only by itself is translated to its CNPJ
 through the registry (`cvm_fetch("cad", "companhias")`) or the
-dataset's `submissao`; the deprecated `issuer_fetch()` still does
-that lookup on the caller's behalf until it is removed.
+dataset's `submissao`.
 
 ### #14 and #15 — `VERSAO` is not a filing key
 

@@ -1,4 +1,4 @@
-# End-to-end tests for issuer_fetch() against the v0.2 CGVN dataset
+# End-to-end tests for issuer_fetch_internal() against the v0.2 CGVN dataset
 # (codigo brasileiro de governanca corporativa). Mocks the HTTP layer
 # with httr2::with_mocked_responses + a local fixture ZIP, matching
 # the pattern used for DFP/ITR/FRE in test-issuer-fetch-yearly.R.
@@ -41,13 +41,13 @@ fresh_head_response <- function() {
 
 # Tracer -------------------------------------------------------------
 
-test_that("issuer_fetch CGVN submissao tracer returns cvm_tbl", {
+test_that("fetch engine CGVN submissao tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_cgvn_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "submissao", year = 2024L, source = "cvm")
+    issuer_fetch_internal("cgvn", "submissao", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -67,13 +67,13 @@ test_that("issuer_fetch CGVN submissao tracer returns cvm_tbl", {
   expect_s3_class(result$data_referencia, "Date")
 })
 
-test_that("issuer_fetch CGVN praticas tracer returns cvm_tbl", {
+test_that("fetch engine CGVN praticas tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_cgvn_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("cgvn", "praticas", year = 2024L, source = "cvm")
+    issuer_fetch_internal("cgvn", "praticas", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -98,13 +98,13 @@ test_that("issuer_fetch CGVN praticas tracer returns cvm_tbl", {
 
 # Filtering by issuer -------------------------------------------------
 
-test_that("issuer_fetch CGVN filters by CNPJ via cnpj_companhia", {
+test_that("fetch engine CGVN filters by CNPJ via cnpj_companhia", {
   skip_if_not_installed("httptest2")
   local_prepare_cgvn_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch(
+    issuer_fetch_internal(
       "cgvn",
       "praticas",
       issuer = "00.000.000/0001-91",
@@ -114,55 +114,6 @@ test_that("issuer_fetch CGVN filters by CNPJ via cnpj_companhia", {
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("issuer_fetch CGVN resolves CD_CVM via submissao for praticas", {
-  # praticas does not carry codigo_cvm; the lookup must read
-  # cgvn/submissao for the same year and map CD_CVM -> CNPJ. CGVN
-  # publishes Codigo_CVM unpadded ("1023"), so the resolver exercises
-  # both ends of the formatC zero-padding path.
-  skip_if_not_installed("httptest2")
-  local_prepare_cgvn_cache()
-
-  result <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "cgvn",
-      "praticas",
-      issuer = "001023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_true(nrow(result) > 0L)
-  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("CGVN CD_CVM resolution accepts unpadded input", {
-  skip_if_not_installed("httptest2")
-  local_prepare_cgvn_cache()
-
-  out_padded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "cgvn",
-      "praticas",
-      issuer = "001023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  out_unpadded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "cgvn",
-      "praticas",
-      issuer = "1023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_identical(nrow(out_padded), nrow(out_unpadded))
 })
 
 # Schema + discovery -------------------------------------------------

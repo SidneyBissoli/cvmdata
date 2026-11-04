@@ -47,7 +47,7 @@ cases <- list(
       dataset = "fre",
       table = "posicao_acionaria",
       year = 2024L,
-      issuer = "PETROBRAS"
+      issuer = "33.000.167/0001-01"
     )
   )
 )
@@ -55,7 +55,7 @@ cases <- list(
 run_case <- function(case, source) {
   args <- c(case$args, list(source = source))
   res <- tryCatch(
-    do.call(issuer_fetch, args),
+    do.call(issuer_fetch_internal, args),
     error = function(e) {
       list(error = conditionMessage(e), class = class(e)[[1L]])
     }

@@ -1,7 +1,7 @@
 # Tests for inst/etl/01-fetch-cvm.R. Sources the script with the
 # testing guard so the helpers are loaded but the CLI driver does not
 # fire. No test touches the network: `fetch_one` is exercised against a
-# mocked `issuer_fetch`.
+# mocked `issuer_fetch_internal`.
 #
 # What is being pinned here is the circuit breaker added after the
 # 2026-09-08 mirror run, where the `fre` job logged "0 ok / 612 failed"
@@ -63,7 +63,7 @@ test_that("the default streak limit is 8", {
 test_that("fetch_one reports a transport failure as transport", {
   load_etl_fetcher()
   local_mocked_bindings(
-    issuer_fetch = function(...) {
+    issuer_fetch_internal = function(...) {
       rlang::abort(
         "HTTP GET failed",
         class = c(
@@ -82,7 +82,7 @@ test_that("fetch_one reports a transport failure as transport", {
 test_that("fetch_one does not call an HTTP status a transport failure", {
   load_etl_fetcher()
   local_mocked_bindings(
-    issuer_fetch = function(...) {
+    issuer_fetch_internal = function(...) {
       rlang::abort(
         "HTTP GET failed",
         class = c("cvmdata_error_http", "cvmdata_error")
@@ -99,7 +99,7 @@ test_that("fetch_one reports a missing ZIP member as non-transport", {
   # A detail table absent from that year's ZIP is the benign case the
   # ETL has always tolerated; it must never feed the breaker.
   local_mocked_bindings(
-    issuer_fetch = function(...) {
+    issuer_fetch_internal = function(...) {
       rlang::abort(
         "CSV not found inside ZIP",
         class = c(
@@ -205,7 +205,7 @@ test_that("fetch_one reports success and carries year = NA through", {
   load_etl_fetcher()
   seen <- NULL
   local_mocked_bindings(
-    issuer_fetch = function(
+    issuer_fetch_internal = function(
       dataset,
       table,
       year = NULL,
@@ -220,7 +220,7 @@ test_that("fetch_one reports success and carries year = NA through", {
   expect_true(out$ok)
   expect_false(out$transport)
   # Non-yearly datasets (CAD) pass year = NA in the loop and must reach
-  # issuer_fetch as NULL, its own "latest published" sentinel.
+  # issuer_fetch_internal as NULL, its own "latest published" sentinel.
   expect_null(seen$year)
   expect_null(seen$report_type)
 })

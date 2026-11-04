@@ -116,11 +116,11 @@
 #' @examples
 #' cvm_groups()
 #'
-#' # All groups served by issuer_fetch()
+#' # Groups under the issuer data contract
 #' g <- cvm_groups()
 #' g[g$contract == "issuer", ]
 #' @family discovery
-#' @seealso [cvm_datasets()], [issuer_fetch()]
+#' @seealso [cvm_datasets()], [cvm_fetch()]
 #' @export
 cvm_groups <- function() {
   out <- .cvm_groups_table()

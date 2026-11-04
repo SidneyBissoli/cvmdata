@@ -153,7 +153,7 @@ mirror_variants_for <- function(tbl) {
 # own `first_year` (schema). The stages enumerate the dataset's years for
 # every table, but CVM detail tables were born at different times (dfp
 # composicao_capital in 2020, a dozen fre tables in 2023). Since #24 the
-# schemas carry each table's first year and issuer_fetch() refuses an
+# schemas carry each table's first year and the fetch engine refuses an
 # earlier one with cvmdata_error_input before any download — a class
 # stage 02 does not read as "absent", so those tuples hard-failed 02b
 # and turned the dfp/fre publish red. A year the table never had is not
