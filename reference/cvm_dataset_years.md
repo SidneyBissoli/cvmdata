@@ -27,7 +27,7 @@ cvm_dataset_years(dataset, group = NULL, schema = NULL)
 - schema:
 
   Optional already-loaded schema (used internally by
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   to avoid double-load). Users typically omit.
 
 ## Value

@@ -225,6 +225,30 @@ account and a sum over the copies counts twice. See the section
 check off.</p>
     </div>
     <div class="section level2">
+    <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
+
+
+<p>When a detail table carries several filings for the same issuer and
+reference date, only the last one delivered is kept, ranked by
+receipt date, then CVM document id, then <code>versao</code>. The version number
+alone is not a filing key: the CVM index can list two filings under
+the same version, or a later filing under a lower one.</p>
+<p>The <code>submissao</code> table of each dataset is the filing index and is not
+collapsed: it returns one row per delivery, re-filings included, with
+the receipt date (<code>dt_receb</code> or <code>data_entrega</code>), the document id
+(<code>id_doc</code>, <code>id_documento</code> or <code>protocolo_entrega</code>) and <code>versao</code>. The
+current filing of an issuer and reference date is the last row by
+that order; joining <code>submissao</code> to a detail table on the issuer and
+reference date alone matches every delivery.</p>
+<p>Tables of datasets with a <code>submissao</code> index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (<code>cvmdata_warn_duplicate_filing</code>); copies that differ in
+<code>vl_conta</code> are kept (<code>cvmdata_warn_conflicting_filing</code>). A table
+holding an earlier filing than the last delivery keeps the CVM
+numbers and warns (<code>cvmdata_warn_stale_filing</code>). Set
+<code>options(cvmdata.check_filings = FALSE)</code> to skip these checks.</p>
+    </div>
+    <div class="section level2">
     <h2 id="readings-of-an-exercise">Readings of an exercise<a class="anchor" aria-label="anchor" href="#readings-of-an-exercise"></a></h2>
 
 
@@ -314,30 +338,6 @@ do not declare registration and cancellation dates.</p>
 <li><p><code>as_of</code>: only in <code>cad</code>: <code>companhias</code>.</p></li>
 <li><p><code><a href="cvm_versions.html">cvm_versions()</a></code>: every table except <code>cad</code>: <code>companhias</code>; <code>cgvn</code>, <code>dfp</code>, <code>fca</code>, <code>fre</code> and <code>itr</code>: <code>submissao</code>; <code>ipe</code>: <code>ipe</code>; <code>vlmo</code>: <code>consolidado</code>, <code>submissao</code>, which already return every row the CVM publishes.</p></li>
 </ul></div>
-    <div class="section level2">
-    <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
-
-
-<p>When a detail table carries several filings for the same issuer and
-reference date, only the last one delivered is kept, ranked by
-receipt date, then CVM document id, then <code>versao</code>. The version number
-alone is not a filing key: the CVM index can list two filings under
-the same version, or a later filing under a lower one.</p>
-<p>The <code>submissao</code> table of each dataset is the filing index and is not
-collapsed: it returns one row per delivery, re-filings included, with
-the receipt date (<code>dt_receb</code> or <code>data_entrega</code>), the document id
-(<code>id_doc</code>, <code>id_documento</code> or <code>protocolo_entrega</code>) and <code>versao</code>. The
-current filing of an issuer and reference date is the last row by
-that order; joining <code>submissao</code> to a detail table on the issuer and
-reference date alone matches every delivery.</p>
-<p>Tables of datasets with a <code>submissao</code> index are checked against it
-before returning. In DFP and ITR tables, rows the CVM file holds twice
-are dropped (<code>cvmdata_warn_duplicate_filing</code>); copies that differ in
-<code>vl_conta</code> are kept (<code>cvmdata_warn_conflicting_filing</code>). A table
-holding an earlier filing than the last delivery keeps the CVM
-numbers and warns (<code>cvmdata_warn_stale_filing</code>). Set
-<code>options(cvmdata.check_filings = FALSE)</code> to skip these checks.</p>
-    </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other fetchers:

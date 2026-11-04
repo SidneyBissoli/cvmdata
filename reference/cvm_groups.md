@@ -48,7 +48,7 @@ decided in `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`).
 ## See also
 
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 
 Other discovery:
 [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
@@ -83,7 +83,7 @@ cvm_groups()
 #> 17 plataformas-de-crowdfunding                  1 offering
 #> 18 securitizadoras                              4 issuer  
 
-# All groups served by issuer_fetch()
+# Groups under the issuer data contract
 g <- cvm_groups()
 g[g$contract == "issuer", ]
 #> # A tibble: 3 × 3

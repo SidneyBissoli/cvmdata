@@ -77,12 +77,13 @@ agentes, ofertas, eventos) estendem
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 pelo YAML de cada conjunto, sem funções novas. Os 4 skeletons
 (`fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`) e
-a classe `cvmdata_error_input_group` saíram na v0.3.
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-segue exportada como wrapper DEPRECADO
-([`lifecycle::deprecate_warn()`](https://lifecycle.r-lib.org/reference/deprecate_soft.html)),
-com o comportamento antigo intacto (`issuer` aceita CNPJ / CD_CVM /
-texto / ticker; `report_type`), até ser removida.
+a classe `cvmdata_error_input_group` saíram na v0.3. `issuer_fetch()`
+foi REMOVIDA em 2026-11-01 (decisão do dono): adivinhava o tipo da
+entrada e abria [`utils::menu()`](https://rdrr.io/r/utils/menu.html).
+Com ela saíram a busca textual, o CD_CVM e o menu; o motor interno
+`issuer_fetch_internal()` ficou (é o que
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+e o ETL do espelho chamam) e filtra só por CNPJ.
 
 \
 `# Função única — qualquer conjunto coberto (hoje: grupo "companhias").`\
@@ -124,10 +125,6 @@ texto / ticker; `report_type`), até ser removida.
 [`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(``dataset``, ``table``, cnpj ``=`` ``NULL``, ticker ``=`` ``NULL``, year ``=`` ``NULL``,`\
 `             basis ``=`` ``NULL``, source ``=`` ``NULL``, on_error ``=`` ``"abort"``,`\
 `             validate ``=`` ``"strict"``, ``...``)`\
-\
-`# Deprecada (wrapper com aviso; remoção em release futura)`\
-[`issuer_fetch`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)`(``dataset``, ``table``, issuer ``=`` ``NULL``, year ``=`` ``NULL``, source ``=`` ``NULL``,`\
-`             report_type ``=`` ``NULL``, on_error ``=`` ``"abort"``, validate ``=`` ``"strict"``, ``...``)`\
 \
 `# Descoberta`\
 [`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)``                                          ``# 18 grupos + contrato`\
@@ -193,10 +190,10 @@ Domínio dos argumentos enumerados (validados via
   (`set_basis_column()` em `R/api-cvm-fetch.R` substitui o `report_type`
   vazado pelo mirror). **Erro** se passado a tabelas sem a divisão
   (`composicao_capital`, `submissao`, `parecer`, `companhias`) — não
-  ignorar calado. `report_type ∈ c("ind", "con")` ou `NULL` sobrevive só
-  em
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  (deprecada).
+  ignorar calado. `report_type ∈ c("ind", "con")` ou `NULL` é o
+  argumento do motor interno
+  ([`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  traduz `basis`).
 
 - `year`: integer vector ou `NULL`. `NULL` → **último ano disponível**,
   descoberto por `HEAD` probing decrescente. Para histórico, integer
@@ -342,38 +339,17 @@ os anos do FCA com a coluna (`ticker_first_year: 2018` no YAML; vazia em
 = zero linhas, calado; ticker ausente de TODOS os anos =
 `cvmdata_error_input`; ticker que aponta para mais de um CNPJ =
 `cvmdata_error_input` pedindo `cnpj` (guarda; medido 2026-10-21: nenhum
-reusado). Busca textual e CD_CVM ficaram SÓ em
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-(deprecada); o cadastro `cvm_fetch("cad", "companhias")` é o lugar de
+reusado). Busca textual e CD_CVM saíram com `issuer_fetch()` (removida
+em 2026-11-01); o cadastro `cvm_fetch("cad", "companhias")` é o lugar de
 resolver nome/código → CNPJ. Sem `cpf`: a CVM não publica CPF (cadastros
 PF só trazem nome; filtro de PF fica para a v0.7).
 
-Em
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
-argumento único com **detecção automática de tipo** (implementado em
-`filter_by_issuer()` em `R/api-issuer-fetch.R`, que
-[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-reaproveita só no ramo CNPJ):
-
-| Padrão do input (após [`as.character()`](https://rdrr.io/r/base/character.html)) | Interpretação | Match contra |
-|----|----|----|
-| `^[0-9]{14}$` | CNPJ sem pontuação | `cnpj_clean(cnpj_cia)` |
-| Contém `.` ou `/` ou `-` e tem 14 dígitos | CNPJ com pontuação | `cnpj_cia` literal e/ou `cnpj_clean(cnpj_cia)` |
-| `^[0-9]{1,6}$` | CD_CVM | `cd_cvm` (com ou sem zero-padding); se a tabela não tem `cd_cvm`, resolve para CNPJ via `submissao` |
-| Resto (≥1 token alfabético) | Busca textual com fronteira de palavra e mapa de abreviações (`BCO ↔︎ BANCO`, `CIA ↔︎ COMPANHIA`, `S.A. ↔︎ S/A`) | `denom_cia` normalizada |
-
-Resolução CD_CVM → CNPJ via `submissao`: quando o usuário passa CD_CVM
-contra uma tabela sem `cd_cvm` (`composicao_capital`, `parecer`), o
-pipeline lê a `submissao` do mesmo dataset/year e faz lookup antes de
-filtrar. CD_CVMs ausentes na `submissao` daquele ano abortam com
-`cvmdata_error_input`. Datasets sem tabela `submissao` abortam com
-mensagem instruindo o uso de CNPJ ou texto.
-
-Match textual: múltiplas matches em modo
-[`interactive()`](https://rdrr.io/r/base/interactive.html) exibem lista
-numerada via [`utils::menu()`](https://rdrr.io/r/utils/menu.html); em
-batch/CI abortam com `cvmdata_error_input` listando candidatos. Zero
-matches aborta com `cvmdata_error_input`.
+O filtro de emissor do motor (`filter_by_issuer()` em
+`R/api-issuer-fetch.R`) compara só CNPJ:
+[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
+dos dois lados, contra `cnpj_cia` ou `cnpj_companhia` (o ticker chega já
+resolvido em CNPJ por
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)).
 
 Política de versão: as tabelas de **detalhe** mantêm apenas a **última
 entrega** por `(cnpj_cia, dt_refer)` via transformação canônica
@@ -438,7 +414,7 @@ conceitual; arquivos reais usam **prefixos de hífen**:
 
 | Prefixo | Conteúdo |
 |----|----|
-| `api-` | Fetcher público (`api-cvm-fetch.R`: casca de validação sobre `issuer_fetch_internal()`), `api-issuer-fetch.R` (pipeline + wrapper deprecado + `filter_by_issuer()` + resolver de ticker) + `cvm-groups` |
+| `api-` | Fetcher público (`api-cvm-fetch.R`: casca de validação sobre `issuer_fetch_internal()`), `api-issuer-fetch.R` (motor `issuer_fetch_internal()` + `filter_by_issuer()` por CNPJ + resolver de ticker) + `cvm-groups` |
 | `schema-` | Loader de YAML (`schema-load.R`) |
 | `source-` | Backends de dados (`source-cvm-http.R`, `source-mirror-duckdb.R`) |
 | `transform-` | Transformações declarativas (`transform-schema.R`) |
@@ -572,9 +548,9 @@ vêm de `expected_field_names()` (`R/util-csv-cvm.R`): o
 `campo_original` do snapshot do dicionário (o META), NUNCA copiado para
 o YAML. Medido 2026-10-25: 1.244 cabeçalhos (todos os CSV de todos os
 ZIPs anuais, 2003–2026) com exatamente os nomes do snapshot nas 74
-tabelas. O robô do espelho lê por `issuer_fetch(source = "cvm")` em
-`strict`: coluna renomeada pela CVM derruba a rodada (alarme), não entra
-calada.
+tabelas. O robô do espelho lê por
+`issuer_fetch_internal(source = "cvm")` em `strict`: coluna renomeada
+pela CVM derruba a rodada (alarme), não entra calada.
 
 8 tabelas FRE têm `meta_status: missing` (sem META oficial CVM):
 `administrador_PCD`, `empregado_PCD`,
@@ -803,11 +779,11 @@ Diretório `schemas_proto/` na raiz (excluído da tarball via
 `.Rbuildignore`) é a área de stage para YAMLs antes da promoção para
 `inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. Workflow:
 escrever o YAML em stage, validar contra dados reais com
-`issuer_fetch(..., validate = "warn")` (ou o fetcher correspondente
-quando v0.4+), ajustar `expected_field_count`/`expected_field_names`/
-`transformations` até zero divergência, então mover para
-`inst/extdata/schemas/`. Conteúdo atual de `schemas_proto/` é rascunho
-parcial — não usar como fonte canônica.
+`cvm_fetch(..., source = "cvm", validate = "warn")`, ajustar
+`expected_field_count`/`expected_field_names`/ `transformations` até
+zero divergência, então mover para `inst/extdata/schemas/`. Conteúdo
+atual de `schemas_proto/` é rascunho parcial — não usar como fonte
+canônica.
 
 ### 10.3 Critério de inclusão das codelists
 

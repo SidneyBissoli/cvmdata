@@ -398,9 +398,7 @@ in the following year’s file (`"restated"`), which is often different.
 `          year ``=`` ``2022``, basis ``=`` ``"con"``,`\
 `          reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)``)`
 
-[`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
-the entry point of earlier releases, is deprecated and still works with
-a warning. The `issuer-fetch` article goes through every
+The `issuer-fetch` article goes through every
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
 argument in depth.
 

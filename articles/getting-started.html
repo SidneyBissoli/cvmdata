@@ -204,9 +204,6 @@ dataset and any table, with the entity filter (<code>cnpj</code>,
 interpreted through each dataset’s schema. Groups not yet implemented
 (funds, registered agents, public offerings, regulatory events) will
 arrive as new schemas behind the same function, not as new fetchers.</p>
-<p><code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code>, the entry point of v0.1 and v0.2, is
-deprecated. It still works and emits a lifecycle warning pointing to
-<code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code>; it will be removed in a later release.</p>
 </div>
 <div class="section level2">
 <h2 id="fetching-data-a-tour-of-the-8-issuer-datasets">Fetching data — a tour of the 8 issuer datasets<a class="anchor" aria-label="anchor" href="#fetching-data-a-tour-of-the-8-issuer-datasets"></a>
@@ -477,9 +474,7 @@ to the issuer’s CNPJ via <code>fca/valor_mobiliario</code>
 <code>cvmdata_error_input</code> — there is no free-text search. To find
 a CNPJ you know only by name or by CVM code, read the registry:
 <code>cvm_fetch("cad", "companhias")</code> carries <code>cd_cvm</code>,
-<code>denom_social</code> and <code>cnpj_cia</code> side by side. (The
-deprecated <code><a href="../reference/issuer_fetch.html">issuer_fetch()</a></code> still accepts CD_CVM and free
-text through its <code>issuer</code> argument until it is removed.)</p>
+<code>denom_social</code> and <code>cnpj_cia</code> side by side.</p>
 <p>An unknown ticker aborts with <code>cvmdata_error_input</code>
 (tickers cover only exchange-listed securities — debentures and private
 placements have none). A CNPJ absent from the table yields zero rows,

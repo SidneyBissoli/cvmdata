@@ -174,9 +174,6 @@ API exportada está agrupada em cinco famílias:
   schemas.
   [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
   devolve todas as versões conhecidas de um documento.
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
-  o entry point das versões anteriores, está depreciada e será removida
-  em uma release futura.
 - **Discovery** —
   [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
   [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),

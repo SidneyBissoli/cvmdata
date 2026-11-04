@@ -16,12 +16,19 @@
   [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
   keeps its `contract` column as a planning map.
 
-- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  is deprecated in favour of
-  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  and warns once per session (`lifecycle`). It keeps its behaviour,
-  including the `issuer` argument’s CVM-code and free-text forms, until
-  it is removed in a later release.
+- `issuer_fetch()` is removed; use
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+  Select issuers with `cnpj` or `ticker` instead of `issuer`, and the
+  statement basis with `basis` instead of `report_type`. The `issuer`
+  argument guessed what it was given (CNPJ, CVM code, ticker or company
+  name) and, when a name matched several companies in an interactive
+  session, opened a
+  [`utils::menu()`](https://rdrr.io/r/utils/menu.html); a data function
+  should take an input of a known type and never stop to ask. Those
+  paths are gone with it: look a CVM code or a company name up in
+  `cvm_fetch("cad", "companhias")`, which carries `cd_cvm`,
+  `denom_social` and `cnpj_cia` side by side. The package no longer
+  imports `lifecycle`.
 
 - The `submissao` table of every dataset (`dfp`, `itr`, `fre`, `fca`,
   `cgvn`, `vlmo`) now returns the complete filing history: one row per
@@ -178,7 +185,7 @@
 
 - [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   is the single public fetcher, built on the same pipeline as
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md):
+  `issuer_fetch()`:
   `cvm_fetch(dataset, table, cnpj, ticker, year, from, to, basis, ...)`.
 
   - Issuers are selected by `cnpj` (CNPJ only, with or without
@@ -402,20 +409,20 @@
   Travessia row. Tables with no delivery columns still keep the highest
   `versao`.
 
-- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  checks each table against its dataset’s filing index (`submissao`).
-  The CVM statement CSVs repeat rows: a sweep of every DFP and ITR file
-  from 2010 to 2026 found 884 issuer-period-table cases with the whole
-  statement doubled and 110 with a few accounts repeated, some from two
-  filings under the same version (TRV XLIII, DFP 2023), most with a
-  single filing in the index. Sums over those issuers counted double.
-  Identical rows are now dropped and `cvmdata_warn_duplicate_filing`
-  names the issuers; copies that differ in `vl_conta` are kept and
-  flagged with `cvmdata_warn_conflicting_filing`. When the table holds
-  an earlier filing than the last delivery (the Travessia case, whose
-  statement CSVs stayed on version 2), `cvmdata_warn_stale_filing` names
-  the issuers. Both checks run for either backend and can be turned off
-  with `options(cvmdata.check_filings = FALSE)`. See defects
+- `issuer_fetch()` checks each table against its dataset’s filing index
+  (`submissao`). The CVM statement CSVs repeat rows: a sweep of every
+  DFP and ITR file from 2010 to 2026 found 884 issuer-period-table cases
+  with the whole statement doubled and 110 with a few accounts repeated,
+  some from two filings under the same version (TRV XLIII, DFP 2023),
+  most with a single filing in the index. Sums over those issuers
+  counted double. Identical rows are now dropped and
+  `cvmdata_warn_duplicate_filing` names the issuers; copies that differ
+  in `vl_conta` are kept and flagged with
+  `cvmdata_warn_conflicting_filing`. When the table holds an earlier
+  filing than the last delivery (the Travessia case, whose statement
+  CSVs stayed on version 2), `cvmdata_warn_stale_filing` names the
+  issuers. Both checks run for either backend and can be turned off with
+  `options(cvmdata.check_filings = FALSE)`. See defects
   [\#14](https://github.com/SidneyBissoli/cvmdata/issues/14) and
   [\#15](https://github.com/SidneyBissoli/cvmdata/issues/15) in the
   data-defects article.
@@ -464,22 +471,20 @@
   index even though the per-year archives download fine. A reachable
   index that genuinely lists no archives still aborts.
 
-- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  with a free-text `issuer` and `year = NULL` no longer aborts with “No
-  issuers match …” when the company is simply absent from the latest
-  probed year (e.g. a header-only current year, or an issuer that has
-  not yet filed). Text matching now participates in the descending year
-  fallback like CNPJ and CD_CVM matching do, walking down to an earlier
-  year that holds the filer; a genuine typo still aborts with the
-  spelling hint on the last candidate year. The same applies to an
-  explicit multi-year request (e.g. `year = 2012:2024`): a text issuer
-  absent from some of the requested years now contributes no rows for
-  those years instead of aborting the whole span, and the spelling error
-  is raised once only if no requested year matched.
+- `issuer_fetch()` with a free-text `issuer` and `year = NULL` no longer
+  aborts with “No issuers match …” when the company is simply absent
+  from the latest probed year (e.g. a header-only current year, or an
+  issuer that has not yet filed). Text matching now participates in the
+  descending year fallback like CNPJ and CD_CVM matching do, walking
+  down to an earlier year that holds the filer; a genuine typo still
+  aborts with the spelling hint on the last candidate year. The same
+  applies to an explicit multi-year request (e.g. `year = 2012:2024`): a
+  text issuer absent from some of the requested years now contributes no
+  rows for those years instead of aborting the whole span, and the
+  spelling error is raised once only if no requested year matched.
 
-- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  with explicit years that precede a dataset’s first published year
-  (e.g. `year = 2005:2024` for `dfp`, which starts in
+- `issuer_fetch()` with explicit years that precede a dataset’s first
+  published year (e.g. `year = 2005:2024` for `dfp`, which starts in
 
   2010\) no longer fails with a raw HTTP 404. The years before
   `first_year` are dropped before any request, with an informational
@@ -489,12 +494,12 @@
   the `"mirror"` and `"cvm"` backends; genuine 404s on years that do
   exist remain governed by `on_error`.
 
-- [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  on the current, not-yet-filed year of an annual financial table
-  (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026) no longer aborts
-  with “non-numeric argument to binary operator”. The CVM publishes a
-  header-only CSV for such years; the `multiply_by_scale` transform now
-  no-ops on a 0-row table and returns a clean empty tibble.
+- `issuer_fetch()` on the current, not-yet-filed year of an annual
+  financial table (e.g. `dfp/dfc_md` for fiscal 2026 early in 2026) no
+  longer aborts with “non-numeric argument to binary operator”. The CVM
+  publishes a header-only CSV for such years; the `multiply_by_scale`
+  transform now no-ops on a 0-row table and returns a clean empty
+  tibble.
 
 - ETL parquet mirror: the pipeline tolerates `(table, year)` pairs that
   legitimately produce no parquet, so a single absent year no longer
@@ -694,10 +699,8 @@
 ### ⚠️ Breaking changes
 
 - [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-  has been renamed
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  to reflect the contract of CVM’s company-issuer datasets (the v0.1
-  scope). The rename is mechanical:
+  has been renamed `issuer_fetch()` to reflect the contract of CVM’s
+  company-issuer datasets (the v0.1 scope). The rename is mechanical:
 
   ``` R
   cvm_fetch(dataset, table, companies = ..., years = ..., ...)
@@ -733,27 +736,24 @@
 - Four further fetchers (`fund_fetch()`, `agent_fetch()`,
   `offering_fetch()`, `event_fetch()`) will be exported as skeletons in
   the following development cycle. v0.1.0.9000 itself only ships
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  as a functional fetcher.
+  `issuer_fetch()` as a functional fetcher.
 
 ### New features
 
 - New dataset `cgvn` (Codigo Brasileiro de Governanca Corporativa)
-  covered by
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
-  Two tables: `submissao` (12 fields, one row per ICBGC informe filed by
-  a company per fiscal year) and `praticas` (11 fields, “pratique ou
-  explique” detail with 54 recommended practices per filing — `id_item`,
-  `capitulo`, `principio`, `pratica_recomendada`, `pratica_adotada` ∈
-  {Sim, Nao, Parcialmente, Nao se Aplica}, `explicacao`). CKAN coverage
-  2021+. `praticas` does not carry `codigo_cvm`; CD_CVM filtering routes
-  through `cgvn/submissao` automatically. Embedded dictionary and
-  codelist snapshots regenerated to include the new tables. Decision
-  doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
+  covered by `issuer_fetch()`. Two tables: `submissao` (12 fields, one
+  row per ICBGC informe filed by a company per fiscal year) and
+  `praticas` (11 fields, “pratique ou explique” detail with 54
+  recommended practices per filing — `id_item`, `capitulo`, `principio`,
+  `pratica_recomendada`, `pratica_adotada` ∈ {Sim, Nao, Parcialmente,
+  Nao se Aplica}, `explicacao`). CKAN coverage 2021+. `praticas` does
+  not carry `codigo_cvm`; CD_CVM filtering routes through
+  `cgvn/submissao` automatically. Embedded dictionary and codelist
+  snapshots regenerated to include the new tables. Decision doc:
+  `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
 - New dataset `vlmo` (Valores Mobiliarios Negociados e Detidos por
-  insiders, art. 11 of CVM Resolution 44) covered by
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
+  insiders, art. 11 of CVM Resolution 44) covered by `issuer_fetch()`.
   Two tables: `submissao` (12 fields, one row per filing) and
   `consolidado` (17 fields, one row per security movement). Unlike the
   other detail tables, `consolidado` carries **no
@@ -771,8 +771,7 @@
   codelist snapshots regenerated to include the new tables. Decision
   doc: `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
-- New dataset `fca` (Formulario Cadastral) covered by
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md),
+- New dataset `fca` (Formulario Cadastral) covered by `issuer_fetch()`,
   the largest v0.2 surface with **10 tables**: `submissao` (9 fields,
   classic convention identical to ITR/DFP/FRE — `cnpj_cia`, `dt_refer`,
   `cd_cvm`) plus 9 FRE-detail tables (`cnpj_companhia` /
@@ -803,18 +802,17 @@
   `data-raw/decisions/cvmdata_v0-2_planejamento_decisao.md`.
 
 - New dataset `ipe` (Informacoes Periodicas e Eventuais) covered by
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md).
-  A **single-table manifest** (`ipe`, 13 fields, ~50k documents/year) of
-  every periodic and eventual document a company filed with the CVM:
-  `cnpj_companhia`, `data_referencia`, `codigo_cvm`, `categoria`,
-  `tipo`, `especie`, `assunto`, `data_entrega`, `tipo_apresentacao`,
-  `protocolo_entrega`, `versao` and `link_download`. There is no
-  separate `submissao` table — the CSV *is* the manifest. `codigo_cvm`
-  is native, so CD_CVM filtering matches directly (no `submissao`
-  bridge). The manifest is **event-per-row**: like `vlmo/consolidado` it
-  declares **no `keep_latest_version`** transformation, so
-  re-submissions and every `versao` of a document are retained verbatim.
-  Slice by document class with a trivial
+  `issuer_fetch()`. A **single-table manifest** (`ipe`, 13 fields, ~50k
+  documents/year) of every periodic and eventual document a company
+  filed with the CVM: `cnpj_companhia`, `data_referencia`, `codigo_cvm`,
+  `categoria`, `tipo`, `especie`, `assunto`, `data_entrega`,
+  `tipo_apresentacao`, `protocolo_entrega`, `versao` and
+  `link_download`. There is no separate `submissao` table — the CSV *is*
+  the manifest. `codigo_cvm` is native, so CD_CVM filtering matches
+  directly (no `submissao` bridge). The manifest is **event-per-row**:
+  like `vlmo/consolidado` it declares **no `keep_latest_version`**
+  transformation, so re-submissions and every `versao` of a document are
+  retained verbatim. Slice by document class with a trivial
   [`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html)
   on `categoria` on the returned tibble. `link_download` is returned as
   a plain URL to the document on the CVM portal; **OCR and PDF download
@@ -913,10 +911,9 @@
 
 - New article `vignettes/articles/groups-overview.Rmd` lists the 18 CKAN
   groups and maps each to one of the five fetcher contracts, with a
-  worked example per fetcher (only
-  [`issuer_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/issuer_fetch.md)
-  runs; the four skeletons stay in `eval = FALSE` chunks until v0.4+).
-  Linked from the pkgdown Articles navbar.
+  worked example per fetcher (only `issuer_fetch()` runs; the four
+  skeletons stay in `eval = FALSE` chunks until v0.4+). Linked from the
+  pkgdown Articles navbar.
 
 - Article `cvm-defects.Rmd` renamed to `data-defects.Rmd`. The taxonomy
   of publication quirks covers any upstream source the package will
