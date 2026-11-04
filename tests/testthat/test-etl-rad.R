@@ -497,6 +497,39 @@ test_that("a text node above libxml2's 10 MB limit is read whole", {
   expect_identical(xml_text1(doc, "./DadosDFP/DataReferencia"), "31/12/2025")
 })
 
+test_that("references to forbidden control characters are dropped", {
+  load_etl_rad()
+  # Rio Paranapanema, ITR 2015-09-30 v1 (id 51434): "DEB &#x1F;- ..."
+  # made libxml2 refuse the whole file (2026-11-02)
+  path <- withr::local_tempfile(fileext = ".xml")
+  writeLines(
+    c(
+      "<?xml version=\"1.0\" encoding=\"utf-8\"?>",
+      "<Conta>",
+      "<A>DEB &#x1F;- Pequenas Centrais Hidrelétricas Ltda</A>",
+      "<B>x&#31;y&#0;z&#x0b;w&#X1a;v</B>",
+      "<C>tab&#9;lf&#x0A;cr&#13;sp&#x20;e&#xE9;</C>",
+      "</Conta>"
+    ),
+    path,
+    useBytes = TRUE
+  )
+  doc <- expect_no_condition(rad_read_xml(path))
+  expect_identical(
+    xml_text1(doc, "./A"),
+    "DEB - Pequenas Centrais Hidrelétricas Ltda"
+  )
+  expect_identical(xml_text1(doc, "./B"), "xyzwv")
+  expect_identical(xml_text1(doc, "./C"), "tab\tlf\ncr\rsp eé")
+})
+
+test_that("other XML errors still abort", {
+  load_etl_rad()
+  path <- withr::local_tempfile(fileext = ".xml")
+  writeLines("<Conta><A>x</B></Conta>", path)
+  expect_error(rad_read_xml(path), "mismatch|Opening and ending tag")
+})
+
 test_that("new layout of a bank: DMPL columns follow the converter's order", {
   load_etl_rad()
   f <- filing_row(

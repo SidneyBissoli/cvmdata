@@ -763,8 +763,46 @@ xml_text1 <- function(node, xpath) {
 # refuses the rest as "Extra content at the end of the document", while
 # libxml2 2.12 warns "huge text node" and goes on. The statements are
 # intact either way; the limit is what is lifted.
+#
+# A character reference to a control character XML 1.0 forbids makes
+# libxml2 refuse the whole file ("xmlParseCharRef: invalid xmlChar
+# value 31"). Measured 2026-11-02 in Rio Paranapanema, ITR 2015-09-30
+# v1 (id 51434): one account description reads "DEB &#x1F;- Pequenas
+# Centrais Hidrelétricas Ltda". Only then are such references dropped
+# and the file read again; the same account in the issuer's previous
+# ITR reads "DEB - Pequenas Centrais Hidrelétricas Ltda", which is what
+# dropping the reference gives.
 rad_read_xml <- function(path) {
-  xml2::read_xml(path, options = c("NOBLANKS", "HUGE"))
+  options <- c("NOBLANKS", "HUGE")
+  tryCatch(
+    xml2::read_xml(path, options = options),
+    error = function(e) {
+      if (!grepl("xmlParseCharRef", conditionMessage(e), fixed = TRUE)) {
+        stop(e)
+      }
+      clean <- tempfile(fileext = ".xml")
+      on.exit(unlink(clean), add = TRUE)
+      writeBin(
+        rad_drop_control_refs(readBin(path, "raw", file.size(path))),
+        clean
+      )
+      xml2::read_xml(clean, options = options)
+    }
+  )
+}
+
+# References to the C0 control characters XML 1.0 does not allow, i.e.
+# all below 0x20 except tab (9), line feed (10) and carriage return
+# (13), in hexadecimal or decimal form. Works on the raw bytes, so the
+# file's declared encoding is kept.
+rad_invalid_charref <- paste0(
+  "&#(?:[xX]0*(?:[0-8bBcCeEfF]|1[0-9a-fA-F])",
+  "|0*(?:[0-8]|1[124-9]|2[0-9]|3[01]));"
+)
+
+rad_drop_control_refs <- function(bytes) {
+  text <- rawToChar(bytes)
+  charToRaw(gsub(rad_invalid_charref, "", text, perl = TRUE, useBytes = TRUE))
 }
 
 # --- new layout -------------------------------------------------------
