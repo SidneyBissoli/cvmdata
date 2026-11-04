@@ -176,9 +176,7 @@ agrupada em cinco famílias:
 - **Fetcher** — `cvm_fetch()` é a função única para qualquer dataset
   e tabela; os grupos ainda no roadmap (fundos, agentes, ofertas,
   eventos) vão estendê-la pelos seus schemas. `cvm_versions()` devolve
-  todas as versões conhecidas de um documento. `issuer_fetch()`, o
-  entry point das versões anteriores, está depreciada e será removida
-  em uma release futura.
+  todas as versões conhecidas de um documento.
 - **Discovery** — `cvm_groups()`, `cvm_datasets()`, `cvm_tables()`,
   `cvm_dictionary()`, `cvm_codelist()`, `cvm_dataset_years()`.
 - **Cache** — `cvm_cache_path()`, `cvm_cache_set_path()`,

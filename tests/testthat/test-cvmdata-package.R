@@ -1,5 +1,5 @@
 # Placeholder test ensuring the package can be loaded and queried.
-# Substantive tests for `issuer_fetch("cad", "companhias")` and
+# Substantive tests for `issuer_fetch_internal("cad", "companhias")` and
 # `load_schema()` are added in Session 2 of the implementation
 # roadmap.
 
