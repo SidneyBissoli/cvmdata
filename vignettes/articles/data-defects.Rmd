@@ -203,6 +203,15 @@ Both checks read the dataset's `submissao` of the same year, take the
 last delivery of each filing key from it, and run for either backend.
 `options(cvmdata.check_filings = FALSE)` turns them off.
 
+Dropping the identical copies is a deliberate exception to the
+package's rule of leaving the CVM's defects in the data and
+reporting them. The other changes to the published rows are declared
+per table in its schema (keeping the latest filing, applying the
+currency scale); this one is not, because no schema can predict
+which statements the CVM will double. It is kept because a doubled
+statement silently doubles every sum built on it, it warns every time
+it applies, and the option above returns the file without it.
+
 The `submissao` itself is not collapsed since 0.2.0.9000: it lists
 every delivery of a filing, so the history behind both cases above is
 one call away, and the current filing is the last row by receipt date,

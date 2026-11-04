@@ -256,6 +256,15 @@
 
 ## Bug fixes
 
+* `cvm_fetch("cad", "companhias")` returned the phone columns `fax`,
+  `fax_resp` and `tel_resp` as numbers, while `tel` and the other phone
+  columns of the package are text. The CVM's META declares the three
+  numeric; the reader now keeps them as character, so a number starting
+  with zero cannot lose it. Measured on 2026-11-01 over the 2,678 rows of
+  the register, no value had lost anything yet (the leading zeros were
+  only the CVM's `0` placeholders); these were the only phone columns of
+  the dictionary still read as numbers.
+
 * `cvm_codelist()` listed free text as categories and missed values in
   use. The codelists were sampled from the latest year alone, and in
   May that was a 2026 with five months of filings (one DFP). Measured
@@ -468,6 +477,17 @@
   asks for the data (items 12.6 and 12.4 of Anexo C).
 
 ## Documentation
+
+* The `itr-dfp` article shows how to compare companies on the CVM's
+  fixed accounts (`st_conta_fixa == "S"`), with what a measurement over
+  every DFP and ITR statement found on 2026-11-01. Within one standard
+  chart, the fixed accounts carry the same name in 99.2% of the
+  companies, and the flag of a company's account changes between years
+  in 0.3-0.4% of cases. Banks and insurers follow other charts, where
+  the same fixed code means something else (`3.01` is revenue from
+  sales for Petrobras and revenue from financial intermediation for
+  Itaú). No argument is added, because the column is already in every
+  statement.
 
 * The data licence is now stated. The CVM publishes every dataset the
   package covers under the Open Data Commons Open Database License

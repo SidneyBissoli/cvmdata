@@ -234,6 +234,9 @@ test_that("identifier_columns classifies prefix + exact-match names", {
     "protocolo_entrega",
     "caixa_postal",
     "tel",
+    "tel_resp",
+    "fax",
+    "fax_resp",
     "versao",
     # case insensitivity
     "CNPJ_CIA",

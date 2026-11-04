@@ -130,6 +130,13 @@ carrying provenance attributes.
 \details{
 Column names, categorical values and free-text fields are preserved
 in Portuguese exactly as published by CVM (snake_case minúsculo).
+Changes to the published rows are declared per table in its schema
+(latest filing, currency scale), with one deliberate exception: in
+DFP and ITR tables, rows the CVM file holds twice, identical in every
+column, are dropped with a warning, since a statement has one row per
+account and a sum over the copies counts twice. See the section
+\emph{Filing versions}; \code{options(cvmdata.check_filings = FALSE)} turns the
+check off.
 }
 \section{Filing versions}{
 
@@ -229,6 +236,18 @@ does not publish past states of the register (the file only records
 when the current value of each field started). The yearly
 \code{fca/geral} file is the CVM's own picture of a company in a given
 year (name, registration situation, category, issuer situation).
+
+\code{as_of} is a filter on dates that are already in the file, so it
+could be written by hand; it is an argument because the obvious ways
+of writing it are wrong. Filtering on \code{sit = "ATIVO"} returns today's
+survivors, which is the bias a historical universe has to avoid. A
+condition on \code{dt_cancel} alone drops every active registration, whose
+cancellation date is empty. And a CNPJ that cancelled and registered
+again has two rows, each in force over its own period, so the test
+has to run on each registration rather than on the company. The
+argument applies the one rule (registered on or before the date,
+cancellation empty or after it) to each row, and refuses tables that
+do not declare registration and cancellation dates.
 }
 
 \section{Arguments by table}{
