@@ -60,7 +60,7 @@ reference year 2024.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmph6c9R3/duckdb`\
+`#> ``ℹ`` /tmp/RtmpPoLgUK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -68,7 +68,7 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmph6c9R3/duckdb`\
+`#> ``ℹ`` /tmp/RtmpPoLgUK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -76,8 +76,8 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `auditor`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 12:37:28.623142`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
+`#>   ``fetched_at``: ``2026-11-05 14:50:38.865917`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
 `#> ``# A tibble: 2 × 19`\
 `#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
@@ -111,7 +111,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmph6c9R3/duckdb`\
+`#> ``ℹ`` /tmp/RtmpPoLgUK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -119,8 +119,8 @@ header the CVM publishes, and a file that departs from it stops the call
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `pcd`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 12:37:28.811619`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
+`#>   ``fetched_at``: ``2026-11-05 14:50:39.263425`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``# A tibble: 0 × 11`\
 `#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
@@ -145,7 +145,7 @@ FRE filing.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmph6c9R3/duckdb`\
+`#> ``ℹ`` /tmp/RtmpPoLgUK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -153,7 +153,7 @@ FRE filing.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmph6c9R3/duckdb`\
+`#> ``ℹ`` /tmp/RtmpPoLgUK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -169,8 +169,8 @@ FRE filing.
 `  `[`names`](https://rdrr.io/r/base/names.html)`(``posicao``)`\
 `)`\
 `posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 12:37:29.385985`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
+`#>   ``fetched_at``: ``2026-11-05 14:50:41.167412`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
 `#> ``# A tibble: 5 × 6`\
 `#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\
