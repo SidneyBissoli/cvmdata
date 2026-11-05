@@ -269,7 +269,7 @@ registration and cancellation dates.
 
 Which arguments apply depends on the table. The rules below are
 generated from the package's table schemas, the same ones the argument
-checks read, for the 74 tables in 8 datasets. An argument passed to a
+checks read, for the 99 tables in 8 datasets. An argument passed to a
 table it does not apply to aborts with `cvmdata_error_input` before
 anything is downloaded; nothing is silently ignored.
 
@@ -293,6 +293,28 @@ anything is downloaded; nothing is silently ignored.
 
 - Years from which the CVM publishes the file with its header only are
   refused too: `fca/departamento_acionistas` (2024).
+
+- Tables the CVM stopped publishing (last year in parentheses) refuse
+  later years and require an explicit `year`, since `year = NULL` would
+  mean the dataset's latest year: `fre/ativo_imobilizado` (2023),
+  `fre/ativo_intangivel` (2023), `fre/auditor_responsavel` (2023),
+  `fre/capital_social_aumento` (2023),
+  `fre/capital_social_aumento_classe_acao` (2022),
+  `fre/capital_social_desdobramento` (2023),
+  `fre/capital_social_desdobramento_classe_acao` (2022),
+  `fre/capital_social_reducao` (2023),
+  `fre/capital_social_reducao_classe_acao` (2022), `fre/direito_acao`
+  (2023), `fre/distribuicao_dividendos` (2023),
+  `fre/distribuicao_dividendos_classe_acao` (2023), `fre/endividamento`
+  (2023), `fre/grupo_economico_reestruturacao` (2016),
+  `fre/historico_emissor` (2023), `fre/informacao_financeira` (2023),
+  `fre/obrigacao` (2023), `fre/participacao_sociedade_valorizacao_acao`
+  (2023), `fre/plano_recompra` (2023), `fre/plano_recompra_classe_acao`
+  (2023), `fre/politica_negociacao` (2023),
+  `fre/politica_negociacao_cargo` (2023),
+  `fre/valor_mobiliario_tesouraria_movimentacao` (2023),
+  `fre/valor_mobiliario_tesouraria_ultimo_exercicio` (2016),
+  `fre/volume_valor_mobiliario` (2023).
 
 - `basis`: required, with no default, in `dfp` and `itr`: `bpa`, `bpp`,
   `dfc_md`, `dfc_mi`, `dmpl`, `dra`, `dre`, `dva`. Refused in every
