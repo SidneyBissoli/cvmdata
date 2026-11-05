@@ -341,35 +341,39 @@ mirror_text_as <- function(x, like) {
 mirror_align_history <- function(previous, rows) {
   changed <- character()
   for (col in intersect(names(previous), names(rows))) {
-    p <- previous[[col]]
-    r <- rows[[col]]
-    if (identical(class(p), class(r))) {
+    pair <- mirror_align_column(previous[[col]], rows[[col]])
+    if (is.null(pair)) {
       next
     }
-    if (all(is.na(p))) {
-      previous[[col]] <- rep(r[NA_integer_], length(p))
-    } else if (all(is.na(r))) {
-      rows[[col]] <- rep(p[NA_integer_], length(r))
-    } else if (is.character(r)) {
-      previous[[col]] <- mirror_as_text(p)
-    } else if (is.character(p)) {
-      cast <- mirror_text_as(p, r)
-      if (is.null(cast)) {
-        rows[[col]] <- mirror_as_text(r)
-      } else {
-        previous[[col]] <- cast
-      }
-    } else if (
-      is.numeric(p) && is.numeric(r) && !is.object(p) && !is.object(r)
-    ) {
-      next
-    } else {
-      previous[[col]] <- mirror_as_text(p)
-      rows[[col]] <- mirror_as_text(r)
-    }
+    previous[[col]] <- pair$p
+    rows[[col]] <- pair$r
     changed <- c(changed, col)
   }
   list(previous = previous, rows = rows, changed = changed)
+}
+
+# One column of the two sides (`p` from the history asset, `r` from the
+# rows superseded now) under the rules of `mirror_align_history()`:
+# list(p, r) converted, or NULL when the pair needs nothing.
+mirror_align_column <- function(p, r) {
+  plain <- function(x) is.numeric(x) && !is.object(x)
+  if (identical(class(p), class(r)) || (plain(p) && plain(r))) {
+    return(NULL)
+  }
+  if (all(is.na(p))) {
+    return(list(p = rep(r[NA_integer_], length(p)), r = r))
+  }
+  if (all(is.na(r))) {
+    return(list(p = p, r = rep(p[NA_integer_], length(r))))
+  }
+  if (is.character(r)) {
+    return(list(p = mirror_as_text(p), r = r))
+  }
+  cast <- if (is.character(p)) mirror_text_as(p, r)
+  if (!is.null(cast)) {
+    return(list(p = cast, r = r))
+  }
+  list(p = mirror_as_text(p), r = mirror_as_text(r))
 }
 
 # History of a partition after this run: the previous history asset (NULL
