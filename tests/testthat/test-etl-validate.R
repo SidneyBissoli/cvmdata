@@ -246,6 +246,20 @@ test_that("mirror_table_years drops years before the table's first_year", {
   )
 })
 
+test_that("mirror_table_years drops years after the table's last_year", {
+  # The legacy FRE tables are absent from the ZIPs after their
+  # last_year; scheduling those years would fail the ZIP member lookup.
+  load_etl_validator()
+  expect_identical(
+    mirror_table_years("fre", "endividamento", 2010:2026),
+    2010:2023
+  )
+  expect_identical(
+    mirror_table_years("fre", "grupo_economico_reestruturacao", 2015:2026),
+    2015:2016
+  )
+})
+
 test_that("validate_expected_tuples never expects a year the table lacks", {
   load_etl_validator()
   tuples <- validate_expected_tuples("dfp", years_arg = 2018:2021)

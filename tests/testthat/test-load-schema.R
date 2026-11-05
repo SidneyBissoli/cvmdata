@@ -176,6 +176,65 @@ test_that("empty_from must be an integer year after first_year", {
   )
 })
 
+test_that("last_year must be an integer year not before first_year", {
+  raw <- list(
+    dataset = "x",
+    table = "y",
+    cvm_archive_url_pattern = NULL,
+    cvm_file_url_pattern = "https://example.com/x_{year}.csv",
+    cvm_file_pattern = "x_{year}.csv",
+    encoding = "ISO-8859-1",
+    delimiter = ";",
+    temporal_partitioning = "yearly",
+    first_year = 2010L,
+    expected_field_count = 1L,
+    transformations = list()
+  )
+  ok <- raw
+  ok$last_year <- 2023L
+  expect_no_error(validate_schema(ok, "x", "y"))
+  one_year <- raw
+  one_year$last_year <- 2010L
+  expect_no_error(validate_schema(one_year, "x", "y"))
+
+  before_first <- raw
+  before_first$last_year <- 2009L
+  expect_error(
+    validate_schema(before_first, "x", "y"),
+    regexp = "last_year",
+    class = "cvmdata_error_internal"
+  )
+  not_a_year <- raw
+  not_a_year$last_year <- "2023"
+  expect_error(
+    validate_schema(not_a_year, "x", "y"),
+    regexp = "last_year",
+    class = "cvmdata_error_internal"
+  )
+  before_empty <- ok
+  before_empty$empty_from <- 2024L
+  expect_error(
+    validate_schema(before_empty, "x", "y"),
+    regexp = "last_year",
+    class = "cvmdata_error_internal"
+  )
+})
+
+test_that("the 25 legacy FRE tables declare last_year", {
+  tree <- schema_tree()
+  fre <- tree[tree$dataset == "fre", , drop = FALSE]
+  last <- vapply(
+    fre$table,
+    function(t) as.integer(load_schema("fre", t)$last_year %||% NA_integer_),
+    integer(1)
+  )
+  expect_identical(sum(!is.na(last)), 25L)
+  expect_identical(
+    sort(unique(last[!is.na(last)])),
+    c(2016L, 2022L, 2023L)
+  )
+})
+
 test_that("fca/departamento_acionistas declares empty_from 2024", {
   schema <- load_schema("fca", "departamento_acionistas")
   expect_identical(as.integer(schema$empty_from), 2024L)

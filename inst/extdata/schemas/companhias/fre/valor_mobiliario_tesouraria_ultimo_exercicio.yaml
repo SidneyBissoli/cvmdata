@@ -1,0 +1,35 @@
+# Schema: fre / valor_mobiliario_tesouraria_ultimo_exercicio
+# FRE detail table, LEGACY: published only in the yearly ZIPs
+# 2010-2016 (measured 2026-10-31 on every ZIP 2010-2024; one
+# header across all years). Detail tables usam convencao cnpj_companhia /
+# data_referencia / nome_companhia (CLAUDE.md Sec.2.2).
+
+dataset: fre
+table: valor_mobiliario_tesouraria_ultimo_exercicio
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_valor_mobiliario_tesouraria_ultimo_exercicio_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/META/meta_fre_cia_aberta.zip#meta_fre_cia_aberta_valor_mobiliario_tesouraria_ultimo_exercicio.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+# Later yearly ZIPs lack the CSV: cvm_fetch() refuses later years and
+# `year = NULL` upfront (decision of the owner, 2026-10-31).
+last_year: 2016
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 14
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por (cnpj_companhia, data_referencia).
