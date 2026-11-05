@@ -133,6 +133,76 @@ test_that("history accumulates across runs", {
   expect_identical(all$superseded_by_versao, c("2", "2", "3", "3"))
 })
 
+test_that("history written under another reader is appended, not refused", {
+  load_etl_history()
+  # fca/endereco 2026 on 2026-11-03: the asset of 10-27 held `telefone`
+  # as a number and `fax` with no value; the rows of the day are text
+  previous <- data.frame(
+    cnpj_companhia = c("00.000.000/0001-91", "11.111.111/0001-11"),
+    telefone = c(30462550, NA),
+    fax = c(NA, NA),
+    data_referencia = as.Date(c("2026-01-01", "2026-01-01")),
+    stringsAsFactors = FALSE
+  )
+  rows <- data.frame(
+    cnpj_companhia = "22.222.222/0001-22",
+    telefone = "0800 123",
+    fax = "3046-2551",
+    data_referencia = as.Date("2026-01-01"),
+    stringsAsFactors = FALSE
+  )
+
+  expect_message(
+    all <- mirror_append_history(previous, rows),
+    "telefone, fax"
+  )
+  expect_identical(all$telefone, c("30462550", NA, "0800 123"))
+  expect_identical(all$fax, c(NA, NA, "3046-2551"))
+  expect_s3_class(all$data_referencia, "Date")
+})
+
+test_that("history follows the current reading when no value is lost", {
+  load_etl_history()
+  previous <- data.frame(
+    dt = c("2026-01-31", NA),
+    vl = c("1.5", "20"),
+    obs = c("12", "n/d"),
+    stringsAsFactors = FALSE
+  )
+  rows <- data.frame(dt = as.Date("2026-02-28"), vl = 3, obs = 7)
+
+  aligned <- mirror_align_history(previous, rows)
+  expect_identical(aligned$changed, c("dt", "vl", "obs"))
+  expect_identical(aligned$previous$dt, as.Date(c("2026-01-31", NA)))
+  expect_identical(aligned$previous$vl, c(1.5, 20))
+  # "n/d" is not a number: both sides stay as text
+  expect_identical(aligned$previous$obs, c("12", "n/d"))
+  expect_identical(aligned$rows$obs, "7")
+
+  all <- suppressMessages(mirror_append_history(previous, rows))
+  expect_identical(all$obs, c("12", "n/d", "7"))
+  expect_identical(all$vl, c(1.5, 20, 3))
+})
+
+test_that("columns of one type are left alone", {
+  load_etl_history()
+  previous <- data.frame(n = 1L, x = "a", stringsAsFactors = FALSE)
+  rows <- data.frame(n = 2.5, x = "b", stringsAsFactors = FALSE)
+  aligned <- mirror_align_history(previous, rows)
+  expect_identical(aligned$changed, character())
+  expect_no_message(all <- mirror_append_history(previous, rows))
+  expect_identical(all$n, c(1, 2.5))
+  expect_identical(
+    mirror_as_text(c(30462550, 1e10, 0.5, NA)),
+    c(
+      "30462550",
+      "10000000000",
+      "0.5",
+      NA
+    )
+  )
+})
+
 test_that("filing keys follow the two naming conventions", {
   load_etl_history()
   expect_identical(

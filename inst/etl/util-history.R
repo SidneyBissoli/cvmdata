@@ -277,13 +277,117 @@ mirror_replacing_versao <- function(old_keys, new, new_key) {
   unname(lookup[old_keys])
 }
 
+# Text form of a column another release of the reader stored with a
+# type. A whole number keeps its digits ("30462550", never "30462550.0"
+# nor "3e+07"); a date is ISO-8601.
+mirror_as_text <- function(x) {
+  if (is.character(x)) {
+    return(x)
+  }
+  out <- if (is.numeric(x) && !is.object(x)) {
+    u <- unique(x)
+    txt <- vapply(
+      u,
+      format,
+      character(1L),
+      scientific = FALSE,
+      digits = 15L,
+      trim = TRUE
+    )
+    txt[match(x, u)]
+  } else if (inherits(x, "Date")) {
+    format(x, "%Y-%m-%d")
+  } else {
+    as.character(x)
+  }
+  out[is.na(x)] <- NA_character_
+  out
+}
+
+# The text column `x` in the type of `like` (a Date or a plain double);
+# NULL when a stored value would not survive the conversion or `like` is
+# of another type.
+mirror_text_as <- function(x, like) {
+  out <- if (inherits(like, "Date")) {
+    as.Date(x, format = "%Y-%m-%d")
+  } else if (is.double(like) && !is.object(like)) {
+    suppressWarnings(as.numeric(x))
+  } else {
+    NULL
+  }
+  if (is.null(out) || any(is.na(out) & !is.na(x))) {
+    return(NULL)
+  }
+  out
+}
+
+# `previous` and `rows` with one type in every column both hold. A
+# history asset is written under one release of the reader and appended
+# under the next: on 2026-11-03 the history of fca/endereco 2026, written
+# on 10-27, held `telefone` as a number and the rows superseded that day
+# held it as text, `bind_rows()` refused, and fca went unpublished (three
+# attempts). The same asset reached the client through DuckDB's
+# `union_by_name`, which printed the old numbers as "30462550.0".
+#
+# The history follows the reading of `rows`, the current one: a column
+# now read as text is written as text (`mirror_as_text()`), a text column
+# now read as a date or a number is converted when every stored value
+# survives. Otherwise both sides stay as text, so the join never stops a
+# publication. A side with no value in the column takes the type of the
+# other; integer and double are left to `bind_rows()`.
+#
+# Returns list(previous, rows, changed): `changed` names the columns
+# converted on either side.
+mirror_align_history <- function(previous, rows) {
+  changed <- character()
+  for (col in intersect(names(previous), names(rows))) {
+    p <- previous[[col]]
+    r <- rows[[col]]
+    if (identical(class(p), class(r))) {
+      next
+    }
+    if (all(is.na(p))) {
+      previous[[col]] <- rep(r[NA_integer_], length(p))
+    } else if (all(is.na(r))) {
+      rows[[col]] <- rep(p[NA_integer_], length(r))
+    } else if (is.character(r)) {
+      previous[[col]] <- mirror_as_text(p)
+    } else if (is.character(p)) {
+      cast <- mirror_text_as(p, r)
+      if (is.null(cast)) {
+        rows[[col]] <- mirror_as_text(r)
+      } else {
+        previous[[col]] <- cast
+      }
+    } else if (
+      is.numeric(p) && is.numeric(r) && !is.object(p) && !is.object(r)
+    ) {
+      next
+    } else {
+      previous[[col]] <- mirror_as_text(p)
+      rows[[col]] <- mirror_as_text(r)
+    }
+    changed <- c(changed, col)
+  }
+  list(previous = previous, rows = rows, changed = changed)
+}
+
 # History of a partition after this run: the previous history asset (NULL
-# on the first supersession) followed by the rows superseded now.
+# on the first supersession) followed by the rows superseded now, the
+# columns the two stored with different types aligned first
+# (`mirror_align_history()`).
 mirror_append_history <- function(previous, rows) {
   if (is.null(previous)) {
     return(rows)
   }
-  dplyr::bind_rows(previous, rows)
+  aligned <- mirror_align_history(previous, rows)
+  if (length(aligned$changed)) {
+    message(sprintf(
+      "  history: column(s) [%s] stored with another type; aligned",
+      paste(aligned$changed, collapse = ", ")
+    ))
+  }
+  dplyr::bind_rows(aligned$previous, aligned$rows)
 }
 
 # Partition path of the history asset for the partition `rel`

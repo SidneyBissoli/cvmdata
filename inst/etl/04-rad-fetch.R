@@ -376,11 +376,9 @@ rad_merge_history <- function(previous, rows, replace = character()) {
   }
   added <- rows[keep, , drop = FALSE]
   list(
-    history = if (is.null(previous)) {
-      added
-    } else {
-      dplyr::bind_rows(previous, added)
-    },
+    # same join as the mirror path: the asset may hold rows another
+    # release of the reader wrote with other column types
+    history = mirror_append_history(previous, added),
     n_added = nrow(added),
     n_skipped = sum(!keep)
   )
