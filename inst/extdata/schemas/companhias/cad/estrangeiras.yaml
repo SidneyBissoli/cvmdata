@@ -1,0 +1,47 @@
+# Schema: cad / estrangeiras
+# Cadastro de Companhias Estrangeiras — current-state snapshot of every
+# foreign company ever registered with the CVM. Single-file dataset, no
+# temporal partitioning.
+#
+# Measured 2026-11-01 on the file of 2026-10-31: 27 rows, 49 columns
+# (the META lists the same 49 names, in another order). The issuer key
+# is CNPJ (not CNPJ_CIA as in cad/companhias); there is no TP_MERC, and
+# the address is foreign (CIDADE/ESTADO/PAIS_ORIGEM instead of MUN/UF).
+# CD_CVM is never empty (80004..80233). The file repeats rows: one row
+# appears twice verbatim and one company has two rows that differ only
+# in the phone (CD_PAIS_TEL/DDD_TEL/TEL); they stay as the CVM
+# publishes them. SIT: 7 ATIVO, 19 CANCELADA, 1 SUSPENSO(A) - DECISAO
+# ADM.; DT_CANCEL is filled exactly when SIT == CANCELADA.
+
+dataset: cad
+table: estrangeiras
+
+# Download topology -------------------------------------------------------
+# Same as cad/companhias: one CSV, the full current snapshot, no {year}.
+cvm_archive_url_pattern: null
+cvm_file_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/DADOS/cad_cia_estrang.csv"
+cvm_file_pattern: "cad_cia_estrang.csv"
+
+# Dictionary --------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ESTRANG/CAD/META/meta_cad_cia_estrang.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+temporal_partitioning: none
+
+# Registry dates (cvm_fetch(as_of = )) -------------------------------------
+# Same rule as cad/companhias. DT_REG is never empty (2000-05-24 ..
+# 2025-05-30); DT_CANCEL 2002-12-23 .. 2025-10-01.
+as_of:
+  registered: dt_reg
+  cancelled: dt_cancel
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 49
+
+# Transformations ---------------------------------------------------------
+# None, as in cad/companhias.
+transformations: []

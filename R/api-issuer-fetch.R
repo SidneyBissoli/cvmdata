@@ -478,8 +478,11 @@ fetch_explicit_years <- function(
   do.call(rbind, successes)
 }
 
-# Detect which CNPJ column the tibble uses. Returns NULL when neither
-# is present (CAD pre-filter, schemas without issuer metadata).
+# Detect which CNPJ column the tibble uses. Returns NULL when none is
+# present (CAD pre-filter, schemas without issuer metadata). Plain
+# `cnpj` is the issuer key of cad/estrangeiras and cad/incentivadas;
+# it is checked last because fre/participacao_sociedade carries both
+# cnpj_companhia (the issuer) and cnpj (the investee company).
 cnpj_col <- function(df) {
   if ("cnpj_cia" %in% names(df)) {
     return("cnpj_cia")
@@ -487,13 +490,17 @@ cnpj_col <- function(df) {
   if ("cnpj_companhia" %in% names(df)) {
     return("cnpj_companhia")
   }
+  if ("cnpj" %in% names(df)) {
+    return("cnpj")
+  }
   NULL
 }
 
 # Keep the rows whose issuer CNPJ is one of `issuer` (CNPJs with or
 # without punctuation; `cvm_fetch()` resolves tickers to CNPJs before
 # calling the engine). CAD/ITR/DFP use `cnpj_cia`, FRE-detail tables
-# `cnpj_companhia` (CLAUDE.md §2.2); a table with neither keeps no row.
+# `cnpj_companhia` (CLAUDE.md §2.2), cad/estrangeiras and
+# cad/incentivadas plain `cnpj`; a table with none keeps no row.
 filter_by_issuer <- function(df, issuer) {
   col <- cnpj_col(df)
   if (is.null(col)) {

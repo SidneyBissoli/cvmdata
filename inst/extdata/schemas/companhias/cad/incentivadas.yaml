@@ -1,0 +1,51 @@
+# Schema: cad / incentivadas
+# Cadastro de Companhias Incentivadas — current-state snapshot of every
+# company ever registered with the CVM as a "companhia incentivada"
+# (tax-incentive registration). Single-file dataset, no temporal
+# partitioning.
+#
+# Measured 2026-11-01 on the file of 2026-10-31: 3570 rows, 47 columns
+# (the META lists the same 47 names, in another order). The issuer key
+# is CNPJ (not CNPJ_CIA as in cad/companhias); there is no TP_MERC, and
+# ST_CIA_INCENT_REG (S/N) is specific to this file. CD_CVM is empty in
+# 1433 rows: most incentivized companies never got a CVM code.
+# No key is unique: CNPJ repeats in 576 rows and (CNPJ, CD_CVM) in 37,
+# where a company was cancelled and registered again (rows differ in
+# DT_REG, DT_CANCEL, MOTIVO_CANCEL, SIT, responsible person ...). SIT:
+# 3548 CANCELADA, 18 ATIVO, 3 FASE OPERACIONAL, 1 empty. DT_CANCEL is
+# filled in 3552 rows: the 3548 CANCELADA plus 4 whose SIT is
+# FASE OPERACIONAL or empty; as_of reads the date, as the CVM wrote it.
+# 16 cells (addresses) carry a double quote, read verbatim (quote = "").
+
+dataset: cad
+table: incentivadas
+
+# Download topology -------------------------------------------------------
+# Same as cad/companhias: one CSV, the full current snapshot, no {year}.
+cvm_archive_url_pattern: null
+cvm_file_url_pattern: "https://dados.cvm.gov.br/dados/CIA_INCENT/CAD/DADOS/cad_cia_incent.csv"
+cvm_file_pattern: "cad_cia_incent.csv"
+
+# Dictionary --------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_INCENT/CAD/META/meta_cad_cia_incent.txt"
+
+# Reader settings ---------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -------------------------------------------------------
+temporal_partitioning: none
+
+# Registry dates (cvm_fetch(as_of = )) -------------------------------------
+# Same rule as cad/companhias. DT_REG is never empty (1977-07-20 ..
+# 2026-06-26).
+as_of:
+  registered: dt_reg
+  cancelled: dt_cancel
+
+# Field count (validation aid) --------------------------------------------
+expected_field_count: 47
+
+# Transformations ---------------------------------------------------------
+# None, as in cad/companhias.
+transformations: []
