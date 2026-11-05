@@ -26,8 +26,8 @@ up-front:
   here and `cnpj_cia` elsewhere, so the call is the same everywhere.
 * Eight tables in FRE ship **without published META** (CVM never
   released the dictionary file). The package declares them with
-  `meta_status: missing` and requires `validate = "warn"` or
-  `"skip"` to read them.
+  `meta_status: missing` and checks every file against the header
+  declared in the schema.
 
 ```{r setup}
 library(cvmdata)
@@ -46,8 +46,8 @@ library(cvmdata)
 | Compensation         | `remuneracao_total_orgao`, `remuneracao_variavel`, `remuneracao_acao`, `remuneracao_maxima_minima_media`                                                                                                                                        |
 | Diversity (workforce)| `empregado_PCD`✱, `empregado_local_declaracao_genero`✱, `empregado_local_declaracao_raca`✱, `empregado_local_faixa_etaria`, `empregado_posicao_declaracao_genero`✱, `empregado_posicao_declaracao_raca`✱, `empregado_posicao_faixa_etaria`✱, `empregado_posicao_local`✱ |
 
-✱ — `meta_status: missing`: dictionary not published by CVM; reader
-requires `validate = "warn"` or `"skip"`.
+✱ — `meta_status: missing`: dictionary not published by CVM; the
+reader checks the header against the schema's `expected_field_names`.
 
 Use `cvm_tables("fre")` for the full list and
 `cvm_dictionary("fre", "<table>")` for per-column metadata. Tables
@@ -80,24 +80,16 @@ de-duplicated re-filings.
 ### PCD employment counts (table without published META)
 
 `empregado_PCD` is one of the eight FRE tables that CVM never
-released a dictionary for. With the default `validate = "strict"`
-the package refuses to read it:
+released a dictionary for. It reads like any other table; the schema
+declares the header the CVM publishes, and a file that departs from it
+stops the call (`on_error = "abort"`, the default) or is read with a
+`cvmdata_warn_validation` warning (`on_error = "warn"`):
 
-```{r workflow-1-pcd-strict, error = TRUE}
-cvm_fetch("fre", "empregado_PCD",
-          cnpj = "00.000.000/0001-91", year = 2024)
-```
-
-The reader expects the user to opt in by relaxing validation. With
-`validate = "warn"` the package emits `cvmdata_warn_meta_unavailable`
-and returns the tibble; with `validate = "skip"` it runs silently:
-
-```{r workflow-1-pcd-warn, warning = TRUE}
+```{r workflow-1-pcd}
 pcd <- cvm_fetch(
   "fre", "empregado_PCD",
   cnpj = "00.000.000/0001-91",
-  year = 2024,
-  validate  = "warn"
+  year = 2024
 )
 pcd
 ```
@@ -142,14 +134,14 @@ location, by position and by site) share both the header convention
 seven of them — the absence of published META. They are intentionally
 kept in the package: research on diversity outcomes in
 publicly-traded firms is a heavy use case, and the snapshot a user
-gets here is the same one a CVM auditor sees. `validate = "warn"`
-plus the `expected_field_names` declared in each YAML guard against
-silent schema drift.
+gets here is the same one a CVM auditor sees. The
+`expected_field_names` declared in each YAML guard against silent
+schema drift.
 
 ## Where to read next
 
 * **issuer-fetch** — `cnpj` / `ticker` / `year` / `from` / `to` /
-  `validate` semantics in full.
+  `on_error` semantics in full.
 * **itr-dfp** — financial statements; same package, different table
   semantics.
 * **cvm-defects** — why eight FRE tables lack META, plus the broader
