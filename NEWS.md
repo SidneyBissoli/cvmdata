@@ -319,6 +319,21 @@
 
 ## Bug fixes
 
+* The mirror of `fca` had not been republished since 2026-10-27. The
+  weekly ETL appends the filings superseded in the week to the history
+  asset of each partition, and the history of `endereco` 2026, written
+  when `telefone` was still read as a number, could not be joined with
+  rows that hold it as text: the publish of `fca` stopped there, three
+  attempts in a row, on 2026-11-03. The join now brings both sides to
+  one type first. The history follows the current reading: a column now
+  read as text is stored as text, a text column now read as a date or a
+  number is converted when every stored value survives, and otherwise
+  both sides stay as text, so a change of type never stops a publication
+  again. The same join serves the RAD backfill. For the same reason
+  `cvm_versions("fca", "endereco", year = 2026)` showed the superseded
+  telephone numbers as `"30462550.0"`; the asset is rewritten with
+  `"30462550"` the next time a filing of that partition is superseded.
+
 * `cvm_fetch("fre", "transacao_parte_relacionada", year = 2022:2023)`
   failed with "Can't combine `taxa_juros` <double> and <character>":
   the CVM publishes the interest rate as free text since the 2023 FRE
