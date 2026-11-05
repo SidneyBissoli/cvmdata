@@ -203,6 +203,108 @@ test_that("columns of one type are left alone", {
   )
 })
 
+named_rows <- function(name, ...) {
+  cbind(dre_rows(...), denom_cia = name, stringsAsFactors = FALSE)
+}
+
+test_that("a rename in the CVM register is not a re-filing", {
+  load_etl_history()
+  keys <- c("cnpj_cia", "dt_refer")
+  old <- named_rows("LIGHT S.A. - EM RECUPERACAO JUDICIAL")
+  renamed <- named_rows("LIGHT S.A.")
+
+  # under the old rule the label alone filed the whole filing
+  expect_identical(
+    mirror_superseded_rows(old, renamed, keys, stamp)$n_replaced,
+    1L
+  )
+  out <- mirror_superseded_rows(old, renamed, keys, stamp, labels = "denom_cia")
+  expect_identical(out$n_replaced, 0L)
+  expect_identical(nrow(out$rows), 0L)
+
+  # a real re-filing still goes, with the name it had
+  restated <- named_rows("LIGHT S.A.", versao = "2", vl = 150)
+  out <- mirror_superseded_rows(
+    old,
+    restated,
+    keys,
+    stamp,
+    labels = "denom_cia"
+  )
+  expect_identical(out$n_replaced, 1L)
+  expect_identical(
+    unique(out$rows$denom_cia),
+    "LIGHT S.A. - EM RECUPERACAO JUDICIAL"
+  )
+})
+
+test_that("the register's label columns depend on the dataset", {
+  load_etl_history()
+  expect_identical(mirror_label_cols("dfp"), c("denom_cia", "nome_companhia"))
+  expect_true("nome_empresarial" %in% mirror_label_cols("cgvn"))
+  # in the FCA the company types its name in the form: content
+  expect_false("nome_empresarial" %in% mirror_label_cols("fca"))
+})
+
+test_that("a rule change prunes the rows that were never superseded", {
+  load_etl_history()
+  keys <- c("cnpj_cia", "dt_refer")
+  old_name <- "LIGHT S.A. - EM RECUPERACAO JUDICIAL"
+  # filed on 11-03 under the old rule: same delivery, only the label moved
+  rename <- mirror_superseded_rows(
+    named_rows(old_name),
+    named_rows("LIGHT S.A."),
+    keys,
+    "2026-11-03T07:00:00Z"
+  )$rows
+  # a real supersession of another company, and one of the same company
+  # in an earlier run
+  real <- mirror_superseded_rows(
+    named_rows("B S.A.", cnpj = "B", versao = "1", vl = 5),
+    named_rows("B S.A.", cnpj = "B", versao = "2", vl = 7),
+    keys,
+    "2026-11-03T07:00:00Z"
+  )$rows
+  earlier <- mirror_superseded_rows(
+    named_rows(old_name, versao = "0", vl = 90),
+    named_rows(old_name),
+    keys,
+    "2026-10-27T07:00:00Z"
+  )$rows
+  rad <- rename
+  rad$history_source <- "rad"
+  history <- rbind(earlier, rename, real, rad)
+  reference <- rbind(
+    named_rows("LIGHT S.A."),
+    named_rows("B S.A.", cnpj = "B", versao = "2", vl = 7)
+  )
+
+  res <- mirror_prune_history(history, reference, keys, "denom_cia")
+  expect_identical(res$n_dropped, 2L)
+  expect_identical(res$n_filings, 1L)
+  expect_identical(nrow(res$history), 6L)
+  expect_identical(
+    res$history$history_source,
+    rep(c("mirror", "rad"), c(4L, 2L))
+  )
+  expect_identical(unique(res$history$versao[1:2]), "0")
+
+  # idempotent, and a change of content under the same delivery stays
+  again <- mirror_prune_history(res$history, reference, keys, "denom_cia")
+  expect_identical(again$n_dropped, 0L)
+  touched <- reference
+  touched$vl_conta[1L] <- 101
+  expect_identical(
+    mirror_prune_history(history, touched, keys, "denom_cia")$n_dropped,
+    0L
+  )
+  # without the label rule the rename is a change: nothing to prune
+  expect_identical(
+    mirror_prune_history(history, reference, keys, character())$n_dropped,
+    0L
+  )
+})
+
 test_that("filing keys follow the two naming conventions", {
   load_etl_history()
   expect_identical(
