@@ -68,16 +68,25 @@ local_published_years <- function(
   )
 }
 
-# Stage the CAD fixture as the cached `cad_cia_aberta.csv` with a fresh
-# etag sidecar (same pattern as test-issuer-fetch-cad.R).
-local_prepare_cad_cache <- function(envir = parent.frame()) {
-  cache_root <- withr::local_tempdir(.local_envir = envir)
-  withr::local_options(cvmdata.cache_dir = cache_root, .local_envir = envir)
+# Stage a CAD fixture as the cached CVM file (default: the
+# `cad_cia_aberta.csv` of cad/companhias) with a fresh etag sidecar
+# (same pattern as test-issuer-fetch-cad.R). Pass the `cache_root` a
+# previous call returned to stage several cad files in one cache.
+local_prepare_cad_cache <- function(
+  fixture = "cad_sample.csv",
+  file = "cad_cia_aberta.csv",
+  cache_root = NULL,
+  envir = parent.frame()
+) {
+  if (is.null(cache_root)) {
+    cache_root <- withr::local_tempdir(.local_envir = envir)
+    withr::local_options(cvmdata.cache_dir = cache_root, .local_envir = envir)
+  }
   raw_dir <- file.path(cache_root, "raw", "companhias", "cad")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
-    test_path("fixtures", "cad_sample.csv"),
-    file.path(raw_dir, "cad_cia_aberta.csv")
+    test_path("fixtures", fixture),
+    file.path(raw_dir, file)
   )
   saveRDS(
     list(
@@ -85,7 +94,7 @@ local_prepare_cad_cache <- function(envir = parent.frame()) {
       last_modified = "Mon, 19 May 2026 00:00:00 GMT",
       fetched_at = "2026-05-19T00:00:00.000Z"
     ),
-    file.path(raw_dir, "cad_cia_aberta.csv.etag.rds")
+    file.path(raw_dir, paste0(file, ".etag.rds"))
   )
   cache_root
 }
