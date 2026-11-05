@@ -12,10 +12,16 @@
   instead of shipping new functions. `cvm_groups()` keeps its `contract`
   column as a planning map.
 
-* `issuer_fetch()` is deprecated in favour of `cvm_fetch()` and warns
-  once per session (`lifecycle`). It keeps its behaviour, including the
-  `issuer` argument's CVM-code and free-text forms, until it is removed
-  in a later release.
+* `issuer_fetch()` is removed; use `cvm_fetch()`. Select issuers with
+  `cnpj` or `ticker` instead of `issuer`, and the statement basis with
+  `basis` instead of `report_type`. The `issuer` argument guessed what
+  it was given (CNPJ, CVM code, ticker or company name) and, when a
+  name matched several companies in an interactive session, opened a
+  `utils::menu()`; a data function should take an input of a known
+  type and never stop to ask. Those paths are gone with it: look a CVM
+  code or a company name up in `cvm_fetch("cad", "companhias")`, which
+  carries `cd_cvm`, `denom_social` and `cnpj_cia` side by side. The
+  package no longer imports `lifecycle`.
 
 * The `submissao` table of every dataset (`dfp`, `itr`, `fre`, `fca`,
   `cgvn`, `vlmo`) now returns the complete filing history: one row per
@@ -263,6 +269,28 @@
 
 ## Bug fixes
 
+* `cvm_fetch("fre", "transacao_parte_relacionada", year = 2022:2023)`
+  failed with "Can't combine `taxa_juros` <double> and <character>":
+  the CVM publishes the interest rate as free text since the 2023 FRE
+  ("CDI + 1,50% a.a.", "N/A"), and the dictionary still declared it
+  numeric, so each year was guessed on its own. The dictionary snapshot
+  is rebuilt from the CVM META of 2026-11-01, which declares it varchar:
+  `taxa_juros` is now character in every year, with the value as
+  published (`"0.000000"`, no longer `0`). The same refresh brings 81
+  declared sizes up to date (`cvm_dictionary()`'s `tamanho`: CNPJ and
+  CPF columns 20 -> 18, among others); sizes do not change the reading.
+  The mirror's history treats a change of declared types as a change of
+  reader, so re-reading the old years does not file them as re-filings.
+
+* `cvm_fetch("cad", "companhias")` returned the phone columns `fax`,
+  `fax_resp` and `tel_resp` as numbers, while `tel` and the other phone
+  columns of the package are text. The CVM's META declares the three
+  numeric; the reader now keeps them as character, so a number starting
+  with zero cannot lose it. Measured on 2026-11-01 over the 2,678 rows of
+  the register, no value had lost anything yet (the leading zeros were
+  only the CVM's `0` placeholders); these were the only phone columns of
+  the dictionary still read as numbers.
+
 * `cvm_codelist()` listed free text as categories and missed values in
   use. The codelists were sampled from the latest year alone, and in
   May that was a 2026 with five months of filings (one DFP). Measured
@@ -475,6 +503,17 @@
   asks for the data (items 12.6 and 12.4 of Anexo C).
 
 ## Documentation
+
+* The `itr-dfp` article shows how to compare companies on the CVM's
+  fixed accounts (`st_conta_fixa == "S"`), with what a measurement over
+  every DFP and ITR statement found on 2026-11-01. Within one standard
+  chart, the fixed accounts carry the same name in 99.2% of the
+  companies, and the flag of a company's account changes between years
+  in 0.3-0.4% of cases. Banks and insurers follow other charts, where
+  the same fixed code means something else (`3.01` is revenue from
+  sales for Petrobras and revenue from financial intermediation for
+  Itaú). No argument is added, because the column is already in every
+  statement.
 
 * The data licence is now stated. The CVM publishes every dataset the
   package covers under the Open Data Commons Open Database License

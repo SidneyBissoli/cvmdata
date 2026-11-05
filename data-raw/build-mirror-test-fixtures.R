@@ -169,7 +169,7 @@ build_parquet_fixtures <- function() {
       cvmdata.cache_ttl_seconds = Inf
     ),
     {
-      bpa <- issuer_fetch(
+      bpa <- issuer_fetch_internal(
         "dfp",
         "bpa",
         report_type = "ind",

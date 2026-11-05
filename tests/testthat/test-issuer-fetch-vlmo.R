@@ -1,4 +1,4 @@
-# End-to-end tests for issuer_fetch() against the v0.2 VLMO dataset
+# End-to-end tests for issuer_fetch_internal() against the v0.2 VLMO dataset
 # (valores mobiliarios negociados e detidos por insiders). Mocks the
 # HTTP layer with httr2::with_mocked_responses + a local fixture ZIP,
 # matching the pattern used for CGVN/DFP/ITR/FRE.
@@ -46,13 +46,13 @@ fresh_head_response <- function() {
 
 # Tracer -------------------------------------------------------------
 
-test_that("issuer_fetch VLMO submissao tracer returns cvm_tbl", {
+test_that("fetch engine VLMO submissao tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_vlmo_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "submissao", year = 2024L, source = "cvm")
+    issuer_fetch_internal("vlmo", "submissao", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -73,13 +73,13 @@ test_that("issuer_fetch VLMO submissao tracer returns cvm_tbl", {
   expect_s3_class(result$data_referencia, "Date")
 })
 
-test_that("issuer_fetch VLMO consolidado tracer returns cvm_tbl", {
+test_that("fetch engine VLMO consolidado tracer returns cvm_tbl", {
   skip_if_not_installed("httptest2")
   local_prepare_vlmo_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch("vlmo", "consolidado", year = 2024L, source = "cvm")
+    issuer_fetch_internal("vlmo", "consolidado", year = 2024L, source = "cvm")
   )
 
   expect_s3_class(result, "cvm_tbl")
@@ -109,13 +109,13 @@ test_that("issuer_fetch VLMO consolidado tracer returns cvm_tbl", {
 
 # Filtering by issuer -------------------------------------------------
 
-test_that("issuer_fetch VLMO filters by CNPJ via cnpj_companhia", {
+test_that("fetch engine VLMO filters by CNPJ via cnpj_companhia", {
   skip_if_not_installed("httptest2")
   local_prepare_vlmo_cache()
 
   result <- httr2::with_mocked_responses(
     function(req) fresh_head_response(),
-    issuer_fetch(
+    issuer_fetch_internal(
       "vlmo",
       "consolidado",
       issuer = "00.000.000/0001-91",
@@ -125,54 +125,6 @@ test_that("issuer_fetch VLMO filters by CNPJ via cnpj_companhia", {
   )
   expect_true(nrow(result) > 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("issuer_fetch VLMO resolves CD_CVM via submissao for consolidado", {
-  # consolidado does not carry codigo_cvm; the lookup must read
-  # vlmo/submissao for the same year and map CD_CVM -> CNPJ. This
-  # exercises the cdcvm_col() generalization shipped in Sessao 10.
-  skip_if_not_installed("httptest2")
-  local_prepare_vlmo_cache()
-
-  result <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "vlmo",
-      "consolidado",
-      issuer = "001023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_true(nrow(result) > 0L)
-  expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
-})
-
-test_that("VLMO CD_CVM resolution accepts unpadded input", {
-  skip_if_not_installed("httptest2")
-  local_prepare_vlmo_cache()
-
-  out_padded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "vlmo",
-      "consolidado",
-      issuer = "001023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  out_unpadded <- httr2::with_mocked_responses(
-    function(req) fresh_head_response(),
-    issuer_fetch(
-      "vlmo",
-      "consolidado",
-      issuer = "1023",
-      year = 2024L,
-      source = "cvm"
-    )
-  )
-  expect_identical(nrow(out_padded), nrow(out_unpadded))
 })
 
 # No dedup by version (event-per-row table) ---------------------------
@@ -248,7 +200,7 @@ test_that("report_type aborts for VLMO tables without variants", {
   expect_error(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
-      issuer_fetch(
+      issuer_fetch_internal(
         "vlmo",
         "consolidado",
         year = 2024L,

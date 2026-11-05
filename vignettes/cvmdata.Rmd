@@ -151,9 +151,8 @@ cvm_fetch("dfp", "bpa", cnpj = "00.000.000/0001-91",
           reading = c("original", "restated"))
 ```
 
-`issuer_fetch()`, the entry point of earlier releases, is deprecated
-and still works with a warning. The `issuer-fetch` article goes
-through every `cvm_fetch()` argument in depth.
+The `issuer-fetch` article goes through every `cvm_fetch()` argument
+in depth.
 
 ## Discovery
 

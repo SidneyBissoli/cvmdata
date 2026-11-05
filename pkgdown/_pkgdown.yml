@@ -25,12 +25,10 @@ reference:
     desc: >
       One function retrieves any CVM open-data table covered by the
       package; `cvm_versions()` returns every known version of a
-      filing. `issuer_fetch()` is the deprecated predecessor of
-      `cvm_fetch()` and will be removed in a later release.
+      filing.
     contents:
       - cvm_fetch
       - cvm_versions
-      - issuer_fetch
   - title: Cache
     desc: >
       Inspect and manage the on-disk cache of downloaded artifacts.
