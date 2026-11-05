@@ -15,7 +15,7 @@ CVM dataset and every table covered by the package.
 This article walks through each argument: how issuers are selected
 (`cnpj`, `ticker`), how the period is selected (`year` or
 `from`/`to`), the `basis` rule for financial statements, the
-`validate` and `on_error` modes, and the cache/source plumbing.
+`on_error` modes, and the cache/source plumbing.
 
 `issuer_fetch()`, the entry point of v0.1 and v0.2, was removed. Its
 `issuer` argument took a CNPJ, a CVM code, a ticker or a company name;
@@ -41,7 +41,6 @@ cvm_fetch(
   basis    = NULL,
   source   = NULL,
   on_error = "abort",
-  validate = "strict",
   ...
 )
 ```
@@ -189,19 +188,6 @@ Incomplete dates (`"2024"`, `"2024-06"`) are rejected, as is a
 window on a snapshot table. One bound without the other aborts; for
 whole years use `year`.
 
-### Partial failure with `on_error`
-
-When several yearly files are read (more than one element in `year`,
-or a window spanning several years), `on_error = "warn"` keeps
-surviving years and emits `cvmdata_warn_partial_failure` listing
-failures. `on_error = "silent"` does the same without the warning.
-`on_error = "abort"` (default) aborts at the first HTTP failure.
-Total failure (every year fails) always aborts regardless.
-Single-year calls, non-yearly tables (CAD) and the implicit
-`year = NULL` fallback always abort on HTTP failure.
-
-Parse and schema-validation failures are governed by `validate`, not
-by `on_error` — schema drift is treated as a separate signal.
 
 ## `basis`
 
@@ -297,21 +283,30 @@ year-end balance as the following year's quarterly filings present it;
 the flow statements (`dre`, `dfc_*`, `dva`, `dmpl`) compare like with
 like.
 
-## `validate`
+## `on_error`
 
-Controls the strictness of schema validation at parse time. Three
-modes:
+One argument decides what happens when something goes wrong while
+reading. Two things can:
 
-| Mode       | Table with META published         | Table with `meta_status: missing`                  |
-|------------|------------------------------------|----------------------------------------------------|
-| `"strict"` | Validates; mismatch aborts.        | Aborts with `cvmdata_error_meta_unavailable`.      |
-| `"warn"`   | Validates; mismatch warns.         | Warns with `cvmdata_warn_meta_unavailable`; data returned. |
-| `"skip"`   | Skips validation silently.         | Skips silently.                                    |
+* **A file departs from the schema.** Every CVM file is checked
+  against the field count and the field names its schema declares
+  (for the eight FRE tables without published META, the names come
+  from the schema's `expected_field_names`).
+* **One of several yearly files fails to download** (more than one
+  element in `year`, or a window spanning several years).
 
-The eight FRE tables without published META (`empregado_PCD`,
-`empregado_local_declaracao_genero`, etc.) need `validate = "warn"`
-or `"skip"` to be readable. See the **fre** article for a worked
-example.
+| `on_error`          | File departs from the schema           | One of several years fails                                  |
+|---------------------|----------------------------------------|-------------------------------------------------------------|
+| `"abort"` (default) | Stops with `cvmdata_error_parse`.      | Stops with `cvmdata_error_http` at the first failure.       |
+| `"warn"`            | Reads it; `cvmdata_warn_validation`.   | Returns the other years; `cvmdata_warn_partial_failure`.    |
+
+A call where nothing could be read always aborts, and so do a single
+year, a non-yearly table (CAD) and the implicit `year = NULL` fallback
+when their one file fails to download. The errors carry classes for
+`tryCatch()`; to silence the warnings of `"warn"`, wrap the call in
+`suppressWarnings()`. Until 2026-11-01 a separate `validate` argument
+governed the schema check, with silent modes in both; it was merged
+into `on_error`.
 
 ## Cache, TTL and source backend
 
