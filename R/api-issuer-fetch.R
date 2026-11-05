@@ -399,7 +399,8 @@ cnpj_col <- function(df) {
 # Keep the rows whose issuer CNPJ is one of `issuer` (CNPJs with or
 # without punctuation; `cvm_fetch()` resolves tickers to CNPJs before
 # calling the engine). CAD/ITR/DFP use `cnpj_cia`, FRE-detail tables
-# `cnpj_companhia` (CLAUDE.md §2.2); a table with neither keeps no row.
+# `cnpj_companhia` (CLAUDE.md §2.2), cad/estrangeiras and
+# cad/incentivadas plain `cnpj`; a table with none keeps no row.
 filter_by_issuer <- function(df, issuer) {
   col <- cnpj_col(df)
   if (is.null(col)) {
