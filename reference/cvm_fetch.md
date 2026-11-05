@@ -269,13 +269,14 @@ registration and cancellation dates.
 
 Which arguments apply depends on the table. The rules below are
 generated from the package's table schemas, the same ones the argument
-checks read, for the 99 tables in 8 datasets. An argument passed to a
+checks read, for the 102 tables in 9 datasets. An argument passed to a
 table it does not apply to aborts with `cvmdata_error_input` before
 anything is downloaded; nothing is silently ignored.
 
 - `year` and `from`/`to`: every table published one file per year. Not
-  for `cad`: `companhias`, a single snapshot. A `year` before the
-  table's first year is refused (a `from`/`to` window is cut to it
+  for `cad`: `companhias`; `recompra_acoes`: `intermediarios`,
+  `quantidades`, `recompra_acoes`, a single snapshot. A `year` before
+  the table's first year is refused (a `from`/`to` window is cut to it
   instead). Most tables start with their dataset; these start later:
   `dfp/composicao_capital` (2020), `fre/acao_entregue` (2023),
   `fre/administrador_PCD` (2023), `fre/administrador_declaracao_genero`
@@ -325,10 +326,16 @@ anything is downloaded; nothing is silently ignored.
 
 - `as_of`: only in `cad`: `companhias`.
 
+- `cnpj`/`ticker` in a table without an issuer column: `recompra_acoes`:
+  `intermediarios`, `quantidades` keep the rows linked to the issuer's
+  rows in `recompra_acoes/recompra_acoes`.
+
 - [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md):
   every table except `cad`: `companhias`; `cgvn`, `dfp`, `fca`, `fre`
-  and `itr`: `submissao`; `ipe`: `ipe`; `vlmo`: `consolidado`,
-  `submissao`, which already return every row the CVM publishes.
+  and `itr`: `submissao`; `ipe`: `ipe`; `recompra_acoes`:
+  `intermediarios`, `quantidades`, `recompra_acoes`; `vlmo`:
+  `consolidado`, `submissao`, which already return every row the CVM
+  publishes.
 
 ## See also
 

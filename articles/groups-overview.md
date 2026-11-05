@@ -88,8 +88,9 @@ securitisation vehicles (`securitizadoras`), and CEPAC issuers
 datasets: `cad`, `dfp`, `itr`, `fre`. v0.2 added `cgvn` (Brazilian
 Corporate Governance Code informe), `vlmo` (securities traded and held
 by insiders), `fca` (registration form, which also backs the B3 ticker
-lookup) and `ipe` (manifest of periodic and eventual documents) — eight
-`companhias` datasets in all.
+lookup) and `ipe` (manifest of periodic and eventual documents).
+`recompra_acoes` (share buyback programs) followed — nine `companhias`
+datasets in all.
 
 The identity key is the issuer’s CNPJ, selected with `cnpj` or, through
 the registration form, with a B3 `ticker`. The temporal axis is annual
@@ -140,7 +141,9 @@ resolve by uniqueness when `group` is omitted, and abort with
 
 \
 [`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``group ``=`` ``"companhias"``)`\
-`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`\
+`#> [1] "cad"            "cgvn"           "dfp"            "fca"           `\
+`#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"`\
+`#> [9] "vlmo"`\
 [`cvm_tables`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)`(``"dfp"``, group ``=`` ``"companhias"``)`\
 `#>  [1] "bpa"                "bpp"                "composicao_capital"`\
 `#>  [4] "dfc_md"             "dfc_mi"             "dmpl"              `\

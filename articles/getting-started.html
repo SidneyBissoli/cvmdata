@@ -146,9 +146,13 @@ expands on the rationale and on which groups are implemented today.</p>
 </h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"</span></span>
+<span><span class="co">#&gt; [1] "cad"            "cgvn"           "dfp"            "fca"           </span></span>
+<span><span class="co">#&gt; [5] "fre"            "ipe"            "itr"            "recompra_acoes"</span></span>
+<span><span class="co">#&gt; [9] "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span>group <span class="op">=</span> <span class="st">"companhias"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"</span></span>
+<span><span class="co">#&gt; [1] "cad"            "cgvn"           "dfp"            "fca"           </span></span>
+<span><span class="co">#&gt; [5] "fre"            "ipe"            "itr"            "recompra_acoes"</span></span>
+<span><span class="co">#&gt; [9] "vlmo"</span></span>
 <span><span class="fu"><a href="../reference/cvm_tables.html">cvm_tables</a></span><span class="op">(</span><span class="st">"dfp"</span><span class="op">)</span></span>
 <span><span class="co">#&gt;  [1] "bpa"                "bpp"                "composicao_capital"</span></span>
 <span><span class="co">#&gt;  [4] "dfc_md"             "dfc_mi"             "dmpl"              </span></span>
@@ -206,12 +210,13 @@ interpreted through each dataset’s schema. Groups not yet implemented
 arrive as new schemas behind the same function, not as new fetchers.</p>
 </div>
 <div class="section level2">
-<h2 id="fetching-data-a-tour-of-the-8-issuer-datasets">Fetching data — a tour of the 8 issuer datasets<a class="anchor" aria-label="anchor" href="#fetching-data-a-tour-of-the-8-issuer-datasets"></a>
+<h2 id="fetching-data-a-tour-of-the-9-issuer-datasets">Fetching data — a tour of the 9 issuer datasets<a class="anchor" aria-label="anchor" href="#fetching-data-a-tour-of-the-9-issuer-datasets"></a>
 </h2>
-<p>The package implements eight datasets in the <code>companhias</code>
+<p>The package implements nine datasets in the <code>companhias</code>
 group: <code>cad</code>, <code>dfp</code>, <code>itr</code>,
-<code>fre</code> (v0.1) and <code>cgvn</code>, <code>vlmo</code>,
-<code>fca</code>, <code>ipe</code> (v0.2). The examples below are marked
+<code>fre</code> (v0.1), <code>cgvn</code>, <code>vlmo</code>,
+<code>fca</code>, <code>ipe</code> (v0.2) and
+<code>recompra_acoes</code>. The examples below are marked
 <code>eval = FALSE</code> to keep the article fast; copy any of them
 into your R session as-is.</p>
 <div class="section level3">
@@ -442,6 +447,25 @@ Mobiliários negociados e detidos (art. 11 …)” is the same event
 PDFs) in any category. The <code>ipe-vlmo</code> article works the
 overlap through end to end.</p>
 </div>
+<div class="section level3">
+<h3 id="recompra_acoes-share-buyback-programs">
+<code>recompra_acoes</code> — share buyback programs<a class="anchor" aria-label="anchor" href="#recompra_acoes-share-buyback-programs"></a>
+</h3>
+<p>One row per buyback program a company approved, from 1997 on, in a
+single file without a year: no <code>year</code>, no
+<code>from</code>/<code>to</code>, no <code>basis</code>.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">programs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"recompra_acoes"</span>, <span class="st">"recompra_acoes"</span>, ticker <span class="op">=</span> <span class="st">"MGLU3"</span><span class="op">)</span></span>
+<span><span class="va">brokers</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"recompra_acoes"</span>, <span class="st">"intermediarios"</span>, ticker <span class="op">=</span> <span class="st">"MGLU3"</span><span class="op">)</span></span></code></pre></div>
+<p><code>intermediarios</code> (the brokers of each program) and
+<code>quantidades</code> (share quantities by type and class) have no
+issuer column, only <code>id_programa</code>. A <code>cnpj</code> or
+<code>ticker</code> on them selects the issuer’s programs in
+<code>recompra_acoes</code> and keeps the rows of those programs, so
+both calls above describe the same programs.
+<code>cnpj_intermediario</code> is the broker’s CNPJ, not the
+issuer’s.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="selecting-issuers">Selecting issuers<a class="anchor" aria-label="anchor" href="#selecting-issuers"></a>
@@ -479,7 +503,7 @@ a CNPJ you know only by name or by CVM code, read the registry:
 (tickers cover only exchange-listed securities — debentures and private
 placements have none). A CNPJ absent from the table yields zero rows,
 silently.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>,</span>
 <span>          cnpj <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span>, <span class="st">"47.960.950/0001-21"</span><span class="op">)</span>,</span>
 <span>          ticker <span class="op">=</span> <span class="st">"PETR4"</span>,</span>
@@ -498,7 +522,7 @@ walks down up to three years and emits a
 returned.</p>
 <p>An explicit vector fetches each year and binds the result. For
 historical reach, just pass a longer vector:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"dre"</span>,</span>
 <span>                  cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
 <span>                  year <span class="op">=</span> <span class="fl">2012</span><span class="op">:</span><span class="fl">2024</span>,</span>
@@ -526,7 +550,7 @@ applies to the <code>cad</code> snapshot.</p>
 </h2>
 <p>Every tibble returned by <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> is of class
 <code>cvm_tbl</code> and carries seven provenance attributes:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"source"</span><span class="op">)</span>           <span class="co">#  "mirror" or "cvm"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"fetched_at"</span><span class="op">)</span>       <span class="co">#  POSIXct, set at download time</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">out</span>, <span class="st">"group"</span><span class="op">)</span>            <span class="co">#  CKAN group slug, e.g. "companhias"</span></span>
@@ -546,7 +570,7 @@ the REPL is self-describing.</p>
 <p>The cache lives under
 <code>tools::R_user_dir("cvmdata", "cache")</code> by default. Two
 functions inspect and reset it:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cvm_cache_path.html">cvm_cache_path</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/cvm_cache_info.html">cvm_cache_info</a></span><span class="op">(</span><span class="op">)</span>                <span class="co"># current size + unit breakdown</span></span>
 <span><span class="fu"><a href="../reference/cvm_cache_clear.html">cvm_cache_clear</a></span><span class="op">(</span><span class="op">)</span>               <span class="co"># interactive prompt by default</span></span></code></pre></div>
@@ -578,7 +602,7 @@ cadence and equivalence guarantees in detail.</p>
 <h2 id="utilities">Utilities<a class="anchor" aria-label="anchor" href="#utilities"></a>
 </h2>
 <p>Two CNPJ helpers, deliberately small:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/cnpj_clean.html">cnpj_clean</a></span><span class="op">(</span><span class="st">"00.000.000/0001-91"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "00000000000191"</span></span>
 <span><span class="fu"><a href="../reference/cnpj_format.html">cnpj_format</a></span><span class="op">(</span><span class="st">"00000000000191"</span><span class="op">)</span></span>
@@ -657,7 +681,7 @@ fail.</td>
 </table>
 <p>Catch them with <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code> or
 <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">withCallingHandlers()</a></code> keyed on the class string, e.g.:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span>, cnpj <span class="op">=</span> <span class="st">"00.000.000/0001-91"</span>,</span>
 <span>            year <span class="op">=</span> <span class="fl">2024</span>, basis <span class="op">=</span> <span class="st">"ind"</span>, source <span class="op">=</span> <span class="st">"cvm"</span><span class="op">)</span>,</span>

@@ -37,7 +37,11 @@ Other discovery:
 
 ``` r
 cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
+#> [1] "cad"            "cgvn"           "dfp"            "fca"           
+#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"
+#> [9] "vlmo"          
 cvm_datasets(group = "companhias")
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
+#> [1] "cad"            "cgvn"           "dfp"            "fca"           
+#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"
+#> [9] "vlmo"          
 ```

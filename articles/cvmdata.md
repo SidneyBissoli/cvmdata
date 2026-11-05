@@ -35,7 +35,9 @@ datasets:
 \
 [`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`\
 [`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
-`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`
+`#> [1] "cad"            "cgvn"           "dfp"            "fca"           `\
+`#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"`\
+`#> [9] "vlmo"`
 
 ## First call — the company registry
 
