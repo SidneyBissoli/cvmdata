@@ -367,6 +367,25 @@
 
 ### Bug fixes
 
+- [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  returned filings “superseded” by their own `versao`
+  (`versao == superseded_by_versao`, `history_source = "mirror"`). The
+  files of the CVM carry the name its register holds for the company
+  today, in every row of every year; when a company is renamed the CVM
+  rewrites that label under the same filing, and the mirror’s history
+  took each rewrite for a re-filing. Three renames in the week of
+  2026-11-03 (Light S.A. left court-supervised reorganisation, Ambipar
+  and Environmental ESG entered it) filed 99,070 such rows: 20,886 in
+  `dfp`, 75,701 in `itr`, 2,051 in `fre`, 432 in `cgvn`, with nothing
+  but the name changed. The register’s name is now left out of the
+  comparison (`denom_cia`, `nome_companhia`, and `nome_empresarial` in
+  `cgvn`; in `fca` that column is the name the company typed in the form
+  and still counts), so a rename is no longer a version, as it is not
+  one for the CVM. The first publish of each dataset after this change
+  removes the rows already filed; an asset left without rows stays as an
+  empty file. The old name remains in the dated snapshot of the mirror
+  ([`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)).
+
 - The mirror of `fca` had not been republished since 2026-10-27. The
   weekly ETL appends the filings superseded in the week to the history
   asset of each partition, and the history of `endereco` 2026, written

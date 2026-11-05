@@ -203,7 +203,12 @@ the table, the current asset <code><a href="cvm_fetch.html">cvm_fetch()</a></cod
 filings, dated. The history holds the filings the mirror saw being
 replaced from 2026-10 on and, for the DFP and ITR statements, the
 ones recovered from the CVM's filing system (RAD) back to 2010;
-<code>history_source</code> says which (<code>"mirror"</code> or <code>"rad"</code>).</p></li>
+<code>history_source</code> says which (<code>"mirror"</code> or <code>"rad"</code>). A change of
+the company's name in the CVM register is not a version: the CVM
+rewrites the name in every row of every year under the same
+filing, and the history does not record it. The name a filing
+carried on a given date is in the dated snapshot of the mirror
+(<code><a href="cvm_release_set.html">cvm_release_set()</a></code>).</p></li>
 <li><p><code>source = "cvm"</code> reads the CVM's yearly CSV without collapsing it
 to the current filing. That file keeps only the versions the CVM
 still publishes, usually the current one alone, and carries no

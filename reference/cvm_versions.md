@@ -127,7 +127,12 @@ The two backends know different parts of the history.
   superseded filings, dated. The history holds the filings the mirror
   saw being replaced from 2026-10 on and, for the DFP and ITR
   statements, the ones recovered from the CVM's filing system (RAD) back
-  to 2010; `history_source` says which (`"mirror"` or `"rad"`).
+  to 2010; `history_source` says which (`"mirror"` or `"rad"`). A change
+  of the company's name in the CVM register is not a version: the CVM
+  rewrites the name in every row of every year under the same filing,
+  and the history does not record it. The name a filing carried on a
+  given date is in the dated snapshot of the mirror
+  ([`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)).
 
 - `source = "cvm"` reads the CVM's yearly CSV without collapsing it to
   the current filing. That file keeps only the versions the CVM still
