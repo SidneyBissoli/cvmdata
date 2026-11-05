@@ -70,6 +70,7 @@ options(cvmdata.cache_dir = file.path(tempdir(), "cvmdata-build-fixtures"))
   "vlmo",
   "fca",
   "ipe",
+  "recompra",
   "dfp2025",
   "dre2023"
 )
@@ -1100,6 +1101,130 @@ build_dre_2023_fixtures <- function() {
   invisible(outputs)
 }
 
+# Recompra de acoes raw fixture: the dataset ZIP has no year, and only
+# the main table carries the issuer CNPJ. The main table is subset by
+# CNPJ_Companhia (BB + MGLU); the two child tables by the ID_Programa of
+# the programs kept, so the fixture exercises the issuer_via bridge.
+build_recompra_raw_fixture <- function() {
+  url <- paste0(
+    "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/",
+    "DADOS/cia_aberta_recompra_acoes.zip"
+  )
+  out_zip <- "tests/testthat/fixtures/cia_aberta_recompra_acoes.zip"
+  out_meta <- paste0(out_zip, ".meta.json")
+  keep_cnpjs <- c("00.000.000/0001-91", "47.960.950/0001-21")
+  files <- c(
+    "cia_aberta_recompra_acoes.csv",
+    "cia_aberta_recompra_acoes_intermediarios.csv",
+    "cia_aberta_recompra_acoes_quantidades.csv"
+  )
+
+  stage <- tempfile("recompra_fixture_")
+  dir.create(stage, recursive = TRUE)
+  on.exit(unlink(stage, recursive = TRUE), add = TRUE)
+  zip_local <- file.path(stage, basename(url))
+  cat(sprintf("[recompra] Downloading %s\n", url))
+  resp <- httr2::req_perform(
+    httr2::req_timeout(httr2::request(url), 300L)
+  )
+  writeBin(httr2::resp_body_raw(resp), zip_local)
+  extract_dir <- file.path(stage, "extract")
+  dir.create(extract_dir)
+  utils::unzip(zip_local, exdir = extract_dir)
+
+  # Lines of a CSV and the values of one of its columns (lowercased name).
+  read_lines <- function(name, col) {
+    path <- file.path(extract_dir, name)
+    raw <- readBin(path, "raw", n = file.info(path)$size)
+    txt <- iconv(rawToChar(raw), from = "ISO-8859-1", to = "UTF-8")
+    lines <- strsplit(txt, "\r?\n", perl = TRUE)[[1L]]
+    body <- lines[-1L]
+    body <- body[nzchar(body)]
+    idx <- which(tolower(strsplit(lines[1L], ";", fixed = TRUE)[[1L]]) == col)
+    values <- vapply(
+      strsplit(body, ";", fixed = TRUE),
+      function(f) f[idx],
+      character(1L)
+    )
+    list(header = lines[1L], body = body, values = values)
+  }
+  write_subset <- function(name, x, keep) {
+    out_raw <- charToRaw(iconv(
+      paste(c(x$header, x$body[keep]), collapse = "\r\n"),
+      from = "UTF-8",
+      to = "ISO-8859-1"
+    ))
+    writeBin(out_raw, file.path(pack_dir, name))
+    sum(keep)
+  }
+
+  pack_dir <- file.path(stage, "pack")
+  dir.create(pack_dir)
+  main <- read_lines(files[[1L]], "cnpj_companhia")
+  keep_main <- main$values %in% keep_cnpjs
+  ids <- read_lines(files[[1L]], "id_programa")$values[keep_main]
+  n_rows <- c(main = write_subset(files[[1L]], main, keep_main))
+  for (f in files[-1L]) {
+    child <- read_lines(f, "id_programa")
+    n_rows[[f]] <- write_subset(f, child, child$values %in% ids)
+  }
+
+  if (file.exists(out_zip)) {
+    file.remove(out_zip)
+  }
+  out_zip_abs <- file.path(
+    normalizePath(dirname(out_zip), winslash = "/", mustWork = TRUE),
+    basename(out_zip)
+  )
+  withr::with_dir(pack_dir, {
+    utils::zip(zipfile = out_zip_abs, files = files, flags = "-q9X")
+  })
+
+  # Mirror fixtures of the same subset, one parquet per table, so the
+  # issuer_via bridge is tested through source = "mirror" too.
+  tables <- c("recompra_acoes", "intermediarios", "quantidades")
+  for (k in seq_along(tables)) {
+    schema <- cvmdata:::load_schema("recompra_acoes", tables[[k]])
+    df <- cvmdata:::read_cvm_csv(
+      file.path(pack_dir, files[[k]]),
+      schema,
+      validate = "skip"
+    )
+    df <- cvmdata:::apply_schema_transformations(df, schema)
+    write_parquet_via_duckdb(
+      df,
+      sprintf(
+        "tests/testthat/fixtures/mirror-recompra_acoes-%s.parquet",
+        tables[[k]]
+      )
+    )
+  }
+
+  meta <- list(
+    source_url = url,
+    fetched_at = format(Sys.Date()),
+    companies_included = keep_cnpjs,
+    files_included = files,
+    notes = paste(
+      "Main table subset by CNPJ_Companhia (BCO BRASIL + MAGAZINE LUIZA);",
+      "intermediarios and quantidades subset by the ID_Programa of the",
+      "programs kept (they carry no issuer column).",
+      "ISO-8859-1 encoding preserved. The CVM ZIP has no year."
+    )
+  )
+  writeLines(
+    jsonlite::toJSON(meta, pretty = TRUE, auto_unbox = TRUE),
+    out_meta
+  )
+  cat(sprintf(
+    "[fixture] %s  %s bytes; rows: %s\n",
+    out_zip,
+    format(file.info(out_zip)$size),
+    paste(n_rows, collapse = "/")
+  ))
+  invisible(out_zip)
+}
+
 # --- dispatch --------------------------------------------------------
 if ("parquet" %in% .targets) {
   build_parquet_fixtures()
@@ -1121,4 +1246,7 @@ if ("fca" %in% .targets) {
 }
 if ("ipe" %in% .targets) {
   build_ipe_raw_fixture()
+}
+if ("recompra" %in% .targets) {
+  build_recompra_raw_fixture()
 }

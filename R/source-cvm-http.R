@@ -1,11 +1,15 @@
-# HTTP source backend for the CVM Open Data Portal. Two paths:
+# HTTP source backend for the CVM Open Data Portal. Three paths:
 #
-# 1. `temporal_partitioning: none` — single CSV (used by CAD).
-# 2. `temporal_partitioning: yearly` — yearly ZIP that contains many
+# 1. `temporal_partitioning: none` + `cvm_file_url_pattern` — single
+#    CSV (used by CAD).
+# 2. `temporal_partitioning: none` + `cvm_archive_url_pattern` — one
+#    ZIP with the whole history, no `{year}` (used by recompra_acoes);
+#    each table is one member of it.
+# 3. `temporal_partitioning: yearly` — yearly ZIP that contains many
 #    CSVs, one of which (optionally selected by report_type) is the
 #    target table.
 #
-# Both paths cache the raw upstream artifact (CSV or ZIP) under
+# Every path caches the raw upstream artifact (CSV or ZIP) under
 # `<cache_root>/raw/<group>/<dataset>/...` with a sidecar `.etag.rds`
 # for ETag/Last-Modified comparison. Freshness is gated by a TTL
 # window (default 30 days, configurable via
@@ -24,6 +28,9 @@ source_cvm_http_get <- function(schema, year = NULL, report_type = NULL, ...) {
   cache_migrate_v0_1_to_v0_2()
   partitioning <- schema$temporal_partitioning %||% "none"
   if (identical(partitioning, "none")) {
+    if (has_archive_url(schema)) {
+      return(get_static_archive_csv(schema, report_type))
+    }
     return(get_simple_csv(schema, report_type))
   }
   if (identical(partitioning, "yearly")) {
@@ -86,6 +93,40 @@ get_simple_csv <- function(schema, report_type) {
   csv_path
 }
 
+# TRUE when the schema downloads a ZIP (`cvm_archive_url_pattern`).
+has_archive_url <- function(schema) {
+  url <- schema$cvm_archive_url_pattern
+  !is.null(url) && !is.na(url) && nzchar(url)
+}
+
+# Path for non-partitioned datasets published as one ZIP
+# (recompra_acoes). The ZIP sits in the dataset directory, which the
+# cache treats as one unit (see `.cache_unit_key()`).
+get_static_archive_csv <- function(schema, report_type) {
+  if (!is.null(report_type)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Table {.val {schema$dataset}}/{.val {schema$table}} does",
+          "not support {.arg report_type}; pass {.code NULL}."
+        )
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  archive_url <- schema$cvm_archive_url_pattern
+  cache_dir <- file.path(
+    cvm_cache_path(),
+    "raw",
+    dataset_group(schema$dataset),
+    schema$dataset
+  )
+  ensure_dir(cache_dir)
+  zip_path <- file.path(cache_dir, basename(archive_url))
+  download_with_etag(archive_url, zip_path)
+  extract_zip_member(schema, zip_path, schema$cvm_file_pattern)
+}
+
 # Path for yearly-partitioned datasets (DFP/ITR/FRE-detail).
 get_yearly_csv <- function(schema, year, report_type) {
   archive_url <- sub(
@@ -108,6 +149,15 @@ get_yearly_csv <- function(schema, year, report_type) {
   zip_path <- file.path(cache_dir, basename(archive_url))
   download_with_etag(archive_url, zip_path)
 
+  extract_zip_member(schema, zip_path, csv_name, year)
+}
+
+# Extract `csv_name` from `zip_path` into the ZIP's directory, unless an
+# extraction newer than the ZIP is already there. A missing member
+# raises `cvmdata_error_zip_member_missing`; `year` (NULL for a ZIP
+# without partitioning) only shapes the message.
+extract_zip_member <- function(schema, zip_path, csv_name, year = NULL) {
+  cache_dir <- dirname(zip_path)
   csv_path <- file.path(cache_dir, csv_name)
   if (
     !file.exists(csv_path) ||
@@ -122,29 +172,44 @@ get_yearly_csv <- function(schema, year, report_type) {
       unzip(zip_path, files = csv_name, exdir = cache_dir, overwrite = TRUE)
     )
   }
-  if (!file.exists(csv_path)) {
-    cvmdata_abort(
-      c(
-        paste(
-          "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
-          "published for {.val {year}}: CSV {.val {csv_name}} not found",
-          "inside ZIP {.path {basename(zip_path)}}."
-        ),
-        "i" = paste(
-          "A table can start later or stop earlier than its dataset;",
-          "{.fn cvm_dataset_years} lists the dataset's years. If the",
-          "table is published for that year, the schema's",
-          "{.field cvm_file_pattern} no longer matches the archive."
-        )
+  if (file.exists(csv_path)) {
+    return(csv_path)
+  }
+  msg <- if (is.null(year)) {
+    c(
+      paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}}: CSV",
+        "{.val {csv_name}} not found inside ZIP",
+        "{.path {basename(zip_path)}}."
       ),
-      # Dedicated subclass (still a `cvmdata_error_parse`) so consumers
-      # can detect "this detail table's CSV is not in the yearly ZIP"
-      # structurally, without matching the rendered message — the ETL
-      # mirror treats it as a benign "table absent that year" skip.
-      class = c("cvmdata_error_zip_member_missing", "cvmdata_error_parse")
+      "i" = paste(
+        "The schema's {.field cvm_file_pattern} no longer matches",
+        "the archive."
+      )
+    )
+  } else {
+    c(
+      paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+        "published for {.val {year}}: CSV {.val {csv_name}} not found",
+        "inside ZIP {.path {basename(zip_path)}}."
+      ),
+      "i" = paste(
+        "A table can start later or stop earlier than its dataset;",
+        "{.fn cvm_dataset_years} lists the dataset's years. If the",
+        "table is published for that year, the schema's",
+        "{.field cvm_file_pattern} no longer matches the archive."
+      )
     )
   }
-  csv_path
+  cvmdata_abort(
+    msg,
+    # Dedicated subclass (still a `cvmdata_error_parse`) so consumers
+    # can detect "this detail table's CSV is not in the ZIP"
+    # structurally, without matching the rendered message — the ETL
+    # mirror treats it as a benign "table absent that year" skip.
+    class = c("cvmdata_error_zip_member_missing", "cvmdata_error_parse")
+  )
 }
 
 # Classes for an aborted CVM request. A transport failure (DNS, TCP
