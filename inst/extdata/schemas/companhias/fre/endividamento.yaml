@@ -1,0 +1,50 @@
+# Schema: fre / endividamento
+# FRE detail table, LEGACY: published only in the yearly ZIPs
+# 2010-2023 (measured 2026-10-31 on every ZIP 2010-2024; one
+# header across all years). META oficial nao publicado pela CVM -
+# `expected_field_names` enumerado a partir do header observado.
+# Detail tables usam convencao cnpj_companhia / data_referencia /
+# nome_companhia (CLAUDE.md Sec.2.2).
+
+dataset: fre
+table: endividamento
+
+# Download topology -----------------------------------------------------
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/DOC/FRE/DADOS/fre_cia_aberta_{year}.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "fre_cia_aberta_endividamento_{year}.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: null
+meta_status: missing
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+temporal_partitioning: yearly
+first_year: 2010
+# Later yearly ZIPs lack the CSV: cvm_fetch() refuses later years and
+# `year = NULL` upfront (decision of the owner, 2026-10-31).
+last_year: 2023
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 10
+
+expected_field_names:
+  - CNPJ_Companhia
+  - Data_Referencia
+  - Versao
+  - ID_Documento
+  - Data_Inicio_Exercicio_Social
+  - Data_Fim_Exercicio_Social
+  - Passivo
+  - Indice_Endividamento
+  - Tipo_Indice
+  - Descricao_Outro_Indice
+
+# Transformations ------------------------------------------------------
+transformations:
+  - action: keep_latest_version
+    note: Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por (cnpj_companhia, data_referencia).

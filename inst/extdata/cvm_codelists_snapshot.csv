@@ -633,12 +633,116 @@ companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Conselho
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas ao Conselho de Administração,2010,2026
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence apenas à Diretoria,2010,2026
 companhias,fre,administrador_membro_conselho_fiscal,orgao_administracao,Pertence à Diretoria e ao Conselho de Administração,2010,2026
+companhias,fre,ativo_imobilizado,tipo_propriedade,Alugada,2010,2023
+companhias,fre,ativo_imobilizado,tipo_propriedade,Arrendada,2010,2023
+companhias,fre,ativo_imobilizado,tipo_propriedade,Própria,2010,2023
+companhias,fre,ativo_imobilizado,uf,AC,2010,2022
+companhias,fre,ativo_imobilizado,uf,AL,2010,2022
+companhias,fre,ativo_imobilizado,uf,AM,2010,2022
+companhias,fre,ativo_imobilizado,uf,AP,2010,2022
+companhias,fre,ativo_imobilizado,uf,BA,2010,2023
+companhias,fre,ativo_imobilizado,uf,BR,2021,2021
+companhias,fre,ativo_imobilizado,uf,CE,2010,2023
+companhias,fre,ativo_imobilizado,uf,DF,2010,2023
+companhias,fre,ativo_imobilizado,uf,ES,2010,2023
+companhias,fre,ativo_imobilizado,uf,GO,2010,2023
+companhias,fre,ativo_imobilizado,uf,MA,2010,2023
+companhias,fre,ativo_imobilizado,uf,MG,2010,2023
+companhias,fre,ativo_imobilizado,uf,MS,2010,2023
+companhias,fre,ativo_imobilizado,uf,MT,2010,2023
+companhias,fre,ativo_imobilizado,uf,PA,2010,2022
+companhias,fre,ativo_imobilizado,uf,PB,2010,2023
+companhias,fre,ativo_imobilizado,uf,PE,2010,2023
+companhias,fre,ativo_imobilizado,uf,PI,2010,2023
+companhias,fre,ativo_imobilizado,uf,PR,2010,2023
+companhias,fre,ativo_imobilizado,uf,RJ,2010,2023
+companhias,fre,ativo_imobilizado,uf,RN,2010,2022
+companhias,fre,ativo_imobilizado,uf,RO,2010,2022
+companhias,fre,ativo_imobilizado,uf,RR,2010,2022
+companhias,fre,ativo_imobilizado,uf,RS,2010,2023
+companhias,fre,ativo_imobilizado,uf,SC,2010,2023
+companhias,fre,ativo_imobilizado,uf,SE,2010,2022
+companhias,fre,ativo_imobilizado,uf,SP,2010,2023
+companhias,fre,ativo_imobilizado,uf,TO,2010,2023
+companhias,fre,ativo_intangivel,tipo_ativo,Concessões,2010,2023
+companhias,fre,ativo_intangivel,tipo_ativo,Contrato de transferência de tecnologia,2010,2022
+companhias,fre,ativo_intangivel,tipo_ativo,Franquias,2010,2022
+companhias,fre,ativo_intangivel,tipo_ativo,Licenças,2010,2022
+companhias,fre,ativo_intangivel,tipo_ativo,Marcas,2010,2023
+companhias,fre,ativo_intangivel,tipo_ativo,Patentes,2010,2023
 companhias,fre,auditor,tipo_origem_auditor,Estrangeiro,2010,2022
 companhias,fre,auditor,tipo_origem_auditor,Nacional,2010,2026
+companhias,fre,auditor_responsavel,pais,Argentina,2011,2019
+companhias,fre,auditor_responsavel,pais,Basil,2010,2014
+companhias,fre,auditor_responsavel,pais,Bras,2012,2013
+companhias,fre,auditor_responsavel,pais,Brasi,2015,2016
+companhias,fre,auditor_responsavel,pais,Brasil,2010,2023
+companhias,fre,auditor_responsavel,pais,Brunei,2012,2012
+companhias,fre,auditor_responsavel,pais,Canadá,2011,2022
+companhias,fre,auditor_responsavel,pais,Chile,2012,2016
+companhias,fre,auditor_responsavel,pais,Colômbia,2022,2022
+companhias,fre,auditor_responsavel,pais,Espanha,2014,2018
+companhias,fre,auditor_responsavel,pais,Luxemburgo,2017,2020
+companhias,fre,auditor_responsavel,pais,Suíça,2010,2018
+companhias,fre,auditor_responsavel,pais,São Paulo,2010,2022
+companhias,fre,auditor_responsavel,pais,África do Sul,2018,2022
+companhias,fre,auditor_responsavel,sigla_uf,AC,2011,2022
+companhias,fre,auditor_responsavel,sigla_uf,AM,2010,2012
+companhias,fre,auditor_responsavel,sigla_uf,BA,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,BR,2016,2022
+companhias,fre,auditor_responsavel,sigla_uf,CE,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,DF,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,ES,2017,2020
+companhias,fre,auditor_responsavel,sigla_uf,GO,2015,2022
+companhias,fre,auditor_responsavel,sigla_uf,MG,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,MT,2021,2021
+companhias,fre,auditor_responsavel,sigla_uf,PA,2010,2021
+companhias,fre,auditor_responsavel,sigla_uf,PB,2010,2011
+companhias,fre,auditor_responsavel,sigla_uf,PE,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,PI,2010,2014
+companhias,fre,auditor_responsavel,sigla_uf,PR,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,RJ,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,RN,2011,2012
+companhias,fre,auditor_responsavel,sigla_uf,RS,2010,2023
+companhias,fre,auditor_responsavel,sigla_uf,SC,2010,2022
+companhias,fre,auditor_responsavel,sigla_uf,SE,2016,2016
+companhias,fre,auditor_responsavel,sigla_uf,SP,2010,2023
+companhias,fre,auditor_responsavel,uf,Acre,2011,2022
+companhias,fre,auditor_responsavel,uf,Amazonas,2010,2012
+companhias,fre,auditor_responsavel,uf,Bahia,2010,2022
+companhias,fre,auditor_responsavel,uf,Brasil,2016,2022
+companhias,fre,auditor_responsavel,uf,Ceará,2010,2022
+companhias,fre,auditor_responsavel,uf,Distrito Federal,2010,2022
+companhias,fre,auditor_responsavel,uf,Espírito Santo,2017,2020
+companhias,fre,auditor_responsavel,uf,Goiás,2015,2022
+companhias,fre,auditor_responsavel,uf,Mato Grosso,2021,2021
+companhias,fre,auditor_responsavel,uf,Minas Gerais,2010,2022
+companhias,fre,auditor_responsavel,uf,Paraná,2010,2022
+companhias,fre,auditor_responsavel,uf,Paraíba,2010,2011
+companhias,fre,auditor_responsavel,uf,Pará,2010,2021
+companhias,fre,auditor_responsavel,uf,Pernambuco,2010,2022
+companhias,fre,auditor_responsavel,uf,Piauí,2010,2014
+companhias,fre,auditor_responsavel,uf,Rio Grande do Norte,2011,2012
+companhias,fre,auditor_responsavel,uf,Rio Grande do Sul,2010,2023
+companhias,fre,auditor_responsavel,uf,Rio de Janeiro,2010,2022
+companhias,fre,auditor_responsavel,uf,Santa Catarina,2010,2022
+companhias,fre,auditor_responsavel,uf,Sergipe,2016,2016
+companhias,fre,auditor_responsavel,uf,São Paulo,2010,2023
 companhias,fre,capital_social,tipo_capital,Capital Autorizado,2010,2026
 companhias,fre,capital_social,tipo_capital,Capital Emitido,2010,2026
 companhias,fre,capital_social,tipo_capital,Capital Integralizado,2010,2026
 companhias,fre,capital_social,tipo_capital,Capital Subscrito,2010,2026
+companhias,fre,capital_social_aumento,fator_cotacao,R$ por Lote de Mil,2010,2023
+companhias,fre,capital_social_aumento,fator_cotacao,R$ por Unidade,2010,2023
+companhias,fre,capital_social_aumento,tipo_subscricao,Sem emissão de ações,2010,2023
+companhias,fre,capital_social_aumento,tipo_subscricao,Subscrição particular,2010,2023
+companhias,fre,capital_social_aumento,tipo_subscricao,Subscrição pública,2010,2023
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C,2010,2022
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe D,2012,2022
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe R,2010,2012
+companhias,fre,capital_social_aumento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2019,2022
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe A,2023,2026
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe B,2023,2026
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Ordinária Classe O,2026,2026
@@ -652,6 +756,47 @@ companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferen
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe R,2010,2026
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe S,2025,2026
 companhias,fre,capital_social_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2010,2026
+companhias,fre,capital_social_desdobramento,tipo_evento,Bonificação,2010,2022
+companhias,fre,capital_social_desdobramento,tipo_evento,Desdobramento,2010,2023
+companhias,fre,capital_social_desdobramento,tipo_evento,Grupamento,2010,2022
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C,2010,2022
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe D,2013,2020
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E,2013,2014
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe F,2013,2014
+companhias,fre,capital_social_desdobramento_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2010,2022
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe C,2010,2010
+companhias,fre,capital_social_reducao_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe E,2010,2010
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe BR,2017,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe C,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe D,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe E,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe F,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe G,2017,2018
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe H,2017,2018
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe I,2017,2018
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe J,2017,2018
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe K,2017,2018
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe R,2010,2022
+companhias,fre,direito_acao,classe_acao_preferencial,Preferencial Classe U,2010,2022
+companhias,fre,direito_acao,conversibilidade,N,2010,2023
+companhias,fre,direito_acao,conversibilidade,S,2010,2023
+companhias,fre,direito_acao,direito_reembolso_capital,N,2010,2022
+companhias,fre,direito_acao,direito_reembolso_capital,S,2010,2023
+companhias,fre,direito_acao,direito_voto,Pleno,2010,2023
+companhias,fre,direito_acao,direito_voto,Restrito,2010,2023
+companhias,fre,direito_acao,direito_voto,Sem Direito,2010,2023
+companhias,fre,direito_acao,especie_acao,Certificados de Depósito de Valores Mobiliários,2010,2022
+companhias,fre,direito_acao,especie_acao,Ordinária,2010,2023
+companhias,fre,direito_acao,especie_acao,Preferencial,2010,2023
+companhias,fre,direito_acao,resgatavel,S,2016,2022
+companhias,fre,direito_acao,restricao_circulacao,N,2010,2023
+companhias,fre,direito_acao,restricao_circulacao,S,2010,2022
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe A,2023,2026
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe O,2025,2025
 companhias,fre,distribuicao_capital_classe_acao,classe_acoes_preferenciais,Ordinária Classe OR,2024,2024
@@ -694,6 +839,32 @@ companhias,fre,empregado_local_faixa_etaria,local,Nordeste,2023,2026
 companhias,fre,empregado_local_faixa_etaria,local,Norte,2023,2026
 companhias,fre,empregado_local_faixa_etaria,local,Sudeste,2023,2026
 companhias,fre,empregado_local_faixa_etaria,local,Sul,2023,2026
+companhias,fre,historico_emissor,pais_constituicao_emissor,Argentina,2010,2019
+companhias,fre,historico_emissor,pais_constituicao_emissor,Bermudas,2010,2022
+companhias,fre,historico_emissor,pais_constituicao_emissor,Brasil,2010,2023
+companhias,fre,historico_emissor,pais_constituicao_emissor,Canadá,2011,2022
+companhias,fre,historico_emissor,pais_constituicao_emissor,Chile,2011,2016
+companhias,fre,historico_emissor,pais_constituicao_emissor,Colômbia,2022,2022
+companhias,fre,historico_emissor,pais_constituicao_emissor,Espanha,2010,2018
+companhias,fre,historico_emissor,pais_constituicao_emissor,"Grã-Bretanha (Reino Unido, UK)",2021,2023
+companhias,fre,historico_emissor,pais_constituicao_emissor,Ilhas Cayman,2021,2022
+companhias,fre,historico_emissor,pais_constituicao_emissor,Ilhas Virgens (Britânicas),2010,2022
+companhias,fre,historico_emissor,pais_constituicao_emissor,Luxemburgo,2017,2020
+companhias,fre,historico_emissor,pais_constituicao_emissor,Suíça,2010,2018
+companhias,fre,historico_emissor,requisicao_registro_emissor,N,2010,2023
+companhias,fre,historico_emissor,requisicao_registro_emissor,S,2010,2022
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,AR,2010,2019
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,BM,2010,2022
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,BR,2010,2023
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,CA,2011,2022
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,CH,2010,2018
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,CL,2011,2016
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,CO,2022,2022
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,ES,2010,2018
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,GB,2021,2023
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,KY,2021,2022
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,LU,2017,2020
+companhias,fre,historico_emissor,sigla_pais_constituicao_emissor,VG,2010,2022
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Coordenador),2025,2026
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Efetivo),2010,2026
 companhias,fre,membro_comite,cargo_ocupado,Membro do Comitê (Suplente),2010,2026
@@ -768,6 +939,13 @@ companhias,fre,participacao_sociedade,uf_sede,SC,2010,2022
 companhias,fre,participacao_sociedade,uf_sede,SE,2010,2022
 companhias,fre,participacao_sociedade,uf_sede,SP,2010,2023
 companhias,fre,participacao_sociedade,uf_sede,TO,2010,2022
+companhias,fre,plano_recompra_classe_acao,escala_cotacao,R$ por Lote de Mil,2014,2022
+companhias,fre,plano_recompra_classe_acao,escala_cotacao,R$ por Unidade,2010,2023
+companhias,fre,plano_recompra_classe_acao,especie_acao,Ordinária,2010,2023
+companhias,fre,plano_recompra_classe_acao,especie_acao,Preferencial,2010,2023
+companhias,fre,plano_recompra_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,plano_recompra_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,plano_recompra_classe_acao,tipo_classe_acao_preferencial,Preferencial Classe U,2012,2022
 companhias,fre,posicao_acionaria,acionista_controlador,N,2010,2026
 companhias,fre,posicao_acionaria,acionista_controlador,S,2010,2026
 companhias,fre,posicao_acionaria,participante_acordo_acionistas,N,2010,2026
@@ -883,6 +1061,93 @@ companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Devedor,20
 companhias,fre,transacao_parte_relacionada,posicao_contratual_emissor,Outra,2016,2026
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PF,2017,2024
 companhias,fre,transacao_parte_relacionada,tipo_pessoa,PJ,2013,2024
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,escala_cotacao,R$ por Unidade,2016,2023
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,especie_acao,Ordinária,2010,2023
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,especie_acao,Preferencial,2010,2023
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe AR,2014,2014
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe C,2021,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe H,2019,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe N,2016,2016
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,tipo_classe_acao_preferencial,Preferencial Classe U,2013,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Ações,2010,2023
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Bônus de Subscrição,2010,2014
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2010,2011
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Certificados de Recebíveis Imobiliários,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Certificados de depósito de valores mobiliários,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Contrato de Investimento Coletivo,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Debêntures,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Debêntures Conversíveis,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Letras Financeiras,2017,2017
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Nota Comercial,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_movimentacao,valor_mobiliario,Título de Investimento Coletivo,2010,2022
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,""" """,2013,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,"""""",2010,2012
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,"1ª emi, ref. à 1ª 2ª 3ª e 4ª s",2011,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,1ª série da 1ª emissão,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,2ª emissão,2011,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,2ª série da 1ª emissão,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,ADR,2012,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Ações Classe B,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Ações Ordinárias - ALLL3,2011,2011
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Ações em tesouraria,2013,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Ações ordinárias,2010,2011
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,BDR,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,BDR nível 3,2012,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,DEBENRURES SIMPLES INCONVERSIV,2011,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,DEBENTURES NÃO CONVERSÍVEIS,2012,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Debentures simples,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Debêntures 9ª emissão,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Debêntures da 00 emissão,2011,2011
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,NÃO SE,2012,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Não aplicável,2014,2014
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,UNIT - ALLL11,2010,2010
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Unit,2014,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Unit composto por 1 ON + 4PN,2014,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,Units,2011,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,descricao_valor_mobiliario,não há,2011,2011
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,escala_cotacao,R$ por Lote de Mil,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,escala_cotacao,R$ por Unidade,2010,2016
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,especie_acao,Ordinária,2010,2016
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,especie_acao,Preferencial,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,tipo_classe_acao_preferencial,Preferencial Classe A,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,tipo_classe_acao_preferencial,Preferencial Classe B,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,tipo_classe_acao_preferencial,Preferencial Classe U,2012,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Ações,2010,2016
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2011,2011
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Certificados de depósito de valores mobiliários,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Debêntures,2010,2015
+companhias,fre,valor_mobiliario_tesouraria_ultimo_exercicio,valor_mobiliario,Debêntures Conversíveis,2014,2014
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe A,2010,2023
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe AR,2020,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe B,2010,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe C,2010,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe D,2010,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe E,2010,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe F,2010,2022
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe P,2012,2012
+companhias,fre,volume_valor_mobiliario,classe_acao_preferencial,Preferencial Classe U,2010,2022
+companhias,fre,volume_valor_mobiliario,entidade_administradora_mercado,"BM&FBOVESPA S.A. - Bolsa de Valores, Mercadorias e Futuros",2010,2023
+companhias,fre,volume_valor_mobiliario,entidade_administradora_mercado,CETIP,2010,2022
+companhias,fre,volume_valor_mobiliario,escala_cotacao,Reais por ação,2010,2023
+companhias,fre,volume_valor_mobiliario,escala_cotacao,Reais por lote de 1000,2010,2022
+companhias,fre,volume_valor_mobiliario,especie_acao,Ordinária,2010,2023
+companhias,fre,volume_valor_mobiliario,especie_acao,Preferencial,2010,2023
+companhias,fre,volume_valor_mobiliario,mercado_valor_mobiliario,Balcão Organizado,2010,2023
+companhias,fre,volume_valor_mobiliario,mercado_valor_mobiliario,Bolsa,2010,2023
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Ações,2010,2023
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Bônus de Subscrição,2014,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Certificado de Recebíveis do Agronegócio,2011,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Certificados de Depósito de Valores Mobiliários,2010,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Certificados de Recebíveis Imobiliários,2010,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Certificados de depósito de valores mobiliários,2010,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Debêntures,2010,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Debêntures Conversíveis,2012,2022
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Letras Financeiras,2013,2017
+companhias,fre,volume_valor_mobiliario,valor_mobiliario,Nota Comercial,2012,2021
 companhias,ipe,ipe,especie,Ata,2003,2026
 companhias,ipe,ipe,especie,Balanço Social,2025,2026
 companhias,ipe,ipe,especie,Boletim de voto a distância,2016,2026

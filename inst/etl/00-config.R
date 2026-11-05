@@ -163,9 +163,15 @@ mirror_table_years <- function(dataset, tbl, years) {
   if (all(is.na(years))) {
     return(years)
   }
-  first_year <- cvmdata:::load_schema(dataset, tbl)$first_year
-  if (is.null(first_year) || is.na(first_year)) {
-    return(years)
+  schema <- cvmdata:::load_schema(dataset, tbl)
+  first_year <- schema$first_year
+  if (!is.null(first_year) && !is.na(first_year)) {
+    years <- years[years >= as.integer(first_year)]
   }
-  years[years >= as.integer(first_year)]
+  # Symmetric: a table that stopped being published (`last_year`, the
+  # legacy FRE tables) is not scheduled for the later years either.
+  if (!is.null(schema$last_year)) {
+    years <- years[years <= as.integer(schema$last_year)]
+  }
+  years
 }
