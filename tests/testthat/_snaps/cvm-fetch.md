@@ -9,6 +9,15 @@
       i Why: item 6 of the Formulario Cadastral (shareholders department) was revoked by Resolucao CVM 59/2021, in force since 2023-01-02.
       i The last year with content is 2023.
 
+# cvm_fetch refuses year = NULL on a table that ended
+
+    Code
+      cvm_fetch("fre", "endividamento", source = "mirror")
+    Condition
+      Error in `check_ended_latest()`:
+      ! Table "fre"/"endividamento" is no longer published: the CVM's files stopped carrying it after 2023.
+      i Pass `year` explicitly, e.g. `year = 2023`; it is published for 2010-2023.
+
 # warn_empty_latest says what each backend returns
 
     Code

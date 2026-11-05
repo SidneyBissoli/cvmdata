@@ -78,6 +78,7 @@ test_that("META-less tables declare the snapshot's field names", {
       info = tree$key[i]
     )
   }
-  # The 8 FRE tables without a CVM-published META (CLAUDE.md Sec. 7).
-  expect_identical(n_missing, 8L)
+  # The 13 FRE tables without a CVM-published META (CLAUDE.md Sec. 7):
+  # 8 current, 5 legacy (last published in 2023).
+  expect_identical(n_missing, 13L)
 })
