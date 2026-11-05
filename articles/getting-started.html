@@ -230,6 +230,12 @@ resolves to a CNPJ: <code>cd_cvm</code>, <code>denom_social</code> and
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">companies</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span><span class="st">"cad"</span>, <span class="st">"companhias"</span><span class="op">)</span></span>
 <span><span class="va">companies</span></span></code></pre></div>
+<p>The CVM keeps two more registers in the same shape, in the same
+dataset: foreign companies
+(<code>cvm_fetch("cad", "estrangeiras")</code>) and companies registered
+under the tax-incentive regime
+(<code>cvm_fetch("cad", "incentivadas")</code>). Their CNPJ column is
+<code>cnpj</code> rather than <code>cnpj_cia</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="dfp-and-itr-financial-statements">

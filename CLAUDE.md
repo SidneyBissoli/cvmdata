@@ -225,16 +225,19 @@ Domínio dos argumentos enumerados (validados via
 
 - `as_of` (Sidney, 2026-10-21; frente Deslistadas): data completa, só em
   tabela-registro cujo YAML declara `as_of: {registered, cancelled}`
-  (hoje `cad/companhias`: `dt_reg`/`dt_cancel`); outra tabela = erro.
-  Mantém os REGISTROS vigentes na data (`dt_reg <= X` e `dt_cancel`
-  vazia ou `> X`), olhando cada `(cnpj_cia, cd_cvm)` — 34 CNPJ têm dois
-  registros. As linhas são as de HOJE (a CVM não publica o cadastro do
-  passado); o retrato do ano é `fca/geral`. Chave do CAD =
-  `(cnpj_cia, cd_cvm, tp_merc)`: 107 registros repetem-se só por
-  `tp_merc` e ficam como a CVM publica (receita de uma linha por
-  registro no help); `tp_merc` vazio nas canceladas. Sem argumentos
-  extras de código CVM ou mercado (recusados 2026-10-21). Mesmo nome
-  previsto na v0.7 para os cadastros de agentes.
+  (hoje as três do `cad`: `dt_reg`/`dt_cancel`); outra tabela = erro.
+  `cad/estrangeiras` e `cad/incentivadas` (2026-11-01) têm a coluna
+  `cnpj` (não `cnpj_cia`), que `cnpj_col()` reconhece por último
+  (`fre/participacao_sociedade` tem `cnpj` da investida E
+  `cnpj_companhia`), e não têm `tp_merc`. Mantém os REGISTROS vigentes
+  na data (`dt_reg <= X` e `dt_cancel` vazia ou `> X`), olhando cada
+  `(cnpj_cia, cd_cvm)` — 34 CNPJ têm dois registros. As linhas são as de
+  HOJE (a CVM não publica o cadastro do passado); o retrato do ano é
+  `fca/geral`. Chave do CAD = `(cnpj_cia, cd_cvm, tp_merc)`: 107
+  registros repetem-se só por `tp_merc` e ficam como a CVM publica
+  (receita de uma linha por registro no help); `tp_merc` vazio nas
+  canceladas. Sem argumentos extras de código CVM ou mercado (recusados
+  2026-10-21). Mesmo nome previsto na v0.7 para os cadastros de agentes.
 
 Sobre exercícios contidos em cada CSV anual: o portal publica em cada
 ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e seu
@@ -813,14 +816,18 @@ gerador for revisitado:
   publicados (decisão do dono, 2026-11-01; lidos do espelho, e da CVM
   quando o espelho ainda não tem a tabela). Exceção escrita em
   `.CARDINALITY_EXCEPTIONS`: `fca/geral/setor_atividade` (classificação
-  setorial da CVM, 66 valores). Cada valor leva `first_seen_year` e
-  `last_seen_year` (NA: valor do `dominio` nunca observado, ou tabela
-  sem ano, o `cad`), EXCLUINDO prefixos: identificadores (`cnpj`,
-  `cd_cvm`, `codigo_cvm`, `cep`, `tel`, `ddd`, `cpf`, `id_doc`,
-  `id_documento`, `versao`), `^cd_` (códigos contábeis),
-  `^nome_`/`^denom_` (nomes próprios), `^ds_` (descrições texto livre),
-  `^email`/`^logradouro`/`^compl`/ `^bairro`/`^mun($|_)`/`^municipio_`
-  (endereço).
+  setorial da CVM, 66 valores). Exclusão escrita em `.FREE_TEXT_COLUMNS`
+  (chave completa, não prefixo; decisão do dono, 2026-11-01): texto
+  livre de tabela pequena demais para o teste de cardinalidade —
+  `cad/estrangeiras` (27 linhas) `resp`, `auditor`, `cidade`, `estado`
+  (`fca/escriturador/cidade` é lista curta legítima, por isso não é
+  prefixo). Cada valor leva `first_seen_year` e `last_seen_year` (NA:
+  valor do `dominio` nunca observado, ou tabela sem ano, o `cad`),
+  EXCLUINDO prefixos: identificadores (`cnpj`, `cd_cvm`, `codigo_cvm`,
+  `cep`, `tel`, `ddd`, `cpf`, `id_doc`, `id_documento`, `versao`),
+  `^cd_` (códigos contábeis), `^nome_`/`^denom_` (nomes próprios),
+  `^ds_` (descrições texto livre), `^email`/`^logradouro`/`^compl`/
+  `^bairro`/`^mun($|_)`/`^municipio_` (endereço).
 - **Tabelas `meta_status: missing`**: excluídas (declarar codelist sem
   ancoragem CVM violaria “se vem da CVM, fica como na CVM”).
 - **Guarda do `--write`** (2026-10-31): recusa gravar se alguma coluna

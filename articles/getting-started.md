@@ -156,6 +156,12 @@ and `cnpj_cia` sit side by side.
 `companies`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``)`\
 `companies`
 
+The CVM keeps two more registers in the same shape, in the same dataset:
+foreign companies (`cvm_fetch("cad", "estrangeiras")`) and companies
+registered under the tax-incentive regime
+(`cvm_fetch("cad", "incentivadas")`). Their CNPJ column is `cnpj` rather
+than `cnpj_cia`.
+
 ### `dfp` and `itr` — financial statements
 
 Annual (DFP) and quarterly (ITR) financial statements share an identical

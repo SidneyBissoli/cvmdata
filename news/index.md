@@ -293,6 +293,19 @@
 
 ### Data coverage
 
+- Two new tables in `cad`, the CVM’s other company registers:
+  `cvm_fetch("cad", "estrangeiras")` (foreign companies, 27 rows) and
+  `cvm_fetch("cad", "incentivadas")` (companies registered under the
+  tax-incentive regime, 3570 rows). Like `cad/companhias` they are one
+  file with today’s state of every registration, and `as_of` applies.
+  Their issuer column is `cnpj` (not `cnpj_cia`), which `cnpj =` now
+  recognises; they have no `tp_merc`. In `cad/incentivadas`, `cd_cvm` is
+  empty for about 40% of the rows and several CNPJs were cancelled and
+  registered again; the rows stay as the CVM publishes them. The
+  codelist generator leaves four free-text columns of `cad/estrangeiras`
+  (`resp`, `auditor`, `cidade`, `estado`) out of the snapshot: with 27
+  rows they stay under the cardinality cap.
+
 - The 25 legacy `fre` tables are covered: tables the CVM published in
   the yearly FRE ZIPs from 2010 and then dropped (`endividamento`,
   `obrigacao`, `distribuicao_dividendos`, `historico_emissor`,

@@ -85,9 +85,9 @@ cvm_fetch(
 - as_of:
 
   Optional complete date (`"YYYY-MM-DD"` or `Date`) for registry tables
-  only (`cad/companhias`): keeps the registrations in force on that
-  date, i.e. registered on or before it and not cancelled by it. The
-  rows are the register as the CVM publishes it today, not a
+  only (the three `cad` tables): keeps the registrations in force on
+  that date, i.e. registered on or before it and not cancelled by it.
+  The rows are the register as the CVM publishes it today, not a
   reconstruction of the past. See the section *Company register*.
   Passing it for any other table aborts.
 
@@ -265,24 +265,35 @@ applies the one rule (registered on or before the date, cancellation
 empty or after it) to each row, and refuses tables that do not declare
 registration and cancellation dates.
 
+The CVM keeps two more registers in the same shape, also in `cad`:
+`cad/estrangeiras` (foreign companies) and `cad/incentivadas` (companies
+registered under the tax-incentive regime). Their issuer column is
+`cnpj`, not `cnpj_cia`, and they have no `tp_merc`; `cnpj` and `as_of`
+work as in `cad/companhias`. In `cad/incentivadas` most companies never
+got a CVM code (`cd_cvm` is `NA` in about 40% of the rows), several
+CNPJs were cancelled and registered again, and a few rows carry a
+cancellation date with a situation other than `"CANCELADA"`; `as_of`
+reads the dates as the CVM published them.
+
 ## Arguments by table
 
 Which arguments apply depends on the table. The rules below are
 generated from the package's table schemas, the same ones the argument
-checks read, for the 102 tables in 9 datasets. An argument passed to a
+checks read, for the 104 tables in 9 datasets. An argument passed to a
 table it does not apply to aborts with `cvmdata_error_input` before
 anything is downloaded; nothing is silently ignored.
 
 - `year` and `from`/`to`: every table published one file per year. Not
-  for `cad`: `companhias`; `recompra_acoes`: `intermediarios`,
-  `quantidades`, `recompra_acoes`, a single snapshot. A `year` before
-  the table's first year is refused (a `from`/`to` window is cut to it
-  instead). Most tables start with their dataset; these start later:
-  `dfp/composicao_capital` (2020), `fre/acao_entregue` (2023),
-  `fre/administrador_PCD` (2023), `fre/administrador_declaracao_genero`
-  (2023), `fre/administrador_declaracao_raca` (2023),
-  `fre/empregado_PCD` (2023), `fre/empregado_local_declaracao_genero`
-  (2023), `fre/empregado_local_declaracao_raca` (2023),
+  for `cad`: `companhias`, `estrangeiras`, `incentivadas`;
+  `recompra_acoes`: `intermediarios`, `quantidades`, `recompra_acoes`, a
+  single snapshot. A `year` before the table's first year is refused (a
+  `from`/`to` window is cut to it instead). Most tables start with their
+  dataset; these start later: `dfp/composicao_capital` (2020),
+  `fre/acao_entregue` (2023), `fre/administrador_PCD` (2023),
+  `fre/administrador_declaracao_genero` (2023),
+  `fre/administrador_declaracao_raca` (2023), `fre/empregado_PCD`
+  (2023), `fre/empregado_local_declaracao_genero` (2023),
+  `fre/empregado_local_declaracao_raca` (2023),
   `fre/empregado_local_faixa_etaria` (2023),
   `fre/empregado_posicao_declaracao_genero` (2023),
   `fre/empregado_posicao_declaracao_raca` (2023),
@@ -324,18 +335,18 @@ anything is downloaded; nothing is silently ignored.
 - `reading`: only in `dfp` and `itr`: `bpa`, `bpp`, `dfc_md`, `dfc_mi`,
   `dmpl`, `dra`, `dre`, `dva` (the tables with `ordem_exerc`).
 
-- `as_of`: only in `cad`: `companhias`.
+- `as_of`: only in `cad`: `companhias`, `estrangeiras`, `incentivadas`.
 
 - `cnpj`/`ticker` in a table without an issuer column: `recompra_acoes`:
   `intermediarios`, `quantidades` keep the rows linked to the issuer's
   rows in `recompra_acoes/recompra_acoes`.
 
 - [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md):
-  every table except `cad`: `companhias`; `cgvn`, `dfp`, `fca`, `fre`
-  and `itr`: `submissao`; `ipe`: `ipe`; `recompra_acoes`:
-  `intermediarios`, `quantidades`, `recompra_acoes`; `vlmo`:
-  `consolidado`, `submissao`, which already return every row the CVM
-  publishes.
+  every table except `cad`: `companhias`, `estrangeiras`,
+  `incentivadas`; `cgvn`, `dfp`, `fca`, `fre` and `itr`: `submissao`;
+  `ipe`: `ipe`; `recompra_acoes`: `intermediarios`, `quantidades`,
+  `recompra_acoes`; `vlmo`: `consolidado`, `submissao`, which already
+  return every row the CVM publishes.
 
 ## See also
 
@@ -353,6 +364,10 @@ issuers <- cvm_fetch("cad", "companhias")
 # universe), one row per registration
 u2015 <- cvm_fetch("cad", "companhias", as_of = "2015-12-31")
 u2015 <- dplyr::distinct(u2015, cnpj_cia, cd_cvm, .keep_all = TRUE)
+
+# The registers of foreign and of tax-incentive companies
+foreign <- cvm_fetch("cad", "estrangeiras")
+incentive <- cvm_fetch("cad", "incentivadas", as_of = "2015-12-31")
 
 # A delisted company by its former ticker
 gol <- cvm_fetch("dfp", "dre", ticker = "GOLL4", year = 2019, basis = "con")
