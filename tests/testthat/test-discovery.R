@@ -4,12 +4,22 @@ test_that("cvm_datasets returns every covered dataset", {
   ds <- cvm_datasets()
   expect_setequal(
     ds,
-    c("cad", "cgvn", "dfp", "fca", "fre", "ipe", "itr", "vlmo")
+    c(
+      "cad",
+      "cgvn",
+      "dfp",
+      "fca",
+      "fre",
+      "ipe",
+      "itr",
+      "recompra_acoes",
+      "vlmo"
+    )
   )
 })
 
-test_that("cvm_tables('fre') returns 36 tables", {
-  expect_length(cvm_tables("fre"), 36L)
+test_that("cvm_tables('fre') returns 61 tables (36 current + 25 legacy)", {
+  expect_length(cvm_tables("fre"), 61L)
 })
 
 test_that("cvm_tables errors on non-string dataset arg", {
@@ -270,7 +280,17 @@ test_that("cvm_datasets accepts explicit group = 'companhias'", {
   ds <- cvm_datasets(group = "companhias")
   expect_setequal(
     ds,
-    c("cad", "cgvn", "dfp", "fca", "fre", "ipe", "itr", "vlmo")
+    c(
+      "cad",
+      "cgvn",
+      "dfp",
+      "fca",
+      "fre",
+      "ipe",
+      "itr",
+      "recompra_acoes",
+      "vlmo"
+    )
   )
 })
 

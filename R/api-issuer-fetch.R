@@ -1,9 +1,56 @@
+# A table without an issuer column (`issuer_via` in its YAML) reaches
+# the issuer through a parent table of the same dataset that has one:
+# the issuer selects the parent's rows, and the child keeps the rows
+# whose `key` is among them. Without this, the issuer filter finds no
+# column in the child and returns zero rows (recompra_acoes:
+# intermediarios and quantidades carry only id_programa).
+fetch_via_parent <- function(
+  schema,
+  dataset,
+  table,
+  issuer,
+  year,
+  source,
+  report_type,
+  on_error,
+  validate
+) {
+  via <- schema$issuer_via
+  parent <- issuer_fetch_internal(
+    dataset = dataset,
+    table = via$table,
+    issuer = issuer,
+    year = year,
+    source = source,
+    on_error = on_error,
+    validate = validate
+  )
+  out <- issuer_fetch_internal(
+    dataset = dataset,
+    table = table,
+    issuer = NULL,
+    year = year,
+    source = source,
+    report_type = report_type,
+    on_error = on_error,
+    validate = validate
+  )
+  keep <- out[[via$key]] %in% parent[[via$key]]
+  cvm_attach_metadata(
+    strip_cvm_tbl(out)[keep, , drop = FALSE],
+    source = source,
+    group = schema$group,
+    dataset = dataset,
+    table = table
+  )
+}
+
+
 # Fetch engine behind `cvm_fetch()` (and the mirror ETL, which calls it
 # with `source = "cvm"`): validates arguments, dispatches per
 # temporal_partitioning, applies schema-declared transformations, filters
 # by issuer CNPJ, checks filings and attaches provenance metadata. The
 # exported `issuer_fetch()` that wrapped it was removed on 2026-11-01.
-
 issuer_fetch_internal <- function(
   dataset,
   table,
@@ -29,16 +76,34 @@ issuer_fetch_internal <- function(
 
   schema <- load_schema(dataset, table)
 
+  if (!is.null(issuer) && !is.null(schema$issuer_via)) {
+    return(fetch_via_parent(
+      schema,
+      dataset,
+      table,
+      issuer,
+      year = year,
+      source = source,
+      report_type = report_type,
+      on_error = on_error,
+      validate = validate
+    ))
+  }
+
   # Drop explicitly-requested years before the dataset's first published
   # year, for both backends, so a "year before the dataset existed"
   # request is a clean user-input concern rather than a backend HTTP 404
   # (source = "cvm") or a silent empty read (source = "mirror"). Genuine
   # network 404s on years that do exist stay governed by `on_error`.
-  if (
-    !is.null(year) &&
-      identical(schema$temporal_partitioning %||% "none", "yearly")
-  ) {
-    year <- clamp_years_to_first(year, schema)
+  # Same for years after a table stopped being published (`last_year`);
+  # `year = NULL` on such a table aborts (see check_ended_latest()).
+  if (identical(schema$temporal_partitioning %||% "none", "yearly")) {
+    if (is.null(year)) {
+      check_ended_latest(schema)
+    } else {
+      year <- clamp_years_to_first(year, schema)
+      year <- clamp_years_to_last(year, schema)
+    }
   }
 
   if (identical(source, "mirror")) {
@@ -284,6 +349,41 @@ clamp_years_to_first <- function(year, schema) {
     "i" = paste(
       "{.val {schema$dataset}}/{.val {schema$table}} starts at",
       "{.val {first_year}}; ignoring {length(dropped)} earlier",
+      "year{?s}: {.val {dropped}}."
+    )
+  ))
+  kept
+}
+
+# Mirror of clamp_years_to_first() for tables with `last_year`.
+clamp_years_to_last <- function(year, schema) {
+  if (is.null(schema$last_year)) {
+    return(year)
+  }
+  last_year <- as.integer(schema$last_year)
+  too_late <- year > last_year
+  if (!any(too_late)) {
+    return(year)
+  }
+  kept <- year[!too_late]
+  dropped <- sort(unique(year[too_late]))
+  if (!length(kept)) {
+    cvmdata_abort(
+      c(
+        paste(
+          "No requested year exists for",
+          "{.val {schema$dataset}}/{.val {schema$table}}."
+        ),
+        "x" = "Requested: {.val {sort(unique(year))}}.",
+        "i" = "This table ends at {.val {last_year}}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
+  cli::cli_inform(c(
+    "i" = paste(
+      "{.val {schema$dataset}}/{.val {schema$table}} ends at",
+      "{.val {last_year}}; ignoring {length(dropped)} later",
       "year{?s}: {.val {dropped}}."
     )
   ))

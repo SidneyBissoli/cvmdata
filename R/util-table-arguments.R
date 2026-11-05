@@ -49,10 +49,12 @@ table_arguments <- function() {
       yearly = table_is_yearly(s),
       first_year = as.integer(s$first_year %||% NA_integer_),
       empty_from = as.integer(s$empty_from %||% NA_integer_),
+      last_year = as.integer(s$last_year %||% NA_integer_),
       basis = table_has_basis(s),
       reading = table_has_readings(s),
       as_of = table_is_registry(s),
       versions = !is.null(table_version_tx(s)),
+      issuer_via = s$issuer_via$table %||% NA_character_,
       stringsAsFactors = FALSE
     )
   })
@@ -107,6 +109,7 @@ doc_arguments_by_table <- function() {
   ds_first <- tapply(yearly$first_year, yearly$dataset, min)
   late <- yearly[yearly$first_year > ds_first[yearly$dataset], , drop = FALSE]
   empty <- a[!is.na(a$empty_from), , drop = FALSE]
+  ended <- a[!is.na(a$last_year), , drop = FALSE]
   c(
     paste0(
       "Which arguments apply depends on the table. The rules below are ",
@@ -139,6 +142,15 @@ doc_arguments_by_table <- function() {
         "."
       )
     },
+    if (nrow(ended)) {
+      paste0(
+        "* Tables the CVM stopped publishing (last year in parentheses) ",
+        "refuse later years and require an explicit `year`, since ",
+        "`year = NULL` would mean the dataset's latest year: ",
+        doc_table_years(ended, "last_year"),
+        "."
+      )
+    },
     paste0(
       "* `basis`: required, with no default, in ",
       doc_table_list(a[a$basis, , drop = FALSE]),
@@ -154,6 +166,22 @@ doc_arguments_by_table <- function() {
       doc_table_list(a[a$as_of, , drop = FALSE]),
       "."
     ),
+    if (any(!is.na(a$issuer_via))) {
+      via <- a[!is.na(a$issuer_via), , drop = FALSE]
+      paste0(
+        "* `cnpj`/`ticker` in a table without an issuer column: ",
+        doc_table_list(via),
+        " keep the rows linked to the issuer's rows in ",
+        doc_join_and(paste0(
+          "`",
+          unique(via$dataset),
+          "/",
+          unique(via$issuer_via),
+          "`"
+        )),
+        "."
+      )
+    },
     paste0(
       "* [cvm_versions()]: every table except ",
       doc_table_list(a[!a$versions, , drop = FALSE]),

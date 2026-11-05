@@ -26,8 +26,18 @@ mirror_repo <- "SidneyBissoli/cvmdata"
 # matrix was extended each session but this allowlist was not, so the
 # four v0.2 datasets only became publishable here in the v0.2.0 release.
 mirror_datasets_v0_1 <- tibble::tibble(
-  group = rep("companhias", 8L),
-  dataset = c("cad", "dfp", "itr", "fre", "cgvn", "vlmo", "fca", "ipe")
+  group = rep("companhias", 9L),
+  dataset = c(
+    "cad",
+    "dfp",
+    "itr",
+    "fre",
+    "cgvn",
+    "vlmo",
+    "fca",
+    "ipe",
+    "recompra_acoes"
+  )
 )
 
 # True iff (group, dataset) is in the v0.1 publish matrix. CLI scripts
@@ -163,9 +173,15 @@ mirror_table_years <- function(dataset, tbl, years) {
   if (all(is.na(years))) {
     return(years)
   }
-  first_year <- cvmdata:::load_schema(dataset, tbl)$first_year
-  if (is.null(first_year) || is.na(first_year)) {
-    return(years)
+  schema <- cvmdata:::load_schema(dataset, tbl)
+  first_year <- schema$first_year
+  if (!is.null(first_year) && !is.na(first_year)) {
+    years <- years[years >= as.integer(first_year)]
   }
-  years[years >= as.integer(first_year)]
+  # Symmetric: a table that stopped being published (`last_year`, the
+  # legacy FRE tables) is not scheduled for the later years either.
+  if (!is.null(schema$last_year)) {
+    years <- years[years <= as.integer(schema$last_year)]
+  }
+  years
 }
