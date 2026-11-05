@@ -130,7 +130,39 @@ carrying provenance attributes.
 \details{
 Column names, categorical values and free-text fields are preserved
 in Portuguese exactly as published by CVM (snake_case minúsculo).
+Changes to the published rows are declared per table in its schema
+(latest filing, currency scale), with one deliberate exception: in
+DFP and ITR tables, rows the CVM file holds twice, identical in every
+column, are dropped with a warning, since a statement has one row per
+account and a sum over the copies counts twice. See the section
+\emph{Filing versions}; \code{options(cvmdata.check_filings = FALSE)} turns the
+check off.
 }
+\section{Filing versions}{
+
+When a detail table carries several filings for the same issuer and
+reference date, only the last one delivered is kept, ranked by
+receipt date, then CVM document id, then \code{versao}. The version number
+alone is not a filing key: the CVM index can list two filings under
+the same version, or a later filing under a lower one.
+
+The \code{submissao} table of each dataset is the filing index and is not
+collapsed: it returns one row per delivery, re-filings included, with
+the receipt date (\code{dt_receb} or \code{data_entrega}), the document id
+(\code{id_doc}, \code{id_documento} or \code{protocolo_entrega}) and \code{versao}. The
+current filing of an issuer and reference date is the last row by
+that order; joining \code{submissao} to a detail table on the issuer and
+reference date alone matches every delivery.
+
+Tables of datasets with a \code{submissao} index are checked against it
+before returning. In DFP and ITR tables, rows the CVM file holds twice
+are dropped (\code{cvmdata_warn_duplicate_filing}); copies that differ in
+\code{vl_conta} are kept (\code{cvmdata_warn_conflicting_filing}). A table
+holding an earlier filing than the last delivery keeps the CVM
+numbers and warns (\code{cvmdata_warn_stale_filing}). Set
+\code{options(cvmdata.check_filings = FALSE)} to skip these checks.
+}
+
 \section{Readings of an exercise}{
 
 Every yearly DFP and ITR statement file carries two columns of
@@ -205,6 +237,18 @@ when the current value of each field started). The yearly
 \code{fca/geral} file is the CVM's own picture of a company in a given
 year (name, registration situation, category, issuer situation).
 
+\code{as_of} is a filter on dates that are already in the file, so it
+could be written by hand; it is an argument because the obvious ways
+of writing it are wrong. Filtering on \code{sit = "ATIVO"} returns today's
+survivors, which is the bias a historical universe has to avoid. A
+condition on \code{dt_cancel} alone drops every active registration, whose
+cancellation date is empty. And a CNPJ that cancelled and registered
+again has two rows, each in force over its own period, so the test
+has to run on each registration rather than on the company. The
+argument applies the one rule (registered on or before the date,
+cancellation empty or after it) to each row, and refuses tables that
+do not declare registration and cancellation dates.
+
 The CVM keeps two more registers in the same shape, also in \code{cad}:
 \code{cad/estrangeiras} (foreign companies) and \code{cad/incentivadas}
 (companies registered under the tax-incentive regime). Their issuer
@@ -219,40 +263,17 @@ CVM published them.
 
 \section{Arguments by table}{
 
-Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 76 tables in 8 datasets. An argument passed to a table it does not apply to aborts with \code{cvmdata_error_input} before anything is downloaded; nothing is silently ignored.
+Which arguments apply depends on the table. The rules below are generated from the package's table schemas, the same ones the argument checks read, for the 104 tables in 9 datasets. An argument passed to a table it does not apply to aborts with \code{cvmdata_error_input} before anything is downloaded; nothing is silently ignored.
 \itemize{
-\item \code{year} and \code{from}/\code{to}: every table published one file per year. Not for \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}, a single snapshot. A \code{year} before the table's first year is refused (a \code{from}/\code{to} window is cut to it instead). Most tables start with their dataset; these start later: \code{dfp/composicao_capital} (2020), \code{fre/acao_entregue} (2023), \code{fre/administrador_PCD} (2023), \code{fre/administrador_declaracao_genero} (2023), \code{fre/administrador_declaracao_raca} (2023), \code{fre/empregado_PCD} (2023), \code{fre/empregado_local_declaracao_genero} (2023), \code{fre/empregado_local_declaracao_raca} (2023), \code{fre/empregado_local_faixa_etaria} (2023), \code{fre/empregado_posicao_declaracao_genero} (2023), \code{fre/empregado_posicao_declaracao_raca} (2023), \code{fre/empregado_posicao_faixa_etaria} (2023), \code{fre/empregado_posicao_local} (2023), \code{fre/mercado_estrangeiro} (2019), \code{fre/remuneracao_acao} (2023), \code{fre/remuneracao_variavel} (2023), \code{fre/titular_valor_mobiliario} (2018), \code{fre/titulo_exterior} (2016), \code{itr/composicao_capital} (2020).
+\item \code{year} and \code{from}/\code{to}: every table published one file per year. Not for \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}; \code{recompra_acoes}: \code{intermediarios}, \code{quantidades}, \code{recompra_acoes}, a single snapshot. A \code{year} before the table's first year is refused (a \code{from}/\code{to} window is cut to it instead). Most tables start with their dataset; these start later: \code{dfp/composicao_capital} (2020), \code{fre/acao_entregue} (2023), \code{fre/administrador_PCD} (2023), \code{fre/administrador_declaracao_genero} (2023), \code{fre/administrador_declaracao_raca} (2023), \code{fre/empregado_PCD} (2023), \code{fre/empregado_local_declaracao_genero} (2023), \code{fre/empregado_local_declaracao_raca} (2023), \code{fre/empregado_local_faixa_etaria} (2023), \code{fre/empregado_posicao_declaracao_genero} (2023), \code{fre/empregado_posicao_declaracao_raca} (2023), \code{fre/empregado_posicao_faixa_etaria} (2023), \code{fre/empregado_posicao_local} (2023), \code{fre/mercado_estrangeiro} (2019), \code{fre/remuneracao_acao} (2023), \code{fre/remuneracao_variavel} (2023), \code{fre/titular_valor_mobiliario} (2018), \code{fre/titulo_exterior} (2016), \code{itr/composicao_capital} (2020).
 \item Years from which the CVM publishes the file with its header only are refused too: \code{fca/departamento_acionistas} (2024).
+\item Tables the CVM stopped publishing (last year in parentheses) refuse later years and require an explicit \code{year}, since \code{year = NULL} would mean the dataset's latest year: \code{fre/ativo_imobilizado} (2023), \code{fre/ativo_intangivel} (2023), \code{fre/auditor_responsavel} (2023), \code{fre/capital_social_aumento} (2023), \code{fre/capital_social_aumento_classe_acao} (2022), \code{fre/capital_social_desdobramento} (2023), \code{fre/capital_social_desdobramento_classe_acao} (2022), \code{fre/capital_social_reducao} (2023), \code{fre/capital_social_reducao_classe_acao} (2022), \code{fre/direito_acao} (2023), \code{fre/distribuicao_dividendos} (2023), \code{fre/distribuicao_dividendos_classe_acao} (2023), \code{fre/endividamento} (2023), \code{fre/grupo_economico_reestruturacao} (2016), \code{fre/historico_emissor} (2023), \code{fre/informacao_financeira} (2023), \code{fre/obrigacao} (2023), \code{fre/participacao_sociedade_valorizacao_acao} (2023), \code{fre/plano_recompra} (2023), \code{fre/plano_recompra_classe_acao} (2023), \code{fre/politica_negociacao} (2023), \code{fre/politica_negociacao_cargo} (2023), \code{fre/valor_mobiliario_tesouraria_movimentacao} (2023), \code{fre/valor_mobiliario_tesouraria_ultimo_exercicio} (2016), \code{fre/volume_valor_mobiliario} (2023).
 \item \code{basis}: required, with no default, in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva}. Refused in every other table.
 \item \code{reading}: only in \code{dfp} and \code{itr}: \code{bpa}, \code{bpp}, \code{dfc_md}, \code{dfc_mi}, \code{dmpl}, \code{dra}, \code{dre}, \code{dva} (the tables with \code{ordem_exerc}).
 \item \code{as_of}: only in \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}.
-\item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
+\item \code{cnpj}/\code{ticker} in a table without an issuer column: \code{recompra_acoes}: \code{intermediarios}, \code{quantidades} keep the rows linked to the issuer's rows in \code{recompra_acoes/recompra_acoes}.
+\item \code{\link[=cvm_versions]{cvm_versions()}}: every table except \code{cad}: \code{companhias}, \code{estrangeiras}, \code{incentivadas}; \code{cgvn}, \code{dfp}, \code{fca}, \code{fre} and \code{itr}: \code{submissao}; \code{ipe}: \code{ipe}; \code{recompra_acoes}: \code{intermediarios}, \code{quantidades}, \code{recompra_acoes}; \code{vlmo}: \code{consolidado}, \code{submissao}, which already return every row the CVM publishes.
 }
-}
-
-\section{Filing versions}{
-
-When a detail table carries several filings for the same issuer and
-reference date, only the last one delivered is kept, ranked by
-receipt date, then CVM document id, then \code{versao}. The version number
-alone is not a filing key: the CVM index can list two filings under
-the same version, or a later filing under a lower one.
-
-The \code{submissao} table of each dataset is the filing index and is not
-collapsed: it returns one row per delivery, re-filings included, with
-the receipt date (\code{dt_receb} or \code{data_entrega}), the document id
-(\code{id_doc}, \code{id_documento} or \code{protocolo_entrega}) and \code{versao}. The
-current filing of an issuer and reference date is the last row by
-that order; joining \code{submissao} to a detail table on the issuer and
-reference date alone matches every delivery.
-
-Tables of datasets with a \code{submissao} index are checked against it
-before returning. In DFP and ITR tables, rows the CVM file holds twice
-are dropped (\code{cvmdata_warn_duplicate_filing}); copies that differ in
-\code{vl_conta} are kept (\code{cvmdata_warn_conflicting_filing}). A table
-holding an earlier filing than the last delivery keeps the CVM
-numbers and warns (\code{cvmdata_warn_stale_filing}). Set
-\code{options(cvmdata.check_filings = FALSE)} to skip these checks.
 }
 
 \examples{
