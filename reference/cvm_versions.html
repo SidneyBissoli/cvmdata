@@ -107,7 +107,6 @@ of tables is in the section <em>Arguments by table</em> of <code><a href="cvm_fe
 <span>  basis <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  source <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  on_error <span class="op">=</span> <span class="st">"abort"</span>,</span>
-<span>  validate <span class="op">=</span> <span class="st">"strict"</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -171,18 +170,15 @@ backend via <code><a href="cvm_source_get.html">cvm_source_get()</a></code>.</p>
 
 
 <dt id="arg-on-error">on_error<a class="anchor" aria-label="anchor" href="#arg-on-error"></a></dt>
-<dd><p>One of <code>"abort"</code> (default), <code>"warn"</code> or <code>"silent"</code>.
-Controls behaviour on HTTP failures when several yearly files are
-read (<code>year</code> with more than one element, or a <code>from</code>/<code>to</code> window
-spanning several years). With <code>"warn"</code>, the failed years are
-skipped and a <code>cvmdata_warn_partial_failure</code> warning lists them;
-with <code>"silent"</code>, they are skipped silently; with <code>"abort"</code>, the
-first failure aborts the call. Total failure always aborts.</p></dd>
-
-
-<dt id="arg-validate">validate<a class="anchor" aria-label="anchor" href="#arg-validate"></a></dt>
-<dd><p>One of <code>"strict"</code> (default), <code>"warn"</code> or <code>"skip"</code>.
-Controls schema validation strictness at parse time.</p></dd>
+<dd><p><code>"abort"</code> (default) or <code>"warn"</code>: what to do when a
+CVM file departs from the table's schema (field count or names) or
+one of several yearly files fails to download. <code>"abort"</code> stops with
+a classed error (<code>cvmdata_error_parse</code> or <code>cvmdata_error_http</code>)
+for <code><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch()</a></code>. <code>"warn"</code> reads the file anyway, skips the failed
+years and returns the rest, with a <code>cvmdata_warn_validation</code> or
+<code>cvmdata_warn_partial_failure</code> warning; wrap the call in
+<code><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings()</a></code> to silence them. A call where nothing could be
+read always aborts.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

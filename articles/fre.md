@@ -16,8 +16,8 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
   `cnpj_cia` elsewhere, so the call is the same everywhere.
 - Eight tables in FRE ship **without published META** (CVM never
   released the dictionary file). The package declares them with
-  `meta_status: missing` and requires `validate = "warn"` or `"skip"` to
-  read them.
+  `meta_status: missing` and checks every file against the header
+  declared in the schema.
 
 \
 [`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
@@ -35,8 +35,8 @@ Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
 | Compensation | `remuneracao_total_orgao`, `remuneracao_variavel`, `remuneracao_acao`, `remuneracao_maxima_minima_media` |
 | Diversity (workforce) | `empregado_PCD`✱, `empregado_local_declaracao_genero`✱, `empregado_local_declaracao_raca`✱, `empregado_local_faixa_etaria`, `empregado_posicao_declaracao_genero`✱, `empregado_posicao_declaracao_raca`✱, `empregado_posicao_faixa_etaria`✱, `empregado_posicao_local`✱ |
 
-✱ — `meta_status: missing`: dictionary not published by CVM; reader
-requires `validate = "warn"` or `"skip"`.
+✱ — `meta_status: missing`: dictionary not published by CVM; the reader
+checks the header against the schema’s `expected_field_names`.
 
 Use `cvm_tables("fre")` for the full list and
 `cvm_dictionary("fre", "<table>")` for per-column metadata. Tables
@@ -60,7 +60,7 @@ reference year 2024.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp1520WN/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -68,7 +68,7 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp1520WN/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -77,7 +77,7 @@ reference year 2024.
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `auditor`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:18.509767`\
+`#>   ``fetched_at``: ``2026-11-05 02:59:37.629838`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
 `#> ``# A tibble: 2 × 19`\
 `#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
@@ -99,42 +99,19 @@ de-duplicated re-filings.
 ### PCD employment counts (table without published META)
 
 `empregado_PCD` is one of the eight FRE tables that CVM never released a
-dictionary for. With the default `validate = "strict"` the package
-refuses to read it:
-
-\
-[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"empregado_PCD"``,`\
-`          cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
-`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
-`#> This is removed when the R session ends.`\
-`#> ``•`` Extensions are re-downloaded each session.`\
-`#> ``•`` Secrets are lost.`\
-`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
-`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
-`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
-`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:18.724777`\
-`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
-`#> ``# A tibble: 0 × 11`\
-`#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
-`#> ``#   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,`\
-`#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
-`#> ``#   quantidade_sem_resposta <dbl>, year <int>`
-
-The reader expects the user to opt in by relaxing validation. With
-`validate = "warn"` the package emits `cvmdata_warn_meta_unavailable`
-and returns the tibble; with `validate = "skip"` it runs silently:
+dictionary for. It reads like any other table; the schema declares the
+header the CVM publishes, and a file that departs from it stops the call
+(`on_error = "abort"`, the default) or is read with a
+`cvmdata_warn_validation` warning (`on_error = "warn"`):
 
 \
 `pcd`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
 `  ``"fre"``, ``"empregado_PCD"``,`\
 `  cnpj ``=`` ``"00.000.000/0001-91"``,`\
-`  year ``=`` ``2024``,`\
-`  validate  ``=`` ``"warn"`\
+`  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp1520WN/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -143,7 +120,7 @@ and returns the tibble; with `validate = "skip"` it runs silently:
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `pcd`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:18.965047`\
+`#>   ``fetched_at``: ``2026-11-05 02:59:37.89632`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``# A tibble: 0 × 11`\
 `#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
@@ -168,7 +145,7 @@ FRE filing.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp1520WN/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -176,7 +153,7 @@ FRE filing.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmp0H8dmP/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp1520WN/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -193,7 +170,7 @@ FRE filing.
 `)`\
 `posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:19.428723`\
+`#>   ``fetched_at``: ``2026-11-05 02:59:38.606762`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
 `#> ``# A tibble: 5 × 6`\
 `#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\
@@ -218,13 +195,13 @@ by position and by site) share both the header convention
 of them — the absence of published META. They are intentionally kept in
 the package: research on diversity outcomes in publicly-traded firms is
 a heavy use case, and the snapshot a user gets here is the same one a
-CVM auditor sees. `validate = "warn"` plus the `expected_field_names`
-declared in each YAML guard against silent schema drift.
+CVM auditor sees. The `expected_field_names` declared in each YAML guard
+against silent schema drift.
 
 ## Where to read next
 
 - **issuer-fetch** — `cnpj` / `ticker` / `year` / `from` / `to` /
-  `validate` semantics in full.
+  `on_error` semantics in full.
 - **itr-dfp** — financial statements; same package, different table
   semantics.
 - **cvm-defects** — why eight FRE tables lack META, plus the broader

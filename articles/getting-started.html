@@ -299,11 +299,10 @@ defense-in-depth check.</p>
 <span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Genuine empty table is fine — FRE/empregado_PCD has meta_status: missing</span></span>
+<span><span class="co"># A table without published META reads like any other</span></span>
 <span><span class="va">pcd</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cvm_fetch.html">cvm_fetch</a></span><span class="op">(</span></span>
 <span>  <span class="st">"fre"</span>, <span class="st">"empregado_PCD"</span>,</span>
-<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
-<span>  validate <span class="op">=</span> <span class="st">"warn"</span>  <span class="co"># or "strict" / "skip"</span></span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>FRE detail tables use a different naming convention:
 <code>cnpj_companhia</code>, <code>data_referencia</code>,
@@ -649,35 +648,24 @@ pass <code>group =</code>.</td>
 </tr>
 <tr class="even">
 <td><code>cvmdata_error_parse</code></td>
-<td>Field-count or field-name validation failed under
-<code>validate = "strict"</code>.</td>
+<td>A file departs from its schema (field count or names) under
+<code>on_error = "abort"</code>.</td>
 </tr>
 <tr class="odd">
-<td><code>cvmdata_error_meta_unavailable</code></td>
-<td>
-<code>meta_status: missing</code> table called under
-<code>validate = "strict"</code>.</td>
-</tr>
-<tr class="even">
 <td><code>cvmdata_warn_year_fallback</code></td>
 <td>
 <code>year = NULL</code> fell back to an earlier year (issuer absent
 in the latest).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>cvmdata_warn_partial_failure</code></td>
 <td>Multi-year batch under <code>on_error = "warn"</code> had some years
 fail.</td>
 </tr>
-<tr class="even">
-<td><code>cvmdata_warn_validation</code></td>
-<td>Validation divergence under <code>validate = "warn"</code>.</td>
-</tr>
 <tr class="odd">
-<td><code>cvmdata_warn_meta_unavailable</code></td>
-<td>
-<code>meta_status: missing</code> table under
-<code>validate = "warn"</code>.</td>
+<td><code>cvmdata_warn_validation</code></td>
+<td>A file departs from its schema, read under
+<code>on_error = "warn"</code>.</td>
 </tr>
 <tr class="even">
 <td><code>cvmdata_warn_eviction</code></td>

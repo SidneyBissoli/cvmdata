@@ -22,7 +22,6 @@ cvm_fetch(
   reading = NULL,
   source = NULL,
   on_error = "abort",
-  validate = "strict",
   ...
 )
 ```
@@ -124,18 +123,16 @@ cvm_fetch(
 
 - on_error:
 
-  One of `"abort"` (default), `"warn"` or `"silent"`. Controls behaviour
-  on HTTP failures when several yearly files are read (`year` with more
-  than one element, or a `from`/`to` window spanning several years).
-  With `"warn"`, the failed years are skipped and a
-  `cvmdata_warn_partial_failure` warning lists them; with `"silent"`,
-  they are skipped silently; with `"abort"`, the first failure aborts
-  the call. Total failure always aborts.
-
-- validate:
-
-  One of `"strict"` (default), `"warn"` or `"skip"`. Controls schema
-  validation strictness at parse time.
+  `"abort"` (default) or `"warn"`: what to do when a CVM file departs
+  from the table's schema (field count or names) or one of several
+  yearly files fails to download. `"abort"` stops with a classed error
+  (`cvmdata_error_parse` or `cvmdata_error_http`) for
+  [`tryCatch()`](https://rdrr.io/r/base/conditions.html). `"warn"` reads
+  the file anyway, skips the failed years and returns the rest, with a
+  `cvmdata_warn_validation` or `cvmdata_warn_partial_failure` warning;
+  wrap the call in
+  [`suppressWarnings()`](https://rdrr.io/r/base/warning.html) to silence
+  them. A call where nothing could be read always aborts.
 
 - ...:
 

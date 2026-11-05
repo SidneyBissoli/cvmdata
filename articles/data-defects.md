@@ -36,7 +36,7 @@ follow the current `mirror-<group>-<dataset>-latest` naming since
 | 5 | CD_CVM zero-padding inconsistent between datasets | CAD ships `1023`; ITR/DFP ship `001023` | **See example below.** Preserved as published; [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md) filters by CNPJ, so the padding never enters a call. |
 | 6 | CNPJ comes with punctuation (`00.000.000/0001-91`) | Per-row formatting; not stripped upstream | Preserved in `cnpj_cia`. `cnpj` accepts both punctuated and clean forms. [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md) / [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md) round-trip. |
 | 7 | `VL_CONTA × ESCALA_MOEDA` (UNIDADE / MIL / MILHÃO / BILHÃO) | Two columns; user must multiply | **See example below.** Applied via the canonical `multiply_by_scale` transformation; `escala_moeda` dropped. |
-| 8 | Eight FRE tables ship without published META | Dictionary `.txt` never released for `empregado_PCD` and seven kin | **See example below.** YAML declares `meta_status: missing`; `validate = "warn"` or `"skip"` opt-in required. |
+| 8 | Eight FRE tables ship without published META | Dictionary `.txt` never released for `empregado_PCD` and seven kin | **See example below.** YAML declares `meta_status: missing` and the published header (`expected_field_names`), which every read checks. |
 | 9 | `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` per yearly CSV | Each year’s CSV covers only the declared year and N − 1, and the N − 1 column is the issuer’s comparative, often restated | Returned as-is by default. `reading = c("original", "restated")` reads an exercise by its own year and labels the figures originally filed and the comparative of the following year’s file. To assemble three or more consecutive years, pass an explicit `year` vector spanning the range. |
 | 10 | FRE 2024 META URL anomalies | Archive name is `meta_fre_cia_aberta.zip` (no `_txt.zip` suffix); `empregado_local_faixa_etaria` entry lives without the `meta_` prefix | Schema-level fixups: `cvm_dictionary_url` lists the archive plus entry; reader looks for both prefixed and bare entry names. |
 | 11 | `VERSAO` per `(cnpj_cia, dt_refer)` enables re-filings | Multiple rows for the same filing key when re-filed | **See example below.** Applied via the canonical `keep_latest_version` transformation, which orders filings by delivery (see \#14). |
@@ -57,7 +57,7 @@ selected by CNPJ in both, shows the two forms:
 `a`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
 `               year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -65,7 +65,7 @@ selected by CNPJ in both, shows the two forms:
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -74,7 +74,7 @@ selected by CNPJ in both, shows the two forms:
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `b`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``, cnpj ``=`` ``"00.000.000/0001-91"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -113,7 +113,7 @@ declares the transformation, and the package returns absolute reais with
 `bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
 `                 year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -121,7 +121,7 @@ declares the transformation, and the package returns absolute reais with
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -132,7 +132,7 @@ declares the transformation, and the package returns absolute reais with
 `# Total assets reported by BCO BRASIL in 2024 (reais):`\
 `bpa``[``bpa``$``cd_conta`` ``==`` ``"1"`` ``&`` ``bpa``$``ordem_exerc`` ``==`` ``"ÚLTIMO"``, ``"vl_conta"``]`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-dfp-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:13.176144`\
+`#>   ``fetched_at``: ``2026-11-05 02:59:31.900546`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"dfp"`` | ``table``: ``"bpa"`\
 `#> ``# A tibble: 1 × 1`\
 `#>        vl_conta`\
@@ -141,17 +141,21 @@ declares the transformation, and the package returns absolute reais with
 `"escala_moeda"`` `[`%in%`](https://rdrr.io/r/base/match.html)` `[`names`](https://rdrr.io/r/base/names.html)`(``bpa``)`\
 `#> [1] FALSE`
 
-### \#8 — META missing in 8 FRE tables, opt-in via `validate`
+### \#8 — META missing in 8 FRE tables
 
 The eight workforce-diversity tables in FRE (`empregado_PCD`,
 `empregado_local_declaracao_genero`, etc.) ship without a CVM
-dictionary. The default `validate = "strict"` refuses to read them:
+dictionary. They are read like any other table: the schema declares the
+header the CVM publishes (`expected_field_names`), and a file whose
+header departs from it stops the call with `cvmdata_error_parse`
+(`on_error = "abort"`, the default) or is read with a
+`cvmdata_warn_validation` warning (`on_error = "warn"`).
 
 \
 [`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"empregado_PCD"``,`\
 `          cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -159,7 +163,7 @@ dictionary. The default `validate = "strict"` refuses to read them:
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-03"`` |`\
-`#>   ``fetched_at``: ``2026-11-05 00:44:14.347049`\
+`#>   ``fetched_at``: ``2026-11-05 02:59:32.892269`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``# A tibble: 0 × 11`\
 `#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
@@ -167,8 +171,6 @@ dictionary. The default `validate = "strict"` refuses to read them:
 `#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
 `#> ``#   quantidade_sem_resposta <dbl>, year <int>`
 
-`validate = "warn"` returns the data and emits
-`cvmdata_warn_meta_unavailable`; `"skip"` silences the warning.
 [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
 for these tables returns `NA` in every metadata column except `campo` /
 `campo_original` — the package never invents content CVM did not
@@ -200,7 +202,7 @@ index and returns every delivery, with its receipt date and document id
 `auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"auditor"``,`\
 `                     cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -208,7 +210,7 @@ index and returns every delivery, with its receipt date and document id
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -233,7 +235,7 @@ matches whichever CNPJ column the table carries:
 `auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"fre"``, ``"auditor"``,`\
 `                     cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -241,7 +243,7 @@ matches whichever CNPJ column the table carries:
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpDBlOmY/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp93MKBP/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -338,8 +340,7 @@ and at the relevant CLAUDE.md section; the package’s source under
 
 ## Where to read next
 
-- **issuer-fetch** — argument reference; `validate` and `on_error`
-  semantics in full.
+- **issuer-fetch** — argument reference; `on_error` semantics in full.
 - **itr-dfp** — workflow with `multiply_by_scale` and
   `keep_latest_version` in action.
 - **fre** — workflow with the eight `meta_status: missing` tables.

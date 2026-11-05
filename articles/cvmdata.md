@@ -457,8 +457,8 @@ Further reading on the pkgdown site:
 - **issuer-fetch** — deep dive on
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
   including
-  `cnpj`/`ticker`/`year`/`from`/`to`/`basis`/`reading`/`on_error`/
-  `validate` semantics.
+  `cnpj`/`ticker`/`year`/`from`/`to`/`basis`/`reading`/`on_error`
+  semantics.
 - **itr-dfp** — quarterly and annual financial statements, with two
   end-to-end workflows.
 - **fre** — reference form, including the eight ESG/governance tables

@@ -357,7 +357,7 @@ how much disk it freed.
 - **issuer-fetch** — argument-level deep dive on
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
   including `cnpj` / `ticker` / `year` / `from` / `to` / `basis` /
-  `validate` / `on_error`.
+  `on_error`.
 - **itr-dfp** — end-to-end workflows on annual and quarterly financial
   statements.
 - **data-defects** — known CVM publication quirks (and other source
