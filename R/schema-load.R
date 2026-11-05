@@ -131,6 +131,35 @@ validate_schema <- function(s, dataset, table) {
   validate_file_pattern_topology(s, dataset, table)
   validate_meta_status(s, dataset, table)
   validate_temporal_partitioning(s, dataset, table)
+  validate_issuer_via(s, dataset, table)
+  invisible(NULL)
+}
+
+# `issuer_via` (optional): `{table, key}` of the parent table, in the
+# same dataset, through which a table without an issuer column is
+# filtered by issuer (see `fetch_via_parent()`).
+validate_issuer_via <- function(s, dataset, table) {
+  via <- s$issuer_via
+  if (is.null(via)) {
+    return(invisible(NULL))
+  }
+  is_name <- function(x) is.character(x) && length(x) == 1L && nzchar(x)
+  ok <- is.list(via) &&
+    setequal(names(via), c("table", "key")) &&
+    is_name(via$table) &&
+    is_name(via$key) &&
+    !identical(via$table, table)
+  if (!ok) {
+    cvmdata_abort(
+      c(paste(
+        "Schema for {.val {dataset}}/{.val {table}}:",
+        "{.field issuer_via} must be a map with a {.field table}",
+        "(another table of the dataset) and a {.field key} (the",
+        "column the two tables share)."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
   invisible(NULL)
 }
 
@@ -149,6 +178,22 @@ validate_url_topology <- function(s, dataset, table) {
           "{.field cvm_file_url_pattern}."
         ),
         "x" = paste("Got archive={.val {archive}},", "file={.val {file_url}}.")
+      ),
+      class = "cvmdata_error_internal"
+    )
+  }
+  # A yearly ZIP is addressed by `{year}`; a ZIP without partitioning
+  # (recompra_acoes) is one URL. A mismatch is a typo in the YAML.
+  yearly <- identical(s$temporal_partitioning, "yearly")
+  if (has_archive && grepl("{year}", archive, fixed = TRUE) != yearly) {
+    cvmdata_abort(
+      c(
+        paste(
+          "Schema for {.val {dataset}}/{.val {table}}:",
+          "{.field cvm_archive_url_pattern} must contain {.code {{year}}}",
+          "exactly when {.code temporal_partitioning: yearly}."
+        ),
+        "x" = "Got {.val {archive}}."
       ),
       class = "cvmdata_error_internal"
     )

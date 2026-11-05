@@ -1,0 +1,41 @@
+# Schema: recompra_acoes / recompra_acoes
+# Programas de Recompra de Acoes: one row per share buyback (or sale of
+# treasury shares) program approved by a company, identified by
+# ID_Programa (unique in the file). CNPJ_Companhia is the only issuer
+# key: no Codigo_CVM. The two other tables of the dataset
+# (intermediarios, quantidades) carry ID_Programa only and reach the
+# issuer through this table.
+#
+# Table name note: the CVM file has no table suffix, so the table takes
+# the dataset name, as ipe/ipe does.
+#
+# Measured 2026-11-01 on the ZIP of 2026-10-31: 1933 programs, 357
+# companies, Data_Deliberacao 1997-01-10..2026-10-28, never empty.
+# Data_Final_Prazo is published verbatim, typos included (max 2286-02-13).
+
+dataset: recompra_acoes
+table: recompra_acoes
+
+# Download topology -----------------------------------------------------
+# One ZIP with the whole history, overwritten by the CVM (no {year}).
+cvm_archive_url_pattern: "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/DADOS/cia_aberta_recompra_acoes.zip"
+cvm_file_url_pattern: null
+cvm_file_pattern: "cia_aberta_recompra_acoes.csv"
+
+# Dictionary ------------------------------------------------------------
+cvm_dictionary_url: "https://dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/RECOMPRA_ACOES/META/meta_cia_aberta_recompra_acoes.zip#meta_cia_aberta_recompra_acoes.txt"
+
+# Reader settings -------------------------------------------------------
+encoding: ISO-8859-1
+delimiter: ";"
+
+# Temporal coverage -----------------------------------------------------
+# Current-state file, CAD-like: each download supersedes the previous one.
+temporal_partitioning: none
+
+# Field count (validation aid) -----------------------------------------
+expected_field_count: 11
+
+# Transformations ------------------------------------------------------
+# None. No versao column: each row is one program.
+transformations: []
