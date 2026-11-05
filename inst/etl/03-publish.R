@@ -218,6 +218,41 @@ download_release_asset <- function(tag, name, dir, attempts = 3L) {
   NULL
 }
 
+# Downloads one asset of the release from its public URL, which costs
+# no API quota: the prune of a rule change reads every history asset of
+# the release in one run (263 in dfp on 2026-11-05), and the hourly
+# quota of the workflow token is already tight for the uploads
+# (util-gh.R). NULL when three attempts did not bring it.
+download_public_asset <- function(tag, name, dir) {
+  path <- file.path(dir, name)
+  url <- sprintf(
+    "https://github.com/%s/releases/download/%s/%s",
+    mirror_repo,
+    tag,
+    utils::URLencode(name, reserved = TRUE)
+  )
+  resp <- tryCatch(
+    httr2::request(url) |>
+      httr2::req_user_agent("cvmdata-etl") |>
+      httr2::req_error(is_error = function(resp) FALSE) |>
+      httr2::req_retry(max_tries = 3L) |>
+      httr2::req_perform(path = path),
+    error = function(e) NULL
+  )
+  if (is.null(resp) || httr2::resp_status(resp) != 200L) {
+    unlink(path)
+    return(NULL)
+  }
+  path
+}
+
+# Whether the previous release holds history written under another rule
+# (`mirror_history_rule`), i.e. whether this run has assets to prune.
+history_rule_pending <- function(prev) {
+  length(prev$history %||% list()) > 0L &&
+    !identical(prev$history_rule %||% "", mirror_history_rule)
+}
+
 download_dir <- tempfile("cvmdata-mirror-prev-")
 dir.create(download_dir)
 on.exit(unlink(download_dir, recursive = TRUE), add = TRUE)
@@ -239,6 +274,15 @@ if (!is.null(prev_hash_file)) {
     message(paste(
       "[03-publish] content unchanged but the sidecar predates the dated",
       "snapshots; publishing to create the first one"
+    ))
+  } else if (unchanged && history_rule_pending(prev)) {
+    message(sprintf(
+      paste(
+        "[03-publish] content unchanged but the history rule changed",
+        "(%s -> %s); publishing to prune the history assets"
+      ),
+      prev$history_rule %||% "none",
+      mirror_history_rule
     ))
   } else if (unchanged && release_public_status(tag) == 200L) {
     message(sprintf(
@@ -266,6 +310,117 @@ if (!is.null(prev_hash_file)) {
 
 history_dir <- file.path(workspace, "out", "history", group, dataset)
 
+# Path of the parquet the previous release holds for the partition
+# `rel`, downloaded once per run; NULL when it cannot be fetched.
+previous_partition <- function(rel) {
+  name <- public_asset_name(rel)
+  path <- file.path(download_dir, name)
+  if (file.exists(path)) {
+    return(path)
+  }
+  download_release_asset(tag, name, download_dir)
+}
+
+# The history asset `hist_rel` as the release holds it. A listed asset
+# that cannot be downloaded stops the run.
+previous_history <- function(hist_rel) {
+  path <- download_release_asset(
+    tag,
+    public_asset_name(hist_rel),
+    download_dir
+  )
+  if (is.null(path)) {
+    stop(
+      sprintf("history asset %s is listed but not downloadable", hist_rel),
+      call. = FALSE
+    )
+  }
+  arrow::read_parquet(path)
+}
+
+# The run that follows a change of `mirror_history_rule`: every history
+# asset of the release loses the rows the current rule would not have
+# filed (`mirror_prune_history()`), judged against the partition of the
+# previous release, the one that replaced them. An asset left without
+# rows is uploaded empty rather than deleted: the sidecar goes last, and
+# a run that died between the two would leave a listed asset missing,
+# which stops every later publish. Returns list(map, files): the history
+# map with the hashes of the assets rewritten, and their local paths.
+prune_history <- function(prev, source_hash, changed, map) {
+  files <- character()
+  dropped <- 0L
+  for (hist_rel in names(map)) {
+    rel <- file.path(dirname(hist_rel), "part-0.parquet")
+    if (is.null(source_hash$data[[rel]])) {
+      next
+    }
+    versioning <- mirror_table_versioning(dataset, mirror_partition_table(rel))
+    hist_path <- download_public_asset(
+      tag,
+      public_asset_name(hist_rel),
+      download_dir
+    )
+    if (is.null(hist_path)) {
+      stop(
+        sprintf("history of %s is listed but not downloadable", rel),
+        call. = FALSE
+      )
+    }
+    history <- arrow::read_parquet(hist_path)
+    if (!any(mirror_history_mine(history))) {
+      # RAD rows only (most of dfp and itr): nothing the rule decides
+      next
+    }
+    ref_path <- if (rel %in% changed) {
+      download_public_asset(tag, public_asset_name(rel), download_dir)
+    } else {
+      file.path(dataset_dir, rel)
+    }
+    if (is.null(ref_path)) {
+      stop(
+        sprintf("previous parquet of %s is listed but not downloadable", rel),
+        call. = FALSE
+      )
+    }
+    reference <- arrow::read_parquet(ref_path)
+    keys <- mirror_filing_keys(reference, versioning$keys)
+    if (is.null(keys)) {
+      next
+    }
+    res <- mirror_prune_history(
+      history,
+      reference,
+      keys,
+      mirror_label_cols(dataset)
+    )
+    if (!res$n_dropped) {
+      next
+    }
+    out <- file.path(history_dir, hist_rel)
+    dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
+    arrow::write_parquet(res$history, out, compression = "snappy")
+    map[[hist_rel]] <- mirror_hash_parquet(out)
+    files <- c(files, out)
+    dropped <- dropped + res$n_dropped
+    message(sprintf(
+      "  %s: %d row(s) of %d filing(s) were not superseded; %d row(s) left",
+      hist_rel,
+      res$n_dropped,
+      res$n_filings,
+      nrow(res$history)
+    ))
+  }
+  message(sprintf(
+    "[03-publish] history rule %s -> %s: %d row(s) pruned in %d of %d asset(s)",
+    prev$history_rule %||% "none",
+    mirror_history_rule,
+    dropped,
+    length(files),
+    length(map)
+  ))
+  list(map = map, files = files)
+}
+
 # Returns list(map = {history partition: content sha256} after this run,
 # files = local history parquets written now).
 build_history <- function(prev, source_hash) {
@@ -285,6 +440,14 @@ build_history <- function(prev, source_hash) {
     "[03-publish] %d partition(s) changed since the previous release",
     length(changed)
   ))
+  # assets rewritten by the prune: read from disk, not from the release
+  pruned <- character()
+  if (history_rule_pending(prev)) {
+    res <- prune_history(prev, source_hash, changed, map)
+    map <- res$map
+    pruned <- res$files
+    files <- res$files
+  }
   for (rel in changed) {
     versioning <- mirror_table_versioning(
       dataset,
@@ -293,11 +456,7 @@ build_history <- function(prev, source_hash) {
     if (!versioning$versioned) {
       next
     }
-    old_path <- download_release_asset(
-      tag,
-      public_asset_name(rel),
-      download_dir
-    )
+    old_path <- previous_partition(rel)
     if (is.null(old_path)) {
       stop(
         sprintf("previous parquet of %s is listed but not downloadable", rel),
@@ -316,7 +475,8 @@ build_history <- function(prev, source_hash) {
       new,
       keys,
       source_hash$computed_at,
-      identity_only = reader_changed
+      identity_only = reader_changed,
+      labels = mirror_label_cols(dataset)
     )
     if (length(diff$columns_added) || length(diff$columns_dropped)) {
       message(sprintf(
@@ -330,22 +490,12 @@ build_history <- function(prev, source_hash) {
       next
     }
     hist_rel <- mirror_history_rel(rel)
-    previous <- NULL
-    if (!is.null(map[[hist_rel]])) {
-      prev_path <- download_release_asset(
-        tag,
-        public_asset_name(hist_rel),
-        download_dir
-      )
-      if (is.null(prev_path)) {
-        stop(
-          sprintf("history of %s is listed but not downloadable", rel),
-          call. = FALSE
-        )
-      }
-      previous <- arrow::read_parquet(prev_path)
-    }
     out <- file.path(history_dir, hist_rel)
+    previous <- if (out %in% pruned) {
+      arrow::read_parquet(out)
+    } else if (!is.null(map[[hist_rel]])) {
+      previous_history(hist_rel)
+    }
     dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
     arrow::write_parquet(
       mirror_append_history(previous, diff$rows),
@@ -353,7 +503,7 @@ build_history <- function(prev, source_hash) {
       compression = "snappy"
     )
     map[[hist_rel]] <- mirror_hash_parquet(out)
-    files <- c(files, out)
+    files <- union(files, out)
     message(sprintf(
       "  %s: %d filing(s) replaced, %d removed -> %d row(s) to history",
       rel,
@@ -366,6 +516,7 @@ build_history <- function(prev, source_hash) {
 }
 
 source_hash$reader <- mirror_reader_id()
+source_hash$history_rule <- mirror_history_rule
 reader_changed <- !is.null(prev) &&
   !identical(prev$reader %||% "", source_hash$reader)
 if (reader_changed) {

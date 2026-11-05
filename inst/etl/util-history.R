@@ -20,7 +20,10 @@
 # with the same numbers (Travessia VI, DFP 2024); the `submissao` table
 # already records every delivery, so a new document with the same data
 # adds nothing to history. A column added or dropped upstream is
-# reported by the caller, not treated as a change of every filing.
+# reported by the caller, not treated as a change of every filing. The
+# name the CVM register holds for the company is left out as well
+# (`mirror_label_cols()`): a rename rewrites it in every row of every
+# year and is not a re-filing.
 #
 # Sourced (not loaded as a package). Depends on `00-config.R` having been
 # sourced first for `mirror_schema_dir()`.
@@ -50,6 +53,38 @@ mirror_delivery_cols <- c(
   "data_entrega",
   "data_recebimento"
 )
+
+# Columns that carry the name the CVM register holds for the company
+# TODAY, not what the company filed: left out of the comparison as well
+# (decision of 2026-11-05). When a company changes its name the CVM
+# rewrites the label in every row of every year, under the same
+# delivery. Measured on the release of 2026-11-03: Light S.A. left
+# court-supervised reorganisation, Ambipar and Environmental ESG entered
+# it, and the three renames alone sent 99,070 rows to history (dfp
+# 20,886, itr 75,701, fre 2,051, cgvn 432), every one "superseded" by
+# its own `versao` with nothing but the label changed. A rename is not
+# a re-filing, for the CVM either; the old name stays in the dated
+# snapshot of the mirror.
+#
+# `nome_empresarial` is the register's label in cgvn only. In fca it is
+# the name the company typed in the form (mixed case, unlike the
+# register's upper case; `geral` dates it in `data_nome_empresarial`),
+# so there it is content and changes with a new delivery.
+mirror_label_cols <- function(dataset) {
+  c(
+    "denom_cia",
+    "nome_companhia",
+    if (identical(dataset, "cgvn")) "nome_empresarial"
+  )
+}
+
+# Version of the rule that decides what goes to history. 03-publish.R
+# stores it in `__source_hash.json` (`history_rule`); when the sidecar of
+# the previous release carries another one (or none: every release
+# before 2026-11-05), the run first drops from every history asset the
+# rows the current rule would not have filed (`mirror_prune_history()`).
+#   2: the register's label columns are left out of the comparison
+mirror_history_rule <- "2"
 
 # Whether the schema of (dataset, table) keeps only the latest filing,
 # i.e. whether a new release can drop rows worth keeping. Returns
@@ -132,15 +167,19 @@ mirror_filing_signatures <- function(df, keys, cols) {
 # (2,803 rows of FRE 2024 alone), and comparing contents would have filed
 # every such filing as superseded by itself. A real re-filing always
 # brings a new delivery, so nothing the CVM did is missed.
+#
+# `labels` (`mirror_label_cols()` of the dataset): columns left out of
+# the comparison besides the delivery identity.
 mirror_superseded_rows <- function(
   old,
   new,
   keys,
   stamp,
-  identity_only = FALSE
+  identity_only = FALSE,
+  labels = character()
 ) {
   cols <- intersect(names(old), names(new))
-  cols <- setdiff(cols, c(mirror_history_cols, mirror_delivery_cols))
+  cols <- setdiff(cols, c(mirror_history_cols, mirror_delivery_cols, labels))
   stopifnot(all(keys %in% cols))
   o <- mirror_filing_signatures(old, keys, cols)
   n <- mirror_filing_signatures(new, keys, cols)
@@ -183,6 +222,68 @@ mirror_superseded_rows <- function(
     n_removed = length(removed),
     columns_added = setdiff(names(new), names(old)),
     columns_dropped = setdiff(names(old), names(new))
+  )
+}
+
+# Which rows of a history asset the mirror path filed (the others are
+# the RAD backfill's). An asset written before `history_source` existed
+# holds mirror rows only.
+mirror_history_mine <- function(history) {
+  if (!"history_source" %in% names(history)) {
+    return(rep(TRUE, nrow(history)))
+  }
+  history$history_source %in% c("mirror", NA)
+}
+
+# `history` without the rows the mirror path filed for a filing that was
+# not superseded: `reference`, the partition of the release that
+# replaced them, still holds the filing under the same delivery and with
+# the same content, the `labels` apart. Each supersession of a filing
+# (its rows of one `superseded_at`) is judged on its own; the rows of
+# the RAD backfill are never touched. Run once per release when the rule
+# changes (`mirror_history_rule`), before anything is appended.
+#
+# Returns list(history, n_dropped, n_filings).
+mirror_prune_history <- function(history, reference, keys, labels) {
+  kept <- list(history = history, n_dropped = 0L, n_filings = 0L)
+  mine <- mirror_history_mine(history)
+  cols <- setdiff(
+    intersect(names(history), names(reference)),
+    c(mirror_history_cols, labels)
+  )
+  if (!any(mine) || !all(keys %in% cols)) {
+    return(kept)
+  }
+  h <- history[mine, , drop = FALSE]
+  key <- mirror_row_strings(h, keys, sep = "|")
+  # only the filings the history holds: the partition has thousands
+  held <- mirror_row_strings(reference, keys, sep = "|") %in% key
+  ref <- mirror_filing_signatures(
+    reference[held, , drop = FALSE],
+    keys,
+    cols
+  )$sig
+  event <- paste(key, h$superseded_at, sep = "\x1e")
+  rows <- mirror_row_strings(h, cols, sep = "\x1f")
+  sig <- vapply(
+    split(rows, event),
+    function(r) {
+      digest::digest(
+        paste(sort(r), collapse = "\n"),
+        algo = "sha256",
+        serialize = FALSE
+      )
+    },
+    character(1L)
+  )
+  event_key <- key[match(names(sig), event)]
+  same <- names(sig)[!is.na(ref[event_key]) & ref[event_key] == sig]
+  drop <- rep(FALSE, nrow(history))
+  drop[mine] <- event %in% same
+  list(
+    history = history[!drop, , drop = FALSE],
+    n_dropped = sum(drop),
+    n_filings = length(same)
   )
 }
 
