@@ -821,6 +821,18 @@
   narrowed by `--year` or `--reread` still records nothing when it has
   nothing to do.
 
+- The RAD reader tells whose a document is by the CVM code when the CNPJ
+  written in it is not the index’s. It already did so for a blank CNPJ
+  and, together with the CNPJ root, for a branch’s; the root no longer
+  counts. Measured case: Technos, ITR 2011-06-30 v1 (id 10642), whose
+  envelope carries the auditor’s CNPJ (61.562.112/0001-20) under the
+  company’s name and CVM code. Version 2, the one the CVM publishes
+  under the right CNPJ, carries the same slip and differs from version 1
+  only in the declared scale (units in v1, thousands in v2), which the
+  history keeps as each version said it. The document’s own CNPJ is
+  noted in the run log and in `__rad_state.json` (`cnpj_doc`). Another
+  CVM code, or none, is still another document.
+
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
   `cvm_dictionary_snapshot.csv`: every installed
