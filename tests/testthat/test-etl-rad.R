@@ -1655,8 +1655,8 @@ test_that("a document under a branch's CNPJ is the company's", {
   # Pacaembu Construtora, ITR 2020-09-30 v1 (id 98410): the index lists
   # the head office (0001-68), the document carries a branch (0002-49),
   # same root and same CVM code. The CSV keeps v2 (id 98861) under the
-  # head office. Decision of 2026-10-25: same root and same CVM code is
-  # the same company; the rows carry the index's identity.
+  # head office. Decision of 2026-10-25, widened on 2026-11-06: the same
+  # CVM code is the same company; the rows carry the index's identity.
   f <- filing_row(
     "96.298.013/0001-68",
     "2020-09-30",
@@ -1673,6 +1673,8 @@ test_that("a document under a branch's CNPJ is the company's", {
     unique(r$tables[["bpa/ind"]]$cnpj_cia),
     "96.298.013/0001-68"
   )
+  # the CNPJ the document carries is kept as a note
+  expect_identical(r$meta$cnpj_doc, "96298013000249")
   # the same root with another CVM code is another document
   other <- f
   other$cd_cvm <- "099999"
@@ -1681,12 +1683,66 @@ test_that("a document under a branch's CNPJ is the company's", {
     r$problems,
     "cnpj in the document \\(96298013000249\\) differs from the index"
   )
+  expect_match(r$problems, "so does cd_cvm \\(025143, index 099999\\)")
   expect_true(r$index_mismatch)
-  # and another root is another company, whatever the CVM code
+})
+
+test_that("a document under another company's CNPJ is told by the CVM code", {
+  load_etl_rad()
+  # Technos, ITR 2011-06-30 v1 (id 10642): the envelope carries the
+  # auditor's CNPJ (61.562.112/0001-20, the PessoaAuditor of the
+  # registration form in the same ZIP) under the company's name and CVM
+  # code; the index and the CSV have 09.295.063/0001-97. Version 2 (id
+  # 10666), the one the CVM publishes, carries the same slip. Decision
+  # of 2026-11-06: the CVM code is the CVM's own key, so a document
+  # whose code matches the index is the company's whatever CNPJ was
+  # typed in it; the rows carry the index's identity.
+  f <- filing_row(
+    "09.295.063/0001-97",
+    "2011-06-30",
+    "1",
+    "TECHNOS S.A.",
+    "022519",
+    "10642"
+  )
+  raw <- rad_read_zip(rad_fx("rad_itr_2011_10642"))
+  expect_identical(raw$meta$cnpj_cia, "61.562.112/0001-20")
+  expect_identical(raw$meta$cd_cvm, "022519")
+  expect_null(raw$meta$cnpj_doc)
+  r <- rad_read_zip(rad_fx("rad_itr_2011_10642"), f)
+  expect_identical(r$problems, character())
+  expect_false(r$index_mismatch)
+  expect_identical(r$meta$cnpj_doc, "61562112000120")
+  expect_true(all(c("bpa/ind", "bpa/con") %in% names(r$tables)))
+  expect_identical(
+    unique(r$tables[["bpa/con"]]$cnpj_cia),
+    "09.295.063/0001-97"
+  )
+  expect_identical(unique(r$tables[["bpa/con"]]$cd_cvm), "022519")
+  # total assets as THIS filing declared them: the envelope says scale
+  # code 1 (units), so 369,282 reais. Version 2, filed the next day
+  # "to change the currency scale to thousands", is the same figures
+  # under scale code 2 (R$ 369,282 thousand, what the CSV has). The
+  # history keeps what each version said, as with any other filing.
+  expect_identical(r$meta$escala, "1")
+  total <- r$tables[["bpa/con"]]
+  total <- total[total$cd_conta == "1" & total$ordem_exerc == ultimo, ]
+  expect_identical(total$vl_conta, 369282)
+  # with another CVM code in the index it is another company's document
   other <- f
-  other$cnpj_cia <- "11.222.333/0001-81"
-  r <- rad_read_zip(rad_fx("rad_itr_2020_98410"), other)
+  other$cd_cvm <- "099999"
+  r <- rad_read_zip(rad_fx("rad_itr_2011_10642"), other)
+  expect_match(
+    r$problems,
+    "cnpj in the document \\(61562112000120\\) differs from the index"
+  )
   expect_true(r$index_mismatch)
+  # a document whose CNPJ is the index's carries no note
+  expect_identical(rad_cnpj_note(NULL), "")
+  expect_match(
+    rad_cnpj_note("61562112000120"),
+    "cnpj in the document 61562112000120, accepted by the CVM code"
+  )
 })
 
 test_that("a missing state stops the robot once the release has history", {

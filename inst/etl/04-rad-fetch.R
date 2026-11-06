@@ -691,22 +691,36 @@ rad_fetch_one <- function(
     waf = FALSE,
     kind = NA_character_,
     note = sprintf(
-      "v%s, %s layout, %d tables, %d rows (%.0fs)",
+      "v%s, %s layout, %d tables, %d rows (%.0fs)%s",
       f$versao,
       res$meta$layout,
       length(rows),
       n_rows,
-      dl$seconds
+      dl$seconds,
+      rad_cnpj_note(res$meta$cnpj_doc)
     ),
     rows = rows,
-    done = list(
-      hash = res$meta$xml_hash,
-      at = utc_now(),
-      layout = res$meta$layout,
-      rows = n_rows,
-      tables = length(rows)
+    done = c(
+      list(
+        hash = res$meta$xml_hash,
+        at = utc_now(),
+        layout = res$meta$layout,
+        rows = n_rows,
+        tables = length(rows)
+      ),
+      # the CNPJ the document carries when it is not the index's (a
+      # branch's, or another company's by a slip of the filer): accepted
+      # by the CVM code, kept in the state so the case can be found
+      if (!is.null(res$meta$cnpj_doc)) list(cnpj_doc = res$meta$cnpj_doc)
     )
   )
+}
+
+rad_cnpj_note <- function(cnpj_doc) {
+  if (is.null(cnpj_doc)) {
+    return("")
+  }
+  sprintf("; cnpj in the document %s, accepted by the CVM code", cnpj_doc)
 }
 
 # Merges the rows of a checkpoint into the history assets. Returns

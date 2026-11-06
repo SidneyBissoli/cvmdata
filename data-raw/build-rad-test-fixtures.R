@@ -91,6 +91,12 @@
 #     - old layout, ITR 3Q2020, Pacaembu Construtora v1 (set aside on
 #       2026-10-25): the document carries a branch's CNPJ (0002-49), the
 #       index the head office's (0001-68), same root and CVM code.
+#   tests/testthat/fixtures/rad_itr_2011_10642.zip
+#     - old layout, ITR 2Q2011, Technos v1 (set aside on 2026-11-05):
+#       the envelope carries the AUDITOR's CNPJ (61.562.112/0001-20)
+#       under the company's name and CVM code (022519); the index has
+#       09.295.063/0001-97. It also declares the scale as units (code
+#       1); version 2 (id 10666) only changed it to thousands.
 #
 # Usage, from the package root, with the original ZIPs (as downloaded
 # from the RAD, named `<id_doc>.zip`) in one directory; a fixture whose
@@ -120,7 +126,8 @@ docs <- list(
   list(id = "93001", name = "rad_dfp_2020_93001", layout = "old"),
   list(id = "107950", name = "rad_itr_2021_107950", layout = "new"),
   list(id = "107658", name = "rad_itr_2021_107658", layout = "new"),
-  list(id = "98410", name = "rad_itr_2020_98410", layout = "old")
+  list(id = "98410", name = "rad_itr_2020_98410", layout = "old"),
+  list(id = "10642", name = "rad_itr_2011_10642", layout = "old")
 )
 
 keep_conta <- function(codes) {
