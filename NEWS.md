@@ -643,6 +643,14 @@
 
 ## Internal
 
+* The package passes `pkgcheck::pkgcheck()`, the automated gate of the
+  rOpenSci software review: the `cvm_tbl` topic documents its value,
+  `print.cvm_tbl()` returns its input invisibly in both branches, the
+  two session-cache resets that only the tests called moved from `R/`
+  to the test helpers, the CRAN badge (a link to a page that does not
+  exist yet) left the READMEs, and `codemeta.json` is generated with
+  `codemetar::write_codemeta()`.
+
 * The two ETL workflows that append to the history assets
   (`etl-mirror.yaml`, weekly, and `etl-rad.yaml`, daily) share the
   GitHub Actions concurrency group `etl-history`, so a run of one waits

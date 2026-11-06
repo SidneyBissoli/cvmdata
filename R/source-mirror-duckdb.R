@@ -91,6 +91,8 @@ source_mirror_duckdb_get <- function(
       resolved_years,
       report_type
     )
+    years_label <- format_years(resolved_years)
+    report_type_label <- format_chr(report_type)
     cvmdata_abort(
       c(
         paste(
@@ -99,8 +101,8 @@ source_mirror_duckdb_get <- function(
         ),
         "i" = paste(
           "Searched release {.val {attr(inventory, 'release_tag')}}",
-          "for {.code year = {format_years(resolved_years)}}",
-          "{.code report_type = {format_chr(report_type)}}."
+          "for {.code year = {years_label}}",
+          "{.code report_type = {report_type_label}}."
         ),
         recorded,
         "i" = paste(
@@ -206,11 +208,12 @@ resolve_mirror_years <- function(
     report_type = report_type
   )
   if (!nrow(candidate)) {
+    report_type_label <- format_chr(report_type)
     cvmdata_abort(
       c(
         paste(
           "No parquet assets for {.val {table}} in the mirror",
-          "(report_type = {format_chr(report_type)})."
+          "(report_type = {report_type_label})."
         ),
         "i" = paste(
           "The mirror may not have published this table yet;",

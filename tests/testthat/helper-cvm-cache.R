@@ -4,6 +4,21 @@
 # that reports them fresh, and the CNPJs of the two issuers the
 # fixtures keep.
 
+# Reset the package's session caches (test-only: production code never
+# clears them). They live here, not in R/, so the package ships no
+# function that only the tests call.
+ticker_lookup_cache_clear <- function() {
+  env <- cvmdata:::.ticker_lookup_cache
+  rm(list = ls(env), envir = env)
+  invisible()
+}
+
+mirror_assets_cache_clear <- function() {
+  env <- cvmdata:::.mirror_assets_cache
+  rm(list = ls(env), envir = env)
+  invisible()
+}
+
 # Stage one or more dataset fixture ZIPs (year 2024 by default; the
 # DFP also ships a 2025 fixture) in a tempdir cache with matching etag
 # sidecars, and redirect cvm_cache_root() at it.
@@ -17,8 +32,8 @@ local_prepare_cvm_cache <- function(
     cvmdata.cache_dir = cache_root,
     .local_envir = envir
   )
-  cvmdata:::ticker_lookup_cache_clear()
-  withr::defer(cvmdata:::ticker_lookup_cache_clear(), envir = envir)
+  ticker_lookup_cache_clear()
+  withr::defer(ticker_lookup_cache_clear(), envir = envir)
   for (ds in datasets) {
     for (yr in years) {
       raw_dir <- file.path(cache_root, "raw", "companhias", ds, yr)

@@ -154,7 +154,7 @@ test_that("a member missing from the static ZIP raises zip_member_missing", {
 # Source = mirror -------------------------------------------------------------
 
 test_that("cnpj reaches the child tables through the mirror too", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   withr::local_options(
     cvmdata.cache_dir = withr::local_tempdir(),
     lifecycle_verbosity = "quiet"

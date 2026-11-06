@@ -3,6 +3,13 @@
 \name{cvm_tbl}
 \alias{cvm_tbl}
 \title{Provenance-carrying tibbles}
+\value{
+This topic documents a class, not a function. A \code{cvm_tbl} is
+a \code{\link[tibble:tibble]{tibble::tibble()}} whose class vector starts with \code{"cvm_tbl"} and
+which carries the seven provenance attributes listed above; the
+methods documented here return a \code{cvm_tbl} whenever the result is
+still a CVM table, and the type the generic promises otherwise.
+}
 \description{
 Every tibble returned by \code{\link[=cvm_fetch]{cvm_fetch()}}, \code{\link[=cvm_versions]{cvm_versions()}} and the
 other public fetchers has the S3 class \code{cvm_tbl}, a subclass of

@@ -18,8 +18,8 @@ local_prepare_fca_cache <- function(envir = parent.frame()) {
   )
   # The ticker lookup table is session-cached; clear it so each test
   # reads from this test's freshly-staged fixture.
-  cvmdata:::ticker_lookup_cache_clear()
-  withr::defer(cvmdata:::ticker_lookup_cache_clear(), envir = envir)
+  ticker_lookup_cache_clear()
+  withr::defer(ticker_lookup_cache_clear(), envir = envir)
   raw_dir <- file.path(cache_root, "raw", "companhias", "fca", "2024")
   dir.create(raw_dir, recursive = TRUE, showWarnings = FALSE)
   file.copy(
