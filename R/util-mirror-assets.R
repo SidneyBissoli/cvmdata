@@ -143,11 +143,13 @@ mirror_list_assets <- function(
   release = cvm_release_get()
 ) {
   key <- .mirror_cache_key(group, dataset, release)
-  if (!isTRUE(refresh) && !is.null(.mirror_assets_cache[[key]])) {
-    return(.mirror_assets_cache[[key]])
+  cached <- mirror_cached_inventory(key, refresh)
+  if (!is.null(cached)) {
+    return(cached)
   }
   latest <- mirror_list_latest(group, dataset, repo, refresh)
   parsed <- if (identical(release, "latest")) {
+    mirror_warn_sidecar_unread(latest, dataset)
     latest
   } else {
     mirror_list_snapshot(latest, group, dataset, release, repo)
@@ -156,12 +158,92 @@ mirror_list_assets <- function(
   parsed
 }
 
+# Seconds an inventory whose sidecar could not be read stays in the
+# session cache. After that the next call fetches the inventory again,
+# so a release that was unreadable for a moment does not leave the whole
+# session without digests; meanwhile no call repeats the listing (the
+# anonymous GitHub API allows 60 an hour).
+.mirror_sidecar_retry_secs <- 300
+
+# The cached inventory under `key`, or NULL when there is none, when
+# `refresh` asks for a new one, or when its sidecar could not be read
+# and the wait above is over.
+mirror_cached_inventory <- function(key, refresh = FALSE) {
+  if (isTRUE(refresh)) {
+    return(NULL)
+  }
+  cached <- .mirror_assets_cache[[key]]
+  tried <- attr(cached, "sidecar_tried_at")
+  if (
+    !is.null(tried) &&
+      as.numeric(difftime(Sys.time(), tried, units = "secs")) >
+        .mirror_sidecar_retry_secs
+  ) {
+    return(NULL)
+  }
+  cached
+}
+
+# Warns, once per fetch of the inventory, that the release publishes a
+# sidecar the package could not read, and what the session goes without
+# (decision of 2026-11-05: a warning, never silence).
+mirror_warn_sidecar_unread <- function(inventory, dataset) {
+  reason <- attr(inventory, "sidecar_unread")
+  if (is.null(reason)) {
+    return(invisible())
+  }
+  tag <- attr(inventory, "release_tag")
+  minutes <- .mirror_sidecar_retry_secs / 60
+  cvmdata_warn(
+    c(
+      paste(
+        "Could not read the index ({.file __source_hash.json}) of the",
+        "mirror release {.val {tag}}."
+      ),
+      "x" = "{reason}",
+      "!" = paste(
+        "Until it is read, cached files of {.val {dataset}} are served",
+        "without checking that the release still holds them, downloads",
+        "are not verified against the published digests, and a missing",
+        "year or table comes without its reason."
+      ),
+      if (isTRUE(attr(inventory, "sidecar_transient"))) {
+        http_retry_hint(503L)
+      },
+      "i" = paste(
+        "The first call after {minutes} minutes asks for the index",
+        "again."
+      )
+    ),
+    class = "cvmdata_warn_sidecar_unread"
+  )
+  invisible()
+}
+
 # The inventory of a dated snapshot. `latest` is the `-latest` inventory:
 # its `snapshots` attribute says which dates exist, and its rows supply
 # the history assets. When the snapshot resolved is the one `-latest`
 # currently carries, its rows are reused as they are (same bytes, no
 # second download of the sidecar).
 mirror_list_snapshot <- function(latest, group, dataset, release, repo) {
+  reason <- attr(latest, "sidecar_unread")
+  if (!is.null(reason)) {
+    # the dates that can be pinned are listed in that sidecar: without
+    # it the mirror would look as if it had no snapshot at all
+    latest_tag <- attr(latest, "release_tag")
+    cvmdata_abort(
+      c(
+        paste(
+          "Could not read the index ({.file __source_hash.json}) of the",
+          "mirror release {.val {latest_tag}}, which lists the dated",
+          "snapshots."
+        ),
+        "x" = "{reason}",
+        if (isTRUE(attr(latest, "sidecar_transient"))) http_retry_hint(503L)
+      ),
+      class = "cvmdata_error_http"
+    )
+  }
   date <- mirror_pick_snapshot(attr(latest, "snapshots"), release, dataset)
   tag <- mirror_snapshot_tag(group, dataset, date)
   if (identical(date, attr(latest, "snapshot"))) {
@@ -170,10 +252,13 @@ mirror_list_snapshot <- function(latest, group, dataset, release, repo) {
     manifest_url <- mirror_download_url(tag, "__source_hash.json", repo)
     sidecar <- mirror_read_sidecar(manifest_url)
     if (is.na(sidecar$hash)) {
+      reason <- sidecar$unread %||% "the manifest carries no content hash"
       cvmdata_abort(
         c(
           "Could not read the manifest of mirror snapshot {.val {tag}}.",
-          "i" = "Expected {.url {manifest_url}}."
+          "x" = "{reason}",
+          "i" = "Expected {.url {manifest_url}}.",
+          if (isTRUE(sidecar$transient)) http_retry_hint(503L)
         ),
         class = "cvmdata_error_http"
       )
@@ -305,8 +390,9 @@ mirror_file_digests <- function(files, rels) {
 # `mirror_list_assets()` for the columns and attributes).
 mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   key <- .mirror_cache_key(group, dataset, "latest")
-  if (!isTRUE(refresh) && !is.null(.mirror_assets_cache[[key]])) {
-    return(.mirror_assets_cache[[key]])
+  cached <- mirror_cached_inventory(key, refresh)
+  if (!is.null(cached)) {
+    return(cached)
   }
   tag <- mirror_release_tag(group, dataset)
   url <- sprintf("https://api.github.com/repos/%s/releases/tags/%s", repo, tag)
@@ -322,12 +408,13 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
     req <- httr2::req_headers(req, Authorization = paste("Bearer", token))
   }
   resp <- tryCatch(
-    httr2::req_perform(req),
+    httr2::req_perform(req_retry_transient(req)),
     error = function(e) {
       cvmdata_abort(
         c(
           "HTTP GET failed for {.url {url}}.",
-          "x" = "{conditionMessage(e)}"
+          "x" = "{conditionMessage(e)}",
+          http_retry_hint(e)
         ),
         class = "cvmdata_error_http"
       )
@@ -335,14 +422,17 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   )
   status <- httr2::resp_status(resp)
   if (status >= 400L) {
-    cvmdata_abort(
+    # a 5xx or a 429 that outlasted the retries says nothing about the
+    # tag; only the other statuses point at a release that is not there
+    hint <- http_retry_hint(status) %||%
       c(
-        "GitHub API returned HTTP {status} for {.url {url}}.",
         "i" = paste(
           "Release tag {.val {tag}} may not exist yet; check",
           "{.url https://github.com/{repo}/releases}."
         )
-      ),
+      )
+    cvmdata_abort(
+      c("GitHub API returned HTTP {status} for {.url {url}}.", hint),
       class = "cvmdata_error_http"
     )
   }
@@ -371,6 +461,11 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   attr(parsed, "snapshot") <- sidecar$snapshot
   attr(parsed, "snapshots") <- sidecar$snapshots
   attr(parsed, "pinned") <- FALSE
+  # set only when the release publishes a sidecar that could not be read
+  # (`mirror_read_sidecar()`); absent on a read sidecar or none at all
+  attr(parsed, "sidecar_unread") <- sidecar$unread
+  attr(parsed, "sidecar_transient") <- sidecar$transient
+  attr(parsed, "sidecar_tried_at") <- if (!is.null(sidecar$unread)) Sys.time()
   .mirror_assets_cache[[key]] <- parsed
   parsed
 }
@@ -468,16 +563,37 @@ mirror_empty_sidecar <- function() {
 
 # Download and normalise a sidecar from its URL (see
 # `mirror_fetch_sidecar()` for the fields).
+#
+# A sidecar that is published but could not be read comes back empty
+# WITH the reason in `unread` (and `transient`: whether the retry policy
+# was exhausted on a failure of the server or of the connection). Until
+# 2026-11-05 the request ran once and any failure was swallowed into an
+# empty sidecar, which reads exactly like a release that has none: no
+# digest check, no eviction of stale cached copies, no reason for a
+# missing partition, and under a pinned date "no dated snapshots yet".
+# The callers now say so: `mirror_list_assets()` warns,
+# `mirror_list_snapshot()` aborts.
 mirror_read_sidecar <- function(url) {
   none <- mirror_empty_sidecar()
+  unread <- function(reason, transient = FALSE) {
+    none$unread <- reason
+    none$transient <- transient
+    none
+  }
   resp <- tryCatch(
-    httr2::req_perform(
-      httr2::req_user_agent(httr2::request(url), "cvmdata")
-    ),
-    error = function(e) NULL
+    httr2::request(url) |>
+      httr2::req_user_agent("cvmdata") |>
+      httr2::req_error(is_error = function(resp) FALSE) |>
+      req_retry_transient() |>
+      httr2::req_perform(),
+    error = function(e) e
   )
-  if (is.null(resp) || httr2::resp_status(resp) >= 400L) {
-    return(none)
+  if (inherits(resp, "condition")) {
+    return(unread(conditionMessage(resp), http_failed_transiently(resp)))
+  }
+  status <- httr2::resp_status(resp)
+  if (status >= 400L) {
+    return(unread(paste("HTTP", status), http_failed_transiently(status)))
   }
   # GitHub serves release assets as `application/octet-stream`, and
   # httr2 refuses to parse JSON under that type unless told otherwise.
@@ -490,7 +606,7 @@ mirror_read_sidecar <- function(url) {
     error = function(e) NULL
   )
   if (is.null(body)) {
-    return(none)
+    return(unread("the file is not valid JSON"))
   }
   snapshot <- body$snapshot %||% NA_character_
   list(
