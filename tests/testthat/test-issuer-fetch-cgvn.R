@@ -56,7 +56,7 @@ test_that("fetch engine CGVN submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "cgvn")
   expect_identical(attr(result, "table"), "submissao")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   # FRE-detail convention: cnpj_companhia / data_referencia.
   expect_true(all(
     c("cnpj_companhia", "data_referencia", "versao", "codigo_cvm") %in%
@@ -78,7 +78,7 @@ test_that("fetch engine CGVN praticas tracer returns cvm_tbl", {
 
   expect_s3_class(result, "cvm_tbl")
   expect_identical(attr(result, "table"), "praticas")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(
     c(
       "cnpj_companhia",
@@ -112,7 +112,7 @@ test_that("fetch engine CGVN filters by CNPJ via cnpj_companhia", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
@@ -122,12 +122,12 @@ test_that("load_schema accepts CGVN YAMLs", {
   sub <- load_schema("cgvn", "submissao")
   expect_s3_class(sub, "cvm_table_schema")
   expect_identical(sub$temporal_partitioning, "yearly")
-  expect_equal(sub$first_year, 2018)
-  expect_equal(sub$expected_field_count, 12)
+  expect_identical(sub$first_year, 2018L)
+  expect_identical(sub$expected_field_count, 12L)
   expect_identical(sub$cvm_file_pattern, "cgvn_cia_aberta_{year}.csv")
 
   prat <- load_schema("cgvn", "praticas")
-  expect_equal(prat$expected_field_count, 11)
+  expect_identical(prat$expected_field_count, 11L)
   expect_identical(
     prat$cvm_file_pattern,
     "cgvn_cia_aberta_praticas_{year}.csv"
@@ -174,20 +174,20 @@ test_that("keep_latest_version composes (cnpj, date, id_item) for CGVN", {
   )
   schema <- list(dataset = "cgvn", table = "praticas")
 
-  out_no_key <- cvmdata:::tx_keep_latest_version(
+  out_no_key <- tx_keep_latest_version(
     df,
     list(action = "keep_latest_version"),
     schema
   )
-  expect_equal(nrow(out_no_key), 1L)
+  expect_identical(nrow(out_no_key), 1L)
   expect_identical(out_no_key$id_item, "1.1.1")
 
-  out_with_key <- cvmdata:::tx_keep_latest_version(
+  out_with_key <- tx_keep_latest_version(
     df,
     list(action = "keep_latest_version", keys = "id_item"),
     schema
   )
-  expect_equal(nrow(out_with_key), 3L)
+  expect_identical(nrow(out_with_key), 3L)
   expect_setequal(out_with_key$id_item, c("1.1.1", "2.2.2", "3.3.3"))
   # 1.1.1 keeps versao 2; 2.2.2 and 3.3.3 keep their lone versao 1.
   out_with_key <- out_with_key[order(out_with_key$id_item), ]
@@ -203,7 +203,7 @@ test_that("keep_latest_version aborts on missing extra key", {
   )
   schema <- list(dataset = "cgvn", table = "praticas")
   expect_error(
-    cvmdata:::tx_keep_latest_version(
+    tx_keep_latest_version(
       df,
       list(action = "keep_latest_version", keys = "id_item"),
       schema
@@ -258,8 +258,8 @@ test_that("identifier_columns classifies prefix + exact-match names", {
     "pratica_recomendada",
     "categ_doc" # categ_doc is not an identifier (codelist)
   )
-  out_pos <- cvmdata:::identifier_columns(positives)
-  out_neg <- cvmdata:::identifier_columns(negatives)
+  out_pos <- identifier_columns(positives)
+  out_neg <- identifier_columns(negatives)
   failed_pos <- positives[!out_pos]
   failed_neg <- negatives[out_neg]
   expect_identical(failed_pos, character(0L), info = "positives misclassified")
@@ -274,13 +274,13 @@ test_that("identifier_columns classifies prefix + exact-match names", {
 test_that("cvm_dictionary('cgvn', 'submissao') returns 12 rows", {
   dict <- cvm_dictionary("cgvn", "submissao")
   expect_s3_class(dict, "tbl_df")
-  expect_equal(nrow(dict), 12L)
+  expect_identical(nrow(dict), 12L)
   expect_true("cnpj_companhia" %in% dict$campo)
 })
 
 test_that("cvm_dictionary('cgvn', 'praticas') returns 11 rows", {
   dict <- cvm_dictionary("cgvn", "praticas")
-  expect_equal(nrow(dict), 11L)
+  expect_identical(nrow(dict), 11L)
   expect_true("id_item" %in% dict$campo)
 })
 

@@ -23,7 +23,7 @@ test_that("cvm_groups rows are sorted alphabetically by group", {
 
 test_that("cvm_groups carries no duplicate group slugs", {
   g <- cvm_groups()
-  expect_identical(length(unique(g$group)), nrow(g))
+  expect_length(unique(g$group), nrow(g))
 })
 
 test_that("cvm_groups contract values are restricted to the 5 canonical", {

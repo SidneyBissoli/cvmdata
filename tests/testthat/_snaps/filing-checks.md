@@ -1,7 +1,7 @@
 # identical rows of a doubled filing are dropped with a warning
 
     Code
-      out <- cvmdata:::drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
+      out <- drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
     Condition
       Warning:
       The CVM file repeats rows for 1 filing; the identical copies were dropped.
@@ -11,7 +11,7 @@
 # a table behind the latest delivery is flagged
 
     Code
-      out <- cvmdata:::check_filings(travessia_bpa_v2(), schema = list(), dataset = "dfp",
+      out <- check_filings(travessia_bpa_v2(), schema = list(), dataset = "dfp",
       table = "bpa", year = 2024L, source = "cvm", validate = "strict")
     Condition
       Warning:
