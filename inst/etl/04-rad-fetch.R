@@ -58,6 +58,13 @@
 #   the last runs). The `hash` of `__source_hash.json` is NOT touched:
 #   it describes the current parquets. Only its `history` map gains the
 #   new content hashes.
+# * A run that finds the whole queue empty still records itself and
+#   publishes the state (2026-11-06): the last run of the state is what
+#   says the robot is alive. Until then only a checkpoint recorded the
+#   run; DFP emptied its queue on 2026-11-04, its state stopped there,
+#   and the portfolio monitor read the robot as stalled. A run narrowed
+#   by `--year` or `--reread` records nothing when it has nothing to do:
+#   its empty queue says nothing about the whole one.
 #
 # Usage:
 #   Rscript inst/etl/04-rad-fetch.R --group companhias --dataset dfp \
@@ -870,7 +877,8 @@ rad_main <- function(
     minutes = minutes,
     t_start = t_start,
     dry_run = dry_run,
-    reread = reread
+    reread = reread,
+    whole_queue = is.null(year) && length(reread) == 0L
   )
   res <- rad_run_checkpoints(queue, state, source_hash, ctx)
   tally <- res$tally
@@ -949,30 +957,48 @@ rad_run_checkpoints <- function(queue, state, source_hash, ctx) {
     ))
     state <- rad_record_run(
       state,
-      list(
-        at = utc_now(ctx$t_start),
-        queue = nrow(queue),
-        attempted = tally$attempted,
-        read = tally$read,
-        failed = tally$failed,
-        reader_failed = tally$reader_failed,
-        outages = tally$outages,
-        rows = tally$rows,
-        checkpoints = tally$checkpoints,
-        stopped = if (is.na(stopped)) NULL else stopped,
-        seconds = round(as.numeric(difftime(
-          Sys.time(),
-          ctx$t_start,
-          units = "secs"
-        )))
-      )
+      rad_run_record(ctx$t_start, nrow(queue), tally, stopped)
     )
     rad_publish(built, state, ctx$index, ctx$out_dir, ctx$tag, ctx$dry_run)
     if (!is.na(stopped) || run$time_out || run$attempted == 0L) {
       break
     }
   }
+  if (rad_idle_round(nrow(queue), tally$checkpoints, ctx$whole_queue)) {
+    message("[04-rad] the queue is empty: recording the idle run")
+    state <- rad_record_run(
+      state,
+      rad_run_record(ctx$t_start, 0L, tally, stopped)
+    )
+    idle <- list(uploads = character(), source_hash = source_hash)
+    rad_publish(idle, state, ctx$index, ctx$out_dir, ctx$tag, ctx$dry_run)
+  }
   list(tally = tally, stopped = stopped)
+}
+
+# The record of a run as `state$runs` keeps it: when it started, the
+# size of the queue it found, the counts so far and why it stopped.
+rad_run_record <- function(t_start, n_queue, tally, stopped = NA_character_) {
+  list(
+    at = utc_now(t_start),
+    queue = n_queue,
+    attempted = tally$attempted,
+    read = tally$read,
+    failed = tally$failed,
+    reader_failed = tally$reader_failed,
+    outages = tally$outages,
+    rows = tally$rows,
+    checkpoints = tally$checkpoints,
+    stopped = if (is.na(stopped)) NULL else stopped,
+    seconds = round(as.numeric(difftime(Sys.time(), t_start, units = "secs")))
+  )
+}
+
+# A run is idle when it went through no checkpoint because the WHOLE
+# queue was empty. `whole_queue` is FALSE for a run narrowed by `--year`
+# or `--reread`, whose empty queue is not the robot's.
+rad_idle_round <- function(n_queue, checkpoints, whole_queue) {
+  n_queue == 0L && checkpoints == 0L && isTRUE(whole_queue)
 }
 
 rad_parse_args <- function(args) {
