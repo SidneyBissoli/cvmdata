@@ -87,7 +87,7 @@ expect_policy <- function(seen, pattern) {
 }
 
 test_that("the mirror's listing, index and download carry the policy", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   release <- list(
     tag_name = "mirror-test-latest",
     assets = list(

@@ -11,7 +11,7 @@
 # CAD (no partition) ------------------------------------------------------
 
 test_that("fetch engine CAD returns a cvm_tbl via mirror", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -40,7 +40,7 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
   # branch in fetch_via_mirror() used to read `transformed$year %||% NA`
   # and reduce it with max(), emitting "Unknown or uninitialised column:
   # year" plus a -Inf warning. Guarded on column presence.
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -70,7 +70,7 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
 # DFP BPA ind 2024 (yearly + variant) -------------------------------------
 
 test_that("fetch engine DFP BPA ind 2024 returns rows via mirror", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -111,7 +111,7 @@ test_that("fetch engine DFP BPA ind 2024 returns rows via mirror", {
 # Filter by company (CD_CVM) ----------------------------------------------
 
 test_that("fetch engine DFP BPA mirror honours the CNPJ filter", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -144,7 +144,7 @@ test_that("fetch engine DFP BPA mirror honours the CNPJ filter", {
 # Latest year resolution --------------------------------------------------
 
 test_that("fetch engine concatenates multiple years from mirror", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -177,7 +177,7 @@ test_that("fetch engine concatenates multiple years from mirror", {
 })
 
 test_that("fetch engine aborts when no asset matches with year =NULL", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -205,7 +205,7 @@ test_that("fetch engine aborts when no asset matches with year =NULL", {
 })
 
 test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -240,7 +240,7 @@ test_that("mirror aborts cleanly on HTTP 500 for an asset GET", {
 })
 
 test_that("mirror short-circuits when hash matches sidecar", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -290,7 +290,7 @@ test_that("mirror short-circuits when hash matches sidecar", {
         year = 2024L,
         source = "mirror"
       )
-      cvmdata:::mirror_assets_cache_clear()
+      mirror_assets_cache_clear()
       # Second call: sidecar matches, L3 retained, no asset re-fetch.
       issuer_fetch_internal(
         "dfp",
@@ -305,7 +305,7 @@ test_that("mirror short-circuits when hash matches sidecar", {
 })
 
 test_that("fetch engine resolves year =NULL to latest mirror year", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -334,7 +334,7 @@ test_that("fetch engine resolves year =NULL to latest mirror year", {
 # Errors ------------------------------------------------------------------
 
 test_that("mirror aborts when no asset matches (table absent)", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -363,7 +363,7 @@ test_that("mirror aborts when no asset matches (table absent)", {
 })
 
 test_that("mirror aborts when no asset matches (year absent)", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -392,7 +392,7 @@ test_that("mirror aborts when no asset matches (year absent)", {
 })
 
 test_that("mirror aborts when report_type missing for variant table", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -413,7 +413,7 @@ test_that("mirror aborts when report_type missing for variant table", {
 })
 
 test_that("mirror aborts when report_type passed to non-variant table", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -439,7 +439,7 @@ test_that("mirror aborts when report_type passed to non-variant table", {
 })
 
 test_that("mirror aborts when years passed to non-yearly table", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -465,7 +465,7 @@ test_that("mirror aborts when years passed to non-yearly table", {
 })
 
 test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -496,7 +496,7 @@ test_that("mirror aborts cleanly on HTTP 404 for an asset GET", {
 # L3 cache reuse ----------------------------------------------------------
 
 test_that("mirror reuses the L3 cache on a second call", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -583,7 +583,7 @@ make_hash_mock <- function(entries, hash_holder) {
 }
 
 test_that("L3 sidecar is created on first fetch with a known hash", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -619,7 +619,7 @@ test_that("L3 sidecar is created on first fetch with a known hash", {
 })
 
 test_that("L3 cache evicts the dataset tree when the hash changes", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -675,7 +675,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
   # Flip the upstream hash and bust the session cache. The next call
   # must evict the L3 tree and redownload.
   hash$value <- "v2"
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   httr2::with_mocked_responses(
     mock,
     issuer_fetch_internal(
@@ -701,7 +701,7 @@ test_that("L3 cache is left alone when current hash is NA", {
   # Pre-populate the L3 with a sidecar carrying some hash. A release
   # that does not publish __source_hash.json (NA on the client side)
   # must not evict.
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -820,7 +820,7 @@ skip_rows <- function(...) {
 }
 
 test_that("no-match error quotes the skip manifest when it covers the year", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -853,7 +853,7 @@ test_that("no-match error quotes the skip manifest when it covers the year", {
       )
     )
   )
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   expect_error(
     httr2::with_mocked_responses(
       mock,
@@ -869,7 +869,7 @@ test_that("no-match error quotes the skip manifest when it covers the year", {
     class = "cvmdata_error_input"
   )
   # A year the manifest does not cover keeps the generic explanation only.
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cnd <- expect_error(
     httr2::with_mocked_responses(
       mock,

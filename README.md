@@ -14,8 +14,6 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![Codecov test
 coverage](https://codecov.io/gh/SidneyBissoli/cvmdata/graph/badge.svg)](https://app.codecov.io/gh/SidneyBissoli/cvmdata)
 [![pkgdown](https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml)
-[![CRAN
-status](https://www.r-pkg.org/badges/version/cvmdata)](https://CRAN.R-project.org/package=cvmdata)
 <!-- badges: end -->
 
 `cvmdata` provides a tidy API to the open data published by the
@@ -92,7 +90,9 @@ snapshots):
 library(cvmdata)
 
 cvm_datasets()
-#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"
+#> [1] "cad"            "cgvn"           "dfp"            "fca"           
+#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"
+#> [9] "vlmo"
 ```
 
 The bundled dictionary surfaces the types and descriptions CVM publishes
@@ -107,7 +107,7 @@ tbl <- knitr::kable(
 cat('<div align="center">', tbl, '</div>', sep = "\n")
 ```
 
-<div align="center">
+<div data-align="center">
 
 <table>
 
@@ -208,7 +208,7 @@ varchar
 
 <td style="text-align:right;">
 
-20
+18
 </td>
 
 </tr>

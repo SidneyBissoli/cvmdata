@@ -278,7 +278,7 @@ fake_github_release <- function(asset_names, base = "https://example.test") {
 }
 
 test_that("mirror_list_assets parses a GitHub release JSON", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   body <- fake_github_release(c(
     "bpa__report_type.ind__year.2024__part-0.parquet",
     "submissao__year.2024__part-0.parquet",
@@ -312,7 +312,7 @@ test_that("mirror_list_assets parses a GitHub release JSON", {
 })
 
 test_that("mirror_list_assets caches per session", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   body <- fake_github_release("companhias__part-0.parquet")
   n_calls <- 0L
   mock <- function(req) {
@@ -336,7 +336,7 @@ test_that("mirror_list_assets caches per session", {
 })
 
 test_that("mirror_list_assets aborts on HTTP 404", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   mock <- function(req) {
     httr2::response(status_code = 404L, body = "Not Found")
   }
@@ -350,7 +350,7 @@ test_that("mirror_list_assets aborts on HTTP 404", {
 })
 
 test_that("mirror_list_assets aborts on network failure", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   mock <- function(req) stop("simulated DNS error")
   expect_error(
     httr2::with_mocked_responses(
@@ -366,7 +366,7 @@ test_that("mirror_list_assets aborts on network failure", {
 })
 
 test_that("mirror_list_assets attaches source_hash attribute", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   body <- fake_github_release(c(
     "companhias__part-0.parquet",
     "__source_hash.json"
@@ -391,7 +391,7 @@ test_that("mirror_list_assets attaches source_hash attribute", {
 })
 
 test_that("mirror_list_assets returns NA hash when sidecar absent", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   body <- fake_github_release("companhias__part-0.parquet")
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
@@ -427,7 +427,7 @@ unread_mock <- function(sidecar, count = function() NULL) {
 }
 
 test_that("a sidecar that cannot be read is a warning, never silence", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   n_calls <- 0L
   mock <- unread_mock(
     function(req) httr2::response(504L),
@@ -471,7 +471,7 @@ test_that("a sidecar that cannot be read is a warning, never silence", {
 })
 
 test_that("a sidecar that is not there does not blame the server", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   w <- expect_warning(
     httr2::with_mocked_responses(
       unread_mock(function(req) httr2::response(404L)),
@@ -483,7 +483,7 @@ test_that("a sidecar that is not there does not blame the server", {
   expect_no_match(conditionMessage(w), "attempts")
 
   # a release that publishes no sidecar at all is not a failure
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   body <- fake_github_release("companhias__part-0.parquet")
   expect_no_warning(httr2::with_mocked_responses(
     function(req) httr2::response_json(status_code = 200L, body = body),
@@ -492,7 +492,7 @@ test_that("a sidecar that is not there does not blame the server", {
 })
 
 test_that("a pinned date with an unread sidecar names the real cause", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   err <- expect_error(
     httr2::with_mocked_responses(
       unread_mock(function(req) httr2::response(503L)),
@@ -512,7 +512,7 @@ test_that("a pinned date with an unread sidecar names the real cause", {
 })
 
 test_that("the API listing blames the tag only when the tag is the suspect", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   listing <- function(status, dataset) {
     expect_error(
       httr2::with_mocked_responses(

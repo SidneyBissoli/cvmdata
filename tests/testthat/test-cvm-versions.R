@@ -19,7 +19,7 @@ ultimo <- paste0(intToUtf8(0x00DA), "LTIMO")
 # Stage a tempdir cache and build the GitHub mock of the dre con 2023
 # partition, with or without its history asset.
 local_mirror_dre <- function(history = TRUE, envir = parent.frame()) {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(cvmdata.cache_dir = cache_root, .local_envir = envir)
   entries <- list(
@@ -356,7 +356,7 @@ test_that("mark_versions keeps the mirror's marks and adds the current one", {
 # Remaining branches ---------------------------------------------------
 
 test_that("cvm_versions resolves a ticker and stacks both bases", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
   # The consolidated fixture stands in for the individual asset too.

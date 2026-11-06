@@ -817,10 +817,15 @@ o gerador for revisitado:
   <https://github.com/ropensci/software-review>. Ancora todo o trabalho
   enquanto princípio de design — decisões que não passem o filtro
   "isso ajuda ou atrapalha a aceitação rOpenSci?" devem ser rejeitadas.
-- **Timing de submissão** (decisão de 2026-05-28): a submissão ao
-  rOpenSci ocorre **ao fim do ciclo de desenvolvimento, após v1.0**,
-  com os 5 fetchers funcionais e os 18 grupos CKAN cobertos — não como
-  etapa intermediária.
+- **Timing de submissão** (decisão de 2026-11-06, substitui a de
+  2026-05-28): a submissão ao rOpenSci ocorre **quando o módulo de
+  companhias abertas estiver perfeito e funcionando** (os 9 conjuntos
+  do grupo `companhias` e o espelho que os serve), não após a v1.0.
+  Os grupos futuros (fundos etc.) entram depois, pela mesma
+  `cvm_fetch()`. O gate é `pkgcheck::pkgcheck()` (robô da revisão;
+  passa desde 2026-11-06) mais a lista "Pré-requisitos (gate)" do
+  ROADMAP; `codemeta.json` se regera com `codemetar::write_codemeta()`
+  a cada release.
 - **CRAN**: permanece **acoplado ao aceite rOpenSci**; rOpenSci submete
   em nome do mantenedor quando aceito.
 - **The R Journal**: paper sobre o pacote, **somente após o aceite

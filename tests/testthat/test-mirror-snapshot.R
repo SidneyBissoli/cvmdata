@@ -49,7 +49,7 @@ build_snapshot_mock <- function(...) {
 }
 
 local_mirror_session <- function(release = "latest", envir = parent.frame()) {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir(.local_envir = envir)
   withr::local_options(
     cvmdata.cache_dir = cache_root,
@@ -118,7 +118,7 @@ test_that("the sidecar's snapshot fields are read and tolerated when absent", {
     fixture_sha256(dfp_fx())
   )
 
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   plain <- httr2::with_mocked_responses(
     build_mock(list(list(name = bpa_name, parquet = dfp_fx())), hash = "h"),
     cvmdata:::mirror_list_assets("companhias", "dfp", release = "latest")
@@ -199,7 +199,7 @@ test_that("a pin before the first snapshot, or without snapshots, is refused", {
     "2026-10-20",
     class = "cvmdata_error_input"
   )
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   expect_error(
     httr2::with_mocked_responses(
       build_mock(list(list(name = bpa_name, parquet = dfp_fx())), hash = "h"),
@@ -485,7 +485,7 @@ test_that("a verified inventory evicts only the history copies", {
   hist <- file.path(dirname(l3), "history.parquet")
   writeBin(as.raw(1:10), hist)
 
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   mock2 <- build_mock(
     list(list(name = bpa_name, parquet = dfp_fx())),
     hash = "h2",

@@ -186,7 +186,7 @@ test_that("cvm_fetch rejects an unknown basis value", {
 })
 
 test_that("cvm_fetch via mirror renames the leaked report_type to basis", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
 
@@ -352,8 +352,8 @@ test_that("cvm_fetch aborts on a ticker absent from fca", {
 # session cache directly so the resolver's rules are exercised without
 # a multi-year fixture.
 local_ticker_lut <- function(lut, years, envir = parent.frame()) {
-  cvmdata:::ticker_lookup_cache_clear()
-  withr::defer(cvmdata:::ticker_lookup_cache_clear(), envir = envir)
+  ticker_lookup_cache_clear()
+  withr::defer(ticker_lookup_cache_clear(), envir = envir)
   attr(lut, "years") <- years
   assign(
     "fca_valor_mobiliario_cvm_all",
@@ -1149,7 +1149,7 @@ test_that("from/to with reading windows on the exercise end", {
 })
 
 test_that("reading works on the mirror backend", {
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(cvmdata.cache_dir = cache_root)
 
