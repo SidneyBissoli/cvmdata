@@ -18,7 +18,8 @@ print.cvm_tbl <- function(x, ...) {
   ) {
     # Provenance stripped by the caller: print as a plain tibble rather
     # than a header of empty fields.
-    return(NextMethod())
+    NextMethod()
+    return(invisible(x))
   }
   release <- attr(x, "release", exact = TRUE)
   # The release is shown only when it says something: the mirror tag the
@@ -41,4 +42,5 @@ print.cvm_tbl <- function(x, ...) {
     )
   ))
   NextMethod()
+  invisible(x)
 }

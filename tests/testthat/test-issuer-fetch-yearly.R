@@ -401,7 +401,7 @@ test_that("fetch engine aborts on unreachable mirror release", {
   # aborts with cvmdata_error_http. We exercise the network failure
   # path here so the inverted contract (was: cvmdata_error_input stub)
   # is caught if it ever regresses.
-  cvmdata:::mirror_assets_cache_clear()
+  mirror_assets_cache_clear()
   cache_root <- withr::local_tempdir()
   withr::local_options(
     cvmdata.cache_dir = cache_root,

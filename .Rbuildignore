@@ -33,3 +33,4 @@
 ^air\.toml$
 ^\.git-blame-ignore-revs$
 ^DATA-LICENSE\.md$
+^codemeta\.json$

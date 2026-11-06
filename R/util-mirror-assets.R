@@ -42,15 +42,9 @@
 .mirror_repo <- "SidneyBissoli/cvmdata"
 
 # Session-scoped cache for asset listings. Keyed by (group, dataset,
-# release).
+# release). The tests reset it through a helper of their own
+# (tests/testthat/helper-cvm-cache.R).
 .mirror_assets_cache <- new.env(parent = emptyenv())
-
-# Reset the session cache. Test helper; never called from production
-# code paths.
-mirror_assets_cache_clear <- function() {
-  rm(list = ls(.mirror_assets_cache), envir = .mirror_assets_cache)
-  invisible()
-}
 
 # Tag of the moving "latest" release for a (group, dataset) pair
 # (mirrors `mirror_tag_latest()` from inst/etl/00-config.R). The

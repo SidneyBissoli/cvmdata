@@ -517,15 +517,9 @@ filter_by_issuer <- function(df, issuer) {
 # field already present in CVM data, no external dependency).
 
 # Session cache for the ticker lookup table (mirrors the mirror
-# inventory cache), one entry per source.
+# inventory cache), one entry per source. The tests reset it through
+# a helper of their own (tests/testthat/helper-cvm-cache.R).
 .ticker_lookup_cache <- new.env(parent = emptyenv())
-
-# Reset the session cache. Test helper; never called from production
-# code paths.
-ticker_lookup_cache_clear <- function() {
-  rm(list = ls(.ticker_lookup_cache), envir = .ticker_lookup_cache)
-  invisible()
-}
 
 # Ticker -> CNPJ across every fca/valor_mobiliario year that carries the
 # trading code (schema `ticker_first_year`: the column is empty in the

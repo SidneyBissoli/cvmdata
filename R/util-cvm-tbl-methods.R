@@ -122,6 +122,11 @@ cvm_tbl_merge_attrs <- function(x, y) {
 #' `rowwise()`, `tibble::as_tibble()` and `as.data.frame()` return
 #' the type they promise.
 #'
+#' @return This topic documents a class, not a function. A `cvm_tbl` is
+#'   a [tibble::tibble()] whose class vector starts with `"cvm_tbl"` and
+#'   which carries the seven provenance attributes listed above; the
+#'   methods documented here return a `cvm_tbl` whenever the result is
+#'   still a CVM table, and the type the generic promises otherwise.
 #' @name cvm_tbl
 #' @family utilities
 #' @seealso [cvm_fetch()] for the fetcher that creates these tibbles.
