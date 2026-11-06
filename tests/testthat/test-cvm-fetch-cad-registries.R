@@ -117,8 +117,8 @@ test_that("as_of applies to the two registries", {
           (is.na(all_rows$dt_cancel) | all_rows$dt_cancel > at)
       )
     )
-    expect_true(nrow(u) > 0L)
-    expect_true(nrow(u) < nrow(all_rows))
+    expect_gt(nrow(u), 0L)
+    expect_lt(nrow(u), nrow(all_rows))
   }
 })
 

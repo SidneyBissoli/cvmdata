@@ -628,8 +628,8 @@ test_that("cvm_fetch as_of keeps the registrations in force on the date", {
   )
   expect_s3_class(u2012, "cvm_tbl")
   expect_named(u2012, names(all_rows))
-  expect_true(nrow(u2012) > 0L)
-  expect_true(nrow(u2012) < nrow(all_rows))
+  expect_gt(nrow(u2012), 0L)
+  expect_lt(nrow(u2012), nrow(all_rows))
   expect_true(all(u2012$dt_reg <= at))
   expect_true(all(is.na(u2012$dt_cancel) | u2012$dt_cancel > at))
   expect_identical(
