@@ -248,17 +248,16 @@ download_with_etag <- function(url, dest_path) {
   if (file.exists(dest_path) && !is.null(cached_meta)) {
     head_resp <- tryCatch(
       httr2::req_perform(
-        httr2::req_retry(
-          httr2::req_method(httr2::request(url), "HEAD"),
-          max_tries = 3L,
-          retry_on_failure = TRUE
+        req_retry_transient(
+          httr2::req_method(httr2::request(url), "HEAD")
         )
       ),
       error = function(e) {
         cvmdata_abort(
           c(
             "HTTP HEAD failed for {.url {url}}.",
-            "x" = "{conditionMessage(e)}"
+            "x" = "{conditionMessage(e)}",
+            http_retry_hint(e)
           ),
           class = http_error_classes(e)
         )
@@ -276,17 +275,14 @@ download_with_etag <- function(url, dest_path) {
   if (!fresh) {
     download_resp <- tryCatch(
       httr2::req_perform(
-        httr2::req_retry(
-          httr2::request(url),
-          max_tries = 3L,
-          retry_on_failure = TRUE
-        )
+        req_retry_transient(httr2::request(url))
       ),
       error = function(e) {
         cvmdata_abort(
           c(
             "HTTP GET failed for {.url {url}}.",
-            "x" = "{conditionMessage(e)}"
+            "x" = "{conditionMessage(e)}",
+            http_retry_hint(e)
           ),
           class = http_error_classes(e)
         )

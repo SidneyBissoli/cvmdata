@@ -410,6 +410,126 @@ test_that("mirror_list_assets returns NA hash when sidecar absent", {
   expect_true(is.na(attr(out, "source_hash")))
 })
 
+# A release that publishes a sidecar, with the sidecar answered by
+# `sidecar(req)` and every request counted in the caller's `n_calls`.
+unread_mock <- function(sidecar, count = function() NULL) {
+  body <- fake_github_release(c(
+    "companhias__part-0.parquet",
+    "__source_hash.json"
+  ))
+  function(req) {
+    count()
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response_json(status_code = 200L, body = body))
+    }
+    sidecar(req)
+  }
+}
+
+test_that("a sidecar that cannot be read is a warning, never silence", {
+  cvmdata:::mirror_assets_cache_clear()
+  n_calls <- 0L
+  mock <- unread_mock(
+    function(req) httr2::response(504L),
+    function() n_calls <<- n_calls + 1L
+  )
+  list_it <- function() {
+    cvmdata:::mirror_list_assets("companhias", "unread_504")
+  }
+  w <- expect_warning(
+    out <- httr2::with_mocked_responses(mock, list_it()),
+    class = "cvmdata_warn_sidecar_unread"
+  )
+  msg <- conditionMessage(w)
+  expect_match(msg, "HTTP 504", fixed = TRUE)
+  expect_match(msg, "each of 4 attempts", fixed = TRUE)
+  expect_match(msg, "not verified", fixed = TRUE)
+  # the inventory still comes, without the digests
+  expect_identical(nrow(out), 2L)
+  expect_true(is.na(attr(out, "source_hash")))
+  expect_identical(attr(out, "sidecar_unread"), "HTTP 504")
+
+  # cached meanwhile: no request, no second warning
+  expect_no_warning(httr2::with_mocked_responses(mock, list_it()))
+  expect_identical(n_calls, 2L)
+
+  # once the wait is over the next call asks again, and a sidecar that
+  # now answers is read without a word
+  key <- cvmdata:::.mirror_cache_key("companhias", "unread_504")
+  cache <- cvmdata:::.mirror_assets_cache
+  stale <- cache[[key]]
+  attr(stale, "sidecar_tried_at") <- Sys.time() - 3600
+  assign(key, stale, envir = cache)
+  healed <- unread_mock(function(req) {
+    httr2::response_json(body = list(hash = "abc123"))
+  })
+  expect_no_warning(
+    out <- httr2::with_mocked_responses(healed, list_it())
+  )
+  expect_identical(attr(out, "source_hash"), "abc123")
+  expect_null(attr(out, "sidecar_unread"))
+})
+
+test_that("a sidecar that is not there does not blame the server", {
+  cvmdata:::mirror_assets_cache_clear()
+  w <- expect_warning(
+    httr2::with_mocked_responses(
+      unread_mock(function(req) httr2::response(404L)),
+      cvmdata:::mirror_list_assets("companhias", "unread_404")
+    ),
+    class = "cvmdata_warn_sidecar_unread"
+  )
+  expect_match(conditionMessage(w), "HTTP 404", fixed = TRUE)
+  expect_no_match(conditionMessage(w), "attempts")
+
+  # a release that publishes no sidecar at all is not a failure
+  cvmdata:::mirror_assets_cache_clear()
+  body <- fake_github_release("companhias__part-0.parquet")
+  expect_no_warning(httr2::with_mocked_responses(
+    function(req) httr2::response_json(status_code = 200L, body = body),
+    cvmdata:::mirror_list_assets("companhias", "no_sidecar")
+  ))
+})
+
+test_that("a pinned date with an unread sidecar names the real cause", {
+  cvmdata:::mirror_assets_cache_clear()
+  err <- expect_error(
+    httr2::with_mocked_responses(
+      unread_mock(function(req) httr2::response(503L)),
+      cvmdata:::mirror_list_assets(
+        "companhias",
+        "unread_pinned",
+        release = "2026-10-27"
+      )
+    ),
+    class = "cvmdata_error_http"
+  )
+  # until 2026-11-05 this read "has no dated snapshots yet"
+  expect_no_match(conditionMessage(err), "no dated snapshots")
+  expect_match(conditionMessage(err), "lists the dated", fixed = TRUE)
+  expect_match(conditionMessage(err), "HTTP 503", fixed = TRUE)
+  expect_match(conditionMessage(err), "each of 4 attempts", fixed = TRUE)
+})
+
+test_that("the API listing blames the tag only when the tag is the suspect", {
+  cvmdata:::mirror_assets_cache_clear()
+  listing <- function(status, dataset) {
+    expect_error(
+      httr2::with_mocked_responses(
+        function(req) httr2::response(status),
+        cvmdata:::mirror_list_assets("companhias", dataset, refresh = TRUE)
+      ),
+      class = "cvmdata_error_http"
+    )
+  }
+  down <- conditionMessage(listing(503L, "api_503"))
+  expect_match(down, "each of 4 attempts", fixed = TRUE)
+  expect_no_match(down, "may not exist")
+  missing <- conditionMessage(listing(404L, "api_404"))
+  expect_match(missing, "may not exist", fixed = TRUE)
+  expect_no_match(missing, "attempts")
+})
+
 test_that("mirror_release_tag returns the canonical tag", {
   expect_identical(
     cvmdata:::mirror_release_tag("companhias", "dfp"),

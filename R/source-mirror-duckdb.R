@@ -395,13 +395,14 @@ mirror_download_asset <- function(url, dest) {
     httr2::req_perform(
       httr2::request(url) |>
         httr2::req_user_agent("cvmdata") |>
-        httr2::req_retry(max_tries = 3L)
+        req_retry_transient()
     ),
     error = function(e) {
       cvmdata_abort(
         c(
           "HTTP GET failed for {.url {url}}.",
-          "x" = "{conditionMessage(e)}"
+          "x" = "{conditionMessage(e)}",
+          http_retry_hint(e)
         ),
         class = "cvmdata_error_http"
       )
