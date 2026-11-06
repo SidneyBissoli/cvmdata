@@ -812,6 +812,15 @@
   document read before the per-share fix with the point lost: Dommo
   Energia DFP 2021 v1, stored at -1.2e19 per share.
 
+- The RAD robot records a run that finds its whole queue empty and
+  publishes `__rad_state.json` for it. Only a checkpoint recorded the
+  run until now, and a checkpoint needs a document: DFP emptied its
+  queue on 2026-11-04, its state stopped on that day, and anything
+  reading the last run of the state (the portfolio monitor does) took a
+  robot with nothing left to do for a robot that had stopped. A run
+  narrowed by `--year` or `--reread` still records nothing when it has
+  nothing to do.
+
 - New contract test `test-schema-snapshot-consistency.R` pins the
   invariants between the hand-written schema YAMLs and the derived
   `cvm_dictionary_snapshot.csv`: every installed
