@@ -67,6 +67,15 @@ rows that came from the `cvm_tbl`;
 and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
 return the type they promise.
 
+## Value
+
+This topic documents a class, not a function. A `cvm_tbl` is a
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+whose class vector starts with `"cvm_tbl"` and which carries the seven
+provenance attributes listed above; the methods documented here return a
+`cvm_tbl` whenever the result is still a CVM table, and the type the
+generic promises otherwise.
+
 ## See also
 
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)

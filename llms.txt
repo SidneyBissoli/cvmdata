@@ -77,7 +77,9 @@ snapshots):
 [`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`\
 \
 [`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
-`#> [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"`
+`#> [1] "cad"            "cgvn"           "dfp"            "fca"           `\
+`#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"`\
+`#> [9] "vlmo"`
 
 The bundled dictionary surfaces the types and descriptions CVM publishes
 for every column:
@@ -94,7 +96,7 @@ for every column:
 |:-------------|:--------------------------------|:-----------|--------:|
 | cd_conta     | Código da conta                 | varchar    |      18 |
 | cd_cvm       | Código CVM                      | char       |       6 |
-| cnpj_cia     | CNPJ da companhia               | varchar    |      20 |
+| cnpj_cia     | CNPJ da companhia               | varchar    |      18 |
 | denom_cia    | Nome empresarial da companhia   | varchar    |     100 |
 | ds_conta     | Descrição da conta              | varchar    |     100 |
 | dt_fim_exerc | Data fim do exercício social    | date       |      10 |

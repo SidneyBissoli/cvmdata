@@ -100,7 +100,9 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SidneyBissoli/cvmdata" class="external-link">cvmdata</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/cvm_datasets.html">cvm_datasets</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cad"  "cgvn" "dfp"  "fca"  "fre"  "ipe"  "itr"  "vlmo"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "cad"            "cgvn"           "dfp"            "fca"           </span></span>
+<span><span class="co">#&gt; [5] "fre"            "ipe"            "itr"            "recompra_acoes"</span></span>
+<span><span class="co">#&gt; [9] "vlmo"</span></span></code></pre></div>
 <p>The bundled dictionary surfaces the types and descriptions CVM publishes for every column:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dict</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/cvm_dictionary.html">cvm_dictionary</a></span><span class="op">(</span><span class="st">"dfp"</span>, <span class="st">"bpa"</span><span class="op">)</span></span>
@@ -109,7 +111,7 @@
 <span>  format <span class="op">=</span> <span class="st">"html"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">'&lt;div align="center"&gt;'</span>, <span class="va">tbl</span>, <span class="st">'&lt;/div&gt;'</span>, sep <span class="op">=</span> <span class="st">"\n"</span><span class="op">)</span></span></code></pre></div>
-<div align="center">
+<div data-align="center">
 <table class="table">
 <thead><tr>
 <th style="text-align:left;">
@@ -165,7 +167,7 @@ CNPJ da companhia
 varchar
 </td>
 <td style="text-align:right;">
-20
+18
 </td>
 </tr>
 <tr>
@@ -374,7 +376,6 @@ varchar
 <li><a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://app.codecov.io/gh/SidneyBissoli/cvmdata" class="external-link"><img src="https://codecov.io/gh/SidneyBissoli/cvmdata/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
-<li><a href="https://CRAN.R-project.org/package=cvmdata" class="external-link"><img src="https://www.r-pkg.org/badges/version/cvmdata" alt="CRAN status"></a></li>
 </ul>
 </div>
 
