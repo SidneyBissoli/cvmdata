@@ -28,7 +28,7 @@ test_that("cvm_fetch DFP BPA by CNPJ returns a cvm_tbl with a basis column", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "dfp")
   expect_identical(attr(result, "table"), "bpa")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_cia == bb_cnpj))
   expect_true("basis" %in% names(result))
   expect_identical(unique(result$basis), "ind")
@@ -88,7 +88,7 @@ test_that("cvm_fetch without cnpj returns every issuer", {
   result <- with_fixture_http(
     cvm_fetch("dfp", "bpa", year = 2024, basis = "ind", source = "cvm")
   )
-  expect_true(length(unique(result$cnpj_cia)) >= 2L)
+  expect_gte(length(unique(result$cnpj_cia)), 2L)
 })
 
 # basis --------------------------------------------------------------
@@ -202,7 +202,7 @@ test_that("cvm_fetch via mirror renames the leaked report_type to basis", {
   )
   expect_s3_class(result, "cvm_tbl")
   expect_identical(attr(result, "source"), "mirror")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true("basis" %in% names(result))
   expect_identical(unique(result$basis), "ind")
   expect_false("report_type" %in% names(result))
@@ -304,7 +304,7 @@ test_that("cvm_fetch resolves a ticker to its CNPJ via fca", {
       source = "cvm"
     )
   )
-  expect_true(nrow(by_ticker) > 0L)
+  expect_gt(nrow(by_ticker), 0L)
   expect_identical(by_ticker$vl_conta, by_cnpj$vl_conta)
   expect_true(all(by_ticker$cnpj_cia == bb_cnpj))
 })
@@ -358,7 +358,7 @@ local_ticker_lut <- function(lut, years, envir = parent.frame()) {
   assign(
     "fca_valor_mobiliario_cvm_all",
     lut,
-    envir = cvmdata:::.ticker_lookup_cache
+    envir = .ticker_lookup_cache
   )
 }
 
@@ -377,11 +377,11 @@ test_that("ticker resolution finds a code that only older FCA files carry", {
     years = c(2019L, 2024L)
   )
   expect_identical(
-    cvmdata:::resolve_ticker_all_years("goll4", source = "cvm"),
+    resolve_ticker_all_years("goll4", source = "cvm"),
     "06.164.253/0001-87"
   )
   expect_identical(
-    cvmdata:::resolve_ticker_all_years(c("PETR4", "GOLL4"), source = "cvm"),
+    resolve_ticker_all_years(c("PETR4", "GOLL4"), source = "cvm"),
     c("33.000.167/0001-01", "06.164.253/0001-87")
   )
 })
@@ -397,7 +397,7 @@ test_that("ticker resolution aborts when a code maps to two issuers", {
     years = c(2018L, 2024L)
   )
   expect_error(
-    cvmdata:::resolve_ticker_all_years("ABCD3", source = "cvm"),
+    resolve_ticker_all_years("ABCD3", source = "cvm"),
     regexp = "more than one issuer",
     class = "cvmdata_error_input"
   )
@@ -414,7 +414,7 @@ test_that("ticker resolution names the years searched when a code is absent", {
     years = c(2018L, 2024L)
   )
   expect_error(
-    cvmdata:::resolve_ticker_all_years("XXXX3", source = "cvm"),
+    resolve_ticker_all_years("XXXX3", source = "cvm"),
     regexp = "2018-2024",
     class = "cvmdata_error_input"
   )
@@ -438,26 +438,26 @@ test_that("cvm_fetch refuses a year the table is not published for", {
 })
 
 test_that("check_published_years clips a window to the published years", {
-  schema <- cvmdata:::load_schema("dfp", "composicao_capital")
-  window <- cvmdata:::check_period(NULL, "2019-01-01", "2021-12-31", schema)
+  schema <- load_schema("dfp", "composicao_capital")
+  window <- check_period(NULL, "2019-01-01", "2021-12-31", schema)
   expect_message(
-    clipped <- cvmdata:::check_published_years(window, schema),
+    clipped <- check_published_years(window, schema),
     regexp = "not published before.*2020"
   )
   expect_identical(clipped$year, 2020:2021)
   expect_identical(clipped$from, as.Date("2019-01-01"))
   expect_error(
-    cvmdata:::check_published_years(
-      cvmdata:::check_period(NULL, "2018-01-01", "2019-12-31", schema),
+    check_published_years(
+      check_period(NULL, "2018-01-01", "2019-12-31", schema),
       schema
     ),
     regexp = "not published for",
     class = "cvmdata_error_input"
   )
-  plain <- cvmdata:::check_period(2020:2024, NULL, NULL, schema)
-  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
-  latest <- cvmdata:::check_period(NULL, NULL, NULL, schema)
-  expect_identical(cvmdata:::check_published_years(latest, schema), latest)
+  plain <- check_period(2020:2024, NULL, NULL, schema)
+  expect_identical(check_published_years(plain, schema), plain)
+  latest <- check_period(NULL, NULL, NULL, schema)
+  expect_identical(check_published_years(latest, schema), latest)
 })
 
 # Table published without content from a year on (schema `empty_from`):
@@ -482,16 +482,16 @@ test_that("cvm_fetch refuses a year the table has no content for", {
 })
 
 test_that("check_published_years clips a window at empty_from", {
-  schema <- cvmdata:::load_schema("fca", "departamento_acionistas")
-  window <- cvmdata:::check_period(NULL, "2022-01-01", "2025-12-31", schema)
+  schema <- load_schema("fca", "departamento_acionistas")
+  window <- check_period(NULL, "2022-01-01", "2025-12-31", schema)
   expect_message(
-    clipped <- cvmdata:::check_published_years(window, schema),
+    clipped <- check_published_years(window, schema),
     regexp = "no content from.*2024.*reading"
   )
   expect_identical(clipped$year, 2022:2023)
   expect_error(
-    cvmdata:::check_published_years(
-      cvmdata:::check_period(NULL, "2024-01-01", "2025-12-31", schema),
+    check_published_years(
+      check_period(NULL, "2024-01-01", "2025-12-31", schema),
       schema
     ),
     regexp = "without content from",
@@ -499,15 +499,15 @@ test_that("check_published_years clips a window at empty_from", {
   )
   # A mixed explicit vector is refused outright: only a window clips.
   expect_error(
-    cvmdata:::check_published_years(
-      cvmdata:::check_period(2023:2024, NULL, NULL, schema),
+    check_published_years(
+      check_period(2023:2024, NULL, NULL, schema),
       schema
     ),
     regexp = "Requested: 2024",
     class = "cvmdata_error_input"
   )
-  plain <- cvmdata:::check_period(2020:2023, NULL, NULL, schema)
-  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
+  plain <- check_period(2020:2023, NULL, NULL, schema)
+  expect_identical(check_published_years(plain, schema), plain)
 })
 
 # Table the CVM stopped publishing (schema `last_year`): the 25 legacy
@@ -540,57 +540,57 @@ test_that("cvm_fetch refuses a year after the table ended", {
 })
 
 test_that("check_published_years clips a window at last_year", {
-  schema <- cvmdata:::load_schema("fre", "grupo_economico_reestruturacao")
-  window <- cvmdata:::check_period(NULL, "2015-01-01", "2018-12-31", schema)
+  schema <- load_schema("fre", "grupo_economico_reestruturacao")
+  window <- check_period(NULL, "2015-01-01", "2018-12-31", schema)
   expect_message(
-    clipped <- cvmdata:::check_published_years(window, schema),
+    clipped <- check_published_years(window, schema),
     regexp = "not published after.*2016.*reading"
   )
   expect_identical(clipped$year, 2015:2016)
   expect_error(
-    cvmdata:::check_published_years(
-      cvmdata:::check_period(NULL, "2017-01-01", "2018-12-31", schema),
+    check_published_years(
+      check_period(NULL, "2017-01-01", "2018-12-31", schema),
       schema
     ),
     regexp = "not published for",
     class = "cvmdata_error_input"
   )
-  plain <- cvmdata:::check_period(2010:2016, NULL, NULL, schema)
-  expect_identical(cvmdata:::check_published_years(plain, schema), plain)
+  plain <- check_period(2010:2016, NULL, NULL, schema)
+  expect_identical(check_published_years(plain, schema), plain)
 })
 
 test_that("clamp_years_to_last drops later years for issuer_fetch", {
-  schema <- cvmdata:::load_schema("fre", "endividamento")
+  schema <- load_schema("fre", "endividamento")
   expect_message(
-    kept <- cvmdata:::clamp_years_to_last(2022:2025, schema),
+    kept <- clamp_years_to_last(2022:2025, schema),
     regexp = "ends at.*2023"
   )
   expect_identical(kept, 2022:2023)
   expect_error(
-    cvmdata:::clamp_years_to_last(2024:2025, schema),
+    clamp_years_to_last(2024:2025, schema),
     regexp = "ends at",
     class = "cvmdata_error_input"
   )
-  open <- cvmdata:::load_schema("fre", "auditor")
-  expect_identical(cvmdata:::clamp_years_to_last(2024L, open), 2024L)
+  open <- load_schema("fre", "auditor")
+  expect_identical(clamp_years_to_last(2024L, open), 2024L)
 })
 
 test_that("warn_empty_latest says what each backend returns", {
-  schema <- cvmdata:::load_schema("fca", "departamento_acionistas")
-  latest <- cvmdata:::check_period(NULL, NULL, NULL, schema)
+  schema <- load_schema("fca", "departamento_acionistas")
+  latest <- check_period(NULL, NULL, NULL, schema)
   expect_snapshot({
-    cvmdata:::warn_empty_latest(latest, schema, "mirror")
-    cvmdata:::warn_empty_latest(latest, schema, "cvm")
+    warn_empty_latest(latest, schema, "mirror")
+    warn_empty_latest(latest, schema, "cvm")
   })
   # Silent with an explicit year, and on tables without empty_from.
-  explicit <- cvmdata:::check_period(2023L, NULL, NULL, schema)
-  expect_no_warning(cvmdata:::warn_empty_latest(explicit, schema, "cvm"))
-  plain <- cvmdata:::load_schema("fca", "geral")
-  expect_no_warning(cvmdata:::warn_empty_latest(latest, plain, "mirror"))
+  explicit <- check_period(2023L, NULL, NULL, schema)
+  expect_no_warning(warn_empty_latest(explicit, schema, "cvm"))
+  plain <- load_schema("fca", "geral")
+  expect_no_warning(warn_empty_latest(latest, plain, "mirror"))
   # Without a reason the bullet falls back to a neutral sentence.
   schema$empty_reason <- NULL
   expect_warning(
-    cvmdata:::warn_empty_latest(latest, schema, "cvm"),
+    warn_empty_latest(latest, schema, "cvm"),
     regexp = "header only",
     class = "cvmdata_warn_empty_upstream"
   )
@@ -627,8 +627,9 @@ test_that("cvm_fetch as_of keeps the registrations in force on the date", {
     cvm_fetch("cad", "companhias", as_of = at, source = "cvm")
   )
   expect_s3_class(u2012, "cvm_tbl")
-  expect_identical(names(u2012), names(all_rows))
-  expect_true(nrow(u2012) > 0L && nrow(u2012) < nrow(all_rows))
+  expect_named(u2012, names(all_rows))
+  expect_true(nrow(u2012) > 0L)
+  expect_true(nrow(u2012) < nrow(all_rows))
   expect_true(all(u2012$dt_reg <= at))
   expect_true(all(is.na(u2012$dt_cancel) | u2012$dt_cancel > at))
   expect_identical(
@@ -666,7 +667,7 @@ test_that("cvm_fetch as_of rejects non-registry tables and partial dates", {
 })
 
 test_that("filter_as_of places rows by registration and cancellation", {
-  schema <- cvmdata:::load_schema("cad", "companhias")
+  schema <- load_schema("cad", "companhias")
   df <- data.frame(
     cnpj_cia = c("a", "b", "c", "d"),
     dt_reg = as.Date(c("2010-01-01", "2010-01-01", "2016-01-01", NA)),
@@ -674,16 +675,16 @@ test_that("filter_as_of places rows by registration and cancellation", {
     stringsAsFactors = FALSE
   )
   at <- as.Date("2015-12-31")
-  expect_identical(cvmdata:::filter_as_of(df, at, schema)$cnpj_cia, "a")
+  expect_identical(filter_as_of(df, at, schema)$cnpj_cia, "a")
   expect_identical(
-    cvmdata:::filter_as_of(df, as.Date("2015-06-30"), schema)$cnpj_cia,
+    filter_as_of(df, as.Date("2015-06-30"), schema)$cnpj_cia,
     "a"
   )
   expect_identical(
-    cvmdata:::filter_as_of(df, as.Date("2015-06-29"), schema)$cnpj_cia,
+    filter_as_of(df, as.Date("2015-06-29"), schema)$cnpj_cia,
     c("a", "b")
   )
-  expect_identical(cvmdata:::filter_as_of(df, NULL, schema), df)
+  expect_identical(filter_as_of(df, NULL, schema), df)
 })
 
 test_that("cvm_fetch rejects a ticker that is not a B3 code", {
@@ -850,7 +851,7 @@ test_that("cvm_fetch accepts Date objects for from/to", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
 })
 
 test_that("cvm_fetch rejects year on a snapshot table", {
@@ -865,8 +866,8 @@ test_that("cvm_fetch rejects year on a snapshot table", {
 # Pure helpers -------------------------------------------------------
 
 test_that("check_period derives the yearly files from the window", {
-  schema <- cvmdata:::load_schema("dfp", "bpa")
-  period <- cvmdata:::check_period(
+  schema <- load_schema("dfp", "bpa")
+  period <- check_period(
     NULL,
     "2022-06-30",
     "2024-03-31",
@@ -876,7 +877,7 @@ test_that("check_period derives the yearly files from the window", {
   expect_identical(period$from, as.Date("2022-06-30"))
   expect_identical(period$to, as.Date("2024-03-31"))
 
-  plain <- cvmdata:::check_period(2023L, NULL, NULL, schema)
+  plain <- check_period(2023L, NULL, NULL, schema)
   expect_identical(plain$year, 2023L)
   expect_null(plain$from)
 })
@@ -997,7 +998,7 @@ test_that("a restated figure is zero where no comparative was filed", {
   )
   total <- both[both$cd_conta == "1", ]
   expect_identical(total$reading, c("original", "restated"))
-  expect_true(total$vl_conta[total$reading == "original"] > 0)
+  expect_gt(total$vl_conta[total$reading == "original"], 0)
   expect_identical(total$vl_conta[total$reading == "restated"], 0)
 
   # MAGAZINE LUIZA restated nothing: the two readings agree account by
@@ -1084,7 +1085,7 @@ test_that("no restated reading when the following file is unpublished", {
     regexp = "not published yet"
   )
   expect_identical(unique(both$reading), "original")
-  expect_true(nrow(both) > 0L)
+  expect_gt(nrow(both), 0L)
 
   expect_message(
     none <- fetch_bpa(
@@ -1239,11 +1240,11 @@ test_that("validate was merged into on_error", {
 
 test_that("error_modes maps on_error onto the two engine modes", {
   expect_identical(
-    cvmdata:::error_modes("abort"),
+    error_modes("abort"),
     list(on_error = "abort", validate = "strict")
   )
   expect_identical(
-    cvmdata:::error_modes("warn"),
+    error_modes("warn"),
     list(on_error = "warn", validate = "warn")
   )
 })

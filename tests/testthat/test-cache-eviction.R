@@ -82,7 +82,7 @@ test_that("cache below 90% of limit triggers no eviction", {
   cache <- local_cache_dir()
   withr::local_options(cvmdata.cache_max_size_mb = 1L) # 1 MiB
   write_unit_yearly(cache, "dfp", 2023, 500L * 1024L) # 500 KiB
-  expect_equal(cache_enforce_limit(), 0L)
+  expect_identical(cache_enforce_limit(), 0L)
   expect_true(dir.exists(file.path(cache, "raw", "companhias", "dfp", "2023")))
 })
 
@@ -177,7 +177,7 @@ test_that("limit = 0, negative, or Inf disables eviction", {
   write_unit_yearly(cache, "dfp", 2024, 600L * 1024L, now - 1000)
   for (val in list(0L, -1L, Inf)) {
     withr::local_options(cvmdata.cache_max_size_mb = val)
-    expect_equal(cache_enforce_limit(), 0L)
+    expect_identical(cache_enforce_limit(), 0L)
     expect_true(dir.exists(file.path(
       cache,
       "raw",
@@ -203,7 +203,7 @@ test_that("malformed cvmdata.cache_max_size_mb falls back to 100 MB default", {
   for (val in list("100", NA_real_, c(1L, 2L), NA, NA_integer_)) {
     withr::local_options(cvmdata.cache_max_size_mb = val)
     # Default = 100 MiB; 1 KiB is well below 90% → no eviction.
-    expect_equal(cache_enforce_limit(), 0L)
+    expect_identical(cache_enforce_limit(), 0L)
     expect_true(file.exists(
       file.path(
         cache,
@@ -234,8 +234,8 @@ test_that("orphan sidecar is ignored in size accounting and not removed", {
     orphan
   )
 
-  expect_equal(cache_current_size_bytes(), 0)
-  expect_equal(cache_enforce_limit(), 0L)
+  expect_identical(cache_current_size_bytes(), 0)
+  expect_identical(cache_enforce_limit(), 0L)
   expect_true(file.exists(orphan))
 })
 
@@ -269,8 +269,8 @@ test_that("cache_enforce_limit protects the just-written dest_path", {
 test_that("cache_enforce_limit is a no-op on empty cache", {
   cache <- local_cache_dir()
   withr::local_options(cvmdata.cache_max_size_mb = 1L)
-  expect_equal(cache_enforce_limit(), 0L)
-  expect_equal(cache_current_size_bytes(), 0)
+  expect_identical(cache_enforce_limit(), 0L)
+  expect_identical(cache_current_size_bytes(), 0)
 })
 
 test_that("cache_enforce_limit is a no-op when cache dir is missing", {
@@ -278,8 +278,8 @@ test_that("cache_enforce_limit is a no-op when cache dir is missing", {
     cvmdata.cache_dir = file.path(tempdir(), "nonexistent-cvmdata-cache")
   )
   withr::local_options(cvmdata.cache_max_size_mb = 1L)
-  expect_equal(cache_enforce_limit(), 0L)
-  expect_equal(cache_current_size_bytes(), 0)
+  expect_identical(cache_enforce_limit(), 0L)
+  expect_identical(cache_current_size_bytes(), 0)
 })
 
 # cvmdata_warn_eviction surfaces removal counts when opted in ------------
@@ -341,13 +341,13 @@ test_that("cvm_cache_info() carries total_size_bytes attribute", {
   cache <- local_cache_dir()
   # Empty cache: attribute is 0.
   info_empty <- cvm_cache_info()
-  expect_equal(attr(info_empty, "total_size_bytes"), 0)
-  expect_equal(nrow(info_empty), 0L)
+  expect_identical(attr(info_empty, "total_size_bytes"), 0)
+  expect_identical(nrow(info_empty), 0L)
 
   # Populated cache: attribute equals cache_current_size_bytes().
   write_unit_yearly(cache, "dfp", 2024, 100L * 1024L)
   info <- cvm_cache_info()
-  expect_equal(
+  expect_identical(
     attr(info, "total_size_bytes"),
     cache_current_size_bytes()
   )

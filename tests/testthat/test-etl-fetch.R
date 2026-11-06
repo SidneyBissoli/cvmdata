@@ -118,12 +118,13 @@ test_that("fetch_one reports a missing ZIP member as non-transport", {
 test_that("fetch_all stops the walk once the breaker trips", {
   load_etl_fetcher()
   withr::local_options(cvmdata.etl_transport_streak = 3L)
-  seen <- 0L
+  tally <- new.env()
+  tally$seen <- 0L
   # `fetch_all` resolves `fetch_one` lexically in the environment the
   # script was sourced into, which is this test's frame — so a plain
   # assignment here is the mock.
   fetch_one <- function(dataset, tbl, year, report_type) {
-    seen <<- seen + 1L
+    tally$seen <- tally$seen + 1L
     list(ok = FALSE, transport = TRUE)
   }
   out <- suppressMessages(
@@ -131,7 +132,7 @@ test_that("fetch_all stops the walk once the breaker trips", {
   )
   expect_true(out$tripped)
   # 16 years were on offer; the breaker cut the walk at the third.
-  expect_identical(seen, 3L)
+  expect_identical(tally$seen, 3L)
   expect_identical(out$n_fail, 3L)
   expect_identical(out$n_transport, 3L)
 })
@@ -156,10 +157,11 @@ test_that("fetch_all never trips after something has come through", {
   # First year succeeds, every later one fails at the transport level:
   # the long streak that follows is not enough, because the portal has
   # demonstrably answered this runner.
-  n <- 0L
+  tally <- new.env()
+  tally$n <- 0L
   fetch_one <- function(dataset, tbl, year, report_type) {
-    n <<- n + 1L
-    if (n == 1L) {
+    tally$n <- tally$n + 1L
+    if (tally$n == 1L) {
       list(ok = TRUE, transport = FALSE)
     } else {
       list(ok = FALSE, transport = TRUE)
@@ -178,13 +180,14 @@ test_that("fetch_all skips the years before the table's first_year", {
   # not requested at all (they were 13 of the 205 fre hard fails of the
   # 2026-10-27 run).
   load_etl_fetcher()
-  years_seen <- integer()
+  tally <- new.env()
+  tally$years_seen <- integer()
   fetch_one <- function(dataset, tbl, year, report_type) {
-    years_seen <<- c(years_seen, year)
+    tally$years_seen <- c(tally$years_seen, year)
     list(ok = TRUE, transport = FALSE)
   }
   out <- suppressMessages(fetch_all("fre", "acao_entregue", 2010:2025))
-  expect_identical(years_seen, 2023:2025)
+  expect_identical(tally$years_seen, 2023:2025)
   expect_identical(out$n_ok, 3L)
   expect_identical(out$n_fail, 0L)
 })
@@ -203,7 +206,8 @@ test_that("fetch_all counts both report_type variants of a table", {
 
 test_that("fetch_one reports success and carries year = NA through", {
   load_etl_fetcher()
-  seen <- NULL
+  tally <- new.env()
+  tally$seen <- NULL
   local_mocked_bindings(
     issuer_fetch_internal = function(
       dataset,
@@ -212,7 +216,7 @@ test_that("fetch_one reports success and carries year = NA through", {
       report_type = NULL,
       ...
     ) {
-      seen <<- list(year = year, report_type = report_type)
+      tally$seen <- list(year = year, report_type = report_type)
       tibble::tibble(x = 1L)
     }
   )
@@ -221,6 +225,6 @@ test_that("fetch_one reports success and carries year = NA through", {
   expect_false(out$transport)
   # Non-yearly datasets (CAD) pass year = NA in the loop and must reach
   # issuer_fetch_internal as NULL, its own "latest published" sentinel.
-  expect_null(seen$year)
-  expect_null(seen$report_type)
+  expect_null(tally$seen$year)
+  expect_null(tally$seen$report_type)
 })

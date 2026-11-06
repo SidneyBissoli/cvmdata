@@ -93,7 +93,7 @@ test_that("validate_one_parquet returns hard fail when file missing", {
     "companhias",
     hints
   )
-  expect_equal(nrow(result), 1L)
+  expect_identical(nrow(result), 1L)
   expect_identical(result$check, "parquet_exists")
   expect_identical(result$severity, "hard")
   expect_identical(result$status, "fail")
@@ -135,10 +135,10 @@ test_that("validate_one_parquet flags soft fail on bad CNPJ format", {
   expect_true(all(syn$status == "pass"))
   # Hard col_is_character passes (cnpj_cia is character).
   hard_fail <- result[result$severity == "hard" & result$status == "fail", ]
-  expect_equal(nrow(hard_fail), 0L)
+  expect_identical(nrow(hard_fail), 0L)
   # Soft checks catch the bad cnpj and the non-digit cd_cvm.
   soft_fail <- result[result$severity == "soft" & result$status == "fail", ]
-  expect_true(nrow(soft_fail) >= 2L)
+  expect_gte(nrow(soft_fail), 2L)
 })
 
 # --- empty-upstream manifest (legitimately 0-row years) ----------------
@@ -199,7 +199,7 @@ test_that("missing parquet is a soft pass when skipped (empty / absent)", {
       hints,
       skip_reason = reason
     )
-    expect_equal(nrow(result), 1L)
+    expect_identical(nrow(result), 1L)
     expect_identical(result$check, sprintf("upstream_%s", reason))
     expect_identical(result$severity, "soft")
     expect_identical(result$status, "pass")
@@ -297,10 +297,10 @@ test_that("validate_dataset reports pass for a clean CAD workspace", {
   stage_cad_workspace(workspace)
 
   results <- validate_dataset("companhias", "cad", workspace)
-  expect_equal(nrow(results), 3L)
+  expect_identical(nrow(results), 3L)
   expect_identical(results$status, rep("pass", 3L))
-  expect_equal(results$hard_failed, rep(0L, 3L))
-  expect_equal(results$soft_failed, rep(0L, 3L))
+  expect_identical(results$hard_failed, rep(0L, 3L))
+  expect_identical(results$soft_failed, rep(0L, 3L))
 })
 
 test_that("validate_dataset reports hard_fail for missing parquet", {
@@ -331,5 +331,5 @@ test_that("validate_write_report writes a markdown summary", {
   expect_true(file.exists(out_path))
   content <- readLines(out_path)
   expect_true(any(grepl("ETL validation report: cad", content, fixed = TRUE)))
-  expect_true(any(grepl("PASS", content)))
+  expect_true(any(grepl("PASS", content, fixed = TRUE)))
 })

@@ -28,7 +28,7 @@ test_that("fetch engine CAD returns a cvm_tbl via mirror", {
     issuer_fetch_internal("cad", "companhias", source = "mirror")
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_identical(attr(result, "source"), "mirror")
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "cad")
@@ -52,8 +52,8 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
   )
   mock <- build_mock(entries)
 
-  expect_no_warning(
-    result <- httr2::with_mocked_responses(
+  result <- expect_no_warning(
+    httr2::with_mocked_responses(
       mock,
       issuer_fetch_internal(
         "cad",
@@ -64,7 +64,7 @@ test_that("CAD via mirror with issuer filter does not warn on year reattach", {
     )
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) >= 1L)
+  expect_gte(nrow(result), 1L)
 })
 
 # DFP BPA ind 2024 (yearly + variant) -------------------------------------
@@ -100,7 +100,7 @@ test_that("fetch engine DFP BPA ind 2024 returns rows via mirror", {
     )
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true("year" %in% names(result))
   expect_true("report_type" %in% names(result))
   expect_true(all(result$year == 2024L))
@@ -136,7 +136,7 @@ test_that("fetch engine DFP BPA mirror honours the CNPJ filter", {
     )
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   cd <- unique(as.integer(result$cd_cvm))
   expect_identical(cd, 1023L)
 })
@@ -172,7 +172,7 @@ test_that("fetch engine concatenates multiple years from mirror", {
       source = "mirror"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_setequal(unique(result$year), c(2023L, 2024L))
 })
 
@@ -254,7 +254,8 @@ test_that("mirror short-circuits when hash matches sidecar", {
     list(name = "__source_hash.json", parquet = NULL)
   )
   hash <- list(value = "stable-hash")
-  asset_calls <- 0L
+  tally <- new.env()
+  tally$asset_calls <- 0L
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
@@ -268,7 +269,7 @@ test_that("mirror short-circuits when hash matches sidecar", {
         body = list(hash = hash$value, components = list())
       ))
     }
-    asset_calls <<- asset_calls + 1L
+    tally$asset_calls <- tally$asset_calls + 1L
     body_raw <- readBin(
       dfp_fx(),
       what = "raw",
@@ -301,7 +302,7 @@ test_that("mirror short-circuits when hash matches sidecar", {
       )
     }
   )
-  expect_equal(asset_calls, 1L)
+  expect_identical(tally$asset_calls, 1L)
 })
 
 test_that("fetch engine resolves year =NULL to latest mirror year", {
@@ -508,7 +509,8 @@ test_that("mirror reuses the L3 cache on a second call", {
     parquet = dfp_fx()
   ))
 
-  asset_calls <- 0L
+  tally <- new.env()
+  tally$asset_calls <- 0L
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
@@ -516,7 +518,7 @@ test_that("mirror reuses the L3 cache on a second call", {
         body = fake_release(entries)
       ))
     }
-    asset_calls <<- asset_calls + 1L
+    tally$asset_calls <- tally$asset_calls + 1L
     body_raw <- readBin(
       dfp_fx(),
       what = "raw",
@@ -548,7 +550,7 @@ test_that("mirror reuses the L3 cache on a second call", {
     }
   )
   # The asset is downloaded only once; the second call reads from L3.
-  expect_equal(asset_calls, 1L)
+  expect_identical(tally$asset_calls, 1L)
 })
 
 # L3 hash invalidation ----------------------------------------------------
@@ -633,7 +635,8 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
     list(name = "__source_hash.json", parquet = NULL)
   )
   hash <- list(value = "v1")
-  asset_calls <- 0L
+  tally <- new.env()
+  tally$asset_calls <- 0L
   mock <- function(req) {
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
       return(httr2::response_json(
@@ -647,7 +650,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
         body = list(hash = hash$value, components = list())
       ))
     }
-    asset_calls <<- asset_calls + 1L
+    tally$asset_calls <- tally$asset_calls + 1L
     body_raw <- readBin(
       dfp_fx(),
       what = "raw",
@@ -670,7 +673,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
       source = "mirror"
     )
   )
-  expect_equal(asset_calls, 1L)
+  expect_identical(tally$asset_calls, 1L)
 
   # Flip the upstream hash and bust the session cache. The next call
   # must evict the L3 tree and redownload.
@@ -686,7 +689,7 @@ test_that("L3 cache evicts the dataset tree when the hash changes", {
       source = "mirror"
     )
   )
-  expect_equal(asset_calls, 2L)
+  expect_identical(tally$asset_calls, 2L)
   sidecar <- file.path(
     cache_root,
     "parquet",
@@ -890,7 +893,7 @@ test_that("no-match error quotes the skip manifest when it covers the year", {
 })
 
 test_that("mirror_normalise_skips accepts only the ETL's four columns", {
-  norm <- cvmdata:::mirror_normalise_skips
+  norm <- mirror_normalise_skips
   expect_null(norm(NULL))
   expect_null(norm(list()))
   expect_null(norm(data.frame(table = "bpa", reason = "empty")))
@@ -902,13 +905,13 @@ test_that("mirror_normalise_skips accepts only the ETL's four columns", {
     reason = "empty",
     extra = 1
   ))
-  expect_identical(names(out), c("table", "year", "report_type", "reason"))
+  expect_named(out, c("table", "year", "report_type", "reason"))
   expect_identical(out$year, NA_integer_)
   expect_identical(out$report_type, NA_character_)
 })
 
 test_that("mirror_skip_bullets filters by table, year and report_type", {
-  bullets <- cvmdata:::mirror_skip_bullets
+  bullets <- mirror_skip_bullets
   inventory <- tibble::tibble(name = character(0L))
   expect_identical(bullets(inventory, "bpa", 2025L, "ind"), character(0L))
   attr(inventory, "skips") <- skip_rows(

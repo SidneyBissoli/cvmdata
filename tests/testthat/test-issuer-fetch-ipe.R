@@ -86,7 +86,7 @@ test_that("fetch engine IPE tracer returns cvm_tbl", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "ipe")
   expect_identical(attr(result, "table"), "ipe")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_identical(ncol(result), 13L)
   # FRE-detail-like convention with Codigo_CVM native in the header.
   expect_true(all(
@@ -124,7 +124,7 @@ test_that("fetch engine IPE filters by CNPJ via cnpj_companhia", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
@@ -140,7 +140,7 @@ test_that("IPE supports slicing the returned tibble by Categoria", {
     issuer_fetch_internal("ipe", "ipe", year = 2024L, source = "cvm")
   )
   fr <- dplyr::filter(out, categoria == "Fato Relevante")
-  expect_true(nrow(fr) > 0L)
+  expect_gt(nrow(fr), 0L)
   expect_true(all(fr$categoria == "Fato Relevante"))
 })
 
@@ -164,8 +164,8 @@ test_that("ipe/ipe declares no keep_latest_version", {
     versao = c(1L, 2L, 3L),
     stringsAsFactors = FALSE
   )
-  out <- cvmdata:::apply_schema_transformations(df, schema)
-  expect_equal(nrow(out), 3L)
+  out <- apply_schema_transformations(df, schema)
+  expect_identical(nrow(out), 3L)
   expect_setequal(out$versao, c(1L, 2L, 3L))
 
   # Sanity: a schema declaring keep_latest_version (as the detail tables
@@ -176,8 +176,8 @@ test_that("ipe/ipe declares no keep_latest_version", {
     table = "ipe",
     transformations = list(list(action = "keep_latest_version"))
   )
-  collapsed <- cvmdata:::apply_schema_transformations(df, dedup_schema)
-  expect_equal(nrow(collapsed), 1L)
+  collapsed <- apply_schema_transformations(df, dedup_schema)
+  expect_identical(nrow(collapsed), 1L)
   expect_identical(collapsed$versao, 3L)
 })
 
@@ -209,8 +209,8 @@ test_that("load_schema accepts the IPE YAML", {
   s <- load_schema("ipe", "ipe")
   expect_s3_class(s, "cvm_table_schema")
   expect_identical(s$temporal_partitioning, "yearly")
-  expect_equal(s$first_year, 2003)
-  expect_equal(s$expected_field_count, 13)
+  expect_identical(s$first_year, 2003L)
+  expect_identical(s$expected_field_count, 13L)
   expect_identical(s$cvm_file_pattern, "ipe_cia_aberta_{year}.csv")
   # Flat .txt META (no zip): the URL has no `#entry` fragment.
   expect_false(grepl("#", s$cvm_dictionary_url, fixed = TRUE))
@@ -235,8 +235,8 @@ test_that("cvm_dataset_years('ipe') includes 2024", {
     "<a href='ipe_cia_aberta_2024.zip'>ipe_cia_aberta_2024.zip</a>"
   )
   rm(
-    list = ls(cvmdata:::.year_listing_cache),
-    envir = cvmdata:::.year_listing_cache
+    list = ls(.year_listing_cache),
+    envir = .year_listing_cache
   )
   listing_response <- function(req) {
     httr2::response(
@@ -251,8 +251,8 @@ test_that("cvm_dataset_years('ipe') includes 2024", {
   )
   expect_true(2024L %in% years)
   rm(
-    list = ls(cvmdata:::.year_listing_cache),
-    envir = cvmdata:::.year_listing_cache
+    list = ls(.year_listing_cache),
+    envir = .year_listing_cache
   )
 })
 
@@ -263,7 +263,7 @@ test_that("cvm_dataset_years('ipe') includes 2024", {
 test_that("cvm_dictionary('ipe', 'ipe') returns 13 rows", {
   dict <- cvm_dictionary("ipe", "ipe")
   expect_s3_class(dict, "tbl_df")
-  expect_equal(nrow(dict), 13L)
+  expect_identical(nrow(dict), 13L)
   expect_true("codigo_cvm" %in% dict$campo)
   expect_true("link_download" %in% dict$campo)
 })

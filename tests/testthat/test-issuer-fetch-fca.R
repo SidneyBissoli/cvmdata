@@ -62,7 +62,7 @@ test_that("fetch engine FCA submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "fca")
   expect_identical(attr(result, "table"), "submissao")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   # Classic convention, identical to ITR/DFP/FRE submissao.
   expect_true(all(
     c("cnpj_cia", "dt_refer", "versao", "cd_cvm", "denom_cia") %in%
@@ -85,7 +85,7 @@ test_that("fetch engine FCA detail tracers return FRE-detail shape", {
     )
     expect_s3_class(result, "cvm_tbl")
     expect_identical(attr(result, "table"), tb)
-    expect_true(nrow(result) > 0L)
+    expect_gt(nrow(result), 0L)
     expect_true(all(
       c("cnpj_companhia", "data_referencia", "versao", "nome_empresarial") %in%
         names(result)
@@ -133,7 +133,7 @@ test_that("fetch engine FCA filters a detail by CNPJ", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
@@ -191,23 +191,23 @@ test_that("report_type aborts for FCA tables without variants", {
 
 test_that("load_schema accepts the 10 FCA YAMLs", {
   expected <- c(
-    submissao = 9,
-    auditor = 15,
-    canal_divulgacao = 7,
-    departamento_acionistas = 23,
-    dri = 26,
-    endereco = 21,
-    escriturador = 24,
-    geral = 26,
-    pais_estrangeiro_negociacao = 7,
-    valor_mobiliario = 18
+    submissao = 9L,
+    auditor = 15L,
+    canal_divulgacao = 7L,
+    departamento_acionistas = 23L,
+    dri = 26L,
+    endereco = 21L,
+    escriturador = 24L,
+    geral = 26L,
+    pais_estrangeiro_negociacao = 7L,
+    valor_mobiliario = 18L
   )
   for (tb in names(expected)) {
     s <- load_schema("fca", tb)
     expect_s3_class(s, "cvm_table_schema")
     expect_identical(s$temporal_partitioning, "yearly")
-    expect_equal(s$first_year, 2010)
-    expect_equal(s$expected_field_count, unname(expected[[tb]]))
+    expect_identical(s$first_year, 2010L)
+    expect_identical(s$expected_field_count, unname(expected[[tb]]))
   }
   # submissao keeps the classic file pattern (no detail infix).
   expect_identical(
@@ -247,8 +247,8 @@ test_that("cvm_dataset_years('fca') includes 2024", {
     "<a href='fca_cia_aberta_2024.zip'>fca_cia_aberta_2024.zip</a>"
   )
   rm(
-    list = ls(cvmdata:::.year_listing_cache),
-    envir = cvmdata:::.year_listing_cache
+    list = ls(.year_listing_cache),
+    envir = .year_listing_cache
   )
   listing_response <- function(req) {
     httr2::response(
@@ -263,8 +263,8 @@ test_that("cvm_dataset_years('fca') includes 2024", {
   )
   expect_true(2024L %in% years)
   rm(
-    list = ls(cvmdata:::.year_listing_cache),
-    envir = cvmdata:::.year_listing_cache
+    list = ls(.year_listing_cache),
+    envir = .year_listing_cache
   )
 })
 
@@ -275,17 +275,17 @@ test_that("cvm_dataset_years('fca') includes 2024", {
 test_that("cvm_dictionary('fca', 'submissao') returns 9 rows", {
   dict <- cvm_dictionary("fca", "submissao")
   expect_s3_class(dict, "tbl_df")
-  expect_equal(nrow(dict), 9L)
+  expect_identical(nrow(dict), 9L)
   expect_true("cnpj_cia" %in% dict$campo)
 })
 
 test_that("cvm_dictionary('fca', 'valor_mobiliario') returns 18 rows", {
   dict <- cvm_dictionary("fca", "valor_mobiliario")
-  expect_equal(nrow(dict), 18L)
+  expect_identical(nrow(dict), 18L)
   expect_true("codigo_negociacao" %in% dict$campo)
 })
 
 test_that("cvm_dictionary('fca', 'departamento_acionistas') = 23 rows", {
   dict <- cvm_dictionary("fca", "departamento_acionistas")
-  expect_equal(nrow(dict), 23L)
+  expect_identical(nrow(dict), 23L)
 })

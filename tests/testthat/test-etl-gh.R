@@ -54,41 +54,44 @@ test_that("gh_quota_aware runs the call again after waiting the quota", {
   # Both helpers resolve system2/wait_for_api_quota in the environment
   # the script was sourced into, this test's frame: plain assignments
   # here are the mocks.
-  calls <- 0L
+  tally <- new.env()
+  tally$calls <- 0L
   system2 <- function(...) {
-    calls <<- calls + 1L
-    if (calls == 1L) 1L else 0L
+    tally$calls <- tally$calls + 1L
+    if (tally$calls == 1L) 1L else 0L
   }
-  waits <- 0L
+  tally$waits <- 0L
   wait_for_api_quota <- function(...) {
-    waits <<- waits + 1L
+    tally$waits <- tally$waits + 1L
     TRUE
   }
   expect_identical(gh_quota_aware(c("release", "upload")), 0L)
-  expect_identical(calls, 2L)
-  expect_identical(waits, 1L)
+  expect_identical(tally$calls, 2L)
+  expect_identical(tally$waits, 1L)
 })
 
 test_that("gh_quota_aware returns other failures without waiting", {
   load_etl_gh()
-  calls <- 0L
+  tally <- new.env()
+  tally$calls <- 0L
   system2 <- function(...) {
-    calls <<- calls + 1L
+    tally$calls <- tally$calls + 1L
     1L
   }
   wait_for_api_quota <- function(...) FALSE
   expect_identical(gh_quota_aware(c("release", "upload")), 1L)
-  expect_identical(calls, 1L)
+  expect_identical(tally$calls, 1L)
 })
 
 test_that("gh_quota_aware gives up after its quota waits", {
   load_etl_gh()
-  calls <- 0L
+  tally <- new.env()
+  tally$calls <- 0L
   system2 <- function(...) {
-    calls <<- calls + 1L
+    tally$calls <- tally$calls + 1L
     1L
   }
   wait_for_api_quota <- function(...) TRUE
-  expect_identical(gh_quota_aware(c("x"), quota_waits = 2L), 1L)
-  expect_identical(calls, 3L)
+  expect_identical(gh_quota_aware("x", quota_waits = 2L), 1L)
+  expect_identical(tally$calls, 3L)
 })

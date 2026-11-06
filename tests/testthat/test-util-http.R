@@ -20,7 +20,7 @@ http_condition <- function(status) {
 
 test_that("only a failure of the server or of the connection is retried", {
   transient <- function(status) {
-    cvmdata:::http_is_transient(httr2::response(status))
+    http_is_transient(httr2::response(status))
   }
   expect_true(all(vapply(
     c(429L, 500L, 502L, 503L, 504L),
@@ -37,7 +37,7 @@ test_that("only a failure of the server or of the connection is retried", {
 })
 
 test_that("the policy is four attempts, failures of the connection included", {
-  req <- cvmdata:::req_retry_transient(httr2::request("https://example.test"))
+  req <- req_retry_transient(httr2::request("https://example.test"))
   expect_identical(req$policies$retry_max_tries, 4L)
   expect_true(req$policies$retry_on_failure)
   expect_true(req$policies$retry_is_transient(httr2::response(504L)))
@@ -45,36 +45,37 @@ test_that("the policy is four attempts, failures of the connection included", {
 })
 
 test_that("the final error says it was retried only when it was", {
-  expect_true(cvmdata:::http_failed_transiently(http_condition(504L)))
-  expect_false(cvmdata:::http_failed_transiently(http_condition(404L)))
-  expect_true(cvmdata:::http_failed_transiently(503L))
-  expect_false(cvmdata:::http_failed_transiently(403L))
+  expect_true(http_failed_transiently(http_condition(504L)))
+  expect_false(http_failed_transiently(http_condition(404L)))
+  expect_true(http_failed_transiently(503L))
+  expect_false(http_failed_transiently(403L))
   no_response <- structure(
     class = c("httr2_failure", "httr2_error", "error", "condition"),
     list(message = "Could not resolve host")
   )
-  expect_true(cvmdata:::http_failed_transiently(no_response))
+  expect_true(http_failed_transiently(no_response))
   # an error of the package's own code never reaches the policy
-  expect_false(cvmdata:::http_failed_transiently(simpleError("a bug")))
+  expect_false(http_failed_transiently(simpleError("a bug")))
 
-  hint <- cvmdata:::http_retry_hint(http_condition(504L))
+  hint <- http_retry_hint(http_condition(504L))
   expect_named(hint, "i")
   expect_match(hint, "each of 4 attempts")
-  expect_null(cvmdata:::http_retry_hint(http_condition(404L)))
+  expect_null(http_retry_hint(http_condition(404L)))
 })
 
 # Runs `code` with every request answered by `respond(req)` and returns
 # the retry policy each requested URL carried.
 policies_seen <- function(respond, code) {
-  seen <- list()
+  tally <- new.env()
+  tally$seen <- list()
   httr2::with_mocked_responses(
     function(req) {
-      seen[[req$url]] <<- req$policies
+      tally$seen[[req$url]] <- req$policies
       respond(req)
     },
     code
   )
-  seen
+  tally$seen
 }
 
 expect_policy <- function(seen, pattern) {
@@ -115,8 +116,8 @@ test_that("the mirror's listing, index and download carry the policy", {
       httr2::response(200L, body = as.raw(1:3))
     },
     {
-      cvmdata:::mirror_list_assets("companhias", "http_policy", refresh = TRUE)
-      cvmdata:::mirror_download_asset(
+      mirror_list_assets("companhias", "http_policy", refresh = TRUE)
+      mirror_download_asset(
         "https://example.test/cia__part-0.parquet",
         dest
       )
@@ -140,27 +141,28 @@ test_that("the CVM listing, HEAD and GET carry the policy", {
       httr2::response(200L, body = as.raw(1:3))
     },
     {
-      cvmdata:::get_years_from_listing(dir_url, "x_(\\d{4})\\.zip")
-      cvmdata:::download_with_etag(url, dest)
+      get_years_from_listing(dir_url, "x_(\\d{4})\\.zip")
+      download_with_etag(url, dest)
     }
   )
   expect_policy(seen, dir_url)
   expect_policy(seen, url)
 
   # a cached copy past its TTL is revalidated with a HEAD first
-  methods <- character()
+  tally <- new.env()
+  tally$methods <- character()
   httr2::with_mocked_responses(
     function(req) {
-      methods <<- c(methods, req$method %||% "GET")
+      tally$methods <- c(tally$methods, req$method %||% "GET")
       expect_identical(req$policies$retry_max_tries, 4L)
       httr2::response(200L, body = as.raw(1:3))
     },
     withr::with_options(
       list(cvmdata.cache_ttl_seconds = 0),
-      cvmdata:::download_with_etag(url, dest)
+      download_with_etag(url, dest)
     )
   )
-  expect_identical(methods[[1L]], "HEAD")
+  expect_identical(tally$methods[[1L]], "HEAD")
 })
 
 test_that("a download that fails transiently says it was retried", {
@@ -168,7 +170,7 @@ test_that("a download that fails transiently says it was retried", {
   fetch <- function(status) {
     httr2::with_mocked_responses(
       function(req) httr2::response(status),
-      cvmdata:::mirror_download_asset("https://example.test/a.parquet", dest)
+      mirror_download_asset("https://example.test/a.parquet", dest)
     )
   }
   expect_error(fetch(504L), "each of 4 attempts", class = "cvmdata_error_http")

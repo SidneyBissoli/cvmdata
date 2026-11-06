@@ -47,7 +47,7 @@ trv_bpa <- function() {
 # keep_latest_version ------------------------------------------------
 
 test_that("keep_latest_version keeps the last delivery, not the top versao", {
-  out <- cvmdata:::tx_keep_latest_version(
+  out <- tx_keep_latest_version(
     travessia_submissao(),
     tx = list(action = "keep_latest_version"),
     schema = list(dataset = "dfp", table = "submissao")
@@ -58,7 +58,7 @@ test_that("keep_latest_version keeps the last delivery, not the top versao", {
 })
 
 test_that("keep_latest_version breaks a versao tie by delivery", {
-  out <- cvmdata:::tx_keep_latest_version(
+  out <- tx_keep_latest_version(
     trv_submissao(),
     tx = list(action = "keep_latest_version"),
     schema = list(dataset = "dfp", table = "submissao")
@@ -75,7 +75,7 @@ test_that("keep_latest_version keeps every row of the chosen filing", {
     id_documento = c("10", "10", "20", "20"),
     nome = c("a", "b", "a", "b")
   )
-  out <- cvmdata:::tx_keep_latest_version(df, list(), list())
+  out <- tx_keep_latest_version(df, list(), list())
   expect_identical(out$id_documento, c("20", "20"))
   expect_identical(out$nome, c("a", "b"))
 })
@@ -88,7 +88,7 @@ test_that("keep_latest_version orders receipt times within a day", {
     data_entrega = c("2025-05-01 09:00:00", "2025-05-01 17:30:00"),
     protocolo_entrega = c("A1", "A2")
   )
-  out <- cvmdata:::tx_keep_latest_version(df, list(), list())
+  out <- tx_keep_latest_version(df, list(), list())
   expect_identical(out$protocolo_entrega, "A2")
 })
 
@@ -96,7 +96,7 @@ test_that("keep_latest_version orders receipt times within a day", {
 
 test_that("identical rows of a doubled filing are dropped with a warning", {
   expect_snapshot(
-    out <- cvmdata:::drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
+    out <- drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
   )
   expect_identical(nrow(out), 2L)
   expect_identical(out$vl_conta, c(127621000, 106772000))
@@ -104,7 +104,7 @@ test_that("identical rows of a doubled filing are dropped with a warning", {
 
 test_that("duplicate warning carries its class", {
   expect_warning(
-    cvmdata:::drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer"),
+    drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer"),
     class = "cvmdata_warn_duplicate_filing"
   )
 })
@@ -113,7 +113,7 @@ test_that("copies that differ in vl_conta are kept and flagged", {
   df <- trv_bpa()
   df$vl_conta[3:4] <- c(1, 2)
   expect_warning(
-    out <- cvmdata:::drop_duplicate_filings(df, "cnpj_cia", "dt_refer"),
+    out <- drop_duplicate_filings(df, "cnpj_cia", "dt_refer"),
     class = "cvmdata_warn_conflicting_filing"
   )
   expect_identical(nrow(out), 4L)
@@ -121,8 +121,8 @@ test_that("copies that differ in vl_conta are kept and flagged", {
 
 test_that("a clean table passes untouched", {
   df <- trv_bpa()[1:2, ]
-  expect_no_warning(
-    out <- cvmdata:::drop_duplicate_filings(df, "cnpj_cia", "dt_refer")
+  out <- expect_no_warning(
+    drop_duplicate_filings(df, "cnpj_cia", "dt_refer")
   )
   expect_identical(out, df)
 })
@@ -152,7 +152,7 @@ test_that("a table behind the latest delivery is flagged", {
     issuer_fetch_internal = function(...) travessia_submissao()
   )
   expect_snapshot(
-    out <- cvmdata:::check_filings(
+    out <- check_filings(
       travessia_bpa_v2(),
       schema = list(),
       dataset = "dfp",
@@ -170,7 +170,7 @@ test_that("stale warning carries its class", {
     issuer_fetch_internal = function(...) travessia_submissao()
   )
   expect_warning(
-    cvmdata:::check_filings(
+    check_filings(
       travessia_bpa_v2(),
       schema = list(),
       dataset = "dfp",
@@ -208,8 +208,8 @@ test_that("the stale check uses the last delivery, not the first row", {
   bpa$cnpj_cia <- "47.960.950/0001-21"
   bpa$dt_refer <- as.Date("2024-06-30")
   bpa$denom_cia <- "MAGAZINE LUIZA S.A."
-  expect_no_warning(
-    out <- cvmdata:::check_filings(
+  out <- expect_no_warning(
+    check_filings(
       bpa,
       schema = list(),
       dataset = "itr",
@@ -225,11 +225,11 @@ test_that("the stale check uses the last delivery, not the first row", {
 test_that("an unreachable filing index skips the stale check", {
   local_mocked_bindings(
     issuer_fetch_internal = function(...) {
-      cvmdata:::cvmdata_abort("boom", class = "cvmdata_error_http")
+      cvmdata_abort("boom", class = "cvmdata_error_http")
     }
   )
   expect_no_warning(
-    cvmdata:::check_filings(
+    check_filings(
       travessia_bpa_v2(),
       schema = list(),
       dataset = "dfp",
@@ -248,7 +248,7 @@ test_that("check_filings is off under options(cvmdata.check_filings = FALSE)", {
   )
   df <- trv_bpa()
   expect_identical(
-    cvmdata:::check_filings(
+    check_filings(
       df,
       schema = list(),
       dataset = "dfp",
@@ -264,7 +264,7 @@ test_that("check_filings is off under options(cvmdata.check_filings = FALSE)", {
 test_that("check_filings leaves submissao alone", {
   df <- trv_submissao()
   expect_identical(
-    cvmdata:::check_filings(
+    check_filings(
       df,
       schema = list(),
       dataset = "dfp",

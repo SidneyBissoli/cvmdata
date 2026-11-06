@@ -53,7 +53,7 @@ test_that("cvm_dictionary('dfp', 'bpa') returns parsed rows", {
     )
   )
   expect_gt(nrow(d), 0L)
-  expect_true(all(!is.na(d$tipo_dados)))
+  expect_false(anyNA(d$tipo_dados))
   expect_true(any(d$tipo_dados == "date"))
   expect_null(attr(d, "meta_status"))
 })
@@ -61,7 +61,7 @@ test_that("cvm_dictionary('dfp', 'bpa') returns parsed rows", {
 test_that("cvm_dictionary('fre', 'auditor') returns 18 rows with tipo_dados", {
   d <- cvm_dictionary("fre", "auditor")
   expect_identical(nrow(d), 18L)
-  expect_true(all(!is.na(d$tipo_dados)))
+  expect_false(anyNA(d$tipo_dados))
   expect_null(attr(d, "meta_status"))
 })
 
@@ -399,8 +399,8 @@ test_that("cvm_dataset_years falls back to declared range when listing down", {
   # back to the declared coverage range (first_year .. current year) and
   # warns, so the mirror ETL and direct users survive a portal timeout.
   rlang::env_unbind(
-    cvmdata:::.year_listing_cache,
-    nms = rlang::env_names(cvmdata:::.year_listing_cache)
+    .year_listing_cache,
+    nms = rlang::env_names(.year_listing_cache)
   )
   testthat::local_mocked_bindings(current_year = function() 2026L)
   mock <- function(req) stop("simulated DNS error")
@@ -413,8 +413,8 @@ test_that("cvm_dataset_years falls back to declared range when listing down", {
 
 test_that("cvm_dataset_years aborts when the listing has no year matches", {
   rlang::env_unbind(
-    cvmdata:::.year_listing_cache,
-    nms = rlang::env_names(cvmdata:::.year_listing_cache)
+    .year_listing_cache,
+    nms = rlang::env_names(.year_listing_cache)
   )
   mock <- function(req) {
     httr2::response(
@@ -434,12 +434,13 @@ test_that("cvm_dataset_years aborts when the listing has no year matches", {
 
 test_that("cvm_dataset_years session cache short-circuits the second call", {
   rlang::env_unbind(
-    cvmdata:::.year_listing_cache,
-    nms = rlang::env_names(cvmdata:::.year_listing_cache)
+    .year_listing_cache,
+    nms = rlang::env_names(.year_listing_cache)
   )
-  calls <- 0L
+  tally <- new.env()
+  tally$calls <- 0L
   mock <- function(req) {
-    calls <<- calls + 1L
+    tally$calls <- tally$calls + 1L
     httr2::response(
       status_code = 200L,
       headers = list("Content-Type" = "text/html"),
@@ -453,10 +454,10 @@ test_that("cvm_dataset_years session cache short-circuits the second call", {
     cvm_dataset_years("dfp")
   )
   expect_identical(first, 2024L)
-  expect_identical(calls, 1L)
+  expect_identical(tally$calls, 1L)
   # Second call must NOT hit the mock — the listing cache returns the
   # memoized vector for the same directory URL.
   second <- cvm_dataset_years("dfp")
   expect_identical(second, 2024L)
-  expect_identical(calls, 1L)
+  expect_identical(tally$calls, 1L)
 })

@@ -190,7 +190,7 @@ test_that("columns of one type are left alone", {
   rows <- data.frame(n = 2.5, x = "b", stringsAsFactors = FALSE)
   aligned <- mirror_align_history(previous, rows)
   expect_identical(aligned$changed, character())
-  expect_no_message(all <- mirror_append_history(previous, rows))
+  all <- expect_no_message(mirror_append_history(previous, rows))
   expect_identical(all$n, c(1, 2.5))
   expect_identical(
     mirror_as_text(c(30462550, 1e10, 0.5, NA)),
@@ -354,13 +354,16 @@ test_that("history assets are named so that the current readers skip them", {
   # filter_mirror_assets() keeps only the current assets unless asked,
   # so cvm_fetch() never reads history rows as current.
   public <- gsub("=", ".", name, fixed = TRUE)
-  expect_identical(cvmdata:::parse_mirror_asset_name(public)$kind, "history")
+  expect_identical(parse_mirror_asset_name(public)$kind, "history")
   assets <- tibble::tibble(
-    name = c(gsub("=", ".", gsub("/", "__", rel, fixed = TRUE)), public),
+    name = c(
+      gsub("=", ".", gsub("/", "__", rel, fixed = TRUE), fixed = TRUE),
+      public
+    ),
     url = paste0("https://example.test/", name),
     size_bytes = c(1L, 2L)
   )
-  kept <- cvmdata:::filter_mirror_assets(assets, "bpa", 2024L, "ind")
+  kept <- filter_mirror_assets(assets, "bpa", 2024L, "ind")
   expect_identical(kept$kind, "current")
 })
 
@@ -416,7 +419,7 @@ test_that("the reader fingerprint follows the reader's code", {
   )
   retyped <- sub("taxa_juros|varchar", "taxa_juros|numeric", dict, fixed = TRUE)
   expect_false(identical(mirror_reader_id(ns, retyped), id))
-  assign(".text_types", c("varchar"), envir = ns)
+  assign(".text_types", "varchar", envir = ns)
   expect_false(identical(mirror_reader_id(ns), id))
   # every object of the list exists in the package
   expect_true(all(vapply(

@@ -74,29 +74,29 @@ ref_years <- function(df) unique(format(as.Date(df$dt_refer), "%Y"))
 test_that("mirror_pick_snapshot takes the latest date on or before the pin", {
   dates <- c("2026-10-27", "2026-10-20", "2026-11-03")
   expect_identical(
-    cvmdata:::mirror_pick_snapshot(dates, "2026-10-25", "dfp"),
+    mirror_pick_snapshot(dates, "2026-10-25", "dfp"),
     "2026-10-20"
   )
   expect_identical(
-    cvmdata:::mirror_pick_snapshot(dates, "2026-10-27", "dfp"),
+    mirror_pick_snapshot(dates, "2026-10-27", "dfp"),
     "2026-10-27"
   )
   expect_identical(
-    cvmdata:::mirror_pick_snapshot(dates, "2027-01-01", "dfp"),
+    mirror_pick_snapshot(dates, "2027-01-01", "dfp"),
     "2026-11-03"
   )
   expect_error(
-    cvmdata:::mirror_pick_snapshot(dates, "2026-10-01", "dfp"),
+    mirror_pick_snapshot(dates, "2026-10-01", "dfp"),
     "2026-10-20",
     class = "cvmdata_error_input"
   )
   expect_error(
-    cvmdata:::mirror_pick_snapshot(character(0L), "2026-10-01", "dfp"),
+    mirror_pick_snapshot(character(0L), "2026-10-01", "dfp"),
     "no dated snapshots",
     class = "cvmdata_error_input"
   )
   expect_error(
-    cvmdata:::mirror_pick_snapshot(NULL, "2026-10-01", "dfp"),
+    mirror_pick_snapshot(NULL, "2026-10-01", "dfp"),
     class = "cvmdata_error_input"
   )
 })
@@ -106,7 +106,7 @@ test_that("the sidecar's snapshot fields are read and tolerated when absent", {
   mock <- build_snapshot_mock()
   inventory <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("companhias", "dfp", release = "latest")
+    mirror_list_assets("companhias", "dfp", release = "latest")
   )
   expect_identical(attr(inventory, "source_hash"), "h27")
   expect_identical(attr(inventory, "snapshot"), "2026-10-27")
@@ -121,7 +121,7 @@ test_that("the sidecar's snapshot fields are read and tolerated when absent", {
   mirror_assets_cache_clear()
   plain <- httr2::with_mocked_responses(
     build_mock(list(list(name = bpa_name, parquet = dfp_fx())), hash = "h"),
-    cvmdata:::mirror_list_assets("companhias", "dfp", release = "latest")
+    mirror_list_assets("companhias", "dfp", release = "latest")
   )
   expect_identical(attr(plain, "snapshot"), NA_character_)
   expect_identical(attr(plain, "snapshots"), character(0L))
@@ -134,7 +134,7 @@ test_that("a pinned inventory points every partition into its snapshot", {
   mock <- build_snapshot_mock()
   inventory <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("companhias", "dfp", release = "2026-10-25")
+    mirror_list_assets("companhias", "dfp", release = "2026-10-25")
   )
   expect_true(attr(inventory, "pinned"))
   expect_identical(attr(inventory, "release_tag"), s20)
@@ -153,22 +153,22 @@ test_that("a pinned inventory points every partition into its snapshot", {
   expect_identical(inventory$size_bytes, as.integer(file.info(old_fx())$size))
 
   # The inventory is cached per release: the two pins live side by side.
-  latest <- cvmdata:::mirror_list_assets(
+  latest <- mirror_list_assets(
     "companhias",
     "dfp",
     release = "latest"
   )
   expect_identical(attr(latest, "release_tag"), s27)
   expect_identical(
-    cvmdata:::mirror_resolved_release("companhias", "dfp", "2026-10-25"),
+    mirror_resolved_release("companhias", "dfp", "2026-10-25"),
     s20
   )
   expect_identical(
-    cvmdata:::mirror_resolved_release("companhias", "dfp", "latest"),
+    mirror_resolved_release("companhias", "dfp", "latest"),
     s27
   )
   expect_identical(
-    cvmdata:::mirror_resolved_release("companhias", "itr", "latest"),
+    mirror_resolved_release("companhias", "itr", "latest"),
     NA_character_
   )
 })
@@ -178,7 +178,7 @@ test_that("a pin equal to the latest snapshot reuses the latest rows", {
   mock <- build_snapshot_mock()
   inventory <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_list_assets("companhias", "dfp", release = "2026-10-30")
+    mirror_list_assets("companhias", "dfp", release = "2026-10-30")
   )
   expect_true(attr(inventory, "pinned"))
   expect_identical(attr(inventory, "release_tag"), s27)
@@ -194,7 +194,7 @@ test_that("a pin before the first snapshot, or without snapshots, is refused", {
   expect_error(
     httr2::with_mocked_responses(
       build_snapshot_mock(),
-      cvmdata:::mirror_list_assets("companhias", "dfp", release = "2026-10-01")
+      mirror_list_assets("companhias", "dfp", release = "2026-10-01")
     ),
     "2026-10-20",
     class = "cvmdata_error_input"
@@ -203,7 +203,7 @@ test_that("a pin before the first snapshot, or without snapshots, is refused", {
   expect_error(
     httr2::with_mocked_responses(
       build_mock(list(list(name = bpa_name, parquet = dfp_fx())), hash = "h"),
-      cvmdata:::mirror_list_assets("companhias", "dfp", release = "2026-10-25")
+      mirror_list_assets("companhias", "dfp", release = "2026-10-25")
     ),
     "no dated snapshots",
     class = "cvmdata_error_input"
@@ -223,7 +223,7 @@ test_that("a snapshot whose manifest cannot be read aborts with the URL", {
   expect_error(
     httr2::with_mocked_responses(
       mock,
-      cvmdata:::mirror_list_assets("companhias", "dfp", release = "2026-10-25")
+      mirror_list_assets("companhias", "dfp", release = "2026-10-25")
     ),
     s20,
     class = "cvmdata_error_http"
@@ -238,16 +238,16 @@ test_that("a manifest without a release pointer is refused", {
     files = NULL
   )
   expect_error(
-    cvmdata:::mirror_inventory_from_manifest(sidecar, "o/r", s20),
+    mirror_inventory_from_manifest(sidecar, "o/r", s20),
     class = "cvmdata_error_parse"
   )
-  empty <- cvmdata:::mirror_inventory_from_manifest(
+  empty <- mirror_inventory_from_manifest(
     list(hash = "h", data = list()),
     "o/r",
     s20
   )
   expect_identical(nrow(empty), 0L)
-  expect_identical(names(empty), c("name", "url", "size_bytes", "sha256"))
+  expect_named(empty, c("name", "url", "size_bytes", "sha256"))
 })
 
 test_that("mirror_assets_to_tibble matches the files map by public name", {
@@ -261,10 +261,10 @@ test_that("mirror_assets_to_tibble matches the files map by public name", {
     )
   )
   files <- stats::setNames(list(list(sha256 = "abc", size = 10)), bpa_rel)
-  out <- cvmdata:::mirror_assets_to_tibble(assets, files)
+  out <- mirror_assets_to_tibble(assets, files)
   expect_identical(out$sha256, c("abc", NA, NA))
   expect_identical(out$size_bytes, c(10L, 1L, 5L))
-  out <- cvmdata:::mirror_assets_to_tibble(assets, NULL)
+  out <- mirror_assets_to_tibble(assets, NULL)
   expect_identical(out$sha256, rep(NA_character_, 3L))
 })
 
@@ -295,7 +295,7 @@ test_that("cvm_fetch under a pinned date reads the snapshot's bytes", {
   latest <- fetch_bpa(mock)
   expect_identical(attr(latest, "release"), s27)
   expect_identical(ref_years(latest), "2024")
-  l3 <- cvmdata:::mirror_l3_path("dfp", "bpa", 2024L, "ind")
+  l3 <- mirror_l3_path("dfp", "bpa", 2024L, "ind")
   expect_identical(fixture_sha256(l3), fixture_sha256(dfp_fx()))
 
   # And back to the pin: replaced again, no error.
@@ -315,7 +315,7 @@ test_that("the release attribute is the -latest tag without snapshots", {
 })
 
 test_that("the release attribute is NA off the mirror and prints when set", {
-  cvm <- cvmdata:::cvm_attach_metadata(
+  cvm <- cvm_attach_metadata(
     data.frame(a = 1),
     source = "cvm",
     group = "companhias",
@@ -323,16 +323,17 @@ test_that("the release attribute is NA off the mirror and prints when set", {
     table = "companhias"
   )
   expect_identical(attr(cvm, "release"), NA_character_)
-  expect_true("release" %in% cvmdata:::cvm_tbl_attr_names)
-  msgs <- character()
+  expect_true("release" %in% cvm_tbl_attr_names)
+  tally <- new.env()
+  tally$msgs <- character()
   withCallingHandlers(
     print(cvm),
     message = function(m) {
-      msgs <<- c(msgs, conditionMessage(m))
+      tally$msgs <- c(tally$msgs, conditionMessage(m))
       invokeRestart("muffleMessage")
     }
   )
-  expect_false(any(grepl("release", msgs, fixed = TRUE)))
+  expect_false(any(grepl("release", tally$msgs, fixed = TRUE)))
 
   mirror <- cvm
   attr(mirror, "source") <- "mirror"
@@ -359,15 +360,15 @@ test_that("a pin drops the history superseded after its date", {
     current[, "superseded_at", drop = FALSE],
     history[, "superseded_at", drop = FALSE]
   )
-  kept <- cvmdata:::mirror_drop_history_after(df, "2024-05-14")
+  kept <- mirror_drop_history_after(df, "2024-05-14")
   expect_identical(sum(is.na(kept$superseded_at)), nrow(current))
   expect_setequal(
     unique(kept$superseded_at[!is.na(kept$superseded_at)]),
     c("2024-03-25", "2024-05-14")
   )
-  expect_identical(cvmdata:::mirror_drop_history_after(df, NA_character_), df)
+  expect_identical(mirror_drop_history_after(df, NA_character_), df)
   expect_identical(
-    cvmdata:::mirror_drop_history_after(df, "2026-10-27"),
+    mirror_drop_history_after(df, "2026-10-27"),
     df
   )
 })
@@ -408,7 +409,7 @@ test_that("a cached parquet that does not match the sidecar is replaced", {
     hash = "h",
     files = TRUE
   )
-  l3 <- cvmdata:::mirror_l3_path("dfp", "bpa", 2024L, "ind")
+  l3 <- mirror_l3_path("dfp", "bpa", 2024L, "ind")
   dir.create(dirname(l3), recursive = TRUE)
   writeBin(as.raw(1:100), l3)
 
@@ -437,7 +438,7 @@ test_that("a download that does not match the sidecar is discarded", {
     "does not match",
     class = "cvmdata_error_http_integrity"
   )
-  expect_false(file.exists(cvmdata:::mirror_l3_path(
+  expect_false(file.exists(mirror_l3_path(
     "dfp",
     "bpa",
     2024L,
@@ -448,15 +449,15 @@ test_that("a download that does not match the sidecar is discarded", {
 test_that("a size mismatch is caught without a sha256", {
   path <- withr::local_tempfile()
   writeBin(as.raw(1:10), path)
-  expect_true(cvmdata:::mirror_file_matches(path, NA_character_, NA_integer_))
-  expect_true(cvmdata:::mirror_file_matches(path, NA_character_, 10L))
-  expect_false(cvmdata:::mirror_file_matches(path, NA_character_, 11L))
-  expect_true(cvmdata:::mirror_file_matches(
+  expect_true(mirror_file_matches(path, NA_character_, NA_integer_))
+  expect_true(mirror_file_matches(path, NA_character_, 10L))
+  expect_false(mirror_file_matches(path, NA_character_, 11L))
+  expect_true(mirror_file_matches(
     path,
     toupper(unname(tools::sha256sum(path))),
     10L
   ))
-  expect_false(cvmdata:::mirror_file_matches(path, strrep("a", 64L), 10L))
+  expect_false(mirror_file_matches(path, strrep("a", 64L), 10L))
 })
 
 test_that("a parquet DuckDB cannot read is removed from the cache", {
@@ -465,7 +466,7 @@ test_that("a parquet DuckDB cannot read is removed from the cache", {
   writeBin(as.raw(1:100), bad)
   mock <- build_mock(list(list(name = bpa_name, parquet = bad)), hash = "h")
   expect_error(fetch_bpa(mock), class = "cvmdata_error_parse")
-  expect_false(file.exists(cvmdata:::mirror_l3_path(
+  expect_false(file.exists(mirror_l3_path(
     "dfp",
     "bpa",
     2024L,
@@ -481,7 +482,7 @@ test_that("a verified inventory evicts only the history copies", {
     files = TRUE
   )
   fetch_bpa(mock)
-  l3 <- cvmdata:::mirror_l3_path("dfp", "bpa", 2024L, "ind")
+  l3 <- mirror_l3_path("dfp", "bpa", 2024L, "ind")
   hist <- file.path(dirname(l3), "history.parquet")
   writeBin(as.raw(1:10), hist)
 
@@ -532,7 +533,7 @@ test_that("the sidecar is parsed when served as application/octet-stream", {
   }
   sidecar <- httr2::with_mocked_responses(
     mock,
-    cvmdata:::mirror_read_sidecar("https://example.test/__source_hash.json")
+    mirror_read_sidecar("https://example.test/__source_hash.json")
   )
   expect_identical(sidecar$hash, "h25")
   expect_identical(sidecar$snapshot, "2026-10-25")

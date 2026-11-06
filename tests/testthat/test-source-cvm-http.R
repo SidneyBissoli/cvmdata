@@ -333,7 +333,7 @@ test_that("download_with_etag fetches via GET when cache is empty", {
 test_that("source_cvm_http_get aborts when yearly schema gets year = NULL", {
   schema <- load_schema("dfp", "bpa")
   expect_error(
-    cvmdata:::source_cvm_http_get(schema, year = NULL, report_type = "ind"),
+    source_cvm_http_get(schema, year = NULL, report_type = "ind"),
     class = "cvmdata_error_internal"
   )
 })
@@ -348,7 +348,7 @@ test_that("source_cvm_http_get aborts on unknown temporal_partitioning", {
     cvm_file_url_pattern = NULL
   )
   expect_error(
-    cvmdata:::source_cvm_http_get(schema, year = NULL, report_type = NULL),
+    source_cvm_http_get(schema, year = NULL, report_type = NULL),
     class = "cvmdata_error_internal"
   )
 })
@@ -363,7 +363,7 @@ test_that("source_cvm_http_get aborts when simple schema has no file URL", {
     cvm_archive_url_pattern = NULL
   )
   expect_error(
-    cvmdata:::source_cvm_http_get(schema, year = NULL, report_type = NULL),
+    source_cvm_http_get(schema, year = NULL, report_type = NULL),
     class = "cvmdata_error_internal"
   )
 })
@@ -437,10 +437,11 @@ test_that("download_with_etag triggers HEAD when fetched_at older than TTL", {
   )
   withr::local_options(cvmdata.cache_ttl_seconds = 60L)
 
-  head_called <- FALSE
+  tally <- new.env()
+  tally$head_called <- FALSE
   mock <- function(req) {
     if (identical(req$method, "HEAD")) {
-      head_called <<- TRUE
+      tally$head_called <- TRUE
       return(httr2::response(
         status_code = 200L,
         headers = list("ETag" = "\"FRESH\"")
@@ -458,7 +459,7 @@ test_that("download_with_etag triggers HEAD when fetched_at older than TTL", {
       source = "cvm"
     )
   )
-  expect_true(head_called)
+  expect_true(tally$head_called)
   expect_s3_class(result, "cvm_tbl")
 })
 
@@ -476,10 +477,11 @@ test_that("cvmdata.cache_ttl_seconds = 0 forces HEAD on every call", {
   )
   withr::local_options(cvmdata.cache_ttl_seconds = 0)
 
-  head_called <- FALSE
+  tally <- new.env()
+  tally$head_called <- FALSE
   mock <- function(req) {
     if (identical(req$method, "HEAD")) {
-      head_called <<- TRUE
+      tally$head_called <- TRUE
       return(httr2::response(
         status_code = 200L,
         headers = list("ETag" = "\"FRESH\"")
@@ -497,7 +499,7 @@ test_that("cvmdata.cache_ttl_seconds = 0 forces HEAD on every call", {
       source = "cvm"
     )
   )
-  expect_true(head_called)
+  expect_true(tally$head_called)
   expect_s3_class(result, "cvm_tbl")
 })
 
@@ -534,10 +536,11 @@ test_that("sidecar without fetched_at triggers HEAD even when TTL = Inf", {
   )
   withr::local_options(cvmdata.cache_ttl_seconds = Inf)
 
-  head_called <- FALSE
+  tally <- new.env()
+  tally$head_called <- FALSE
   mock <- function(req) {
     if (identical(req$method, "HEAD")) {
-      head_called <<- TRUE
+      tally$head_called <- TRUE
       return(httr2::response(
         status_code = 200L,
         headers = list("ETag" = "\"FRESH\"")
@@ -555,7 +558,7 @@ test_that("sidecar without fetched_at triggers HEAD even when TTL = Inf", {
       source = "cvm"
     )
   )
-  expect_true(head_called)
+  expect_true(tally$head_called)
   expect_s3_class(result, "cvm_tbl")
 })
 
@@ -573,10 +576,11 @@ test_that("invalid cvmdata.cache_ttl_seconds falls back to HEAD", {
   )
   withr::local_options(cvmdata.cache_ttl_seconds = "not-a-number")
 
-  head_called <- FALSE
+  tally <- new.env()
+  tally$head_called <- FALSE
   mock <- function(req) {
     if (identical(req$method, "HEAD")) {
-      head_called <<- TRUE
+      tally$head_called <- TRUE
       return(httr2::response(
         status_code = 200L,
         headers = list("ETag" = "\"FRESH\"")
@@ -594,7 +598,7 @@ test_that("invalid cvmdata.cache_ttl_seconds falls back to HEAD", {
       source = "cvm"
     )
   )
-  expect_true(head_called)
+  expect_true(tally$head_called)
   expect_s3_class(result, "cvm_tbl")
 })
 
