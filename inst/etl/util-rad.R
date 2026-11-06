@@ -345,7 +345,8 @@ rad_snippet <- function(head, n = 120L) {
 # denom_cia, cd_cvm, id_doc, dt_receb) or NULL. Returns
 # list(meta, tables, problems):
 #   meta     list(layout, dataset, id_doc, cnpj_cia, cd_cvm, denom_cia,
-#            dt_refer, versao, versao_doc, moeda, escala,
+#            dt_refer, versao, versao_doc, cnpj_doc (only when the
+#            document's CNPJ is not the index's), moeda, escala,
 #            tipo_apresentacao, motivo_reapresentacao, xml_hash)
 #   tables   named list "<table>/<report_type>" -> tibble with the
 #            columns of `rad_table_columns(table)`; empty statements are
@@ -469,65 +470,69 @@ rad_finish <- function(res, filing) {
   )
 }
 
-# A document filed under a BRANCH's CNPJ is the company's: the first
-# eight digits (the root, which identifies the company) and the CVM code
-# both match the index. Pacaembu Construtora, ITR 2020-09-30 v1 (id
-# 98410): the document carries 96.298.013/0002-49, the index and the CSV
-# the head office 0001-68, CVM code 025143 on both. Decision of the
-# owner, 2026-10-25: accepted; the rows carry the index's identity, as
-# every row does. A different root, or the same root with another CVM
-# code, is still another document.
-rad_same_company <- function(doc_cnpj, idx_cnpj, doc_cd, idx_cd) {
+# When the CNPJ written in the document is not the index's, the document
+# is still the company's if its CVM code is the one the index lists for
+# the delivery: the code is the key the CVM itself assigns to the
+# registration, and the rows carry the index's identity either way. The
+# three cases measured so far, each decided by the owner:
+# * blank (all zeros): Inter & Co, DFP 2021 v1 (id 113859), a company
+#   abroad (2026-10-23);
+# * a BRANCH's CNPJ: Pacaembu Construtora, ITR 2020-09-30 v1 (id 98410),
+#   0002-49 in the document, the head office 0001-68 in the index and in
+#   the CSV (2026-10-25);
+# * ANOTHER company's CNPJ: Technos, ITR 2011-06-30 v1 (id 10642), where
+#   the envelope (`Documento.xml`) carries 61.562.112/0001-20, the
+#   auditor's (the `PessoaAuditor` of the registration form in the same
+#   ZIP), under the company's name and CVM code 022519. Version 2 (id
+#   10666), which only changes the scale from units to thousands,
+#   carries the same slip and is the one the CVM publishes, under the
+#   right CNPJ (2026-11-06; the only such document in 6,825 read).
+# Another CVM code, or none, is still another document.
+rad_same_cvm_code <- function(doc_cd, idx_cd) {
   doc_cd <- rad_format_cd_cvm(doc_cd)
   idx_cd <- rad_format_cd_cvm(idx_cd)
-  nchar(doc_cnpj) == 14L &&
-    nchar(idx_cnpj) == 14L &&
-    identical(substr(doc_cnpj, 1L, 8L), substr(idx_cnpj, 1L, 8L)) &&
-    !is.na(doc_cd) &&
-    identical(doc_cd, idx_cd)
+  !is.na(doc_cd) && identical(doc_cd, idx_cd)
 }
 
 # The identity of the filing comes from the index; the document is
 # checked against it. The version inside the document can differ from
 # the index (Travessia VI, DFP 2024: the index says 2, the XML says 1);
-# the CSV takes the index, so the document's is kept as a note only.
+# the CSV takes the index, so the document's is kept as a note only, and
+# so is a CNPJ accepted by the CVM code (`cnpj_doc`).
 rad_apply_filing <- function(meta, filing) {
   problems <- character()
   doc_cnpj <- gsub("[^0-9]", "", meta$cnpj_cia %||% "")
   idx_cnpj <- gsub("[^0-9]", "", filing$cnpj_cia)
-  if (grepl("^0+$", doc_cnpj)) {
-    # a blank CNPJ (all zeros: Inter & Co, DFP 2021, a company abroad)
-    # is not a different CNPJ; the identity is then checked by the CVM
-    # code, which the index lists for the delivery (decision of
-    # 2026-10-23). The rows carry the index's identity either way.
-    doc_cd <- rad_format_cd_cvm(meta$cd_cvm)
-    idx_cd <- rad_format_cd_cvm(filing$cd_cvm)
-    if (is.na(doc_cd) || !identical(doc_cd, idx_cd)) {
-      problems <- c(
-        problems,
+  blank <- grepl("^0+$", doc_cnpj)
+  differs <- nzchar(doc_cnpj) && doc_cnpj != idx_cnpj
+  if (differs && !rad_same_cvm_code(meta$cd_cvm, filing$cd_cvm)) {
+    problems <- c(
+      problems,
+      if (blank) {
         sprintf(
           paste0(
             "cnpj blank in the document and cd_cvm (%s) ",
             "differs from the index (%s)"
           ),
-          doc_cd,
-          idx_cd
+          rad_format_cd_cvm(meta$cd_cvm),
+          rad_format_cd_cvm(filing$cd_cvm)
         )
-      )
-    }
-  } else if (
-    nzchar(doc_cnpj) &&
-      doc_cnpj != idx_cnpj &&
-      !rad_same_company(doc_cnpj, idx_cnpj, meta$cd_cvm, filing$cd_cvm)
-  ) {
-    problems <- c(
-      problems,
-      sprintf(
-        "cnpj in the document (%s) differs from the index (%s)",
-        doc_cnpj,
-        idx_cnpj
-      )
+      } else {
+        sprintf(
+          paste0(
+            "cnpj in the document (%s) differs from the index (%s) ",
+            "and so does cd_cvm (%s, index %s)"
+          ),
+          doc_cnpj,
+          idx_cnpj,
+          rad_format_cd_cvm(meta$cd_cvm),
+          rad_format_cd_cvm(filing$cd_cvm)
+        )
+      }
     )
+  }
+  if (differs && !blank) {
+    meta$cnpj_doc <- doc_cnpj
   }
   idx_refer <- as.Date(filing$dt_refer)
   if (!is.na(meta$dt_refer) && !identical(meta$dt_refer, idx_refer)) {
