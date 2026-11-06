@@ -41,6 +41,27 @@ asking the mirror for a missing year quotes it: whether the CVM
 published the CSV with the header only, or did not include it in the
 yearly ZIP at all.
 
+### When a server fails
+
+Every request the package makes, to GitHub or to the CVM portal, is
+tried up to four times when the failure is the server’s or the
+connection’s: an HTTP 5xx, a 429, or no response at all. The waits
+between attempts grow and add up to about fifteen seconds in the worst
+case. A 4xx is never retried, because the same request would bring the
+same answer: a file that does not exist is reported at once. When the
+four attempts fail, the error (`cvmdata_error_http`) says so and that
+trying again in a few minutes usually works.
+
+The `__source_hash.json` sidecar gets one more guarantee. When the
+release publishes it and the package still cannot read it, the call goes
+on with a `cvmdata_warn_sidecar_unread` warning that names what the
+session goes without: cached files are served without checking that the
+release still holds them, downloads are not verified against the
+published digests, and a missing year comes without its reason. The
+first call after five minutes asks for the sidecar again. Under a pinned
+date the sidecar is what lists the dates, so there the call stops with
+the same reason instead.
+
 ### Dated snapshots
 
 The `-latest` release is rewritten in place every week, so by itself it

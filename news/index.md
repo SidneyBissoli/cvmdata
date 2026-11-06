@@ -367,6 +367,36 @@
 
 ### Bug fixes
 
+- A passing failure of GitHub or of the CVM portal no longer fails the
+  call on the first answer. The package asked for each file up to three
+  times but repeated only on HTTP 429 and 503, so the 504 that the
+  download host of GitHub Releases returned on 2026-11-05, for files
+  that were there, stopped
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  at once. Every request now follows one rule: an HTTP 5xx, a 429 and a
+  request with no response are tried up to four times, with growing
+  waits (about fifteen seconds in the worst case). A 4xx is never
+  retried, since the same request would bring the same answer: a file
+  that does not exist is still reported immediately. When the four
+  attempts fail, the `cvmdata_error_http` says so and suggests trying
+  again in a few minutes; the error of the release listing no longer
+  suggests that the release “may not exist yet” when GitHub answered a
+  5xx.
+
+- An unreadable `__source_hash.json` is a warning, never silence. The
+  sidecar of a mirror release was requested once and any failure was
+  swallowed, which left the session exactly as if the release had none:
+  cached files served without checking that the release still held them,
+  downloads not verified against the published digests, a missing year
+  without its reason, and under a pinned date the error “has no dated
+  snapshots yet”. The request now follows the retry rule above; if the
+  sidecar still cannot be read, the call goes on with a
+  `cvmdata_warn_sidecar_unread` warning that says what the session goes
+  without, and the first call after five minutes asks for it again.
+  Under a pinned date the call stops with the real reason.
+
 - [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
   returned filings “superseded” by their own `versao`
   (`versao == superseded_by_versao`, `history_source = "mirror"`). The
