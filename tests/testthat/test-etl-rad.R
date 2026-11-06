@@ -932,6 +932,83 @@ test_that("a checkpoint replaces the record of its own run, not another", {
   expect_length(rad_record_run(state, list(at = "x"), keep = 2L)$runs, 2L)
 })
 
+test_that("a run that finds the whole queue empty records itself", {
+  load_etl_rad()
+  expect_true(rad_idle_round(0L, 0L, TRUE))
+  # narrowed by --year or --reread: its empty queue is not the robot's
+  expect_false(rad_idle_round(0L, 0L, FALSE))
+  expect_false(rad_idle_round(0L, 0L, NULL))
+  # a queue the run did not touch (--limit 0) is not an empty one
+  expect_false(rad_idle_round(12L, 0L, TRUE))
+  expect_false(rad_idle_round(0L, 1L, TRUE))
+
+  uploaded <- character()
+  upload_release_asset <- function(tag, path, attempts = 4L) {
+    uploaded <<- c(uploaded, basename(path))
+    invisible(TRUE)
+  }
+  index <- data.frame(
+    cnpj_cia = "X",
+    dt_refer = as.Date("2024-12-31"),
+    versao = "1",
+    denom_cia = "X SA",
+    cd_cvm = "1",
+    id_doc = "77",
+    dt_receb = as.Date("2025-01-01"),
+    stringsAsFactors = FALSE
+  )
+  # DFP on 2026-11-06: the queue emptied two days before
+  state <- rad_empty_state("dfp")
+  state$done[["15513"]] <- list(hash = "abc", rows = 10L)
+  state <- rad_record_run(
+    state,
+    list(at = "2026-11-04T08:27:57Z", queue = 12L, read = 12L)
+  )
+  out_dir <- withr::local_tempdir()
+  ctx <- list(
+    tag = "mirror-companhias-dfp-latest",
+    work = out_dir,
+    prev_dir = out_dir,
+    hist_dir = out_dir,
+    out_dir = out_dir,
+    index = index,
+    limit = 300L,
+    minutes = 260,
+    t_start = as.POSIXct("2026-11-06 08:50:06", tz = "UTC"),
+    dry_run = FALSE,
+    reread = NULL,
+    whole_queue = TRUE
+  )
+  source_hash <- list(hash = "h", history = list())
+  said <- capture_messages(
+    res <- rad_run_checkpoints(index[0L, ], state, source_hash, ctx)
+  )
+  expect_match(said, "the queue is empty: recording the idle run", all = FALSE)
+  expect_identical(res$tally$checkpoints, 0L)
+  expect_true(is.na(res$stopped))
+  # the state and the unread list go up; no history asset, no hash map
+  expect_identical(uploaded, c("__rad_state.json", "__rad_unread.csv"))
+  back <- rad_read_state(file.path(out_dir, "__rad_state.json"), "dfp")
+  expect_length(back$runs, 2L)
+  expect_identical(back$runs[[1L]]$at, "2026-11-06T08:50:06Z")
+  expect_identical(back$runs[[1L]]$queue, 0L)
+  expect_identical(back$runs[[1L]]$attempted, 0L)
+  expect_null(back$runs[[1L]]$stopped)
+  expect_identical(back$runs[[2L]]$at, "2026-11-04T08:27:57Z")
+  expect_identical(back$done[["15513"]]$hash, "abc")
+
+  # a narrowed run with nothing to do leaves the release alone
+  uploaded <- character()
+  other_dir <- withr::local_tempdir()
+  ctx$out_dir <- other_dir
+  ctx$whole_queue <- FALSE
+  expect_no_message(
+    rad_run_checkpoints(index[0L, ], state, source_hash, ctx)
+  )
+  expect_identical(uploaded, character())
+  expect_false(file.exists(file.path(other_dir, "__rad_state.json")))
+})
+
 # A refusal by the WAF is retried after a pause (decision of 2026-10-22:
 # one refusal in a good run of 74 turned the job red, and the document
 # downloaded whole hours later). The download is replaced below: the
