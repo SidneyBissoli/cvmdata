@@ -8,7 +8,7 @@ test_that("tx_multiply_by_scale aborts when column/scale_column missing", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(vl = 1:3, esc = c("MIL", "MIL", "MIL"))
   expect_error(
-    cvmdata:::tx_multiply_by_scale(
+    tx_multiply_by_scale(
       df,
       tx = list(action = "multiply_by_scale"),
       schema = schema
@@ -16,7 +16,7 @@ test_that("tx_multiply_by_scale aborts when column/scale_column missing", {
     class = "cvmdata_error_internal"
   )
   expect_error(
-    cvmdata:::tx_multiply_by_scale(
+    tx_multiply_by_scale(
       df,
       tx = list(action = "multiply_by_scale", column = "vl"),
       schema = schema
@@ -29,7 +29,7 @@ test_that("tx_multiply_by_scale aborts when columns absent from tibble", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(vl = 1:3, esc = c("MIL", "MIL", "MIL"))
   expect_error(
-    cvmdata:::tx_multiply_by_scale(
+    tx_multiply_by_scale(
       df,
       tx = list(
         action = "multiply_by_scale",
@@ -61,7 +61,7 @@ test_that("tx_multiply_by_scale no-ops on a 0-row tibble", {
     escala_moeda = character(0L),
     stringsAsFactors = FALSE
   )
-  out <- cvmdata:::tx_multiply_by_scale(empty, tx, schema)
+  out <- tx_multiply_by_scale(empty, tx, schema)
   expect_identical(nrow(out), 0L)
   expect_true(all(c("vl_conta", "escala_moeda") %in% names(out)))
 })
@@ -70,7 +70,7 @@ test_that("tx_drop aborts when column key is missing", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(a = 1:3, b = 4:6)
   expect_error(
-    cvmdata:::tx_drop(
+    tx_drop(
       df,
       tx = list(action = "drop"),
       schema = schema
@@ -84,7 +84,7 @@ test_that("tx_keep_latest_version is a no-op when cnpj/date column absent", {
   # dt_refer / data_referencia → function must return the input
   # untouched (line 152 in transform-schema.R).
   df <- tibble::tibble(versao = c("1", "2"), payload = c("a", "b"))
-  out <- cvmdata:::tx_keep_latest_version(
+  out <- tx_keep_latest_version(
     df,
     tx = list(action = "keep_latest_version"),
     schema = list(dataset = "synth", table = "x")
@@ -94,7 +94,7 @@ test_that("tx_keep_latest_version is a no-op when cnpj/date column absent", {
 
 test_that("tx_keep_latest_version is a no-op when versao column absent", {
   df <- tibble::tibble(cnpj_cia = "x", dt_refer = "2024-12-31")
-  out <- cvmdata:::tx_keep_latest_version(
+  out <- tx_keep_latest_version(
     df,
     tx = list(action = "keep_latest_version"),
     schema = list(dataset = "synth", table = "x")
@@ -106,7 +106,7 @@ test_that("apply_one_transformation aborts on unknown action", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(a = 1:3)
   expect_error(
-    cvmdata:::apply_one_transformation(
+    apply_one_transformation(
       df,
       tx = list(action = "obliterate"),
       schema = schema
@@ -119,7 +119,7 @@ test_that("apply_one_transformation aborts when action is NULL", {
   schema <- list(dataset = "synth", table = "x")
   df <- data.frame(a = 1:3)
   expect_error(
-    cvmdata:::apply_one_transformation(
+    apply_one_transformation(
       df,
       tx = list(column = "a"),
       schema = schema
@@ -130,12 +130,12 @@ test_that("apply_one_transformation aborts when action is NULL", {
 
 test_that("scale_factor aborts on unknown scale label", {
   expect_error(
-    cvmdata:::scale_factor(c("MIL", "QUINTILHAO")),
+    scale_factor(c("MIL", "QUINTILHAO")),
     class = "cvmdata_error_parse"
   )
 })
 
 test_that("scale_factor returns NA for NA input without aborting", {
-  out <- cvmdata:::scale_factor(c("MIL", NA))
-  expect_equal(out, c(1e3, NA_real_))
+  out <- scale_factor(c("MIL", NA))
+  expect_identical(out, c(1e3, NA_real_))
 })

@@ -63,7 +63,7 @@ test_that("fetch engine DFP BPA ind tracer returns cvm_tbl", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "dfp")
   expect_identical(attr(result, "table"), "bpa")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(c("cnpj_cia", "cd_cvm", "vl_conta") %in% names(result)))
   # multiply_by_scale + drop applied
   expect_false("escala_moeda" %in% names(result))
@@ -124,7 +124,7 @@ test_that("fetch engine DFP filters by CNPJ", {
       issuer = "00000000000191"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(grepl("0001-91$", result$cnpj_cia)))
 })
 
@@ -132,7 +132,8 @@ test_that("fetch engine DFP filters by CNPJ", {
 
 test_that("fetch_yearly_partitioned uses max year when no companies filter", {
   schema <- load_schema("dfp", "bpa")
-  calls <- list()
+  tally <- new.env()
+  tally$calls <- list()
   testthat::local_mocked_bindings(
     cvm_dataset_years = function(dataset, schema = NULL) {
       c(2024L, 2025L, 2026L)
@@ -145,11 +146,11 @@ test_that("fetch_yearly_partitioned uses max year when no companies filter", {
       validate,
       ...
     ) {
-      calls[[length(calls) + 1L]] <<- year
+      tally$calls[[length(tally$calls) + 1L]] <- year
       data.frame(cd_cvm = "x", stringsAsFactors = FALSE)
     }
   )
-  out <- cvmdata:::fetch_yearly_partitioned(
+  out <- fetch_yearly_partitioned(
     schema,
     "dfp",
     year = NULL,
@@ -157,14 +158,15 @@ test_that("fetch_yearly_partitioned uses max year when no companies filter", {
     report_type = "ind",
     validate = "skip"
   )
-  expect_length(calls, 1L)
-  expect_identical(calls[[1L]], 2026L)
-  expect_equal(nrow(out), 1L)
+  expect_length(tally$calls, 1L)
+  expect_identical(tally$calls[[1L]], 2026L)
+  expect_identical(nrow(out), 1L)
 })
 
 test_that("fetch_yearly_partitioned falls back when max year empty", {
   schema <- load_schema("dfp", "bpa")
-  calls <- integer(0L)
+  tally <- new.env()
+  tally$calls <- integer(0L)
   testthat::local_mocked_bindings(
     cvm_dataset_years = function(dataset, schema = NULL) {
       c(2024L, 2025L, 2026L)
@@ -177,7 +179,7 @@ test_that("fetch_yearly_partitioned falls back when max year empty", {
       validate,
       ...
     ) {
-      calls[[length(calls) + 1L]] <<- year
+      tally$calls[[length(tally$calls) + 1L]] <- year
       if (year == 2026L) {
         data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
       } else {
@@ -186,7 +188,7 @@ test_that("fetch_yearly_partitioned falls back when max year empty", {
     }
   )
   expect_warning(
-    out <- cvmdata:::fetch_yearly_partitioned(
+    out <- fetch_yearly_partitioned(
       schema,
       "dfp",
       year = NULL,
@@ -196,13 +198,14 @@ test_that("fetch_yearly_partitioned falls back when max year empty", {
     ),
     class = "cvmdata_warn_year_fallback"
   )
-  expect_identical(calls, c(2026L, 2025L))
-  expect_equal(nrow(out), 1L)
+  expect_identical(tally$calls, c(2026L, 2025L))
+  expect_identical(nrow(out), 1L)
 })
 
 test_that("fetch_yearly_partitioned gives up after .latest_year_max_tries", {
   schema <- load_schema("dfp", "bpa")
-  calls <- integer(0L)
+  tally <- new.env()
+  tally$calls <- integer(0L)
   testthat::local_mocked_bindings(
     cvm_dataset_years = function(dataset, schema = NULL) {
       c(2020L, 2021L, 2022L, 2023L, 2024L, 2025L, 2026L)
@@ -215,11 +218,11 @@ test_that("fetch_yearly_partitioned gives up after .latest_year_max_tries", {
       validate,
       ...
     ) {
-      calls[[length(calls) + 1L]] <<- year
+      tally$calls[[length(tally$calls) + 1L]] <- year
       data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
     }
   )
-  out <- suppressWarnings(cvmdata:::fetch_yearly_partitioned(
+  out <- suppressWarnings(fetch_yearly_partitioned(
     schema,
     "dfp",
     year = NULL,
@@ -228,18 +231,19 @@ test_that("fetch_yearly_partitioned gives up after .latest_year_max_tries", {
     validate = "skip"
   ))
   # Tries exactly .latest_year_max_tries = 3 years (2026, 2025, 2024).
-  expect_identical(calls, c(2026L, 2025L, 2024L))
-  expect_equal(nrow(out), 0L)
+  expect_identical(tally$calls, c(2026L, 2025L, 2024L))
+  expect_identical(nrow(out), 0L)
 })
 
 test_that("fetch_yearly_partitioned with explicit years skips discovery", {
   schema <- load_schema("dfp", "bpa")
-  discovery_called <- 0L
-  fetch_calls <- integer(0L)
+  tally <- new.env()
+  tally$discovery_called <- 0L
+  tally$fetch_calls <- integer(0L)
   testthat::local_mocked_bindings(
     cvm_dataset_years = function(dataset, schema = NULL) {
-      discovery_called <<- discovery_called + 1L
-      c(2024L)
+      tally$discovery_called <- tally$discovery_called + 1L
+      2024L
     },
     fetch_one_year = function(
       schema,
@@ -249,11 +253,11 @@ test_that("fetch_yearly_partitioned with explicit years skips discovery", {
       validate,
       ...
     ) {
-      fetch_calls[[length(fetch_calls) + 1L]] <<- year
+      tally$fetch_calls[[length(tally$fetch_calls) + 1L]] <- year
       data.frame(cd_cvm = "x", year = year, stringsAsFactors = FALSE)
     }
   )
-  out <- cvmdata:::fetch_yearly_partitioned(
+  out <- fetch_yearly_partitioned(
     schema,
     "dfp",
     year = c(2022L, 2023L),
@@ -261,15 +265,15 @@ test_that("fetch_yearly_partitioned with explicit years skips discovery", {
     report_type = "ind",
     validate = "skip"
   )
-  expect_identical(discovery_called, 0L)
-  expect_identical(fetch_calls, c(2022L, 2023L))
-  expect_equal(nrow(out), 2L)
+  expect_identical(tally$discovery_called, 0L)
+  expect_identical(tally$fetch_calls, c(2022L, 2023L))
+  expect_identical(nrow(out), 2L)
 })
 
 test_that("clamp_years_to_first drops early years and keeps the rest", {
   schema <- load_schema("dfp", "bpa") # first_year = 2010
   expect_message(
-    res <- cvmdata:::clamp_years_to_first(c(2008L, 2010L, 2011L), schema),
+    res <- clamp_years_to_first(c(2008L, 2010L, 2011L), schema),
     regexp = "starts at"
   )
   expect_identical(res, c(2010L, 2011L))
@@ -277,20 +281,21 @@ test_that("clamp_years_to_first drops early years and keeps the rest", {
 
 test_that("clamp_years_to_first is a silent no-op when all years valid", {
   schema <- load_schema("dfp", "bpa")
-  expect_silent(res <- cvmdata:::clamp_years_to_first(2010:2012, schema))
+  res <- expect_silent(clamp_years_to_first(2010:2012, schema))
   expect_identical(res, 2010:2012)
 })
 
 test_that("clamp_years_to_first aborts when every year precedes first_year", {
   schema <- load_schema("dfp", "bpa")
   expect_error(
-    cvmdata:::clamp_years_to_first(2005:2009, schema),
+    clamp_years_to_first(2005:2009, schema),
     class = "cvmdata_error_input"
   )
 })
 
 test_that("issuer_fetch_internal clamps explicit years below first_year", {
-  called_years <- integer(0L)
+  tally <- new.env()
+  tally$called_years <- integer(0L)
   testthat::local_mocked_bindings(
     fetch_one_year = function(
       schema,
@@ -300,12 +305,12 @@ test_that("issuer_fetch_internal clamps explicit years below first_year", {
       validate,
       ...
     ) {
-      called_years[[length(called_years) + 1L]] <<- year
+      tally$called_years[[length(tally$called_years) + 1L]] <- year
       data.frame(cd_cvm = "009512", stringsAsFactors = FALSE)
     }
   )
   expect_message(
-    out <- cvmdata:::issuer_fetch_internal(
+    out <- issuer_fetch_internal(
       "dfp",
       "bpa",
       issuer = "33000167000101",
@@ -317,7 +322,7 @@ test_that("issuer_fetch_internal clamps explicit years below first_year", {
     regexp = "starts at"
   )
   # 2008 and 2009 dropped before HTTP; only 2010-2012 fetched.
-  expect_identical(sort(unique(called_years)), 2010:2012)
+  expect_identical(sort(unique(tally$called_years)), 2010:2012)
 })
 
 test_that("issuer_fetch_internal aborts when all explicit years too early", {
@@ -325,7 +330,7 @@ test_that("issuer_fetch_internal aborts when all explicit years too early", {
     fetch_one_year = function(...) stop("must not fetch a clamped year")
   )
   expect_error(
-    cvmdata:::issuer_fetch_internal(
+    issuer_fetch_internal(
       "dfp",
       "bpa",
       issuer = "33000167000101",
@@ -353,7 +358,7 @@ test_that("explicit years stay silent-empty when CNPJ matches no year", {
       data.frame(cd_cvm = character(0), stringsAsFactors = FALSE)
     }
   )
-  out <- cvmdata:::fetch_explicit_years(
+  out <- fetch_explicit_years(
     schema,
     year = c(2012L, 2024L),
     issuer = "00000000000191",
@@ -361,7 +366,7 @@ test_that("explicit years stay silent-empty when CNPJ matches no year", {
     validate = "skip",
     on_error = "abort"
   )
-  expect_equal(nrow(out), 0L)
+  expect_identical(nrow(out), 0L)
 })
 
 # Schema validation --------------------------------------------------
@@ -441,7 +446,7 @@ test_that("load_schema rejects mixed cvm_file_pattern + variants", {
         temporal_partitioning = "yearly",
         first_year = 2010L
       )
-      cvmdata:::validate_schema(bad, "x", "y")
+      validate_schema(bad, "x", "y")
     },
     class = "cvmdata_error_internal"
   )
@@ -458,7 +463,7 @@ test_that("load_schema rejects yearly schema lacking first_year", {
         cvm_file_pattern = "x_{year}.csv",
         temporal_partitioning = "yearly"
       )
-      cvmdata:::validate_schema(bad, "x", "y")
+      validate_schema(bad, "x", "y")
     },
     class = "cvmdata_error_internal"
   )
@@ -468,7 +473,7 @@ test_that("load_schema accepts DFP bpa.yaml", {
   s <- load_schema("dfp", "bpa")
   expect_s3_class(s, "cvm_table_schema")
   expect_identical(s$temporal_partitioning, "yearly")
-  expect_equal(s$first_year, 2010)
+  expect_identical(s$first_year, 2010L)
   expect_named(s$cvm_file_pattern_variants, c("ind", "con"))
 })
 
@@ -508,15 +513,15 @@ test_that("cvm_dataset_years returns NA for non-yearly dataset", {
 # Transformations ----------------------------------------------------
 
 test_that("scale_factor maps CVM labels", {
-  expect_equal(cvmdata:::scale_factor("UNIDADE"), 1)
-  expect_equal(cvmdata:::scale_factor("MIL"), 1e3)
-  expect_equal(cvmdata:::scale_factor("MILHÃO"), 1e6)
-  expect_equal(cvmdata:::scale_factor("BILHÃO"), 1e9)
-  expect_equal(cvmdata:::scale_factor(c("MIL", "UNIDADE")), c(1e3, 1))
+  expect_identical(scale_factor("UNIDADE"), 1)
+  expect_identical(scale_factor("MIL"), 1e3)
+  expect_identical(scale_factor("MILHÃO"), 1e6)
+  expect_identical(scale_factor("BILHÃO"), 1e9)
+  expect_identical(scale_factor(c("MIL", "UNIDADE")), c(1e3, 1))
 })
 
 test_that("scale_factor rejects unknown label", {
-  expect_error(cvmdata:::scale_factor("ZILHAO"), class = "cvmdata_error_parse")
+  expect_error(scale_factor("ZILHAO"), class = "cvmdata_error_parse")
 })
 
 test_that("keep_latest_version keeps max versao per (cnpj, dt_refer)", {
@@ -532,14 +537,14 @@ test_that("keep_latest_version keeps max versao per (cnpj, dt_refer)", {
     payload = c("v1", "v2", "v3", "x")
   )
   schema <- list()
-  out <- cvmdata:::tx_keep_latest_version(df, list(), schema)
-  expect_equal(nrow(out), 2L)
+  out <- tx_keep_latest_version(df, list(), schema)
+  expect_identical(nrow(out), 2L)
   expect_setequal(out$payload, c("v3", "x"))
 })
 
 test_that("keep_latest_version is no-op without versao triple", {
   df <- data.frame(x = 1:3)
-  out <- cvmdata:::tx_keep_latest_version(df, list(), list())
+  out <- tx_keep_latest_version(df, list(), list())
   expect_identical(out, df)
 })
 
@@ -548,14 +553,14 @@ test_that("multiply_by_scale aborts when columns missing", {
   schema <- list(dataset = "x", table = "y")
   tx <- list(column = "vl_conta", scale_column = "escala_moeda")
   expect_error(
-    cvmdata:::tx_multiply_by_scale(df, tx, schema),
+    tx_multiply_by_scale(df, tx, schema),
     class = "cvmdata_error_parse"
   )
 })
 
 test_that("apply_one_transformation aborts on unknown action", {
   expect_error(
-    cvmdata:::apply_one_transformation(
+    apply_one_transformation(
       data.frame(),
       list(action = "bogus"),
       list()
@@ -566,7 +571,7 @@ test_that("apply_one_transformation aborts on unknown action", {
 
 test_that("apply_one_transformation aborts on missing action", {
   expect_error(
-    cvmdata:::apply_one_transformation(
+    apply_one_transformation(
       data.frame(),
       list(),
       list(dataset = "x", table = "y")
@@ -578,7 +583,7 @@ test_that("apply_one_transformation aborts on missing action", {
 test_that("apply_schema_transformations no-op when transformations empty", {
   df <- data.frame(a = 1:3)
   expect_identical(
-    cvmdata:::apply_schema_transformations(df, list()),
+    apply_schema_transformations(df, list()),
     df
   )
 })
@@ -596,9 +601,10 @@ test_that("get_yearly_csv downloads ZIP when cache is empty", {
     n = file.size(test_path("fixtures", "dfp_cia_aberta_2024.zip"))
   )
   schema <- load_schema("dfp", "bpa")
-  call_count <- 0L
+  tally <- new.env()
+  tally$call_count <- 0L
   mock_fn <- function(req) {
-    call_count <<- call_count + 1L
+    tally$call_count <- tally$call_count + 1L
     httr2::response(
       status_code = 200L,
       headers = list(
@@ -614,13 +620,13 @@ test_that("get_yearly_csv downloads ZIP when cache is empty", {
   )
   expect_true(file.exists(csv_path))
   expect_match(basename(csv_path), "BPA_ind_2024\\.csv$")
-  expect_identical(call_count, 1L)
+  expect_identical(tally$call_count, 1L)
 })
 
 test_that("resolve_file_pattern rejects bad report_type", {
   schema <- load_schema("dfp", "bpa")
   expect_error(
-    cvmdata:::resolve_file_pattern(schema, "xxx"),
+    resolve_file_pattern(schema, "xxx"),
     class = "cvmdata_error_input"
   )
 })
@@ -628,14 +634,14 @@ test_that("resolve_file_pattern rejects bad report_type", {
 test_that("resolve_file_pattern errors on missing report_type", {
   schema <- load_schema("dfp", "bpa")
   expect_error(
-    cvmdata:::resolve_file_pattern(schema, NULL),
+    resolve_file_pattern(schema, NULL),
     class = "cvmdata_error_input"
   )
 })
 
 test_that("resolve_file_pattern returns scalar for non-variant tables", {
   schema <- load_schema("dfp", "composicao_capital")
-  out <- cvmdata:::resolve_file_pattern(schema, NULL)
+  out <- resolve_file_pattern(schema, NULL)
   expect_match(out, "composicao_capital_\\{year\\}\\.csv$")
 })
 
@@ -650,8 +656,8 @@ test_that("cvm_dataset_years parses HTML listing for yearly dataset", {
   )
   # clear cache
   rm(
-    list = ls(cvmdata:::.year_listing_cache),
-    envir = cvmdata:::.year_listing_cache
+    list = ls(.year_listing_cache),
+    envir = .year_listing_cache
   )
   mock_listing <- function(req) {
     httr2::response(
@@ -702,7 +708,7 @@ test_that("validate_schema rejects bad meta_status", {
     meta_status = "weird"
   )
   expect_error(
-    cvmdata:::validate_schema(bad, "x", "y"),
+    validate_schema(bad, "x", "y"),
     class = "cvmdata_error_internal"
   )
 })
@@ -717,7 +723,7 @@ test_that("validate_schema rejects bad temporal_partitioning", {
     temporal_partitioning = "monthly"
   )
   expect_error(
-    cvmdata:::validate_schema(bad, "x", "y"),
+    validate_schema(bad, "x", "y"),
     class = "cvmdata_error_internal"
   )
 })
@@ -733,7 +739,7 @@ test_that("validate_schema rejects missing_meta without field_names", {
     meta_status = "missing"
   )
   expect_error(
-    cvmdata:::validate_schema(bad, "x", "y"),
+    validate_schema(bad, "x", "y"),
     class = "cvmdata_error_internal"
   )
 })
@@ -749,7 +755,7 @@ test_that("validate_schema rejects bad variant keys", {
     first_year = 2010L
   )
   expect_error(
-    cvmdata:::validate_schema(bad, "x", "y"),
+    validate_schema(bad, "x", "y"),
     class = "cvmdata_error_internal"
   )
 })
@@ -807,7 +813,7 @@ test_that("fetch engine ITR BPA ind tracer returns cvm_tbl", {
   expect_identical(attr(result, "source"), "cvm")
   expect_identical(attr(result, "dataset"), "itr")
   expect_identical(attr(result, "table"), "bpa")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(c("cnpj_cia", "cd_cvm", "vl_conta") %in% names(result)))
   expect_false("escala_moeda" %in% names(result))
   expect_type(result$vl_conta, "double")
@@ -874,8 +880,8 @@ test_that("ITR bpa is not flagged stale when the index lists v1 before v2", {
   # The BPA fixture holds MAGAZINE LUIZA 2024-06-30 at versao 2, the
   # last delivery. The check must compare against that delivery, not
   # against the first row of the (now complete) index.
-  expect_no_warning(
-    result <- httr2::with_mocked_responses(
+  result <- expect_no_warning(
+    httr2::with_mocked_responses(
       function(req) fresh_head_response(),
       cvm_fetch(
         "itr",
@@ -921,7 +927,7 @@ test_that("load_schema accepts ITR bpa.yaml with first_year 2011", {
   s <- load_schema("itr", "bpa")
   expect_s3_class(s, "cvm_table_schema")
   expect_identical(s$temporal_partitioning, "yearly")
-  expect_equal(s$first_year, 2011)
+  expect_identical(s$first_year, 2011L)
   expect_named(s$cvm_file_pattern_variants, c("ind", "con"))
 })
 
@@ -1024,7 +1030,7 @@ test_that("fetch engine FRE auditor tracer returns cvm_tbl", {
   expect_identical(attr(result, "source"), "cvm")
   expect_identical(attr(result, "dataset"), "fre")
   expect_identical(attr(result, "table"), "auditor")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   # FRE-detail uses cnpj_companhia / data_referencia / nome_companhia.
   expect_true(all(
     c("cnpj_companhia", "data_referencia", "nome_companhia", "versao") %in%
@@ -1060,7 +1066,7 @@ test_that("load_schema accepts FRE submissao.yaml with first_year 2010", {
   s <- load_schema("fre", "submissao")
   expect_s3_class(s, "cvm_table_schema")
   expect_identical(s$temporal_partitioning, "yearly")
-  expect_equal(s$first_year, 2010)
+  expect_identical(s$first_year, 2010L)
   expect_identical(s$cvm_file_pattern, "fre_cia_aberta_{year}.csv")
 })
 
@@ -1108,7 +1114,7 @@ test_that("fetch engine FRE detail filters by CNPJ via cnpj_companhia", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
@@ -1164,7 +1170,7 @@ test_that("FRE meta_status:missing strict passes when header matches", {
     )
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true("quantidade_pcd" %in% names(result))
 })
 
@@ -1211,7 +1217,8 @@ test_that("FRE meta_status:missing skip suppresses validation", {
   skip_if_not_installed("httptest2")
   local_fre_cache_bad_pcd(rename_pcd_header)
 
-  warnings_seen <- character(0L)
+  tally <- new.env()
+  tally$warnings_seen <- character(0L)
   result <- withCallingHandlers(
     httr2::with_mocked_responses(
       function(req) fresh_head_response(),
@@ -1224,11 +1231,11 @@ test_that("FRE meta_status:missing skip suppresses validation", {
       )
     ),
     cvmdata_warn_validation = function(w) {
-      warnings_seen <<- c(warnings_seen, conditionMessage(w))
+      tally$warnings_seen <- c(tally$warnings_seen, conditionMessage(w))
       invokeRestart("muffleWarning")
     }
   )
-  expect_length(warnings_seen, 0L)
+  expect_length(tally$warnings_seen, 0L)
   expect_s3_class(result, "cvm_tbl")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
 })

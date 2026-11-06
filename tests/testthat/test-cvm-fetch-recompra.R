@@ -134,19 +134,19 @@ test_that("year and from/to are refused on the non-yearly tables", {
 
 test_that("the static ZIP path refuses report_type", {
   local_prepare_recompra_cache()
-  schema <- cvmdata:::load_schema("recompra_acoes", "quantidades")
+  schema <- load_schema("recompra_acoes", "quantidades")
   expect_error(
-    cvmdata:::source_cvm_http_get(schema, report_type = "ind"),
+    source_cvm_http_get(schema, report_type = "ind"),
     class = "cvmdata_error_input"
   )
 })
 
 test_that("a member missing from the static ZIP raises zip_member_missing", {
   local_prepare_recompra_cache()
-  schema <- cvmdata:::load_schema("recompra_acoes", "quantidades")
+  schema <- load_schema("recompra_acoes", "quantidades")
   schema$cvm_file_pattern <- "cia_aberta_recompra_acoes_ausente.csv"
   expect_error(
-    with_fixture_http(cvmdata:::source_cvm_http_get(schema)),
+    with_fixture_http(source_cvm_http_get(schema)),
     class = "cvmdata_error_zip_member_missing"
   )
 })
@@ -176,34 +176,34 @@ test_that("cnpj reaches the child tables through the mirror too", {
 # Schema and cache ------------------------------------------------------------
 
 test_that("{year} in the archive URL must match the partitioning", {
-  base <- cvmdata:::load_schema("recompra_acoes", "recompra_acoes")
+  base <- load_schema("recompra_acoes", "recompra_acoes")
   s <- unclass(base)
   s$cvm_archive_url_pattern <- "https://example.test/x_{year}.zip"
   expect_error(
-    cvmdata:::validate_url_topology(s, "recompra_acoes", "recompra_acoes"),
+    validate_url_topology(s, "recompra_acoes", "recompra_acoes"),
     class = "cvmdata_error_internal"
   )
-  y <- unclass(cvmdata:::load_schema("vlmo", "submissao"))
+  y <- unclass(load_schema("vlmo", "submissao"))
   y$cvm_archive_url_pattern <- "https://example.test/vlmo.zip"
   expect_error(
-    cvmdata:::validate_url_topology(y, "vlmo", "submissao"),
+    validate_url_topology(y, "vlmo", "submissao"),
     class = "cvmdata_error_internal"
   )
 })
 
 test_that("a malformed issuer_via is refused", {
-  s <- unclass(cvmdata:::load_schema("recompra_acoes", "quantidades"))
+  s <- unclass(load_schema("recompra_acoes", "quantidades"))
   expect_no_error(
-    cvmdata:::validate_issuer_via(s, "recompra_acoes", "quantidades")
+    validate_issuer_via(s, "recompra_acoes", "quantidades")
   )
   s$issuer_via <- list(table = "recompra_acoes")
   expect_error(
-    cvmdata:::validate_issuer_via(s, "recompra_acoes", "quantidades"),
+    validate_issuer_via(s, "recompra_acoes", "quantidades"),
     class = "cvmdata_error_internal"
   )
   s$issuer_via <- list(table = "quantidades", key = "id_programa")
   expect_error(
-    cvmdata:::validate_issuer_via(s, "recompra_acoes", "quantidades"),
+    validate_issuer_via(s, "recompra_acoes", "quantidades"),
     class = "cvmdata_error_internal"
   )
 })
@@ -213,7 +213,7 @@ test_that("the static ZIP and its extracted CSVs form one cache unit", {
   with_fixture_http(
     cvm_fetch("recompra_acoes", "quantidades", source = "cvm")
   )
-  units <- cvmdata:::build_cache_units(dirname(dirname(raw_dir)))
+  units <- build_cache_units(dirname(dirname(raw_dir)))
   expect_length(units$units, 1L)
   expect_true(any(grepl("_quantidades\\.csv$", units$units[[1L]])))
   expect_true(any(grepl("\\.zip$", units$units[[1L]])))

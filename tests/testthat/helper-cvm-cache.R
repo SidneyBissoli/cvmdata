@@ -8,13 +8,13 @@
 # clears them). They live here, not in R/, so the package ships no
 # function that only the tests call.
 ticker_lookup_cache_clear <- function() {
-  env <- cvmdata:::.ticker_lookup_cache
+  env <- .ticker_lookup_cache
   rm(list = ls(env), envir = env)
   invisible()
 }
 
 mirror_assets_cache_clear <- function() {
-  env <- cvmdata:::.mirror_assets_cache
+  env <- .mirror_assets_cache
   rm(list = ls(env), envir = env)
   invisible()
 }

@@ -59,7 +59,7 @@ test_that("later snapshots take the new and the changed partitions", {
 
   tag_b <- "mirror-companhias-dfp-snapshot-2026-11-03"
   releases <- snapshot_releases_map(prev, data_now, changed, tag_b)
-  expect_identical(names(releases), names(data_now))
+  expect_named(releases, names(data_now))
   expect_identical(
     unname(unlist(releases)),
     c(tag_a, tag_b, tag_b)
@@ -102,7 +102,7 @@ test_that("file digests are keyed by partition path with the real sha256", {
   dir.create(dirname(path), recursive = TRUE)
   writeBin(as.raw(1:64), path)
   digests <- snapshot_file_digests(path, root)
-  expect_identical(names(digests), rel)
+  expect_named(digests, rel)
   expect_identical(digests[[rel]]$size, 64)
   expect_identical(
     digests[[rel]]$sha256,

@@ -100,7 +100,7 @@ test_that("fetch engine parses date columns as Date", {
   )
 
   date_cols <- grep("^dt_", names(result), value = TRUE)
-  expect_true(length(date_cols) > 0L)
+  expect_gt(length(date_cols), 0L)
   for (col in date_cols) {
     expect_s3_class(result[[col]], "Date")
   }
@@ -202,9 +202,10 @@ test_that("source_cvm_http_get downloads when cache is empty", {
   )
   schema <- load_schema("cad", "companhias")
 
-  call_count <- 0L
+  tally <- new.env()
+  tally$call_count <- 0L
   mock_fn <- function(req) {
-    call_count <<- call_count + 1L
+    tally$call_count <- tally$call_count + 1L
     httr2::response(
       status_code = 200L,
       headers = list(
@@ -224,7 +225,7 @@ test_that("source_cvm_http_get downloads when cache is empty", {
   expect_true(file.exists(paste0(csv_path, ".etag.rds")))
   meta <- readRDS(paste0(csv_path, ".etag.rds"))
   expect_identical(meta$etag, "\"first-download\"")
-  expect_identical(call_count, 1L)
+  expect_identical(tally$call_count, 1L)
 })
 
 test_that("source_cvm_http_get re-downloads when ETag changes", {
@@ -253,9 +254,10 @@ test_that("source_cvm_http_get re-downloads when ETag changes", {
     what = "raw",
     n = file.size(test_path("fixtures", "cad_sample.csv"))
   )
-  call_count <- 0L
+  tally <- new.env()
+  tally$call_count <- 0L
   mock_fn <- function(req) {
-    call_count <<- call_count + 1L
+    tally$call_count <- tally$call_count + 1L
     httr2::response(
       status_code = 200L,
       headers = list(
@@ -274,7 +276,7 @@ test_that("source_cvm_http_get re-downloads when ETag changes", {
 
   meta <- readRDS(paste0(csv_path, ".etag.rds"))
   expect_identical(meta$etag, "\"new-etag\"")
-  expect_identical(call_count, 2L)
+  expect_identical(tally$call_count, 2L)
 })
 
 test_that("source_cvm_http_get requires year for yearly schema", {

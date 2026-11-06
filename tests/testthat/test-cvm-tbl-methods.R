@@ -83,9 +83,10 @@ test_that("group_by keeps the class and the grouping", {
   expect_provenance(g, x)
   expect_s3_class(g, "grouped_df")
   expect_identical(dplyr::group_vars(g), "cnpj_cia")
-  expect_identical(
-    class(g),
-    c("cvm_tbl", "grouped_df", "tbl_df", "tbl", "data.frame")
+  expect_s3_class(
+    g,
+    c("cvm_tbl", "grouped_df", "tbl_df", "tbl", "data.frame"),
+    exact = TRUE
   )
 })
 
@@ -110,7 +111,7 @@ test_that("verbs after group_by keep class and attributes", {
   u <- dplyr::ungroup(g)
   expect_provenance(u, x)
   expect_false(inherits(u, "grouped_df"))
-  expect_identical(class(u), class(x))
+  expect_s3_class(u, class(x), exact = TRUE)
 
   kept <- dplyr::summarise(
     dplyr::group_by(x, cnpj_cia, cd_conta),
@@ -202,12 +203,12 @@ test_that("vec_rbind and rbind of divergent provenance say mixed", {
   expect_identical(attr(out, "group"), "companhias")
   expect_identical(attr(out, "dataset"), "dfp")
   expect_identical(attr(out, "package_version"), attr(x, "package_version"))
-  expect_equal(as.numeric(attr(out, "fetched_at")), as.numeric(older))
+  expect_identical(as.numeric(attr(out, "fetched_at")), as.numeric(older))
 
   # Order does not matter: y first gives the same reconciled provenance.
   rev <- vctrs::vec_rbind(y, x)
   expect_identical(attr(rev, "source"), "mixed")
-  expect_equal(as.numeric(attr(rev, "fetched_at")), as.numeric(older))
+  expect_identical(as.numeric(attr(rev, "fetched_at")), as.numeric(older))
 
   three <- rbind(x, y, make_cvm_tbl())
   expect_s3_class(three, "cvm_tbl")
@@ -243,15 +244,15 @@ test_that("binding with a plain tibble follows dplyr's first-input rule", {
   second <- dplyr::bind_rows(plain, x)
   expect_false(inherits(second, "cvm_tbl"))
   expect_null(attr(second, "source", exact = TRUE))
-  expect_identical(class(second), class(plain))
+  expect_s3_class(second, class(plain), exact = TRUE)
 
-  expect_identical(class(vctrs::vec_rbind(x, plain)), class(plain))
-  expect_identical(class(vctrs::vec_rbind(plain, x)), class(plain))
-  expect_identical(class(rbind(x, plain)), class(plain))
+  expect_s3_class(vctrs::vec_rbind(x, plain), class(plain), exact = TRUE)
+  expect_s3_class(vctrs::vec_rbind(plain, x), class(plain), exact = TRUE)
+  expect_s3_class(rbind(x, plain), class(plain), exact = TRUE)
 
   df <- as.data.frame(unclass_cvm(x))
-  expect_identical(class(vctrs::vec_rbind(x, df)), class(plain))
-  expect_identical(class(vctrs::vec_rbind(df, x)), class(plain))
+  expect_s3_class(vctrs::vec_rbind(x, df), class(plain), exact = TRUE)
+  expect_s3_class(vctrs::vec_rbind(df, x), class(plain), exact = TRUE)
 })
 
 test_that("vec_cast to a cvm_tbl stamps the target's provenance", {
@@ -261,9 +262,9 @@ test_that("vec_cast to a cvm_tbl stamps the target's provenance", {
   expect_provenance(vctrs::vec_cast(plain, x), x)
   expect_provenance(vctrs::vec_cast(df, x), x)
   expect_provenance(vctrs::vec_cast(x, x), x)
-  expect_identical(class(vctrs::vec_cast(x, plain)), class(plain))
-  expect_identical(class(vctrs::vec_cast(x, df)), "data.frame")
-  expect_identical(class(vctrs::vec_ptype(x)), class(x))
+  expect_s3_class(vctrs::vec_cast(x, plain), class(plain), exact = TRUE)
+  expect_s3_class(vctrs::vec_cast(x, df), "data.frame", exact = TRUE)
+  expect_s3_class(vctrs::vec_ptype(x), class(x), exact = TRUE)
 })
 
 test_that("operations that leave the CVM table drop the class", {
@@ -290,7 +291,7 @@ test_that("merging provenance tolerates absent attributes", {
   y <- make_cvm_tbl()
   attr(y, "fetched_at") <- NULL
   merged <- cvm_tbl_merge_attrs(x, y)
-  expect_equal(merged$fetched_at, attr(x, "fetched_at"))
+  expect_identical(merged$fetched_at, attr(x, "fetched_at"))
   attr(x, "fetched_at") <- NULL
   expect_null(cvm_tbl_merge_attrs(x, y)$fetched_at)
 })

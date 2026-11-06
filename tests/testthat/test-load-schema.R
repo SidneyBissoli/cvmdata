@@ -10,7 +10,7 @@ test_that("load_schema('cad', 'companhias') returns a cvm_table_schema", {
   expect_identical(schema$delimiter, ";")
   expect_identical(schema$expected_field_count, 47L)
   expect_true(nzchar(schema$cvm_file_url_pattern))
-  expect_true(is.null(schema$cvm_archive_url_pattern))
+  expect_null(schema$cvm_archive_url_pattern)
 })
 
 test_that("load_schema errors on unknown dataset/table", {

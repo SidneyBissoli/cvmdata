@@ -309,15 +309,12 @@ test_that("mark_versions tells the current filing of a CSV from the old ones", {
     cd_conta = c("3.01", "3.11", "3.01", "3.11", "3.01", "3.11"),
     vl_conta = c(1, 2, 10, 20, 100, 200)
   )
-  out <- cvmdata:::mark_versions(
+  out <- mark_versions(
     df[c(3L, 1L, 5L, 4L, 2L, 6L), ],
     tx = list(action = "keep_latest_version"),
     source = "cvm"
   )
-  expect_identical(
-    names(out),
-    c(names(df), cvmdata:::.version_columns)
-  )
+  expect_named(out, c(names(df), .version_columns))
   expect_identical(out$versao, c("1", "1", "2", "2", "1", "1"))
   expect_identical(
     out$history_source,
@@ -343,7 +340,7 @@ test_that("mark_versions keeps the mirror's marks and adds the current one", {
     id_doc = c(NA, "134555"),
     motivo_reapresentacao = NA_character_
   )
-  out <- cvmdata:::mark_versions(
+  out <- mark_versions(
     df,
     tx = list(action = "keep_latest_version"),
     source = "mirror"
@@ -391,26 +388,26 @@ test_that("cvm_versions resolves a ticker and stacks both bases", {
   expect_identical(sum(out$basis == "ind"), 8L)
   expect_identical(sum(out$basis == "con"), 16L)
   expect_true(all(out$history_source[out$basis == "ind"] == "current"))
-  expect_identical(utils::tail(names(out), 5L), cvmdata:::.version_columns)
+  expect_identical(utils::tail(names(out), 5L), .version_columns)
 })
 
 test_that("fetch_versions_cvm handles a table without yearly files", {
-  schema <- cvmdata:::load_schema("cad", "companhias")
+  schema <- load_schema("cad", "companhias")
   expect_error(
-    cvmdata:::fetch_versions_cvm(schema, NULL, 2024L, NULL, "strict", "abort"),
+    fetch_versions_cvm(schema, NULL, 2024L, NULL, "strict", "abort"),
     class = "cvmdata_error_input"
   )
   local_prepare_cad_cache()
   out <- with_fixture_http(
-    cvmdata:::fetch_versions_cvm(schema, NULL, NULL, NULL, "skip", "abort")
+    fetch_versions_cvm(schema, NULL, NULL, NULL, "skip", "abort")
   )
-  expect_true(nrow(out) > 0L)
+  expect_gt(nrow(out), 0L)
   expect_true("cnpj_cia" %in% names(out))
 })
 
 test_that("mark_versions copes with empty, keyless and unversioned frames", {
   tx <- list(action = "keep_latest_version")
-  empty <- cvmdata:::mark_versions(
+  empty <- mark_versions(
     tibble::tibble(cnpj_cia = character(), versao = character()),
     tx,
     "cvm"
@@ -418,16 +415,16 @@ test_that("mark_versions copes with empty, keyless and unversioned frames", {
   expect_identical(nrow(empty), 0L)
   expect_identical(
     utils::tail(names(empty), 5L),
-    cvmdata:::.version_columns
+    .version_columns
   )
-  keyless <- cvmdata:::mark_versions(
+  keyless <- mark_versions(
     tibble::tibble(versao = c("2", "1"), vl_conta = c(2, 1)),
     tx,
     "cvm"
   )
   expect_identical(keyless$versao, c("1", "2"))
   expect_true(all(keyless$history_source == "current"))
-  unversioned <- cvmdata:::mark_versions(
+  unversioned <- mark_versions(
     tibble::tibble(cnpj_cia = "x", dt_refer = as.Date("2023-12-31"), v = 1),
     tx,
     "cvm"

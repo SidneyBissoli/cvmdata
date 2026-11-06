@@ -46,7 +46,7 @@ test_that("cad/estrangeiras reads the whole file as the CVM publishes it", {
   expect_false(anyNA(x$cd_cvm))
   # One row appears twice verbatim: kept, as published.
   expect_identical(sum(duplicated(as.data.frame(x))), 1L)
-  expect_true(all(is.na(x$dt_cancel) == (x$sit != "CANCELADA")))
+  expect_true(all(is.na(x$dt_cancel) == (!x$sit %in% "CANCELADA")))
 })
 
 test_that("cad/incentivadas keeps empty CVM codes and re-registrations", {
@@ -98,9 +98,9 @@ test_that("cnpj_col prefers the issuer column over plain cnpj", {
   # fre/participacao_sociedade carries the issuer (cnpj_companhia) and
   # the investee (cnpj).
   df <- data.frame(cnpj_companhia = "a", cnpj = "b")
-  expect_identical(cvmdata:::cnpj_col(df), "cnpj_companhia")
-  expect_identical(cvmdata:::cnpj_col(data.frame(cnpj = "b")), "cnpj")
-  expect_null(cvmdata:::cnpj_col(data.frame(x = 1)))
+  expect_identical(cnpj_col(df), "cnpj_companhia")
+  expect_identical(cnpj_col(data.frame(cnpj = "b")), "cnpj")
+  expect_null(cnpj_col(data.frame(x = 1)))
 })
 
 test_that("as_of applies to the two registries", {
@@ -117,7 +117,8 @@ test_that("as_of applies to the two registries", {
           (is.na(all_rows$dt_cancel) | all_rows$dt_cancel > at)
       )
     )
-    expect_true(nrow(u) > 0L && nrow(u) < nrow(all_rows))
+    expect_gt(nrow(u), 0L)
+    expect_lt(nrow(u), nrow(all_rows))
   }
 })
 

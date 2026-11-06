@@ -61,7 +61,7 @@ test_that("fetch engine VLMO submissao tracer returns cvm_tbl", {
   expect_identical(attr(result, "group"), "companhias")
   expect_identical(attr(result, "dataset"), "vlmo")
   expect_identical(attr(result, "table"), "submissao")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   # FRE-detail-like convention with Codigo_CVM in the header.
   expect_true(all(
     c("cnpj_companhia", "data_referencia", "versao", "codigo_cvm") %in%
@@ -84,7 +84,7 @@ test_that("fetch engine VLMO consolidado tracer returns cvm_tbl", {
 
   expect_s3_class(result, "cvm_tbl")
   expect_identical(attr(result, "table"), "consolidado")
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_identical(ncol(result), 17L)
   expect_true(all(
     c(
@@ -102,9 +102,9 @@ test_that("fetch engine VLMO consolidado tracer returns cvm_tbl", {
   # consolidado does not carry codigo_cvm natively (CVM design).
   expect_false("codigo_cvm" %in% names(result))
   expect_s3_class(result$data_movimentacao, "Date")
-  expect_true(is.numeric(result$quantidade))
-  expect_true(is.numeric(result$preco_unitario))
-  expect_true(is.numeric(result$volume))
+  expect_type(result$quantidade, "double")
+  expect_type(result$preco_unitario, "double")
+  expect_type(result$volume, "double")
 })
 
 # Filtering by issuer -------------------------------------------------
@@ -123,7 +123,7 @@ test_that("fetch engine VLMO filters by CNPJ via cnpj_companhia", {
       source = "cvm"
     )
   )
-  expect_true(nrow(result) > 0L)
+  expect_gt(nrow(result), 0L)
   expect_true(all(result$cnpj_companhia == "00.000.000/0001-91"))
 })
 
@@ -146,8 +146,8 @@ test_that("vlmo/consolidado declares no keep_latest_version", {
     quantidade = c(100, 200, 300),
     stringsAsFactors = FALSE
   )
-  out <- cvmdata:::apply_schema_transformations(df, schema)
-  expect_equal(nrow(out), 3L)
+  out <- apply_schema_transformations(df, schema)
+  expect_identical(nrow(out), 3L)
   expect_setequal(out$versao, c(1L, 2L, 3L))
 
   # Sanity: a schema declaring keep_latest_version (as the detail tables
@@ -158,8 +158,8 @@ test_that("vlmo/consolidado declares no keep_latest_version", {
     table = "consolidado",
     transformations = list(list(action = "keep_latest_version"))
   )
-  collapsed <- cvmdata:::apply_schema_transformations(df, dedup_schema)
-  expect_equal(nrow(collapsed), 1L)
+  collapsed <- apply_schema_transformations(df, dedup_schema)
+  expect_identical(nrow(collapsed), 1L)
   expect_identical(collapsed$versao, 3L)
 })
 
@@ -169,14 +169,14 @@ test_that("load_schema accepts VLMO YAMLs", {
   sub <- load_schema("vlmo", "submissao")
   expect_s3_class(sub, "cvm_table_schema")
   expect_identical(sub$temporal_partitioning, "yearly")
-  expect_equal(sub$first_year, 2018)
-  expect_equal(sub$expected_field_count, 12)
+  expect_identical(sub$first_year, 2018L)
+  expect_identical(sub$expected_field_count, 12L)
   expect_identical(sub$cvm_file_pattern, "vlmo_cia_aberta_{year}.csv")
   # The filing index returns every delivery: no transformation at all.
   expect_length(sub$transformations, 0L)
 
   con <- load_schema("vlmo", "consolidado")
-  expect_equal(con$expected_field_count, 17)
+  expect_identical(con$expected_field_count, 17L)
   # CVM file is named "...con..."; package table is "consolidado".
   expect_identical(
     con$cvm_file_pattern,
@@ -220,13 +220,13 @@ test_that("report_type aborts for VLMO tables without variants", {
 test_that("cvm_dictionary('vlmo', 'submissao') returns 12 rows", {
   dict <- cvm_dictionary("vlmo", "submissao")
   expect_s3_class(dict, "tbl_df")
-  expect_equal(nrow(dict), 12L)
+  expect_identical(nrow(dict), 12L)
   expect_true("cnpj_companhia" %in% dict$campo)
 })
 
 test_that("cvm_dictionary('vlmo', 'consolidado') returns 17 rows", {
   dict <- cvm_dictionary("vlmo", "consolidado")
-  expect_equal(nrow(dict), 17L)
+  expect_identical(nrow(dict), 17L)
   expect_true("data_movimentacao" %in% dict$campo)
 })
 

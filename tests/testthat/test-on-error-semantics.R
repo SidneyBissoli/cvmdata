@@ -42,7 +42,7 @@ local_dfp_cache_2024_fresh <- function(envir = parent.frame()) {
 test_that("on_error = 'warn' emits warning and returns surviving years", {
   local_dfp_cache_2024_fresh()
   mock <- function(req) {
-    if (grepl("_2023\\.zip", req$url)) {
+    if (grepl("_2023.zip", req$url, fixed = TRUE)) {
       stop("simulated 503 for 2023")
     }
     testthat::fail(
@@ -71,7 +71,7 @@ test_that("on_error = 'warn' emits warning and returns surviving years", {
 test_that("on_error = 'silent' returns surviving years without warning", {
   local_dfp_cache_2024_fresh()
   mock <- function(req) {
-    if (grepl("_2023\\.zip", req$url)) {
+    if (grepl("_2023.zip", req$url, fixed = TRUE)) {
       stop("simulated 503 for 2023")
     }
     testthat::fail(
@@ -79,8 +79,8 @@ test_that("on_error = 'silent' returns surviving years without warning", {
     )
   }
   result <- NULL
-  expect_no_warning(
-    result <- httr2::with_mocked_responses(
+  result <- expect_no_warning(
+    httr2::with_mocked_responses(
       mock,
       issuer_fetch_internal(
         "dfp",
@@ -99,7 +99,7 @@ test_that("on_error = 'silent' returns surviving years without warning", {
 test_that("on_error = 'abort' (default) propagates HTTP error in batch", {
   local_dfp_cache_2024_fresh()
   mock <- function(req) {
-    if (grepl("_2023\\.zip", req$url)) {
+    if (grepl("_2023.zip", req$url, fixed = TRUE)) {
       stop("simulated 503 for 2023")
     }
     testthat::fail(

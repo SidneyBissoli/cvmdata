@@ -21,14 +21,14 @@
 # warn_empty_latest says what each backend returns
 
     Code
-      cvmdata:::warn_empty_latest(latest, schema, "mirror")
+      warn_empty_latest(latest, schema, "mirror")
     Condition
       Warning:
       `year = NULL`: table "fca"/"departamento_acionistas" is published without content from 2024 on.
       i Why: item 6 of the Formulario Cadastral (shareholders department) was revoked by Resolucao CVM 59/2021, in force since 2023-01-02.
       i Returning 2023, the last year with content.
     Code
-      cvmdata:::warn_empty_latest(latest, schema, "cvm")
+      warn_empty_latest(latest, schema, "cvm")
     Condition
       Warning:
       `year = NULL`: table "fca"/"departamento_acionistas" is published without content from 2024 on.

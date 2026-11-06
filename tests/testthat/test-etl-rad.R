@@ -116,7 +116,7 @@ test_that("the three number spellings parse; anything else is NA", {
     rad_parse_number(x, per_share = TRUE),
     c(-0.02, 1.23, 2.4, 0, 7, 1461169)
   )
-  expect_equal(rad_parse_number(x), c(-2, 123, 24, 0, 7, 1461169))
+  expect_identical(rad_parse_number(x), c(-2, 123, 24, 0, 7, 1461169))
   expect_identical(rad_scale_factor("2"), 1e3)
   expect_identical(rad_scale_factor("1"), 1)
   expect_true(is.na(rad_scale_factor("7")))
@@ -170,9 +170,9 @@ test_that("new layout DFP: package columns, two exercises, index identity", {
     )
   )
   bpa <- r$tables[["bpa/ind"]]
-  expect_identical(names(bpa), rad_table_columns("bpa"))
-  expect_identical(names(r$tables[["dre/ind"]]), rad_table_columns("dre"))
-  expect_identical(names(r$tables[["dmpl/ind"]]), rad_table_columns("dmpl"))
+  expect_named(bpa, rad_table_columns("bpa"))
+  expect_named(r$tables[["dre/ind"]], rad_table_columns("dre"))
+  expect_named(r$tables[["dmpl/ind"]], rad_table_columns("dmpl"))
   expect_s3_class(bpa$dt_refer, "Date")
   expect_s3_class(bpa$dt_fim_exerc, "Date")
   expect_type(bpa$vl_conta, "double")
@@ -307,7 +307,7 @@ test_that("old layout DFP: dot-decimal numbers, direct cash flow", {
   expect_true("dfc_md/ind" %in% names(r$tables))
   expect_false("dfc_mi/ind" %in% names(r$tables))
   bpa <- r$tables[["bpa/ind"]]
-  expect_identical(names(bpa), rad_table_columns("bpa"))
+  expect_named(bpa, rad_table_columns("bpa"))
   expect_setequal(unique(bpa$ordem_exerc), c(ultimo, penultimo))
   expect_identical(
     bpa$vl_conta[bpa$cd_conta == "1" & bpa$ordem_exerc == ultimo],
@@ -802,7 +802,7 @@ test_that("history rows carry the RAD columns and merge once per version", {
   expect_identical(nrow(r$history), nrow(h))
   expect_identical(r$n_added, nrow(bpa))
   mine <- r$history[r$history$id_doc %in% "15513", ]
-  expect_equal(sort(mine$vl_conta), sort(good$vl_conta))
+  expect_identical(sort(mine$vl_conta), sort(good$vl_conta))
   expect_identical(sum(r$history$id_doc %in% "99"), nrow(bpa))
   expect_identical(sum(r$history$history_source == "mirror"), nrow(bpa))
   # without `replace` the same document is still skipped
@@ -877,7 +877,7 @@ test_that("the command line of stage 04 parses", {
 
 test_that("plain integers parse and free text follows the CVM converter", {
   load_etl_rad()
-  expect_equal(
+  expect_identical(
     rad_parse_number(c("1461169", "-73961", "   ")),
     c(1461169, -73961, 0)
   )
@@ -942,9 +942,10 @@ test_that("a run that finds the whole queue empty records itself", {
   expect_false(rad_idle_round(12L, 0L, TRUE))
   expect_false(rad_idle_round(0L, 1L, TRUE))
 
-  uploaded <- character()
+  tally <- new.env()
+  tally$uploaded <- character()
   upload_release_asset <- function(tag, path, attempts = 4L) {
-    uploaded <<- c(uploaded, basename(path))
+    tally$uploaded <- c(tally$uploaded, basename(path))
     invisible(TRUE)
   }
   index <- data.frame(
@@ -987,7 +988,7 @@ test_that("a run that finds the whole queue empty records itself", {
   expect_identical(res$tally$checkpoints, 0L)
   expect_true(is.na(res$stopped))
   # the state and the unread list go up; no history asset, no hash map
-  expect_identical(uploaded, c("__rad_state.json", "__rad_unread.csv"))
+  expect_identical(tally$uploaded, c("__rad_state.json", "__rad_unread.csv"))
   back <- rad_read_state(file.path(out_dir, "__rad_state.json"), "dfp")
   expect_length(back$runs, 2L)
   expect_identical(back$runs[[1L]]$at, "2026-11-06T08:50:06Z")
@@ -998,14 +999,14 @@ test_that("a run that finds the whole queue empty records itself", {
   expect_identical(back$done[["15513"]]$hash, "abc")
 
   # a narrowed run with nothing to do leaves the release alone
-  uploaded <- character()
+  tally$uploaded <- character()
   other_dir <- withr::local_tempdir()
   ctx$out_dir <- other_dir
   ctx$whole_queue <- FALSE
   expect_no_message(
     rad_run_checkpoints(index[0L, ], state, source_hash, ctx)
   )
-  expect_identical(uploaded, character())
+  expect_identical(tally$uploaded, character())
   expect_false(file.exists(file.path(other_dir, "__rad_state.json")))
 })
 
@@ -1174,7 +1175,7 @@ test_that("the queue stops on a persistent refusal, not on a transient one", {
   expect_identical(run$stopped, "waf")
   expect_identical(seen$ids, "1")
   expect_identical(run$failed, 1L)
-  expect_identical(names(run$state$unread), "1")
+  expect_named(run$state$unread, "1")
 })
 
 # Every failure carries a kind, and only the reader's kind weighs on the
@@ -1403,7 +1404,8 @@ test_that("the RAD down pauses the run without spending attempts", {
     "10" = "download"
   ))
   state <- rad_mark_unread(rad_empty_state("dfp"), "5", "earlier", "download")
-  msgs <- character()
+  tally <- new.env()
+  tally$msgs <- character()
   run <- withCallingHandlers(
     rad_run_queue(
       queue_of(12),
@@ -1414,12 +1416,12 @@ test_that("the RAD down pauses the run without spending attempts", {
       Sys.time()
     ),
     message = function(m) {
-      msgs <<- c(msgs, conditionMessage(m))
+      tally$msgs <- c(tally$msgs, conditionMessage(m))
       invokeRestart("muffleMessage")
     }
   )
-  expect_match(msgs, "3 downloads failed in a row", all = FALSE)
-  expect_match(msgs, "the RAD is still down: stopping", all = FALSE)
+  expect_match(tally$msgs, "3 downloads failed in a row", all = FALSE)
+  expect_match(tally$msgs, "the RAD is still down: stopping", all = FALSE)
   expect_identical(run$stopped, "rad-down")
   expect_identical(run$outages, 2L)
   expect_identical(run$attempted, 10L)
@@ -1494,7 +1496,8 @@ test_that("the reader's failures stop the run, but only past the floor", {
   expect_identical(run$reader_failed, 2L)
   # floor reached: the run stops at the failure that crosses the rate
   rad_failure_floor <- 4L
-  msgs <- character()
+  tally <- new.env()
+  tally$msgs <- character()
   run <- withCallingHandlers(
     rad_run_queue(
       queue_of(6),
@@ -1505,12 +1508,12 @@ test_that("the reader's failures stop the run, but only past the floor", {
       Sys.time()
     ),
     message = function(m) {
-      msgs <<- c(msgs, conditionMessage(m))
+      tally$msgs <- c(tally$msgs, conditionMessage(m))
       invokeRestart("muffleMessage")
     }
   )
   expect_match(
-    msgs,
+    tally$msgs,
     "the reader failed on 2 of 4 documents: stopping",
     all = FALSE
   )
@@ -1624,12 +1627,12 @@ test_that("per-share values in scientific notation read as the CSV has them", {
   got <- function(code, ini) {
     dre$vl_conta[dre$cd_conta == code & dre$dt_ini_exerc == as.Date(ini)]
   }
-  expect_equal(got("3.99.01.01", "2021-04-01"), 15)
-  expect_equal(got("3.99.01.01", "2021-01-01"), 55)
-  expect_equal(got("3.99.01.01", "2020-01-01"), -5)
-  expect_equal(got("3.99.01.01", "2020-04-01"), -10)
-  expect_equal(got("3.99.02.01", "2021-01-01"), 54)
-  expect_equal(got("3.99.02.01", "2020-01-01"), -5)
+  expect_identical(got("3.99.01.01", "2021-04-01"), 15)
+  expect_identical(got("3.99.01.01", "2021-01-01"), 55)
+  expect_identical(got("3.99.01.01", "2020-01-01"), -5)
+  expect_identical(got("3.99.01.01", "2020-04-01"), -10)
+  expect_identical(got("3.99.02.01", "2021-01-01"), 54)
+  expect_identical(got("3.99.02.01", "2020-01-01"), -5)
   # Meliuz, ITR 2021-06-30 v1 (id 107950): `-0.05`, the dot after a
   # zero, and `-002`, `123`, `24` (digits only, the point lost)
   f <- filing_row(
@@ -1643,11 +1646,11 @@ test_that("per-share values in scientific notation read as the CSV has them", {
   r <- rad_read_zip(rad_fx("rad_itr_2021_107950"), f)
   expect_identical(r$problems, character())
   dre <- r$tables[["dre/ind"]]
-  expect_equal(got("3.99.01.01", "2021-04-01"), -50)
-  expect_equal(got("3.99.02.01", "2021-04-01"), -50)
-  expect_equal(got("3.99.01.01", "2021-01-01"), -20)
-  expect_equal(got("3.99.01.01", "2020-04-01"), 1230)
-  expect_equal(got("3.99.01.01", "2020-01-01"), 2400)
+  expect_identical(got("3.99.01.01", "2021-04-01"), -50)
+  expect_identical(got("3.99.02.01", "2021-04-01"), -50)
+  expect_identical(got("3.99.01.01", "2021-01-01"), -20)
+  expect_identical(got("3.99.01.01", "2020-04-01"), 1230)
+  expect_identical(got("3.99.01.01", "2020-01-01"), 2400)
 })
 
 test_that("a document under a branch's CNPJ is the company's", {
