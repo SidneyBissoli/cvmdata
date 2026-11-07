@@ -221,3 +221,23 @@ test_that("the repair writes a read sidecar back with its nulls", {
   back <- jsonlite::read_json(out)
   expect_null(back$skips[[1L]]$report_type)
 })
+
+test_that("a skip field read as an empty list becomes null again", {
+  load_etl_snapshot()
+  sidecar <- jsonlite::fromJSON(
+    paste0(
+      '{"skips":[{"table":"a","year":2026,"report_type":{},"reason":"absent"},',
+      '{"table":"b","year":2025,"report_type":"ind","reason":"empty"}]}'
+    ),
+    simplifyVector = FALSE
+  )
+  out <- snapshot_normalise_skips(sidecar)
+  expect_true(out$changed)
+  expect_null(out$sidecar$skips[[1L]]$report_type)
+  expect_identical(out$sidecar$skips[[2L]]$report_type, "ind")
+  text <- jsonlite::toJSON(out$sidecar, auto_unbox = TRUE, null = "null")
+  expect_match(as.character(text), '"report_type":null', fixed = TRUE)
+  clean <- snapshot_normalise_skips(out$sidecar)
+  expect_false(clean$changed)
+  expect_false(snapshot_normalise_skips(list(skips = list()))$changed)
+})

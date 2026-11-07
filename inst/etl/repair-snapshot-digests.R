@@ -117,15 +117,17 @@ repair_main <- function(group, dataset, dry_run) {
   for (date in dates) {
     tag <- mirror_tag_snapshot(group, dataset, as.Date(date))
     sidecar <- repair_read_sidecar(tag, work)
-    repaired <- snapshot_repair_files(sidecar, lookup)
+    skips <- snapshot_normalise_skips(sidecar)
+    repaired <- snapshot_repair_files(skips$sidecar, lookup)
     message(sprintf(
-      "[repair] %s %s: %d of %d partition digest(s) were wrong",
+      "[repair] %s %s: %d of %d partition digest(s) were wrong%s",
       dataset,
       date,
       length(repaired$fixed),
-      length(sidecar$files %||% list())
+      length(sidecar$files %||% list()),
+      if (skips$changed) "; skips had `{}` for null" else ""
     ))
-    if (length(repaired$fixed)) {
+    if (length(repaired$fixed) || skips$changed) {
       path <- repair_write_sidecar(
         repaired$sidecar,
         file.path(out_dir, tag, "__source_hash.json")
@@ -145,6 +147,7 @@ repair_main <- function(group, dataset, dry_run) {
       call. = FALSE
     )
   }
+  latest <- snapshot_normalise_skips(latest)$sidecar
   uploads[[latest_tag]] <- repair_write_sidecar(
     latest,
     file.path(out_dir, latest_tag, "__source_hash.json")

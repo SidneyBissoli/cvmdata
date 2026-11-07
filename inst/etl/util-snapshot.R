@@ -146,3 +146,31 @@ snapshot_repair_files <- function(sidecar, lookup) {
   }
   list(sidecar = sidecar, fixed = fixed)
 }
+
+# A sidecar read back from JSON with its `skips` fields made scalar
+# again: a missing `year` or `report_type` is `null` in what 03-publish.R
+# writes, and `read_json()` gives NULL for it; a sidecar rewritten by a
+# tool that encoded NULL as `{}` (the first repair of 2026-11-07) gives
+# an empty list instead, which `write_json()` keeps as `{}` and the
+# client reads as a list column. Both become NULL here, so the next
+# write (with `null = "null"`) puts `null` back. Returns list(sidecar,
+# changed = whether any field was an empty list).
+snapshot_normalise_skips <- function(sidecar) {
+  changed <- FALSE
+  skips <- sidecar$skips
+  if (is.list(skips) && length(skips)) {
+    for (k in seq_along(skips)) {
+      entry <- skips[[k]]
+      for (field in names(entry)) {
+        value <- entry[[field]]
+        if (is.list(value) && !length(value)) {
+          entry[field] <- list(NULL)
+          changed <- TRUE
+        }
+      }
+      skips[[k]] <- entry
+    }
+    sidecar$skips <- skips
+  }
+  list(sidecar = sidecar, changed = changed)
+}
