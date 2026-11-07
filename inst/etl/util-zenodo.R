@@ -176,8 +176,8 @@ edition_plan_dataset <- function(group, dataset, latest, snapshot) {
 }
 
 # The two sidecars of a dataset for the edition: list(latest, snapshot,
-# date). The snapshot sidecar is the `-latest` one when the edition
-# resolves to the snapshot `-latest` currently carries.
+# date), `latest` for the history map and the snapshot dates, `snapshot`
+# (the dated release's own sidecar) for the partitions and their digests.
 edition_read_sidecars <- function(group, dataset, edition, dir) {
   latest_tag <- mirror_tag_latest(group, dataset)
   latest_dir <- file.path(dir, latest_tag)
@@ -195,9 +195,9 @@ edition_read_sidecars <- function(group, dataset, edition, dir) {
   }
   latest <- jsonlite::read_json(latest_file)
   date <- edition_pick_snapshot(latest$snapshots, edition, dataset)
-  if (identical(date, latest$snapshot)) {
-    return(list(latest = latest, snapshot = latest, date = date))
-  }
+  # Always the dated sidecar, even for the snapshot `-latest` carries:
+  # since 2026-11-07 its `files` map holds the digests of the bytes at
+  # the pointers, while `-latest` describes its own rewritten assets.
   tag <- mirror_tag_snapshot(group, dataset, as.Date(date))
   snapshot_dir <- file.path(dir, tag)
   dir.create(snapshot_dir, recursive = TRUE, showWarnings = FALSE)

@@ -583,6 +583,31 @@ licence_notes <- paste0(
   "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md"
 )
 updated_at <- format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC", tz = "UTC")
+# What the data is, for whoever downloads the assets without the package
+# (first step of the Zenodo editions, decision of 2026-11-06): the
+# release carried only parquets and the sidecar, with no description of
+# the layout, the transformations or the dictionary. It goes in the
+# notes for the same reason as the licence: no new asset.
+content_notes <- sprintf(
+  paste0(
+    "**What is here.** One parquet file per table, statement basis and ",
+    "reference year (`<table>__report_type=<ind|con>__year=<YYYY>__",
+    "part-0.parquet`; GitHub shows `=` as `.`), written by the ETL of ",
+    "the package (`inst/etl/` in the repository) from the CSV files the ",
+    "CVM publishes for the dataset `%s`: column names in lower case, ",
+    "dates and numbers parsed, values as the CVM delivers them (no row ",
+    "dropped, no value corrected). The `__history.parquet` assets keep ",
+    "the superseded versions of each partition (restated filings), ",
+    "appended week after week. Column dictionary: `cvm_dictionary()` in ",
+    "the package or https://sidneybissoli.github.io/cvmdata/reference/",
+    "cvm_dictionary.html; code lists: `cvm_codelist()`. ",
+    "`__source_hash.json` is the index of the release (content hash, ",
+    "digest of every partition, snapshot dates). Quarterly editions of ",
+    "the whole mirror, with a DOI, are planned on Zenodo from January ",
+    "2027."
+  ),
+  dataset
+)
 latest_notes <- sprintf(
   paste0(
     "Auto-generated parquet mirror snapshot for group '%s', dataset '%s'.\n",
@@ -592,12 +617,13 @@ latest_notes <- sprintf(
     "`snapshots`, every date that can be pinned with ",
     "`options(cvmdata.mirror_release = \"YYYY-MM-DD\")`.\n\n",
     "See https://sidneybissoli.github.io/cvmdata/articles/",
-    "cache-and-mirror.html for client usage.\n\n%s"
+    "cache-and-mirror.html for client usage.\n\n%s\n\n%s"
   ),
   group,
   dataset,
   updated_at,
   snapshot_tag,
+  content_notes,
   licence_notes
 )
 snapshot_notes <- sprintf(
@@ -609,7 +635,7 @@ snapshot_notes <- sprintf(
     "partition of this snapshot and, under `releases`, the snapshot ",
     "release that holds its bytes. Read it from R with ",
     "`options(cvmdata.mirror_release = \"%s\")`. Snapshot releases are ",
-    "never deleted: later snapshots point into this one.\n\n%s"
+    "never deleted: later snapshots point into this one.\n\n%s\n\n%s"
   ),
   group,
   dataset,
@@ -618,6 +644,7 @@ snapshot_notes <- sprintf(
   length(changed_rels),
   length(parquets),
   source_hash$snapshot,
+  content_notes,
   licence_notes
 )
 
