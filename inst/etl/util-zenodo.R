@@ -1157,6 +1157,21 @@ edition_report <- function(
         "",
         sprintf("Draft %s: %s", draft$id, draft$links$html %||% ""),
         "",
+        if (!is.null(draft$conceptrecid)) {
+          c(
+            sprintf(
+              paste(
+                "Concept record id: **%s**. After publishing the first",
+                "edition, save it as the repository variable",
+                "`ZENODO_%sCONCEPT`, so the next edition is a new version",
+                "of this record."
+              ),
+              draft$conceptrecid,
+              if (identical(target, "sandbox")) "SANDBOX_" else ""
+            ),
+            ""
+          )
+        },
         if (!is.null(read_back)) {
           c("Read back from the draft:", "", edition_md_table(read_back))
         },
