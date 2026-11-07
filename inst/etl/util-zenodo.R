@@ -1012,9 +1012,26 @@ zenodo_drop_draft <- function(client, draft) {
   result
 }
 
+# The content URL of a file of a PUBLISHED record, from the JSON of
+# `/api/records/<id>`: `files[].key` names the file and `links$self` is
+# the content (`.../files/<key>/content`). The deposit API's file links
+# of a published deposition did not serve the bytes in the sandbox
+# trial of 2026-11-07 (second run: "the manifest of the previous
+# edition could not be downloaded"); the public records API does, with
+# or without a token, which is also what a reader of the edition uses.
+zenodo_record_file_url <- function(record, name) {
+  for (f in record$files %||% list()) {
+    if (identical(f$key %||% f$filename, name)) {
+      return(f$links$self %||% f$links$content %||% NA_character_)
+    }
+  }
+  NA_character_
+}
+
 # The manifest of the latest published edition of the concept record,
-# downloaded from the record's `manifest.csv`, or NULL when there is no
-# published edition yet (the first one has nothing to compare with).
+# downloaded from the record's `manifest.csv` through the public
+# records API, or NULL when there is no published edition yet (the
+# first one has nothing to compare with).
 zenodo_previous_manifest <- function(client, concept, dir) {
   if (is.null(concept) || !nzchar(concept)) {
     return(NULL)
@@ -1025,10 +1042,10 @@ zenodo_previous_manifest <- function(client, concept, dir) {
   }
   record <- zenodo_get(
     client,
-    sprintf("/api/deposit/depositions/%s", versions$published$id)
+    sprintf("/api/records/%s", versions$published$id)
   )
-  files <- zenodo_files_table(record$files)
-  if (!"manifest.csv" %in% files$name) {
+  url <- zenodo_record_file_url(record, "manifest.csv")
+  if (is.na(url)) {
     stop(
       sprintf(
         "the published edition %s has no manifest.csv",
@@ -1039,14 +1056,18 @@ zenodo_previous_manifest <- function(client, concept, dir) {
   }
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   target <- file.path(dir, "manifest-previous.csv")
-  resp <- zenodo_request(
-    client,
-    files$download[files$name == "manifest.csv"]
-  ) |>
+  resp <- zenodo_request(client, url) |>
     httr2::req_perform(path = target)
   if (httr2::resp_status(resp) != 200L) {
     stop(
-      "the manifest of the previous edition could not be downloaded",
+      sprintf(
+        paste(
+          "the manifest of the previous edition could not be downloaded:",
+          "%d from %s"
+        ),
+        httr2::resp_status(resp),
+        url
+      ),
       call. = FALSE
     )
   }
