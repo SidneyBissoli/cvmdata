@@ -409,7 +409,8 @@ cobertos vivem no `ROADMAP.md`. Três topologias de download: CSV avulso
 (`yearly` + `{year}`); o `schema-load` recusa `{year}` fora do anual.
 Tabela sem coluna de emissor declara `issuer_via: {table, key}` e é
 filtrada por `cnpj`/`ticker` através da tabela-mãe.
-Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh}.R`.
+Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh}.R`
++ `repair-snapshot-digests.R` (reparo único dos sidecars datados, 2026-11-07).
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
 snapshots, fixtures e vignette data) com **auditorias one-shot**
@@ -671,7 +672,18 @@ também `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`
 mudou (a primeira leva todas = baseline) e o sidecar completo, que ganha
 `snapshot` (data), `snapshots` (todas as datas), `releases` (partição →
 tag do snapshot que guarda os bytes) e `files` (partição → sha256 +
-tamanho do arquivo). Snapshot NUNCA é apagado (os ponteiros dos
+tamanho do arquivo). **Os dois sidecars diferem em `files` desde
+2026-11-07** (`snapshot_pointer_digests()`): o parquet reescrito pela
+rodada muda de bytes mesmo com as mesmas linhas (`fetched_at` nos
+metadados), então o `-latest` publica o digest do arquivo que subiu
+para ele e guarda em `snapshot_files` o digest dos bytes apontados por
+`releases`, carregado rodada a rodada; o sidecar do snapshot datado leva
+esse mapa em `files`. Antes disso, pin em data que não fosse a do último
+snapshot falhava com `cvmdata_error_http_integrity` em toda partição não
+mudada (medido: `composicao_capital` 2021 pinado em 2026-11-04). Sidecar
+de `-latest` sem `snapshot_files` PARA o publish e pede
+`inst/etl/repair-snapshot-digests.R` (reconstrói `files` de cada
+snapshot datado pelos bytes apontados). Snapshot NUNCA é apagado (os ponteiros dos
 seguintes dependem dele); `-latest` continua inteiro para o cliente
 antigo; os `__history` ficam só no `-latest`. Snapshot sobe ANTES do
 `-latest` (retry no mesmo dia cai na mesma tag com `--clobber`); criado
