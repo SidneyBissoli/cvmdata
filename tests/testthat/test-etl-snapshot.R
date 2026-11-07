@@ -183,3 +183,61 @@ test_that("the repair rebuilds the files map from the bytes at the pointers", {
   sidecar$releases[[rel_2025]] <- NULL
   expect_error(snapshot_repair_files(sidecar, lookup), "no release pointer")
 })
+
+# The repair rewrites a sidecar it read: a JSON null (a skip without
+# report_type) must come out as null again, not as `{}` (2026-11-07:
+# the first repair broke every client on the fre sidecars).
+etl_script_path <- function(script) {
+  installed <- system.file("etl", script, package = "cvmdata")
+  if (nzchar(installed)) {
+    return(installed)
+  }
+  normalizePath(test_path("..", "..", "inst", "etl", script), winslash = "/")
+}
+
+test_that("the repair writes a read sidecar back with its nulls", {
+  load_etl_snapshot()
+  skip_if_not_installed("jsonlite")
+  withr::local_options(cvmdata.etl_testing = TRUE)
+  env <- environment()
+  scripts <- c("00-config.R", "util-release.R", "repair-snapshot-digests.R")
+  for (script in scripts) {
+    sys.source(etl_script_path(script), envir = env)
+  }
+  root <- withr::local_tempdir()
+  original <- file.path(root, "in.json")
+  writeLines(
+    paste0(
+      '{"skips":[{"table":"t","year":2026,"report_type":null,',
+      '"reason":"absent"}],"snapshots":["2026-11-03"]}'
+    ),
+    original
+  )
+  sidecar <- jsonlite::read_json(original)
+  out <- repair_write_sidecar(sidecar, file.path(root, "out", "sidecar.json"))
+  text <- paste(readLines(out), collapse = "")
+  expect_match(text, '"report_type":[[:space:]]*null')
+  expect_false(grepl("{}", text, fixed = TRUE))
+  back <- jsonlite::read_json(out)
+  expect_null(back$skips[[1L]]$report_type)
+})
+
+test_that("a skip field read as an empty list becomes null again", {
+  load_etl_snapshot()
+  sidecar <- jsonlite::fromJSON(
+    paste0(
+      '{"skips":[{"table":"a","year":2026,"report_type":{},"reason":"absent"},',
+      '{"table":"b","year":2025,"report_type":"ind","reason":"empty"}]}'
+    ),
+    simplifyVector = FALSE
+  )
+  out <- snapshot_normalise_skips(sidecar)
+  expect_true(out$changed)
+  expect_null(out$sidecar$skips[[1L]]$report_type)
+  expect_identical(out$sidecar$skips[[2L]]$report_type, "ind")
+  text <- jsonlite::toJSON(out$sidecar, auto_unbox = TRUE, null = "null")
+  expect_match(as.character(text), '"report_type":null', fixed = TRUE)
+  clean <- snapshot_normalise_skips(out$sidecar)
+  expect_false(clean$changed)
+  expect_false(snapshot_normalise_skips(list(skips = list()))$changed)
+})
