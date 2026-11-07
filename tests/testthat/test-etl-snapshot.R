@@ -183,3 +183,40 @@ test_that("the repair rebuilds the files map from the bytes at the pointers", {
   sidecar$releases[[rel_2025]] <- NULL
   expect_error(snapshot_repair_files(sidecar, lookup), "no release pointer")
 })
+
+# The repair rewrites a sidecar it read: a JSON null (a skip without
+# report_type) must come out as null again, not as `{}` (2026-11-07:
+# the first repair broke every client on the fre sidecars).
+etl_script_path <- function(script) {
+  installed <- system.file("etl", script, package = "cvmdata")
+  if (nzchar(installed)) {
+    return(installed)
+  }
+  normalizePath(test_path("..", "..", "inst", "etl", script), winslash = "/")
+}
+
+test_that("the repair writes a read sidecar back with its nulls", {
+  load_etl_snapshot()
+  skip_if_not_installed("jsonlite")
+  withr::local_options(cvmdata.etl_testing = TRUE)
+  env <- environment()
+  for (script in c("00-config.R", "util-release.R", "repair-snapshot-digests.R")) {
+    sys.source(etl_script_path(script), envir = env)
+  }
+  root <- withr::local_tempdir()
+  original <- file.path(root, "in.json")
+  writeLines(
+    paste0(
+      '{"skips":[{"table":"t","year":2026,"report_type":null,',
+      '"reason":"absent"}],"snapshots":["2026-11-03"]}'
+    ),
+    original
+  )
+  sidecar <- jsonlite::read_json(original)
+  out <- repair_write_sidecar(sidecar, file.path(root, "out", "sidecar.json"))
+  text <- paste(readLines(out), collapse = "")
+  expect_match(text, '"report_type":[[:space:]]*null')
+  expect_false(grepl("{}", text, fixed = TRUE))
+  back <- jsonlite::read_json(out)
+  expect_null(back$skips[[1L]]$report_type)
+})

@@ -77,6 +77,14 @@ repair_digest_lookup <- function(dir) {
   }
 }
 
+# `null = "null"`: a sidecar read with `read_json()` holds the JSON
+# nulls of `skips` (a table without `report_type`) as NULL, and
+# `write_json()` writes NULL as `{}` unless told otherwise. The first
+# repair of 2026-11-07 wrote `"report_type": {}` into the fre sidecars
+# and every client failed on them ("arguments imply differing number
+# of rows: 2, 0" in the skips parser) until the sidecars were written
+# again. 03-publish.R is not exposed: its `skips` is a data.frame with
+# NA, which `na = "null"` covers.
 repair_write_sidecar <- function(sidecar, path) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   jsonlite::write_json(
@@ -84,7 +92,8 @@ repair_write_sidecar <- function(sidecar, path) {
     path,
     auto_unbox = TRUE,
     pretty = TRUE,
-    na = "null"
+    na = "null",
+    null = "null"
   )
   path
 }

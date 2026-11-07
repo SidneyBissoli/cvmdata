@@ -354,6 +354,14 @@
 
 ## Bug fixes
 
+* The reader of the mirror's index no longer fails on a skip entry
+  whose missing field is encoded as an empty object (`{}`) instead of
+  `null`. The one-off repair of the sidecars on 2026-11-07 wrote the
+  fre index that way and every read of fre failed for about an hour
+  with "arguments imply differing number of rows"; the index was
+  written again, and the reader now takes both encodings as a missing
+  value.
+
 * A mirror pinned to a date other than its latest snapshot
   (`cvm_release_set("2026-11-04")`) no longer fails with
   `cvmdata_error_http_integrity` on the partitions that had not changed
