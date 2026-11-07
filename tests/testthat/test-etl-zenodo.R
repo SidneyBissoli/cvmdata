@@ -719,12 +719,15 @@ test_that("the report says what failed and what the owner does next", {
     files = data.frame(name = "a.tar", size = 1, sha256 = "s"),
     draft = list(
       id = 20,
+      conceptrecid = 19,
       links = list(html = "https://sandbox.zenodo.org/deposit/20")
     ),
     read_back = data.frame(name = "a.tar", status = "ok"),
     outcome = "ready"
   )
   expect_true(any(grepl("press *Publish*", ready, fixed = TRUE)))
+  expect_true(any(grepl("Concept record id: **19**", ready, fixed = TRUE)))
+  expect_true(any(grepl("ZENODO_SANDBOX_CONCEPT", ready, fixed = TRUE)))
   expect_true(any(grepl(
     "https://sandbox.zenodo.org/deposit/20",
     ready,
