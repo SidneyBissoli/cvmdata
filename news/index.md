@@ -908,6 +908,14 @@
   narrowed by `--year` or `--reread` still records nothing when it has
   nothing to do.
 
+- The RAD robot stops when a year of the `submissao` index does not read
+  from the mirror, naming the year, instead of dropping it in silence.
+  On 2026-11-05 the ITR index came without 2012 and 2013 (4,732
+  deliveries) and the run went on with a queue that skipped both years.
+  The years asked for are now the `submissao` partitions the release’s
+  `__source_hash.json` lists, so a year the mirror does not publish is
+  never asked for.
+
 - The RAD reader tells whose a document is by the CVM code when the CNPJ
   written in it is not the index’s. It already did so for a blank CNPJ
   and, together with the CNPJ root, for a branch’s; the root no longer
