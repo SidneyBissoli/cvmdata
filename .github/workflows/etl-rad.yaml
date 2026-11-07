@@ -15,7 +15,8 @@ name: ETL RAD history
 #     `limit` (documents per dataset, default 300), `year` (one
 #     reference year, smoke test), `reread` (id_doc to read again, their
 #     history rows replaced: a document read wrong before a reader fix),
-#     `dry_run` (read, do not publish).
+#     `dry_run` (read, do not publish), `label_all` (stage 05 judges
+#     every year again: the scale-error backfill).
 #
 # One job per dataset, DFP first (decision 3: most recent year first,
 # DFP before ITR). Each document costs ~40–50 s (download, reading and
@@ -58,6 +59,11 @@ on:
         type: string
       dry_run:
         description: Read the documents but do not publish
+        required: false
+        default: false
+        type: boolean
+      label_all:
+        description: Stage 05 judges every year again (scale-error backfill)
         required: false
         default: false
         type: boolean
@@ -129,6 +135,23 @@ jobs:
           fi
           # shellcheck disable=SC2086
           Rscript inst/etl/04-rad-fetch.R $args
+
+      - name: Stage 05 — label the scale errors in the history
+        # The versions this run appended get their `scale_error`
+        # verdict, judged over the whole document
+        # (inst/etl/05-label-scale.R). Runs after a stage 04 that
+        # stopped with status 2 too: it published what it read.
+        if: ${{ !cancelled() }}
+        run: |
+          args="--group companhias --dataset ${{ matrix.dataset }}"
+          if [ "${{ inputs.label_all }}" = "true" ]; then
+            args="$args --all"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            args="$args --dry-run"
+          fi
+          # shellcheck disable=SC2086
+          Rscript inst/etl/05-label-scale.R $args
 
       - name: Upload the unread list
         if: always()
