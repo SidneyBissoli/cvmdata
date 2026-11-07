@@ -626,6 +626,31 @@ test_that("the read-back reports a file missing from the draft and an extra", {
   expect_identical(back$status, c("missing", "extra"))
 })
 
+test_that("the manifest of a published record is read by its content link", {
+  load_etl_zenodo()
+  # the shape of /api/records/<id> on the sandbox, 2026-11-07
+  record <- jsonlite::fromJSON(
+    paste0(
+      '{"id":636201,"conceptrecid":636200,"doi":"10.5072/zenodo.636201",',
+      '"metadata":{"version":"2026-11-06"},"files":[{"id":"660021ed",',
+      '"key":"manifest.csv","size":4729,"checksum":"md5:c9ac",',
+      '"links":{"self":"https://sandbox.zenodo.org/api/records/636201',
+      '/files/manifest.csv/content"}},{"key":"README.md",',
+      '"links":{"self":"https://sandbox.zenodo.org/x"}}]}'
+    ),
+    simplifyVector = FALSE
+  )
+  expect_identical(
+    zenodo_record_file_url(record, "manifest.csv"),
+    paste0(
+      "https://sandbox.zenodo.org/api/records/636201",
+      "/files/manifest.csv/content"
+    )
+  )
+  expect_identical(zenodo_record_file_url(record, "missing.csv"), NA_character_)
+  expect_identical(zenodo_record_file_url(list(), "manifest.csv"), NA_character_)
+})
+
 # --- the entry point ---------------------------------------------------
 
 test_that("the arguments of stage 06 are parsed and checked", {
