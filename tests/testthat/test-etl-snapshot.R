@@ -110,3 +110,76 @@ test_that("file digests are keyed by partition path with the real sha256", {
   )
   expect_identical(digests[[rel]]$sha256, unname(tools::sha256sum(path)))
 })
+
+# The digests a dated sidecar publishes describe the bytes at the
+# pointers, not the file rewritten locally (defect found 2026-11-07).
+rel_2024 <- "bpa/year=2024/part-0.parquet"
+rel_2025 <- "bpa/year=2025/part-0.parquet"
+
+test_that("unchanged partitions keep the digest of the bytes they point to", {
+  load_etl_snapshot()
+  local <- list(
+    "bpa/year=2024/part-0.parquet" = list(sha256 = "new-a", size = 11),
+    "bpa/year=2025/part-0.parquet" = list(sha256 = "new-b", size = 22)
+  )
+  prev <- list(
+    snapshot_files = list(
+      "bpa/year=2024/part-0.parquet" = list(sha256 = "old-a", size = 10)
+    )
+  )
+  out <- snapshot_pointer_digests(local, prev, changed = rel_2025)
+  expect_identical(out[[rel_2024]]$sha256, "old-a")
+  expect_identical(out[[rel_2024]]$size, 10)
+  expect_identical(out[[rel_2025]]$sha256, "new-b")
+  # the first snapshot changes every partition: nothing to carry over
+  expect_identical(snapshot_pointer_digests(local, NULL, names(local)), local)
+})
+
+test_that("a sidecar without snapshot_files stops the run and names the fix", {
+  load_etl_snapshot()
+  local <- list("bpa/year=2024/part-0.parquet" = list(sha256 = "x", size = 1))
+  prev <- list(releases = list("bpa/year=2024/part-0.parquet" = "old-tag"))
+  expect_error(
+    snapshot_pointer_digests(local, prev, changed = character()),
+    "no `snapshot_files` entry for the unchanged partition bpa/year=2024"
+  )
+  expect_error(
+    snapshot_pointer_digests(local, prev, changed = character()),
+    "run inst/etl/repair-snapshot-digests.R"
+  )
+})
+
+test_that("the repair rebuilds the files map from the bytes at the pointers", {
+  load_etl_snapshot()
+  sidecar <- list(
+    snapshot = "2026-11-03",
+    files = list(
+      "bpa/year=2024/part-0.parquet" = list(sha256 = "local-a", size = 11),
+      "bpa/year=2025/part-0.parquet" = list(sha256 = "local-b", size = 22)
+    ),
+    releases = list(
+      "bpa/year=2024/part-0.parquet" = "snap-2026-10-27",
+      "bpa/year=2025/part-0.parquet" = "snap-2026-11-03"
+    )
+  )
+  stored <- list(
+    "snap-2026-10-27|bpa/year=2024/part-0.parquet" = list(
+      sha256 = "stored-a",
+      size = 10
+    ),
+    "snap-2026-11-03|bpa/year=2025/part-0.parquet" = list(
+      sha256 = "local-b",
+      size = 22
+    )
+  )
+  lookup <- function(tag, rel) stored[[paste(tag, rel, sep = "|")]]
+  repaired <- snapshot_repair_files(sidecar, lookup)
+  files <- repaired$sidecar$files
+  expect_identical(repaired$fixed, rel_2024)
+  expect_identical(files[[rel_2024]]$sha256, "stored-a")
+  expect_identical(files[[rel_2024]]$size, 10)
+  expect_identical(files[[rel_2025]]$sha256, "local-b")
+  expect_identical(repaired$sidecar$releases, sidecar$releases)
+  sidecar$releases[[rel_2025]] <- NULL
+  expect_error(snapshot_repair_files(sidecar, lookup), "no release pointer")
+})

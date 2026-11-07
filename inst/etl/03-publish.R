@@ -534,6 +534,15 @@ source_hash$releases <- snapshot_releases_map(
   snapshot_tag
 )
 source_hash$files <- snapshot_file_digests(parquets, dataset_dir)
+# The bytes of an unchanged partition live in an earlier snapshot and
+# differ from the local file (util-snapshot.R, 2026-11-07): the dated
+# sidecar gets the digests of the bytes at the pointers, `-latest` keeps
+# the local ones in `files` and carries the pointer map along.
+source_hash$snapshot_files <- snapshot_pointer_digests(
+  source_hash$files,
+  prev,
+  changed_rels
+)
 message(sprintf(
   "[03-publish] snapshot %s: %d of %d partition(s)%s; %d snapshot date(s)",
   snapshot_tag,
@@ -780,6 +789,22 @@ jsonlite::write_json(
   pretty = TRUE,
   na = "null"
 )
+# The dated snapshot's own sidecar: `files` describes the bytes a client
+# pinned to this date downloads, which for an unchanged partition are
+# those of an earlier snapshot, not the file uploaded to `-latest`.
+snapshot_stage_dir <- file.path(stage_dir, "snapshot")
+dir.create(snapshot_stage_dir, recursive = TRUE, showWarnings = FALSE)
+snapshot_hash_asset <- file.path(snapshot_stage_dir, "__source_hash.json")
+snapshot_source_hash <- source_hash
+snapshot_source_hash$files <- source_hash$snapshot_files
+snapshot_source_hash$snapshot_files <- NULL
+jsonlite::write_json(
+  snapshot_source_hash,
+  snapshot_hash_asset,
+  auto_unbox = TRUE,
+  pretty = TRUE,
+  na = "null"
+)
 
 stage_assets <- function(paths, root) {
   staged <- character(length(paths))
@@ -803,7 +828,7 @@ assets <- c(
 # under a pinned date drops the rows superseded after it).
 snapshot_assets <- c(
   file.path(stage_dir, asset_name_of(changed_rels)),
-  hash_asset
+  snapshot_hash_asset
 )
 
 # The snapshot goes first. If its upload dies half-way, `-latest` still

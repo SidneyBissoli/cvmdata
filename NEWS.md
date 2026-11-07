@@ -354,6 +354,20 @@
 
 ## Bug fixes
 
+* A mirror pinned to a date other than its latest snapshot
+  (`cvm_release_set("2026-11-04")`) no longer fails with
+  `cvmdata_error_http_integrity` on the partitions that had not changed
+  since an earlier snapshot. The ETL rewrites every parquet on every
+  run, and two runs over the same rows write different bytes (the
+  file's metadata carries the run's `fetched_at`); the sidecar of a
+  dated snapshot published the digest of the file just written while
+  pointing the client at the earlier snapshot's bytes, so the download
+  check rejected a correct file. The dated sidecar now carries the
+  digest of the bytes it points to, carried over from run to run, and
+  the sidecars already published were rebuilt from the bytes themselves
+  (`inst/etl/repair-snapshot-digests.R`). Found by the digest check of
+  the Zenodo edition robot on 2026-11-07.
+
 * A passing failure of GitHub or of the CVM portal no longer fails the
   call on the first answer. The package asked for each file up to three
   times but repeated only on HTTP 429 and 503, so the 504 that the
