@@ -481,7 +481,7 @@ test_that("the first edition opens a new deposition and a failure deletes it", {
   # the body is a JSON object with the metadata, never `[]` (the
   # sandbox answered 500 to an empty array on 2026-11-07)
   body <- as.character(jsonlite::toJSON(seen[[1L]]$body, auto_unbox = TRUE))
-  expect_match(body, '^{"metadata":{"upload_type":"dataset"', fixed = TRUE)
+  expect_true(startsWith(body, '{"metadata":{"upload_type":"dataset"'))
   empty <- jsonlite::toJSON(structure(list(), names = character()))
   expect_identical(as.character(empty), "{}")
   expect_identical(seen[[2L]]$method, "DELETE")
