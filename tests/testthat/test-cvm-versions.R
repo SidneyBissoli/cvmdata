@@ -58,14 +58,15 @@ test_that("cvm_versions via mirror returns every version, with the columns", {
   expect_identical(attr(out, "table"), "dre")
   expect_identical(nrow(out), 40L)
   expect_identical(
-    utils::tail(names(out), 6L),
+    utils::tail(names(out), 7L),
     c(
       "basis",
       "superseded_at",
       "superseded_by_versao",
       "history_source",
       "id_doc",
-      "motivo_reapresentacao"
+      "motivo_reapresentacao",
+      "scale_error"
     )
   )
   expect_false("report_type" %in% names(out))
@@ -87,6 +88,7 @@ test_that("the current version is marked and the superseded ones are dated", {
   expect_true(all(is.na(current$superseded_by_versao)))
   expect_true(all(is.na(current$id_doc)))
   expect_true(all(is.na(current$motivo_reapresentacao)))
+  expect_true(all(current$scale_error == "sem erro de escala"))
 
   old <- out[out$history_source != "current", ]
   expect_true(all(old$history_source == "rad"))
@@ -128,6 +130,39 @@ test_that("the figures of every version are returned as filed", {
   petr <- net[net$cnpj_cia == petr_cnpj, ]
   expect_identical(petr$versao, c("1", "2"))
   expect_identical(petr$vl_conta, c(125166000000, 125166000000))
+})
+
+test_that("a superseded version that was a scale error is labelled and said", {
+  mock <- local_mirror_dre()
+  expect_message(
+    out <- httr2::with_mocked_responses(
+      mock,
+      cvm_versions("dfp", "dre", year = 2023, basis = "con")
+    ),
+    "1 superseded version was a scale error"
+  )
+  labels <- unique(out[c("cnpj_cia", "versao", "scale_error")])
+  labels <- labels[order(labels$cnpj_cia, labels$versao), ]
+  expect_identical(labels$versao, c("1", "2", "1", "2", "3"))
+  expect_identical(
+    labels$scale_error,
+    c(
+      "sem erro de escala",
+      "sem erro de escala",
+      "erro de escala e outras mudanças",
+      "sem erro de escala",
+      "sem erro de escala"
+    )
+  )
+  # the Petrobras rows alone carry no scale error: no message
+  expect_no_message(
+    petr <- httr2::with_mocked_responses(
+      mock,
+      cvm_versions("dfp", "dre", cnpj = petr_cnpj, year = 2023, basis = "con")
+    ),
+    message = "scale error"
+  )
+  expect_true(all(petr$scale_error == "sem erro de escala"))
 })
 
 test_that("cvm_versions filters by cnpj and orders by document and version", {
@@ -245,14 +280,15 @@ test_that("cvm_versions via cvm reads the yearly file and says it is partial", {
   expect_s3_class(out, "cvm_tbl")
   expect_identical(attr(out, "source"), "cvm")
   expect_identical(
-    utils::tail(names(out), 6L),
+    utils::tail(names(out), 7L),
     c(
       "basis",
       "superseded_at",
       "superseded_by_versao",
       "history_source",
       "id_doc",
-      "motivo_reapresentacao"
+      "motivo_reapresentacao",
+      "scale_error"
     )
   )
   expect_s3_class(out$superseded_at, "Date")
@@ -261,6 +297,7 @@ test_that("cvm_versions via cvm reads the yearly file and says it is partial", {
   # row is the current one.
   expect_true(all(out$history_source == "current"))
   expect_true(all(is.na(out$superseded_by_versao)))
+  expect_true(all(out$scale_error == "sem erro de escala"))
   mglu <- out[out$cnpj_cia == "47.960.950/0001-21", ]
   expect_identical(
     unique(mglu[, c("dt_refer", "versao")])$versao,
@@ -388,7 +425,7 @@ test_that("cvm_versions resolves a ticker and stacks both bases", {
   expect_identical(sum(out$basis == "ind"), 8L)
   expect_identical(sum(out$basis == "con"), 16L)
   expect_true(all(out$history_source[out$basis == "ind"] == "current"))
-  expect_identical(utils::tail(names(out), 5L), .version_columns)
+  expect_identical(utils::tail(names(out), 6L), .version_columns)
 })
 
 test_that("fetch_versions_cvm handles a table without yearly files", {
@@ -414,7 +451,7 @@ test_that("mark_versions copes with empty, keyless and unversioned frames", {
   )
   expect_identical(nrow(empty), 0L)
   expect_identical(
-    utils::tail(names(empty), 5L),
+    utils::tail(names(empty), 6L),
     .version_columns
   )
   keyless <- mark_versions(

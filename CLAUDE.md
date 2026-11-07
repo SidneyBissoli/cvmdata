@@ -110,7 +110,11 @@ cvm_fetch(dataset, table,
 # Só tabelas com `keep_latest_version` no YAML; outra = cvmdata_error_input.
 # Colunas da tabela (+ year, basis) + superseded_at (Date),
 # superseded_by_versao, history_source ("current" na vigente; "rad" /
-# "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao.
+# "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao,
+# scale_error ("apenas erro de escala" / "erro de escala e outras
+# mudanças" / "sem erro de escala" — a vigente é sempre "sem"; NA =
+# versão ainda não julgada pelo robô; gravada pelo estágio 05 do ETL,
+# decisão do dono 2026-11-06; cli_inform único quando há versão marcada).
 # source = "mirror": part-N ∪ __history por union_by_name (DuckDB);
 # source = "cvm": CSV anual SEM keep_latest_version + cli_inform de que
 # o CSV guarda só parte das versões (completo só no espelho/RAD).
@@ -405,7 +409,7 @@ cobertos vivem no `ROADMAP.md`. Três topologias de download: CSV avulso
 (`yearly` + `{year}`); o `schema-load` recusa `{year}` fora do anual.
 Tabela sem coluna de emissor declara `issuer_via: {table, key}` e é
 filtrada por `cnpj`/`ticker` através da tabela-mãe.
-Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,util-hash}.R`.
+Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh}.R`.
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
 snapshots, fixtures e vignette data) com **auditorias one-shot**
@@ -645,6 +649,20 @@ pulos do stage 02: table/year/report_type/reason ∈ {empty, absent});
 `mirror_skip_bullets()` cita no erro "No parquet assets match". NUNCA
 asset novo no release: `parse_mirror_asset_name()` aborta em qualquer
 nome que não seja parquet ou `__source_hash.json`. `03-publish.R --dry-run` = smoke local sem tocar o release.
+**Etiqueta de erro de escala** (decisão do dono 2026-11-06; estágio
+`inst/etl/05-label-scale.R` + `util-scale.R`): depois do 03 (espelho) e do
+04 (RAD), o estágio 05 lê do release o histórico e as partições vigentes das
+8 demonstrações de cada ano cujo histórico mudou desde o último julgamento
+(`scale_labeled` e `scale_rule` no `__source_hash.json`), julga cada versão
+substituída pelo DOCUMENTO INTEIRO (ind + con) e regrava a coluna
+`scale_error` nos `__history` do ano (coluna nova, nunca asset novo). Regra
+fechada: contas `ÚLTIMO` sem `3.99*`, não nulas nas duas versões; mais da
+metade segue um mesmo fator 1000^n → erro de escala; "apenas" se TODAS seguem
+e nenhuma conta não nula só de um lado; senão "e outras mudanças"; o resto é
+"sem". Sucessor = entrega seguinte por (`superseded_at`, `id_doc`, `versao`),
+vigente por último; versão gravada pelo caminho do espelho só tem as tabelas
+que mudaram — as ausentes vêm do sucessor (iguais). Só dfp e itr. `--all` =
+backfill (input `label_all` do `etl-rad.yaml`); `--dry-run` grava local.
 **Snapshots datados** (decisão A do dono, 2026-10-25; medido: 624 MB em
 8 releases, ~60 MB/semana mudam = 11% das partições; cópia integral
 seria 32 GB/ano, só-mudadas 3,5 GB/ano): toda rodada que publica cria

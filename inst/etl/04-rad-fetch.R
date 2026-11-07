@@ -89,12 +89,14 @@ for (sibling in c(
   "00-config.R",
   "util-hash.R",
   "util-history.R",
+  "util-release.R",
   "util-rad.R"
 )) {
   marker <- c(
     "00-config.R" = "mirror_tag_latest",
     "util-hash.R" = "mirror_hash_parquet",
     "util-history.R" = "mirror_append_history",
+    "util-release.R" = "upload_release_asset",
     "util-rad.R" = "rad_read_zip"
   )[[sibling]]
   if (!exists(marker, mode = "function")) {
@@ -389,71 +391,6 @@ rad_merge_history <- function(previous, rows, replace = character()) {
     n_added = nrow(added),
     n_skipped = sum(!keep)
   )
-}
-
-# --- release I/O ------------------------------------------------------
-
-asset_name_of <- function(rel) {
-  gsub("[/\\\\]", "__", rel)
-}
-public_asset_name <- function(rel) {
-  gsub("=", ".", asset_name_of(rel), fixed = TRUE)
-}
-
-download_release_asset <- function(tag, name, dir, attempts = 3L) {
-  for (attempt in seq_len(attempts)) {
-    status <- suppressWarnings(system2(
-      "gh",
-      c(
-        "release",
-        "download",
-        tag,
-        "--repo",
-        mirror_repo,
-        "--pattern",
-        name,
-        "--dir",
-        shQuote(dir),
-        "--clobber"
-      ),
-      stdout = NULL,
-      stderr = NULL
-    ))
-    path <- file.path(dir, name)
-    if (status == 0L && file.exists(path)) {
-      return(path)
-    }
-    if (attempt < attempts) {
-      Sys.sleep(5 * attempt)
-    }
-  }
-  NULL
-}
-
-upload_release_asset <- function(tag, path, attempts = 4L) {
-  for (attempt in seq_len(attempts)) {
-    status <- system2(
-      "gh",
-      c(
-        "release",
-        "upload",
-        tag,
-        shQuote(path),
-        "--repo",
-        mirror_repo,
-        "--clobber"
-      )
-    )
-    if (status == 0L) {
-      return(invisible(TRUE))
-    }
-    if (attempt < attempts) {
-      wait <- 10 * 2^(attempt - 1L)
-      message(sprintf("    upload failed; retry %d in %ds", attempt, wait))
-      Sys.sleep(wait)
-    }
-  }
-  stop(sprintf("upload failed for %s", basename(path)), call. = FALSE)
 }
 
 # --- the run ----------------------------------------------------------

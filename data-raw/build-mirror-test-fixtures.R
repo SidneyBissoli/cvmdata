@@ -1024,9 +1024,10 @@ build_dfp_2025_fixtures <- function() {
 # (version 1 in R$ units superseded by version 2 "to reflect the R$
 # thousand scale", itself superseded by version 3). Four accounts are
 # kept so the fixture stays small; every version and reading
-# (`ordem_exerc`) of them survives. The history asset carries the five
+# (`ordem_exerc`) of them survives. The history asset carries the six
 # columns the current one lacks (`superseded_at`, `superseded_by_versao`,
-# `history_source`, `id_doc`, `motivo_reapresentacao`), as published.
+# `history_source`, `id_doc`, `motivo_reapresentacao` and, since the
+# scale-error backfill of 2026-11, `scale_error`), as published.
 build_dre_2023_fixtures <- function() {
   base_url <- paste0(
     "https://github.com/SidneyBissoli/cvmdata/releases/download/",

@@ -189,3 +189,14 @@ jobs:
           Rscript inst/etl/03-publish.R \
             --group ${{ matrix.group }} \
             --dataset ${{ matrix.dataset }}
+
+      - name: Stage 05 — label the scale errors in the history
+        # The superseded versions stage 03 just filed get their
+        # `scale_error` verdict, judged over the whole document
+        # (inst/etl/05-label-scale.R); only the years whose history
+        # moved are read again. DFP and ITR statements only.
+        if: ${{ !inputs.year && (matrix.dataset == 'dfp' || matrix.dataset == 'itr') }}
+        run: |
+          Rscript inst/etl/05-label-scale.R \
+            --group ${{ matrix.group }} \
+            --dataset ${{ matrix.dataset }}
