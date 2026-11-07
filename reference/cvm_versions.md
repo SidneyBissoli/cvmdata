@@ -145,7 +145,7 @@ The two backends know different parts of the history.
 
 The columns of the table, `year` and `basis` as
 [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
-returns them, then five version columns:
+returns them, then six version columns:
 
 - `superseded_at`: `Date` the version stopped being the current one (the
   receipt date of the version that replaced it); `NA` for the current
@@ -164,9 +164,44 @@ returns them, then five version columns:
 - `motivo_reapresentacao`: the reason the issuer gave for the re-filing,
   as the CVM publishes it, when known.
 
+- `scale_error`: whether the superseded version was a scale error (see
+  below); `"sem erro de escala"` for the current version.
+
 Rows are ordered by issuer, reference date and `versao`. `versao` is not
 a key on its own: the CVM index carries two filings under the same
 `VERSAO` for some documents.
+
+## Scale errors
+
+About one superseded DFP or ITR version in twenty is not a restatement
+but a filing in the wrong unit (R\$ units where the form asks for R\$
+thousand, or the reverse), replaced within days by the same figures a
+thousand times larger or smaller; measured on the mirror in 2026-11,
+every year from 2010 on has such documents. Their rows stay in the
+history (the wrong figures were public) and `scale_error` says what the
+replacement changed, judged by the ETL over the whole document (the
+eight statements, individual and consolidated) with one verdict per
+version:
+
+- `"apenas erro de escala"`: every account the two versions share
+  differs by the same factor of 1000, and neither has an account the
+  other lacks. The version carries no information of its own.
+
+- `"erro de escala e outras mudanças"`: more than half of the shared
+  accounts differ by one factor of 1000, but some differ otherwise or
+  exist in one version only. The replacement fixed the unit and changed
+  figures.
+
+- `"sem erro de escala"`: everything else, the current version included:
+  an ordinary restatement, or a version identical to its replacement.
+
+The judgement reads the `ÚLTIMO` rows, leaves out the per-share accounts
+(`3.99*`), and takes accounts with a zero on both sides as saying
+nothing. `NA` marks a superseded version the ETL has not judged yet (it
+runs after every update of the history). When the result holds a version
+with a scale error the call says so once, with a message (not a warning:
+a whole year always has one);
+[`suppressMessages()`](https://rdrr.io/r/base/message.html) silences it.
 
 ## See also
 
@@ -192,9 +227,11 @@ petr[
   c("versao", "superseded_at", "superseded_by_versao", "vl_conta")
 ]
 
-# Braskem filed it three times: version 1 in R$ units by mistake
-# (a loss of R$ 4.5 million), version 2 "to reflect the R$ thousand
-# scale" (R$ 4.89 billion) and version 3.
+# Braskem filed it three times: version 1 in R$ units (a loss of
+# R$ 4.5 million) AND with other figures, version 2 "to reflect the
+# R$ thousand scale" (a loss of R$ 4.89 billion: other operating
+# expenses grew by R$ 360 million too) and version 3, identical to
+# version 2 in this statement. `scale_error` tells the two apart.
 brkm <- cvm_versions(
   "dfp",
   "dre",
@@ -202,6 +239,6 @@ brkm <- cvm_versions(
   year = 2023,
   basis = "con"
 )
-unique(brkm[, c("versao", "superseded_at", "motivo_reapresentacao")])
+unique(brkm[, c("versao", "superseded_at", "scale_error")])
 }
 ```
