@@ -800,16 +800,24 @@ zenodo_split_versions <- function(depositions) {
 }
 
 # The draft the edition goes into. Without a concept record the first
-# edition opens a new deposition; with one, the draft already open is
-# reused (a run repeated after a failure) or a new version of the latest
-# published edition is opened. The deposition returned is fresh from
-# the API, with its `links$bucket`.
-zenodo_open_draft <- function(client, concept = NULL) {
+# edition opens a new deposition, created with its metadata in the body
+# (the sandbox trial of 2026-11-07 answered 500 to a body of `[]`: an
+# empty R list serialises as an array, and the API wants an object);
+# with one, the draft already open is reused (a run repeated after a
+# failure) or a new version of the latest published edition is opened,
+# and the metadata is set afterwards. The deposition returned is fresh
+# from the API, with its `links$bucket`.
+zenodo_open_draft <- function(client, concept = NULL, metadata = NULL) {
   if (is.null(concept) || !nzchar(concept)) {
+    body <- if (is.null(metadata)) {
+      structure(list(), names = character())
+    } else {
+      list(metadata = metadata)
+    }
     draft <- zenodo_perform(
       zenodo_request(client, "/api/deposit/depositions") |>
         httr2::req_method("POST") |>
-        httr2::req_body_json(list()),
+        httr2::req_body_json(body),
       what = "create"
     )
     attr(draft, "created") <- TRUE

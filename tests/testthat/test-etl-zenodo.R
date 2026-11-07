@@ -444,7 +444,8 @@ test_that("the first edition opens a new deposition and a failure deletes it", {
   handler <- function(req) {
     seen[[length(seen) + 1L]] <<- list(
       method = req$method %||% "GET",
-      url = req$url
+      url = req$url,
+      body = req$body$data
     )
     if (
       identical(req$method, "POST") &&
@@ -464,13 +465,25 @@ test_that("the first edition opens a new deposition and a failure deletes it", {
     }
     httr2::response_json(status_code = 200L, body = list())
   }
+  metadata <- edition_metadata(
+    "2026-10-06",
+    list(cad = "2026-10-06"),
+    "0.2",
+    "<p>x</p>"
+  )
   httr2::with_mocked_responses(handler, {
-    draft <- zenodo_open_draft(client, NULL)
+    draft <- zenodo_open_draft(client, NULL, metadata)
     expect_identical(draft$id, 77L)
     expect_true(attr(draft, "created"))
     expect_identical(zenodo_drop_draft(client, draft), "deleted")
   })
   expect_identical(seen[[1L]]$method, "POST")
+  # the body is a JSON object with the metadata, never `[]` (the
+  # sandbox answered 500 to an empty array on 2026-11-07)
+  body <- as.character(jsonlite::toJSON(seen[[1L]]$body, auto_unbox = TRUE))
+  expect_true(startsWith(body, '{"metadata":{"upload_type":"dataset"'))
+  empty <- jsonlite::toJSON(structure(list(), names = character()))
+  expect_identical(as.character(empty), "{}")
   expect_identical(seen[[2L]]$method, "DELETE")
   expect_match(seen[[2L]]$url, "/api/deposit/depositions/77$")
 })

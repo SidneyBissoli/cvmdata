@@ -317,7 +317,13 @@ edition_main <- function(opts) {
 
   # 4. the draft
   zenodo_check_license(client)
-  draft <- zenodo_open_draft(client, concept)
+  metadata <- edition_metadata(
+    edition,
+    snapshots,
+    package_version,
+    edition_description(edition, snapshots, counts)
+  )
+  draft <- zenodo_open_draft(client, concept, metadata)
   message(sprintf(
     "[06-zenodo] draft %s (%s): %s",
     draft$id,
@@ -327,16 +333,7 @@ edition_main <- function(opts) {
   read_back <- NULL
   failure <- tryCatch(
     {
-      zenodo_set_metadata(
-        client,
-        draft,
-        edition_metadata(
-          edition,
-          snapshots,
-          package_version,
-          edition_description(edition, snapshots, counts)
-        )
-      )
+      zenodo_set_metadata(client, draft, metadata)
       actions <- zenodo_sync_files(client, draft, files)
       message(sprintf(
         paste(
