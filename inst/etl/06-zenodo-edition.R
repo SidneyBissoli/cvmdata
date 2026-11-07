@@ -316,7 +316,7 @@ edition_main <- function(opts) {
   }
 
   # 4. the draft
-  zenodo_check_license(client, "odc-odbl")
+  zenodo_check_license(client)
   draft <- zenodo_open_draft(client, concept)
   message(sprintf(
     "[06-zenodo] draft %s (%s): %s",

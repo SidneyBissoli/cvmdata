@@ -358,7 +358,7 @@ test_that("the metadata is an ODbL dataset, dated and versioned by edition", {
     "<p>x</p>"
   )
   expect_identical(md$upload_type, "dataset")
-  expect_identical(md$license, "odc-odbl")
+  expect_identical(md$license, "odbl-1.0")
   expect_identical(md$access_right, "open")
   expect_identical(md$publication_date, "2026-10-06")
   expect_identical(md$version, "2026-10-06")
