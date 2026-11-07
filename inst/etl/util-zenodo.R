@@ -578,7 +578,7 @@ edition_metadata <- function(edition, snapshots, package_version, description) {
     )),
     description = description,
     access_right = "open",
-    license = "odc-odbl",
+    license = zenodo_license_odbl,
     version = format(as.Date(edition)),
     language = "eng",
     keywords = list(
@@ -758,9 +758,15 @@ zenodo_check_token <- function(client) {
 
 # Is the licence id known to this Zenodo? The id of the ODbL is checked
 # before the metadata is sent, so a renamed vocabulary fails the run
-# with a clear message instead of a 400 on the metadata.
-zenodo_check_license <- function(client, license) {
-  zenodo_get(client, sprintf("/api/licenses/%s", license))
+# with a clear message instead of a 400 on the metadata. The sandbox
+# trial of 2026-11-07 is why: the legacy `/api/licenses/<id>` answers
+# 404 and the opendefinition id `odc-odbl` is not the one Zenodo uses;
+# the vocabulary is `/api/vocabularies/licenses/<id>` and the ODbL is
+# `odbl-1.0` (the same on both sites).
+zenodo_license_odbl <- "odbl-1.0"
+
+zenodo_check_license <- function(client, license = zenodo_license_odbl) {
+  zenodo_get(client, sprintf("/api/vocabularies/licenses/%s", license))
   invisible(TRUE)
 }
 
