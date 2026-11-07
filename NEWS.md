@@ -174,6 +174,30 @@
   version superseded, 14 of them with a different net income.
   `cvm_fetch()` is unchanged and keeps ignoring the history assets.
 
+* `cvm_versions()` gains a sixth version column, `scale_error`, that
+  tells a superseded version filed in the wrong unit from a true
+  restatement. About one superseded DFP or ITR version in twenty is a
+  filing in R$ units where the form asks for R$ thousand (or the
+  reverse), replaced within days by the same figures a thousand times
+  larger; without a mark the row a thousand times smaller read as a
+  restatement. The ETL now judges every superseded version once, over
+  the whole document (the eight statements, individual and
+  consolidated), and writes one of three values:
+  `"apenas erro de escala"` (every shared account differs by the same
+  factor of 1000 and neither version has an account the other lacks),
+  `"erro de escala e outras mudanças"` (more than half of the shared
+  accounts follow one factor of 1000, but some changed otherwise or
+  exist in one version only) and `"sem erro de escala"` (everything
+  else, the current version included). The rule reads the `ÚLTIMO`
+  rows, leaves out the per-share accounts (`3.99*`) and takes a zero on
+  both sides as saying nothing. Measured on the 6,825 superseded
+  versions of DFP 2010–2025 and ITR 2011–2026: 353 "apenas", 28 "e
+  outras mudanças" (Braskem DFP 2023 version 1 among them: the scale
+  and other operating expenses, R$ 360 million higher in version 2),
+  every one of them recovered from the RAD. A call whose result holds
+  such a version says so once, with a message (`suppressMessages()`
+  silences it); `NA` marks a version the ETL has not judged yet.
+
 * `cvm_fetch()` is the single public fetcher, built on the same pipeline
   as `issuer_fetch()`:
   `cvm_fetch(dataset, table, cnpj, ticker, year, from, to, basis, ...)`.
@@ -642,6 +666,26 @@
   false since v0.1.0 made the mirror the default.
 
 ## Internal
+
+* A fifth ETL stage, `inst/etl/05-label-scale.R`, writes the
+  `scale_error` column into the history assets of the DFP and ITR
+  statements. The verdict needs every table of a version and of its
+  successor, so it is not given where the rows are written (the mirror
+  path sees one partition at a time, the RAD path one document without
+  its successor): the stage runs after 03 in `etl-mirror.yaml` and after
+  04 in `etl-rad.yaml`, reads from the release the history and current
+  assets of the years whose history moved since they were last judged
+  (`scale_labeled` and `scale_rule` in `__source_hash.json`), judges
+  every superseded version (`inst/etl/util-scale.R`) and rewrites the
+  history assets of those years. The versions of a document are paired
+  in the order of `superseded_at`, `id_doc` and `versao`, the current
+  one last; a version the mirror path filed holds only the tables whose
+  content changed, so the tables it lacks are taken from its successor
+  before the comparison. `--all` judges every year (the backfill, a
+  `label_all` input of `etl-rad.yaml`); `--dry-run` writes locally. The
+  release I/O the three stages shared by copy (`download_release_asset()`,
+  `download_public_asset()`, `upload_release_asset()`, the asset names)
+  now lives in `inst/etl/util-release.R`.
 
 * The package passes `pkgcheck::pkgcheck()`, the automated gate of the
   rOpenSci software review: the `cvm_tbl` topic documents its value,

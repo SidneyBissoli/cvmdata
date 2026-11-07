@@ -33,13 +33,15 @@ stopifnot(requireNamespace("digest", quietly = TRUE))
 stopifnot(requireNamespace("dplyr", quietly = TRUE))
 stopifnot(requireNamespace("yaml", quietly = TRUE))
 
-# Columns appended to every history row.
+# Columns appended to every history row (`scale_error` by stage 05,
+# util-scale.R).
 mirror_history_cols <- c(
   "superseded_at",
   "superseded_by_versao",
   "history_source",
   "id_doc",
-  "motivo_reapresentacao"
+  "motivo_reapresentacao",
+  "scale_error"
 )
 
 # Columns that identify the delivery, not its content (CLAUDE.md 2.3 and

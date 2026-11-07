@@ -43,7 +43,7 @@
 #'
 #' @section Columns:
 #' The columns of the table, `year` and `basis` as [cvm_fetch()]
-#' returns them, then five version columns:
+#' returns them, then six version columns:
 #'
 #' * `superseded_at`: `Date` the version stopped being the current one
 #'   (the receipt date of the version that replaced it); `NA` for the
@@ -57,10 +57,42 @@
 #'   history knows it.
 #' * `motivo_reapresentacao`: the reason the issuer gave for the
 #'   re-filing, as the CVM publishes it, when known.
+#' * `scale_error`: whether the superseded version was a scale error
+#'   (see below); `"sem erro de escala"` for the current version.
 #'
 #' Rows are ordered by issuer, reference date and `versao`. `versao` is
 #' not a key on its own: the CVM index carries two filings under the
 #' same `VERSAO` for some documents.
+#'
+#' @section Scale errors:
+#' About one superseded DFP or ITR version in twenty is not a
+#' restatement but a filing in the wrong unit (R$ units where the form
+#' asks for R$ thousand, or the reverse), replaced within days by the
+#' same figures a thousand times larger or smaller; measured on the
+#' mirror in 2026-11, every year from 2010 on has such documents. Their
+#' rows stay in the history (the wrong figures were public) and
+#' `scale_error` says what the replacement changed, judged by the ETL
+#' over the whole document (the eight statements, individual and
+#' consolidated) with one verdict per version:
+#'
+#' * `"apenas erro de escala"`: every account the two versions share
+#'   differs by the same factor of 1000, and neither has an account the
+#'   other lacks. The version carries no information of its own.
+#' * `"erro de escala e outras mudanças"`: more than half of the shared
+#'   accounts differ by one factor of 1000, but some differ otherwise or
+#'   exist in one version only. The replacement fixed the unit and
+#'   changed figures.
+#' * `"sem erro de escala"`: everything else, the current version
+#'   included: an ordinary restatement, or a version identical to its
+#'   replacement.
+#'
+#' The judgement reads the `ÚLTIMO` rows, leaves out the per-share
+#' accounts (`3.99*`), and takes accounts with a zero on both sides as
+#' saying nothing. `NA` marks a superseded version the ETL has not
+#' judged yet (it runs after every update of the history). When the
+#' result holds a version with a scale error the call says so once,
+#' with a message (not a warning: a whole year always has one);
+#' `suppressMessages()` silences it.
 #'
 #' @inheritParams cvm_fetch
 #' @param year Integer vector of years whose documents to return, as
@@ -90,9 +122,11 @@
 #'   c("versao", "superseded_at", "superseded_by_versao", "vl_conta")
 #' ]
 #'
-#' # Braskem filed it three times: version 1 in R$ units by mistake
-#' # (a loss of R$ 4.5 million), version 2 "to reflect the R$ thousand
-#' # scale" (R$ 4.89 billion) and version 3.
+#' # Braskem filed it three times: version 1 in R$ units (a loss of
+#' # R$ 4.5 million) AND with other figures, version 2 "to reflect the
+#' # R$ thousand scale" (a loss of R$ 4.89 billion: other operating
+#' # expenses grew by R$ 360 million too) and version 3, identical to
+#' # version 2 in this statement. `scale_error` tells the two apart.
 #' brkm <- cvm_versions(
 #'   "dfp",
 #'   "dre",
@@ -100,7 +134,7 @@
 #'   year = 2023,
 #'   basis = "con"
 #' )
-#' unique(brkm[, c("versao", "superseded_at", "motivo_reapresentacao")])
+#' unique(brkm[, c("versao", "superseded_at", "scale_error")])
 #'
 #' @family fetchers
 #' @export
@@ -165,6 +199,7 @@ cvm_versions <- function(
   if (identical(source, "cvm")) {
     inform_versions_cvm()
   }
+  inform_scale_errors(out)
 
   cvm_attach_metadata(
     out,
@@ -181,7 +216,18 @@ cvm_versions <- function(
   "superseded_by_versao",
   "history_source",
   "id_doc",
-  "motivo_reapresentacao"
+  "motivo_reapresentacao",
+  "scale_error"
+)
+
+# The values of `scale_error`, as stage 05 of the ETL writes them
+# (inst/etl/util-scale.R, `scale_labels`; keep the two in step). The
+# current version is always "sem erro de escala"; a superseded version
+# the robot has not judged yet is NA.
+.scale_error_labels <- c(
+  only = "apenas erro de escala",
+  mixed = "erro de escala e outras mudan\u00e7as",
+  none = "sem erro de escala"
 )
 
 # Arguments of `cvm_fetch()` that select rows of the current reading;
@@ -339,8 +385,34 @@ mark_versions <- function(df, tx, source) {
     df$history_source[!is_current] <- "cvm"
   }
   df$history_source[is_current] <- "current"
+  df$scale_error[is_current] <- .scale_error_labels[["none"]]
   ord <- if (is.null(key)) order(ver) else order(key, ver)
   df[ord, , drop = FALSE]
+}
+
+# One line when a superseded version in the result was a scale error:
+# its figures are a thousand times off, not restated. Not a warning:
+# every year from 2010 to 2026 has such a document, so a year-wide call
+# would always warn. Silence it with `rlang::local_options()`'s
+# `rlib_message_verbosity = "quiet"` or `suppressMessages()`.
+inform_scale_errors <- function(df) {
+  flagged <- df$scale_error %in% .scale_error_labels[c("only", "mixed")]
+  if (!any(flagged)) {
+    return(invisible())
+  }
+  id_cols <- c(
+    first_present(df, c("cnpj_cia", "cnpj_companhia")),
+    first_present(df, c("dt_refer", "data_referencia")),
+    "versao",
+    "superseded_at"
+  )
+  n <- nrow(unique(df[flagged, intersect(id_cols, names(df)), drop = FALSE]))
+  cli::cli_inform(c(
+    "i" = paste(
+      "{n} superseded version{?s} {?was/were} a scale error (figures in",
+      "the wrong unit, re-filed): see column {.var scale_error}."
+    )
+  ))
 }
 
 # The document key `keep_latest_version` collapses on: issuer, reference
