@@ -83,7 +83,7 @@ locally before review:
 `lintr``::`[`lint_package`](https://lintr.r-lib.org/reference/lint.html)`(``)`\
 \
 `# coverage target is >= 90%`\
-`covr``::`[`package_coverage`](http://covr.r-lib.org/reference/package_coverage.md)`(``)`\
+`covr``::`[`package_coverage`](https://covr.r-lib.org/reference/package_coverage.html)`(``)`\
 \
 `# pkgdown site must build cleanly; deep-dive articles call the CVM`\
 `# portal and need network access`\

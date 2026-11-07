@@ -829,7 +829,7 @@ Comandos triviais de pacote R
 [`devtools::install()`](https://devtools.r-lib.org/reference/install.html),
 [`devtools::build()`](https://devtools.r-lib.org/reference/build.html),
 [`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html),
-[`covr::package_coverage()`](http://covr.r-lib.org/reference/package_coverage.md))
+[`covr::package_coverage()`](https://covr.r-lib.org/reference/package_coverage.html))
 não estão listados aqui — usar diretamente.
 
 ``` powershell
