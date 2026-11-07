@@ -200,7 +200,8 @@ test_that("the repair writes a read sidecar back with its nulls", {
   skip_if_not_installed("jsonlite")
   withr::local_options(cvmdata.etl_testing = TRUE)
   env <- environment()
-  for (script in c("00-config.R", "util-release.R", "repair-snapshot-digests.R")) {
+  scripts <- c("00-config.R", "util-release.R", "repair-snapshot-digests.R")
+  for (script in scripts) {
     sys.source(etl_script_path(script), envir = env)
   }
   root <- withr::local_tempdir()
