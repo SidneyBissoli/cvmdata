@@ -77,6 +77,14 @@ repair_digest_lookup <- function(dir) {
   }
 }
 
+# `null = "null"`: a sidecar read with `read_json()` holds the JSON
+# nulls of `skips` (a table without `report_type`) as NULL, and
+# `write_json()` writes NULL as `{}` unless told otherwise. The first
+# repair of 2026-11-07 wrote `"report_type": {}` into the fre sidecars
+# and every client failed on them ("arguments imply differing number
+# of rows: 2, 0" in the skips parser) until the sidecars were written
+# again. 03-publish.R is not exposed: its `skips` is a data.frame with
+# NA, which `na = "null"` covers.
 repair_write_sidecar <- function(sidecar, path) {
   dir.create(dirname(path), recursive = TRUE, showWarnings = FALSE)
   jsonlite::write_json(
@@ -84,7 +92,8 @@ repair_write_sidecar <- function(sidecar, path) {
     path,
     auto_unbox = TRUE,
     pretty = TRUE,
-    na = "null"
+    na = "null",
+    null = "null"
   )
   path
 }
@@ -108,15 +117,17 @@ repair_main <- function(group, dataset, dry_run) {
   for (date in dates) {
     tag <- mirror_tag_snapshot(group, dataset, as.Date(date))
     sidecar <- repair_read_sidecar(tag, work)
-    repaired <- snapshot_repair_files(sidecar, lookup)
+    skips <- snapshot_normalise_skips(sidecar)
+    repaired <- snapshot_repair_files(skips$sidecar, lookup)
     message(sprintf(
-      "[repair] %s %s: %d of %d partition digest(s) were wrong",
+      "[repair] %s %s: %d of %d partition digest(s) were wrong%s",
       dataset,
       date,
       length(repaired$fixed),
-      length(sidecar$files %||% list())
+      length(sidecar$files %||% list()),
+      if (skips$changed) "; skips had `{}` for null" else ""
     ))
-    if (length(repaired$fixed)) {
+    if (length(repaired$fixed) || skips$changed) {
       path <- repair_write_sidecar(
         repaired$sidecar,
         file.path(out_dir, tag, "__source_hash.json")
@@ -136,6 +147,7 @@ repair_main <- function(group, dataset, dry_run) {
       call. = FALSE
     )
   }
+  latest <- snapshot_normalise_skips(latest)$sidecar
   uploads[[latest_tag]] <- repair_write_sidecar(
     latest,
     file.path(out_dir, latest_tag, "__source_hash.json")

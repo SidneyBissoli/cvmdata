@@ -629,11 +629,30 @@ mirror_normalise_skips <- function(x) {
     return(NULL)
   }
   data.frame(
-    table = as.character(x$table),
-    year = suppressWarnings(as.integer(x$year)),
-    report_type = as.character(x$report_type),
-    reason = as.character(x$reason),
+    table = mirror_skip_scalars(x$table),
+    year = suppressWarnings(as.integer(mirror_skip_scalars(x$year))),
+    report_type = mirror_skip_scalars(x$report_type),
+    reason = mirror_skip_scalars(x$reason),
     stringsAsFactors = FALSE
+  )
+}
+
+# A column of the skip manifest as character, one value per row. A
+# missing value may arrive as `null` (NA after parsing) or, from a
+# sidecar rewritten by a tool that encodes NULL as `{}` (the repair of
+# 2026-11-07 did, and every read of the fre sidecars failed with
+# "arguments imply differing number of rows"), as an empty list in a
+# list column: both are NA.
+mirror_skip_scalars <- function(column) {
+  if (!is.list(column)) {
+    return(as.character(column))
+  }
+  vapply(
+    column,
+    function(v) {
+      if (length(v) == 1L && !is.list(v)) as.character(v) else NA_character_
+    },
+    character(1L)
   )
 }
 

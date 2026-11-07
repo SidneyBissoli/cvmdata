@@ -910,6 +910,21 @@ test_that("mirror_normalise_skips accepts only the ETL's four columns", {
   expect_identical(out$report_type, NA_character_)
 })
 
+test_that("mirror_normalise_skips reads a null encoded as an empty object", {
+  # a sidecar rewritten with NULL as `{}` (the repair of 2026-11-07):
+  # jsonlite parses the column as a list with an empty list per row
+  parsed <- jsonlite::fromJSON(paste0(
+    '[{"table":"mercado_estrangeiro","year":2026,"report_type":{},',
+    '"reason":"absent"},{"table":"bpa","year":2025,"report_type":"ind",',
+    '"reason":"empty"}]'
+  ))
+  out <- mirror_normalise_skips(parsed)
+  expect_identical(out$table, c("mercado_estrangeiro", "bpa"))
+  expect_identical(out$year, c(2026L, 2025L))
+  expect_identical(out$report_type, c(NA, "ind"))
+  expect_identical(out$reason, c("absent", "empty"))
+})
+
 test_that("mirror_skip_bullets filters by table, year and report_type", {
   bullets <- mirror_skip_bullets
   inventory <- tibble::tibble(name = character(0L))
