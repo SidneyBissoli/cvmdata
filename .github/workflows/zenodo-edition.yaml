@@ -1,0 +1,174 @@
+name: Zenodo edition
+
+# Prepares the quarterly DOI edition of the parquet mirror on Zenodo as
+# a DRAFT (inst/etl/06-zenodo-edition.R; design decided by the owner
+# on 2026-11-06). The robot never publishes: the owner reads the report
+# in the job summary, opens the draft on Zenodo and publishes it.
+#
+# Triggers:
+#   - schedule: the 22nd of January, April, July and October at
+#     10:00 UTC. The edition is dated on the first Tuesday of the month
+#     (the first weekly round of the mirror, at most the 7th) and the
+#     deposit waits 14 days of grace, so the 22nd is the first day on
+#     which the grace has always elapsed. The day is fixed instead of
+#     "the third Tuesday" because cron treats day-of-month and
+#     day-of-week as OR, not AND. The scheduled run targets production
+#     and does nothing until the secret ZENODO_TOKEN exists, which
+#     happens only after the sandbox trial passed.
+#   - workflow_dispatch: `target` (sandbox by default), `edition`
+#     (a date, to prepare a past edition again), `datasets` (a subset,
+#     for the sandbox trial: `cad,vlmo,recompra_acoes` are the small
+#     ones), `grace` (0 to prepare this month's edition before the 14
+#     days), `dry_run` (build and verify, no Zenodo call) and
+#     `allow_shrink` (accept a table with fewer rows than the previous
+#     edition, after a prune that was decided).
+#
+# Secrets and variables, set on the site of the repository
+# (`gh secret set` from this machine writes an empty value):
+#   ZENODO_SANDBOX_TOKEN, ZENODO_TOKEN     secrets; scopes deposit:write
+#                                          and deposit:actions (the
+#                                          second edition is a new
+#                                          version, which needs actions)
+#   ZENODO_SANDBOX_CONCEPT, ZENODO_CONCEPT variables; the concept
+#                                          record id printed in the
+#                                          report of the first edition,
+#                                          set after it is published
+#
+# Shares the concurrency group of the mirror and RAD robots: the
+# history assets are read from `-latest`, and a read in the middle of
+# a publish would mix two states.
+
+on:
+  schedule:
+    - cron: '0 10 22 1,4,7,10 *'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Zenodo site (the sandbox is disposable; production is forever)
+        required: false
+        default: sandbox
+        type: choice
+        options:
+          - sandbox
+          - production
+      edition:
+        description: Edition date YYYY-MM-DD (optional; default = the latest edition whose grace elapsed)
+        required: false
+        type: string
+      datasets:
+        description: Datasets, comma-separated (optional; default = all nine)
+        required: false
+        type: string
+      grace:
+        description: Days between the edition date and the deposit
+        required: false
+        default: '14'
+        type: string
+      dry_run:
+        description: Build and verify the files; do not touch Zenodo
+        required: false
+        default: false
+        type: boolean
+      allow_shrink:
+        description: Accept a table with fewer rows than the previous edition
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read  # gh release download, when the public URL fails
+
+concurrency:
+  group: etl-history
+  cancel-in-progress: false
+
+jobs:
+  edition:
+    # Pinned, not ubuntu-latest: see etl-mirror.yaml.
+    runs-on: ubuntu-24.04
+    # ~600 MB downloaded from the mirror, packed, uploaded to Zenodo
+    # and downloaded again for the read-back; the sandbox is slow.
+    timeout-minutes: 300
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CVMDATA_ETL_WORKSPACE: /tmp/cvmdata-etl
+      ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+      ZENODO_SANDBOX_TOKEN: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+      ZENODO_CONCEPT: ${{ vars.ZENODO_CONCEPT }}
+      ZENODO_SANDBOX_CONCEPT: ${{ vars.ZENODO_SANDBOX_CONCEPT }}
+      EDITION_TARGET: ${{ inputs.target || 'production' }}
+      EDITION_DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the Zenodo token
+        id: token
+        run: |
+          case "$EDITION_TARGET" in
+            production) token="$ZENODO_TOKEN" ;;
+            *) token="$ZENODO_SANDBOX_TOKEN" ;;
+          esac
+          if [ -n "$token" ] || [ "$EDITION_DRY_RUN" = "true" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::no Zenodo token for the $EDITION_TARGET; no edition prepared"
+          fi
+
+      - uses: r-lib/actions/setup-r@v2
+        if: steps.token.outputs.present == 'true'
+        timeout-minutes: 10
+        with:
+          r-version: release
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        if: steps.token.outputs.present == 'true'
+        timeout-minutes: 15
+        with:
+          extra-packages: any::arrow, any::devtools, any::digest, any::jsonlite
+          needs: check
+
+      - name: Install cvmdata from source
+        if: steps.token.outputs.present == 'true'
+        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = FALSE)'
+
+      - name: Stage 06 — prepare the edition
+        if: steps.token.outputs.present == 'true'
+        run: |
+          args="--target $EDITION_TARGET --grace ${{ inputs.grace || '14' }}"
+          if [ -n "${{ inputs.edition }}" ]; then
+            args="$args --edition ${{ inputs.edition }}"
+          fi
+          if [ -n "${{ inputs.datasets }}" ]; then
+            args="$args --datasets ${{ inputs.datasets }}"
+          fi
+          if [ "$EDITION_DRY_RUN" = "true" ]; then
+            args="$args --dry-run"
+          fi
+          if [ "${{ inputs.allow_shrink }}" = "true" ]; then
+            args="$args --allow-shrink"
+          fi
+          # shellcheck disable=SC2086
+          Rscript inst/etl/06-zenodo-edition.R $args
+
+      - name: Report
+        if: ${{ always() && steps.token.outputs.present == 'true' }}
+        run: |
+          report=$(ls "$CVMDATA_ETL_WORKSPACE"/zenodo/*/edition-report.md 2>/dev/null | head -n 1)
+          if [ -n "$report" ]; then
+            cat "$report" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No report written: the run stopped before the checks." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload the report and the manifest
+        if: ${{ always() && steps.token.outputs.present == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: zenodo-edition-${{ env.EDITION_TARGET }}
+          path: |
+            ${{ env.CVMDATA_ETL_WORKSPACE }}/zenodo/*/edition-report.md
+            ${{ env.CVMDATA_ETL_WORKSPACE }}/zenodo/*/deposit/manifest.csv
+            ${{ env.CVMDATA_ETL_WORKSPACE }}/zenodo/*/deposit/README.md
+          if-no-files-found: ignore
