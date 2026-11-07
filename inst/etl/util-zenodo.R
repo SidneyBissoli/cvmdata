@@ -850,11 +850,15 @@ zenodo_open_draft <- function(client, concept = NULL, metadata = NULL) {
   after <- zenodo_split_versions(zenodo_list_versions(client, concept))
   if (is.null(after$draft)) {
     stop(
-      "newversion opened no draft: the versions of the record are all submitted",
+      paste(
+        "newversion opened no draft: the versions of the record are",
+        "all submitted"
+      ),
       call. = FALSE
     )
   }
-  if (identical(as.character(after$draft$id), as.character(versions$published$id))) {
+  published_id <- as.character(versions$published$id)
+  if (identical(as.character(after$draft$id), published_id)) {
     stop(
       "newversion returned the published record itself, not a new draft",
       call. = FALSE
