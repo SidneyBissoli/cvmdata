@@ -409,7 +409,7 @@ cobertos vivem no `ROADMAP.md`. Três topologias de download: CSV avulso
 (`yearly` + `{year}`); o `schema-load` recusa `{year}` fora do anual.
 Tabela sem coluna de emissor declara `issuer_via: {table, key}` e é
 filtrada por `cnpj`/`ticker` através da tabela-mãe.
-Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh}.R`
+Layout do ETL: `inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,06-zenodo-edition,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh,util-zenodo}.R`
 + `repair-snapshot-digests.R` (reparo único dos sidecars datados, 2026-11-07).
 
 `data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
@@ -664,6 +664,26 @@ e nenhuma conta não nula só de um lado; senão "e outras mudanças"; o resto �
 vigente por último; versão gravada pelo caminho do espelho só tem as tabelas
 que mudaram — as ausentes vêm do sucessor (iguais). Só dfp e itr. `--all` =
 backfill (input `label_all` do `etl-rad.yaml`); `--dry-run` grava local.
+**Edição trimestral com DOI no Zenodo** (desenho do dono 2026-11-06;
+estágio `inst/etl/06-zenodo-edition.R` + `util-zenodo.R`; workflow
+`zenodo-edition.yaml`, dia 22 de jan/abr/jul/out): edição = espelho
+inteiro na primeira terça do mês (snapshot ≤ data por conjunto, como
+`cvm_release_set()`), + `__history` do dia do depósito, README,
+dicionário, codelists, DATA-LICENSE, `manifest.csv` e `SHA256SUMS`, um
+`.tar` por conjunto (tar interno do R, sem compressão), UM registro com
+uma versão por edição (`newversion`). O robô PREPARA o rascunho e NUNCA
+publica (`zenodo_actions_allowed` sem `publish`; teste varre o fonte);
+carência de 14 dias; conferências em ordem: sha256 de toda partição
+contra o sidecar datado → contagem de linhas por tabela contra o
+`manifest.csv` da edição anterior (menos linhas ou tabela sumida =
+falha, salvo `--allow-shrink`; crescimento só se reporta) → leitura de
+volta do rascunho; falha antes do depósito não toca o Zenodo, falha
+depois apaga/descarta o rascunho. Relatório em
+`<workspace>/zenodo/<edição>/edition-report.md` (job summary). Sandbox
+primeiro (`--target sandbox`, padrão); segredos `ZENODO_SANDBOX_TOKEN` /
+`ZENODO_TOKEN` (escopos write + actions) e variáveis
+`ZENODO_SANDBOX_CONCEPT` / `ZENODO_CONCEPT` pelo site do GitHub; sem
+token o workflow agendado não faz nada. Ensaio local: `--dry-run`.
 **Snapshots datados** (decisão A do dono, 2026-10-25; medido: 624 MB em
 8 releases, ~60 MB/semana mudam = 11% das partições; cópia integral
 seria 32 GB/ano, só-mudadas 3,5 GB/ano): toda rodada que publica cria

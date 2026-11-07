@@ -67,6 +67,17 @@
 
 ## New features
 
+* The mirror gets quarterly editions with a DOI. Four times a year (the
+  first weekly round of January, April, July and October) the ETL
+  prepares, as a Zenodo draft the maintainer publishes by hand, the
+  whole mirror as it stood on that day: every dataset, the superseded
+  versions, the column dictionary, the code lists, the data licence
+  and the checksums, one version of a single record per edition. The
+  release notes of every mirror release now describe what the assets
+  are (layout, transformations, dictionary) for whoever downloads them
+  without the package. The first edition is January 2027; the weekly
+  snapshots keep serving the dates in between, without a DOI.
+
 * New dataset `recompra_acoes` (programas de recompra de ações) in the
   `companhias` group, with three tables: `recompra_acoes` (one row per
   buyback program, with the issuer's CNPJ), `intermediarios` (the

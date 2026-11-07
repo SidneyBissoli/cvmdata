@@ -295,10 +295,19 @@ snapshot datado: adotado (item no ROADMAP). Não prometer além disso. -->
 
 What we plan, and what we do not:
 
-- **A DOI for each dated snapshot.** Each snapshot will be deposited
-  in an archive that issues DOIs (Zenodo), so a paper can cite the
-  exact data it used and the data outlive the GitHub repository.
-  <!-- Reescrever no presente quando estiver implementado. -->
+- **A DOI for each quarterly edition.** Four times a year (the first
+  weekly round of January, April, July and October) the whole mirror
+  as it stood on that day — every dataset, the superseded versions,
+  the column dictionary, the licence and the checksums — is deposited
+  on Zenodo as one version of a single record, so a paper can cite the
+  exact data it used and the data outlive the GitHub repository. The
+  robot prepares the deposit after a 14-day grace period and verifies
+  it (every partition against the mirror's digests, row counts against
+  the previous edition, a read-back of the draft); the maintainer
+  publishes it by hand. The weekly snapshots keep serving the dates in
+  between, without a DOI. First edition: January 2027.
+  <!-- Reescrever no presente, com o DOI do registro, quando a
+  primeira edição estiver publicada. -->
 - **No transfer to an organisation.** `cvmdata` is a personal
   project, and we will not claim an institutional home it does not
   have. The guarantees above are the ones that hold for a single
