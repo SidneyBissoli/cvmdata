@@ -492,6 +492,7 @@ test_that("a later edition is a new version of the latest published one", {
   load_etl_zenodo()
   client <- zenodo_client("token", "sandbox")
   calls <- character()
+  listings <- 0L
   handler <- function(req) {
     calls <<- c(
       calls,
@@ -502,30 +503,19 @@ test_that("a later edition is a new version of the latest published one", {
     )
     url <- req$url
     if (grepl("conceptrecid:76", url, fixed = TRUE)) {
-      return(httr2::response_json(
-        status_code = 200L,
-        body = list(
-          list(id = 10, submitted = TRUE),
-          list(id = 12, submitted = TRUE)
-        )
-      ))
+      listings <<- listings + 1L
+      versions <- list(
+        list(id = 10, submitted = TRUE),
+        list(id = 12, submitted = TRUE)
+      )
+      if (listings > 1L) {
+        # after newversion the listing shows the new, unsubmitted version
+        versions <- c(versions, list(list(id = 20, submitted = FALSE)))
+      }
+      return(httr2::response_json(status_code = 200L, body = versions))
     }
     if (grepl("/actions/newversion$", url)) {
       return(httr2::response_json(status_code = 201L, body = list(id = 12)))
-    }
-    if (grepl("/api/deposit/depositions/12$", url)) {
-      return(httr2::response_json(
-        status_code = 200L,
-        body = list(
-          id = 12,
-          links = list(
-            latest_draft = paste0(
-              zenodo_base_url("sandbox"),
-              "/api/deposit/depositions/20"
-            )
-          )
-        )
-      ))
     }
     if (grepl("/api/deposit/depositions/20$", url)) {
       return(httr2::response_json(
@@ -543,18 +533,36 @@ test_that("a later edition is a new version of the latest published one", {
     expect_identical(draft$id, 20L)
     expect_false(attr(draft, "created"))
   })
+  listing <- paste0(
+    "GET /api/deposit/depositions?q=conceptrecid:76",
+    "&all_versions=true&size=100"
+  )
   expect_identical(
     calls,
     c(
-      paste0(
-        "GET /api/deposit/depositions?q=conceptrecid:76",
-        "&all_versions=true&size=100"
-      ),
+      listing,
       "POST /api/deposit/depositions/12/actions/newversion",
-      "GET /api/deposit/depositions/12",
+      listing,
       "GET /api/deposit/depositions/20"
     )
   )
+})
+
+test_that("a newversion that opens no draft is an error, not an edit", {
+  load_etl_zenodo()
+  client <- zenodo_client("token", "sandbox")
+  handler <- function(req) {
+    if (grepl("conceptrecid:76", req$url, fixed = TRUE)) {
+      return(httr2::response_json(
+        status_code = 200L,
+        body = list(list(id = 12, submitted = TRUE))
+      ))
+    }
+    httr2::response_json(status_code = 201L, body = list(id = 12))
+  }
+  httr2::with_mocked_responses(handler, {
+    expect_error(zenodo_open_draft(client, "76"), "opened no draft")
+  })
 })
 
 test_that("a draft already open is reused instead of opening another", {

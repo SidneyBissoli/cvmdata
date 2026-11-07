@@ -842,15 +842,32 @@ zenodo_open_draft <- function(client, concept = NULL, metadata = NULL) {
     )
   }
   zenodo_action(client, versions$published$id, "newversion")
-  latest <- zenodo_get(
-    client,
-    sprintf("/api/deposit/depositions/%s", versions$published$id)
-  )
-  draft_url <- latest$links$latest_draft
-  if (is.null(draft_url)) {
-    stop("newversion opened no draft (no `latest_draft` link)", call. = FALSE)
+  # The draft is found by listing the versions again: on the sandbox
+  # (2026-11-07, run 42398564349) the `latest_draft` link of the
+  # published deposition pointed back to the record itself, and the
+  # edit of it answered 404. The listing shows the new, unsubmitted
+  # version with its own id, which is also how a repeated run finds it.
+  after <- zenodo_split_versions(zenodo_list_versions(client, concept))
+  if (is.null(after$draft)) {
+    stop(
+      paste(
+        "newversion opened no draft: the versions of the record are",
+        "all submitted"
+      ),
+      call. = FALSE
+    )
   }
-  draft <- zenodo_get(client, draft_url)
+  published_id <- as.character(versions$published$id)
+  if (identical(as.character(after$draft$id), published_id)) {
+    stop(
+      "newversion returned the published record itself, not a new draft",
+      call. = FALSE
+    )
+  }
+  draft <- zenodo_get(
+    client,
+    sprintf("/api/deposit/depositions/%s", after$draft$id)
+  )
   attr(draft, "created") <- FALSE
   draft
 }
