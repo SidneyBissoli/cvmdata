@@ -691,6 +691,48 @@ test_that("rad_compare tells identical tables from changed ones", {
   expect_identical(nrow(cmp$only_rad), 1L)
 })
 
+test_that("the index years are the submissao partitions the release has", {
+  load_etl_rad()
+  source_hash <- list(
+    data = list(
+      "submissao/year=2013/part-0.parquet" = "a",
+      "bpa/report_type=con/year=2026/part-0.parquet" = "b",
+      "submissao/year=2011/part-0.parquet" = "c",
+      "submissao/year=2012/part-0.parquet" = "d"
+    )
+  )
+  expect_identical(rad_index_years(source_hash), c(2011L, 2012L, 2013L))
+  expect_identical(rad_index_years(list()), integer())
+})
+
+test_that("a year of the index that does not read stops the run", {
+  load_etl_rad()
+  # 2026-11-05: two years of the ITR index failed and were dropped in
+  # silence; the queue ran without them
+  row <- function(y) {
+    data.frame(
+      cnpj_cia = "A",
+      dt_refer = as.Date(sprintf("%d-03-31", y)),
+      versao = "1",
+      id_doc = as.character(y),
+      dt_receb = as.Date(sprintf("%d-05-15", y)),
+      extra = "dropped"
+    )
+  }
+  index <- rad_read_index("itr", 2011:2012, fetch = row)
+  expect_identical(index$id_doc, c("2011", "2012"))
+  expect_false("extra" %in% names(index))
+
+  flaky <- function(y) {
+    if (y == 2012L) stop("HTTP 502") else row(y)
+  }
+  expect_error(
+    rad_read_index("itr", 2011:2013, fetch = flaky),
+    "submissao index of itr for year\\(s\\): 2012 \\(HTTP 502\\)"
+  )
+  expect_error(rad_read_index("itr", integer(), fetch = row), "no submissao")
+})
+
 test_that("the queue holds the superseded deliveries, newest year first", {
   load_etl_rad()
   index <- data.frame(

@@ -125,23 +125,55 @@ utc_now <- function(t = Sys.time()) {
 
 # --- queue ------------------------------------------------------------
 
-# The `submissao` rows of every published year of `dataset`, from the
-# mirror.
-rad_read_index <- function(dataset, years) {
-  parts <- lapply(years, function(y) {
-    tryCatch(
+# The years of the `submissao` index the release publishes, read from
+# its `__source_hash.json` (`data`: partition path -> sha256). The
+# robot asks for these years and no others, so a year it cannot read is
+# a failure, not a year the mirror lacks (DFP of the current year).
+rad_index_years <- function(source_hash) {
+  paths <- names(source_hash$data %||% list())
+  hit <- regmatches(paths, regexec("^submissao/year=(\\d{4})/", paths))
+  years <- vapply(hit, function(m) if (length(m)) m[2] else NA_character_, "")
+  sort(unique(as.integer(years[!is.na(years)])))
+}
+
+# The `submissao` rows of `years` of `dataset`, from the mirror. Every
+# year must read: on 2026-11-05 two years of the ITR index (2012, 2013)
+# failed to download, were dropped in silence, and the run worked on a
+# queue without them. A missing year now stops the run, naming it.
+rad_read_index <- function(dataset, years, fetch = NULL) {
+  fetch <- fetch %||%
+    function(y) {
       suppressMessages(cvmdata::cvm_fetch(
         dataset,
         "submissao",
         year = y,
         source = "mirror"
-      )),
-      error = function(e) NULL
+      ))
+    }
+  if (length(years) == 0L) {
+    stop(
+      sprintf("the mirror publishes no submissao index for %s", dataset),
+      call. = FALSE
     )
+  }
+  parts <- lapply(years, function(y) {
+    tryCatch(fetch(y), error = function(e) e)
   })
-  parts <- parts[!vapply(parts, is.null, logical(1))]
-  if (length(parts) == 0L) {
-    return(NULL)
+  bad <- vapply(parts, inherits, logical(1), what = "error")
+  if (any(bad)) {
+    failed <- vapply(
+      which(bad),
+      function(i) sprintf("%d (%s)", years[i], conditionMessage(parts[[i]])),
+      character(1)
+    )
+    stop(
+      sprintf(
+        "could not read the submissao index of %s for year(s): %s",
+        dataset,
+        paste(failed, collapse = "; ")
+      ),
+      call. = FALSE
+    )
   }
   keep <- c(
     "cnpj_cia",
@@ -796,18 +828,7 @@ rad_main <- function(
   rad_check_state_present(state_file, source_hash, tag)
   state <- rad_read_state(state_file, dataset)
 
-  schema <- yaml::read_yaml(file.path(
-    mirror_schema_dir(dataset),
-    "submissao.yaml"
-  ))
-  years <- seq.int(
-    schema$first_year %||% 2010L,
-    as.integer(format(Sys.Date(), "%Y"))
-  )
-  index <- rad_read_index(dataset, years)
-  if (is.null(index)) {
-    stop("could not read the submissao index from the mirror", call. = FALSE)
-  }
+  index <- rad_read_index(dataset, rad_index_years(source_hash))
   queue <- rad_queue(index, state, year = year, reread = reread)
   message(sprintf(
     "[04-rad] index: %d deliveries; queue: %d (%d done, %d set aside)",
