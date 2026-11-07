@@ -1071,7 +1071,11 @@ zenodo_previous_manifest <- function(client, concept, dir) {
       call. = FALSE
     )
   }
-  manifest <- utils::read.csv(target, stringsAsFactors = FALSE, encoding = "UTF-8")
+  manifest <- utils::read.csv(
+    target,
+    stringsAsFactors = FALSE,
+    encoding = "UTF-8"
+  )
   attr(manifest, "edition") <- record$metadata$version %||% NA_character_
   attr(manifest, "doi") <- record$doi %||% NA_character_
   manifest

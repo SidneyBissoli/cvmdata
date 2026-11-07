@@ -648,7 +648,10 @@ test_that("the manifest of a published record is read by its content link", {
     )
   )
   expect_identical(zenodo_record_file_url(record, "missing.csv"), NA_character_)
-  expect_identical(zenodo_record_file_url(list(), "manifest.csv"), NA_character_)
+  expect_identical(
+    zenodo_record_file_url(list(), "manifest.csv"),
+    NA_character_
+  )
 })
 
 # --- the entry point ---------------------------------------------------
