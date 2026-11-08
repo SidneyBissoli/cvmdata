@@ -42,6 +42,16 @@ Attribution for the mirror and for anything you derive from it:
 > to Parquet by the `cvmdata` R package,
 > <https://github.com/SidneyBissoli/cvmdata>.
 
+## Personal data
+
+The mirror departs from the CVM in one respect. Full CPFs and birth
+dates are not redistributed: every CPF is masked as `***.456.789-**`, a
+foreign document in a CPF column becomes `***`, and `data_nascimento`
+becomes the year, in `ano_nascimento`. Names and biographies stay as
+published. These are personal data under the Brazilian LGPD (Lei
+13.709/2018) wherever you read them from: their open publication does
+not free you from respecting the purpose of the disclosure.
+
 ## What this means for you
 
 In short (the licence text prevails):

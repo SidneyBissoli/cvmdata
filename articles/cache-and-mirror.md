@@ -99,6 +99,17 @@ live on `-latest` only; under a pin the rows superseded after the pinned
 date are dropped, so the result is the set of versions known on that
 day.
 
+### Personal data
+
+This is the one place the two sources differ by design. The CVM
+publishes full CPFs and birth dates of the people who run and control
+listed companies; a mirror with permanent editions keeps what research
+needs. From the mirror, every CPF reads `***.456.789-**`, a foreign
+document in a CPF column reads `***`, and `data_nascimento` is the year,
+in `ano_nascimento`. Names and biographies are as published, and the
+masked CPF plus the name still follow a person across tables.
+`source = "cvm"` returns what the CVM publishes.
+
 ### Data licence and attribution
 
 The CVM publishes every dataset covered by the package under the [Open

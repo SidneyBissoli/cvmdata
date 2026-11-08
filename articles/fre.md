@@ -60,7 +60,7 @@ reference year 2024.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpxy8EcB/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp50Fv08/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -68,7 +68,7 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpxy8EcB/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp50Fv08/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -77,7 +77,7 @@ reference year 2024.
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `auditor`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
-`#>   ``fetched_at``: ``2026-11-08 02:42:37.325358`\
+`#>   ``fetched_at``: ``2026-11-08 13:29:24.930826`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
 `#> ``# A tibble: 2 × 19`\
 `#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
@@ -111,7 +111,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpxy8EcB/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp50Fv08/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -120,7 +120,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `pcd`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
-`#>   ``fetched_at``: ``2026-11-08 02:42:37.706937`\
+`#>   ``fetched_at``: ``2026-11-08 13:29:25.291787`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``# A tibble: 0 × 11`\
 `#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
@@ -145,7 +145,7 @@ FRE filing.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpxy8EcB/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp50Fv08/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -153,7 +153,7 @@ FRE filing.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpxy8EcB/duckdb`\
+`#> ``ℹ`` /tmp/Rtmp50Fv08/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -170,7 +170,7 @@ FRE filing.
 `)`\
 `posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-05"`` |`\
-`#>   ``fetched_at``: ``2026-11-08 02:42:38.420785`\
+`#>   ``fetched_at``: ``2026-11-08 13:29:25.892119`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
 `#> ``# A tibble: 5 × 6`\
 `#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\

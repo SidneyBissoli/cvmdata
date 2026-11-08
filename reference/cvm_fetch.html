@@ -221,6 +221,21 @@ account and a sum over the copies counts twice. See the section
 check off.</p>
     </div>
     <div class="section level2">
+    <h2 id="personal-data">Personal data<a class="anchor" aria-label="anchor" href="#personal-data"></a></h2>
+
+
+<p>The CVM publishes, by legal duty, data of the natural persons who run
+and control listed companies. The mirror keeps what research needs and
+no more: every CPF, in the columns that hold it and in free text, is
+masked the way the Federal Revenue masks its open CNPJ data
+(<code>***.456.789-**</code>), a foreign document in those columns becomes <code>***</code>,
+and <code>data_nascimento</code> becomes the integer <code>ano_nascimento</code>. Names, CNPJs
+and biographies stay as published; the masked CPF plus the name still
+follow a person across tables. <code>source = "cvm"</code> reads everything from
+the CVM untouched, under the same duty to respect the purpose of the
+disclosure (Lei 13.709/2018, art. 7, paragraphs 3 and 4).</p>
+    </div>
+    <div class="section level2">
     <h2 id="filing-versions">Filing versions<a class="anchor" aria-label="anchor" href="#filing-versions"></a></h2>
 
 
