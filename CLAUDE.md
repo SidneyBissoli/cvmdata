@@ -333,11 +333,16 @@ medido 2026-10-21: nenhum reusado). Busca textual e CD_CVM saíram
 com `issuer_fetch()` (removida em 2026-11-01); o cadastro `cvm_fetch("cad",
 "companhias")` é o lugar de resolver nome/código → CNPJ. Sem argumento
 `cpf` (filtro de PF fica para a v0.7). A CVM PUBLICA CPF completo
-(`999.999.999-99`, sem máscara) em 14 colunas de 9 tabelas do FCA e do
-FRE — administradores, conselho fiscal, comitês, DRI, auditor
-responsável, acionistas PF, parentes de administradores (medido
-2026-11-07; a frase anterior aqui dizia o contrário). Os cadastros de
-PF da v0.7 é que só trazem nome.
+(`999.999.999-99`, sem máscara) em colunas `cpf*` e `documento_*` e em
+texto livre do FCA e do FRE — administradores, conselho fiscal, comitês,
+DRI, auditor responsável, acionistas PF, parentes de administradores. O
+ESPELHO E O ZENODO NÃO REDISTRIBUEM: CPF vira `***.456.789-**`,
+documento estrangeiro vira `***`, `data_nascimento` vira `ano_nascimento`
+(`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
+`data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a única
+exceção à regra "se vem da CVM, fica como na CVM", e só no que o pacote
+redistribui: `source = "cvm"` devolve tudo intacto. Os cadastros de PF da
+v0.7 é que só trazem nome.
 
 O filtro de emissor do motor (`filter_by_issuer()` em
 `R/api-issuer-fetch.R`) compara só CNPJ: `cnpj_clean()` dos dois lados,

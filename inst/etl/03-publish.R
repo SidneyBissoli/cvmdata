@@ -71,6 +71,7 @@
 source("inst/etl/00-config.R")
 source("inst/etl/util-hash.R")
 source("inst/etl/util-history.R")
+source("inst/etl/util-privacy.R")
 source("inst/etl/util-snapshot.R")
 source("inst/etl/util-gh.R")
 source("inst/etl/util-release.R")
@@ -352,6 +353,52 @@ prune_history <- function(prev, source_hash, changed, map) {
   list(map = map, files = files)
 }
 
+# The run that follows a change of `mirror_privacy_rule`: every history
+# asset of the release goes through the rule. Same shape as the prune:
+# returns list(map, files), and `written` holds the assets the prune has
+# already rewritten this run, read from disk. Rows are never dropped.
+# Nothing to do when the previous release is under the current rule.
+scrub_history <- function(prev, map, written) {
+  files <- character()
+  if (identical(prev$privacy_rule %||% "", mirror_privacy_rule)) {
+    return(list(map = map, files = files))
+  }
+  for (hist_rel in names(map)) {
+    out <- file.path(history_dir, hist_rel)
+    path <- if (out %in% written) {
+      out
+    } else {
+      download_public_asset(tag, public_asset_name(hist_rel), download_dir)
+    }
+    if (is.null(path)) {
+      stop(
+        sprintf("history asset %s is listed but not downloadable", hist_rel),
+        call. = FALSE
+      )
+    }
+    # no memory map: `path` may be the file overwritten below
+    history <- as.data.frame(arrow::read_parquet(path, mmap = FALSE))
+    if (!length(mirror_privacy_counts(history))) {
+      next
+    }
+    dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
+    arrow::write_parquet(
+      mirror_apply_privacy(history),
+      out,
+      compression = "snappy"
+    )
+    map[[hist_rel]] <- mirror_hash_parquet(out)
+    files <- c(files, out)
+  }
+  message(sprintf(
+    "[03-publish] privacy rule %s: %d of %d history asset(s) rewritten",
+    mirror_privacy_rule,
+    length(files),
+    length(map)
+  ))
+  list(map = map, files = files)
+}
+
 # Returns list(map = {history partition: content sha256} after this run,
 # files = local history parquets written now).
 build_history <- function(prev, source_hash) {
@@ -379,6 +426,10 @@ build_history <- function(prev, source_hash) {
     pruned <- res$files
     files <- res$files
   }
+  scrubbed <- scrub_history(prev, map, pruned)
+  map <- scrubbed$map
+  pruned <- union(pruned, scrubbed$files)
+  files <- union(files, scrubbed$files)
   for (rel in changed) {
     versioning <- mirror_table_versioning(
       dataset,
@@ -394,7 +445,9 @@ build_history <- function(prev, source_hash) {
         call. = FALSE
       )
     }
-    old <- arrow::read_parquet(old_path)
+    # Masked before comparing: the change of rule is not a re-filing, and
+    # no unmasked row of the previous release reaches history.
+    old <- mirror_apply_privacy(arrow::read_parquet(old_path))
     new <- arrow::read_parquet(file.path(dataset_dir, rel))
     keys <- mirror_filing_keys(new, versioning$keys)
     if (is.null(keys)) {
@@ -423,7 +476,7 @@ build_history <- function(prev, source_hash) {
     hist_rel <- mirror_history_rel(rel)
     out <- file.path(history_dir, hist_rel)
     previous <- if (out %in% pruned) {
-      arrow::read_parquet(out)
+      arrow::read_parquet(out, mmap = FALSE)
     } else if (!is.null(map[[hist_rel]])) {
       previous_history(hist_rel)
     }
@@ -448,6 +501,7 @@ build_history <- function(prev, source_hash) {
 
 source_hash$reader <- mirror_reader_id()
 source_hash$history_rule <- mirror_history_rule
+source_hash$privacy_rule <- mirror_privacy_rule
 reader_changed <- !is.null(prev) &&
   !identical(prev$reader %||% "", source_hash$reader)
 if (reader_changed) {

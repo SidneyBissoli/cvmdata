@@ -333,3 +333,17 @@ test_that("validate_write_report writes a markdown summary", {
   expect_true(any(grepl("ETL validation report: cad", content, fixed = TRUE)))
   expect_true(any(grepl("PASS", content, fixed = TRUE)))
 })
+
+test_that("the validator fails a parquet the masking did not reach", {
+  load_etl_validator()
+  bad <- validate_privacy_check(
+    tibble::tibble(cpf = "111.444.777-35", nome = "Fulana de Tal")
+  )
+  expect_identical(bad$status, "fail")
+  expect_identical(bad$severity, "hard")
+  expect_identical(bad$note, "cpf: 1")
+  good <- validate_privacy_check(
+    tibble::tibble(cpf = "***.444.777-**", nome = "Fulana de Tal")
+  )
+  expect_identical(good$status, "pass")
+})

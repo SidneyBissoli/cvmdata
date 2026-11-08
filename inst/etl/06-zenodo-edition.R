@@ -38,10 +38,16 @@
 # `options(cvmdata.etl_testing = TRUE)` loads the helpers and skips the
 # entry point.
 
-for (sibling in c("00-config.R", "util-release.R", "util-zenodo.R")) {
+for (sibling in c(
+  "00-config.R",
+  "util-release.R",
+  "util-privacy.R",
+  "util-zenodo.R"
+)) {
   marker <- c(
     "00-config.R" = "mirror_tag_latest",
     "util-release.R" = "download_public_asset",
+    "util-privacy.R" = "mirror_apply_privacy",
     "util-zenodo.R" = "edition_date_for"
   )[[sibling]]
   if (!exists(marker, mode = "function")) {
@@ -244,6 +250,17 @@ edition_main <- function(opts) {
   }
   all_plan <- do.call(rbind, plans)
   digests_failed <- edition_verify_digests(all_plan)
+  # A published record cannot be deleted: stop before touching Zenodo.
+  privacy_failed <- edition_check_privacy(all_plan)
+  if (length(privacy_failed)) {
+    stop(
+      paste(
+        "personal data in the edition, nothing was deposited:",
+        paste(privacy_failed, collapse = "; ")
+      ),
+      call. = FALSE
+    )
+  }
   counts <- edition_count_tables(all_plan)
   manifest <- edition_manifest(plans)
 

@@ -21,6 +21,7 @@ load_etl_rad <- function() {
     "util-hash.R",
     "util-history.R",
     "util-release.R",
+    "util-privacy.R",
     "util-rad.R",
     "04-rad-fetch.R"
   )

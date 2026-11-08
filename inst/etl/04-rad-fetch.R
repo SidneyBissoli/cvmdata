@@ -90,6 +90,7 @@ for (sibling in c(
   "util-hash.R",
   "util-history.R",
   "util-release.R",
+  "util-privacy.R",
   "util-rad.R"
 )) {
   marker <- c(
@@ -97,6 +98,7 @@ for (sibling in c(
     "util-hash.R" = "mirror_hash_parquet",
     "util-history.R" = "mirror_append_history",
     "util-release.R" = "upload_release_asset",
+    "util-privacy.R" = "mirror_apply_privacy",
     "util-rad.R" = "rad_read_zip"
   )[[sibling]]
   if (!exists(marker, mode = "function")) {
@@ -363,7 +365,7 @@ rad_unread_table <- function(state, index) {
 # History rows of one document: the package columns plus the history
 # columns of util-history.R and the RAD extras.
 rad_history_rows <- function(tables, filing, meta) {
-  motivo <- trimws(meta$motivo_reapresentacao %||% "")
+  motivo <- mirror_mask_text(trimws(meta$motivo_reapresentacao %||% ""))
   lapply(tables, function(t) {
     t$superseded_at <- filing$superseded_at
     t$superseded_by_versao <- filing$superseded_by_versao
