@@ -96,7 +96,7 @@ mirror_hash_meta_entry <- function(local_base, fragment) {
 # arrow (`fetched_at`, `package_version`, ...) are dropped first; column
 # classes stay, so a type change still counts as a change.
 mirror_hash_parquet <- function(path) {
-  df <- as.data.frame(arrow::read_parquet(path))
+  df <- as.data.frame(arrow::read_parquet(path, mmap = FALSE))
   attributes(df) <- attributes(df)[c("names", "row.names", "class")]
   digest::digest(df, algo = "sha256")
 }

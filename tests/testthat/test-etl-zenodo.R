@@ -13,6 +13,7 @@ load_etl_zenodo <- function() {
   scripts <- c(
     "00-config.R",
     "util-release.R",
+    "util-privacy.R",
     "util-zenodo.R",
     "06-zenodo-edition.R"
   )
@@ -769,4 +770,30 @@ test_that("the report says what failed and what the owner does next", {
     ready,
     fixed = TRUE
   )))
+})
+
+test_that("the edition refuses a file with personal data, naming no value", {
+  load_etl_zenodo()
+  dir <- withr::local_tempdir()
+  clean <- file.path(dir, "clean.parquet")
+  dirty <- file.path(dir, "dirty.parquet")
+  arrow::write_parquet(data.frame(cpf = "***.444.777-**"), clean)
+  arrow::write_parquet(
+    data.frame(
+      cpf = "111.444.777-35",
+      data_nascimento = as.Date("1965-03-01")
+    ),
+    dirty
+  )
+  plan <- data.frame(
+    dataset = "fre",
+    rel = c("a/part-0.parquet", "b/part-0.parquet"),
+    path = c(clean, dirty)
+  )
+  found <- edition_check_privacy(plan)
+  expect_length(found, 1L)
+  expect_match(found, "fre/b/part-0.parquet", fixed = TRUE)
+  expect_match(found, "cpf 1", fixed = TRUE)
+  expect_no_match(found, "111.444", fixed = TRUE)
+  expect_length(edition_check_privacy(plan[1L, ]), 0L)
 })

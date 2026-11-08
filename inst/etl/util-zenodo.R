@@ -268,6 +268,30 @@ edition_verify_digests <- function(plan) {
   out
 }
 
+# Files of the edition holding what the mirror does not redistribute
+# (`mirror_privacy_counts()`, util-privacy.R): "<dataset>/<rel>: columns",
+# with names and counts only, empty when every file is clean.
+edition_check_privacy <- function(plan) {
+  out <- character()
+  for (i in seq_len(nrow(plan))) {
+    left <- mirror_privacy_counts(
+      as.data.frame(arrow::read_parquet(plan$path[i]))
+    )
+    if (length(left)) {
+      out <- c(
+        out,
+        sprintf(
+          "%s/%s: %s",
+          plan$dataset[i],
+          plan$rel[i],
+          paste(names(left), left, sep = " ", collapse = ", ")
+        )
+      )
+    }
+  }
+  out
+}
+
 # --- row counts ------------------------------------------------------
 
 # Rows of a parquet file. The table is read and dropped at once rather
@@ -504,9 +528,27 @@ edition_readme <- function(
       "column names, parses dates and numbers, and writes one parquet",
       "partition per table, statement basis (individual or consolidated)",
       "and reference year. Values are kept as the CVM delivers them: no",
-      "row is dropped, no value is corrected. The mirror is refreshed",
+      "row is dropped, no value is corrected, with the one exception of",
+      "*Personal data* below. The mirror is refreshed",
       "every week; an edition is the mirror as it stood on the first",
       "weekly round of January, April, July or October."
+    ),
+    "",
+    "### Personal data",
+    "",
+    paste(
+      "The CVM publishes, by legal duty, data of the natural persons who",
+      "run and control listed companies. This deposit is permanent and",
+      "public, so it keeps only what research needs: every CPF (the",
+      "individual taxpayer number), in the columns that hold it and in",
+      "free text, is masked the way the Brazilian Federal Revenue masks",
+      "it in its open CNPJ data (`***.456.789-**`); a foreign document",
+      "in a CPF column becomes `***`; `data_nascimento` is reduced to",
+      "the year, as the integer column `ano_nascimento`. Names, CNPJs,",
+      "biographies and the declarations the CVM requires stay as",
+      "published, and the masked CPF plus the name still identify a",
+      "person across tables. The complete values remain on the CVM",
+      "portal, and `cvm_fetch(source = \"cvm\")` reads them from there."
     ),
     "",
     "### History",

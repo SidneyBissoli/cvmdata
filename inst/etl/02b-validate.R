@@ -13,6 +13,7 @@
 #   * n_rows > 0
 #   * Identifier column has character type (matches reader policy)
 #   * vl_conta numeric when the schema declares `multiply_by_scale`
+#   * No full CPF and no birth date left (util-privacy.R)
 #
 # Soft checks (warn, continue):
 #   * cnpj_cia / cnpj_companhia values match the CVM punctuated format
@@ -62,6 +63,7 @@
 }
 
 source(.validate_locate_config())
+source(file.path(dirname(.validate_locate_config()), "util-privacy.R"))
 
 stopifnot(requireNamespace("arrow", quietly = TRUE))
 stopifnot(requireNamespace("pointblank", quietly = TRUE))
@@ -364,6 +366,7 @@ validate_one_parquet <- function(
   if (nrow(tbl) == 0L) {
     return(pre)
   }
+  pre <- rbind(pre, validate_privacy_check(tbl))
   vset <- validate_run_pointblank(tbl, hints, table)
   pb <- tibble::tibble(
     check = vset$label,
@@ -374,6 +377,21 @@ validate_one_parquet <- function(
     note = ""
   )
   rbind(pre, pb)
+}
+
+# Hard check: stage 02 masks every parquet, so anything the rule would
+# still change means the masking did not run. The note names columns and
+# counts, never a value.
+validate_privacy_check <- function(tbl) {
+  left <- mirror_privacy_counts(tbl)
+  tibble::tibble(
+    check = "no full CPF or birth date",
+    severity = "hard",
+    status = if (length(left)) "fail" else "pass",
+    n = nrow(tbl),
+    n_failed = as.integer(sum(left)),
+    note = paste(names(left), left, sep = ": ", collapse = "; ")
+  )
 }
 
 # --- aggregate ---------------------------------------------------------
