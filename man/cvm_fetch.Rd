@@ -136,6 +136,20 @@ account and a sum over the copies counts twice. See the section
 \emph{Filing versions}; \code{options(cvmdata.check_filings = FALSE)} turns the
 check off.
 }
+\section{Personal data}{
+
+The CVM publishes, by legal duty, data of the natural persons who run
+and control listed companies. The mirror keeps what research needs and
+no more: every CPF, in the columns that hold it and in free text, is
+masked the way the Federal Revenue masks its open CNPJ data
+(\verb{***.456.789-**}), a foreign document in those columns becomes \verb{***},
+and \code{data_nascimento} becomes the integer \code{ano_nascimento}. Names, CNPJs
+and biographies stay as published; the masked CPF plus the name still
+follow a person across tables. \code{source = "cvm"} reads everything from
+the CVM untouched, under the same duty to respect the purpose of the
+disclosure (Lei 13.709/2018, art. 7, paragraphs 3 and 4).
+}
+
 \section{Filing versions}{
 
 When a detail table carries several filings for the same issuer and

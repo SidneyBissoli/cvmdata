@@ -16,7 +16,7 @@
 >    O DESCRIPTION inteiro é colado na issue. O README tem o mesmo
 >    defeito (cobertura de 4 conjuntos; comparação com `GetITRData`
 >    e `GetDFPData2` diferente da desta issue) — consertar junto.
-> 2. Decisão do dono sobre os CPFs (seção *Ethics*, marcada TODO).
+> 2. Confirmar que as fotos datadas antigas já foram limpas (seção *Ethics*).
 > 3. Seção *Use of Generative AI*: o texto é do dono; o daqui é
 >    rascunho com os fatos medidos. Ler e reescrever na primeira pessoa.
 > 4. Reconferir os números marcados `<!-- medido em ... -->` (testes,
@@ -172,22 +172,30 @@ Open Database License, as part of its legal disclosure regime; it
 collects nothing from users and does not link records across sources.
 
 Some of those tables identify natural persons, and we want to state it
-plainly. The CVM publishes the full CPF (the Brazilian individual
-taxpayer number) and the name of board members, fiscal council and
-committee members, investor-relations officers, audit partners,
-individual shareholders above the disclosure threshold, and relatives
-of directors: 14 columns in 9 tables of the FCA and FRE
-<!-- medido em 2026-11-07: dicionário (14 colunas `cpf*`) e espelho
-(FRE 2025: 8.742 CPFs de administradores, 9.840 de acionistas PF,
-1.694 de parentes; FCA 2025: 1.003 de diretores de RI), formato
-completo 999.999.999-99, sem máscara -->. `cvmdata` returns them as
-published, and the mirror redistributes them.
+plainly. The CVM publishes, by legal duty, the name, the full CPF (the
+Brazilian individual taxpayer number) and the birth date of board members,
+fiscal council and committee members, investor-relations officers, audit
+partners, individual shareholders above the disclosure threshold, and
+relatives of directors.
+<!-- medido em 2026-11-08: cerca de 557 mil valores em 13 colunas `cpf*`,
+2.406 em 2 colunas `documento_*`, 2.364 biografias e outros
+textos livres com CPF (201); 131.129 datas de nascimento em 2 tabelas -->
 
-<!-- TODO (decisão do dono): manter como a CVM publica, ou mascarar/
-retirar os CPFs no espelho e na edição do Zenodo (que é permanente)?
-Escrever aqui a decisão e o porquê. A LGPD (Lei 13.709/2018, art. 7º
-§§ 3º–4º) permite tratar dado tornado público, respeitada a finalidade
-da publicação. -->
+`cvmdata` treats its two sources differently, on purpose.
+`source = "cvm"` returns what the regulator publishes. The mirror and its
+Zenodo editions, which are public and permanent and which we redistribute
+ourselves, keep what research needs and no more: every CPF, in the columns
+that hold it and in free text, is masked as `***.456.789-**`, the way the
+Federal Revenue publishes its own open CNPJ data; a foreign document in a
+CPF column becomes `***`; and the birth date is reduced to the year. Names
+stay, because the name is the content of the disclosure the regulation
+requires, and the masked CPF plus the name still follow a person across
+tables (FRE 2021-2025: no two different people merge). A guard stops any
+publication, and any deposit, that still holds a full CPF or a birth date.
+The reasoning follows the Brazilian LGPD (Lei 13.709/2018), art. 7,
+paragraphs 3 and 4, and art. 10, paragraph 1; it is written down in
+`data-raw/decisions/` in the repository. We are not lawyers, and we would
+welcome the reviewers' view.
 
 -   Any other questions or issues we should be aware of?:
 

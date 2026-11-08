@@ -2,6 +2,21 @@
 
 ## ⚠️ Breaking changes
 
+* The mirror and the Zenodo editions no longer redistribute full CPFs and
+  birth dates. The CVM publishes them by legal duty; a public and permanent
+  deposit keeps only what research needs. Every CPF, in the columns that
+  hold it (`cpf*`, `documento_*`) and in free text, becomes
+  `***.456.789-**`, the way the Federal Revenue publishes its open CNPJ
+  data; a foreign document in those columns becomes `***`; and
+  `data_nascimento` (`fre`: `administrador_membro_conselho_fiscal`,
+  `membro_comite`) becomes the integer column `ano_nascimento`. Names, CNPJs
+  and biographies stay as published, and the masked CPF plus the name still
+  follow a person across tables. Scripts that read `data_nascimento` from
+  the mirror need `ano_nascimento`, or `source = "cvm"`, which still reads
+  everything from the CVM untouched. The dated snapshots are rewritten too,
+  so `cvm_release_set()` returns the masked values for past dates. See
+  "Personal data" in `?cvm_fetch`.
+
 * The four skeleton fetchers `fund_fetch()`, `agent_fetch()`,
   `offering_fetch()` and `event_fetch()`, exported since v0.1.0.9000 as
   placeholders that only aborted, are gone, and so is their condition

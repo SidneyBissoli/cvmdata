@@ -14,6 +14,7 @@ load_etl_scale <- function() {
     "util-hash.R",
     "util-history.R",
     "util-release.R",
+    "util-privacy.R",
     "util-rad.R",
     "util-scale.R",
     "04-rad-fetch.R",

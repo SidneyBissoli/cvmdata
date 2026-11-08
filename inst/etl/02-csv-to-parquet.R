@@ -16,6 +16,7 @@
 #     --group companhias --dataset dfp [--year 2024]
 
 source("inst/etl/00-config.R")
+source("inst/etl/util-privacy.R")
 stopifnot(requireNamespace("arrow", quietly = TRUE))
 stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 
@@ -132,7 +133,13 @@ write_one <- function(tbl, y, rtype) {
   dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
   out_path <- file.path(out_dir, "part-0.parquet")
 
-  arrow::write_parquet(res, out_path, compression = "snappy")
+  # The one place the mirror departs from the CVM: full CPFs and birth
+  # dates are not redistributed (util-privacy.R).
+  arrow::write_parquet(
+    mirror_apply_privacy(res),
+    out_path,
+    compression = "snappy"
+  )
   message(sprintf(
     "  wrote %s (%s rows, %.1f KB)",
     out_path,
