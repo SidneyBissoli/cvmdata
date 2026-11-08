@@ -1,126 +1,106 @@
 # rOpenSci pre-submission inquiry — draft
 
-> **Status (2026-05-28): rascunho desatualizado — NÃO usar/postar como
-> está.** Este texto é da época do v0.1.0 e descreve a API antiga, com
-> `cvm_fetch()` unificado como entry point. A arquitetura mudou desde
-> então: passou a 5 fetchers por contrato de dado (`issuer_fetch()`,
-> `fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`),
-> com `cvm_fetch()` e `cad_fetch()` removidos sem wrapper. Ver `NEWS.md`
-> e `data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`.
-> **Nota de 2026-10-19:** a arquitetura mudou de novo — voltou a uma
-> função única, `cvm_fetch()`, com assinatura nova (`cnpj`/`ticker`,
-> `year` ou `from`/`to`, `basis`); os 5 fetchers são história. Ver
-> `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`. Este draft
-> continua desatualizado e será reescrito do zero.
+> **Estado (2026-11-07): reescrito do zero para o escopo da submissão**
+> (decisão do dono de 2026-11-06: o módulo de companhias, função única,
+> 9 conjuntos). Segue os campos do modelo atual da issue
+> ("Submit a presubmission inquiry",
+> `ropensci/software-review/.github/ISSUE_TEMPLATE/B-submit-a-presubmission-inquiry.md`,
+> lido em 2026-11-07), que agora tem duas seções que o rascunho antigo
+> não tinha: ética/privacidade de dados e uso de IA generativa.
 >
-> Por decisão de timing de 2026-05-28, a submissão ao rOpenSci foi
-> adiada para o **fim do ciclo de desenvolvimento** (após v1.0, com os
-> 5 fetchers funcionais e os 18 grupos cobertos). Este draft será
-> **reescrito do zero** nessa ocasião, refletindo a cobertura completa
-> (18 grupos, 54 datasets na contagem do CKAN de 2026-10-16). A entrada
-> no CRAN permanece acoplada ao aceite rOpenSci. Sequenciamento
-> canônico: `ROADMAP.md`, seção "Fim do ciclo — submissão rOpenSci,
-> CRAN e publicação".
+> **Antes de postar** (nada disto é opcional):
 >
-> **Nota de 2026-11-02:** as duas seções que a revisão de desenho de
-> 2026-10-21 apontou como inexistentes já estão escritas com a
-> arquitetura atual e podem ser aproveitadas na reescrita: *Are there
-> other R packages that accomplish the same thing?* (sobreposição,
-> conferida no código dos pacotes) e *Why the mirror is the default
-> source* (proveniência, longevidade, bus factor). O resto do texto
-> continua desatualizado.
-
-Draft for the issue to be opened at
-<https://github.com/ropensci/software-review/issues/new/choose>
-(template "Pre-Submission Inquiry"). Not posted yet — review,
-adjust, and post when ready.
-
-Items marked `<!-- TODO -->` need verification before posting:
-
-- Versions and status of `GetDFPData2` and `GetFREData` (checked
-  2026-11-02; recheck before posting).
-- Test count "590+" — confirm via
-  `devtools::test()` or `length(testthat::test_dir("tests/testthat"))`.
+> 1. Release 0.3.0 cortada (FRE 2026, 25/11; os 85 lints antes) e o
+>    campo `Description` do DESCRIPTION reescrito: o atual ainda diz
+>    "first release covers cad, itr, dfp, fre" e "future releases".
+>    O DESCRIPTION inteiro é colado na issue. O README tem o mesmo
+>    defeito (cobertura de 4 conjuntos; comparação com `GetITRData`
+>    e `GetDFPData2` diferente da desta issue) — consertar junto.
+> 2. Decisão do dono sobre os CPFs (seção *Ethics*, marcada TODO).
+> 3. Seção *Use of Generative AI*: o texto é do dono; o daqui é
+>    rascunho com os fatos medidos. Ler e reescrever na primeira pessoa.
+> 4. Reconferir os números marcados `<!-- medido em ... -->` (testes,
+>    cobertura, tabelas, versões dos pacotes do Perlin).
+> 5. Se a primeira edição do Zenodo já tiver saído, trocar o futuro
+>    pelo DOI.
 
 ---
 
-## Package: cvmdata
+Submitting Author Name: Sidney da Silva Pereira Bissoli
+Submitting Author Github Handle: <!--author1-->@SidneyBissoli<!--end-author1-->
+Repository: <!--repourl-->https://github.com/SidneyBissoli/cvmdata<!--end-repourl-->
+Submission type: <!--submission-type-->Pre-submission<!--end-submission-type-->
+Language: <!--language-->en<!--end-language-->
 
-`cvmdata` provides a tidy R API to the open data published by the
-Brazilian Securities and Exchange Commission (CVM), covering core
-publicly-traded-company datasets with a unified `cvm_fetch()` entry
-point, an HTTP-with-cache backend against `dados.cvm.gov.br`, and a
-parquet mirror in GitHub Releases refreshed weekly for
-reproducibility.
+---
 
-- Public repo: <https://github.com/SidneyBissoli/cvmdata>
-- pkgdown site: <https://sidneybissoli.github.io/cvmdata/>
-- Released v0.1.0 on 2026-05-24 (covers `cad`, `dfp`, `itr`, `fre` —
-  the four core publicly-traded-company datasets).
-- License: MIT.
+-   Paste the full DESCRIPTION file inside a code block below:
 
-## Which rOpenSci scope categories does the package fit?
+```
+<!-- TODO: colar o DESCRIPTION da 0.3.0 no momento de postar. -->
+```
 
-Primary: **data extraction** — programmatic, reproducible access to
-governmental open data published by a national securities regulator.
+## Scope
 
-Secondary: **data munging** — schema-driven cleanup of categorical
-encoding (ISO-8859-1 → UTF-8), date conversion guided by the
-official CVM data dictionary, scale normalization for monetary
-values (`vl_conta × escala_moeda`), and version-deduplication of
-resubmitted regulatory filings.
+**Data Lifecycle Packages**
 
-## Statement of need
+- [x] data retrieval
 
-### What problem does it solve?
+- Explain how and why the package falls under these categories:
 
-The Brazilian Securities and Exchange Commission (CVM) publishes
-yearly bulk dumps of regulatory filings on the open-data portal at
-`dados.cvm.gov.br`. These datasets are the primary source for
-empirical research in Brazilian finance, accounting and corporate
-governance — they contain every annual (DFP) and quarterly (ITR)
-financial statement, every reference form (FRE) including
-governance, remuneration and ESG-adjacent disclosures, plus the
-live company registry (CAD). They are also the only
-government-grade source for investigative data journalism on
-listed companies in Brazil.
+`cvmdata` retrieves the open data of the Brazilian Securities and
+Exchange Commission (CVM, Comissão de Valores Mobiliários), the
+regulator of the Brazilian capital market, and does the work that
+stands between those files and an analysis: it resolves resubmitted
+filings, separates the original and the restated figures of a fiscal
+year, applies the currency scale, and checks every file against the
+regulator's own data dictionary.
 
-Today these data are typically accessed via ad-hoc scrapers, Excel
-import scripts, or copy-pasted CSVs. Existing R packages on CRAN
-(see comparables below) cover overlapping datasets but scrape the
-B3-mirrored interface of these same data and rename CVM columns to
-English. There is no R package that:
+One area we are unsure of: to recover filings the regulator replaced
+before our mirror started keeping them, the ETL parses the XML
+documents of the CVM's filing archive (RAD) into the same tables as the
+CSV. That reader lives in `inst/etl/`, not in the package API, so we
+did not tick *data extraction*; we would welcome the editors' view.
 
-1. Reads directly from the CVM open-data portal — the regulatory
-   primary source — without an intermediate mirror outside the
-   regulator's control.
-2. Preserves CVM's published column names, table names, categorical
-   values and free text in Portuguese. Fidelity matters when the
-   downstream user is a Brazilian researcher cross-referencing CVM
-   publications, accounting standards (CPC/IFRS-BR), and academic
-   literature.
-3. Offers byte-identical reproducibility through a parquet mirror
-   refreshed on a published schedule, content-addressed by a
-   SHA-256 hash sidecar, with a documented dual-backend contract
-   (live CVM HTTP vs. archived parquet).
+-   Who is the target audience and what are scientific applications of this package?
 
-`cvmdata` fills these gaps.
+Researchers in empirical finance, accounting and corporate governance
+who work with Brazilian listed companies, and the data journalists and
+analysts who cover them. The CVM files are the primary source for that
+work: every annual (DFP) and quarterly (ITR) financial statement since
+2010, the yearly reference form (FRE: governance, compensation,
+ownership, board diversity), the registration form (FCA, which links B3
+tickers to companies), the company register (CAD), the corporate
+governance code report (CGVN), insider trading positions (VLMO),
+share-buyback programmes, and the index of periodic and occasional
+filings (IPE).
 
-### Who is the target audience?
+Typical applications are panels of financial ratios, event studies
+around restatements, governance and compensation research, and
+backtests that need the companies that left the exchange
+(`cvm_fetch("cad", "companhias", as_of = "2015-12-31")` returns the
+registrations in force on a date, survivorship-free). Two problems in
+these data bias results without a word, and the package addresses them
+by default:
 
-- Academic researchers in Brazilian finance, accounting, corporate
-  governance, and empirical economics. Typical use cases include
-  cross-sectional regressions on financial ratios, governance event
-  studies, ESG and remuneration disclosure research, and time-series
-  panels of regulated entities.
-- Data journalists covering listed companies, corporate scandals,
-  governance issues, and equity ownership.
-- Market analysts and quant practitioners building fundamental
-  databases.
-- Educators in finance and accounting using real Brazilian data
-  in coursework.
+- **Resubmissions.** A filing can be delivered several times, and the
+  version number is not a key (we measured two "version 1" filings of
+  the same document). `cvm_fetch()` returns the current filing by
+  delivery date and document id; `cvm_versions()` returns every
+  version, with the date it was superseded and the reason the company
+  declared. About one superseded DFP/ITR version in twenty was filed in
+  the wrong unit (R$ instead of R$ thousand) and replaced days later by
+  the same figures a thousand times larger; `cvm_versions()` labels
+  those (`scale_error`) so they are not read as restatements
+  (353 + 28 of 6,825 superseded versions, DFP 2010–2025 and ITR
+  2011–2026).
+- **Restated comparatives.** Each yearly file carries the exercise it
+  reports and the previous one as the company now presents it. With
+  `reading = c("original", "restated")` the two figures of the same
+  exercise come side by side (about a third of the DFP filers of 2023
+  restated 2022).
 
-### Are there other R packages that accomplish the same thing?
+-   Are there other R packages that accomplish the same thing? If so, how does yours differ or meet our criteria for best-in-category?
 
 <!-- Conferido em 2026-11-02 no código-fonte dos tarballs do CRAN
 (GetDFPData2 0.6.5, GetFREData 1.1.0) e nos arquivos do CRAN para os
@@ -143,209 +123,200 @@ archived in 2020. We found no other R package that reads the CVM open
 data, and none in rOpenSci (`rb3` covers the B3 exchange, not the
 CVM).
 
-What the packages share: both current packages download from
-`dados.cvm.gov.br`, keep CVM column names (`GetDFPData2` in the
-original upper case, `GetFREData` in Portuguese snake_case, as
-`cvmdata` does), and cache the downloaded files locally. A user who
-needs the DFP of a list of companies by CVM code, or one FRE table
-for a few years, is well served by them.
+What the packages share: both download from `dados.cvm.gov.br`, keep
+CVM column names (`GetDFPData2` in the original upper case,
+`GetFREData` in Portuguese snake_case, as `cvmdata` does), and cache
+the downloaded files locally. A user who needs the DFP of a list of
+companies by CVM code, or one FRE table for a few years, is well
+served by them.
 
 Where `cvmdata` differs, by design rather than by degree:
 
-1. **Filing versions.** The CVM files hold resubmissions. Neither
-   package resolves them: `GetDFPData2` keeps `VERSAO` as a column
-   and every delivery the file holds. `cvmdata` keeps the current
-   filing by delivery date and document id (the version number alone
-   is not a key: measured cases have two "version 1" filings), lists
-   every delivery in `submissao`, removes statements the CVM file
-   holds twice (884 cases in DFP/ITR 2010–2026), and returns the
-   replaced filings through `cvm_versions()`.
+1. **Filing versions.** Neither package resolves resubmissions:
+   `GetDFPData2` keeps `VERSAO` as a column and every delivery the file
+   holds. `cvmdata` keeps the current filing (above), lists every
+   delivery in each dataset's `submissao` table, removes statements the
+   CVM file holds twice (884 cases in DFP/ITR 2010–2026), and returns
+   the replaced filings through `cvm_versions()`, including those
+   recovered from the filing archive back to 2010.
 2. **Both readings of an exercise.** `GetDFPData2` keeps one of the
-   two `ORDEM_EXERC` columns of each file. `cvmdata` returns the file
-   as published or, with `reading`, the original and the restated
-   figures of the same exercise side by side.
-3. **Values.** `cvmdata` applies `ESCALA_MOEDA` and returns amounts in
-   reais; `GetDFPData2` returns the scale as a column, so units differ
-   across companies. `GetFREData` turns identifier columns (`id_*`,
-   `versao`) into numbers, which drops leading zeros; `cvmdata`
-   keeps every identifier as character.
-4. **Validation against the CVM dictionary.** Every `cvmdata` table
-   is checked against the CVM `META` file (column count and names) on
-   every read, and the package ships the dictionary and the code lists
-   (`cvm_dictionary()`, `cvm_codelist()`).
-5. **Coverage and selection.** One function, `cvm_fetch()`, reads DFP,
-   ITR, FRE, FCA, CAD, CGVN, VLMO and IPE, selecting companies by CNPJ
-   or by B3 ticker (including tickers of delisted companies), by year
-   or by a window of reference dates. The other packages select by CVM
-   code only.
-6. **Reproducibility.** A dated, checksummed parquet mirror (see *Why
-   the mirror is the default source*); the other packages cache the
-   portal's current files, which the CVM overwrites in place.
+   two `ORDEM_EXERC` values of each file; `cvmdata` returns the file as
+   published or, with `reading`, both figures side by side.
+3. **Values and identifiers.** `cvmdata` applies `ESCALA_MOEDA` and
+   returns amounts in reais; `GetDFPData2` returns the scale as a
+   column, so units differ across companies. `GetFREData` turns
+   identifier columns (`id_*`, `versao`) into numbers, which drops
+   leading zeros; `cvmdata` keeps every identifier as character.
+4. **Validation against the CVM dictionary.** Every file is checked
+   against the CVM `META` file (column count and names) on every read;
+   a column the CVM renames stops the read with a classed error instead
+   of entering the result. The package ships the dictionary and the
+   code lists (`cvm_dictionary()`, `cvm_codelist()`).
+5. **Coverage and selection.** One function, `cvm_fetch()`, reads nine
+   datasets and 104 tables <!-- medido em 2026-11-07: cvm_tables() e o
+   snapshot do dicionário --> (DFP, ITR, FRE, FCA, CAD, CGVN, VLMO,
+   IPE, share buybacks), selecting companies by CNPJ or by B3 ticker
+   (including tickers of delisted companies), by year or by a window of
+   reference dates. The other packages select by CVM code only.
+6. **Reproducibility.** A dated, checksummed mirror (see below); the
+   other packages cache the portal's current files, which the CVM
+   overwrites in place.
 
 The packages coexist without name collisions, and we would be glad to
 point users of either toward the other where it fits better.
 
-Outside this Brazilian niche, `cvmdata`'s design borrows patterns
-from the rOpenSci data-extraction family — single fetch verb,
-tidy output with attached metadata, configurable cache,
-dual-backend fallback with explicit precedence — rather than
-overlapping in scope.
+-   (If applicable) Does your package comply with our guidance around _Ethics, Data Privacy and Human Subjects Research_?
 
-## Technical state
+The package reads only data the regulator publishes openly, under the
+Open Database License, as part of its legal disclosure regime; it
+collects nothing from users and does not link records across sources.
 
-- v0.1.0 released 2026-05-24.
-- CI: R-CMD-check matrix on Ubuntu devel/release/oldrel-1, macOS
-  release, Windows release — green via
-  `.github/workflows/R-CMD-check.yaml`.
-- Test coverage ≥ 90% via `covr`/codecov.
-- ~590 unit tests <!-- TODO: confirm exact count --> in
-  `tests/testthat/`. All HTTP traffic is mocked via `httptest2` and
-  `httr2::with_mocked_responses()` — no test reaches the live CVM
-  portal or the GitHub Releases mirror.
-- Documentation: an intro vignette (`cvmdata.Rmd`, CRAN-safe via
-  `eval = interactive()`) and five long-form articles
-  (`cvm-fetch.Rmd`, `itr-dfp.Rmd`, `fre.Rmd`, `cvm-defects.Rmd`,
-  `cache-and-mirror.Rmd`). Articles that need data read
-  pre-computed RDS bundles from `inst/extdata/vignette-data/`.
-- pkgdown site published at
-  <https://sidneybissoli.github.io/cvmdata/>.
-- `R CMD check --as-cran` clean locally; win-builder R-devel
-  resubmission pending after May 2026 doc fixes.
+Some of those tables identify natural persons, and we want to state it
+plainly. The CVM publishes the full CPF (the Brazilian individual
+taxpayer number) and the name of board members, fiscal council and
+committee members, investor-relations officers, audit partners,
+individual shareholders above the disclosure threshold, and relatives
+of directors: 14 columns in 9 tables of the FCA and FRE
+<!-- medido em 2026-11-07: dicionário (14 colunas `cpf*`) e espelho
+(FRE 2025: 8.742 CPFs de administradores, 9.840 de acionistas PF,
+1.694 de parentes; FCA 2025: 1.003 de diretores de RI), formato
+completo 999.999.999-99, sem máscara -->. `cvmdata` returns them as
+published, and the mirror redistributes them.
 
-## Other relevant context
+<!-- TODO (decisão do dono): manter como a CVM publica, ou mascarar/
+retirar os CPFs no espelho e na edição do Zenodo (que é permanente)?
+Escrever aqui a decisão e o porquê. A LGPD (Lei 13.709/2018, art. 7º
+§§ 3º–4º) permite tratar dado tornado público, respeitada a finalidade
+da publicação. -->
 
-- **Bilingual API surface, by design.** Function names, arguments,
-  metadata attributes, error messages and roxygen docs are in
-  English following rOpenSci and tidyverse conventions. Table
-  names, column names, categorical values and free-text content
-  are preserved in Portuguese exactly as published by CVM. The
-  mismatch is deliberate: the package's audience is predominantly
-  Portuguese-speaking, and fidelity to the regulatory source
-  outweighs cosmetic uniformity. The convention is documented in
-  the project's `CLAUDE.md` and in the README.
-- **Dual-backend with explicit precedence.** `cvm_fetch()` exposes
-  a `source` argument with two values: `"mirror"` (the default,
-  parquet via DuckDB, ~30× faster than HTTP for full years) and
-  `"cvm"` (live HTTP against `dados.cvm.gov.br`). Precedence:
-  explicit argument > `options(cvmdata.source)` > built-in default.
-  The chosen source is attached to every returned tibble as the
-  `source` attribute for downstream auditability. Why the default is
-  the mirror, and what that costs, is the next section.
+-   Any other questions or issues we should be aware of?:
 
-### Why the mirror is the default source
+**The default source is a mirror, not the regulator's portal.** We
+expect this to be the first thing reviewers question, so here is what
+it rests on.
 
-The default reads parquet files that the maintainer's ETL publishes
-in GitHub Releases, not the regulator's portal. We know this is the
-choice reviewers will question first, so here is what it rests on and
-what guards it.
+*Why a mirror.* The CVM publishes most datasets as one ZIP per year of
+semicolon-separated Latin-1 CSVs; one table of one company means
+downloading and parsing the year's whole archive. The mirror stores the
+same tables as parquet, already parsed and typed, partitioned by table,
+basis and year, so a call reads only what it needs (about 30 times
+faster for full years). It also keeps what the portal cannot: the CVM
+overwrites its files in place, and the mirror keeps dated snapshots.
 
-**Why a mirror at all.** The CVM publishes most datasets as one ZIP
-per year of semicolon-separated Latin-1 CSVs; a single table of a
-single company means downloading and parsing the whole year's
-archive. The mirror stores the same tables,
-already parsed and typed, partitioned by table, basis and year, so a
-call reads only the partitions it needs (~30× faster for full years).
-It also does something the portal cannot: the portal overwrites its
-files in place, while the mirror keeps dated snapshots (below), so a
-result can be reproduced as of a given date.
+*Provenance.* The mirror is built weekly by the package's own reader,
+in strict mode, from the CVM files (`inst/etl/`,
+`.github/workflows/etl-mirror.yaml`); a renamed or added column stops
+the publication. Every result carries `source`, `fetched_at` and, under
+a pinned date, the `release` it came from. `source = "cvm"` reads the
+portal with the same parser and returns the same columns, so any result
+can be checked against the regulator by changing one argument.
 
-**Provenance.** The mirror is not a second source of truth. It is
-built by the package's own reader, in strict mode, from the CVM files
-(`inst/etl/`, run weekly by `.github/workflows/etl-mirror.yaml`), and
-the reader aborts on any column the CVM renames or adds, so a change
-upstream stops the publication instead of entering it silently. Every
-tibble carries `source`, `fetched_at` and, under a pinned date, the
-`release` it came from. `source = "cvm"` reads the portal directly
-with the same parser and returns the same columns, so any result can
-be checked against the regulator in one argument.
+*Integrity.* Each release has a sidecar with the SHA-256 and size of
+every file; the client checks both on download and on cache reuse and
+discards a file that does not match (`cvmdata_error_http_integrity`).
 
-**Integrity.** Each release has a sidecar with the SHA-256 and size of
-every parquet file; the client checks both on download and on cache
-reuse, and discards a file that does not match
-(`cvmdata_error_http_integrity`) rather than reading it.
+*Reproducibility over time.* Every run that changes data creates a
+dated snapshot holding the partitions that changed, plus a sidecar
+mapping every partition to the snapshot that holds its bytes (about
+60 MB a week). Snapshots are never deleted;
+`cvm_release_set("2026-10-27")` pins a session to the mirror as it
+stood on that date. Superseded filings are kept in a per-partition
+history asset, read by `cvm_versions()`.
 
-**Reproducibility over time.** Besides the rolling
-`mirror-<group>-<dataset>-latest` release, every run that changes data
-creates `mirror-<group>-<dataset>-snapshot-<date>` holding only the
-partitions that changed, plus a sidecar mapping every partition to the
-snapshot that holds its bytes (~60 MB/week measured, ~3.5 GB/year).
-Snapshots are never deleted. `cvm_release_set("2026-10-27")` pins a
-session to the latest snapshot on or before that date. Filings the CVM
-later replaced are kept in a per-partition history asset, read by
-`cvm_versions()`.
+*A DOI per quarterly edition.* Four times a year the whole mirror as
+it stood that day (every dataset, the superseded versions, the
+dictionary, the licence and the checksums) is deposited on Zenodo as a
+new version of one record, so a paper can cite the exact data it used
+and the data outlive the GitHub repository. The ETL prepares the
+deposit after a 14-day grace period and verifies it (every file
+against the mirror's digests, row counts against the previous edition,
+a read-back of the draft); the maintainer publishes it by hand. The
+pipeline passed a full rehearsal on the Zenodo sandbox; the first
+edition is due in January 2027.
 
-**Longevity and bus factor.** The risk is real: today the releases
-live under the maintainer's personal GitHub account and a single
-maintainer runs the ETL. What limits it now:
+*Longevity and bus factor.* The releases live under the maintainer's
+personal GitHub account and one person runs the ETL; we do not claim
+an institutional home the project does not have. What limits the risk:
+`source = "cvm"` never depends on the mirror; the ETL is part of the
+package and needs only a GitHub token, so a fork can rebuild the whole
+mirror; an external monitor checks every week, without credentials,
+that the latest CVM filing is in the mirror and that the releases open
+anonymously; and the Zenodo editions survive the repository. Storage
+stays on GitHub Releases while it fits (about 3.5 GB a year of new
+partitions); if it stopped fitting, the files would move to Cloudflare
+object storage, which changes how URLs are built, not the API.
 
-- `source = "cvm"` never depends on the mirror; if the mirror
-  disappears, `cvm_source_set("cvm")` keeps every call working,
-  only slower.
-- The ETL is part of the package and needs nothing but a GitHub
-  token: a fork can rebuild and republish the whole mirror with the
-  same workflow.
-- An external monitor checks every week, without credentials, that the
-  latest filing on the CVM portal is also in the mirror, and raises an
-  alert after 7 days of lag or if a release stops opening anonymously.
+*Precedent.* CRAN packages already serve preprocessed data from GitHub
+Releases: `geobr` (v2) and `censobr` (IPEA) download parquet files from
+`github.com/ipea/*_prep_data/releases`, and `capesR` reads from Hugging
+Face with a checksum index in the package. None offers the official
+source as an alternative backend. We found no CRAN or rOpenSci policy
+on mirrors as such; what CRAN asks (an informative failure, a small
+managed cache under `tools::R_user_dir()`, https, a licence for the
+data) is met, and the mirror is redistributed under the CVM's ODbL.
 
-<!-- Decisões do dono, 2026-11-02: (1) sem organização no GitHub —
-projeto pessoal, nada a transferir por ora; (2) segundo host só se o
-tamanho inviabilizar o GitHub, e então Cloudflare; (3) DOI por
-snapshot datado: adotado (item no ROADMAP). Não prometer além disso. -->
+**Scope of this submission and what comes next.** The CVM catalogue has
+18 groups; this submission covers one, `companhias` (listed companies),
+completely. Funds, agents, offerings and enforcement will extend
+`cvm_fetch()` through one YAML schema per table, with no new
+functions; `cvm_groups()` already lists the plan. We chose to submit
+the module that exists rather than wait for the whole catalogue.
 
-What we plan, and what we do not:
+**Language.** Function names, arguments, attributes, messages and
+documentation are in English; table names, column names, categorical
+values and free text stay in Portuguese exactly as the CVM publishes
+them. The mismatch is deliberate: the audience reads Portuguese, and
+the columns must match the regulator's dictionary, the accounting
+standards and the literature.
 
-- **A DOI for each quarterly edition.** Four times a year (the first
-  weekly round of January, April, July and October) the whole mirror
-  as it stood on that day — every dataset, the superseded versions,
-  the column dictionary, the licence and the checksums — is deposited
-  on Zenodo as one version of a single record, so a paper can cite the
-  exact data it used and the data outlive the GitHub repository. The
-  robot prepares the deposit after a 14-day grace period and verifies
-  it (every partition against the mirror's digests, row counts against
-  the previous edition, a read-back of the draft); the maintainer
-  publishes it by hand. The weekly snapshots keep serving the dates in
-  between, without a DOI. First edition: January 2027.
-  <!-- Reescrever no presente, com o DOI do registro, quando a
-  primeira edição estiver publicada. -->
-- **No transfer to an organisation.** `cvmdata` is a personal
-  project, and we will not claim an institutional home it does not
-  have. The guarantees above are the ones that hold for a single
-  maintainer: the official source is always one argument away, and
-  anyone can rebuild the mirror.
-- **Storage stays on GitHub Releases** while the mirror fits there
-  (~3.5 GB/year of new partitions, measured). If its size ever made
-  GitHub impractical, the parquet files would move to Cloudflare
-  object storage. The client already locates every partition through
-  the sidecar, so the move would change how download URLs are built,
-  not the package API.
+**Technical state.** <!-- medido em 2026-11-07; reconferir na 0.3.0 -->
+`pkgcheck()` passes (one failure fixed in November 2026; the remaining
+notes are optional). R CMD check is clean on Ubuntu (devel, release,
+oldrel-1), macOS and Windows; test coverage is 95%
+<!-- Codecov 95,26 % em 2026-11-06; testes medidos em 2026-11-07:
+3.568 expectativas, 696 blocos, 0 falhas, 1 pulada --> and the suite
+has 3,568 expectations in 43 files, none of which touches the network (`httptest2` and mocked
+`httr2` responses; integration tests behind an environment variable).
+The pkgdown site has an introductory vignette and eight articles,
+including one on the defects we found in the CVM files and how the
+package handles each. Version 0.3.0 is the one submitted; the lifecycle
+badge says *experimental*.
 
-**Precedent.** Data packages on CRAN already serve preprocessed data
-from GitHub Releases: `geobr` (v2) and `censobr` (IPEA) download
-parquet files from `github.com/ipea/*_prep_data/releases`, `geobr`
-with the IPEA server as a second host, and `capesR` reads from Hugging
-Face with a checksum index shipped in the package. None of them offers
-the official source as an alternative backend; `cvmdata` does. We
-found no CRAN or rOpenSci policy on mirrors as such; what CRAN asks
-(fail with an informative message, a small managed cache under
-`tools::R_user_dir()`, https, a licence for the data downloaded) is
-met. The CVM publishes these datasets under the ODbL, and the mirror
-is redistributed under the same licence.
-- **Coverage roadmap.** v0.1 covers the four core
-  publicly-traded-company datasets. v0.2+ adds investment funds
-  (ICVM 555), real-estate funds (FII), FIDCs, foreign issuers and
-  exempt-securities filings — all scoped, all using the same
-  `cvm_fetch(dataset, table, ...)` entry point.
+## Use of Generative AI
 
-## Confirmations
+- [x] Generative AI tools were used to produce some of the material in this submission.
 
-- [ ] [Package fits within scope](https://devguide.ropensci.org/policies.html#aims-and-scope)
-      (data extraction primary, data munging secondary).
-- [ ] No major overlap with existing rOpenSci packages.
-      Overlap with CRAN packages (`GetDFPData2` and `GetFREData`) is
-      documented above and is partial: same portal, different
-      treatment of filing versions, values and identifiers, broader
-      coverage, and a reproducible mirror.
-- [ ] CRAN-ready (`R CMD check --as-cran`): 0/0/0 local; CRAN
-      submission will follow rOpenSci acceptance, per the rOpenSci
-      workflow.
+<!-- TODO (dono): rascunho com os fatos medidos em 2026-11-07;
+reescrever na primeira pessoa e conferir cada afirmação sobre o seu
+próprio papel. A política (blog da rOpenSci, 2026-02-26) pede: onde e
+como a IA foi usada, link para o "agents.md" ou equivalente, e a
+afirmação de que todo o material gerado foi revisado pelo autor. Os
+editores podem perguntar se houve contribuição humana suficiente;
+o que pesa: motivação, histórico de desenvolvimento, decisões de
+desenho documentadas. -->
+
+The package was developed with Claude Code (Anthropic) throughout: the
+R code, the tests, the ETL, the documentation and the measurements
+behind them were written in sessions where I set the task and the
+design, and the model wrote and ran the code. Every commit since the
+first one (May 2026) carries the co-author line; the instructions the
+model works under are in [`CLAUDE.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/CLAUDE.md),
+which also documents the package's conventions.
+
+My part: the scope, the API and every design decision, recorded with
+alternatives and reasons in
+[`data-raw/decisions/`](https://github.com/SidneyBissoli/cvmdata/tree/main/data-raw/decisions),
+the `ROADMAP.md` and `NEWS.md` (for example: one fetch function instead
+of five; `basis` with no default because a third of the issuers file
+only individual statements; the mirror as default with the portal one
+argument away; a DOI per quarterly edition rather than per snapshot;
+what counts as a scale error). I reviewed every pull request before
+merging it, and most decisions came from checking the data: the
+figures quoted in this inquiry were measured on the CVM files, not
+taken from the model's account of them.
+
+Where reviewers may want to look harder: the tests were written by the
+model, against fixtures cut from real CVM files; and the XML reader of
+the filing archive (`inst/etl/util-rad.R`) was calibrated
+account-by-account against 60 current filings, but covers two document
+layouts that we know only from the documents we read.
