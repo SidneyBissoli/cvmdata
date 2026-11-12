@@ -1217,6 +1217,11 @@ test_that("the download service failing for a request is asked again", {
     "'http://127.0.0.1:8182/Download/DownloadDocumento.svc' could not be",
     "activated."
   )))
+  expect_true(rad_service_flicker(paste(
+    "the RAD answered an error instead of the ZIP: The underlying",
+    "connection was closed: A connection that was expected to be kept",
+    "alive was closed by the server."
+  )))
   expect_false(rad_service_flicker("HTTP 500"))
   expect_false(rad_service_flicker(NA_character_))
   expect_false(rad_service_flicker(
