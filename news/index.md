@@ -934,7 +934,13 @@
   2026-11-12 one document asked 30 times from outside GitHub failed 8
   times, the next request delivering the ZIP every time. The 15 min
   pause of the outage rule did nothing for that. A document that fails
-  every time still joins the outage streak.
+  every time still joins the outage streak. The first run with the
+  retries (2026-11-12) showed they were not enough from the GitHub
+  runner: the failure came in blocks of 25 in a row (five documents,
+  five tries each), three times, where a connection per request had got
+  it scattered. As an experiment, every request to the RAD now opens and
+  closes its own connection, and the log says, for each failed attempt,
+  whether the connection was new and how long the answer took.
 
 - The RAD robot stops when a year of the `submissao` index does not read
   from the mirror, naming the year, instead of dropping it in silence.
