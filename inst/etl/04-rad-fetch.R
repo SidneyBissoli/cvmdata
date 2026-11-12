@@ -44,7 +44,14 @@
 #   (an outage does not spend their attempts) and the run pauses
 #   `rad_outage_pause` seconds, then goes on with the next documents;
 #   past `rad_outage_pauses` pauses in one run it stops as `rad-down`.
-#   The streak is counted within a checkpoint. The failure rate that
+#   The streak is counted within a checkpoint. From 2026-11-06 the same
+#   service fails per REQUEST, not for a stretch: six daily ITR runs in
+#   a row stopped as `rad-down` (2026-11-07 to 11-12), and on 11-12 one
+#   document asked 30 times from outside GitHub failed 8 times, the next
+#   request delivering the ZIP every time. A pause of 15 min does nothing
+#   for that, so the document is asked again first (`rad_service_retries`
+#   times, `rad_service_pause` seconds apart) and only a document that
+#   fails every time counts toward the streak. The failure rate that
 #   also stops the run (more than `rad_failure_rate` of the attempts)
 #   counts ONLY the `reader` kind, and only after `rad_failure_floor`
 #   attempts (decision of 2026-10-23: a run of 16 stopped with one
@@ -120,6 +127,8 @@ rad_checkpoint_docs <- 50L # documents between two publications of a run
 rad_outage_streak <- 5L # download failures in a row that mean the RAD is down
 rad_outage_pause <- 900 # seconds of pause when the RAD is down
 rad_outage_pauses <- 5L # pauses of one run before it stops as `rad-down`
+rad_service_pause <- 10 # seconds before asking a document again (crawl delay)
+rad_service_retries <- 4L # new requests when the download service flickers
 
 utc_now <- function(t = Sys.time()) {
   format(t, "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")
@@ -586,11 +595,88 @@ rad_undo_streak <- function(state, streak) {
   state
 }
 
+# Whether a download error is the RAD's internal download service
+# failing for ONE request ("The HTTP service located at
+# http://127.0.0.1:8182/Download/DownloadDocumento.svc is unavailable",
+# "The requested service, '...DownloadDocumento.svc' could not be
+# activated"). Measured 2026-11-12 from a Brazilian network, outside
+# GitHub: the same document asked 30 times, 3 min and then 10 s apart,
+# got this text 8 times, scattered, and the ZIP on the very next request
+# every time. Other texts of the RAD (ITR 67723, "Index was out of
+# range") are about the document and are not retried.
+rad_service_flicker <- function(error) {
+  !is.na(error) && grepl("DownloadDocumento.svc", error, fixed = TRUE)
+}
+
+# A failed `rad_fetch_one()` result of the given kind.
+rad_failure <- function(kind, note) {
+  list(ok = FALSE, waf = identical(kind, "waf"), kind = kind, note = note)
+}
+
+# Downloads one document to `zip`, asking again what is worth asking
+# again (see `rad_fetch_one()`). Returns list(dl, failure): `failure` is
+# NULL when the ZIP arrived, the `rad_fetch_one()` result otherwise.
+rad_download_patiently <- function(
+  id_doc,
+  zip,
+  pause,
+  retries,
+  service_pause,
+  service_retries
+) {
+  refused <- 0L
+  flickers <- 0L
+  repeat {
+    dl <- rad_download(id_doc, zip)
+    if (dl$ok) {
+      return(list(dl = dl, failure = NULL))
+    }
+    if (rad_service_flicker(dl$error)) {
+      flickers <- flickers + 1L
+      if (flickers > service_retries) {
+        note <- sprintf("%s, %d times in a row", dl$error, flickers)
+        return(list(dl = dl, failure = rad_failure("download", note)))
+      }
+      message(sprintf(
+        "  %s: the RAD's download service failed, asking again (try %d of %d)",
+        id_doc,
+        flickers + 1L,
+        service_retries + 1L
+      ))
+      Sys.sleep(service_pause)
+      next
+    }
+    waf <- identical(dl$status, 403L) ||
+      grepl("not a ZIP", dl$error, fixed = TRUE)
+    if (!waf) {
+      return(list(dl = dl, failure = rad_failure("download", dl$error)))
+    }
+    refused <- refused + 1L
+    if (refused > retries) {
+      note <- sprintf("%s, refused %d times", dl$error, refused)
+      return(list(dl = dl, failure = rad_failure("waf", note)))
+    }
+    message(sprintf(
+      "  %s refused by the RAD (%s): pausing %ds before try %d of %d",
+      id_doc,
+      dl$error,
+      as.integer(pause),
+      refused + 1L,
+      retries + 1L
+    ))
+    Sys.sleep(pause)
+  }
+}
+
 # Downloads and reads one document. Returns list(ok, waf, kind, note,
 # rows, done): `note` is the reason when not ok, a summary otherwise;
 # `done` is the state entry of a document read. A refusal by the WAF
 # (403 or an HTML body) is retried after `pause` seconds, `retries`
-# times; `waf` is TRUE only when every try was refused. `kind` names the
+# times; `waf` is TRUE only when every try was refused. The download
+# service failing for the request (`rad_service_flicker()`) is asked
+# again after `service_pause` seconds, `service_retries` times, on a
+# count of its own; failing every time, it is a `download` failure like
+# any other and joins the outage streak of the queue. `kind` names the
 # failure (see the header): "waf", "download" (the RAD did not deliver
 # the ZIP), "document" (not the document of the index row, or nothing
 # in it) or "reader" (the reader could not read it); NA when ok.
@@ -598,37 +684,23 @@ rad_fetch_one <- function(
   f,
   work,
   pause = rad_waf_pause,
-  retries = rad_waf_retries
+  retries = rad_waf_retries,
+  service_pause = rad_service_pause,
+  service_retries = rad_service_retries
 ) {
   zip <- file.path(work, paste0(f$id_doc, ".zip"))
-  for (try in seq_len(retries + 1L)) {
-    dl <- rad_download(f$id_doc, zip)
-    if (dl$ok) {
-      break
-    }
-    waf <- identical(dl$status, 403L) ||
-      grepl("not a ZIP", dl$error, fixed = TRUE)
-    if (!waf) {
-      return(list(ok = FALSE, waf = FALSE, kind = "download", note = dl$error))
-    }
-    if (try > retries) {
-      return(list(
-        ok = FALSE,
-        waf = TRUE,
-        kind = "waf",
-        note = sprintf("%s, refused %d times", dl$error, try)
-      ))
-    }
-    message(sprintf(
-      "  %s refused by the RAD (%s): pausing %ds before try %d of %d",
-      f$id_doc,
-      dl$error,
-      as.integer(pause),
-      try + 1L,
-      retries + 1L
-    ))
-    Sys.sleep(pause)
+  got <- rad_download_patiently(
+    f$id_doc,
+    zip,
+    pause,
+    retries,
+    service_pause,
+    service_retries
+  )
+  if (!is.null(got$failure)) {
+    return(got$failure)
   }
+  dl <- got$dl
   res <- tryCatch(rad_read_zip(zip, f), error = function(e) {
     list(meta = list(), tables = list(), problems = conditionMessage(e))
   })
