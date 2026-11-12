@@ -608,6 +608,21 @@ rad_service_flicker <- function(error) {
   !is.na(error) && grepl("DownloadDocumento.svc", error, fixed = TRUE)
 }
 
+# What one download attempt looked like on the wire, for the log: whether
+# the connection was new and how long the answer took ("new connection,
+# 0.3s"). The parts `rad_download()` could not tell are left out.
+rad_attempt_note <- function(dl) {
+  conn <- if (isTRUE(dl$new_conn)) {
+    "new connection"
+  } else if (isFALSE(dl$new_conn)) {
+    "reused connection"
+  } else {
+    "connection unknown"
+  }
+  secs <- dl$ttfb %||% NA_real_
+  if (is.na(secs)) conn else sprintf("%s, %.1fs", conn, secs)
+}
+
 # A failed `rad_fetch_one()` result of the given kind.
 rad_failure <- function(kind, note) {
   list(ok = FALSE, waf = identical(kind, "waf"), kind = kind, note = note)
@@ -638,8 +653,9 @@ rad_download_patiently <- function(
         return(list(dl = dl, failure = rad_failure("download", note)))
       }
       message(sprintf(
-        "  %s: the RAD's download service failed, asking again (try %d of %d)",
+        "  %s: the RAD's download service failed (%s), try %d of %d next",
         id_doc,
+        rad_attempt_note(dl),
         flickers + 1L,
         service_retries + 1L
       ))

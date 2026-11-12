@@ -1235,10 +1235,59 @@ test_that("the download service failing for a request is asked again", {
   )
   suppressMessages(expect_message(
     got <- rad_fetch_one(f, withr::local_tempdir(), service_pause = 0),
-    "download service failed, asking again \\(try 2 of 5\\)"
+    "download service failed \\(connection unknown\\), try 2 of 5 next"
   ))
   expect_true(got$ok)
   expect_identical(fake$calls(), 3L)
+})
+
+# Experiment of 2026-11-12: the runner got the service failure in blocks
+# of 25 where a connection per request got it scattered, so every request
+# opens its own connection and the log says what each attempt was.
+test_that("every request to the RAD opens and closes its own connection", {
+  load_etl_rad()
+  req <- rad_download_request("20773")
+  expect_true(req$options$fresh_connect)
+  expect_true(req$options$forbid_reuse)
+})
+
+test_that("the log tells the connection and the wait of an attempt", {
+  load_etl_rad()
+  expect_identical(
+    rad_attempt_note(list(new_conn = TRUE, ttfb = 0.26)),
+    "new connection, 0.3s"
+  )
+  expect_identical(
+    rad_attempt_note(list(new_conn = FALSE, ttfb = 12.71)),
+    "reused connection, 12.7s"
+  )
+  expect_identical(rad_attempt_note(list(new_conn = NA)), "connection unknown")
+  expect_identical(rad_attempt_note(list()), "connection unknown")
+  # what libcurl timed: no connect time means the connection was reused
+  local_mocked_bindings(
+    resp_timing = function(resp) c(connect = 0, starttransfer = 0.3),
+    .package = "httr2"
+  )
+  expect_identical(
+    rad_response_timing(NULL),
+    list(new_conn = FALSE, ttfb = 0.3)
+  )
+  local_mocked_bindings(
+    resp_timing = function(resp) c(connect = 0.04, starttransfer = 14),
+    .package = "httr2"
+  )
+  expect_identical(
+    rad_response_timing(NULL),
+    list(new_conn = TRUE, ttfb = 14)
+  )
+  local_mocked_bindings(
+    resp_timing = function(resp) stop("no timing"),
+    .package = "httr2"
+  )
+  expect_identical(
+    rad_response_timing(NULL),
+    list(new_conn = NA, ttfb = NA_real_)
+  )
 })
 
 test_that("a service that fails every time is a download failure", {
