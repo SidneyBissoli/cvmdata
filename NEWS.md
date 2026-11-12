@@ -858,6 +858,17 @@
   narrowed by `--year` or `--reread` still records nothing when it has
   nothing to do.
 
+* The RAD robot asks a document again when the RAD's internal download
+  service fails for the request ("The HTTP service located at
+  ...DownloadDocumento.svc is unavailable"), up to four more times, 10 s
+  apart, before counting a download failure. From 2026-11-06 the service
+  fails per request and not for a stretch: six daily ITR runs in a row
+  stopped as `rad-down` after reading 6 to 194 of 300 documents, and on
+  2026-11-12 one document asked 30 times from outside GitHub failed 8
+  times, the next request delivering the ZIP every time. The 15 min
+  pause of the outage rule did nothing for that. A document that fails
+  every time still joins the outage streak.
+
 * The RAD robot stops when a year of the `submissao` index does not
   read from the mirror, naming the year, instead of dropping it in
   silence. On 2026-11-05 the ITR index came without 2012 and 2013

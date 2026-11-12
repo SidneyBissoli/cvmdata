@@ -1093,6 +1093,20 @@ waf_download <- function(answers, fixture) {
         error = "HTTP 403"
       ))
     }
+    if (identical(answer, "svc")) {
+      # the body the RAD answered on 2026-11-12, as `rad_download()` notes it
+      return(list(
+        ok = FALSE,
+        status = 200L,
+        bytes = 310,
+        seconds = 1,
+        error = paste0(
+          "the RAD answered an error instead of the ZIP: ",
+          "The HTTP service located at http://127.0.0.1:8182/Download/",
+          "DownloadDocumento.svc is unavailable. This could be because t..."
+        )
+      ))
+    }
     list(
       ok = FALSE,
       status = 500L,
@@ -1191,6 +1205,78 @@ test_that("a failure that is not a refusal is not retried", {
   expect_false(got$waf)
   expect_identical(got$note, "HTTP 500")
   expect_identical(fake$calls(), 1L)
+})
+
+# The download service of the RAD fails per request (measured 2026-11-12:
+# 8 of 30 requests for one document, the next one delivering the ZIP), so
+# the document is asked again before it counts as a download failure.
+test_that("the download service failing for a request is asked again", {
+  load_etl_rad()
+  expect_true(rad_service_flicker(paste(
+    "the RAD answered an error instead of the ZIP: The requested service,",
+    "'http://127.0.0.1:8182/Download/DownloadDocumento.svc' could not be",
+    "activated."
+  )))
+  expect_false(rad_service_flicker("HTTP 500"))
+  expect_false(rad_service_flicker(NA_character_))
+  expect_false(rad_service_flicker(
+    "the RAD answered an error instead of the ZIP: Index was out of range."
+  ))
+
+  fake <- waf_download(c("svc", "svc", "zip"), "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row(
+    "43.335.774/0001-86",
+    "2024-12-31",
+    "1",
+    "TRAVESSIA SECURITIZADORA DE CRÉDITOS MERCANTIS VI S.A.",
+    "026824",
+    "151243"
+  )
+  suppressMessages(expect_message(
+    got <- rad_fetch_one(f, withr::local_tempdir(), service_pause = 0),
+    "download service failed, asking again \\(try 2 of 5\\)"
+  ))
+  expect_true(got$ok)
+  expect_identical(fake$calls(), 3L)
+})
+
+test_that("a service that fails every time is a download failure", {
+  load_etl_rad()
+  fake <- waf_download("svc", "rad_dfp_2024_151243")
+  rad_download <- fake$download
+  f <- filing_row("A", "2024-12-31", "1", "A", "1", "1")
+  got <- suppressMessages(
+    rad_fetch_one(f, withr::local_tempdir(), service_pause = 0)
+  )
+  expect_false(got$ok)
+  expect_false(got$waf)
+  expect_identical(got$kind, "download")
+  expect_identical(fake$calls(), rad_service_retries + 1L)
+  expect_match(got$note, "DownloadDocumento.svc", fixed = TRUE)
+  expect_match(got$note, "5 times in a row", fixed = TRUE)
+})
+
+test_that("the service retries and the WAF retries count apart", {
+  load_etl_rad()
+  fake <- waf_download(
+    c("svc", "html", "svc", "403", "zip"),
+    "rad_dfp_2024_151243"
+  )
+  rad_download <- fake$download
+  f <- filing_row(
+    "43.335.774/0001-86",
+    "2024-12-31",
+    "1",
+    "TRAVESSIA SECURITIZADORA DE CRÉDITOS MERCANTIS VI S.A.",
+    "026824",
+    "151243"
+  )
+  got <- suppressMessages(
+    rad_fetch_one(f, withr::local_tempdir(), pause = 0, service_pause = 0)
+  )
+  expect_true(got$ok)
+  expect_identical(fake$calls(), 5L)
 })
 
 test_that("the queue stops on a persistent refusal, not on a transient one", {
