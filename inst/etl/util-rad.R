@@ -216,7 +216,8 @@ rad_document_url <- function(id_doc) {
 }
 
 # Downloads one document to `dest` (a .zip path). Returns
-# list(ok, status, bytes, seconds, error). The RAD answers
+# list(ok, status, bytes, seconds, error, new_conn, ttfb); the last two
+# come from `rad_response_timing()`. The RAD answers
 # `Content-Type: text/html` even for the ZIP, so the body is checked by
 # its magic bytes, not by the header. A 403 or an HTML body is how the
 # WAF refuses: the caller pauses and retries the document, and stops
@@ -237,6 +238,17 @@ rad_download_stall_bps <- 1024
 rad_download_stall_secs <- 180
 rad_download_timeout <- 900
 
+# Every request opens its own connection (`fresh_connect`) and closes it
+# (`forbid_reuse`): an experiment of 2026-11-12, not a proven fix. The
+# RAD's download service was failing for part of the requests, and where
+# the same failure came scattered from a network that opened a connection
+# per request (curl, one process each: 8 of 30), the GitHub runner, whose
+# libcurl keeps the connection of an error answer open for the next
+# request, got it 25 times in a row, three times in one run (five
+# documents, five tries each; run 43225364495). The RAD closes the
+# connection after a ZIP anyway, so only the requests after an error
+# change. `rad_download()` reports whether the connection was new, for
+# the log to tell whether the option took and whether the blocks ended.
 rad_download_request <- function(id_doc, timeout = rad_download_timeout) {
   req <- httr2::request(rad_document_url(id_doc))
   req <- httr2::req_user_agent(req, rad_user_agent)
@@ -244,7 +256,26 @@ rad_download_request <- function(id_doc, timeout = rad_download_timeout) {
   httr2::req_options(
     req,
     low_speed_limit = rad_download_stall_bps,
-    low_speed_time = rad_download_stall_secs
+    low_speed_time = rad_download_stall_secs,
+    fresh_connect = TRUE,
+    forbid_reuse = TRUE
+  )
+}
+
+# What libcurl timed of one answer: list(new_conn, ttfb). `new_conn` is
+# TRUE when the request opened a connection (a reused one has no connect
+# time); `ttfb` is the seconds until the first byte, which is how long
+# the RAD took to build the ZIP (measured 2026-11-12: 12 to 23 s before
+# the first byte, the transfer itself being short). NA when unknown.
+rad_response_timing <- function(resp) {
+  t <- tryCatch(httr2::resp_timing(resp), error = function(e) NULL)
+  if (is.null(t)) {
+    return(list(new_conn = NA, ttfb = NA_real_))
+  }
+  connect <- unname(t["connect"])
+  list(
+    new_conn = if (is.na(connect)) NA else connect > 0,
+    ttfb = unname(t["starttransfer"])
   )
 }
 
@@ -256,7 +287,9 @@ rad_download <- function(id_doc, dest, timeout = rad_download_timeout) {
     status = NA_integer_,
     bytes = NA_real_,
     seconds = NA_real_,
-    error = NA_character_
+    error = NA_character_,
+    new_conn = NA,
+    ttfb = NA_real_
   )
   req <- rad_download_request(id_doc, timeout)
   resp <- tryCatch(
@@ -270,6 +303,9 @@ rad_download <- function(id_doc, dest, timeout = rad_download_timeout) {
     return(out)
   }
   out$status <- httr2::resp_status(resp)
+  timing <- rad_response_timing(resp)
+  out$new_conn <- timing$new_conn
+  out$ttfb <- timing$ttfb
   if (out$status != 200L) {
     out$error <- paste0("HTTP ", out$status)
     if (file.exists(dest)) {
