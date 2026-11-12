@@ -602,10 +602,21 @@ rad_undo_streak <- function(state, streak) {
 # activated"). Measured 2026-11-12 from a Brazilian network, outside
 # GitHub: the same document asked 30 times, 3 min and then 10 s apart,
 # got this text 8 times, scattered, and the ZIP on the very next request
-# every time. Other texts of the RAD (ITR 67723, "Index was out of
-# range") are about the document and are not retried.
+# every time. The same backend also answers "The underlying connection
+# was closed: A connection that was expected to be kept alive was closed
+# by the server." (3 of the 8 failures of the run of 2026-11-12, 292 of
+# 300 read): the front end lost its connection to the service, not the
+# robot its own, so it is asked again too. Other texts of the RAD (ITR
+# 67723, "Index was out of range") are about the document and are not
+# retried.
+rad_service_flicker_texts <- c(
+  "DownloadDocumento.svc",
+  "The underlying connection was closed"
+)
+
 rad_service_flicker <- function(error) {
-  !is.na(error) && grepl("DownloadDocumento.svc", error, fixed = TRUE)
+  texts <- rad_service_flicker_texts
+  !is.na(error) && any(vapply(texts, grepl, logical(1), error, fixed = TRUE))
 }
 
 # What one download attempt looked like on the wire, for the log: whether

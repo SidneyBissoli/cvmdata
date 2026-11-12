@@ -873,7 +873,11 @@
   five tries each), three times, where a connection per request had got
   it scattered. As an experiment, every request to the RAD now opens and
   closes its own connection, and the log says, for each failed attempt,
-  whether the connection was new and how long the answer took.
+  whether the connection was new and how long the answer took. The run
+  with both (2026-11-12) read 292 of 300 with no pause, every retry on a
+  new connection. Three of its eight failures were the same backend
+  answering "The underlying connection was closed"; that text is now
+  asked again too.
 
 * The RAD robot stops when a year of the `submissao` index does not
   read from the mirror, naming the year, instead of dropping it in
