@@ -147,11 +147,50 @@ rad_index_years <- function(source_hash) {
   sort(unique(as.integer(years[!is.na(years)])))
 }
 
+# The GitHub Actions annotation of a run that could not reach a source it
+# depends on. The title is a fixed contract with the portfolio panel, the
+# same one `@sbissoli/mcp-live-source` writes for the MCP servers (hence
+# the Portuguese): a failed run that carries it measured nothing, and the
+# panel leaves the red to the goal of the product (documents read in the
+# window) instead of lighting up for an outage of GitHub.
+rad_unreachable_annotation <- function(text) {
+  text <- gsub("%", "%25", text, fixed = TRUE)
+  text <- gsub("\r", "%0D", text, fixed = TRUE)
+  text <- gsub("\n", "%0A", text, fixed = TRUE)
+  paste0("::error title=Fonte inalcan\u00e7\u00e1vel::", text)
+}
+
+# Ends the run for an unreachable source: the annotation on stdout (where
+# the runner reads workflow commands) and exit status 3, the one the MCP
+# servers use for the same verdict.
+rad_quit_unreachable <- function(e) {
+  message("[04-rad] ", conditionMessage(e))
+  cat(rad_unreachable_annotation(conditionMessage(e)), "\n", sep = "")
+  quit(status = 3L)
+}
+
 # The `submissao` rows of `years` of `dataset`, from the mirror. Every
 # year must read: on 2026-11-05 two years of the ITR index (2012, 2013)
 # failed to download, were dropped in silence, and the run worked on a
 # queue without them. A missing year now stops the run, naming it.
-rad_read_index <- function(dataset, years, fetch = NULL) {
+#
+# A year the MIRROR could not serve is not a defect of the robot: on
+# 2026-11-12 GitHub answered HTTP 500 to the 2024 partition on each of
+# the 4 attempts of the client, the run died before reaching the RAD and
+# the portfolio panel went red for it. Such a year (any
+# `cvmdata_error_http`) is asked again after a pause, and when it still
+# fails the error carries the class `rad_mirror_unreachable`, which the
+# run turns into the labelled exit of `rad_quit_unreachable()`.
+rad_index_pause <- 60
+rad_index_retries <- 2L
+
+rad_read_index <- function(
+  dataset,
+  years,
+  fetch = NULL,
+  pause = rad_index_pause,
+  retries = rad_index_retries
+) {
   fetch <- fetch %||%
     function(y) {
       suppressMessages(cvmdata::cvm_fetch(
@@ -167,9 +206,22 @@ rad_read_index <- function(dataset, years, fetch = NULL) {
       call. = FALSE
     )
   }
-  parts <- lapply(years, function(y) {
-    tryCatch(fetch(y), error = function(e) e)
-  })
+  read_year <- function(y) tryCatch(fetch(y), error = function(e) e)
+  is_http <- function(x) inherits(x, "cvmdata_error_http")
+  parts <- lapply(years, read_year)
+  for (try in seq_len(retries)) {
+    again <- which(vapply(parts, is_http, logical(1)))
+    if (length(again) == 0L) {
+      break
+    }
+    message(sprintf(
+      "[04-rad] the mirror did not serve the index of %s, asking again in %ds",
+      paste(years[again], collapse = ", "),
+      pause
+    ))
+    Sys.sleep(pause)
+    parts[again] <- lapply(years[again], read_year)
+  }
   bad <- vapply(parts, inherits, logical(1), what = "error")
   if (any(bad)) {
     failed <- vapply(
@@ -177,14 +229,18 @@ rad_read_index <- function(dataset, years, fetch = NULL) {
       function(i) sprintf("%d (%s)", years[i], conditionMessage(parts[[i]])),
       character(1)
     )
-    stop(
-      sprintf(
-        "could not read the submissao index of %s for year(s): %s",
-        dataset,
-        paste(failed, collapse = "; ")
-      ),
-      call. = FALSE
+    text <- sprintf(
+      "could not read the submissao index of %s for year(s): %s",
+      dataset,
+      paste(failed, collapse = "; ")
     )
+    if (all(vapply(parts[bad], is_http, logical(1)))) {
+      stop(structure(
+        class = c("rad_mirror_unreachable", "error", "condition"),
+        list(message = text, call = NULL)
+      ))
+    }
+    stop(text, call. = FALSE)
   }
   keep <- c(
     "cnpj_cia",
@@ -929,7 +985,10 @@ rad_main <- function(
   rad_check_state_present(state_file, source_hash, tag)
   state <- rad_read_state(state_file, dataset)
 
-  index <- rad_read_index(dataset, rad_index_years(source_hash))
+  index <- tryCatch(
+    rad_read_index(dataset, rad_index_years(source_hash)),
+    rad_mirror_unreachable = rad_quit_unreachable
+  )
   queue <- rad_queue(index, state, year = year, reread = reread)
   message(sprintf(
     "[04-rad] index: %d deliveries; queue: %d (%d done, %d set aside)",

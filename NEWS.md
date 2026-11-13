@@ -879,6 +879,15 @@
   answering "The underlying connection was closed"; that text is now
   asked again too.
 
+* The RAD robot no longer fails as a defect of its own when the mirror
+  cannot serve the delivery index. On 2026-11-12 GitHub answered HTTP 500
+  to one partition on each of the client's four attempts and the run died
+  before reaching the RAD. A year that fails with an HTTP error is asked
+  again twice, 60 s apart; if it still fails, the run ends with exit
+  status 3 and the annotation `Fonte inalcançável` (the contract the MCP
+  servers of the portfolio already write), which tells the portfolio
+  panel that nothing was measured.
+
 * The RAD robot stops when a year of the `submissao` index does not
   read from the mirror, naming the year, instead of dropping it in
   silence. On 2026-11-05 the ITR index came without 2012 and 2013

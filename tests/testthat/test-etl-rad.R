@@ -734,6 +734,67 @@ test_that("a year of the index that does not read stops the run", {
   expect_error(rad_read_index("itr", integer(), fetch = row), "no submissao")
 })
 
+# 2026-11-12, run 43242114740: GitHub answered HTTP 500 to one partition
+# of the index on each of the client's 4 attempts and the run died before
+# reaching the RAD. A year the mirror did not serve is asked again, and
+# when it still fails the error is labelled as the source being
+# unreachable, not as a defect of the robot.
+test_that("a year the mirror does not serve is retried, then labelled", {
+  load_etl_rad()
+  row <- function(y) {
+    data.frame(
+      cnpj_cia = "A",
+      dt_refer = as.Date(sprintf("%d-03-31", y)),
+      versao = "1",
+      id_doc = as.character(y),
+      dt_receb = as.Date(sprintf("%d-05-15", y))
+    )
+  }
+  http <- function(msg) {
+    stop(structure(
+      class = c("cvmdata_error_http", "cvmdata_error", "error", "condition"),
+      list(message = msg, call = NULL)
+    ))
+  }
+  calls <- 0L
+  recovers <- function(y) {
+    if (y == 2024L) {
+      calls <<- calls + 1L
+      if (calls < 2L) http("HTTP 500")
+    }
+    row(y)
+  }
+  expect_message(
+    index <- rad_read_index("itr", 2023:2024, fetch = recovers, pause = 0),
+    "did not serve the index of 2024"
+  )
+  expect_identical(index$id_doc, c("2023", "2024"))
+  expect_identical(calls, 2L)
+
+  down <- function(y) if (y == 2024L) http("HTTP 500") else row(y)
+  err <- tryCatch(
+    suppressMessages(rad_read_index("itr", 2023:2024, fetch = down, pause = 0)),
+    error = function(e) e
+  )
+  expect_s3_class(err, "rad_mirror_unreachable")
+  expect_match(conditionMessage(err), "year\\(s\\): 2024 \\(HTTP 500\\)")
+
+  # a failure that is not HTTP stays a plain error, and is not retried
+  mixed <- function(y) if (y == 2024L) http("HTTP 500") else stop("bad parquet")
+  err <- tryCatch(
+    suppressMessages(
+      rad_read_index("itr", 2023:2024, fetch = mixed, pause = 0)
+    ),
+    error = function(e) e
+  )
+  expect_false(inherits(err, "rad_mirror_unreachable"))
+
+  expect_identical(
+    rad_unreachable_annotation("itr: 100% down\nline 2"),
+    "::error title=Fonte inalcan\u00e7\u00e1vel::itr: 100%25 down%0Aline 2"
+  )
+})
+
 test_that("the queue holds the superseded deliveries, newest year first", {
   load_etl_rad()
   index <- data.frame(
