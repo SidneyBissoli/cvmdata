@@ -130,3 +130,57 @@ primeira publicação reescreve o histórico do `-latest`, as guardas do 02b e
 do 06 recusam coluna de contato presente, e as fotos datadas pedem
 `repair-personal-data.R` de novo, com registro no NEWS.
 
+## Complemento de 2026-11-14: contagens de administradores por órgão
+
+Decisão do dono, depois de ler a fonte: três tabelas do FRE saem do espelho
+e das edições, `administrador_declaracao_genero`,
+`administrador_declaracao_raca` e `administrador_PCD`. `source = "cvm"`
+continua lendo as três. As cinco tabelas de empregados (`empregado_*`)
+ficam, em decisão separada, ainda aberta.
+
+**O que a lei diz** (Lei 13.709/2018, texto lido no Planalto em
+2026-11-14):
+
+- art. 5º, II: dado sensível inclui "origem racial ou étnica" e "dado
+  referente à saúde". Gênero não está na lista.
+- art. 11: dado sensível só com consentimento específico ou nas hipóteses
+  do inciso II. Legítimo interesse não é uma delas, e não há a dispensa do
+  art. 7º, § 4º, para dado tornado público.
+- art. 11, II, c, com o art. 5º, XVIII: a hipótese de pesquisa é de "órgão
+  de pesquisa", que é órgão público ou pessoa jurídica sem fins
+  lucrativos. Pessoa física não se enquadra.
+- art. 12: dado anonimizado não é dado pessoal, salvo quando a
+  anonimização "com esforços razoáveis, puder ser revertida".
+
+Interpretação, não texto: tratar deficiência como "dado referente à
+saúde". Disputado: identidade de gênero. Fico e Nobrega (Revista Direito e
+Práxis, 13(2), 2022, doi 10.1590/2179-8966/2022/66817; lido o resumo)
+sustentam que é dado sensível mesmo sem estar na lista. Posição da ANPD
+procurada e não encontrada.
+
+**O que a medição mostrou** (FRE 2025, só contagens; linha unânime = todos
+declararam a mesma categoria e ninguém deixou de responder): 694
+companhias, 5 órgãos cada, 1.913 linhas com pessoas. Raça: 1.297 linhas
+unânimes (67,8%), 5.472 pessoas. Deficiência: 1.608 (84%), 7.371 pessoas,
+todas "sem deficiência"; 33 pessoas com deficiência declarada, 8 em órgãos
+de até 3 membros. Gênero: 969 (50,7%); a tabela tem as colunas "não
+binário" e "outros" (2 pessoas em 2025; 20 em 2024, com 4 órgãos inteiros
+em "outros"). Tamanho dos órgãos: 58 de 1 pessoa, 178 de 2, 1.187 de 3 a
+5. Os membros de cada órgão estão nomeados em
+`administrador_membro_conselho_fiscal`; os rótulos de órgão diferem entre
+as tabelas, mas, juntando à mão só a diretoria, 351 das 469 linhas unânimes
+de raça têm o mesmo número de diretores nomeados (1.300 pessoas), e 430 das
+de deficiência (1.715 pessoas). É reversão com esforço pequeno.
+
+**Por que não esconder só as linhas de órgão pequeno ou unânime.** A regra
+dependeria do dado de cada ano, e a tabela de deficiência ficaria com 16%
+das linhas.
+
+**Como funciona.** `mirror: false` e `mirror_reason` no YAML da tabela.
+`mirror_tables()` do ETL deixa de listá-la, então os estágios 01, 02 e 02b
+não a tocam; o 03 apaga do `-latest` as partições, como sobra, e os ativos
+de histórico (`mirror_drop_excluded_history()`), o único caso em que
+histórico é apagado. `cvm_fetch()` e `cvm_versions()` recusam a tabela no
+espelho com `cvmdata_error_input` e apontam `source = "cvm"`. A guarda da
+edição (`edition_check_privacy()`) recusa qualquer arquivo dessas tabelas.
+As fotos datadas ainda as têm até o reparo.

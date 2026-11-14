@@ -333,3 +333,44 @@ test_that("load_schema reads UTF-8 comments under LC_CTYPE=C", {
   expect_match(schema$cvm_archive_url_pattern, "^https://")
   expect_named(schema$cvm_file_pattern_variants, c("ind", "con"))
 })
+
+test_that("a table out of the mirror is refused there, with the way out", {
+  schema <- load_schema("fre", "administrador_declaracao_raca")
+  expect_false(schema$mirror)
+  expect_error(
+    cvm_fetch("fre", "administrador_declaracao_raca", year = 2024),
+    class = "cvmdata_error_input"
+  )
+  expect_error(
+    cvm_versions("fre", "administrador_PCD", year = 2024),
+    class = "cvmdata_error_input"
+  )
+  expect_snapshot(
+    cvm_fetch("fre", "administrador_declaracao_genero", year = 2024),
+    error = TRUE
+  )
+  expect_null(check_mirrored(schema, "cvm"))
+  expect_null(check_mirrored(load_schema("fre", "empregado_PCD"), "mirror"))
+})
+
+test_that("`mirror: false` needs a reason", {
+  raw <- yaml::read_yaml(system.file(
+    "extdata",
+    "schemas",
+    "companhias",
+    "fre",
+    "administrador_declaracao_raca.yaml",
+    package = "cvmdata"
+  ))
+  expect_no_error(validate_mirror(raw, "fre", "administrador_declaracao_raca"))
+  raw$mirror_reason <- NULL
+  expect_error(
+    validate_mirror(raw, "fre", "administrador_declaracao_raca"),
+    class = "cvmdata_error_internal"
+  )
+  raw$mirror <- "no"
+  expect_error(
+    validate_mirror(raw, "fre", "administrador_declaracao_raca"),
+    class = "cvmdata_error_internal"
+  )
+})

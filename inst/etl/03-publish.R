@@ -403,6 +403,8 @@ scrub_history <- function(prev, map, written) {
 # files = local history parquets written now).
 build_history <- function(prev, source_hash) {
   map <- if (is.null(prev)) list() else prev$history %||% list()
+  # tables that left the mirror take their history with them
+  map <- mirror_drop_excluded_history(map, mirror_excluded_tables(dataset))$map
   files <- character()
   if (is.null(prev)) {
     return(list(map = map, files = files))
@@ -516,6 +518,18 @@ if (reader_changed) {
 }
 history <- build_history(prev, source_hash)
 source_hash$history <- history$map
+# history assets of tables the mirror no longer carries: deleted from the
+# release with the stale partitions, at the end
+excluded_history <- mirror_drop_excluded_history(
+  if (is.null(prev)) list() else prev$history %||% list(),
+  mirror_excluded_tables(dataset)
+)$dropped
+if (length(excluded_history)) {
+  message(sprintf(
+    "[03-publish] %d history asset(s) of tables no longer mirrored to remove",
+    length(excluded_history)
+  ))
+}
 message(sprintf(
   "[03-publish] history: %d asset(s) in the release, %d written now",
   length(history$map),
@@ -941,6 +955,7 @@ if (!is.null(attr(current, "status"))) {
 # `__rad_state.json` / `__rad_unread.csv` live here too (both deleted on
 # 2026-10-27 by the old "everything but history" sweep). The sidecar is
 # re-uploaded on every publish.
+listed <- current
 current <- current[mirror_is_partition_asset(current)]
 stale <- setdiff(current, gsub("=", ".", basename(assets), fixed = TRUE))
 if (length(stale) == length(current) && length(current) > 0L) {
@@ -949,6 +964,14 @@ if (length(stale) == length(current) && length(current) > 0L) {
     call. = FALSE
   )
 }
+# the one case a history asset is removed: its table left the mirror
+stale <- c(
+  stale,
+  intersect(
+    listed,
+    vapply(excluded_history, public_asset_name, character(1L))
+  )
+)
 for (name in stale) {
   message("  removing stale asset ", name)
   status <- gh_quota_aware(
