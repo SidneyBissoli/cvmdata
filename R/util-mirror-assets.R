@@ -262,6 +262,7 @@ mirror_list_snapshot <- function(latest, group, dataset, release, repo) {
     out <- vctrs::vec_rbind(current, history)
     attr(out, "source_hash") <- sidecar$hash
     attr(out, "skips") <- sidecar$skips
+    attr(out, "omitted") <- sidecar$omitted
     attr(out, "snapshots") <- attr(latest, "snapshots")
   }
   attr(out, "release_tag") <- tag
@@ -447,6 +448,7 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   parsed <- mirror_assets_to_tibble(assets, sidecar$files)
   attr(parsed, "source_hash") <- sidecar$hash
   attr(parsed, "skips") <- sidecar$skips
+  attr(parsed, "omitted") <- sidecar$omitted
   attr(parsed, "release_tag") <- if (is.na(sidecar$snapshot)) {
     tag
   } else {
@@ -547,6 +549,7 @@ mirror_empty_sidecar <- function() {
   list(
     hash = NA_character_,
     skips = NULL,
+    omitted = NULL,
     snapshot = NA_character_,
     snapshots = character(0L),
     releases = NULL,
@@ -606,6 +609,7 @@ mirror_read_sidecar <- function(url) {
   list(
     hash = body$hash %||% NA_character_,
     skips = mirror_normalise_skips(body$skips),
+    omitted = mirror_normalise_omitted(body$privacy_omitted),
     snapshot = if (is.character(snapshot) && length(snapshot) == 1L) {
       snapshot
     } else {
@@ -617,6 +621,80 @@ mirror_read_sidecar <- function(url) {
     files = if (is.list(body$files)) body$files else NULL,
     data = if (is.list(body$data)) body$data else NULL
   )
+}
+
+# What the mirror omitted from its count tables to protect personal data
+# (`privacy_omitted` of the sidecar, written by the ETL since 2026-11): one
+# row per (table, year) with the companies and people in the CVM's table,
+# those the mirror left out, the minimum group size of the rule and, in the
+# list column `cnpj`, the companies left out. NULL when the sidecar has
+# none (older release, dataset without such a table, unexpected shape).
+mirror_normalise_omitted <- function(x) {
+  needed <- c("table", "companies", "companies_omitted")
+  if (!is.data.frame(x) || !nrow(x) || !all(needed %in% names(x))) {
+    return(NULL)
+  }
+  number <- function(name) {
+    if (is.null(x[[name]])) {
+      return(rep(NA_real_, nrow(x)))
+    }
+    suppressWarnings(as.numeric(x[[name]]))
+  }
+  # jsonlite gives a list of vectors, or a matrix when every entry has the
+  # same length.
+  cnpj <- x$cnpj
+  cnpj <- if (is.null(cnpj)) {
+    rep(list(character(0L)), nrow(x))
+  } else if (is.matrix(cnpj)) {
+    lapply(seq_len(nrow(cnpj)), function(i) as.character(cnpj[i, ]))
+  } else if (is.list(cnpj)) {
+    lapply(cnpj, function(v) as.character(unlist(v)))
+  } else {
+    as.list(as.character(cnpj))
+  }
+  out <- data.frame(
+    table = as.character(x$table),
+    year = suppressWarnings(as.integer(number("year"))),
+    min = number("min"),
+    companies = number("companies"),
+    companies_omitted = number("companies_omitted"),
+    people = number("people"),
+    people_omitted = number("people_omitted"),
+    stringsAsFactors = FALSE
+  )
+  out$cnpj <- cnpj
+  out
+}
+
+# The omissions of the partitions a mirror read just used, handed from the
+# backend to the public fetcher, which warns and stamps the result (the
+# rows cross transformations and filters on the way, where an attribute
+# would be lost). `mirror_note_omitted()` adds, `mirror_take_omitted()`
+# returns what was added and empties the note.
+.mirror_omitted_note <- new.env(parent = emptyenv())
+
+mirror_note_omitted <- function(inventory, table, years) {
+  omitted <- attr(inventory, "omitted")
+  if (is.null(omitted)) {
+    return(invisible(NULL))
+  }
+  rows <- omitted[omitted$table == table, , drop = FALSE]
+  if (!is.null(years)) {
+    rows <- rows[rows$year %in% as.integer(years), , drop = FALSE]
+  }
+  if (!nrow(rows)) {
+    return(invisible(NULL))
+  }
+  prior <- .mirror_omitted_note$rows
+  rows <- if (is.null(prior)) rows else rbind(prior, rows)
+  .mirror_omitted_note$rows <- rows[!duplicated(rows$year), , drop = FALSE]
+  invisible(NULL)
+}
+
+mirror_take_omitted <- function() {
+  rows <- .mirror_omitted_note$rows
+  .mirror_omitted_note$rows <- NULL
+  rows
 }
 
 # The skip manifest as a data frame with exactly the four columns the

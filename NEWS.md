@@ -17,6 +17,27 @@
   so `cvm_release_set()` returns the masked values for past dates. See
   "Personal data" in `?cvm_fetch`.
 
+* The five `fre` tables that count employees by race, gender or
+  disability (`empregado_PCD`, `empregado_local_declaracao_genero`,
+  `empregado_local_declaracao_raca`, `empregado_posicao_declaracao_genero`,
+  `empregado_posicao_declaracao_raca`) come from the mirror without the
+  companies that, in a year, have a group of fewer than 10 people or a
+  group in which everybody declared the same category. Nobody is named in
+  these tables, so a count is anonymised data while it cannot be traced to
+  a person (LGPD, art. 12); in a group of one, or in a unanimous one, it
+  can. The whole filing of the company leaves the table, so no row can be
+  rebuilt by subtraction. Measured on the 2025 FRE: 10% to 11% of the
+  companies by position, 29% to 32% by region and 38% in `empregado_PCD`,
+  holding 0.1% to 15% of the people counted. **Totals computed from these
+  tables are now lower than the CVM's.** Reading one of them raises the new
+  warning `cvmdata_warn_privacy_omitted` with the companies and the share
+  of people left out in each year; the numbers stay in the new attribute
+  `omitted`, which `print()` announces and which survives dplyr verbs; and
+  a company asked for by `cnpj` or `ticker` that was left out is named,
+  instead of zero rows that would read as "did not file". The Zenodo
+  editions carry the same numbers in `privacy_omitted.csv`.
+  `source = "cvm"` reads every company.
+
 * Three `fre` tables left the mirror and the Zenodo editions:
   `administrador_declaracao_genero`, `administrador_declaracao_raca` and
   `administrador_PCD`. They count the gender, race and disability

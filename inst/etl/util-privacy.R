@@ -22,6 +22,16 @@
 #     `cad/incentivadas` are webmail), and telling one from the other
 #     would mean guessing by domain. The address of the company stays;
 #     so do the city, state and country of a person.
+#   * counts of declarations (owner's decision of 2026-11-14): the five
+#     workforce tables of the FRE count employees by race, gender or
+#     disability, per company and position or region. Nobody is named, so
+#     a count is anonymised data (LGPD art. 12) while it cannot be traced
+#     back to a person; it can in a group of a few people and in a group
+#     where everybody declared the same. A filing with any group under
+#     `mirror_group_min` people, or with a unanimous group, leaves the
+#     table whole, so no row can be rebuilt by subtraction. The references
+#     read for the minimum (IBGE, UK Government Analysis Function, ONS,
+#     CMS) are in the decision file.
 # `source = "cvm"` still reads everything from the CVM, untouched: this
 # file runs in the ETL only.
 #
@@ -43,7 +53,7 @@
 # Version of the rule. 03-publish.R stores it in `__source_hash.json`; a
 # previous sidecar with another one (or none) makes that run rewrite the
 # history assets of the release.
-mirror_privacy_rule <- "2"
+mirror_privacy_rule <- "3"
 
 # A punctuated CPF is a CPF even when its check digits fail (a typing
 # error); any other spelling needs the check digits, or phone numbers and
@@ -88,6 +98,74 @@ mirror_contact_columns <- function(cols) {
     drop <- drop | grepl(.address_cols, cols)
   }
   cols[drop]
+}
+
+# Smallest group of people a count table may show.
+mirror_group_min <- 10L
+
+# A table of declaration counts: one row per filing and position or
+# region, with the people who did not answer in their own column. The
+# five workforce tables of the FRE and no other (the age-band tables have
+# no `quantidade_sem_resposta`); the test pins this against the schemas.
+mirror_is_group_table <- function(cols) {
+  "quantidade_sem_resposta" %in% cols && any(c("posicao", "local") %in% cols)
+}
+
+# The counts of a group table as a numeric matrix, one column per
+# `quantidade_*` column, missing as zero.
+mirror_group_counts <- function(df) {
+  cols <- grep("^quantidade_", names(df), value = TRUE)
+  m <- vapply(
+    cols,
+    function(cn) suppressWarnings(as.numeric(as.character(df[[cn]]))),
+    numeric(nrow(df))
+  )
+  m <- matrix(m, nrow = nrow(df), dimnames = list(NULL, cols))
+  m[is.na(m)] <- 0
+  m
+}
+
+# Rows of a group table the mirror does not carry: every row of a filing
+# (company, reference date, version, document) in which some group with
+# people is under the minimum or unanimous (everybody answered, and all in
+# one category). FALSE everywhere for any other table.
+mirror_group_unsafe <- function(df) {
+  if (!mirror_is_group_table(names(df)) || !nrow(df)) {
+    return(logical(nrow(df)))
+  }
+  m <- mirror_group_counts(df)
+  size <- rowSums(m)
+  silent <- m[, "quantidade_sem_resposta"]
+  declared <- m[, colnames(m) != "quantidade_sem_resposta", drop = FALSE]
+  top <- apply(declared, 1L, max)
+  bad <- size > 0 & (size < mirror_group_min | (silent == 0 & top == size))
+  keys <- intersect(
+    c("cnpj_companhia", "data_referencia", "versao", "id_documento"),
+    names(df)
+  )
+  filing <- do.call(paste, c(lapply(df[keys], as.character), sep = "\r"))
+  filing %in% filing[bad]
+}
+
+# What the rule takes from a group table, for the sidecar of the release
+# and the reader's warning: companies and people in the table, companies
+# and people omitted, and the CNPJs omitted. NULL for any other table.
+# Counts and company identifiers only.
+mirror_group_report <- function(df) {
+  if (!mirror_is_group_table(names(df))) {
+    return(NULL)
+  }
+  unsafe <- mirror_group_unsafe(df)
+  people <- rowSums(mirror_group_counts(df))
+  cnpj <- as.character(df[["cnpj_companhia"]])
+  list(
+    min = mirror_group_min,
+    companies = length(unique(cnpj[people > 0])),
+    companies_omitted = length(unique(cnpj[unsafe])),
+    people = sum(people),
+    people_omitted = sum(people[unsafe]),
+    cnpj = sort(unique(cnpj[unsafe]))
+  )
 }
 
 mirror_digits <- function(x) gsub("[^0-9]", "", x)
@@ -201,10 +279,26 @@ mirror_is_document_col <- function(name) {
   grepl("^(cpf|documento_)", name)
 }
 
-# The data frame the mirror may publish: same rows, same column order, with
-# the rules above applied. Only the columns that change are assigned, so
-# the attributes of the frame survive.
+# The data frame the mirror may publish: the rules above applied to the
+# columns, then the filings a group table may not show taken out. Same
+# column order; the attributes of the frame survive both steps.
 mirror_apply_privacy <- function(df) {
+  df <- mirror_mask_columns(df)
+  unsafe <- mirror_group_unsafe(df)
+  if (!any(unsafe)) {
+    return(df)
+  }
+  kept <- df[!unsafe, , drop = FALSE]
+  own <- setdiff(names(attributes(df)), c("names", "row.names", "class"))
+  for (a in own) {
+    attr(kept, a) <- attr(df, a, exact = TRUE)
+  }
+  kept
+}
+
+# The column rules: same rows, same column order. Only the columns that
+# change are assigned, so the attributes of the frame survive.
+mirror_mask_columns <- function(df) {
   for (cn in mirror_contact_columns(names(df))) {
     df[[cn]] <- NULL
   }
@@ -236,10 +330,15 @@ mirror_apply_privacy <- function(df) {
 # means the frame may be published. Counts and column names only, so a
 # failure can be logged without printing anybody's data. A contact column
 # is listed whenever it is present, with its filled values as the count:
-# zero there still means "this column must go".
+# zero there still means "this column must go". The rows of a group table
+# that must go are counted under `small_or_unanimous_groups`.
 mirror_privacy_counts <- function(df) {
-  safe <- mirror_apply_privacy(df)
+  safe <- mirror_mask_columns(df)
   out <- integer()
+  unsafe <- sum(mirror_group_unsafe(df))
+  if (unsafe) {
+    out[["small_or_unanimous_groups"]] <- unsafe
+  }
   for (cn in mirror_contact_columns(names(df))) {
     out[[cn]] <- sum(!is.na(df[[cn]]))
   }
