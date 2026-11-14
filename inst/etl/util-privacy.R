@@ -14,6 +14,14 @@
 #     banks and public services use to confirm an identity.
 #   * names, biographies and per-body counts stay as published: the name
 #     is the content of the disclosure (Res. CVM 80, items 7.5 and 7.6).
+#   * contact data (owner's decision of 2026-11-14): no e-mail, telephone
+#     or fax of anybody, person or company, and no street address of a
+#     person. The columns are dropped, not blanked. The field of the
+#     company is not spared because small companies declare somebody's
+#     own address there (measured: 296 of the 696 company e-mails of
+#     `cad/incentivadas` are webmail), and telling one from the other
+#     would mean guessing by domain. The address of the company stays;
+#     so do the city, state and country of a person.
 # `source = "cvm"` still reads everything from the CVM, untouched: this
 # file runs in the ETL only.
 #
@@ -35,7 +43,7 @@
 # Version of the rule. 03-publish.R stores it in `__source_hash.json`; a
 # previous sidecar with another one (or none) makes that run rewrite the
 # history assets of the release.
-mirror_privacy_rule <- "1"
+mirror_privacy_rule <- "2"
 
 # A punctuated CPF is a CPF even when its check digits fail (a typing
 # error); any other spelling needs the check digits, or phone numbers and
@@ -59,6 +67,28 @@ mirror_privacy_rule <- "1"
   "^(id$|id_|codigo_|cd_|protocolo|versao|link|url|",
   "cep|ddd|ddi|tel|fax|cnpj_)"
 )
+
+# Contact columns, by the tokens of the name so a column the CVM adds
+# later is caught too: `email`, `tel_resp`, `ddd_telefone`, `ddi_fax`,
+# `cd_pais_tel`. tests/testthat/test-etl-privacy.R pins the match against
+# the dictionary snapshot.
+.contact_cols <- "(^|_)(email|e_mail|tel|telefone|celular|fax)($|_)"
+
+# Street address: of the person in charge in the `cad` (`*_resp`), and the
+# plain columns of a table that names a contact person (`fca/dri`,
+# `fca/departamento_acionistas`, `fre/auditor_responsavel`).
+.address_cols <- "^(logradouro|compl|complemento|bairro|cep|caixa_postal)$"
+.address_resp_cols <- sub("[$]$", "_resp$", .address_cols)
+.person_markers <- c("responsavel", "contato", "responsavel_tecnico")
+
+# Columns of a frame the mirror does not carry, in the order they appear.
+mirror_contact_columns <- function(cols) {
+  drop <- grepl(.contact_cols, cols) | grepl(.address_resp_cols, cols)
+  if (any(cols %in% .person_markers)) {
+    drop <- drop | grepl(.address_cols, cols)
+  }
+  cols[drop]
+}
 
 mirror_digits <- function(x) gsub("[^0-9]", "", x)
 
@@ -175,6 +205,9 @@ mirror_is_document_col <- function(name) {
 # the rules above applied. Only the columns that change are assigned, so
 # the attributes of the frame survive.
 mirror_apply_privacy <- function(df) {
+  for (cn in mirror_contact_columns(names(df))) {
+    df[[cn]] <- NULL
+  }
   for (cn in names(df)) {
     x <- df[[cn]]
     if (!is.character(x)) {
@@ -201,10 +234,15 @@ mirror_apply_privacy <- function(df) {
 # How many values of each column `mirror_apply_privacy()` would change, as
 # a named integer holding only the columns with something to change: empty
 # means the frame may be published. Counts and column names only, so a
-# failure can be logged without printing anybody's data.
+# failure can be logged without printing anybody's data. A contact column
+# is listed whenever it is present, with its filled values as the count:
+# zero there still means "this column must go".
 mirror_privacy_counts <- function(df) {
   safe <- mirror_apply_privacy(df)
   out <- integer()
+  for (cn in mirror_contact_columns(names(df))) {
+    out[[cn]] <- sum(!is.na(df[[cn]]))
+  }
   for (cn in intersect(names(df), names(safe))) {
     a <- df[[cn]]
     b <- safe[[cn]]

@@ -79,10 +79,8 @@ não fecham nenhum: não são CPF e ficam).
 
 ## O que continua em aberto
 
-- **Dados de contato** (`cad/*_resp`, `fca/dri`, `fca/departamento_acionistas`,
-  `fca/endereco`): e-mail, telefone e endereço do responsável. Em geral são
-  corporativos, mas cerca de 1.150 e-mails são de webmail (medido
-  2026-11-08). Fora desta decisão.
+- **Dados de contato:** decididos em 2026-11-14, na seção "Complemento de
+  2026-11-14" abaixo.
 - **O que não se limpa daqui:** o histórico do git (fixture
   `fca_cia_aberta_2024.zip`, até esta mudança, com 4 CPFs reais), os
   depósitos do sandbox do Zenodo e as cópias que terceiros já baixaram.
@@ -91,3 +89,44 @@ não fecham nenhum: não são CPF e ficam).
 - Se o dono consultar advogado, a pergunta é se este desenho basta para o
   depósito permanente, e como responder a um pedido do art. 18 da LGPD
   sobre um registro do Zenodo que não se apaga.
+
+## Complemento de 2026-11-14: dados de contato
+
+Decisão do dono, depois de uma avaliação da decisão de 08/11 no papel de
+advogado (análise, não parecer). Princípio que ele fixou: a regra vale por
+si, sem depender do que a medição do dia mostrar, porque o dado de amanhã
+pode ser outro e o depósito é para sempre.
+
+**Regra:** o espelho e as edições não levam e-mail, telefone nem fax de
+ninguém, pessoa ou empresa, nem o endereço de rua de uma pessoa. As colunas
+saem (não ficam vazias). O endereço da companhia fica; cidade, estado e
+país de uma pessoa ficam; nomes ficam. `source = "cvm"` segue intacto.
+
+| Onde | Sai | Fica |
+|---|---|---|
+| `cad` (3 tabelas) | `email`, `tel`, `fax`, `ddd_*`, `cd_pais_*` e todos os `*_resp` de contato e de rua | endereço da companhia, `resp`, `mun_resp`, `uf_resp`, `pais_resp` |
+| `fca/endereco`, `fca/escriturador` | e-mail, telefone, fax | endereço |
+| `fca/dri`, `fca/departamento_acionistas`, `fre/auditor_responsavel` | e-mail, telefone, fax, `logradouro`, `complemento`, `bairro`, `cep` | nome, cidade, estado, país |
+
+**Por que o campo da empresa também sai.** Os campos são distintos, e uma
+regra só para os campos de pessoa era possível sem adivinhação. Mas o campo
+da empresa traz e-mail de pessoa: a companhia pequena declara como contato
+institucional o endereço de alguém. Medido em 2026-11-14 (webmail = gmail,
+hotmail, yahoo, outlook, uol e semelhantes; preenchidos / webmail):
+`cad/companhias` empresa 1.787 / 48 e responsável 1.791 / 51;
+`cad/incentivadas` empresa 696 / 296 e responsável 369 / 153;
+`cad/estrangeiras` 26 / 0 e 25 / 0; `fca/endereco` 2025 1.435 / 10;
+`fca/dri` 2025 1.007 / 11. Limpar só esses exigiria adivinhar pelo domínio.
+A pesquisa não usa telefone nem e-mail, e o contato atual está no portal da
+CVM.
+
+**Como funciona.** `mirror_contact_columns()` em `util-privacy.R` escolhe
+pelas palavras do nome da coluna (`email`, `tel`, `telefone`, `celular`,
+`fax`), para pegar coluna que a CVM criar depois; o endereço de rua sai
+pelos sufixos `_resp` e, sem sufixo, quando a tabela tem coluna de pessoa
+de contato (`responsavel`, `contato`, `responsavel_tecnico`). Um teste
+prende o resultado ao dicionário. `mirror_privacy_rule` passa a "2": a
+primeira publicação reescreve o histórico do `-latest`, as guardas do 02b e
+do 06 recusam coluna de contato presente, e as fotos datadas pedem
+`repair-personal-data.R` de novo, com registro no NEWS.
+

@@ -17,6 +17,21 @@
   so `cvm_release_set()` returns the masked values for past dates. See
   "Personal data" in `?cvm_fetch`.
 
+* The mirror and the Zenodo editions no longer carry contact data. The
+  columns of e-mail, telephone and fax are gone from every table, for
+  people and for companies alike (`email`, `tel`, `telefone`, `fax`, their
+  `ddd_*`, `ddi_*` and `cd_pais_*` parts and the `*_resp` variants), and so
+  is the street address of a person: `logradouro_resp`, `compl_resp`,
+  `bairro_resp` and `cep_resp` in `cad`, and `logradouro`, `complemento`,
+  `bairro` and `cep` in `fca` `dri` and `departamento_acionistas` and in
+  `fre` `auditor_responsavel`. The address of the company (`cad`, `fca`
+  `endereco` and `escriturador`) stays, and so do the city, state and
+  country of a person. The field of the company is not spared because
+  small companies declare somebody's own address there: 296 of the 696
+  company e-mails of `cad` `incentivadas` are webmail. Scripts that need
+  these columns read them with `source = "cvm"`. The dated snapshots are
+  rewritten once more, with a public record here.
+
 * The four skeleton fetchers `fund_fetch()`, `agent_fetch()`,
   `offering_fetch()` and `event_fetch()`, exported since v0.1.0.9000 as
   placeholders that only aborted, are gone, and so is their condition

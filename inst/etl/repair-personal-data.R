@@ -46,8 +46,9 @@ stopifnot(requireNamespace("arrow", quietly = TRUE))
 stopifnot(requireNamespace("jsonlite", quietly = TRUE))
 
 # Rewrites one local parquet through the rule when it has something to
-# mask. Returns the number of values changed (0 = file untouched); stops if
-# the rewritten file does not hold the same rows or still fails the guard.
+# mask or drop. Returns the number of values changed (0 = file untouched);
+# stops if the rewritten file does not hold the same rows or still fails
+# the guard.
 scrub_parquet_file <- function(path) {
   # no memory map: it would hold the file open against the overwrite
   df <- as.data.frame(arrow::read_parquet(path, mmap = FALSE))
@@ -69,7 +70,8 @@ scrub_parquet_file <- function(path) {
       call. = FALSE
     )
   }
-  as.integer(sum(left))
+  # at least one: a contact column with no filled value is still dropped
+  max(1L, as.integer(sum(left)))
 }
 
 # sha256 of the parquet assets of a release, by asset name.

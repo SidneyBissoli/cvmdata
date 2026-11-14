@@ -143,7 +143,12 @@ and control listed companies. The mirror keeps what research needs and
 no more: every CPF, in the columns that hold it and in free text, is
 masked the way the Federal Revenue masks its open CNPJ data
 (\verb{***.456.789-**}), a foreign document in those columns becomes \verb{***},
-and \code{data_nascimento} becomes the integer \code{ano_nascimento}. Names, CNPJs
+and \code{data_nascimento} becomes the integer \code{ano_nascimento}. Contact data
+is not carried at all: the columns of e-mail, telephone and fax, of
+people and of companies alike, and the street address of a person
+(\verb{*_resp} in \code{cad}; \code{fca} \code{dri} and \code{departamento_acionistas}; \code{fre}
+\code{auditor_responsavel}) are absent from the mirror. The address of the
+company stays. Names, CNPJs
 and biographies stay as published; the masked CPF plus the name still
 follow a person across tables. \code{source = "cvm"} reads everything from
 the CVM untouched, under the same duty to respect the purpose of the

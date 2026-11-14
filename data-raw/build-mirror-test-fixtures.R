@@ -88,7 +88,12 @@ if (length(unknown_targets)) {
   ))
 }
 
+# The fixtures have the shape of what the mirror publishes, so they go
+# through the same privacy rule as stage 02 (inst/etl/util-privacy.R).
+source(file.path("inst", "etl", "util-privacy.R"))
+
 write_parquet_via_duckdb <- function(df, path) {
+  df <- mirror_apply_privacy(df)
   con <- DBI::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
   DBI::dbWriteTable(con, "t", df, overwrite = TRUE)

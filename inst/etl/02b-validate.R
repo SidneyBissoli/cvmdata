@@ -385,7 +385,7 @@ validate_one_parquet <- function(
 validate_privacy_check <- function(tbl) {
   left <- mirror_privacy_counts(tbl)
   tibble::tibble(
-    check = "no full CPF or birth date",
+    check = "no full CPF, birth date or contact data",
     severity = "hard",
     status = if (length(left)) "fail" else "pass",
     n = nrow(tbl),
