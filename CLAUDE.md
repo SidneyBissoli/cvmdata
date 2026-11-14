@@ -370,7 +370,10 @@ a linha fica, o nome vira `[omitido a pedido do titular]`, os dados da
 pessoa ficam vazios; lista só no segredo `CVMDATA_MIRROR_SUPPRESSED`, uma
 pessoa por linha `nome;CPF`, nunca no repositório; `privacy_suppressed` no
 sidecar é só a contagem, e lista menor que a anterior para o publish, salvo
-`--allow-unsuppress`)
+`--allow-unsuppress`);
+aviso de privacidade público em `PRIVACY.md` / `PRIVACY.pt-BR.md` (vale
+o português), teste de legítimo interesse e procedimento de pedidos de
+titular em `data-raw/decisions/cvmdata_lgpd_*.md`
 (`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
 `data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a única
 exceção à regra "se vem da CVM, fica como na CVM", e só no que o pacote

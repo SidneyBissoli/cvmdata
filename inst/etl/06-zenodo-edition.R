@@ -174,7 +174,9 @@ edition_build_deposit <- function(
     readme
   )
   close(readme)
-  file.copy(edition_repo_file("DATA-LICENSE.md"), deposit_dir, overwrite = TRUE)
+  for (name in c("DATA-LICENSE.md", "PRIVACY.md", "PRIVACY.pt-BR.md")) {
+    file.copy(edition_repo_file(name), deposit_dir, overwrite = TRUE)
+  }
   file.copy(
     edition_extdata("cvm_dictionary_snapshot.csv"),
     file.path(deposit_dir, "cvm_dictionary.csv"),

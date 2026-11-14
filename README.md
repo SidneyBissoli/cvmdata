@@ -455,6 +455,11 @@ what the licence asks of you when you redistribute the data, are in
 [`DATA-LICENSE.md`](DATA-LICENSE.md). The package **code** is MIT
 licensed.
 
+The data names people. What the mirror holds about them, what it leaves
+out, who answers for it and how a person named in the data can ask for a
+change are in the privacy notice, [`PRIVACY.md`](PRIVACY.md)
+([em português](PRIVACY.pt-BR.md)).
+
 ## Related work
 
 For exchange-side market data (prices, volumes, tickers, indices,

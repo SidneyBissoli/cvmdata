@@ -80,6 +80,10 @@ other personal data in these tables is your own processing of personal
 data: you answer for it under the law that applies to you (in Brazil,
 the LGPD), and the permissions listed below do not extend to it.
 
+If you are named in the data, the privacy notice of the mirror says who
+answers for it and how to ask for a change: [`PRIVACY.md`](PRIVACY.md),
+[`PRIVACY.pt-BR.md`](PRIVACY.pt-BR.md).
+
 ## What this means for you
 
 In short (the licence text prevails):
