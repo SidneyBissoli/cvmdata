@@ -450,3 +450,19 @@ test_that("only the partition parquets of the release can be stale", {
     c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
   )
 })
+
+test_that("a table that left the mirror takes its history assets", {
+  load_etl_history()
+  map <- list(
+    "administrador_PCD/year=2024/history.parquet" = "a",
+    "administrador_membro_conselho_fiscal/year=2024/history.parquet" = "b",
+    "bpa/report_type=con/year=2024/history.parquet" = "c"
+  )
+  res <- mirror_drop_excluded_history(map, "administrador_PCD")
+  expect_named(res$map, names(map)[2:3])
+  expect_identical(res$dropped, names(map)[1L])
+  same <- mirror_drop_excluded_history(map, character())
+  expect_identical(same$map, map)
+  expect_length(same$dropped, 0L)
+  expect_length(mirror_drop_excluded_history(list(), "x")$map, 0L)
+})

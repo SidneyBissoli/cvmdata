@@ -27,6 +27,11 @@ temporal_partitioning: yearly
 # (declared 2010 until 2026-10-21; measured on the mirror's inventory and
 # confirmed in the ZIP members). cvm_fetch() refuses earlier years upfront.
 first_year: 2023
+
+# Not redistributed: read it with `source = "cvm"`
+# (data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md).
+mirror: false
+mirror_reason: "counts of disability of named board members by body; in a small or unanimous body they tell the declaration of each person (owner's decision of 2026-11-14)"
 # Field count (validation aid) -----------------------------------------
 expected_field_count: 10
 

@@ -157,6 +157,7 @@ cvm_versions <- function(
   modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
+  check_mirrored(schema, source)
   version_tx <- check_versioned_table(schema)
   basis <- check_basis(basis, schema)
   period <- check_published_years(

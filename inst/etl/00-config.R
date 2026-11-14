@@ -131,10 +131,27 @@ mirror_schema_dir <- function(dataset) {
   path
 }
 
-# Returns the table ids for a dataset by reading YAML filenames.
-mirror_tables <- function(dataset) {
+# Table ids of a dataset, by the YAML filenames: every table the package
+# reads, mirrored or not.
+mirror_schema_tables <- function(dataset) {
   files <- list.files(mirror_schema_dir(dataset), pattern = "\\.yaml$")
   tools::file_path_sans_ext(files)
+}
+
+# Tables the mirror and the editions do not redistribute (`mirror: false`
+# in the schema; owner's decision of 2026-11-14 for the three board
+# diversity tables of the FRE). They are not fetched, written, validated
+# nor published, and what earlier runs published of them is removed.
+mirror_excluded_tables <- function(dataset) {
+  Filter(
+    function(tbl) isFALSE(cvmdata:::load_schema(dataset, tbl)$mirror),
+    mirror_schema_tables(dataset)
+  )
+}
+
+# The table ids every stage iterates: the mirrored ones.
+mirror_tables <- function(dataset) {
+  setdiff(mirror_schema_tables(dataset), mirror_excluded_tables(dataset))
 }
 
 # Variant tables --------------------------------------------------------

@@ -109,7 +109,11 @@ needs. From the mirror, every CPF reads `***.456.789-**`, a foreign
 document in a CPF column reads `***`, and `data_nascimento` is the year,
 in `ano_nascimento`. Contact columns are absent: e-mail, telephone and
 fax of people and of companies, and the street address of a person (the
-address of the company is there). Names and biographies are as published, and the
+address of the company is there). Three `fre` tables are read from the
+CVM only, with `source = "cvm"`: `administrador_declaracao_genero`,
+`administrador_declaracao_raca` and `administrador_PCD`, the counts of
+gender, race and disability declarations of board members by body.
+Names and biographies are as published, and the
 masked CPF plus the name still follow a person across tables.
 `source = "cvm"` returns what the CVM publishes.
 

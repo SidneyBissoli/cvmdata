@@ -148,7 +148,12 @@ is not carried at all: the columns of e-mail, telephone and fax, of
 people and of companies alike, and the street address of a person
 (\verb{*_resp} in \code{cad}; \code{fca} \code{dri} and \code{departamento_acionistas}; \code{fre}
 \code{auditor_responsavel}) are absent from the mirror. The address of the
-company stays. Names, CNPJs
+company stays. Three tables of the \code{fre} are not in the mirror at all:
+\code{administrador_declaracao_genero}, \code{administrador_declaracao_raca} and
+\code{administrador_PCD} count the gender, race and disability declarations
+of board members by body, and in a small or unanimous body the count
+tells the declaration of each named member; asking for them without
+\code{source = "cvm"} is an error that says so. Names, CNPJs
 and biographies stay as published; the masked CPF plus the name still
 follow a person across tables. \code{source = "cvm"} reads everything from
 the CVM untouched, under the same duty to respect the purpose of the
