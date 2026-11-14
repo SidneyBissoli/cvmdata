@@ -171,6 +171,7 @@ cvm_versions <- function(
     cnpj <- unique(c(cnpj, cnpj_clean(resolved)))
   }
 
+  mirror_take_omitted()
   variants <- if (is.null(basis)) list(NULL) else as.list(basis)
   parts <- lapply(variants, function(b) {
     out <- if (identical(source, "mirror")) {
@@ -202,13 +203,14 @@ cvm_versions <- function(
   }
   inform_scale_errors(out)
 
-  cvm_attach_metadata(
+  out <- cvm_attach_metadata(
     out,
     source = source,
     group = schema$group,
     dataset = dataset,
     table = table
   )
+  note_privacy_omitted(out, mirror_take_omitted(), cnpj)
 }
 
 # Version columns, in the order they end the result.

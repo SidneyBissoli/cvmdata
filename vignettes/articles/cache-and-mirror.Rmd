@@ -113,6 +113,11 @@ address of the company is there). Three `fre` tables are read from the
 CVM only, with `source = "cvm"`: `administrador_declaracao_genero`,
 `administrador_declaracao_raca` and `administrador_PCD`, the counts of
 gender, race and disability declarations of board members by body.
+The five workforce tables that count employees by race, gender or
+disability come without the companies that, in a year, have a group of
+fewer than 10 people or one in which everybody declared the same
+category: reading one of them warns with the companies and the share of
+people left out, and keeps the numbers in `attr(x, "omitted")`.
 Names and biographies are as published, and the
 masked CPF plus the name still follow a person across tables.
 `source = "cvm"` returns what the CVM publishes.

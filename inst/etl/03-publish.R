@@ -584,6 +584,32 @@ message(sprintf(
   sum(source_hash$skips$reason == "absent")
 ))
 
+# What the group rule of util-privacy.R omitted from the count tables, as
+# stage 02 recorded it: one entry per (table, year) with the companies and
+# people in the table, those omitted and the CNPJs omitted. The package
+# warns with these numbers; absent for a dataset without such a table.
+read_omitted_manifest <- function(path) {
+  if (!file.exists(path)) {
+    return(list())
+  }
+  entries <- jsonlite::read_json(path)
+  lapply(entries, function(e) {
+    e$cnpj <- I(as.character(unlist(e$cnpj)))
+    e
+  })
+}
+source_hash$privacy_omitted <- read_omitted_manifest(
+  file.path(workspace, "out", "omitted", sprintf("%s.json", dataset))
+)
+message(sprintf(
+  "[03-publish] privacy: %d count table partition(s) with omitted filings",
+  sum(vapply(
+    source_hash$privacy_omitted,
+    function(e) e$companies_omitted > 0L,
+    logical(1L)
+  ))
+))
+
 # Dated snapshot ----------------------------------------------------------
 # The partitions whose bytes change today go into the snapshot release of
 # the day (the first snapshot takes every partition); the sidecar records

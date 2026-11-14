@@ -58,13 +58,14 @@ scrub_parquet_file <- function(path) {
   }
   tmp <- tempfile(fileext = ".parquet")
   on.exit(unlink(tmp), add = TRUE)
-  arrow::write_parquet(mirror_apply_privacy(df), tmp, compression = "snappy")
+  safe <- mirror_apply_privacy(df)
+  arrow::write_parquet(safe, tmp, compression = "snappy")
   if (!suppressWarnings(file.copy(tmp, path, overwrite = TRUE))) {
     stop(sprintf("could not overwrite %s", basename(path)), call. = FALSE)
   }
   # the file that will be uploaded, not the one just written
   again <- as.data.frame(arrow::read_parquet(path, mmap = FALSE))
-  if (nrow(again) != nrow(df) || length(mirror_privacy_counts(again))) {
+  if (nrow(again) != nrow(safe) || length(mirror_privacy_counts(again))) {
     stop(
       sprintf("rewrite of %s failed its check", basename(path)),
       call. = FALSE

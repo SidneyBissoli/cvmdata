@@ -131,7 +131,8 @@ edition_build_deposit <- function(
   snapshots,
   counts,
   manifest,
-  package_version
+  package_version,
+  omitted = NULL
 ) {
   unlink(deposit_dir, recursive = TRUE)
   dir.create(deposit_dir, recursive = TRUE, showWarnings = FALSE)
@@ -155,6 +156,14 @@ edition_build_deposit <- function(
     row.names = FALSE,
     fileEncoding = "UTF-8"
   )
+  if (!is.null(omitted) && nrow(omitted)) {
+    utils::write.csv(
+      omitted,
+      file.path(deposit_dir, "privacy_omitted.csv"),
+      row.names = FALSE,
+      fileEncoding = "UTF-8"
+    )
+  }
   readme <- file(
     file.path(deposit_dir, "README.md"),
     open = "w",
@@ -233,6 +242,7 @@ edition_main <- function(opts) {
   # 1. the files of the mirror, verified
   plans <- list()
   snapshots <- list()
+  omitted <- list()
   for (ds in datasets) {
     sidecars <- edition_read_sidecars(group, ds, edition, sidecar_dir)
     plan <- edition_plan_dataset(group, ds, sidecars$latest, sidecars$snapshot)
@@ -247,6 +257,7 @@ edition_main <- function(opts) {
     plan$rows <- vapply(plan$path, edition_row_count, numeric(1L))
     plans[[ds]] <- plan
     snapshots[[ds]] <- sidecars$date
+    omitted[[ds]] <- edition_omitted(ds, sidecars$snapshot$privacy_omitted)
   }
   all_plan <- do.call(rbind, plans)
   digests_failed <- edition_verify_digests(all_plan)
@@ -290,7 +301,8 @@ edition_main <- function(opts) {
     snapshots,
     counts,
     manifest,
-    package_version
+    package_version,
+    omitted = do.call(rbind, omitted)
   )
   shown <- files[c("name", "size", "sha256")]
 
