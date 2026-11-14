@@ -44,10 +44,12 @@ Attribution for the mirror and for anything you derive from it:
 
 ## Personal data
 
-The mirror departs from the CVM in one respect. Full CPFs and birth
-dates are not redistributed: every CPF is masked as `***.456.789-**`, a
-foreign document in a CPF column becomes `***`, and `data_nascimento`
-becomes the year, in `ano_nascimento`. Names and biographies stay as
+The mirror departs from the CVM in one respect. Full CPFs, birth dates
+and contact data are not redistributed: every CPF is masked as
+`***.456.789-**`, a foreign document in a CPF column becomes `***`,
+`data_nascimento` becomes the year, in `ano_nascimento`, and the columns
+of e-mail, telephone and fax (of people and of companies) and of the
+street address of a person are left out. Names and biographies stay as
 published. These are personal data under the Brazilian LGPD (Lei
 13.709/2018) wherever you read them from: their open publication does
 not free you from respecting the purpose of the disclosure.

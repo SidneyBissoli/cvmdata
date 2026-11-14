@@ -162,11 +162,16 @@ and control listed companies. The mirror keeps what research needs and
 no more: every CPF, in the columns that hold it and in free text, is
 masked the way the Federal Revenue masks its open CNPJ data
 (`***.456.789-**`), a foreign document in those columns becomes `***`,
-and `data_nascimento` becomes the integer `ano_nascimento`. Names, CNPJs
-and biographies stay as published; the masked CPF plus the name still
-follow a person across tables. `source = "cvm"` reads everything from
-the CVM untouched, under the same duty to respect the purpose of the
-disclosure (Lei 13.709/2018, art. 7, paragraphs 3 and 4).
+and `data_nascimento` becomes the integer `ano_nascimento`. Contact data
+is not carried at all: the columns of e-mail, telephone and fax, of
+people and of companies alike, and the street address of a person
+(`*_resp` in `cad`; `fca` `dri` and `departamento_acionistas`; `fre`
+`auditor_responsavel`) are absent from the mirror. The address of the
+company stays. Names, CNPJs and biographies stay as published; the
+masked CPF plus the name still follow a person across tables.
+`source = "cvm"` reads everything from the CVM untouched, under the same
+duty to respect the purpose of the disclosure (Lei 13.709/2018, art. 7,
+paragraphs 3 and 4).
 
 ## Filing versions
 

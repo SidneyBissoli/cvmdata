@@ -359,8 +359,10 @@ colunas `cpf*` e `documento_*` e em texto livre do FCA e do FRE —
 administradores, conselho fiscal, comitês, DRI, auditor responsável,
 acionistas PF, parentes de administradores. O ESPELHO E O ZENODO NÃO
 REDISTRIBUEM: CPF vira `***.456.789-**`, documento estrangeiro vira
-`***`, `data_nascimento` vira `ano_nascimento`
-(`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
+`***`, `data_nascimento` vira `ano_nascimento` e as colunas de e-mail,
+telefone e fax (de pessoa e de empresa) e de endereço de rua de pessoa
+saem (complemento de 2026-11-14) (`inst/etl/util-privacy.R`; decisão do
+dono de 2026-11-08 em
 `data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a
 única exceção à regra “se vem da CVM, fica como na CVM”, e só no que o
 pacote redistribui: `source = "cvm"` devolve tudo intacto. Os cadastros
