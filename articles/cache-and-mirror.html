@@ -207,10 +207,14 @@ tables are read from the CVM only, with <code>source = "cvm"</code>:
 <code>administrador_declaracao_genero</code>,
 <code>administrador_declaracao_raca</code> and
 <code>administrador_PCD</code>, the counts of gender, race and
-disability declarations of board members by body. Names and biographies
-are as published, and the masked CPF plus the name still follow a person
-across tables. <code>source = "cvm"</code> returns what the CVM
-publishes.</p>
+disability declarations of board members by body. The five workforce
+tables that count employees by race, gender or disability come without
+the companies that, in a year, have a group of fewer than 10 people or
+one in which everybody declared the same category: reading one of them
+warns with the companies and the share of people left out, and keeps the
+numbers in <code>attr(x, "omitted")</code>. Names and biographies are as
+published, and the masked CPF plus the name still follow a person across
+tables. <code>source = "cvm"</code> returns what the CVM publishes.</p>
 </div>
 <div class="section level3">
 <h3 id="data-licence-and-attribution">Data licence and attribution<a class="anchor" aria-label="anchor" href="#data-licence-and-attribution"></a>

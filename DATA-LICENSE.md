@@ -54,10 +54,14 @@ redistributed either: the counts of gender, race and disability
 declarations of board members by body
 (`administrador_declaracao_genero`, `administrador_declaracao_raca`,
 `administrador_PCD`), which in a small or unanimous body tell the
-declaration of each named member. Names and biographies stay as
-published. These are personal data under the Brazilian LGPD (Lei
-13.709/2018) wherever you read them from: their open publication does
-not free you from respecting the purpose of the disclosure.
+declaration of each named member. The five workforce tables that count
+employees by race, gender or disability come without the companies that,
+in a year, have a group of fewer than 10 people or a group in which
+everybody declared the same category, so totals computed from them are
+lower than the CVM’s. Names and biographies stay as published. These are
+personal data under the Brazilian LGPD (Lei 13.709/2018) wherever you
+read them from: their open publication does not free you from respecting
+the purpose of the disclosure.
 
 ## What this means for you
 

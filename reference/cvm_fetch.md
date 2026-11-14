@@ -172,11 +172,21 @@ company stays. Three tables of the `fre` are not in the mirror at all:
 `administrador_PCD` count the gender, race and disability declarations
 of board members by body, and in a small or unanimous body the count
 tells the declaration of each named member; asking for them without
-`source = "cvm"` is an error that says so. Names, CNPJs and biographies
-stay as published; the masked CPF plus the name still follow a person
-across tables. `source = "cvm"` reads everything from the CVM untouched,
-under the same duty to respect the purpose of the disclosure (Lei
-13.709/2018, art. 7, paragraphs 3 and 4).
+`source = "cvm"` is an error that says so. The five workforce tables
+that count employees by race, gender or disability (`empregado_PCD` and
+the `empregado_local_*` and `empregado_posicao_*` `declaracao_genero`
+and `declaracao_raca`) come from the mirror without the companies that,
+in a year, have a group of fewer than 10 people or a group in which
+everybody declared the same category. Reading one of them raises a
+warning of class `cvmdata_warn_privacy_omitted` with the companies and
+the share of people left out in each year, the same numbers stay in
+`attr(x, "omitted")`, and a company asked for by `cnpj` or `ticker` that
+was left out is named. Totals computed from these tables are lower than
+the CVM's. Names, CNPJs and biographies stay as published; the masked
+CPF plus the name still follow a person across tables. `source = "cvm"`
+reads everything from the CVM untouched, under the same duty to respect
+the purpose of the disclosure (Lei 13.709/2018, art. 7, paragraphs 3 and
+4).
 
 ## Filing versions
 
