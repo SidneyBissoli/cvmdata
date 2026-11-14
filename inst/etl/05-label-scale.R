@@ -129,8 +129,15 @@ scale_current_rels <- function(source_hash, year) {
 
 # Reads one asset of the release (downloaded to `dir`) with `table` and
 # `report_type` added; `cols` limits the columns read (NULL = all).
-scale_read_asset <- function(tag, rel, dir, cols = NULL) {
-  path <- download_public_asset(tag, public_asset_name(rel), dir)
+# `digests` is the sha256 the API lists for the assets of the release
+# (`release_asset_digests()`): this stage runs right after stage 03 or
+# 04 replaced history assets, when the public URL may still serve the
+# old bytes, and a history read stale would be labelled and uploaded
+# over the new one, dropping the versions just added.
+scale_read_asset <- function(tag, rel, dir, cols = NULL, digests = NULL) {
+  name <- public_asset_name(rel)
+  expect <- if (is.null(digests)) NULL else unname(digests[name])
+  path <- download_public_asset(tag, name, dir, expect_sha256 = expect)
   if (is.null(path)) {
     stop(sprintf("asset %s is listed but not downloadable", rel), call. = FALSE)
   }
@@ -150,15 +157,28 @@ scale_read_asset <- function(tag, rel, dir, cols = NULL) {
 # version, writes every history asset of the year with `scale_error`
 # under `out_dir` and returns list(files = local paths by rel,
 # verdicts).
-scale_label_year <- function(tag, source_hash, year, prev_dir, out_dir) {
+scale_label_year <- function(
+  tag,
+  source_hash,
+  year,
+  prev_dir,
+  out_dir,
+  digests = NULL
+) {
   assets <- scale_history_assets(source_hash$history)
   assets <- assets[assets$year == year, , drop = FALSE]
   history <- lapply(assets$rel, function(rel) {
-    scale_read_asset(tag, rel, prev_dir)
+    scale_read_asset(tag, rel, prev_dir, digests = digests)
   })
   names(history) <- assets$rel
   current <- lapply(scale_current_rels(source_hash, year), function(rel) {
-    scale_read_asset(tag, rel, prev_dir, cols = scale_value_cols)
+    scale_read_asset(
+      tag,
+      rel,
+      prev_dir,
+      cols = scale_value_cols,
+      digests = digests
+    )
   })
   value_cols <- c(scale_value_cols, mirror_history_cols, "table", "report_type")
   verdicts <- scale_label_versions(
@@ -214,7 +234,14 @@ scale_main <- function(group, dataset, all, year, dry_run) {
   }
 
   for (y in years) {
-    res <- scale_label_year(tag, source_hash, y, prev_dir, out_dir)
+    res <- scale_label_year(
+      tag,
+      source_hash,
+      y,
+      prev_dir,
+      out_dir,
+      digests = release_asset_digests(tag)
+    )
     message(sprintf(
       "[05-scale] %s %d: %s",
       dataset,

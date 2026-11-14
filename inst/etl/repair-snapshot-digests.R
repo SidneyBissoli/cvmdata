@@ -41,11 +41,29 @@ stopifnot(requireNamespace("digest", quietly = TRUE))
 repair_read_sidecar <- function(tag, dir) {
   target <- file.path(dir, tag)
   dir.create(target, recursive = TRUE, showWarnings = FALSE)
-  path <- download_public_asset(tag, "__source_hash.json", target)
+  path <- download_public_asset(
+    tag,
+    "__source_hash.json",
+    target,
+    expect_sha256 = repair_asset_digest(tag, "__source_hash.json")
+  )
   if (is.null(path)) {
     stop(sprintf("release %s has no __source_hash.json", tag), call. = FALSE)
   }
   jsonlite::read_json(path)
+}
+
+# The sha256 the API lists for one asset of a release (NA when it lists
+# none), read once per release. Every download of the repair is checked
+# against it: the repair usually runs right after assets were replaced
+# (repair-personal-data.R), when the public URL may still serve the old
+# bytes, and digests measured on those would be written as repaired.
+repair_digest_cache <- new.env(parent = emptyenv())
+repair_asset_digest <- function(tag, name) {
+  if (is.null(repair_digest_cache[[tag]])) {
+    repair_digest_cache[[tag]] <- release_asset_digests(tag)
+  }
+  unname(repair_digest_cache[[tag]][name])
 }
 
 # A lookup of list(sha256, size) by (tag, rel) that downloads each
@@ -60,7 +78,13 @@ repair_digest_lookup <- function(dir) {
     }
     target <- file.path(dir, tag)
     dir.create(target, recursive = TRUE, showWarnings = FALSE)
-    path <- download_public_asset(tag, public_asset_name(rel), target)
+    name <- public_asset_name(rel)
+    path <- download_public_asset(
+      tag,
+      name,
+      target,
+      expect_sha256 = repair_asset_digest(tag, name)
+    )
     if (is.null(path)) {
       stop(
         sprintf("asset %s of %s could not be downloaded", rel, tag),
