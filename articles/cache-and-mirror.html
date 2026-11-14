@@ -202,7 +202,12 @@ foreign document in a CPF column reads <code>***</code>, and
 <code>data_nascimento</code> is the year, in
 <code>ano_nascimento</code>. Contact columns are absent: e-mail,
 telephone and fax of people and of companies, and the street address of
-a person (the address of the company is there). Names and biographies
+a person (the address of the company is there). Three <code>fre</code>
+tables are read from the CVM only, with <code>source = "cvm"</code>:
+<code>administrador_declaracao_genero</code>,
+<code>administrador_declaracao_raca</code> and
+<code>administrador_PCD</code>, the counts of gender, race and
+disability declarations of board members by body. Names and biographies
 are as published, and the masked CPF plus the name still follow a person
 across tables. <code>source = "cvm"</code> returns what the CVM
 publishes.</p>

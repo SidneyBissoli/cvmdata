@@ -167,11 +167,16 @@ is not carried at all: the columns of e-mail, telephone and fax, of
 people and of companies alike, and the street address of a person
 (`*_resp` in `cad`; `fca` `dri` and `departamento_acionistas`; `fre`
 `auditor_responsavel`) are absent from the mirror. The address of the
-company stays. Names, CNPJs and biographies stay as published; the
-masked CPF plus the name still follow a person across tables.
-`source = "cvm"` reads everything from the CVM untouched, under the same
-duty to respect the purpose of the disclosure (Lei 13.709/2018, art. 7,
-paragraphs 3 and 4).
+company stays. Three tables of the `fre` are not in the mirror at all:
+`administrador_declaracao_genero`, `administrador_declaracao_raca` and
+`administrador_PCD` count the gender, race and disability declarations
+of board members by body, and in a small or unanimous body the count
+tells the declaration of each named member; asking for them without
+`source = "cvm"` is an error that says so. Names, CNPJs and biographies
+stay as published; the masked CPF plus the name still follow a person
+across tables. `source = "cvm"` reads everything from the CVM untouched,
+under the same duty to respect the purpose of the disclosure (Lei
+13.709/2018, art. 7, paragraphs 3 and 4).
 
 ## Filing versions
 

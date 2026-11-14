@@ -21,6 +21,26 @@
   returns the masked values for past dates. See “Personal data” in
   [`?cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
 
+- Three `fre` tables left the mirror and the Zenodo editions:
+  `administrador_declaracao_genero`, `administrador_declaracao_raca` and
+  `administrador_PCD`. They count the gender, race and disability
+  declarations of board members by body, and the members of each body
+  are named in another table: in a body where everybody declared the
+  same, the count is the declaration of each person (measured on the
+  2025 FRE: 68% of the race rows and 84% of the disability rows). Race
+  and health are sensitive data under the LGPD (art. 5, II), which gives
+  a private person no ground to redistribute them (art. 11), and gender
+  identity is argued to be.
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  and
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  now refuse these tables under the default source with
+  `cvmdata_error_input` and point to `source = "cvm"`, which reads them
+  from the CVM as before. Their partitions and history assets are
+  removed from the `-latest` release at the next publish and from the
+  dated snapshots after it. The workforce tables (`empregado_*`) are
+  unchanged.
+
 - The mirror and the Zenodo editions no longer carry contact data. The
   columns of e-mail, telephone and fax are gone from every table, for
   people and for companies alike (`email`, `tel`, `telefone`, `fax`,
