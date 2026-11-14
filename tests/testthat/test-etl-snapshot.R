@@ -241,3 +241,82 @@ test_that("a skip field read as an empty list becomes null again", {
   expect_false(clean$changed)
   expect_false(snapshot_normalise_skips(list(skips = list()))$changed)
 })
+
+# The public URL of a release serves the old bytes for a few minutes
+# after an asset is replaced (2026-11-14: the digest repair run right
+# after the personal-data repair measured the old files and reported
+# nothing to fix). A download is checked against the sha256 the API
+# lists, and a stale copy is fetched again through the API.
+load_etl_release <- function(env = parent.frame()) {
+  withr::local_options(cvmdata.etl_testing = TRUE)
+  for (script in c("00-config.R", "util-release.R")) {
+    sys.source(etl_script_path(script), envir = env)
+  }
+}
+
+test_that("the asset listing of a release becomes sha256 by name", {
+  skip_if_not_installed("jsonlite")
+  load_etl_release()
+  json <- paste0(
+    '{"assets":[',
+    '{"name":"a.parquet","digest":"sha256:abc123","size":10},',
+    '{"name":"old.parquet","digest":null,"size":20},',
+    '{"name":"other.parquet","digest":"sha512:ffff","size":30}]}'
+  )
+  expect_identical(
+    parse_asset_digests(json),
+    c(
+      "a.parquet" = "abc123",
+      "old.parquet" = NA_character_,
+      "other.parquet" = NA_character_
+    )
+  )
+})
+
+test_that("a stale public copy is fetched again through the API", {
+  skip_if_not_installed("digest")
+  load_etl_release()
+  env <- environment()
+  dir <- withr::local_tempdir()
+  name <- "t__year.2024__part-0.parquet"
+  fresh <- file.path(withr::local_tempdir(), "fresh.bin")
+  writeBin(charToRaw("new bytes"), fresh)
+  fresh_sha <- digest::digest(file = fresh, algo = "sha256")
+  api_calls <- 0L
+  env$download_release_asset <- function(tag, name, dir, attempts = 3L) {
+    api_calls <<- api_calls + 1L
+    file.copy(fresh, file.path(dir, name), overwrite = TRUE)
+    file.path(dir, name)
+  }
+  stale <- function(req) {
+    writeBin(charToRaw("old bytes"), file.path(dir, name))
+    httr2::response(status_code = 200L, body = charToRaw("old bytes"))
+  }
+  httr2::with_mocked_responses(stale, {
+    # no expectation: the public copy is taken as it comes
+    plain <- download_public_asset("tag", name, dir)
+    expect_identical(readBin(plain, "raw", 100L), charToRaw("old bytes"))
+    expect_identical(api_calls, 0L)
+    # an asset the API lists without a digest is not checked either
+    download_public_asset("tag", name, dir, expect_sha256 = NA_character_)
+    expect_identical(api_calls, 0L)
+    expect_message(
+      path <- download_public_asset(
+        "tag",
+        name,
+        dir,
+        expect_sha256 = fresh_sha
+      ),
+      "stale copy"
+    )
+    expect_identical(api_calls, 1L)
+    expect_identical(readBin(path, "raw", 100L), charToRaw("new bytes"))
+    # the API copy differing too is not something to carry on with
+    expect_error(
+      suppressMessages(
+        download_public_asset("tag", name, dir, expect_sha256 = "0000")
+      ),
+      "does not have the sha256"
+    )
+  })
+})

@@ -16,6 +16,13 @@
 # download that differs. The CVM rewrites nothing here: the old bytes are
 # gone once uploaded, and that is the point.
 #
+# The public URL serves the old bytes for a few minutes after the upload
+# (measured 2026-11-14: about three). Both repairs check every download
+# against the sha256 the API lists (`release_asset_digests()`), so a dry
+# run or the digest repair right after this one reads the new bytes; a
+# client pinned to an old date fails its integrity check on the rewritten
+# files from the moment the URL turns until the digest repair has run.
+#
 # Usage:
 #   Rscript inst/etl/repair-personal-data.R --group companhias \
 #     --dataset fre [--dry-run]
@@ -65,24 +72,10 @@ scrub_parquet_file <- function(path) {
   as.integer(sum(left))
 }
 
-# Names of the parquet assets of a release.
+# sha256 of the parquet assets of a release, by asset name.
 release_parquet_assets <- function(tag) {
-  out <- system2(
-    "gh",
-    c(
-      "release",
-      "view",
-      tag,
-      "--repo",
-      mirror_repo,
-      "--json",
-      "assets",
-      "--jq",
-      shQuote(".assets[].name")
-    ),
-    stdout = TRUE
-  )
-  out[grepl("[.]parquet$", out)]
+  digests <- release_asset_digests(tag)
+  digests[grepl("[.]parquet$", names(digests))]
 }
 
 personal_repair_main <- function(group, dataset, dry_run) {
@@ -110,8 +103,13 @@ personal_repair_main <- function(group, dataset, dry_run) {
     assets <- release_parquet_assets(tag)
     n_files <- 0L
     n_values <- 0L
-    for (name in assets) {
-      path <- download_public_asset(tag, name, dir)
+    for (name in names(assets)) {
+      path <- download_public_asset(
+        tag,
+        name,
+        dir,
+        expect_sha256 = assets[[name]]
+      )
       if (is.null(path)) {
         stop(sprintf("%s of %s not downloadable", name, tag), call. = FALSE)
       }
