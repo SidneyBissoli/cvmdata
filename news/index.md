@@ -21,6 +21,12 @@
   returns the masked values for past dates. See “Personal data” in
   [`?cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
 
+- `DATA-LICENSE.md` and the README of the Zenodo editions now say that
+  the ODbL does not license the personal data in the tables: the licence
+  governs the rights over the database (its section 2.4), and whoever
+  reuses the names answers for that processing under the law that
+  applies to them.
+
 - The five `fre` tables that count employees by race, gender or
   disability (`empregado_PCD`, `empregado_local_declaracao_genero`,
   `empregado_local_declaracao_raca`,
