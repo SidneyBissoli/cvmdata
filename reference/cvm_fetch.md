@@ -185,8 +185,7 @@ was left out is named. Totals computed from these tables are lower than
 the CVM's. Names, CNPJs and biographies stay as published; the masked
 CPF plus the name still follow a person across tables. `source = "cvm"`
 reads everything from the CVM untouched, under the same duty to respect
-the purpose of the disclosure (Lei 13.709/2018, art. 7, paragraphs 3 and
-4).
+the purpose of the disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 
 ## Filing versions
 
