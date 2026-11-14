@@ -12,7 +12,8 @@ fazê-la, é a da seção "O que continua em aberto".
 > estavam descritos com alcance maior do que a tese tem. O texto abaixo
 > foi corrigido no lugar; a seção "Fontes, como lidas em 2026-11-14" diz
 > o que cada fonte afirma. As decisões não mudaram por causa disso; a do
-> nome está em revisão pelo dono.
+> nome foi revista e mantida pelo dono no mesmo dia (ver o complemento
+> "código no lugar do nome").
 
 ## O que se decidiu
 
@@ -334,3 +335,46 @@ um teste prende isso aos esquemas) e marca todas as linhas da entrega
 pessoas é pequeno ou unânime. `mirror_apply_privacy()` as retira, então a
 regra vale no estágio 02, no histórico, na comparação com a release
 anterior e nas guardas do 02b e do 06. `mirror_privacy_rule` passa a "3".
+
+## Complemento de 2026-11-14: código no lugar do nome (examinado e recusado)
+
+O dono pediu que se examinasse trocar o nome por um código antes de
+decidir. Examinado, **o nome fica**.
+
+**O que as fontes dizem** (lidas em 2026-11-14):
+
+- LGPD, art. 13, § 4º: pseudonimização é o tratamento em que o dado só
+  volta a ser associado à pessoa "pelo uso de informação adicional mantida
+  separadamente pelo controlador em ambiente controlado e seguro".
+- ANPD, "Estudo técnico sobre a anonimização de dados na LGPD: análise
+  jurídica" (versão 1.0, novembro de 2023; seções 3 e 4.4): a avaliação
+  "deve ter em consideração não apenas o uso de meios próprios do agente
+  [...], mas também a atuação de outras pessoas ou entidades que, com
+  meios e esforços razoáveis, podem reidentificar"; "a LGPD aponta para a
+  teoria objetiva".
+
+Leitura do responsável: a informação que desfaz o código não ficaria
+guardada com ele, está aberta no portal da CVM. O código não seria
+pseudonimização no sentido do art. 13, § 4º, e o dado seguiria pessoal,
+com as mesmas obrigações.
+
+**O que a medição mostra** (FRE 2025, 8.989 linhas de administradores e
+conselheiros fiscais; só agregados):
+
+| Campos que continuariam na linha | Linhas únicas |
+|---|---|
+| Companhia, órgão e cargo | 32,4% |
+| Mais a data de eleição | 40,1% |
+| Mais o ano de nascimento | 90,8% |
+
+Linha única casa com o arquivo da CVM e recebe o nome de volta. Das 8.901
+biografias, 3.037 (34,1%) trazem o nome completo da pessoa e 3.840 (43,1%)
+o primeiro e o último nome. O nome de pessoa aparece em pelo menos 14
+tabelas do `cad`, do `fca` e do `fre`, várias com pessoa e empresa na mesma
+coluna. Das 6.498 pessoas, 1.089 (16,8%) estão em duas ou mais companhias.
+
+**Por que o nome fica.** O código só esconderia a pessoa de quem lê o
+espelho sem cruzar com a origem; custaria limpar ou tirar as biografias e
+tratar 14 tabelas; tiraria a ligação com outras bases pelo nome; e não
+mudaria a situação perante a lei. Não foi medido quanto da pesquisa sobre
+governança depende dessa ligação.
