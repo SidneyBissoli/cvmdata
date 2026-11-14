@@ -13,7 +13,8 @@
 #     `ano_nascimento`, integer), because name + CPF + birth date is what
 #     banks and public services use to confirm an identity.
 #   * names, biographies and per-body counts stay as published: the name
-#     is the content of the disclosure (Res. CVM 80, items 7.5 and 7.6).
+#     is the first field the form asks of each board member (Res. CVM 80,
+#     Annex C, item 7.3), and research follows the person across companies.
 #   * contact data (owner's decision of 2026-11-14): no e-mail, telephone
 #     or fax of anybody, person or company, and no street address of a
 #     person. The columns are dropped, not blanked. The field of the
