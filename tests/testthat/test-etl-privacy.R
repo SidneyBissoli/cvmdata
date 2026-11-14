@@ -211,3 +211,112 @@ test_that("the repair rewrites a dirty parquet once and leaves a clean one", {
   expect_identical(env$scrub_parquet_file(path), 0L)
   expect_identical(file.mtime(path), before)
 })
+
+test_that("contact data is dropped, the company address stays", {
+  load_etl_privacy()
+  # fca/endereco: a company, so the address stays
+  company <- data.frame(
+    cnpj_companhia = "11.222.333/0001-81",
+    logradouro = "Rua A, 1",
+    cep = "01000-000",
+    cidade = "Sao Paulo",
+    ddi_telefone = "55",
+    ddd_telefone = "11",
+    telefone = 30000000,
+    fax = NA_character_,
+    email = "ri@empresa.com.br"
+  )
+  attr(company, "fetched_at") <- "2026-11-14"
+  out <- mirror_apply_privacy(company)
+  expect_named(out, c("cnpj_companhia", "logradouro", "cep", "cidade"))
+  expect_identical(attr(out, "fetched_at"), "2026-11-14")
+  expect_identical(
+    mirror_privacy_counts(company),
+    c(ddi_telefone = 1L, ddd_telefone = 1L, telefone = 1L, fax = 0L, email = 1L)
+  )
+  expect_identical(mirror_apply_privacy(out), out)
+  expect_length(mirror_privacy_counts(out), 0L)
+
+  # fca/dri: the table names a person, so the street address goes too
+  person <- cbind(company, responsavel = "Fulana de Tal", uf = "SP")
+  expect_named(
+    mirror_apply_privacy(person),
+    c("cnpj_companhia", "cidade", "responsavel", "uf")
+  )
+
+  # cad: the address of the person in charge goes, the company's stays
+  cad <- data.frame(
+    cnpj_cia = "11.222.333/0001-81",
+    logradouro = "Rua A, 1",
+    tel = "30000000",
+    resp = "Fulana de Tal",
+    logradouro_resp = "Rua B, 2",
+    cep_resp = "02000-000",
+    mun_resp = "Sao Paulo",
+    ddd_tel_resp = "11",
+    email_resp = "fulana@gmail.com"
+  )
+  expect_named(
+    mirror_apply_privacy(cad),
+    c("cnpj_cia", "logradouro", "resp", "mun_resp")
+  )
+})
+
+test_that("the contact rule matches the dictionary and nothing else", {
+  load_etl_privacy()
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    stringsAsFactors = FALSE
+  )
+  dropped <- lapply(
+    split(dict$campo, paste(dict$dataset, dict$table, sep = "/")),
+    mirror_contact_columns
+  )
+  dropped <- dropped[lengths(dropped) > 0L]
+  expect_identical(
+    sort(names(dropped)),
+    c(
+      "cad/companhias",
+      "cad/estrangeiras",
+      "cad/incentivadas",
+      "fca/departamento_acionistas",
+      "fca/dri",
+      "fca/endereco",
+      "fca/escriturador",
+      "fre/auditor_responsavel"
+    )
+  )
+  # companies keep their address
+  for (tbl in c("fca/endereco", "fca/escriturador")) {
+    expect_false(any(c("logradouro", "cep") %in% dropped[[tbl]]))
+  }
+  expect_identical(
+    sort(unique(unlist(dropped, use.names = FALSE))),
+    c(
+      "bairro",
+      "bairro_resp",
+      "cd_pais_fax",
+      "cd_pais_tel",
+      "cep",
+      "cep_resp",
+      "compl_resp",
+      "complemento",
+      "ddd_fax",
+      "ddd_fax_resp",
+      "ddd_tel",
+      "ddd_tel_resp",
+      "ddd_telefone",
+      "ddi_fax",
+      "ddi_telefone",
+      "email",
+      "email_resp",
+      "fax",
+      "fax_resp",
+      "logradouro",
+      "logradouro_resp",
+      "tel",
+      "tel_resp",
+      "telefone"
+    )
+  )
+})
