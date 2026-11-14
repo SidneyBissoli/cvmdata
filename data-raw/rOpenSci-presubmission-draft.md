@@ -193,7 +193,7 @@ requires, and the masked CPF plus the name still follow a person across
 tables (FRE 2021-2025: no two different people merge). A guard stops any
 publication, and any deposit, that still holds a full CPF or a birth date.
 The reasoning follows the Brazilian LGPD (Lei 13.709/2018), art. 7,
-paragraphs 3 and 4, and art. 10, paragraph 1; it is written down in
+paragraphs 3 and 7, and art. 10, paragraph 1; it is written down in
 `data-raw/decisions/` in the repository. We are not lawyers, and we would
 welcome the reviewers' view.
 
