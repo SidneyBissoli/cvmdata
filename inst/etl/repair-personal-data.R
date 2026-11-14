@@ -10,6 +10,16 @@
 # values. Everything else in those files stays, and a file with nothing to
 # mask is left alone.
 #
+# Since rule 3 (2026-11-14) the repair does two more things. The assets
+# of the tables the mirror no longer carries (`mirror: false`) are DELETED
+# from the snapshots: nothing later points anywhere else for them, and
+# repair-snapshot-digests.R takes their entries out of the sidecars. And a
+# count table loses the filings with a small or unanimous group, so the
+# rewritten file has fewer rows; what it lost is measured before the
+# rewrite and saved in `omitted-reports.json` of the workspace, where the
+# digest repair reads it to fill `privacy_omitted` of the dated sidecars
+# (a reader pinned to an old date gets the same warning).
+#
 # Run it AFTER the first publish under the rule, then rerun
 # repair-snapshot-digests.R for the same dataset: the sidecars carry the
 # sha256 of the bytes each snapshot points to, and the client refuses a
@@ -75,6 +85,42 @@ scrub_parquet_file <- function(path) {
   max(1L, as.integer(sum(left)))
 }
 
+# Table of an asset name (`<table>__year.2024__part-0.parquet`).
+asset_table <- function(name) {
+  strsplit(name, "__", fixed = TRUE)[[1L]][[1L]]
+}
+
+# What the group rule would take from a local parquet, or NULL when it is
+# not a count table or loses nothing (a file already rewritten says
+# nothing about what it lost, so it must not overwrite an earlier report).
+group_report_of_file <- function(path) {
+  df <- as.data.frame(arrow::read_parquet(path, mmap = FALSE))
+  report <- mirror_group_report(df)
+  if (is.null(report) || !report$companies_omitted) {
+    return(NULL)
+  }
+  report
+}
+
+# The reports of earlier runs of this repair, by release tag and asset.
+read_omitted_reports <- function(path) {
+  if (!file.exists(path)) {
+    return(list())
+  }
+  jsonlite::read_json(path)
+}
+
+write_omitted_reports <- function(reports, path) {
+  reports <- lapply(reports, function(by_asset) {
+    lapply(by_asset, function(r) {
+      r$cnpj <- I(as.character(unlist(r$cnpj)))
+      r
+    })
+  })
+  jsonlite::write_json(reports, path, auto_unbox = TRUE, pretty = TRUE)
+  path
+}
+
 # sha256 of the parquet assets of a release, by asset name.
 release_parquet_assets <- function(tag) {
   digests <- release_asset_digests(tag)
@@ -99,6 +145,9 @@ personal_repair_main <- function(group, dataset, dry_run) {
       call. = FALSE
     )
   }
+  excluded <- mirror_excluded_tables(dataset)
+  reports_path <- file.path(work, "omitted-reports.json")
+  reports <- read_omitted_reports(reports_path)
   for (date in as.character(unlist(latest$snapshots %||% list()))) {
     tag <- mirror_tag_snapshot(group, dataset, as.Date(date))
     dir <- file.path(work, tag)
@@ -106,7 +155,15 @@ personal_repair_main <- function(group, dataset, dry_run) {
     assets <- release_parquet_assets(tag)
     n_files <- 0L
     n_values <- 0L
+    n_deleted <- 0L
     for (name in names(assets)) {
+      if (asset_table(name) %in% excluded) {
+        n_deleted <- n_deleted + 1L
+        if (!dry_run) {
+          delete_release_asset(tag, name)
+        }
+        next
+      }
       path <- download_public_asset(
         tag,
         name,
@@ -115,6 +172,10 @@ personal_repair_main <- function(group, dataset, dry_run) {
       )
       if (is.null(path)) {
         stop(sprintf("%s of %s not downloadable", name, tag), call. = FALSE)
+      }
+      report <- group_report_of_file(path)
+      if (!is.null(report)) {
+        reports[[tag]][[name]] <- report
       }
       changed <- scrub_parquet_file(path)
       if (changed > 0L) {
@@ -127,14 +188,17 @@ personal_repair_main <- function(group, dataset, dry_run) {
       unlink(path)
     }
     message(sprintf(
-      "[repair-personal] %s: %d of %d file(s), %s value(s)%s",
+      "[repair-personal] %s: %d of %d file(s), %s value(s)%s; %d file(s) %s",
       tag,
       n_files,
       length(assets),
       format(n_values, big.mark = ","),
-      if (dry_run) " (dry run, nothing uploaded)" else " rewritten"
+      if (dry_run) " (dry run, nothing uploaded)" else " rewritten",
+      n_deleted,
+      if (dry_run) "of tables out of the mirror to delete" else "deleted"
     ))
   }
+  write_omitted_reports(reports, reports_path)
   invisible(NULL)
 }
 

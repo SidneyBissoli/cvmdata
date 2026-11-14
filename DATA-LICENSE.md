@@ -62,6 +62,17 @@ published. These are personal data under the Brazilian LGPD (Lei
 13.709/2018) wherever you read them from: their open publication does
 not free you from respecting the purpose of the disclosure.
 
+**The ODbL does not license the personal data.** The licence governs
+the rights over the database and says so itself (section 2.4): "The
+individual items of the Contents contained in this Database may be
+covered by other rights, including copyright, patent, data protection,
+privacy, or personality rights, and this License does not cover any
+rights (other than Database Rights or in contract) in individual
+Contents contained in the Database." What you do with the names and the
+other personal data in these tables is your own processing of personal
+data: you answer for it under the law that applies to you (in Brazil,
+the LGPD), and the permissions listed below do not extend to it.
+
 ## What this means for you
 
 In short (the licence text prevails):

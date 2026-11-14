@@ -150,7 +150,11 @@ release_asset_digests <- function(tag) {
   if (!is.null(attr(out, "status")) || !length(out)) {
     stop(sprintf("could not list the assets of %s", tag), call. = FALSE)
   }
-  parse_asset_digests(paste(out, collapse = "\n"))
+  # Joined with nothing: R cuts a long line of output into pieces, and a
+  # newline between two of them can fall inside a string (seen on
+  # 2026-11-14 with the assets of an fre snapshot: "invalid character
+  # inside string"). JSON needs no line break between tokens.
+  parse_asset_digests(paste(out, collapse = ""))
 }
 
 # The `{"assets": [{name, digest, ...}]}` of `gh release view` as a
@@ -175,6 +179,28 @@ parse_asset_digests <- function(json) {
 
 # Uploads one asset to the release, replacing an asset of the same name;
 # four attempts with a growing wait, then an error.
+# Deletes one asset of a release. Used by the repair of the dated
+# snapshots for the tables the mirror no longer carries; stops when gh
+# refuses, because a partly cleaned snapshot must not pass for done.
+delete_release_asset <- function(tag, name) {
+  status <- system2(
+    "gh",
+    c(
+      "release",
+      "delete-asset",
+      tag,
+      shQuote(name),
+      "--repo",
+      mirror_repo,
+      "--yes"
+    )
+  )
+  if (!identical(status, 0L)) {
+    stop(sprintf("could not delete %s from %s", name, tag), call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 upload_release_asset <- function(tag, path, attempts = 4L) {
   for (attempt in seq_len(attempts)) {
     status <- system2(

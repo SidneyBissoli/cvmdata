@@ -122,6 +122,23 @@ repair_write_sidecar <- function(sidecar, path) {
   path
 }
 
+# What repair-personal-data.R measured before rewriting the count tables
+# of this dataset, by release tag and asset name; empty when it did not
+# run in this workspace.
+repair_omitted_reports <- function(group, dataset) {
+  path <- file.path(
+    mirror_workspace(),
+    "repair-personal",
+    group,
+    dataset,
+    "omitted-reports.json"
+  )
+  if (!file.exists(path)) {
+    return(list())
+  }
+  jsonlite::read_json(path)
+}
+
 repair_main <- function(group, dataset, dry_run) {
   latest_tag <- mirror_tag_latest(group, dataset)
   work <- file.path(mirror_workspace(), "repair", group, dataset)
@@ -137,21 +154,36 @@ repair_main <- function(group, dataset, dry_run) {
     return(invisible(NULL))
   }
   lookup <- repair_digest_lookup(file.path(work, "assets"))
+  # Rule 3 of util-privacy.R (2026-11-14): the tables that left the mirror
+  # leave the dated sidecars too (repair-personal-data.R deleted their
+  # assets), and what the group rule took from the count tables, measured
+  # by that repair before it rewrote them, goes into `privacy_omitted`.
+  excluded <- mirror_excluded_tables(dataset)
+  reports <- repair_omitted_reports(group, dataset)
   uploads <- character()
   for (date in dates) {
     tag <- mirror_tag_snapshot(group, dataset, as.Date(date))
     sidecar <- repair_read_sidecar(tag, work)
     skips <- snapshot_normalise_skips(sidecar)
-    repaired <- snapshot_repair_files(skips$sidecar, lookup)
+    cleaned <- snapshot_drop_tables(skips$sidecar, excluded)
+    noted <- snapshot_add_omitted(cleaned$sidecar, reports, public_asset_name)
+    repaired <- snapshot_repair_files(noted$sidecar, lookup)
     message(sprintf(
-      "[repair] %s %s: %d of %d partition digest(s) were wrong%s",
+      paste0(
+        "[repair] %s %s: %d of %d partition digest(s) were wrong%s; ",
+        "%d partition(s) of tables out of the mirror dropped; ",
+        "%d privacy_omitted entr(ies) written"
+      ),
       dataset,
       date,
       length(repaired$fixed),
       length(sidecar$files %||% list()),
-      if (skips$changed) "; skips had `{}` for null" else ""
+      if (skips$changed) "; skips had `{}` for null" else "",
+      length(cleaned$dropped),
+      noted$added
     ))
-    if (length(repaired$fixed) || skips$changed) {
+    touched <- length(cleaned$dropped) > 0L || noted$added > 0L
+    if (length(repaired$fixed) || skips$changed || touched) {
       path <- repair_write_sidecar(
         repaired$sidecar,
         file.path(out_dir, tag, "__source_hash.json")
@@ -172,6 +204,7 @@ repair_main <- function(group, dataset, dry_run) {
     )
   }
   latest <- snapshot_normalise_skips(latest)$sidecar
+  latest <- snapshot_drop_tables(latest, excluded)$sidecar
   uploads[[latest_tag]] <- repair_write_sidecar(
     latest,
     file.path(out_dir, latest_tag, "__source_hash.json")

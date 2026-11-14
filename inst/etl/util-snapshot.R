@@ -174,3 +174,64 @@ snapshot_normalise_skips <- function(sidecar) {
   }
   list(sidecar = sidecar, changed = changed)
 }
+
+# A sidecar without the partitions of tables the mirror no longer carries
+# (`mirror: false` in the schema): their entries leave every map keyed by
+# partition. Returns list(sidecar, dropped = the partition paths removed).
+# The assets themselves are deleted by repair-personal-data.R.
+snapshot_drop_tables <- function(sidecar, excluded) {
+  gone <- function(rels) {
+    tables <- vapply(
+      rels,
+      function(rel) strsplit(rel, "/", fixed = TRUE)[[1L]][[1L]],
+      character(1L)
+    )
+    rels[tables %in% excluded]
+  }
+  dropped <- character()
+  for (field in c("data", "files", "releases", "snapshot_files")) {
+    map <- sidecar[[field]]
+    if (!is.list(map) || !length(map)) {
+      next
+    }
+    out <- gone(names(map))
+    dropped <- union(dropped, out)
+    sidecar[[field]] <- map[setdiff(names(map), out)]
+  }
+  list(sidecar = sidecar, dropped = dropped)
+}
+
+# A dated sidecar with `privacy_omitted` filled from what the repair of
+# the parquets measured before rewriting them: `reports[[tag]][[key(rel)]]`
+# is the report of `mirror_group_report()` for the asset of partition `rel`
+# on release `tag`. A partition points to the snapshot that holds its
+# bytes, so one report serves every later sidecar that points there.
+# Entries already in the sidecar stay unless a report replaces them.
+# Returns list(sidecar, added = number of entries written).
+snapshot_add_omitted <- function(sidecar, reports, key = identity) {
+  entries <- sidecar$privacy_omitted %||% list()
+  id <- function(e) paste(e$table, e$year %||% "", sep = "\r")
+  names(entries) <- vapply(entries, id, character(1L))
+  added <- 0L
+  for (rel in names(sidecar$releases %||% list())) {
+    report <- reports[[sidecar$releases[[rel]]]][[key(rel)]]
+    if (is.null(report)) {
+      next
+    }
+    year <- regmatches(rel, regexpr("(?<=year=)[0-9]{4}", rel, perl = TRUE))
+    entry <- c(
+      list(
+        table = strsplit(rel, "/", fixed = TRUE)[[1L]][[1L]],
+        year = if (length(year)) as.integer(year) else NULL
+      ),
+      report
+    )
+    entry$cnpj <- I(as.character(unlist(entry$cnpj)))
+    entries[[id(entry)]] <- entry
+    added <- added + 1L
+  }
+  if (length(entries)) {
+    sidecar$privacy_omitted <- unname(entries)
+  }
+  list(sidecar = sidecar, added = added)
+}
