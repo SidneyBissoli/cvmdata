@@ -35,6 +35,9 @@ cvm_tbl_attr_names <- c(
 cvm_tbl_attrs <- function(x) {
   out <- lapply(cvm_tbl_attr_names, function(a) attr(x, a, exact = TRUE))
   names(out) <- cvm_tbl_attr_names
+  # Not provenance, but it must not be lost on the first `filter()`: what
+  # the mirror left out of a count table (`note_privacy_omitted()`).
+  out["omitted"] <- list(attr(x, "omitted", exact = TRUE))
   out
 }
 
@@ -45,7 +48,7 @@ cvm_tbl_attrs <- function(x) {
 #
 # @noRd
 cvm_tbl_reattach <- function(out, attrs) {
-  for (a in cvm_tbl_attr_names) {
+  for (a in names(attrs)) {
     attr(out, a) <- attrs[[a]]
   }
   class(out) <- union("cvm_tbl", class(out))
@@ -66,6 +69,9 @@ cvm_tbl_merge_attrs <- function(x, y) {
     if (!identical(ax[[a]], ay[[a]])) {
       out[[a]] <- "mixed"
     }
+  }
+  if (!identical(ax$omitted, ay$omitted)) {
+    out["omitted"] <- list(NULL)
   }
   stamps <- c(ax$fetched_at, ay$fetched_at)
   out$fetched_at <- if (length(stamps) > 0) min(stamps) else NULL

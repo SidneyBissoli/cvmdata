@@ -74,6 +74,7 @@ source_mirror_duckdb_get <- function(
     report_type,
     partitioning
   )
+  mirror_note_omitted(inventory, table, resolved_years)
   matches <- filter_mirror_assets(
     inventory,
     table = table,

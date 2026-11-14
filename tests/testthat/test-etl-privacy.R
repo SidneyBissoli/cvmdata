@@ -320,3 +320,114 @@ test_that("the contact rule matches the dictionary and nothing else", {
     )
   )
 })
+
+group_frame <- function() {
+  data.frame(
+    cnpj_companhia = rep(
+      c("11.111.111/0001-11", "22.222.222/0001-22", "33.333.333/0001-33"),
+      each = 2L
+    ),
+    data_referencia = as.Date("2025-12-31"),
+    versao = 1L,
+    id_documento = rep(c("1", "2", "3"), each = 2L),
+    posicao = rep(c("Lideranca", "Nao-lideranca"), 3L),
+    # company 1: a group of 4; company 2: a unanimous group of 30;
+    # company 3: both groups large and mixed, one of them only because
+    # somebody did not answer
+    quantidade_branco = c(3, 60, 30, 40, 12, 50),
+    quantidade_pardo = c(1, 40, 0, 25, 8, 0),
+    quantidade_sem_resposta = c(0, 0, 0, 5, 0, 1),
+    stringsAsFactors = FALSE
+  )
+}
+
+test_that("a filing with a small or unanimous group leaves a count table", {
+  load_etl_privacy()
+  df <- group_frame()
+  attr(df, "fetched_at") <- "2026-11-14"
+  expect_true(mirror_is_group_table(names(df)))
+  expect_identical(
+    mirror_group_unsafe(df),
+    c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
+  )
+  out <- mirror_apply_privacy(df)
+  expect_identical(unique(out$cnpj_companhia), "33.333.333/0001-33")
+  expect_identical(nrow(out), 2L)
+  expect_identical(names(out), names(df))
+  expect_identical(attr(out, "fetched_at"), "2026-11-14")
+  expect_identical(mirror_apply_privacy(out), out)
+  expect_length(mirror_privacy_counts(out), 0L)
+  expect_identical(
+    mirror_privacy_counts(df),
+    c(small_or_unanimous_groups = 4L)
+  )
+})
+
+test_that("the group rule reports companies and people, never rows", {
+  load_etl_privacy()
+  report <- mirror_group_report(group_frame())
+  expect_identical(report$min, 10L)
+  expect_identical(report$companies, 3L)
+  expect_identical(report$companies_omitted, 2L)
+  expect_identical(report$people, 275)
+  expect_identical(report$people_omitted, 204)
+  expect_identical(report$cnpj, c("11.111.111/0001-11", "22.222.222/0001-22"))
+  expect_null(mirror_group_report(data.frame(cpf = "x")))
+})
+
+test_that("a group nobody is in, text counts and other tables are left alone", {
+  load_etl_privacy()
+  df <- group_frame()[5:6, ]
+  df$quantidade_branco <- as.character(df$quantidade_branco)
+  df <- rbind(
+    df,
+    transform(
+      df[1L, ],
+      posicao = "Outra",
+      quantidade_branco = "0",
+      quantidade_pardo = 0,
+      quantidade_sem_resposta = NA
+    )
+  )
+  expect_identical(mirror_group_unsafe(df), c(FALSE, FALSE, FALSE))
+  ages <- data.frame(
+    cnpj_companhia = "11.111.111/0001-11",
+    posicao = "Lideranca",
+    quantidade_ate30anos = 1
+  )
+  expect_false(mirror_is_group_table(names(ages)))
+  expect_identical(mirror_apply_privacy(ages), ages)
+})
+
+test_that("the group rule matches the five workforce tables and no other", {
+  load_etl_privacy()
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    stringsAsFactors = FALSE
+  )
+  columns <- split(dict$campo, paste(dict$dataset, dict$table, sep = "/"))
+  dir <- system.file("extdata", "schemas", "companhias", package = "cvmdata")
+  for (path in list.files(
+    dir,
+    "[.]yaml$",
+    recursive = TRUE,
+    full.names = TRUE
+  )) {
+    schema <- yaml::read_yaml(path)
+    key <- paste(schema$dataset, schema$table, sep = "/")
+    if (is.null(columns[[key]]) && !is.null(schema$expected_field_names)) {
+      columns[[key]] <- tolower(schema$expected_field_names)
+    }
+  }
+  hit <- names(columns)[vapply(columns, mirror_is_group_table, logical(1L))]
+  expect_setequal(
+    hit,
+    c(
+      "fre/empregado_PCD",
+      "fre/empregado_local_declaracao_genero",
+      "fre/empregado_local_declaracao_raca",
+      "fre/empregado_posicao_declaracao_genero",
+      "fre/empregado_posicao_declaracao_raca"
+    )
+  )
+})

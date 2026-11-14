@@ -830,3 +830,25 @@ test_that("the stages iterate the mirrored tables only", {
   expect_true("empregado_PCD" %in% mirror_tables("fre"))
   expect_length(mirror_excluded_tables("dfp"), 0L)
 })
+
+test_that("the edition carries what the group rule left out, counts only", {
+  load_etl_zenodo()
+  entries <- list(
+    list(
+      table = "empregado_PCD",
+      year = 2025L,
+      min = 10L,
+      companies = 459L,
+      companies_omitted = 173L,
+      people = 100,
+      people_omitted = 5,
+      cnpj = list("11.222.333/0001-81")
+    )
+  )
+  got <- edition_omitted("fre", entries)
+  expect_identical(nrow(got), 1L)
+  expect_identical(got$companies_omitted, 173)
+  expect_false(any(grepl("cnpj", names(got))))
+  expect_null(edition_omitted("dfp", NULL))
+  expect_null(edition_omitted("dfp", list()))
+})

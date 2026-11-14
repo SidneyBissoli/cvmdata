@@ -39,8 +39,42 @@ print.cvm_tbl <- function(x, ...) {
       "{.field group}: {.val {grp}}  |  ",
       "{.field dataset}: {.val {ds}}  |  ",
       "{.field table}: {.val {tbl}}"
-    )
+    ),
+    print_omitted_field(attr(x, "omitted", exact = TRUE))
   ))
   NextMethod()
   invisible(x)
+}
+
+# The header line of a count table the mirror left companies out of, or
+# nothing: the warning of the read is gone by the time the object is
+# printed again.
+print_omitted_field <- function(omitted) {
+  if (is.null(omitted)) {
+    return(NULL)
+  }
+  rows <- omitted[which(omitted$companies_omitted > 0), , drop = FALSE]
+  if (!nrow(rows)) {
+    return(NULL)
+  }
+  # the latest year says it; the attribute has the others
+  last <- rows[nrow(rows), , drop = FALSE]
+  others <- if (nrow(rows) > 1L) {
+    sprintf(", and in %d other year(s)", nrow(rows) - 1L)
+  } else {
+    ""
+  }
+  c(
+    "!" = paste0(
+      "{.field omitted}: ",
+      format(last$companies_omitted, big.mark = ",", trim = TRUE),
+      " of ",
+      format(last$companies, big.mark = ",", trim = TRUE),
+      " companies of ",
+      last$year,
+      " are not in the mirror",
+      others,
+      " (privacy rule; {.code attr(x, \"omitted\")})"
+    )
+  )
 }

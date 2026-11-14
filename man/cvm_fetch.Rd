@@ -153,7 +153,17 @@ company stays. Three tables of the \code{fre} are not in the mirror at all:
 \code{administrador_PCD} count the gender, race and disability declarations
 of board members by body, and in a small or unanimous body the count
 tells the declaration of each named member; asking for them without
-\code{source = "cvm"} is an error that says so. Names, CNPJs
+\code{source = "cvm"} is an error that says so. The five workforce tables
+that count employees by race, gender or disability (\code{empregado_PCD} and
+the \verb{empregado_local_*} and \verb{empregado_posicao_*} \code{declaracao_genero} and
+\code{declaracao_raca}) come from the mirror without the companies that, in a
+year, have a group of fewer than 10 people or a group in which everybody
+declared the same category. Reading one of them raises a warning of
+class \code{cvmdata_warn_privacy_omitted} with the companies and the share of
+people left out in each year, the same numbers stay in
+\code{attr(x, "omitted")}, and a company asked for by \code{cnpj} or \code{ticker} that
+was left out is named. Totals computed from these tables are lower than
+the CVM's. Names, CNPJs
 and biographies stay as published; the masked CPF plus the name still
 follow a person across tables. \code{source = "cvm"} reads everything from
 the CVM untouched, under the same duty to respect the purpose of the

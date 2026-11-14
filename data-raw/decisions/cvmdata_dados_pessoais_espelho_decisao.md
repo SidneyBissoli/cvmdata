@@ -184,3 +184,74 @@ histórico é apagado. `cvm_fetch()` e `cvm_versions()` recusam a tabela no
 espelho com `cvmdata_error_input` e apontam `source = "cvm"`. A guarda da
 edição (`edition_check_privacy()`) recusa qualquer arquivo dessas tabelas.
 As fotos datadas ainda as têm até o reparo.
+
+## Complemento de 2026-11-14: contagens de empregados
+
+Decisão do dono: as cinco tabelas de empregados com raça, gênero e
+deficiência (`empregado_PCD`, `empregado_local_declaracao_genero`,
+`empregado_local_declaracao_raca`, `empregado_posicao_declaracao_genero`,
+`empregado_posicao_declaracao_raca`) ficam no espelho, sem a companhia que,
+no ano, tem algum grupo com menos de 10 pessoas ou algum grupo unânime
+(todos responderam e todos declararam a mesma categoria). A regra é igual
+para as cinco. As tabelas de faixa etária e a de cargo por região não
+entram: não trazem dado sensível.
+
+**Por que ficam.** São agregados: uma linha é uma companhia, num ano, num
+de dois cargos ou numa de seis regiões, com a contagem por categoria.
+Nenhuma tabela do conjunto nomeia empregados. Pelo art. 12 da LGPD (lido
+em 2026-11-14), dado anonimizado não é dado pessoal, salvo quando a
+anonimização puder ser revertida "utilizando exclusivamente meios
+próprios" ou "com esforços razoáveis". Para a grande maioria das linhas a
+lei não se aplica. A primeira recomendação do assistente, de tirar as cinco
+tabelas, ia além do que a lei pede e foi retirada.
+
+**Por que a regra.** Num grupo de 1 pessoa, quem conhece a empresa sabe de
+quem é a declaração; num grupo unânime, quem sabe que a pessoa está nele
+sabe a categoria dela. O que os órgãos de estatística publicam, lido em
+2026-11-14:
+
+| Órgão | Regra | Fonte |
+|---|---|---|
+| IBGE, Censo Agropecuário | menos de 3 informantes por célula até município; menos de 10 em níveis menores | Guia do usuário da sala de acesso a dados restritos, 2022, Anexo 4 |
+| IBGE, pesquisas por empresa | três ou mais informantes na célula; outra linha é omitida para o usuário não obter a informação "por diferença" | mesmo guia |
+| Governo britânico, Analysis Function | contagens de 1 ou 2 potencialmente reveladoras; limiar 3; linhas "dominated by zeros" são divulgação de atributo; população em risco abaixo de 1.000 pede proteção mesmo com variável de baixo impacto | Statistical Disclosure Control for tables produced from administrative data |
+| ONS | suprime contagens abaixo de 10 no Integrated Data Service | Comparison of post-tabular statistical disclosure control methods |
+| CMS (EUA) | célula de 1 a 10 não se publica, nem célula que permita derivá-la | CMS Cell Size Suppression Policy |
+| ANPD | nenhum número: processo "baseado em riscos", "não é possível estabelecer uma metodologia padronizada a todos os casos", e em base pública "o risco deve ser majorado" | Estudo técnico sobre anonimização de dados na LGPD (orientativo) |
+
+Não lidos, por virem truncados: o manual europeu de controle de divulgação
+e o do UK Data Service.
+
+**Por que 10 e os unânimes.** 10 é o que os órgãos usam em dado sensível
+ou recorte pequeno; com os unânimes na regra, custa quase o mesmo que 3.
+Os unânimes entram pelo mesmo motivo que tirou as tabelas de
+administradores. Não há exceção para "sem deficiência": seria escolha por
+categoria sem fonte. A companhia inteira sai da tabela no ano, e não só a
+linha, para a linha não ser recalculada por subtração entre as tabelas por
+cargo e por região.
+
+**Custo medido** (FRE 2025; companhias que saem, e pessoas contadas que
+saem com elas): raça por cargo 49 de 465 (10,5%; 0,1%); gênero por cargo 51
+(11,0%; 0,1%); raça por região 147 (31,6%; 15,0%); gênero por região 134
+(28,8%; 7,5%); deficiência 173 de 459 (37,7%; 5,0%). Na de deficiência, 185
+das 244 linhas unânimes são de grupos com 10 pessoas ou mais, todas "sem
+deficiência".
+
+**Como o usuário fica sabendo** (desenho aprovado pelo dono): (1) aviso
+`cvmdata_warn_privacy_omitted` a cada leitura, com as companhias e a
+parcela de pessoas que não vieram, por ano; (2) atributo `omitted` no
+resultado, que o cabeçalho impresso anuncia e que sobrevive aos verbos do
+dplyr; (3) companhia pedida por `cnpj` ou `ticker` que foi omitida é
+nomeada, em vez de zero linhas caladas, e nesse caso o aviso geral não sai.
+Os números vêm de `privacy_omitted` no `__source_hash.json`, gravado pelo
+robô por tabela e ano, com a lista de CNPJs omitidos (não revela nada de
+pessoas e já seria dedutível comparando com a CVM). A edição do Zenodo leva
+`privacy_omitted.csv`, só com contagens.
+
+**Como funciona.** `mirror_group_unsafe()` em `util-privacy.R` reconhece a
+tabela pelas colunas (`quantidade_sem_resposta` mais `posicao` ou `local`;
+um teste prende isso aos esquemas) e marca todas as linhas da entrega
+(companhia, data de referência, versão, documento) em que algum grupo com
+pessoas é pequeno ou unânime. `mirror_apply_privacy()` as retira, então a
+regra vale no estágio 02, no histórico, na comparação com a release
+anterior e nas guardas do 02b e do 06. `mirror_privacy_rule` passa a "3".

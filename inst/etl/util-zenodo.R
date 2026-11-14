@@ -309,6 +309,36 @@ edition_check_privacy <- function(plan, excluded = mirror_excluded_tables) {
 
 # --- row counts ------------------------------------------------------
 
+# What the group rule of util-privacy.R left out of the count tables of a
+# dataset, from `privacy_omitted` of its dated sidecar: one row per table
+# and year, counts only (the deposit does not list the companies). NULL
+# when the sidecar has none.
+edition_omitted <- function(dataset, entries) {
+  if (!length(entries)) {
+    return(NULL)
+  }
+  field <- function(e, name) {
+    value <- e[[name]]
+    if (is.null(value)) NA_real_ else as.numeric(value)
+  }
+  do.call(
+    rbind,
+    lapply(entries, function(e) {
+      data.frame(
+        dataset = dataset,
+        table = as.character(e$table),
+        year = as.integer(field(e, "year")),
+        min_group = field(e, "min"),
+        companies = field(e, "companies"),
+        companies_omitted = field(e, "companies_omitted"),
+        people = field(e, "people"),
+        people_omitted = field(e, "people_omitted"),
+        stringsAsFactors = FALSE
+      )
+    })
+  )
+}
+
 # Rows of a parquet file. The table is read and dropped at once rather
 # than counted from the footer with `ParquetFileReader`, whose object
 # holds the file open until it is collected (on Windows that blocks
@@ -531,6 +561,9 @@ edition_readme <- function(
     "  columns.",
     "- `DATA-LICENSE.md`: the licence of the data and the attribution it",
     "  requires.",
+    "- `privacy_omitted.csv` (when a count table lost companies): per",
+    "  table and year, the companies and people in the CVM's table and",
+    "  those this deposit leaves out (see *Personal data*).",
     "- `SHA256SUMS`: the digests of the files of this deposit",
     "  (`sha256sum -c SHA256SUMS`).",
     "",
@@ -568,7 +601,15 @@ edition_readme <- function(
       "and `administrador_PCD` count the gender, race and disability",
       "declarations of board members by body, and in a small or",
       "unanimous body the count tells the declaration of each named",
-      "member. Names, CNPJs,",
+      "member. The five workforce tables that count employees by race,",
+      "gender or disability (`empregado_PCD`, `empregado_local_*` and",
+      "`empregado_posicao_*` `declaracao_genero` and `declaracao_raca`)",
+      "are here without the companies that, in a year, have a group of",
+      "fewer than 10 people or a group in which everybody declared the",
+      "same category; the whole filing of the company leaves the table,",
+      "so no row can be rebuilt by subtraction. Totals computed from",
+      "these tables are therefore lower than the CVM's:",
+      "`privacy_omitted.csv` says by how much. Names, CNPJs,",
       "biographies and the declarations the CVM requires stay as",
       "published, and the masked CPF plus the name still identify a",
       "person across tables. The complete values remain on the CVM",

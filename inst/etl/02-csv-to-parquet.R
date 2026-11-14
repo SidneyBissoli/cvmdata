@@ -134,7 +134,15 @@ write_one <- function(tbl, y, rtype) {
   out_path <- file.path(out_dir, "part-0.parquet")
 
   # The one place the mirror departs from the CVM: full CPFs and birth
-  # dates are not redistributed (util-privacy.R).
+  # dates are not redistributed (util-privacy.R). What the group rule
+  # takes from a count table is recorded for the sidecar.
+  report <- mirror_group_report(res)
+  if (!is.null(report)) {
+    omitted_reports[[length(omitted_reports) + 1L]] <<- c(
+      list(table = tbl, year = if (is.na(y)) NULL else as.integer(y)),
+      report
+    )
+  }
   arrow::write_parquet(
     mirror_apply_privacy(res),
     out_path,
@@ -184,6 +192,7 @@ message(sprintf(
 
 # Process every tuple, collecting its outcome; tally and build the skip
 # manifest afterwards so the loop itself stays simple (lint budget).
+omitted_reports <- list()
 outcomes <- list()
 for (tbl in tables) {
   for (y in mirror_table_years(dataset, tbl, years_to_process)) {
@@ -233,6 +242,21 @@ jsonlite::write_json(
   auto_unbox = TRUE,
   pretty = TRUE,
   na = "null"
+)
+
+# What the group rule omitted, per (table, year): read by 03-publish into
+# the sidecar (`privacy_omitted`), where the package finds the numbers of
+# its warning. `cnpj` stays an array even with one company.
+omitted_dir <- file.path(out_root, "omitted")
+dir.create(omitted_dir, recursive = TRUE, showWarnings = FALSE)
+jsonlite::write_json(
+  lapply(omitted_reports, function(r) {
+    r$cnpj <- I(r$cnpj)
+    r
+  }),
+  file.path(omitted_dir, sprintf("%s.json", dataset)),
+  auto_unbox = TRUE,
+  pretty = TRUE
 )
 
 message(sprintf(

@@ -113,7 +113,17 @@
 #' `administrador_PCD` count the gender, race and disability declarations
 #' of board members by body, and in a small or unanimous body the count
 #' tells the declaration of each named member; asking for them without
-#' `source = "cvm"` is an error that says so. Names, CNPJs
+#' `source = "cvm"` is an error that says so. The five workforce tables
+#' that count employees by race, gender or disability (`empregado_PCD` and
+#' the `empregado_local_*` and `empregado_posicao_*` `declaracao_genero` and
+#' `declaracao_raca`) come from the mirror without the companies that, in a
+#' year, have a group of fewer than 10 people or a group in which everybody
+#' declared the same category. Reading one of them raises a warning of
+#' class `cvmdata_warn_privacy_omitted` with the companies and the share of
+#' people left out in each year, the same numbers stay in
+#' `attr(x, "omitted")`, and a company asked for by `cnpj` or `ticker` that
+#' was left out is named. Totals computed from these tables are lower than
+#' the CVM's. Names, CNPJs
 #' and biographies stay as published; the masked CPF plus the name still
 #' follow a person across tables. `source = "cvm"` reads everything from
 #' the CVM untouched, under the same duty to respect the purpose of the
@@ -357,6 +367,7 @@ cvm_fetch <- function(
     )
     strip_cvm_tbl(out)
   }
+  mirror_take_omitted()
   variants <- if (is.null(basis)) list(NULL) else as.list(basis)
   parts <- lapply(variants, function(b) {
     out <- if (is.null(reading)) {
@@ -387,13 +398,106 @@ cvm_fetch <- function(
   )
   out <- filter_as_of(out, as_of, schema)
 
-  cvm_attach_metadata(
+  out <- cvm_attach_metadata(
     out,
     source = source,
     group = schema$group,
     dataset = dataset,
     table = table
   )
+  note_privacy_omitted(out, mirror_take_omitted(), cnpj)
+}
+
+# The mirror leaves out of its count tables the companies whose numbers
+# would tell the declaration of a person (inst/etl/util-privacy.R; owner's
+# decision of 2026-11-14). The result says so three ways: a warning with
+# the numbers of the years read, the attribute `omitted` (one row per
+# year, which `print()` announces), and, when companies were asked for by
+# `cnpj` or `ticker`, the warning names the ones left out instead, and
+# stays quiet when none was: zero rows would otherwise read as "did not
+# file". `omitted` is what the backend noted for the partitions it read.
+note_privacy_omitted <- function(out, omitted, cnpj = NULL) {
+  if (is.null(omitted) || !any(omitted$companies_omitted > 0, na.rm = TRUE)) {
+    return(out)
+  }
+  omitted <- omitted[order(omitted$year), , drop = FALSE]
+  attr(out, "omitted") <- tibble::tibble(
+    year = omitted$year,
+    companies = omitted$companies,
+    companies_omitted = omitted$companies_omitted,
+    people = omitted$people,
+    people_omitted = omitted$people_omitted,
+    min = omitted$min
+  )
+  lines <- if (is.null(cnpj)) {
+    privacy_omitted_shares(omitted)
+  } else {
+    privacy_omitted_asked(omitted, cnpj)
+  }
+  if (!length(lines)) {
+    return(out)
+  }
+  dataset <- attr(out, "dataset", exact = TRUE)
+  table <- attr(out, "table", exact = TRUE)
+  least <- min(omitted$min, na.rm = TRUE)
+  cvmdata_warn(
+    c(
+      paste(
+        "The mirror leaves companies out of",
+        "{.val {dataset}}/{.val {table}} to protect personal data."
+      ),
+      stats::setNames(lines, rep("*", length(lines))),
+      "i" = paste(
+        "A company is left out in a year in which one of its groups has",
+        "fewer than {least} people, or everybody in a group declared the",
+        "same category: such a count tells the declaration of a person,",
+        "which is sensitive data under the LGPD."
+      ),
+      "i" = paste(
+        "{.code source = \"cvm\"} reads every company. The numbers stay",
+        "in {.code attr(x, \"omitted\")}."
+      )
+    ),
+    class = "cvmdata_warn_privacy_omitted"
+  )
+  out
+}
+
+# One line per year read: companies left out and their share of the
+# people counted (the six latest years; the attribute has them all).
+privacy_omitted_shares <- function(omitted) {
+  rows <- utils::tail(
+    omitted[omitted$companies_omitted > 0, , drop = FALSE],
+    6L
+  )
+  sprintf(
+    "%s: %s of %s companies (%.1f%%), with %.1f%% of the people counted.",
+    ifelse(is.na(rows$year), "all years", as.character(rows$year)),
+    format(rows$companies_omitted, big.mark = ",", trim = TRUE),
+    format(rows$companies, big.mark = ",", trim = TRUE),
+    100 * rows$companies_omitted / rows$companies,
+    100 * rows$people_omitted / rows$people
+  )
+}
+
+# One line per year in which a company that was asked for is left out.
+privacy_omitted_asked <- function(omitted, cnpj) {
+  asked <- cnpj_clean(cnpj)
+  lines <- character()
+  for (i in seq_len(nrow(omitted))) {
+    hit <- intersect(asked, cnpj_clean(omitted$cnpj[[i]]))
+    if (length(hit)) {
+      lines <- c(
+        lines,
+        sprintf(
+          "%s: asked for and left out: %s.",
+          omitted$year[i],
+          paste(cnpj_format(hit), collapse = ", ")
+        )
+      )
+    }
+  }
+  lines
 }
 
 # `basis` ---------------------------------------------------------------

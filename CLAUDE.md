@@ -342,7 +342,10 @@ e as colunas de e-mail, telefone e fax (de pessoa e de empresa) e de
 endereço de rua de pessoa saem, e três tabelas do FRE ficam fora do
 espelho (`mirror: false` no YAML: `administrador_declaracao_genero`,
 `administrador_declaracao_raca`, `administrador_PCD`; só com
-`source = "cvm"`) (complementos de 2026-11-14)
+`source = "cvm"`), e as cinco tabelas de contagem de empregados por
+raça, gênero e deficiência vêm sem a companhia que tem grupo com menos
+de 10 pessoas ou unânime (aviso `cvmdata_warn_privacy_omitted`, atributo
+`omitted`, `privacy_omitted` no sidecar) (complementos de 2026-11-14)
 (`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
 `data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a única
 exceção à regra "se vem da CVM, fica como na CVM", e só no que o pacote
@@ -521,6 +524,10 @@ cvmdata_warn                           (pai genérico de warnings)
 │                                       o CSV só com cabeçalho desde esse
 │                                       ano; espelho devolve o último ano
 │                                       com dado, portal devolve zero linhas)
+├── cvmdata_warn_privacy_omitted       (tabela de contagem lida do espelho
+│                                       sem as companhias com grupo < 10
+│                                       pessoas ou unânime; números em
+│                                       attr(x, "omitted"))
 └── cvmdata_warn_stale_filing          (a tabela traz entrega anterior à
                                         última do índice submissao)
 ```
