@@ -270,10 +270,25 @@ edition_verify_digests <- function(plan) {
 
 # Files of the edition holding what the mirror does not redistribute
 # (`mirror_privacy_counts()`, util-privacy.R): "<dataset>/<rel>: columns",
-# with names and counts only, empty when every file is clean.
-edition_check_privacy <- function(plan) {
+# with names and counts only, empty when every file is clean. A file of a
+# table the mirror does not redistribute (`mirror: false` in its schema)
+# fails whatever it holds: a dated snapshot written before the rule still
+# lists it.
+edition_check_privacy <- function(plan, excluded = mirror_excluded_tables) {
   out <- character()
+  gone <- list()
   for (i in seq_len(nrow(plan))) {
+    ds <- plan$dataset[i]
+    if (is.null(gone[[ds]])) {
+      gone[[ds]] <- c("", excluded(ds))
+    }
+    if (edition_table_of(plan$rel[i]) %in% gone[[ds]]) {
+      out <- c(
+        out,
+        sprintf("%s/%s: table not redistributed", ds, plan$rel[i])
+      )
+      next
+    }
     left <- mirror_privacy_counts(
       as.data.frame(arrow::read_parquet(plan$path[i]))
     )
@@ -547,7 +562,13 @@ edition_readme <- function(
       "the year, as the integer column `ano_nascimento`; and contact",
       "data is left out: the columns of e-mail, telephone and fax, of",
       "people and of companies, and the street address of a person. The",
-      "address of the company stays. Names, CNPJs,",
+      "address of the company stays. Three tables of the FRE are not in",
+      "the deposit, although the dictionary describes them:",
+      "`administrador_declaracao_genero`, `administrador_declaracao_raca`",
+      "and `administrador_PCD` count the gender, race and disability",
+      "declarations of board members by body, and in a small or",
+      "unanimous body the count tells the declaration of each named",
+      "member. Names, CNPJs,",
       "biographies and the declarations the CVM requires stay as",
       "published, and the masked CPF plus the name still identify a",
       "person across tables. The complete values remain on the CVM",

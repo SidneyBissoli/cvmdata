@@ -49,7 +49,11 @@ and contact data are not redistributed: every CPF is masked as
 `***.456.789-**`, a foreign document in a CPF column becomes `***`,
 `data_nascimento` becomes the year, in `ano_nascimento`, and the columns
 of e-mail, telephone and fax (of people and of companies) and of the
-street address of a person are left out. Names and biographies stay as
+street address of a person are left out. Three tables of the FRE are
+not redistributed either: the counts of gender, race and disability
+declarations of board members by body (`administrador_declaracao_genero`,
+`administrador_declaracao_raca`, `administrador_PCD`), which in a small or
+unanimous body tell the declaration of each named member. Names and biographies stay as
 published. These are personal data under the Brazilian LGPD (Lei
 13.709/2018) wherever you read them from: their open publication does
 not free you from respecting the purpose of the disclosure.

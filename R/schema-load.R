@@ -131,6 +131,7 @@ validate_schema <- function(s, dataset, table) {
   validate_file_pattern_topology(s, dataset, table)
   validate_meta_status(s, dataset, table)
   validate_temporal_partitioning(s, dataset, table)
+  validate_mirror(s, dataset, table)
   validate_issuer_via(s, dataset, table)
   invisible(NULL)
 }
@@ -366,6 +367,34 @@ validate_last_year <- function(s, dataset, table, first_year) {
         "Schema for {.val {dataset}}/{.val {table}} declares an invalid",
         "{.field last_year}: must be an integer year not before",
         "{.field first_year} ({.val {first_year}}) nor {.field empty_from}."
+      )),
+      class = "cvmdata_error_internal"
+    )
+  }
+  invisible(NULL)
+}
+
+# `mirror` (optional, default TRUE): `false` marks a table the mirror and
+# the Zenodo editions do not redistribute; it is read with
+# `source = "cvm"` only. `mirror_reason` is then required: the message of
+# `check_mirrored()` quotes it.
+validate_mirror <- function(s, dataset, table) {
+  mirrored <- s$mirror
+  if (is.null(mirrored)) {
+    return(invisible(NULL))
+  }
+  reason <- s$mirror_reason
+  has_reason <- is.character(reason) && length(reason) == 1L && nzchar(reason)
+  ok <- is.logical(mirrored) &&
+    length(mirrored) == 1L &&
+    !is.na(mirrored) &&
+    (mirrored || has_reason)
+  if (!ok) {
+    cvmdata_abort(
+      c(paste(
+        "Schema for {.val {dataset}}/{.val {table}} declares an invalid",
+        "{.field mirror}: must be {.code true} or {.code false}, and",
+        "{.code false} needs a {.field mirror_reason}."
       )),
       class = "cvmdata_error_internal"
     )

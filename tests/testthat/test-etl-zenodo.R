@@ -797,3 +797,36 @@ test_that("the edition refuses a file with personal data, naming no value", {
   expect_no_match(found, "111.444", fixed = TRUE)
   expect_length(edition_check_privacy(plan[1L, ]), 0L)
 })
+
+test_that("the edition refuses a table the mirror does not redistribute", {
+  load_etl_zenodo()
+  dir <- withr::local_tempdir()
+  clean <- file.path(dir, "clean.parquet")
+  arrow::write_parquet(data.frame(quantidade_pardo = 1L), clean)
+  plan <- data.frame(
+    dataset = "fre",
+    rel = c(
+      "administrador_declaracao_raca/year=2025/part-0.parquet",
+      "empregado_PCD/year=2025/part-0.parquet"
+    ),
+    path = clean
+  )
+  found <- edition_check_privacy(plan)
+  expect_length(found, 1L)
+  expect_match(found, "administrador_declaracao_raca", fixed = TRUE)
+  expect_match(found, "not redistributed", fixed = TRUE)
+})
+
+test_that("the stages iterate the mirrored tables only", {
+  load_etl_zenodo()
+  gone <- c(
+    "administrador_PCD",
+    "administrador_declaracao_genero",
+    "administrador_declaracao_raca"
+  )
+  expect_setequal(mirror_excluded_tables("fre"), gone)
+  expect_false(any(gone %in% mirror_tables("fre")))
+  expect_true(all(gone %in% mirror_schema_tables("fre")))
+  expect_true("empregado_PCD" %in% mirror_tables("fre"))
+  expect_length(mirror_excluded_tables("dfp"), 0L)
+})

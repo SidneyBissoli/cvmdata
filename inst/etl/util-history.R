@@ -526,3 +526,12 @@ mirror_is_partition_asset <- function(name) {
 mirror_partition_table <- function(rel) {
   strsplit(rel, "/", fixed = TRUE)[[1L]][[1L]]
 }
+
+# The history map without the assets of tables the mirror no longer
+# carries. Returns list(map, dropped = the history paths removed), so the
+# publish can delete those assets from the release.
+mirror_drop_excluded_history <- function(map, excluded) {
+  tables <- vapply(names(map), mirror_partition_table, character(1L))
+  gone <- names(map)[tables %in% excluded]
+  list(map = map[setdiff(names(map), gone)], dropped = gone)
+}

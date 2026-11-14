@@ -108,7 +108,12 @@
 #' people and of companies alike, and the street address of a person
 #' (`*_resp` in `cad`; `fca` `dri` and `departamento_acionistas`; `fre`
 #' `auditor_responsavel`) are absent from the mirror. The address of the
-#' company stays. Names, CNPJs
+#' company stays. Three tables of the `fre` are not in the mirror at all:
+#' `administrador_declaracao_genero`, `administrador_declaracao_raca` and
+#' `administrador_PCD` count the gender, race and disability declarations
+#' of board members by body, and in a small or unanimous body the count
+#' tells the declaration of each named member; asking for them without
+#' `source = "cvm"` is an error that says so. Names, CNPJs
 #' and biographies stay as published; the masked CPF plus the name still
 #' follow a person across tables. `source = "cvm"` reads everything from
 #' the CVM untouched, under the same duty to respect the purpose of the
@@ -323,6 +328,7 @@ cvm_fetch <- function(
   modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
+  check_mirrored(schema, source)
   basis <- check_basis(basis, schema)
   reading <- check_reading(reading, schema)
   period <- check_period(year, from, to, schema)
@@ -916,6 +922,26 @@ check_published_years <- function(period, schema) {
   period <- check_first_year(period, schema)
   period <- check_last_year(period, schema)
   check_empty_from(period, schema)
+}
+
+# A table the mirror does not redistribute (`mirror: false` in the
+# schema): refused under `source = "mirror"` before any download, with the
+# reason of the schema and the way to read it.
+check_mirrored <- function(schema, source) {
+  if (!identical(source, "mirror") || !isFALSE(schema$mirror)) {
+    return(invisible(NULL))
+  }
+  cvmdata_abort(
+    c(
+      paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}} is not in the",
+        "mirror."
+      ),
+      "i" = "Not redistributed: {schema$mirror_reason}.",
+      "i" = "Read it from the CVM with {.code source = \"cvm\"}."
+    ),
+    class = "cvmdata_error_input"
+  )
 }
 
 check_last_year <- function(period, schema) {
