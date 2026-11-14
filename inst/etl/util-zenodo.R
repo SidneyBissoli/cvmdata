@@ -616,6 +616,17 @@ edition_readme <- function(
       "portal, and `cvm_fetch(source = \"cvm\")` reads them from there."
     ),
     "",
+    paste(
+      "The licence of this deposit does not license the personal data in",
+      "it. The ODbL governs the rights over the database; its section 2.4",
+      "says the contents \"may be covered by other rights, including",
+      "[...] data protection, privacy, or personality rights\", which the",
+      "licence \"does not cover\". What you do with the names and the",
+      "other personal data here is your own processing of personal data,",
+      "and you answer for it under the law that applies to you (in",
+      "Brazil, the LGPD, Lei 13.709/2018)."
+    ),
+    "",
     "### History",
     "",
     paste(

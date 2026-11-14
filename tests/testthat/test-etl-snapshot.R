@@ -320,3 +320,82 @@ test_that("a stale public copy is fetched again through the API", {
     )
   })
 })
+
+test_that("a table that left the mirror leaves the dated sidecar", {
+  load_etl_snapshot()
+  sidecar <- list(
+    hash = "h",
+    data = list(
+      "administrador_PCD/year=2024/part-0.parquet" = "a",
+      "x/part-0.parquet" = "b"
+    ),
+    files = list(
+      "administrador_PCD/year=2024/part-0.parquet" = list(
+        sha256 = "s",
+        size = 1L
+      ),
+      "x/part-0.parquet" = list(sha256 = "t", size = 2L)
+    ),
+    releases = list(
+      "administrador_PCD/year=2024/part-0.parquet" = "tag-1",
+      "x/part-0.parquet" = "tag-1"
+    )
+  )
+  res <- snapshot_drop_tables(sidecar, "administrador_PCD")
+  expect_identical(res$dropped, "administrador_PCD/year=2024/part-0.parquet")
+  expect_named(res$sidecar$data, "x/part-0.parquet")
+  expect_named(res$sidecar$files, "x/part-0.parquet")
+  expect_named(res$sidecar$releases, "x/part-0.parquet")
+  expect_identical(res$sidecar$hash, "h")
+  same <- snapshot_drop_tables(sidecar, character())
+  expect_identical(same$sidecar, sidecar)
+  expect_length(same$dropped, 0L)
+})
+
+test_that("a dated sidecar takes the omissions of the bytes it points to", {
+  load_etl_snapshot()
+  rel <- "empregado_PCD/year=2025/part-0.parquet"
+  sidecar <- list(
+    releases = stats::setNames(
+      list("tag-1", "tag-2"),
+      c(rel, "x/part-0.parquet")
+    ),
+    privacy_omitted = list(
+      list(table = "empregado_PCD", year = 2024L, companies_omitted = 1L)
+    )
+  )
+  report <- list(
+    min = 10L,
+    companies = 459L,
+    companies_omitted = 173L,
+    people = 100,
+    people_omitted = 5,
+    cnpj = list("11.222.333/0001-81")
+  )
+  key <- function(rel) gsub("/", "__", gsub("=", ".", rel, fixed = TRUE))
+  reports <- list("tag-1" = stats::setNames(list(report), key(rel)))
+  res <- snapshot_add_omitted(sidecar, reports, key)
+  expect_identical(res$added, 1L)
+  got <- res$sidecar$privacy_omitted
+  expect_length(got, 2L)
+  expect_identical(got[[2L]]$table, "empregado_PCD")
+  expect_identical(got[[2L]]$year, 2025L)
+  expect_identical(got[[2L]]$companies_omitted, 173L)
+  # one CNPJ stays an array in the JSON
+  expect_match(
+    as.character(jsonlite::toJSON(got[[2L]], auto_unbox = TRUE)),
+    '"cnpj":["11.222.333/0001-81"]',
+    fixed = TRUE
+  )
+  # the report of another release is not this sidecar's
+  other <- snapshot_add_omitted(
+    sidecar,
+    list("tag-9" = reports[["tag-1"]]),
+    key
+  )
+  expect_identical(other$added, 0L)
+  expect_identical(other$sidecar, sidecar)
+  # a second pass replaces, never duplicates
+  again <- snapshot_add_omitted(res$sidecar, reports, key)
+  expect_length(again$sidecar$privacy_omitted, 2L)
+})
