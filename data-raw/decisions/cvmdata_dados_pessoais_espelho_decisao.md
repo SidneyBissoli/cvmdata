@@ -4,6 +4,16 @@ Decisão do dono em 2026-11-08, depois de duas pesquisas (CPF e nome).
 Não é parecer jurídico; a pergunta aberta a advogado, se o dono quiser
 fazê-la, é a da seção "O que continua em aberto".
 
+> **Correção de 2026-11-14.** As fontes citadas nas seções "O que se
+> decidiu" e "Por quê" foram lidas uma a uma em 2026-11-14, e três
+> afirmações da versão de 08/11 não se sustentavam como escritas: o item
+> da norma da CVM estava errado, a finalidade da divulgação estava
+> descrita em palavras que a norma não usa, e dois precedentes do STF
+> estavam descritos com alcance maior do que a tese tem. O texto abaixo
+> foi corrigido no lugar; a seção "Fontes, como lidas em 2026-11-14" diz
+> o que cada fonte afirma. As decisões não mudaram por causa disso; a do
+> nome está em revisão pelo dono.
+
 ## O que se decidiu
 
 Igual no espelho (GitHub Releases) e nas edições do Zenodo:
@@ -13,7 +23,7 @@ Igual no espelho (GitHub Releases) e nas edições do Zenodo:
 | CPF, onde estiver | Máscara da Receita: `***.456.789-**` | Sobra para a finalidade: a máscara com o nome identifica a pessoa entre tabelas |
 | Documento estrangeiro em coluna de CPF | `***` | Mesmo motivo, sem máscara parcial possível |
 | `data_nascimento` | Só o ano, na coluna `ano_nascimento` (inteiro) | Nome + CPF + nascimento é o trio de confirmação de identidade; a pesquisa usa idade |
-| Nomes | Como a CVM publica | O nome é o conteúdo da divulgação (Res. CVM 80, itens 7.5 e 7.6) |
+| Nomes | Como a CVM publica | O nome é o primeiro campo que o formulário pede de cada administrador e conselheiro fiscal (Res. CVM 80, Anexo C, item 7.3, a; item 7.4 para os comitês), e a pesquisa precisa seguir a pessoa entre companhias |
 | Biografias e declarações | Como a CVM publica, salvo o número de CPF citado nelas | Divulgação exigida; editar o texto falsificaria o que ele afirma |
 | Contagens de raça, gênero e deficiência | Como a CVM publica | Por órgão, ninguém identificado |
 
@@ -25,21 +35,90 @@ o que o pacote **redistribui**: quem lê da CVM recebe da CVM.
 
 ## Por quê
 
-O depósito do Zenodo é público e permanente, e o depositante responde
-sozinho por ele (Termos do Zenodo). A CVM publica por dever legal, e o
-art. 7º, §§ 3º, 4º e 7º da LGPD permite tratar dado tornado público
-respeitando a finalidade da publicação; o art. 10, § 1º limita o legítimo
+O depósito do Zenodo é público e guardado enquanto o repositório
+existir, e o depositante responde sozinho por ele (termos de uso do
+Zenodo). A companhia entrega o formulário por dever regulatório e a CVM
+o publica; o art. 7º, § 3º, da LGPD manda tratar o dado de acesso
+público considerando "a finalidade, a boa-fé e o interesse público que
+justificaram sua disponibilização", e o § 7º admite nova finalidade com
+propósitos legítimos e específicos; o art. 10, § 1º limita o legítimo
 interesse aos dados estritamente necessários. O teste do necessário dá
 resultados opostos para o nome e para o CPF:
 
-- **Nome:** tirá-lo desfaz a finalidade (dizer ao mercado quem governa a
-  companhia). O padrão federal é nome completo com CPF descaracterizado
-  (Parecer 001/2021 e Despacho 093/2022 da CONJUR-CGU/AGU; dados abertos
-  do CNPJ da Receita). O STF apoia a publicação de nomes de quem presta
-  contas (Tema 483) e rejeita um direito geral ao esquecimento (Tema 786).
+- **Nome:** sem ele não se segue a pessoa entre companhias e anos, que é
+  o que a pesquisa sobre governança faz. A máscara do CPF sozinha não
+  serve (medição abaixo). Órgãos federais publicam nome completo com CPF
+  descaracterizado nos seus próprios dados (Receita, nos dados abertos do
+  CNPJ; CGU, na transparência ativa); nenhuma dessas fontes trata de um
+  particular que republica dado público, e os dois temas do STF citados
+  na versão de 08/11 têm outro objeto. Ver "Fontes, como lidas".
 - **CPF:** a máscara faz o mesmo serviço. Medido no FRE 2021–2025: 10.687
   CPFs distintos dão 10.561 máscaras; 123 máscaras são compartilhadas, e
   máscara + nome não junta nenhuma pessoa diferente.
+
+## Fontes, como lidas em 2026-11-14
+
+O que cada fonte diz, com as palavras dela. Nenhuma foi escrita para o
+caso do espelho: um particular que republica dado que a CVM publica.
+
+- **Resolução CVM 80, texto consolidado** (com alterações até a Res. CVM
+  231/25). O emissor "deve enviar à CVM" o formulário de referência (art.
+  22, II). As informações devem ser divulgadas "de forma abrangente,
+  equitativa e simultânea para todo o mercado" (art. 17) e "devem ser
+  úteis à avaliação dos valores mobiliários por ele emitidos" (art. 18).
+  O Anexo C, item 7.3, pede, de cada administrador e membro do conselho
+  fiscal: nome, data de nascimento, profissão, "CPF ou número do
+  passaporte", cargo, datas de eleição e posse, prazo do mandato, se foi
+  eleito pelo controlador, se é independente, mandatos consecutivos,
+  "principais experiências profissionais durante os últimos 5 anos" e a
+  descrição de condenação criminal, condenação administrativa da CVM, do
+  Banco Central ou da Susep, e condenação que o tenha suspendido ou
+  inabilitado, nos últimos 5 anos. O item 7.4 pede o mesmo dos membros de
+  comitês. Os itens 7.5 e 7.6, citados por engano na versão de 08/11,
+  tratam de relações de parentesco e de subordinação. A norma não
+  menciona a LGPD nem dados pessoais.
+- **Receita Federal, Notas Técnicas RFB/Cocad nº 47 e nº 86, de 2024, e
+  metadados do CNPJ.** Nos dados abertos do CNPJ a Receita publica o nome
+  do sócio ou administrador; o CPF é descaracterizado "por meio da
+  ocultação dos 3 (três) primeiros dígitos e dos 2 (dois) dígitos
+  verificadores"; e no lugar da data de nascimento vai um código de
+  "faixa etária" (0 a 12, 13 a 20, 21 a 30 anos e assim por diante). O
+  fundamento dado é o sigilo fiscal (art. 198 do CTN), não a LGPD. O
+  espelho guarda o ano de nascimento, que é mais fino que a faixa da
+  Receita. A Receita publica telefone e e-mail do estabelecimento.
+- **Parecer n. 00001/2021/CONJUR-CGU/CGU/AGU, aprovado com complementos
+  pelo Despacho n. 00093/2022.** Trata da transparência ativa da
+  Administração Pública (contratos, convênios, atos de servidores).
+  Conclui que "somente devem ser divulgados os dados pessoais que sejam
+  imprescindíveis ao interesse público"; que os preâmbulos de contratos
+  devem limitar-se "aos nomes das partes e seus respectivos CPF/CNPJ e
+  endereços"; e que o CPF do representante legal "deve ser divulgado de
+  forma descaracterizada, de modo a evitar, ao mesmo tempo, os homônimos
+  e o uso desautorizado de tal dado por terceiros". O despacho diz que a
+  ocultação dos três primeiros dígitos e dos dois verificadores
+  "enquadra-se no conceito de técnica de anonimização do dado".
+- **STF, Tema 483** (ARE 652777). Tese: "É legítima a publicação,
+  inclusive em sítio eletrônico mantido pela Administração Pública, dos
+  nomes dos seus servidores e do valor dos correspondentes vencimentos e
+  vantagens pecuniárias." Trata de servidores públicos, não de
+  administradores de companhias.
+- **STF, Tema 786** (RE 1010606). Tese: "É incompatível com a
+  Constituição a ideia de um direito ao esquecimento, assim entendido
+  como o poder de obstar, em razão da passagem do tempo, a divulgação de
+  fatos ou dados verídicos e licitamente obtidos e publicados em meios de
+  comunicação social analógicos ou digitais. Eventuais excessos ou abusos
+  no exercício da liberdade de expressão e de informação devem ser
+  analisados caso a caso [...]". Trata de meios de comunicação social.
+- **Zenodo, termos de uso (v1.3) e políticas gerais.** "The uploader is
+  exclusively responsible for the content that they upload to Zenodo" e
+  deve garantir que ele cumpre as leis de privacidade e proteção de
+  dados. Os itens são guardados "for the lifetime of the repository"; a
+  retirada é "an exceptional action", fica uma página no lugar e "the DOI
+  and the URL of the original object are retained".
+- **LGPD, art. 7º, § 4º**, citado na versão de 08/11 junto com os §§ 3º e
+  7º: trata de dados "tornados manifestamente públicos pelo titular".
+  Aqui quem publica é a companhia, por dever regulatório, e não o
+  titular; o parágrafo que rege o caso é o § 3º, com o § 7º.
 
 ## O que a medição acrescentou (2026-11-08)
 
