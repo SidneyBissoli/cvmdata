@@ -41,7 +41,11 @@ The mirror lives in two places, both open to anybody:
   deposited with a permanent identifier (DOI), so that a study can cite
   exactly the data it used.
 
-Both services store the files outside Brazil.
+Both services store files outside Brazil. Zenodo states that files are
+kept in CERN data centres, "primarily Geneva, with replicas in Budapest".
+GitHub states that it stores and processes data "in a variety of
+locations, including your local region, the United States". Read in the
+policies of both services on 14 November 2026.
 
 ## Which personal data the mirror holds
 
@@ -81,9 +85,20 @@ only.
 
 Research, teaching and public scrutiny of the governance of Brazilian
 listed companies: who runs and oversees them, for how long, with what
-background and with which ties. It is the purpose for which the law has
-companies disclose this information. The mirror is not used for
-decisions about people, advertising, profiling or the sale of data.
+background and with which ties.
+
+That is not the original purpose of the disclosure. The CVM rule has
+companies disclose information "useful for the assessment of the
+securities" they issue, "to the whole market" (Resolução CVM 80, arts.
+17 and 18; our translation), and asks in the reference form for the name,
+birth date, profession, CPF, position, terms, professional experience
+and convictions of each director and fiscal council member (Annex C,
+item 7.3). The study of governance is a new purpose, which the person
+responsible understands to be compatible with the original one, under
+art. 7, § 7, of the LGPD.
+
+The mirror is not used for decisions about people, advertising,
+profiling or the sale of data.
 
 ## On what ground
 
@@ -99,13 +114,17 @@ in
 ## For how long
 
 - **Current copy:** rebuilt every week from the CVM portal. What the CVM
-  corrects or withdraws changes in the current copy within about nine
-  days.
+  corrects or withdraws changes in the current copy at the following
+  weekly refresh.
 - **Dated snapshots:** keep the mirror as it was on each date, so that
   published results can be reproduced. They have no expiry.
-- **Zenodo editions:** permanent by nature. Withdrawing a record depends
-  on a request to Zenodo; the person responsible commits to making it
-  when a data subject's request is well founded.
+- **Zenodo editions:** Zenodo retains items "for the lifetime of the
+  repository". After 30 days from publication it deletes a record only
+  "in duly justified cases, such as copyright infringement or exposure
+  of personal data", on request to its support; a page with the citation
+  stays in its place (read in the Zenodo help and policies on 14 November
+  2026). The person responsible commits to making that request when a
+  data subject's request is well founded.
 
 ## Your rights and how to exercise them
 

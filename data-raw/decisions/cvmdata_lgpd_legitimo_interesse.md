@@ -1,5 +1,14 @@
 # Teste de legítimo interesse e registro do tratamento — espelho do cvmdata
 
+> **RASCUNHO, não vale como registro.** Será reescrito no modelo do Anexo
+> II do Guia Orientativo da ANPD sobre legítimo interesse (versão 1.0,
+> fevereiro de 2024, lido inteiro em 2026-11-14), depois de resolvidos os
+> pontos abertos da seção 4. Já se sabe que a seção 2.1 está errada ao
+> dizer que o espelho "serve à mesma finalidade": a Resolução CVM 80
+> (arts. 17 e 18, lidos em 2026-11-14) dá como finalidade da divulgação a
+> avaliação dos valores mobiliários pelo mercado; a pesquisa sobre
+> governança é finalidade nova, a ser justificada pelo art. 7º, § 7º.
+
 Registro de 2026-11-14, feito pelo responsável pelo espelho com apoio do
 assistente. Não é parecer jurídico. Cada artigo citado foi lido no texto
 da Lei 13.709/2018 (LGPD) publicado no Planalto em 2026-11-14; o que não

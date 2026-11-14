@@ -48,7 +48,7 @@ aberto 1 do teste de legítimo interesse.
 |---|---|
 | Confirmação de tratamento (art. 18, I) | responder sim ou não, com as tabelas e os anos |
 | Acesso (art. 18, II) | enviar as linhas do espelho sobre a pessoa, a origem (o formulário e a companhia), a finalidade e os critérios; dizer o que o espelho não guarda |
-| Correção (art. 18, III) | o dado é cópia do formulário. Explicar que a correção se faz na origem, por reapresentação da companhia à CVM, e que a cópia corrente acompanha em até cerca de nove dias. Se o erro for do espelho (a conversão), corrigir no ETL e republicar |
+| Correção (art. 18, III) | o dado é cópia do formulário. Explicar que a correção se faz na origem, por reapresentação da companhia à CVM, e que a cópia corrente acompanha na atualização semanal seguinte. Se o erro for do espelho (a conversão), corrigir no ETL e republicar |
 | Eliminação, anonimização ou bloqueio de dado desnecessário, excessivo ou irregular (art. 18, IV) | avaliar se o dado é necessário à finalidade. Se não for, retirar para todos (regra nova no ETL), não só para quem pediu |
 | Oposição (art. 18, § 2º) | avaliar o motivo contra o teste de legítimo interesse. Se proceder, retirar a pessoa conforme a seção seguinte |
 | Com quem os dados são compartilhados (art. 18, VII) | o espelho é aberto: qualquer pessoa pode tê-lo baixado. Informar os dois lugares em que é publicado |
@@ -68,10 +68,14 @@ titular com a sua data:
    volta.
 3. **Edições no Zenodo:** pedir ao suporte do Zenodo a retirada do
    registro por exposição de dado pessoal e depositar uma edição
-   corrigida. Registrado pelo responsável em 2026-11-08, a partir da
-   ajuda do Zenodo: o dono apaga o próprio registro em até 30 dias da
-   publicação; depois disso, só por pedido justificado ao suporte, e a
-   página de citação permanece.
+   corrigida. Lido na ajuda do Zenodo ("Manage records", seção "Delete
+   records") e nas políticas gerais em 2026-11-14: o dono apaga o próprio
+   registro "within 30 days after publication"; fora desse prazo, "we
+   only allow deletion in duly justified cases, such as copyright
+   infringement or exposure of personal data", por pedido ao suporte, e
+   "requests without a valid justification will be automatically
+   declined"; o registro retirado dá lugar a uma página com a citação, e
+   "the DOI and the URL of the original object are retained".
 4. **O que não se alcança:** cópias já baixadas por terceiros e a origem,
    que é o portal da CVM. Dizer isso ao titular e indicar que o pedido
    sobre a origem se faz à companhia ou à CVM.

@@ -39,7 +39,11 @@ O espelho existe em dois lugares, ambos abertos a qualquer pessoa:
   depositadas com um identificador permanente (DOI), para que um estudo
   possa citar exatamente o dado que usou.
 
-Os dois serviços guardam os arquivos fora do Brasil.
+Os dois serviços guardam arquivos fora do Brasil. O Zenodo informa que
+os arquivos ficam nos centros de dados do CERN, "primarily Geneva, with
+replicas in Budapest". O GitHub informa que armazena e processa dados
+"in a variety of locations, including your local region, the United
+States". Lido nas políticas dos dois serviços em 14/11/2026.
 
 ## Quais dados pessoais o espelho guarda
 
@@ -78,10 +82,20 @@ recebe o que a CVM publica. Este aviso trata só do espelho.
 
 Para pesquisa, ensino e acompanhamento público da governança das
 companhias abertas brasileiras: quem as administra e fiscaliza, por
-quanto tempo, com que formação e com quais vínculos. É a mesma finalidade
-pela qual a lei manda as companhias divulgarem essas informações. O
-espelho não é usado para decisões sobre pessoas, publicidade, formação de
-perfis nem venda de dados.
+quanto tempo, com que formação e com quais vínculos.
+
+Essa não é a finalidade original da divulgação. A norma da CVM manda as
+companhias divulgarem informações "úteis à avaliação dos valores
+mobiliários" que emitem, "para todo o mercado" (Resolução CVM 80, arts.
+17 e 18), e pede, no formulário de referência, o nome, a data de
+nascimento, a profissão, o CPF, o cargo, os mandatos, a experiência
+profissional e as condenações de cada administrador e conselheiro fiscal
+(Anexo C, item 7.3). O estudo da governança é uma finalidade nova, que o
+responsável entende compatível com a original, nos termos do art. 7º,
+§ 7º, da LGPD.
+
+O espelho não é usado para decisões sobre pessoas, publicidade, formação
+de perfis nem venda de dados.
 
 ## Com que fundamento
 
@@ -96,14 +110,18 @@ sustenta essa escolha está registrado em
 ## Por quanto tempo
 
 - **Cópia corrente:** é refeita toda semana a partir do portal da CVM.
-  O que a CVM corrige ou retira muda na cópia corrente em até cerca de
-  nove dias.
+  O que a CVM corrige ou retira muda na cópia corrente na atualização
+  semanal seguinte.
 - **Fotos datadas:** guardam o espelho como estava em cada data, para
   que resultados publicados possam ser refeitos. Não têm prazo de
   expiração.
-- **Edições no Zenodo:** são permanentes por natureza. A retirada de um
-  registro depende de pedido ao Zenodo; o responsável se compromete a
-  fazê-lo quando um pedido de titular proceder.
+- **Edições no Zenodo:** o Zenodo guarda os itens "for the lifetime of
+  the repository". Passados 30 dias da publicação, só aceita apagar um
+  registro "in duly justified cases, such as copyright infringement or
+  exposure of personal data", por pedido ao suporte; no lugar fica uma
+  página com a citação (lido na ajuda e nas políticas do Zenodo em
+  14/11/2026). O responsável se compromete a fazer esse pedido quando um
+  pedido de titular proceder.
 
 ## Seus direitos e como exercê-los
 
