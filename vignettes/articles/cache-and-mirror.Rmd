@@ -107,7 +107,9 @@ publishes full CPFs and birth dates of the people who run and control
 listed companies; a mirror with permanent editions keeps what research
 needs. From the mirror, every CPF reads `***.456.789-**`, a foreign
 document in a CPF column reads `***`, and `data_nascimento` is the year,
-in `ano_nascimento`. Names and biographies are as published, and the
+in `ano_nascimento`. Contact columns are absent: e-mail, telephone and
+fax of people and of companies, and the street address of a person (the
+address of the company is there). Names and biographies are as published, and the
 masked CPF plus the name still follow a person across tables.
 `source = "cvm"` returns what the CVM publishes.
 
