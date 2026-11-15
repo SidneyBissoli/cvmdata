@@ -718,7 +718,13 @@ licence_notes <- paste0(
   "The parquet files in this release are a derivative database of ",
   "that portal, converted by the cvmdata ETL, and are redistributed ",
   "under the same licence. Attribution and terms: ",
-  "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md"
+  "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md",
+  "\n\n**Personal data.** The mirror holds data about companies, not ",
+  "about people. What it leaves out, who answers for it and how a ",
+  "person mentioned in a text can ask for the name to be removed: ",
+  "https://github.com/SidneyBissoli/cvmdata/blob/main/PRIVACY.md ",
+  "(em portugues: ",
+  "https://github.com/SidneyBissoli/cvmdata/blob/main/PRIVACY.pt-BR.md)"
 )
 updated_at <- format(Sys.time(), "%Y-%m-%d %H:%M:%S UTC", tz = "UTC")
 # What the data is, for whoever downloads the assets without the package

@@ -226,6 +226,12 @@ what the licence asks of you when you redistribute the data, are in
 [`DATA-LICENSE.md`](DATA-LICENSE.md). The package **code** is MIT
 licensed.
 
+The mirror holds data about companies, not about people; the tables
+that describe people are read straight from the CVM. What the mirror
+leaves out, who answers for it and how a person mentioned in a text can
+ask for the name to be removed are in the privacy notice,
+[`PRIVACY.md`](PRIVACY.md) ([em português](PRIVACY.pt-BR.md)).
+
 ## Related work
 
 For exchange-side market data (prices, volumes, tickers, indices,
