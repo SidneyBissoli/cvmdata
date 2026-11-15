@@ -719,9 +719,9 @@ licence_notes <- paste0(
   "that portal, converted by the cvmdata ETL, and are redistributed ",
   "under the same licence. Attribution and terms: ",
   "https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md",
-  "\n\n**Personal data.** These files name people. What the mirror ",
-  "holds about them, what it leaves out, who answers for it and how a ",
-  "person named in the data can ask for a change: ",
+  "\n\n**Personal data.** The mirror holds data about companies, not ",
+  "about people. What it leaves out, who answers for it and how a ",
+  "person mentioned in a text can ask for the name to be removed: ",
   "https://github.com/SidneyBissoli/cvmdata/blob/main/PRIVACY.md ",
   "(em portugues: ",
   "https://github.com/SidneyBissoli/cvmdata/blob/main/PRIVACY.pt-BR.md)"
