@@ -191,8 +191,34 @@ Os arquivos ficam fora do Brasil (políticas dos dois serviços lidas em
 2026-11-14): o Zenodo informa que os arquivos ficam nos centros de dados
 do CERN, "primarily Geneva, with replicas in Budapest"; o GitHub informa
 que armazena e processa dados "in a variety of locations, including your
-local region, the United States". O enquadramento disso nas regras de
-transferência internacional está em "Pendências".
+local region, the United States".
+
+O que as regras dizem (lidas em 2026-11-14):
+
+- LGPD, art. 33: a transferência internacional "somente é permitida"
+  nos casos que o artigo lista, entre eles país ou organismo com
+  proteção adequada (I) e cláusulas-padrão contratuais (II, b).
+- Regulamento de Transferência Internacional de Dados (Resolução CD/ANPD
+  nº 19/2024, texto do DOU): transferência é a operação em que "um
+  agente de tratamento transmite, compartilha ou disponibiliza acesso a
+  dados pessoais a outro agente de tratamento" (art. 3º, III); cabe ao
+  controlador verificar se a operação "caracteriza transferência
+  internacional de dados" e se está amparada em "mecanismo de
+  transferência internacional válidos" (art. 4º); a validade das
+  cláusulas-padrão "pressupõe a adoção integral e sem alteração do
+  texto" do Anexo II, "mediante instrumento contratual firmado entre o
+  exportador e o importador" (art. 16).
+- Página da ANPD sobre transferência internacional: "Até o momento, a
+  União Europeia foi considerada como organismo internacional adequado"
+  (Resolução nº 32/2026), e nenhuma cláusula equivalente, cláusula
+  específica ou norma corporativa global foi aprovada.
+
+Leitura do responsável, ainda sem conclusão: Budapeste está na União
+Europeia; Genebra e os Estados Unidos não estão cobertos por decisão de
+adequação. Não se sabe se guardar os arquivos no GitHub e no Zenodo
+caracteriza transferência no sentido do regulamento, nem se algum dos
+dois oferece contrato com as cláusulas-padrão brasileiras. Ver
+"Pendências".
 
 ### x. Armazenamento, retenção e descarte
 
@@ -268,7 +294,10 @@ abaixo.
 2. Fotos datadas: reparo depois dessa publicação.
 3. Histórico do git com quatro CPFs reais e registro de teste no Zenodo
    sandbox.
-4. Transferência internacional: ler o regulamento da ANPD e enquadrar.
+4. Transferência internacional: regulamento lido; falta saber se a
+   hospedagem no GitHub e no Zenodo é transferência e, se for, com que
+   mecanismo (ler os contratos dos dois serviços; é a pergunta que
+   mais pede advogado).
 5. Classificação do GitHub e do Zenodo como operadores.
 6. Texto livre fora das biografias: 78 linhas não examinadas.
 7. Ano de nascimento ou faixa etária: decisão em aberto.
@@ -303,13 +332,21 @@ a ANPD publicar regulamento sobre o RIPD.
 - Resolução CVM 80, texto consolidado — 2026-11-14.
 - Receita Federal, Notas Técnicas RFB/Cocad nº 47 e nº 86, de 2024 —
   2026-11-14.
+- Resolução CD/ANPD nº 19/2024 (Regulamento de Transferência
+  Internacional de Dados), texto do DOU, arts. 1º a 9º, 15 e 16 —
+  2026-11-14. Retificação posterior não conferida.
+- ANPD, página "Transferência Internacional de Dados" — 2026-11-14.
+- LGPD, art. 33 — 2026-11-14.
 - Zenodo, ajuda "Manage records", políticas gerais e termos de uso v1.3
   — 2026-11-14.
 - GitHub, declaração de privacidade — 2026-11-14.
 
 ## Não lido
 
-- Regulamento da ANPD sobre transferência internacional de dados.
+- Resolução CD/ANPD nº 32/2026 (adequação da União Europeia), citada
+  só como a página da ANPD a cita.
+- Contrato de tratamento de dados do GitHub.
+- Regras do Zenodo e do CERN sobre transferência de dados.
 - Resolução CD/ANPD nº 18/2024.
 - LGPD, arts. 5º, VII, 38 e 55-J, no texto da lei (citados aqui só como
   a página da ANPD os cita).
