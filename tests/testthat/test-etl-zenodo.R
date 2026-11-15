@@ -862,3 +862,22 @@ test_that("the edition carries what the group rule left out, counts only", {
   expect_null(edition_omitted("dfp", NULL))
   expect_null(edition_omitted("dfp", list()))
 })
+
+test_that("the ETL refuses an installed package with other schemas", {
+  load_etl_zenodo()
+  installed <- withr::local_tempdir()
+  source <- withr::local_tempdir()
+  writeLines("mirror: false", file.path(installed, "a.yaml"))
+  writeLines("mirror: false", file.path(source, "a.yaml"))
+  expect_true(mirror_check_installed(installed, source))
+  # no source tree at the working directory: nothing to compare
+  expect_true(mirror_check_installed(installed, file.path(source, "absent")))
+  # the same directory (devtools::load_all())
+  expect_true(mirror_check_installed(source, source))
+  # the source tree moved on and the package was not reinstalled
+  writeLines("mirror: true", file.path(source, "a.yaml"))
+  expect_error(mirror_check_installed(installed, source), "reinstall")
+  writeLines("mirror: false", file.path(source, "a.yaml"))
+  writeLines("x: 1", file.path(source, "b.yaml"))
+  expect_error(mirror_check_installed(installed, source), "reinstall")
+})
