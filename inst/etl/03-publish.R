@@ -80,6 +80,7 @@ args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
 dataset <- NULL
 dry_run <- FALSE
+allow_unsuppress <- FALSE
 i <- 1L
 while (i <= length(args)) {
   if (args[i] == "--group") {
@@ -94,6 +95,11 @@ while (i <= length(args)) {
   }
   if (args[i] == "--dry-run") {
     dry_run <- TRUE
+    i <- i + 1L
+    next
+  }
+  if (args[i] == "--allow-unsuppress") {
+    allow_unsuppress <- TRUE
     i <- i + 1L
     next
   }
@@ -194,6 +200,7 @@ prev_hash_file <- download_release_asset(
   download_dir
 )
 prev <- NULL
+suppressed_count <- nrow(mirror_suppressed())
 if (!is.null(prev_hash_file)) {
   prev <- tryCatch(
     jsonlite::read_json(prev_hash_file),
@@ -202,7 +209,30 @@ if (!is.null(prev_hash_file)) {
   unchanged <- !is.null(prev) &&
     identical(prev$hash, source_hash$hash) &&
     !is.na(source_hash$hash)
-  if (unchanged && is.null(prev$releases)) {
+  # People who asked to leave (util-privacy.R). A list shorter than the one
+  # of the previous release would put somebody back: a secret that was
+  # emptied or lost must stop the run, not undo a request. Counts only.
+  was_suppressed <- as.integer(prev$privacy_suppressed %||% 0L)
+  if (suppressed_count < was_suppressed && !allow_unsuppress) {
+    stop(
+      sprintf(
+        paste(
+          "the suppression list has %d entr(ies) and the previous release",
+          "was published with %d: check CVMDATA_MIRROR_SUPPRESSED, or pass",
+          "--allow-unsuppress if an entry was removed on purpose"
+        ),
+        suppressed_count,
+        was_suppressed
+      ),
+      call. = FALSE
+    )
+  }
+  if (unchanged && suppressed_count != was_suppressed) {
+    message(paste(
+      "[03-publish] content unchanged but the suppression list changed;",
+      "publishing to pass the history assets through it"
+    ))
+  } else if (unchanged && is.null(prev$releases)) {
     message(paste(
       "[03-publish] content unchanged but the sidecar predates the dated",
       "snapshots; publishing to create the first one"
@@ -353,14 +383,17 @@ prune_history <- function(prev, source_hash, changed, map) {
   list(map = map, files = files)
 }
 
-# The run that follows a change of `mirror_privacy_rule`: every history
-# asset of the release goes through the rule. Same shape as the prune:
+# The run that follows a change of `mirror_privacy_rule` or of the list
+# of people who asked to leave: every history asset of the release goes
+# through the rule. Same shape as the prune:
 # returns list(map, files), and `written` holds the assets the prune has
 # already rewritten this run, read from disk. Rows are never dropped.
 # Nothing to do when the previous release is under the current rule.
 scrub_history <- function(prev, map, written) {
   files <- character()
-  if (identical(prev$privacy_rule %||% "", mirror_privacy_rule)) {
+  same_rule <- identical(prev$privacy_rule %||% "", mirror_privacy_rule)
+  same_list <- as.integer(prev$privacy_suppressed %||% 0L) == suppressed_count
+  if (same_rule && same_list) {
     return(list(map = map, files = files))
   }
   for (hist_rel in names(map)) {
@@ -504,6 +537,8 @@ build_history <- function(prev, source_hash) {
 source_hash$reader <- mirror_reader_id()
 source_hash$history_rule <- mirror_history_rule
 source_hash$privacy_rule <- mirror_privacy_rule
+# how many people asked to leave; the list itself is never published
+source_hash$privacy_suppressed <- suppressed_count
 reader_changed <- !is.null(prev) &&
   !identical(prev$reader %||% "", source_hash$reader)
 if (reader_changed) {

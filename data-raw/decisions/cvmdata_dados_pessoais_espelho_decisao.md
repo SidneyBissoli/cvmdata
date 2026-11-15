@@ -378,3 +378,46 @@ espelho sem cruzar com a origem; custaria limpar ou tirar as biografias e
 tratar 14 tabelas; tiraria a ligação com outras bases pelo nome; e não
 mudaria a situação perante a lei. Não foi medido quanto da pesquisa sobre
 governança depende dessa ligação.
+
+## Complemento de 2026-11-14: quem pede para sair
+
+Duas decisões do dono no mesmo dia.
+
+**Todo pedido de quem comprovar ser a pessoa (ou seu representante) é
+atendido**, sem julgar o motivo. A LGPD, art. 18, § 2º (lido em
+2026-11-14), dá o direito de oposição "em caso de descumprimento ao
+disposto nesta Lei"; o responsável atende além disso, porque a retirada
+custa pouco ao espelho (ver abaixo) e porque assim não lhe cabe decidir
+sozinho, em 15 dias, se um motivo procede.
+
+**A linha fica, os dados da pessoa saem, o nome vira um rótulo.**
+
+| Campo | O que acontece |
+|---|---|
+| Nome | vira `[omitido a pedido do titular]` |
+| CPF mascarado, ano de nascimento, profissão, biografia, nacionalidade e UF do acionista, município do responsável | ficam vazios |
+| Companhia, órgão, cargo, datas de mandato | ficam |
+| Percentuais de participação acionária | ficam, e a soma continua fechando |
+| Menção ao nome em texto de outra linha do mesmo conjunto | vira o rótulo |
+
+Apagar a linha erraria a contagem de um conselho em uma pessoa e a soma
+de uma composição acionária. O limite: quem cruzar com o arquivo da CVM
+descobre quem é, pelo cargo e pela companhia. O espelho deixa de ser fonte
+do nome; não o esconde do mundo.
+
+**Como funciona.** `mirror_suppress_people()` em `util-privacy.R`, chamada
+por `mirror_apply_privacy()`, então vale no estágio 02, no histórico, na
+comparação com a release anterior, nas guardas do 02b e do 06 e nos
+reparos das fotos datadas. A lista é dado pessoal e não entra no
+repositório: vem da variável `CVMDATA_MIRROR_SUPPRESSED` (segredo do
+repositório nos workflows), uma pessoa por linha, `nome completo;CPF`, o
+CPF opcional. Com CPF, um homônimo de outro documento não é tocado. Nome
+de uma palavra só é recusado. O sidecar leva `privacy_suppressed`, só a
+contagem; rodada com lista menor que a da release anterior para em vez de
+devolver alguém (`--allow-unsuppress` quando for de propósito), e lista
+que mudou força a publicação para passar o histórico pela regra. Nada
+disso grava um nome em log.
+
+**O que não está feito.** Fotos datadas e edições do Zenodo já publicadas
+não mudam sozinhas: pedem os reparos (`repair-personal-data.R`,
+`repair-snapshot-digests.R`) e, no Zenodo, pedido ao suporte.
