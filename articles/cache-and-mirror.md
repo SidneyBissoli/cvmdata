@@ -170,6 +170,23 @@ evicts (with `what` of `"all"`, `"raw"`, or `"parquet"`).
 [`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
 `#> [1] "mirror"`
 
+### Editions with a DOI
+
+A dated snapshot lives on GitHub and can be pinned, but it has no
+permanent identifier. The whole mirror is deposited on Zenodo in
+editions (the plan is four a year, on the first weekly round of January,
+April, July and October): one `.tar` of parquet files per dataset, the
+history of superseded filings, the dictionary, the code lists, the
+licence, the privacy notice and the checksums. Each edition has its own
+DOI, and
+[10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440)
+resolves to the latest. The first one is of 2026-11-15
+([10.5281/zenodo.24260441](https://doi.org/10.5281/zenodo.24260441)).
+The package does not read from Zenodo: to work with the data of an
+edition, pin its date with
+[`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md),
+or open the parquet files of the deposit with any parquet reader.
+
 ## Mirror pipeline validation
 
 Every weekly mirror publish runs a hybrid validation step

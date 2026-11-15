@@ -20,3 +20,18 @@ package version 0.2.0.9000, <https://sidneybissoli.github.io/cvmdata/>.
   note = {R package version 0.2.0.9000},\
   url = {https://sidneybissoli.github.io/cvmdata/},\
 }
+
+Bissoli S (2026). “cvmdata mirror: open data of the Brazilian securities
+regulator (CVM) in parquet.”
+[doi:10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440).
+Data set, in editions. This DOI resolves to the latest edition; cite the
+DOI of the edition you used.
+
+@Misc{,\
+  title = {cvmdata mirror: open data of the Brazilian securities regulator (CVM) in parquet},\
+  author = {Sidney da Silva Pereira Bissoli},\
+  year = {2026},\
+  publisher = {Zenodo},\
+  doi = {10.5281/zenodo.24260440},\
+  note = {Data set, in editions. This DOI resolves to the latest edition; cite the DOI of the edition you used.},\
+}

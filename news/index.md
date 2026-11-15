@@ -2,6 +2,14 @@
 
 ## cvmdata 0.2.0.9000 (in development)
 
+### New
+
+- The data of the mirror can be cited: the first Zenodo edition was
+  published on 2026-11-15, DOI `10.5281/zenodo.24260441`;
+  `10.5281/zenodo.24260440` resolves to the latest edition.
+  `citation("cvmdata")` now gives the data as well as the package, and
+  the README says how to cite.
+
 ### ⚠️ Breaking changes
 
 - **The mirror and the Zenodo editions carry data about companies, not

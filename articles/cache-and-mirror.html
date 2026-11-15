@@ -292,6 +292,21 @@ and timestamps; <code><a href="../reference/cvm_cache_clear.html">cvm_cache_clea
 <span><span class="fu"><a href="../reference/cvm_source_get.html">cvm_source_get</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "mirror"</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="editions-with-a-doi">Editions with a DOI<a class="anchor" aria-label="anchor" href="#editions-with-a-doi"></a>
+</h3>
+<p>A dated snapshot lives on GitHub and can be pinned, but it has no
+permanent identifier. The whole mirror is deposited on Zenodo in
+editions (the plan is four a year, on the first weekly round of January,
+April, July and October): one <code>.tar</code> of parquet files per
+dataset, the history of superseded filings, the dictionary, the code
+lists, the licence, the privacy notice and the checksums. Each edition
+has its own DOI, and <a href="https://doi.org/10.5281/zenodo.24260440" class="external-link">10.5281/zenodo.24260440</a>
+resolves to the latest. The first one is of 2026-11-15 (<a href="https://doi.org/10.5281/zenodo.24260441" class="external-link">10.5281/zenodo.24260441</a>).
+The package does not read from Zenodo: to work with the data of an
+edition, pin its date with <code><a href="../reference/cvm_release_set.html">cvm_release_set()</a></code>, or open the
+parquet files of the deposit with any parquet reader.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="mirror-pipeline-validation">Mirror pipeline validation<a class="anchor" aria-label="anchor" href="#mirror-pipeline-validation"></a>

@@ -307,6 +307,11 @@ varchar
 <p>Every returned tibble carries provenance attributes (<code>source</code>, <code>fetched_at</code>, <code>group</code>, <code>dataset</code>, <code>table</code>, <code>package_version</code>, <code>release</code>) so a downstream caller can audit which backend, and which mirror release, served the data.</p>
 <p><strong>Licence of the data.</strong> The CVM publishes every dataset covered by <code>cvmdata</code> under the <a href="https://opendatacommons.org/licenses/odbl/1-0/" class="external-link">Open Data Commons Open Database License (ODbL) v1.0</a>. The mirror is a derivative database in the terms of that licence and is redistributed under the ODbL as well. Attribution for the data: <em>“Contains data from the Comissão de Valores Mobiliários (CVM) Open Data Portal, <a href="https://dados.cvm.gov.br/" class="external-link uri">https://dados.cvm.gov.br/</a>, under the ODbL v1.0.”</em> Details, including what the licence asks of you when you redistribute the data, are in <a href="DATA-LICENSE.html"><code>DATA-LICENSE.md</code></a>. The package <strong>code</strong> is MIT licensed.</p>
 <p>The mirror holds data about companies, not about people; the tables that describe people are read straight from the CVM. What the mirror leaves out, who answers for it and how a person mentioned in a text can ask for the name to be removed are in the privacy notice, <a href="PRIVACY.html"><code>PRIVACY.md</code></a> (<a href="PRIVACY.pt-BR.html">em português</a>).</p>
+<div class="section level3">
+<h3 id="citing-the-data">Citing the data<a class="anchor" aria-label="anchor" href="#citing-the-data"></a>
+</h3>
+<p>The mirror is deposited on Zenodo in editions with a DOI (the plan is four a year), so that a study can cite the exact data it used and the data outlives the GitHub releases. Cite the edition you used; the DOI <a href="https://doi.org/10.5281/zenodo.24260440" class="external-link">10.5281/zenodo.24260440</a> always resolves to the latest one. The first edition is of 2026-11-15 (<a href="https://doi.org/10.5281/zenodo.24260441" class="external-link">10.5281/zenodo.24260441</a>). <code>citation("cvmdata")</code> gives both the package and the data.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="related-work">Related work<a class="anchor" aria-label="anchor" href="#related-work"></a>
