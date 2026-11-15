@@ -11,3 +11,25 @@ bibentry(
   note     = sprintf("R package version %s", meta$Version),
   url      = "https://sidneybissoli.github.io/cvmdata/"
 )
+
+bibentry(
+  bibtype   = "Misc",
+  title     = paste(
+    "cvmdata mirror: open data of the Brazilian securities regulator",
+    "(CVM) in parquet"
+  ),
+  author    = person(
+    given   = "Sidney da Silva Pereira",
+    family  = "Bissoli",
+    comment = c(ORCID = "0009-0001-0442-3700")
+  ),
+  year      = "2026",
+  publisher = "Zenodo",
+  doi       = "10.5281/zenodo.24260440",
+  note      = paste(
+    "Data set, in editions. This DOI resolves to the latest",
+    "edition; cite the DOI of the edition you used."
+  ),
+  header    = "To cite the data of the mirror, use:"
+)
+

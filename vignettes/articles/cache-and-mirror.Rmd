@@ -164,6 +164,21 @@ cvm_cache_path()
 cvm_source_get()
 ```
 
+### Editions with a DOI
+
+A dated snapshot lives on GitHub and can be pinned, but it has no
+permanent identifier. The whole mirror is deposited on Zenodo in
+editions (the plan is four a year, on the first weekly round of January,
+April, July and October): one `.tar` of parquet files per dataset, the
+history of superseded filings, the dictionary, the code lists, the
+licence, the privacy notice and the checksums. Each edition has its own
+DOI, and [10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440) resolves to the latest.
+The first one is of 2026-11-15
+([10.5281/zenodo.24260441](https://doi.org/10.5281/zenodo.24260441)). The package does not read from
+Zenodo: to work with the data of an edition, pin its date with
+`cvm_release_set()`, or open the parquet files of the deposit with any
+parquet reader.
+
 ## Mirror pipeline validation
 
 Every weekly mirror publish runs a hybrid validation step

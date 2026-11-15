@@ -461,6 +461,16 @@ leaves out, who answers for it and how a person mentioned in a text can
 ask for the name to be removed are in the privacy notice,
 [`PRIVACY.md`](PRIVACY.md) ([em português](PRIVACY.pt-BR.md)).
 
+### Citing the data
+
+The mirror is deposited on Zenodo in editions with a DOI (the plan is
+four a year), so that a study can cite the exact data it used and the data
+outlives the GitHub releases. Cite the edition you used; the DOI
+[10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440) always resolves to the latest
+one. The first edition is of 2026-11-15
+([10.5281/zenodo.24260441](https://doi.org/10.5281/zenodo.24260441)). `citation("cvmdata")` gives both
+the package and the data.
+
 ## Related work
 
 For exchange-side market data (prices, volumes, tickers, indices,
