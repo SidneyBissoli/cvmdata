@@ -1,12 +1,12 @@
 # rOpenSci pre-submission inquiry — draft
 
-> **Estado (2026-11-07): reescrito do zero para o escopo da submissão**
-> (decisão do dono de 2026-11-06: o módulo de companhias, função única,
-> 9 conjuntos). Segue os campos do modelo atual da issue
-> ("Submit a presubmission inquiry",
+> **Estado (2026-11-15): atualizado para o espelho só com dado de
+> companhia** (decisão do dono de 2026-11-15) e para a primeira edição
+> com DOI, publicada no mesmo dia. A base é a reescrita de 2026-11-07
+> (escopo: o módulo de companhias, função única, 9 conjuntos), que segue
+> os campos do modelo da issue ("Submit a presubmission inquiry",
 > `ropensci/software-review/.github/ISSUE_TEMPLATE/B-submit-a-presubmission-inquiry.md`,
-> lido em 2026-11-07), que agora tem duas seções que o rascunho antigo
-> não tinha: ética/privacidade de dados e uso de IA generativa.
+> lido em 2026-11-07; reler antes de postar).
 >
 > **Antes de postar** (nada disto é opcional):
 >
@@ -16,13 +16,14 @@
 >    O DESCRIPTION inteiro é colado na issue. O README tem o mesmo
 >    defeito (cobertura de 4 conjuntos; comparação com `GetITRData`
 >    e `GetDFPData2` diferente da desta issue) — consertar junto.
-> 2. Confirmar que as fotos datadas antigas já foram limpas (seção *Ethics*).
-> 3. Seção *Use of Generative AI*: o texto é do dono; o daqui é
->    rascunho com os fatos medidos. Ler e reescrever na primeira pessoa.
-> 4. Reconferir os números marcados `<!-- medido em ... -->` (testes,
->    cobertura, tabelas, versões dos pacotes do Perlin).
-> 5. Se a primeira edição do Zenodo já tiver saído, trocar o futuro
->    pelo DOI.
+> 2. Seção *Use of Generative AI*: o texto é do dono; o daqui é
+>    rascunho com fatos medidos. Ler e reescrever na primeira pessoa.
+>    **Atenção à frase sobre a revisão dos pull requests**, marcada no
+>    texto: ela precisa dizer o que de fato acontece.
+> 3. Rodar `pkgcheck()` de novo (passou em 2026-11-06; o pacote mudou
+>    muito desde então) e reconferir os números marcados
+>    `<!-- medido em ... -->`.
+> 4. Reler a seção *Ethics*: é a que mais mudou.
 
 ---
 
@@ -68,8 +69,9 @@ Researchers in empirical finance, accounting and corporate governance
 who work with Brazilian listed companies, and the data journalists and
 analysts who cover them. The CVM files are the primary source for that
 work: every annual (DFP) and quarterly (ITR) financial statement since
-2010, the yearly reference form (FRE: governance, compensation,
-ownership, board diversity), the registration form (FCA, which links B3
+2010, the yearly reference form (FRE: capital, compensation, workforce,
+and the tables on boards and ownership, which the package reads straight
+from the CVM), the registration form (FCA, which links B3
 tickers to companies), the company register (CAD), the corporate
 governance code report (CGVN), insider trading positions (VLMO),
 share-buyback programmes, and the index of periodic and occasional
@@ -153,8 +155,8 @@ Where `cvmdata` differs, by design rather than by degree:
    of entering the result. The package ships the dictionary and the
    code lists (`cvm_dictionary()`, `cvm_codelist()`).
 5. **Coverage and selection.** One function, `cvm_fetch()`, reads nine
-   datasets and 104 tables <!-- medido em 2026-11-07: cvm_tables() e o
-   snapshot do dicionário --> (DFP, ITR, FRE, FCA, CAD, CGVN, VLMO,
+   datasets and 104 tables <!-- medido em 2026-11-15: cvm_tables(); 91
+   no espelho, 13 lidas da CVM --> (DFP, ITR, FRE, FCA, CAD, CGVN, VLMO,
    IPE, share buybacks), selecting companies by CNPJ or by B3 ticker
    (including tickers of delisted companies), by year or by a window of
    reference dates. The other packages select by CVM code only.
@@ -171,31 +173,58 @@ The package reads only data the regulator publishes openly, under the
 Open Database License, as part of its legal disclosure regime; it
 collects nothing from users and does not link records across sources.
 
-Some of those tables identify natural persons, and we want to state it
-plainly. The CVM publishes, by legal duty, the name, the full CPF (the
-Brazilian individual taxpayer number) and the birth date of board members,
-fiscal council and committee members, investor-relations officers, audit
-partners, individual shareholders above the disclosure threshold, and
-relatives of directors.
-<!-- medido em 2026-11-08: cerca de 557 mil valores em 13 colunas `cpf*`,
-2.406 em 2 colunas `documento_*`, 2.364 biografias e outros
-textos livres com CPF (201); 131.129 datas de nascimento em 2 tabelas -->
+Some of those tables describe natural persons, and we want to state
+plainly what we do about it. The CVM publishes, by legal duty, the name,
+the full CPF (the Brazilian individual taxpayer number) and the birth
+date of board members, fiscal council and committee members,
+investor-relations officers, audit partners, individual shareholders
+and relatives of directors, with biographies and, since 2023, counts of
+race, gender and disability declarations by governing body.
 
 `cvmdata` treats its two sources differently, on purpose.
-`source = "cvm"` returns what the regulator publishes. The mirror and its
-Zenodo editions, which are public and permanent and which we redistribute
-ourselves, keep what research needs and no more: every CPF, in the columns
-that hold it and in free text, is masked as `***.456.789-**`, the way the
-Federal Revenue publishes its own open CNPJ data; a foreign document in a
-CPF column becomes `***`; and the birth date is reduced to the year. Names
-stay, because the name is the content of the disclosure the regulation
-requires, and the masked CPF plus the name still follow a person across
-tables (FRE 2021-2025: no two different people merge). A guard stops any
-publication, and any deposit, that still holds a full CPF or a birth date.
-The reasoning follows the Brazilian LGPD (Lei 13.709/2018), art. 7,
-paragraphs 3 and 7, and art. 10, paragraph 1; it is written down in
-`data-raw/decisions/` in the repository. We are not lawyers, and we would
-welcome the reviewers' view.
+
+- **`source = "cvm"`** downloads the regulator's file to the user's
+  machine and returns what the regulator publishes. We redistribute
+  nothing on that path.
+- **The mirror and its Zenodo editions**, which we do redistribute, carry
+  data about companies, not about people. The 13 tables in which the CVM
+  describes natural persons are not in the mirror
+  <!-- medido em 2026-11-15: 12 do fre e fca/dri; no fre publicado ficaram
+  49 das 61 tabelas --> (board and committee members, family and
+  subordination ties, shareholders, related parties, the people who sign
+  the form and the audit, the investor-relations officer, and the three
+  counts of declarations of board members): `cvm_fetch()` reads them from
+  the CVM by itself, with a message, so the same call works. In the
+  tables that stay, the columns that name a person are dropped, contact
+  columns (e-mail, telephone, fax) are dropped, a CPF that a text
+  mentions is masked, and the five workforce tables that count employees
+  by race, gender or disability come without the companies that have a
+  group of fewer than 10 people or a unanimous group (the reader gets a
+  classed warning with the share left out). A guard stops any
+  publication, and any deposit, that the rule would still change.
+
+What remains is a name that a text about a company happens to mention
+(an auditor's report, the subject of a filing). For that the mirror has
+a privacy notice (`PRIVACY.md`, in English and Portuguese) and a removal
+on request: the name is replaced wherever a text of the mirror mentions
+it.
+
+We got here by narrowing the scope twice. We first kept names and
+masked identifiers; we then found that we could not settle, without
+legal advice, whether hosting personal data on services abroad is an
+international transfer under the Brazilian LGPD (Lei 13.709/2018, art.
+33), and that replacing names by a code would not take the data out of
+the law (90.8% of the rows of the board table could be matched back to
+the CVM file <!-- medido em 2026-11-14, FRE 2025 -->). So the mirror
+stopped carrying people. The cost is stated in the documentation: no
+dated snapshot and no history of superseded filings for those 13
+tables. The dated snapshots already published were rewritten under the
+same rule, sample rows naming real people were replaced by invented
+values in the test fixtures, and the git history was rewritten to drop
+the earlier versions of those files. The decisions, with the sources
+read and the measurements, are in `data-raw/decisions/` in the
+repository. We are not lawyers, and we would welcome the reviewers'
+view.
 
 -   Any other questions or issues we should be aware of?:
 
@@ -231,16 +260,21 @@ mapping every partition to the snapshot that holds its bytes (about
 stood on that date. Superseded filings are kept in a per-partition
 history asset, read by `cvm_versions()`.
 
-*A DOI per quarterly edition.* Four times a year the whole mirror as
-it stood that day (every dataset, the superseded versions, the
-dictionary, the licence and the checksums) is deposited on Zenodo as a
-new version of one record, so a paper can cite the exact data it used
-and the data outlive the GitHub repository. The ETL prepares the
-deposit after a 14-day grace period and verifies it (every file
-against the mirror's digests, row counts against the previous edition,
-a read-back of the draft); the maintainer publishes it by hand. The
-pipeline passed a full rehearsal on the Zenodo sandbox; the first
-edition is due in January 2027.
+*A DOI per edition.* The whole mirror as it stood on a date (every
+dataset, the superseded versions, the dictionary, the licence, the
+privacy notice and the checksums) is deposited on Zenodo as a version
+of one record, so a paper can cite the exact data it used and the data
+outlive the GitHub repository. The plan is four editions a year. The
+ETL prepares the deposit and verifies it (every file against the
+mirror's digests, row counts against the previous edition, a read-back
+of the draft); the maintainer publishes it by hand. The first edition
+was published on 2026-11-15
+([10.5281/zenodo.24260441](https://doi.org/10.5281/zenodo.24260441);
+[10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440)
+resolves to the latest edition): 18 files, 593 MB. The package does not
+read from Zenodo; it reads the GitHub releases, and
+`cvm_release_set("2026-11-15")` pins a session to the data of that
+edition.
 
 *Longevity and bus factor.* The releases live under the maintainer's
 personal GitHub account and one person runs the ETL; we do not claim
@@ -277,18 +311,26 @@ them. The mismatch is deliberate: the audience reads Portuguese, and
 the columns must match the regulator's dictionary, the accounting
 standards and the literature.
 
-**Technical state.** <!-- medido em 2026-11-07; reconferir na 0.3.0 -->
-`pkgcheck()` passes (one failure fixed in November 2026; the remaining
-notes are optional). R CMD check is clean on Ubuntu (devel, release,
-oldrel-1), macOS and Windows; test coverage is 95%
-<!-- Codecov 95,26 % em 2026-11-06; testes medidos em 2026-11-07:
-3.568 expectativas, 696 blocos, 0 falhas, 1 pulada --> and the suite
-has 3,568 expectations in 43 files, none of which touches the network (`httptest2` and mocked
-`httr2` responses; integration tests behind an environment variable).
-The pkgdown site has an introductory vignette and eight articles,
-including one on the defects we found in the CVM files and how the
-package handles each. Version 0.3.0 is the one submitted; the lifecycle
-badge says *experimental*.
+**Technical state.** <!-- medido em 2026-11-15; reconferir na 0.3.0 -->
+`pkgcheck()` passed on 2026-11-06 <!-- rodar de novo antes de postar -->.
+R CMD check is clean on Ubuntu (devel, release, oldrel-1), macOS and
+Windows; test coverage is 95%
+<!-- Codecov 95,26 % em 2026-11-06; reconferir. Testes medidos em
+2026-11-15: 3.854 expectativas, 745 blocos, 45 arquivos, 0 falhas,
+1 pulada --> and the suite has 3,854 expectations in 45 files, none of
+which touches the network (`httptest2` and mocked `httr2` responses;
+integration tests behind an environment variable). Beyond the tests, we
+read every partition the mirror publishes through `cvm_fetch()`
+<!-- varredura de 2026-11-15: 1.400 partições, 91 tabelas, 70,8 milhões
+de linhas, 0 erro; 26 leituras das 13 tabelas pela CVM; 104 dicionários
+--> (1,400 partitions, 70.8 million rows, no failure), which is also how
+we know what the package reports about the source: in that read it
+warned of statements the CVM file holds twice in 178 partitions, of
+copies of one filing with different values in 54, and of a table that
+carries a filing older than the last one in 28. The pkgdown site has an
+introductory vignette and eight articles, including one on the defects
+we found in the CVM files and how the package handles each. Version
+0.3.0 is the one submitted; the lifecycle badge says *experimental*.
 
 ## Use of Generative AI
 
@@ -318,8 +360,15 @@ the `ROADMAP.md` and `NEWS.md` (for example: one fetch function instead
 of five; `basis` with no default because a third of the issuers file
 only individual statements; the mirror as default with the portal one
 argument away; a DOI per quarterly edition rather than per snapshot;
-what counts as a scale error). I reviewed every pull request before
-merging it, and most decisions came from checking the data: the
+what counts as a scale error).
+<!-- ATENÇÃO (dono): a frase seguinte dizia "I reviewed every pull
+request before merging it". Em novembro de 2026 os pull requests foram
+mesclados pelo modelo depois das checagens automáticas, sob autorização
+permanente sua, sem leitura sua de cada um. Escreva aqui o que de fato
+acontece; o texto abaixo é uma proposta. -->
+Pull requests are merged once the automated checks pass; I did not read
+every diff. What I review is each decision, before the work starts and
+after it is measured, and most decisions came from checking the data: the
 figures quoted in this inquiry were measured on the CVM files, not
 taken from the model's account of them.
 
