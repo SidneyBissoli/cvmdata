@@ -822,13 +822,23 @@ test_that("the stages iterate the mirrored tables only", {
   gone <- c(
     "administrador_PCD",
     "administrador_declaracao_genero",
-    "administrador_declaracao_raca"
+    "administrador_declaracao_raca",
+    "administrador_membro_conselho_fiscal",
+    "auditor_responsavel",
+    "membro_comite",
+    "posicao_acionaria",
+    "posicao_acionaria_classe_acao",
+    "relacao_familiar",
+    "relacao_subordinacao",
+    "responsavel",
+    "transacao_parte_relacionada"
   )
   expect_setequal(mirror_excluded_tables("fre"), gone)
   expect_false(any(gone %in% mirror_tables("fre")))
   expect_true(all(gone %in% mirror_schema_tables("fre")))
   expect_true("empregado_PCD" %in% mirror_tables("fre"))
   expect_length(mirror_excluded_tables("dfp"), 0L)
+  expect_identical(mirror_excluded_tables("fca"), "dri")
 })
 
 test_that("the edition carries what the group rule left out, counts only", {

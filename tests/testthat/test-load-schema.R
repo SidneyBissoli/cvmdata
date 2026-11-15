@@ -334,23 +334,57 @@ test_that("load_schema reads UTF-8 comments under LC_CTYPE=C", {
   expect_named(schema$cvm_file_pattern_variants, c("ind", "con"))
 })
 
-test_that("a table out of the mirror is refused there, with the way out", {
+test_that("a table out of the mirror is read from the CVM by itself", {
   schema <- load_schema("fre", "administrador_declaracao_raca")
   expect_false(schema$mirror)
+  rlang::reset_message_verbosity(
+    "cvmdata_unmirrored fre administrador_declaracao_raca"
+  )
+  # the mirror as the default of the session: switch, and say so
+  expect_message(
+    expect_identical(route_unmirrored(schema, "mirror"), "cvm"),
+    class = "cvmdata_message_unmirrored"
+  )
+  # the CVM asked for, and a table that is in the mirror: nothing to do
+  expect_identical(route_unmirrored(schema, "cvm"), "cvm")
+  expect_identical(
+    route_unmirrored(load_schema("fre", "empregado_PCD"), "mirror"),
+    "mirror"
+  )
+  expect_null(check_mirrored(schema, "cvm"))
+})
+
+test_that("a table out of the mirror is refused when the mirror is asked", {
+  # the call names the mirror
   expect_error(
-    cvm_fetch("fre", "administrador_declaracao_raca", year = 2024),
+    cvm_fetch(
+      "fre",
+      "administrador_declaracao_raca",
+      year = 2024,
+      source = "mirror"
+    ),
     class = "cvmdata_error_input"
   )
   expect_error(
-    cvm_versions("fre", "administrador_PCD", year = 2024),
+    cvm_versions("fre", "administrador_PCD", year = 2024, source = "mirror"),
     class = "cvmdata_error_input"
   )
   expect_snapshot(
-    cvm_fetch("fre", "administrador_declaracao_genero", year = 2024),
+    cvm_fetch(
+      "fre",
+      "administrador_declaracao_genero",
+      year = 2024,
+      source = "mirror"
+    ),
     error = TRUE
   )
-  expect_null(check_mirrored(schema, "cvm"))
-  expect_null(check_mirrored(load_schema("fre", "empregado_PCD"), "mirror"))
+  # the session is pinned to a dated snapshot: the CVM has only today's
+  # file, so the switch would break the pin
+  withr::local_options(cvmdata.mirror_release = "2026-11-10")
+  expect_error(
+    cvm_fetch("fre", "posicao_acionaria", year = 2024),
+    class = "cvmdata_error_input"
+  )
 })
 
 test_that("`mirror: false` needs a reason", {

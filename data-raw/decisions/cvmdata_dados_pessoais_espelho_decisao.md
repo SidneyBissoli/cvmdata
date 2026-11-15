@@ -457,3 +457,81 @@ quanto da pesquisa sobre governança usa esse texto.
 **Como funciona.** `.biography_cols` e `mirror_dropped_columns()` em
 `util-privacy.R`; `mirror_privacy_rule` passa a "4", o que faz a rodada
 seguinte reescrever o histórico. As fotos datadas pedem o reparo.
+
+## Complemento de 2026-11-15: o espelho só leva dado de companhia (regra 5)
+
+**Esta decisão do dono substitui as anteriores sobre pessoas** (nome,
+ano de nascimento, biografias, retirada a pedido nas tabelas de pessoas).
+Elas ficam registradas acima como história e continuam valendo só para o
+que um texto sobre a companhia cita.
+
+**O que levou a ela.** Lidos em 2026-11-14 e 2026-11-15:
+
+- LGPD, art. 33: a transferência internacional de dados pessoais
+  "somente é permitida" nos casos que o artigo lista.
+- Resolução CD/ANPD nº 19/2024 (Regulamento de Transferência
+  Internacional de Dados), arts. 3º, 4º e 16: transferência é a operação
+  em que "um agente de tratamento transmite, compartilha ou disponibiliza
+  acesso a dados pessoais a outro agente de tratamento"; cabe ao
+  controlador verificar se ela existe e se tem mecanismo válido; as
+  cláusulas-padrão valem com "adoção integral e sem alteração do texto",
+  em contrato "firmado entre o exportador e o importador".
+- Página da ANPD sobre transferência internacional: só a União Europeia
+  tem decisão de adequação; nenhum outro mecanismo foi aprovado.
+- GitHub: o contrato de tratamento de dados (outubro de 2025) define
+  cláusulas-padrão só para a União Europeia, o Reino Unido e a Suíça, e a
+  declaração de privacidade diz que os dados ficam "in a variety of
+  locations, including your local region, the United States".
+- Zenodo: os arquivos ficam "primarily Geneva, with replicas in
+  Budapest"; "the uploader is exclusively responsible for the content";
+  dado que era sensível deve estar "anonymised to an appropriate degree
+  or fully consent cleared"; não há contrato de tratamento de dados com
+  quem deposita.
+
+A leitura não resolveu se hospedar o espelho nesses serviços é
+transferência internacional nem, se for, com que mecanismo. O dono
+decidiu não consultar advogado. Trocar o nome por um código não tiraria
+o espelho da lei (medido em 2026-11-14: 90,8% das linhas se casam de
+volta com o arquivo da CVM).
+
+**A regra.** A pergunta por tabela é uma só: é sobre a companhia ou
+sobre pessoas?
+
+| O quê | Onde |
+|---|---|
+| Demonstrações financeiras, capital, valores mobiliários, governança corporativa, cadastro, IPE | espelho e Zenodo |
+| `fre`: `administrador_membro_conselho_fiscal`, `membro_comite`, `relacao_familiar`, `relacao_subordinacao`, `responsavel`, `auditor_responsavel`, `posicao_acionaria`, `posicao_acionaria_classe_acao`, `transacao_parte_relacionada`, e as três de declaração dos administradores; `fca`: `dri` | só direto da CVM |
+| Coluna de pessoa em tabela de companhia: `resp` e as que o descrevem no `cad`; `contato` e suas datas em `fca/departamento_acionistas`; responsável técnico em `fca/auditor`; `cpf_auditor` em `fre/auditor` | sai a coluna |
+| Auditor pessoa física em `fre/auditor` e `fca/auditor` (1 linha em 1.097 no FRE de 2025) | sai a linha |
+| Contagens de empregados por raça, gênero e deficiência | espelho, com a regra dos grupos pequenos |
+| E-mail, telefone e fax, de pessoa e de companhia | fora, como antes (296 dos 696 e-mails de companhia de `cad/incentivadas` são webmail) |
+
+`posicao_acionaria` e `transacao_parte_relacionada` saem inteiras porque
+misturam pessoas e empresas na mesma coluna (FRE de 2025: 9.944
+acionistas pessoa física e 6.690 pessoa jurídica; em
+`transacao_parte_relacionada` a coluna `tipo_pessoa` vem vazia). Tirar só
+as linhas de pessoa física quebraria a soma das participações.
+
+**Por que ler da CVM resolve.** Nessa leitura o arquivo vai do portal da
+CVM para o computador do usuário; o responsável pelo espelho não guarda
+nem publica o dado.
+
+**O que se perde.** Retratos datados e histórico de reapresentações
+dessas tabelas (a CVM publica todos os anos, mas só a versão vigente de
+cada formulário); velocidade na primeira leitura; a composição acionária
+nas edições com DOI.
+
+**O que sobra de dado pessoal no espelho.** Nomes que um texto sobre a
+companhia cita. Medido no FRE, FCA, DFP, ITR, IPE, CGVN e VLMO de 2025,
+só por sinais ("Sr.", "Dr.", CPF mascarado), então é um piso: 226 de
+3.747 e 503 de 7.064 textos de parecer da DFP e do ITR; 172 de 32.777
+assuntos do IPE; menos de 30 em cada uma das outras colunas que ficam.
+Para isso valem a máscara do CPF e a retirada a pedido, que troca o nome
+pelo rótulo onde o texto o cita.
+
+**Como funciona.** `mirror: false` nos esquemas; `.person_cols`,
+`mirror_person_rows()` e `mirror_privacy_rule` "5" em `util-privacy.R`;
+`route_unmirrored()` no cliente: tabela fora do espelho é lida da CVM
+sozinha, com mensagem, e dá erro só com `source = "mirror"` explícito ou
+sob retrato datado. A rodada seguinte apaga do `-latest` as partições e
+o histórico dessas tabelas; as fotos datadas pedem o reparo.
