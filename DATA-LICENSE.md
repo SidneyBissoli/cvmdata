@@ -57,7 +57,10 @@ unanimous body tell the declaration of each named member. The five
 workforce tables that count employees by race, gender or disability come
 without the companies that, in a year, have a group of fewer than 10
 people or a group in which everybody declared the same category, so
-totals computed from them are lower than the CVM's. Names and biographies stay as
+totals computed from them are lower than the CVM's. The biography
+column (`experiencia_profissional`) of the board and committee tables
+is not carried: the texts mention union and party membership,
+religion, health and convictions. Names stay as
 published. These are personal data under the Brazilian LGPD (Lei
 13.709/2018) wherever you read them from: their open publication does
 not free you from respecting the purpose of the disclosure.

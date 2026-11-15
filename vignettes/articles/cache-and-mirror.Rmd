@@ -118,7 +118,8 @@ disability come without the companies that, in a year, have a group of
 fewer than 10 people or one in which everybody declared the same
 category: reading one of them warns with the companies and the share of
 people left out, and keeps the numbers in `attr(x, "omitted")`.
-Names and biographies are as published, and the
+The biography column (`experiencia_profissional`) of the board and
+committee tables is not in the mirror. Names are as published, and the
 masked CPF plus the name still follow a person across tables.
 `source = "cvm"` returns what the CVM publishes.
 

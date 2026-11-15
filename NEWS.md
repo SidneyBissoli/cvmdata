@@ -9,19 +9,28 @@
   `***.456.789-**`, the way the Federal Revenue publishes its open CNPJ
   data; a foreign document in those columns becomes `***`; and
   `data_nascimento` (`fre`: `administrador_membro_conselho_fiscal`,
-  `membro_comite`) becomes the integer column `ano_nascimento`. Names, CNPJs
-  and biographies stay as published, and the masked CPF plus the name still
+  `membro_comite`) becomes the integer column `ano_nascimento`. Names and
+  CNPJs stay as published, and the masked CPF plus the name still
   follow a person across tables. Scripts that read `data_nascimento` from
   the mirror need `ano_nascimento`, or `source = "cvm"`, which still reads
   everything from the CVM untouched. The dated snapshots are rewritten too,
   so `cvm_release_set()` returns the masked values for past dates. See
   "Personal data" in `?cvm_fetch`.
 
+* The biography column `experiencia_profissional` of the `fre` tables
+  `administrador_membro_conselho_fiscal` and `membro_comite` is no longer
+  in the mirror or in the Zenodo editions. The texts mention union and
+  party membership, elected office, religion, health and convictions,
+  which the Brazilian LGPD treats as sensitive data (art. 5, II; art.
+  11), and no list of words separates those texts from the others
+  safely. Profession, position, body and dates of office stay. Scripts
+  that read the column need `source = "cvm"`.
+
 * A person named in the mirror can ask to leave it. The robot reads a
   private list (never in the repository) and, for each person on it,
   keeps the row and replaces the name with `[omitido a pedido do
   titular]`, empties the columns that describe the person (masked CPF,
-  birth year, profession, biography, nationality) and replaces a mention
+  birth year, profession, nationality) and replaces a mention
   of the name in any text of the dataset. Seats, dates of office and
   shareholding percentages stay, so counts and sums are unchanged. The
   sidecar of each release carries only how many people asked
