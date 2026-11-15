@@ -62,6 +62,13 @@ published. These are personal data under the Brazilian LGPD (Lei
 13.709/2018) wherever you read them from: their open publication does
 not free you from respecting the purpose of the disclosure.
 
+A person named in these tables can ask to leave the mirror. The row
+stays, so a board keeps its number of members and a shareholding still
+adds up, but the name reads `[omitido a pedido do titular]`, the columns
+that describe the person are empty, and a mention of the name in a text
+of the same dataset reads the same label. The file of the CVM is not
+changed by this.
+
 **The ODbL does not license the personal data.** The licence governs
 the rights over the database and says so itself (section 2.4): "The
 individual items of the Contents contained in this Database may be

@@ -431,3 +431,159 @@ test_that("the group rule matches the five workforce tables and no other", {
     )
   )
 })
+
+# People who asked to leave (decisions of 2026-11-14). Names are invented.
+
+test_that("the suppression list reads names and optional CPFs", {
+  load_etl_privacy()
+  expect_identical(nrow(mirror_suppressed("")), 0L)
+  people <- mirror_suppressed(paste(
+    "# a comment",
+    "  Jo\u00e3o  Ant\u00f4nio Exemplo ; 111.444.777-35",
+    "MARIA EXEMPLO DE TAL",
+    "maria exemplo de tal",
+    sep = "\n"
+  ))
+  expect_identical(
+    people$name,
+    c("JOAO ANTONIO EXEMPLO", "MARIA EXEMPLO DE TAL")
+  )
+  expect_identical(people$cpf, c("444777", NA))
+  # a first name alone would be erased from every text: refused, unnamed
+  err <- expect_error(mirror_suppressed("Maria Exemplo\nJoao"), "entry 2")
+  expect_no_match(conditionMessage(err), "Joao")
+})
+
+test_that("a person who asked to leave keeps the row and loses the data", {
+  load_etl_privacy()
+  withr::local_envvar(
+    CVMDATA_MIRROR_SUPPRESSED = "Jo\u00e3o Ant\u00f4nio Exemplo"
+  )
+  df <- data.frame(
+    cnpj_companhia = "11.222.333/0001-81",
+    orgao_administracao = c("Conselho", "Conselho", "Diretoria"),
+    nome = c("JOAO ANTONIO EXEMPLO", "Maria Exemplo de Tal", "Outro Nome"),
+    cpf = c("111.444.777-35", "529.982.247-25", NA),
+    data_nascimento = as.Date(c("1965-03-01", "1970-01-01", NA)),
+    profissao = c("Engenheiro", "Advogada", "Contador"),
+    experiencia_profissional = c(
+      "O Sr. Jo\u00e3o  Ant\u00f4nio Exemplo foi diretor.",
+      "Trabalhou com joao antonio exemplo e com Joao Antonio Exemplos.",
+      "Nada a declarar."
+    ),
+    data_eleicao = as.Date("2024-04-30")
+  )
+  out <- mirror_apply_privacy(df)
+  expect_identical(nrow(out), 3L)
+  expect_identical(out$nome[1L], mirror_suppressed_label)
+  expect_true(all(is.na(c(
+    out$cpf[1L],
+    out$ano_nascimento[1L],
+    out$profissao[1L],
+    out$experiencia_profissional[1L]
+  ))))
+  # what places the seat stays
+  expect_identical(out$orgao_administracao, df$orgao_administracao)
+  expect_identical(out$data_eleicao, df$data_eleicao)
+  # a mention in somebody else's text becomes the label; a longer name
+  # that merely starts the same is another person
+  expect_identical(
+    out$experiencia_profissional[2L],
+    paste0(
+      "Trabalhou com ",
+      mirror_suppressed_label,
+      " e com Joao Antonio Exemplos."
+    )
+  )
+  expect_identical(out$nome[2:3], df$nome[2:3])
+  expect_identical(out$cpf[2L], "***.982.247-**")
+  # idempotent, and the guard sees a frame that still names the person
+  expect_identical(mirror_apply_privacy(out), out)
+  expect_length(mirror_privacy_counts(out), 0L)
+  expect_true("nome" %in% names(mirror_privacy_counts(df)))
+})
+
+test_that("with a CPF on the list a namesake is left alone", {
+  load_etl_privacy()
+  withr::local_envvar(
+    CVMDATA_MIRROR_SUPPRESSED = "Maria Exemplo de Tal;111.444.777-35"
+  )
+  df <- data.frame(
+    nome = c(
+      "Maria Exemplo de Tal",
+      "MARIA EXEMPLO DE TAL",
+      "Maria Exemplo de Tal"
+    ),
+    cpf = c("***.444.777-**", "529.982.247-25", NA),
+    profissao = c("Economista", "Medica", "Professora"),
+    experiencia_profissional = c("a", "Maria Exemplo de Tal, medica.", "c")
+  )
+  out <- mirror_apply_privacy(df)
+  # same middle digits, and a row without a document: the person
+  expect_identical(out$nome[c(1L, 3L)], rep(mirror_suppressed_label, 2L))
+  # another document: somebody else, name and text untouched
+  expect_identical(out$nome[2L], "MARIA EXEMPLO DE TAL")
+  expect_identical(out$profissao[2L], "Medica")
+  expect_identical(
+    out$experiencia_profissional[2L],
+    "Maria Exemplo de Tal, medica."
+  )
+})
+
+test_that("a shareholder who asked to leave keeps the percentages", {
+  load_etl_privacy()
+  withr::local_envvar(CVMDATA_MIRROR_SUPPRESSED = "Maria Exemplo de Tal")
+  df <- data.frame(
+    acionista = c("Maria Exemplo de Tal", "Holding Exemplo S.A."),
+    cpf_cnpj_acionista = c("111.444.777-35", "11.222.333/0001-81"),
+    nacionalidade = c("Brasileira", NA),
+    sigla_uf = c("SP", "RJ"),
+    percentual_total_acoes_circulacao = c(40, 60),
+    representante_legal = c(NA, "Maria Exemplo de Tal"),
+    cpf_cnpj_representante_legal = c(NA, "111.444.777-35")
+  )
+  out <- mirror_apply_privacy(df)
+  expect_identical(
+    out$acionista,
+    c(mirror_suppressed_label, "Holding Exemplo S.A.")
+  )
+  expect_identical(out$percentual_total_acoes_circulacao, c(40, 60))
+  expect_true(all(is.na(c(
+    out$cpf_cnpj_acionista[1L],
+    out$nacionalidade[1L],
+    out$sigla_uf[1L],
+    out$cpf_cnpj_representante_legal[2L]
+  ))))
+  expect_identical(out$representante_legal[2L], mirror_suppressed_label)
+  expect_identical(out$sigla_uf[2L], "RJ")
+})
+
+test_that("every column of the person roles exists in the dictionary", {
+  load_etl_privacy()
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    encoding = "UTF-8"
+  )
+  for (nc in names(.person_roles)) {
+    tables <- unique(dict[dict$campo == nc, c("dataset", "table")])
+    expect_gt(nrow(tables), 0L, label = nc)
+    own <- setdiff(
+      unlist(.person_roles[[nc]]),
+      # `data_nascimento` is `ano_nascimento` once the rule has run
+      "ano_nascimento"
+    )
+    expect_true(all(own %in% dict$campo), label = nc)
+  }
+})
+
+test_that("only util-privacy.R reads the suppression list", {
+  dir <- dirname(etl_script_path("util-privacy.R"))
+  for (path in list.files(dir, pattern = "[.]R$", full.names = TRUE)) {
+    lines <- readLines(path, warn = FALSE)
+    hits <- grep('Sys.getenv("CVMDATA_MIRROR_SUPPRESSED"', lines, fixed = TRUE)
+    expect_true(
+      !length(hits) || basename(path) == "util-privacy.R",
+      label = basename(path)
+    )
+  }
+})
