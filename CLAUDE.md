@@ -345,7 +345,13 @@ espelho (`mirror: false` no YAML: `administrador_declaracao_genero`,
 `source = "cvm"`), e as cinco tabelas de contagem de empregados por
 raça, gênero e deficiência vêm sem a companhia que tem grupo com menos
 de 10 pessoas ou unânime (aviso `cvmdata_warn_privacy_omitted`, atributo
-`omitted`, `privacy_omitted` no sidecar) (complementos de 2026-11-14)
+`omitted`, `privacy_omitted` no sidecar) (complementos de 2026-11-14);
+quem pede para sair e comprova ser a pessoa sai (`mirror_suppress_people()`:
+a linha fica, o nome vira `[omitido a pedido do titular]`, os dados da
+pessoa ficam vazios; lista só no segredo `CVMDATA_MIRROR_SUPPRESSED`, uma
+pessoa por linha `nome;CPF`, nunca no repositório; `privacy_suppressed` no
+sidecar é só a contagem, e lista menor que a anterior para o publish, salvo
+`--allow-unsuppress`)
 (`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
 `data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a única
 exceção à regra "se vem da CVM, fica como na CVM", e só no que o pacote

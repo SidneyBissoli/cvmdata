@@ -91,6 +91,8 @@ jobs:
     timeout-minutes: 300
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # people who asked to leave the mirror (inst/etl/util-privacy.R)
+      CVMDATA_MIRROR_SUPPRESSED: ${{ secrets.CVMDATA_MIRROR_SUPPRESSED }}
       CVMDATA_ETL_WORKSPACE: /tmp/cvmdata-etl
       ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
       ZENODO_SANDBOX_TOKEN: ${{ secrets.ZENODO_SANDBOX_TOKEN }}

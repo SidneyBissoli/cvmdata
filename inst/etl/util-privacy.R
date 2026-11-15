@@ -280,6 +280,231 @@ mirror_is_document_col <- function(name) {
   grepl("^(cpf|documento_)", name)
 }
 
+# People who asked to leave -------------------------------------------------
+# Owner's decisions of 2026-11-14: a person named in the mirror who asks to
+# leave, and shows to be that person, leaves. The row stays, so a board
+# keeps its number of members and a shareholding still adds up; the name
+# becomes `mirror_suppressed_label`, the columns that describe the person
+# go blank, and a mention of the name in any text of the dataset becomes
+# the label too. The CVM file still names the person: the mirror stops
+# being a source of the name, it does not hide it from the world.
+#
+# The list is personal data and never enters the repository. It comes from
+# the environment variable `CVMDATA_MIRROR_SUPPRESSED` (a secret of the
+# repository in the workflows): one person per line, `full name;CPF`, the
+# CPF optional. With a CPF, a namesake whose document differs is left
+# alone. Nothing here logs a name.
+mirror_suppressed_label <- "[omitido a pedido do titular]"
+
+# Name column of a table -> the columns that describe that person. The
+# first of `document` present in the table tells a namesake apart; `blank`
+# is emptied on the person's own rows. Company, body, position, dates of
+# office and shareholding percentages are not listed: they stay.
+# tests/testthat/test-etl-privacy.R pins the names against the dictionary.
+.person_roles <- list(
+  nome = list(
+    document = "cpf",
+    blank = c("cpf", "ano_nascimento", "profissao", "experiencia_profissional")
+  ),
+  resp = list(
+    document = character(),
+    blank = c("mun_resp", "uf_resp", "pais_resp")
+  ),
+  auditor = list(
+    document = c("cpf_cnpj_auditor", "cpf_auditor"),
+    blank = c("cpf_cnpj_auditor", "cpf_auditor")
+  ),
+  responsavel_tecnico = list(
+    document = "cpf_responsavel_tecnico",
+    blank = "cpf_responsavel_tecnico"
+  ),
+  contato = list(document = character(), blank = character()),
+  responsavel = list(document = "cpf_responsavel", blank = "cpf_responsavel"),
+  acionista = list(
+    document = "cpf_cnpj_acionista",
+    blank = c("cpf_cnpj_acionista", "nacionalidade", "sigla_uf")
+  ),
+  acionista_relacionado = list(
+    document = "cpf_cnpj_acionista_relacionado",
+    blank = "cpf_cnpj_acionista_relacionado"
+  ),
+  representante_legal = list(
+    document = "cpf_cnpj_representante_legal",
+    blank = "cpf_cnpj_representante_legal"
+  ),
+  nome_administrador = list(
+    document = "cpf_administrador",
+    blank = "cpf_administrador"
+  ),
+  nome_pessoa_relacionada = list(
+    document = c("cpf_pessoa_relacionada", "documento_pessoa_relacionada"),
+    blank = c("cpf_pessoa_relacionada", "documento_pessoa_relacionada")
+  ),
+  nome_responsavel = list(document = character(), blank = character()),
+  parte_relacionada = list(
+    document = "documento_parte_relacionada",
+    blank = "documento_parte_relacionada"
+  )
+)
+
+# Accented spellings of the letters a Portuguese name carries, by base
+# letter (escapes, so the file stays ASCII).
+.name_variants <- c(
+  A = "áàâãäÁÀÂÃÄ",
+  E = "éèêëÉÈÊË",
+  I = "íìîïÍÌÎÏ",
+  O = "óòôõöÓÒÔÕÖ",
+  U = "úùûüÚÙÛÜ",
+  C = "çÇ",
+  N = "ñÑ"
+)
+
+# A name as it is compared: upper case, no accents, single spaces.
+mirror_name_key <- function(x) {
+  x <- enc2utf8(as.character(x))
+  for (base in names(.name_variants)) {
+    x <- gsub(sprintf("[%s]", .name_variants[[base]]), base, x)
+  }
+  toupper(gsub("\\s+", " ", trimws(x)))
+}
+
+# The six digits a masked CPF keeps (`***.456.789-**`), from a full, a
+# zero-padded or an already masked CPF; NA for anything else.
+mirror_cpf_middle <- function(x) {
+  d <- mirror_digits(as.character(x))
+  n <- nchar(d)
+  out <- rep(NA_character_, length(d))
+  out[which(n == 6L)] <- d[which(n == 6L)]
+  out[which(n == 11L)] <- substr(d[which(n == 11L)], 4L, 9L)
+  padded <- which(n == 14L & startsWith(d, "000"))
+  out[padded] <- substr(d[padded], 7L, 12L)
+  out
+}
+
+# The list of people to leave out: data frame(name = key, cpf = middle
+# digits or NA). An entry needs at least two words, or a first name alone
+# would be erased from every text; the error names the line, not the name.
+mirror_suppressed <- function(raw = Sys.getenv("CVMDATA_MIRROR_SUPPRESSED")) {
+  lines <- trimws(strsplit(enc2utf8(raw), "\r?\n")[[1L]])
+  lines <- lines[nzchar(lines) & !startsWith(lines, "#")]
+  parts <- strsplit(lines, ";", fixed = TRUE)
+  name <- mirror_name_key(vapply(parts, function(p) p[1L], character(1L)))
+  cpf <- mirror_cpf_middle(vapply(
+    parts,
+    function(p) if (length(p) > 1L) p[2L] else NA_character_,
+    character(1L)
+  ))
+  short <- which(lengths(strsplit(name, " ", fixed = TRUE)) < 2L)
+  if (length(short)) {
+    stop(
+      sprintf(
+        "suppression list: entry %s needs a full name (two words or more)",
+        paste(short, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  unique(data.frame(name = name, cpf = cpf, stringsAsFactors = FALSE))
+}
+
+# Regular expression that finds a name key in running text whatever the
+# case, the accents and the spacing, as a whole name (not inside a word).
+mirror_name_regex <- function(key) {
+  chars <- strsplit(key, "", fixed = TRUE)[[1L]]
+  piece <- vapply(
+    chars,
+    function(ch) {
+      if (ch == " ") {
+        "\\s+"
+      } else if (ch %in% names(.name_variants)) {
+        sprintf("[%s%s%s]", ch, tolower(ch), .name_variants[[ch]])
+      } else if (grepl("[A-Z0-9]", ch)) {
+        ch
+      } else {
+        sprintf("\\Q%s\\E", ch)
+      }
+    },
+    character(1L)
+  )
+  paste0(
+    "(?i)(?<![\\p{L}\\p{N}])",
+    paste(piece, collapse = ""),
+    "(?![\\p{L}\\p{N}])"
+  )
+}
+
+# The frame without the people of the list: on the rows where a name
+# column holds the person, the name becomes the label and the person's
+# columns go blank; everywhere else a mention of the name in a text
+# becomes the label. Rows of a namesake (same name, another document) are
+# left alone. Same rows, same columns; idempotent.
+mirror_suppress_people <- function(df, people = mirror_suppressed()) {
+  if (!nrow(people) || !nrow(df)) {
+    return(df)
+  }
+  roles <- .person_roles[intersect(names(.person_roles), names(df))]
+  roles <- roles[vapply(names(roles), function(nc) is.character(df[[nc]]), NA)]
+  texts <- Filter(
+    function(cn) {
+      is.character(df[[cn]]) &&
+        !cn %in% names(roles) &&
+        !mirror_is_document_col(cn) &&
+        !grepl(.privacy_skip_cols, cn)
+    },
+    names(df)
+  )
+  for (i in seq_len(nrow(people))) {
+    own <- mirror_suppress_rows(df, roles, people$name[i], people$cpf[i])
+    df <- mirror_suppress_mentions(
+      own$df,
+      texts,
+      people$name[i],
+      skip = own$namesake
+    )
+  }
+  df
+}
+
+# The person's own rows: name to the label, the person's columns blank.
+# Returns list(df, namesake = rows that hold the name with another
+# document).
+mirror_suppress_rows <- function(df, roles, name, cpf) {
+  namesake <- logical(nrow(df))
+  for (nc in names(roles)) {
+    key <- mirror_name_key(df[[nc]])
+    hit <- !is.na(key) & key == name
+    doc <- intersect(roles[[nc]]$document, names(df))
+    if (any(hit) && !is.na(cpf) && length(doc)) {
+      middle <- mirror_cpf_middle(df[[doc[1L]]])
+      other <- hit & !is.na(middle) & middle != cpf
+      namesake <- namesake | other
+      hit <- hit & !other
+    }
+    if (!any(hit)) {
+      next
+    }
+    for (own in intersect(roles[[nc]]$blank, names(df))) {
+      df[[own]][hit] <- NA
+    }
+    df[[nc]][hit] <- mirror_suppressed_label
+  }
+  list(df = df, namesake = namesake)
+}
+
+# A mention of the name in the text columns, outside the rows in `skip`.
+mirror_suppress_mentions <- function(df, texts, name, skip) {
+  re <- mirror_name_regex(name)
+  for (cn in texts) {
+    x <- df[[cn]]
+    hit <- !skip & !is.na(x) & grepl(re, x, perl = TRUE)
+    if (any(hit)) {
+      x[hit] <- gsub(re, mirror_suppressed_label, x[hit], perl = TRUE)
+      df[[cn]] <- x
+    }
+  }
+  df
+}
+
 # The data frame the mirror may publish: the rules above applied to the
 # columns, then the filings a group table may not show taken out. Same
 # column order; the attributes of the frame survive both steps.
@@ -323,7 +548,7 @@ mirror_mask_columns <- function(df) {
     df[["data_nascimento"]] <- mirror_birth_year(df[["data_nascimento"]])
     names(df)[names(df) == "data_nascimento"] <- "ano_nascimento"
   }
-  df
+  mirror_suppress_people(df)
 }
 
 # How many values of each column `mirror_apply_privacy()` would change, as

@@ -17,6 +17,17 @@
   so `cvm_release_set()` returns the masked values for past dates. See
   "Personal data" in `?cvm_fetch`.
 
+* A person named in the mirror can ask to leave it. The robot reads a
+  private list (never in the repository) and, for each person on it,
+  keeps the row and replaces the name with `[omitido a pedido do
+  titular]`, empties the columns that describe the person (masked CPF,
+  birth year, profession, biography, nationality) and replaces a mention
+  of the name in any text of the dataset. Seats, dates of office and
+  shareholding percentages stay, so counts and sums are unchanged. The
+  sidecar of each release carries only how many people asked
+  (`privacy_suppressed`), and a run whose list is shorter than the
+  previous one stops instead of putting somebody back.
+
 * `DATA-LICENSE.md` and the README of the Zenodo editions now say that
   the ODbL does not license the personal data in the tables: the licence
   governs the rights over the database (its section 2.4), and whoever

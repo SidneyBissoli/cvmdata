@@ -103,6 +103,8 @@ jobs:
         include: ${{ (github.event_name == 'schedule' || inputs.dataset == '') && fromJSON('[{"group":"companhias","dataset":"cad"},{"group":"companhias","dataset":"dfp"},{"group":"companhias","dataset":"itr"},{"group":"companhias","dataset":"fre"},{"group":"companhias","dataset":"cgvn"},{"group":"companhias","dataset":"vlmo"},{"group":"companhias","dataset":"fca"},{"group":"companhias","dataset":"ipe"},{"group":"companhias","dataset":"recompra_acoes"}]') || fromJSON(format('[{{"group":"{0}","dataset":"{1}"}}]', inputs.group, inputs.dataset)) }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # people who asked to leave the mirror (inst/etl/util-privacy.R)
+      CVMDATA_MIRROR_SUPPRESSED: ${{ secrets.CVMDATA_MIRROR_SUPPRESSED }}
       # runner.* contexts are not allowed at job-level env, only inside
       # steps. Hardcoding /tmp works on ubuntu-latest and keeps the env
       # readable across all stages without per-step duplication.
