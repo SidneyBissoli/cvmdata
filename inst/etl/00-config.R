@@ -128,7 +128,50 @@ mirror_schema_dir <- function(dataset) {
       call. = FALSE
     )
   }
+  mirror_check_installed(
+    path,
+    file.path("inst", "extdata", "schemas", group, dataset)
+  )
   path
+}
+
+# The ETL reads the schemas of the INSTALLED package. Run from a source
+# tree whose schemas differ from the installed ones (a local repair after a
+# pull, without reinstalling), it would follow the old schemas in silence:
+# on 2026-11-15 a repair left the files of a table that had just become
+# `mirror: false` in the dated snapshots, because the installed copy did
+# not know. So: when the working directory is a source tree, its schemas
+# must be the installed ones, byte for byte. Nothing to compare under a
+# plain installed run or under `devtools::load_all()`.
+mirror_check_installed <- function(installed, source) {
+  if (!dir.exists(source)) {
+    return(invisible(TRUE))
+  }
+  same_dir <- identical(
+    normalizePath(installed, winslash = "/"),
+    normalizePath(source, winslash = "/")
+  )
+  if (same_dir) {
+    return(invisible(TRUE))
+  }
+  sums <- function(dir) {
+    files <- sort(list.files(dir, pattern = "\\.yaml$"))
+    stats::setNames(unname(tools::md5sum(file.path(dir, files))), files)
+  }
+  if (!identical(sums(installed), sums(source))) {
+    stop(
+      sprintf(
+        paste(
+          "the installed cvmdata has other schemas than this source tree",
+          "(%s): reinstall the package (devtools::install()) before",
+          "running the ETL from here"
+        ),
+        source
+      ),
+      call. = FALSE
+    )
+  }
+  invisible(TRUE)
 }
 
 # Table ids of a dataset, by the YAML filenames: every table the package
