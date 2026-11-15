@@ -95,8 +95,8 @@ seu, a forma será combinada na resposta.
 
 Todo pedido de quem comprovar ser a pessoa, ou seu representante, é
 atendido, sem necessidade de explicar o motivo. O nome passa a aparecer
-como `[omitido a pedido do titular]` em todos os textos do espelho, a
-partir da atualização semanal seguinte.
+como `[omitido a pedido do titular]` nos textos da cópia corrente do
+espelho, na atualização semanal que se seguir ao atendimento.
 
 Você também pode pedir a confirmação de que o espelho cita o seu nome e
 o acesso a esses trechos (LGPD, art. 18). A confirmação sai o quanto
@@ -106,12 +106,15 @@ antes; a resposta completa, em até 15 dias do pedido (art. 19).
 
 - O texto de origem continua no portal da CVM. Um pedido sobre a origem
   se faz à companhia ou à CVM.
-- **Fotos datadas e edições no Zenodo já publicadas** não mudam sozinhas.
-  O responsável as refaz quando um pedido chega; no Zenodo, depois de 30
-  dias da publicação, a retirada de um registro depende de pedido ao
-  suporte do serviço, que só a aceita "in duly justified cases, such as
-  copyright infringement or exposure of personal data" (lido na ajuda do
-  Zenodo em 14/11/2026).
+- **Fotos datadas e edições no Zenodo já publicadas podem continuar
+  citando o nome.** O espelho é mantido por uma pessoa só, e este aviso
+  não promete o que ela pode não conseguir cumprir. As fotos datadas
+  podem ser refeitas, mas isso não é automático. No Zenodo, depois de 30
+  dias da publicação, a retirada de um registro não depende do
+  responsável: depende de pedido ao suporte do serviço, que só a aceita
+  "in duly justified cases, such as copyright infringement or exposure
+  of personal data" (lido na ajuda do Zenodo em 14/11/2026). A resposta
+  ao seu pedido dirá o que foi feito e o que não foi possível.
 - Arquivos já baixados por terceiros estão fora do alcance do
   responsável.
 - O atendimento segue o procedimento registrado em

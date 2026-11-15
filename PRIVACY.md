@@ -98,8 +98,8 @@ request is yours, the way to do so will be agreed in the reply.
 Every request from somebody who shows to be the person, or their
 representative, is honoured, with no need to give a reason. The name
 then reads `[omitido a pedido do titular]` ("omitted at the request of
-the data subject") in every text of the mirror, from the following
-weekly refresh.
+the data subject") in the texts of the current copy of the mirror, at
+the weekly refresh that follows the handling of the request.
 
 You can also ask for confirmation that the mirror mentions your name and
 for access to those passages (LGPD, art. 18). Confirmation is given as
@@ -110,13 +110,16 @@ soon as possible; the full answer, within 15 days of the request (art.
 
 - The original text remains on the CVM portal. A request about the
   origin is made to the company or to the CVM.
-- **Dated snapshots and Zenodo editions already published** do not
-  change by themselves. The person responsible rebuilds them when a
-  request arrives; on Zenodo, after 30 days from publication, removing a
-  record depends on a request to the service's support, which accepts it
-  only "in duly justified cases, such as copyright infringement or
-  exposure of personal data" (read in the Zenodo help on 14 November
-  2026).
+- **Dated snapshots and Zenodo editions already published may go on
+  mentioning the name.** The mirror is maintained by one person, and
+  this notice does not promise what that person may be unable to
+  deliver. Dated snapshots can be rebuilt, but that is not automatic. On
+  Zenodo, after 30 days from publication, removing a record is not up to
+  the person responsible: it depends on a request to the service's
+  support, which accepts it only "in duly justified cases, such as
+  copyright infringement or exposure of personal data" (read in the
+  Zenodo help on 14 November 2026). The answer to your request will say
+  what was done and what was not possible.
 - Files already downloaded by third parties are beyond the reach of the
   person responsible.
 - Requests are handled by the procedure recorded in
