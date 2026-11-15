@@ -1,7 +1,8 @@
 # Data licence and attribution
 
 The code of the `cvmdata` package is released under the MIT licence
-(see `LICENSE.md`). The **data** the package serves is not the
+(see [`LICENSE.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/LICENSE.md)).
+The **data** the package serves is not the
 package's own and has a licence of its own.
 
 ## Source
