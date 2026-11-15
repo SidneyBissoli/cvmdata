@@ -168,8 +168,8 @@ the CVM's. The biography column \code{experiencia_profissional} of
 mirror: the texts mention union and party membership, religion, health
 and convictions. Names and CNPJs stay as published; the masked CPF plus
 the name still follow a person across tables. \code{source = "cvm"} reads
-everything from the CVM untouched, under the same duty to respect the purpose of the
-disclosure (Lei 13.709/2018, art. 7, paragraph 3).
+everything from the CVM untouched, under the same duty to respect the
+purpose of the disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 }
 
 \section{Filing versions}{

@@ -575,8 +575,9 @@ mirror_mask_columns <- function(df) {
 # means the frame may be published. Counts and column names only, so a
 # failure can be logged without printing anybody's data. A contact or
 # biography column is listed whenever it is present, with its filled
-# values as the count: zero there still means "this column must go". The rows of a group table
-# that must go are counted under `small_or_unanimous_groups`.
+# values as the count: zero there still means "this column must go". The
+# rows of a group table that must go are counted under
+# `small_or_unanimous_groups`.
 mirror_privacy_counts <- function(df) {
   safe <- mirror_mask_columns(df)
   out <- integer()
