@@ -61,6 +61,14 @@
   (`privacy_suppressed`), and a run whose list is shorter than the
   previous one stops instead of putting somebody back.
 
+* The mirror has a privacy notice, `PRIVACY.md` and `PRIVACY.pt-BR.md`
+  (the Portuguese version prevails): what the mirror leaves out, what a
+  text about a company may still say about a person, who answers for it
+  and how to ask for a name to be removed. It is linked from the README
+  and from `DATA-LICENSE.md`, cited in the notes of every mirror release
+  and shipped inside the Zenodo editions. The procedure for requests is
+  in `data-raw/decisions/`.
+
 * `DATA-LICENSE.md` and the README of the Zenodo editions now say that
   the ODbL does not license the personal data in the tables: the licence
   governs the rights over the database (its section 2.4), and whoever

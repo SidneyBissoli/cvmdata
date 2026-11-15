@@ -224,6 +224,12 @@ Dados Abertos da Comissão de Valores Mobiliários (CVM),
 o que a licença pede de quem redistribui os dados, estão em
 [`DATA-LICENSE.md`](DATA-LICENSE.md). O **código** do pacote é MIT.
 
+O espelho guarda dados sobre companhias, não sobre pessoas; as tabelas
+que descrevem pessoas são lidas direto da CVM. O que o espelho deixa de
+fora, quem responde por ele e como uma pessoa citada em um texto pode
+pedir que o nome saia estão no aviso de privacidade,
+[`PRIVACY.pt-BR.md`](PRIVACY.pt-BR.md) ([in English](PRIVACY.md)).
+
 ## Trabalhos relacionados
 
 Para dados de mercado do lado da bolsa (preços, volumes, tickers,
