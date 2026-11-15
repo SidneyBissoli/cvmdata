@@ -1,0 +1,74 @@
+# Look up the codelist for a categorical column
+
+Returns the set of categorical values observed for a single
+`(dataset, table, column)` triple, sourced from the snapshot embedded
+under `inst/extdata/cvm_codelists_snapshot.csv`. The snapshot is built
+offline by `data-raw/build-codelists-snapshot.R` from every published
+year of the CVM open-data CSVs.
+
+## Usage
+
+``` r
+cvm_codelist(dataset, table, column, group = NULL)
+```
+
+## Arguments
+
+- dataset:
+
+  Short dataset id (e.g. `"cad"`).
+
+- table:
+
+  Table name within the dataset (e.g. `"companhias"`).
+
+- column:
+
+  Snake-case column name (e.g. `"sit"`).
+
+- group:
+
+  Optional CKAN group slug (e.g. `"companhias"`). When `NULL` (default)
+  the function resolves by uniqueness across the embedded snapshot. From
+  v0.4 onward, datasets may exist in more than one group; in that case
+  omitting `group` aborts with `cvmdata_error_input_ambiguous`.
+
+## Value
+
+A tibble with one row per categorical value, sorted alphabetically.
+Columns: `value` (character), `first_seen_year` and `last_seen_year`
+(integer): the first and last year the value appears in the data. `NA`
+for a value the dictionary enumerates but the data never uses, and for
+tables without yearly files (`cad`).
+
+## Details
+
+Inclusion criteria for the snapshot (see CLAUDE.md §9.2): columns whose
+dictionary `dominio` enumerates values (e.g. `S/N`, `PF/PJ`), and
+`varchar` columns with `tamanho < 200` and at most 50 distinct values
+over every published year. The CVM's sector classification
+(`fca`/`geral`/`setor_atividade`, 66 values) is kept above that cap on
+purpose.
+
+## See also
+
+[`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
+
+Other discovery:
+[`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md),
+[`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+[`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
+[`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+
+## Examples
+
+``` r
+cvm_codelist("cad", "companhias", "sit")
+#> # A tibble: 3 × 3
+#>   value                     first_seen_year last_seen_year
+#>   <chr>                               <int>          <int>
+#> 1 ATIVO                                  NA             NA
+#> 2 CANCELADA                              NA             NA
+#> 3 SUSPENSO(A) - DECISÃO ADM              NA             NA
+```

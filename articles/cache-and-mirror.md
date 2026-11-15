@@ -1,0 +1,407 @@
+# Cache and mirror backend
+
+`cvmdata` ships two interchangeable backends behind
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+and a multi-layer disk cache that both backends share. This article
+walks through the contract, the pipeline that keeps the mirror fresh,
+and the workflows for switching between backends, inspecting the cache,
+and tuning the TTL and eviction options.
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
+
+## Reference: backends and caches
+
+### Source backends
+
+| Backend | What it queries | When to prefer it |
+|----|----|----|
+| `"mirror"` | Parquet snapshots in GitHub Releases named `mirror-<group>-<dataset>-latest`, queried via DuckDB. | Default from v0.1.0. ~30× faster on yearly bundles; staleness bounded by the weekly refresh window vs. CVM live. |
+| `"cvm"` | The CVM Open Data Portal over HTTP (`dados.cvm.gov.br`). | Highest freshness — bytes are direct from the regulator. Opt in when you need the latest publication within the refresh window. |
+
+The active backend is selected at three precedence levels: an explicit
+`source = ...` argument to
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+wins over the option `cvmdata.source` (set via
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)),
+which in turn wins over the built-in default returned by
+[`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md).
+
+The mirror is maintained by the package author, not by the CVM. Its
+content is the CVM’s, re-encoded to UTF-8, typed according to the CVM
+data dictionary and partitioned by year; no value is altered. Two
+consequences are worth knowing before you rely on the default. First,
+the mirror can lag the portal by up to the weekly refresh window.
+Second, the ETL skips a year whose CSV the CVM publishes with no data
+rows, so the mirror’s inventory for a table may end earlier than the
+portal’s list of years (the `cvm` backend returns such a year as zero
+rows instead). Every skip is recorded, with its reason, in the
+`__source_hash.json` sidecar of the release, and the error you get when
+asking the mirror for a missing year quotes it: whether the CVM
+published the CSV with the header only, or did not include it in the
+yearly ZIP at all.
+
+### When a server fails
+
+Every request the package makes, to GitHub or to the CVM portal, is
+tried up to four times when the failure is the server’s or the
+connection’s: an HTTP 5xx, a 429, or no response at all. The waits
+between attempts grow and add up to about fifteen seconds in the worst
+case. A 4xx is never retried, because the same request would bring the
+same answer: a file that does not exist is reported at once. When the
+four attempts fail, the error (`cvmdata_error_http`) says so and that
+trying again in a few minutes usually works.
+
+The `__source_hash.json` sidecar gets one more guarantee. When the
+release publishes it and the package still cannot read it, the call goes
+on with a `cvmdata_warn_sidecar_unread` warning that names what the
+session goes without: cached files are served without checking that the
+release still holds them, downloads are not verified against the
+published digests, and a missing year comes without its reason. The
+first call after five minutes asks for the sidecar again. Under a pinned
+date the sidecar is what lists the dates, so there the call stops with
+the same reason instead.
+
+### Dated snapshots
+
+The `-latest` release is rewritten in place every week, so by itself it
+cannot answer “what did the mirror hold on 1 September?”. Since
+2026-10-27 every weekly run that changes something also publishes a
+dated release, `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`, with
+the partitions whose content changed that week and a complete
+`__source_hash.json` that lists every partition of the day’s mirror and,
+for each one, the snapshot release that holds its bytes. A snapshot is
+never deleted, so a date keeps resolving to the same bytes.
+
+The option `cvmdata.mirror_release` chooses the copy the package reads.
+[`cvm_release_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md)
+returns it (`"latest"` by default) and
+[`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)
+changes it: pass a complete date and the package resolves it to the most
+recent snapshot on or before that date, reads each partition from the
+release that holds it, and records the resolved tag in the `release`
+attribute of every tibble. Like `cvmdata.source`, the pin is a property
+of the session: set it once at the top of a script and every
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+and
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+below it reads the same retrato. A date before the first snapshot of a
+dataset is an error that names the earliest date available.
+
+Two details follow from the design. The weekly snapshot carries only
+what changed (about 60 MB a week over the eight datasets, measured in
+October 2026), so pinning costs the mirror little; and the local cache
+holds one copy of each partition, verified against the SHA-256 the
+sidecar publishes, so switching between dates re-downloads only the
+partitions whose bytes differ. The history assets read by
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+live on `-latest` only; under a pin the rows superseded after the pinned
+date are dropped, so the result is the set of versions known on that
+day.
+
+### Personal data
+
+This is the one place the two sources differ by design. The CVM
+publishes full CPFs and birth dates of the people who run and control
+listed companies; a mirror with permanent editions keeps what research
+needs. The mirror carries data about companies, not about people. The
+`fre` tables that describe natural persons (board and committee members,
+family and subordination ties, shareholders, related parties, the people
+who sign the form and the audit, and the three counts of declarations of
+board members) and `fca/dri` are not in it:
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+reads them from the CVM by itself, with a message, and there is no dated
+snapshot of them. In the tables that stay, the columns that name a
+person and the columns of e-mail, telephone and fax are absent, and a
+CPF that a text mentions reads `***.456.789-**`. The five workforce
+tables that count employees by race, gender or disability come without
+the companies that, in a year, have a group of fewer than 10 people or
+one in which everybody declared the same category: reading one of them
+warns with the companies and the share of people left out, and keeps the
+numbers in `attr(x, "omitted")`. `source = "cvm"` returns what the CVM
+publishes.
+
+### Data licence and attribution
+
+The CVM publishes every dataset covered by the package under the [Open
+Data Commons Open Database License (ODbL)
+v1.0](https://opendatacommons.org/licenses/odbl/1-0/), declared on each
+dataset page of the portal. The mirror is a *derivative database* in the
+terms of that licence and is redistributed under the ODbL as well; the
+release notes of every `mirror-*-latest` release carry the notice. When
+you redistribute data obtained through `cvmdata`, or a database derived
+from it, keep the attribution:
+
+> Contains data from the Comissão de Valores Mobiliários (CVM) Open Data
+> Portal, <https://dados.cvm.gov.br/>, made available under the Open
+> Data Commons Open Database License (ODbL) v1.0.
+
+The full notice, with what the licence asks of you, is in the
+repository’s
+[`DATA-LICENSE.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/DATA-LICENSE.md).
+The package code is MIT licensed; the data is not.
+
+### Cache layers
+
+| Layer | Location | Content | Invalidation |
+|----|----|----|----|
+| L1 | `<cache>/raw/<group>/<dataset>/[<year>/]` | Raw CVM CSV (CAD) or yearly ZIPs (DFP/ITR/FRE) + extracted CSVs, with `*.etag.rds` sidecars. | HTTP HEAD with ETag / Last-Modified, throttled by `options(cvmdata.cache_ttl_seconds)` (default 30 days). |
+| L3 | `<cache>/parquet/<group>/<dataset>/<table>/[report_type=R/]year=Y/part-0.parquet` | Parquet downloaded from the mirror. | Content-addressed via the `<cache>/parquet/<group>/<dataset>/__source_hash.json` sidecar — the whole dataset tree is evicted when the upstream hash changes. |
+| L4 | In-session memory. | Planned for v0.2. | — |
+
+The `<group>` segment is the CKAN group slug returned by
+[`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
+(e.g. `"companhias"` for the four datasets shipped in v0.1.0). Caches
+written by `cvmdata` ≤ 0.0.x without the segment are migrated
+automatically the first time a 0.1.x session touches them.
+
+[`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
+returns the cache root;
+[`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)
+relocates it;
+[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+lists every artifact with its size, ETag and timestamps;
+[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+evicts (with `what` of `"all"`, `"raw"`, or `"parquet"`).
+
+\
+[`cvm_cache_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)`(``)`\
+`#> [1] "/github/home/.cache/R/cvmdata"`\
+[`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
+`#> [1] "mirror"`
+
+## Mirror pipeline validation
+
+Every weekly mirror publish runs a hybrid validation step
+(`inst/etl/02b-validate.R`) between parquet generation and upload. The
+checks are split into two tiers: *hard* failures block the publish (the
+matrix job exits 1 and the previous mirror release stays in place),
+*soft* failures emit a warning and let the publish proceed. The
+validation markdown report is uploaded as a workflow artifact so
+post-hoc inspection is always available, regardless of outcome.
+
+| Check | Severity | Applies to |
+|----|----|----|
+| Parquet file exists | hard | Every (table, year, report_type) implied by the schema |
+| Parquet readable by `arrow` | hard | Every produced parquet |
+| `n_rows > 0` | hard | Every produced parquet |
+| Identifier column (`cnpj_cia` / `cnpj_companhia`) is character | hard | Tables that carry one |
+| `vl_conta` is numeric | hard | Tables that declare `multiply_by_scale` |
+| Identifier values match the CVM CNPJ regex | soft | Tables with `cnpj_cia` / `cnpj_companhia` |
+| `cd_cvm` values are all-digits | soft | Tables with `cd_cvm` |
+| `dt_refer` / `data_referencia` within `[first_year, today + 1y]` | soft | Tables with a publish-date column |
+
+The hybrid scope follows the decisions of session 3.14: universal
+invariants live in code (no per-dataset YAMLs), hard checks bound the
+worst case (empty / unreadable / wrong-type), soft checks bound the
+content noise the CVM occasionally publishes. New checks land in the
+same script; documenting them here is the rOpenSci-auditable surface.
+
+### Superseded filings
+
+Each CVM annual file carries only the filing delivered last for every
+company and reference date, so a restatement silently replaces the
+previous numbers in the file, and the mirror followed suit until
+2026-10. Since then the publish step compares, for every partition whose
+content hash moved, the parquet of the previous release with the new
+one, filing by filing, and appends the rows of the filings that were
+replaced or dropped to a cumulative history asset of the same partition,
+named `<table>__report_type=R__year=Y__history.parquet`, with two extra
+columns: `superseded_at` (the ETL run, UTC) and `superseded_by_versao`
+(the `versao` of the replacing filing, `NA` when the filing vanished). A
+filing counts as changed by the content of its rows, not by a new
+`versao` or document id with the same numbers (the `submissao` table
+already records every delivery). The `-latest` parquets and
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+are untouched: the client ignores the history assets. Reading them
+through the package, and recovering filings superseded before the
+history existed, are planned separately (see the roadmap).
+
+## Workflow 1 — Working with the mirror (default)
+
+From v0.1.0 the mirror is the default backend, so
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+routes every call through DuckDB without further configuration. The
+snippet below makes the choice explicit (helpful in scripts that may
+inherit a different session option) and exercises both the cold and warm
+cache paths:
+
+\
+`# Make the choice explicit (a no-op when the option is already unset`\
+`# from the built-in default).`\
+[`cvm_source_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)`(``"mirror"``)`\
+\
+`# First call: the mirror's release inventory is fetched once via the`\
+`# GitHub REST API, parquet assets are downloaded into the L3 cache, and`\
+`# DuckDB reads them from disk.`\
+`bb_bpa_mirror`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`\
+\
+`# Second call: the L3 cache short-circuits the download; the API`\
+`# inventory is reused from the session cache; only DuckDB runs.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`
+
+The argument `source = ...` to
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+always overrides the option, so a single call can fall back to the CVM
+portal without disturbing the session-wide setting:
+
+\
+`# Persisted setting is "mirror"; this one call still queries CVM live.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"``,`\
+`  source ``=`` ``"cvm"`\
+`)`
+
+### Pinning a script to a date
+
+A script meant to reproduce a result months later should not depend on
+whatever the mirror holds when it runs again. Pin the session to the
+snapshot of the day the result was produced:
+
+\
+`# Every mirror read below comes from the snapshot on or before this date.`\
+[`cvm_release_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)`(``"2026-11-01"``)`\
+\
+`bb_bpa_pinned`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``bb_bpa_pinned``, ``"release"``)`\
+`#> [1] "mirror-companhias-dfp-snapshot-2026-10-27"`\
+\
+`# Back to the weekly refresh.`\
+[`cvm_release_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)`(``"latest"``)`
+
+The sidecar of every `-latest` release lists, under `snapshots`, the
+dates that can be pinned; the release notes of each snapshot say how
+many partitions it carries and how to read it.
+
+## Workflow 2 — CVM vs Mirror equivalence
+
+The mirror backend returns tibbles that are column- and type-equivalent
+to the CVM HTTP path on the common columns. The mirror additionally
+attaches a `year` partition column reattached from the asset filename —
+it is not present on the CVM path because the CVM CSV does not carry it.
+The `report_type` partition the mirror also carries is exposed by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+under the public name `basis`, on both backends, for the tables that
+have the individual/consolidated split. The table below was captured by
+`data-raw/validate-mirror-end-to-end.R`, which runs the same four calls
+through both backends and compares schemas:
+
+\
+`cmp`` ``<-`` `[`readRDS`](https://rdrr.io/r/base/readRDS.html)`(`[`system.file`](https://rdrr.io/r/base/system.file.html)`(`\
+`  ``"extdata"``, ``"vignette-data"``, ``"cache-and-mirror"``,`\
+`  ``"cvm-vs-mirror.rds"``,`\
+`  package ``=`` ``"cvmdata"`\
+`)``)`\
+`knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(``cmp``)`
+
+| chamada | n_rows_cvm | n_rows_mirror | colunas_iguais | tipos_iguais | cvm_only | mirror_only |
+|:---|---:|---:|:---|:---|:---|:---|
+| cad/companhias | 2673 | 2673 | TRUE | TRUE |  |  |
+| dfp/bpa ind 2024 | 94515 | 94515 | FALSE | TRUE |  | report_type,year |
+| itr/dre con (latest) | 27962 | 27904 | FALSE | TRUE |  | report_type,year |
+| fre/posicao_acionaria 2024 (PETROBRAS) | 26 | 26 | FALSE | TRUE |  | year |
+
+Small `nrow` differences (e.g. ITR’s `~0.2%`) are the expected staleness
+window between the weekly cron and the live CVM portal — every Tuesday
+at 04:00 BRT the mirror refreshes; chamadas during the rest of the week
+may see CVM rows the mirror has not yet snapshotted. This is feature,
+not bug: the mirror is a snapshot.
+
+## Workflow 3 — Inspecting and clearing the cache
+
+[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+walks the cache and returns one row per artifact:
+
+\
+`info`` ``<-`` `[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)`\
+`info`\
+\
+`# Total bytes across all listed artifacts:`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``info``, ``"total_size_bytes"``)`
+
+The first column of
+[`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)
+is `group`, mirroring the on-disk layout — useful when later releases
+bring datasets from multiple CKAN groups into the same cache.
+
+[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+accepts a `what` argument scoping the eviction to L1 (`"raw"`), L3
+(`"parquet"`), or both (`"all"`), plus an optional `group` to restrict
+the eviction to a single CKAN group. The L3 mode evicts by dataset
+because the partition layout nests year under table:
+
+\
+`# Drop the mirror's local parquet copy for DFP only.`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"parquet"``, dataset ``=`` ``"dfp"``, confirm ``=`` ``FALSE``)`\
+\
+`# Drop every artifact belonging to the "companhias" CKAN group`\
+`# (raw + parquet), leaving other groups intact.`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"all"``, group ``=`` ``"companhias"``, confirm ``=`` ``FALSE``)`\
+\
+`# Reset everything (raw + parquet, all groups).`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` ``"all"``, confirm ``=`` ``FALSE``)`
+
+In interactive sessions `confirm = TRUE` (the default) prompts via
+[`utils::askYesNo()`](https://rdrr.io/r/utils/askYesNo.html); batch
+scripts must pass `confirm = FALSE`.
+
+## Workflow 4 — TTL and LRU eviction
+
+Two options shape the cache’s behaviour beyond explicit clears:
+
+- `cvmdata.cache_ttl_seconds` (default `2592000`, i.e. 30 days) controls
+  how often the L1 cache revalidates against CVM with an HTTP HEAD
+  request. Set to `0` to revalidate on every call and to `Inf` to skip
+  revalidation entirely until manual clear.
+- `cvmdata.cache_max_size_mb` (default `100`) caps the size of L1. When
+  total size exceeds 90% of the limit, the next download evicts the
+  oldest units until the cache drops to 80% of the limit. Setting the
+  option to `0`, a negative value, or `Inf` disables the eviction
+  engine. The L3 mirror cache is content-addressed and not subject to
+  size-based eviction.
+
+\
+`# Force revalidation on every L1 hit.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_ttl_seconds ``=`` ``0``)`\
+\
+`# Cap L1 at 250 MiB; LRU kicks in past 225 MiB and stops at 200 MiB.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_max_size_mb ``=`` ``250``)`\
+\
+`# Subscribe to eviction notifications even in non-interactive runs.`\
+[`options`](https://rdrr.io/r/base/options.html)`(``cvmdata.cache_warn_evictions ``=`` ``TRUE``)`
+
+Eviction emits the `cvmdata_warn_eviction` warning class (interactive
+sessions get it for free; batch jobs honour the `cache_warn_evictions`
+option). The aggregated message reports how many units were removed and
+how much disk it freed.
+
+## Where to read next
+
+- **groups-overview** — the 18 CKAN groups, the single fetcher that
+  serves them, and which datasets each `cvmdata` release unlocks.
+- **issuer-fetch** — argument-level deep dive on
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+  including `cnpj` / `ticker` / `year` / `from` / `to` / `basis` /
+  `on_error`.
+- **itr-dfp** — end-to-end workflows on annual and quarterly financial
+  statements.
+- **data-defects** — known CVM publication quirks (and other source
+  defects, starting in v0.4+) and how the package handles each one.

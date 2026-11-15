@@ -1,0 +1,207 @@
+# Reference Form (FRE)
+
+The **Formulário de Referência** (FRE) is the annual reference form
+filed by every publicly-traded company in Brazil. It bundles governance,
+executive compensation, capital structure, related-party transactions,
+employment, and ESG/diversity disclosures into a single 35-table
+dataset, plus the `submissao` header — 36 tables in total.
+
+Two quirks set FRE apart from ITR/DFP and are worth surfacing up-front:
+
+- FRE detail tables use a different header convention from CAD/ITR/DFP:
+  `cnpj_companhia`, `data_referencia`, `nome_companhia` (no `cd_cvm`
+  column in the detail rows).
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  smooths over this — `cnpj` matches `cnpj_companhia` here and
+  `cnpj_cia` elsewhere, so the call is the same everywhere.
+- Eight tables in FRE ship **without published META** (CVM never
+  released the dictionary file). The package declares them with
+  `meta_status: missing` and checks every file against the header
+  declared in the schema.
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
+
+## Reference: 36 tables, by theme
+
+| Theme | Tables |
+|----|----|
+| Header | `submissao` |
+| Audit | `auditor`, `responsavel` |
+| Capital structure | `capital_social`, `capital_social_classe_acao`, `capital_social_titulo_conversivel`, `distribuicao_capital`, `distribuicao_capital_classe_acao`, `acao_entregue`, `outro_valor_mobiliario`, `mercado_estrangeiro`, `titulo_exterior` |
+| Ownership | `posicao_acionaria`, `posicao_acionaria_classe_acao`, `titular_valor_mobiliario`, `participacao_sociedade`, `transacao_parte_relacionada` |
+| Board & committees | `administrador_membro_conselho_fiscal`, `membro_comite`, `relacao_familiar`, `relacao_subordinacao` |
+| Diversity (board) | `administrador_declaracao_genero`, `administrador_declaracao_raca`, `administrador_PCD` |
+|  | (the ✱ tables with `declaracao_genero`, `declaracao_raca` or `PCD` come from the mirror without the companies that have a group under 10 people or a unanimous group; the read warns with the numbers) |
+| Compensation | `remuneracao_total_orgao`, `remuneracao_variavel`, `remuneracao_acao`, `remuneracao_maxima_minima_media` |
+|  | (these three are read with `source = "cvm"` only; the mirror does not redistribute them) |
+| Diversity (workforce) | `empregado_PCD`✱, `empregado_local_declaracao_genero`✱, `empregado_local_declaracao_raca`✱, `empregado_local_faixa_etaria`, `empregado_posicao_declaracao_genero`✱, `empregado_posicao_declaracao_raca`✱, `empregado_posicao_faixa_etaria`✱, `empregado_posicao_local`✱ |
+
+✱ — `meta_status: missing`: dictionary not published by CVM; the reader
+checks the header against the schema’s `expected_field_names`.
+
+Use `cvm_tables("fre")` for the full list and
+`cvm_dictionary("fre", "<table>")` for per-column metadata. Tables
+marked ✱ return rows with `NA` in every dictionary column except
+`campo`/`campo_original` (which come from the YAML’s
+`expected_field_names`) and carry an attribute
+`meta_status = "missing"`.
+
+## Workflow 1 — Audit and ESG/PCD disclosures for one issuer
+
+Goal: pull the audit firm history and the PCD (*Pessoa com Deficiência*)
+employment counts for **BCO BRASIL S.A.** (CNPJ `00.000.000/0001-91`),
+reference year 2024.
+
+### The audit firm
+
+\
+`auditor`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"auditor"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/RtmpidlB5W/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/RtmpidlB5W/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`auditor`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
+`#>   ``fetched_at``: ``2026-11-15 16:53:39.337537`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
+`#> ``# A tibble: 2 × 18`\
+`#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
+`#>   ``<chr>``            ``<date>``          ``<chr>``  ``<chr>``        ``<chr>``          ``<chr>``     `\
+`#> ``1`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131376    `\
+`#> ``2`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131377    `\
+`#> ``# ℹ 12 more variables: auditor <chr>, cnpj_auditor <chr>,`\
+`#> ``#   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,`\
+`#> ``#   data_inicio_contratacao <date>, data_fim_contratacao <date>,`\
+`#> ``#   data_inicio_prestacao_servico <date>, servico_contratado <chr>,`\
+`#> ``#   remuneracao_auditor <chr>, justificativa_substituicao <chr>,`\
+`#> ``#   razao_apresentada <chr>, year <int>`
+
+Notice the header columns: `cnpj_companhia`, `data_referencia`,
+`nome_companhia` (no `cd_cvm`). The `cnpj` filter matched
+`cnpj_companhia` directly. `keep_latest_version` has already
+de-duplicated re-filings.
+
+### PCD employment counts (table without published META)
+
+`empregado_PCD` is one of the eight FRE tables that CVM never released a
+dictionary for. It reads like any other table; the schema declares the
+header the CVM publishes, and a file that departs from it stops the call
+(`on_error = "abort"`, the default) or is read with a
+`cvmdata_warn_validation` warning (`on_error = "warn"`):
+
+\
+`pcd`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"empregado_PCD"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/RtmpidlB5W/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`pcd`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
+`#>   ``fetched_at``: ``2026-11-15 16:53:39.696759`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
+`#> ``!`` ``omitted``: 11 of 21 companies of 2024 are not in the mirror (privacy rule;`\
+`` #>   `attr(x, "omitted")`) ``\
+`#> ``# A tibble: 0 × 11`\
+`#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
+`#> ``#   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,`\
+`#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
+`#> ``#   quantidade_sem_resposta <dbl>, year <int>`
+
+`cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
+the YAML’s `expected_field_names`) with `NA` in every metadata column —
+by design, because the package never invents content the CVM did not
+publish.
+
+## Workflow 2 — Shareholder positions (cap table)
+
+Goal: extract the top shareholders of BCO BRASIL recorded in the 2024
+FRE filing.
+
+\
+`posicao`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"fre"``, ``"posicao_acionaria"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024`\
+`)`\
+`#> ``ℹ`` Table ``"fre"``/``"posicao_acionaria"`` is not in the mirror: reading it from the`\
+`#>   CVM.`\
+`#> ``ℹ`` Not redistributed: shareholders, natural persons and companies in the same`\
+`#>   column; the mirror carries company data only (owner's decision of`\
+`#>   2026-11-15).`\
+`#> ``This message is displayed once per session.`\
+\
+`# Columns covering shareholder identity and stake:`\
+`cols`` ``<-`` `[`intersect`](https://rdrr.io/r/base/sets.html)`(`\
+`  `[`c`](https://rdrr.io/r/base/c.html)`(``"acionista"``, ``"cpf_cnpj_acionista"``,`\
+`    ``"percentual_total_acoes_circulacao"``,`\
+`    ``"percentual_acao_ordinaria_circulacao"``)``,`\
+`  `[`names`](https://rdrr.io/r/base/names.html)`(``posicao``)`\
+`)`\
+`posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
+`#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-11-15 16:53:40.552459`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
+`#> ``# A tibble: 5 × 6`\
+`#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\
+`#>   ``<chr>``           ``<date>``          ``<chr>``                       ``<chr>``             `\
+`#> ``1`` BCO BRASIL S.A. 2024-12-31      Ministério da Economia / S… 00.394.460/0001-41`\
+`#> ``2`` BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            ``NA``                `\
+`#> ``3`` BCO BRASIL S.A. 2024-12-31      Outros                      ``NA``                `\
+`#> ``4`` BCO BRASIL S.A. 2024-12-31      Ações Tesouraria            ``NA``                `\
+`#> ``5`` BCO BRASIL S.A. 2024-12-31      Outros                      ``NA``                `\
+`#> ``# ℹ 2 more variables: percentual_total_acoes_circulacao <dbl>,`\
+`#> ``#   percentual_acao_ordinaria_circulacao <dbl>`
+
+`posicao_acionaria` names shareholders, natural persons among them, so
+it is not in the mirror: the call above reads the file of the year from
+the CVM, with a message saying so. The same holds for the tables of
+board and committee members, family and subordination ties and related
+parties.
+
+The same approach works for `posicao_acionaria_classe_acao` (one row per
+share class held), `capital_social` (issued and paid-in capital totals),
+and `distribuicao_capital` (treasury and free-float breakdown).
+
+## A note on the workforce-diversity bundle
+
+The eight workforce-diversity tables (PCD, race, gender, age, location,
+by position and by site) share both the header convention
+(`cnpj_companhia` / `data_referencia` / `nome_companhia`) and — in seven
+of them — the absence of published META. They are intentionally kept in
+the package: research on diversity outcomes in publicly-traded firms is
+a heavy use case, and the snapshot a user gets here is the same one a
+CVM auditor sees. The `expected_field_names` declared in each YAML guard
+against silent schema drift.
+
+## Where to read next
+
+- **issuer-fetch** — `cnpj` / `ticker` / `year` / `from` / `to` /
+  `on_error` semantics in full.
+- **itr-dfp** — financial statements; same package, different table
+  semantics.
+- **cvm-defects** — why eight FRE tables lack META, plus the broader
+  list of CVM publication quirks the package handles.

@@ -1,0 +1,25 @@
+# Articles
+
+### Get started
+
+- [Introduction to
+  cvmdata](https://sidneybissoli.github.io/cvmdata/articles/cvmdata.md):
+
+### Deep dives
+
+- [Getting started with
+  cvmdata](https://sidneybissoli.github.io/cvmdata/articles/getting-started.md):
+- [Groups overview: the 18 CKAN groups and the single
+  fetcher](https://sidneybissoli.github.io/cvmdata/articles/groups-overview.md):
+- [cvm_fetch(): the generic
+  API](https://sidneybissoli.github.io/cvmdata/articles/issuer-fetch.md):
+- [Quarterly and annual statements (ITR &
+  DFP)](https://sidneybissoli.github.io/cvmdata/articles/itr-dfp.md):
+- [Reference Form
+  (FRE)](https://sidneybissoli.github.io/cvmdata/articles/fre.md):
+- [IPE and VLMO: the document index vs. the structured
+  data](https://sidneybissoli.github.io/cvmdata/articles/ipe-vlmo.md):
+- [Cache and mirror
+  backend](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.md):
+- [Known defects of the CVM
+  publication](https://sidneybissoli.github.io/cvmdata/articles/data-defects.md):

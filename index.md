@@ -1,0 +1,276 @@
+# cvmdata
+
+**English** \|
+[Português](https://github.com/SidneyBissoli/cvmdata/blob/main/README.pt-BR.md)
+
+`cvmdata` provides a tidy API to the open data published by the
+Brazilian Securities and Exchange Commission (CVM — Comissão de Valores
+Mobiliários). The first release covers the core publicly-traded-company
+datasets: company registry (`cad`), quarterly financial statements
+(`itr`), annual financial statements (`dfp`) and the reference form
+(`fre`), the latter including ESG/governance tables on board diversity,
+compensation and shareholder structure.
+
+The package preserves table names, column names, categorical values and
+free text in Portuguese exactly as CVM publishes them. Function names,
+arguments and metadata attributes follow English-language rOpenSci and
+tidyverse conventions.
+
+**Where the data comes from.** By default, `cvmdata` does *not* read the
+CVM portal on every call: it reads a **mirror** of the portal — Parquet
+snapshots of the CVM files, maintained by the package author in this
+repository’s [GitHub
+Releases](https://github.com/SidneyBissoli/cvmdata/releases) and
+refreshed weekly by an automated pipeline. Pass `source = "cvm"` (or
+call `cvm_source_set("cvm")`) to read the official portal directly. The
+CVM publishes these datasets under the Open Database License (ODbL) and
+the mirror is redistributed under the same licence; see [Data provenance
+and licence](#data-provenance-and-licence) below.
+
+## Why cvmdata
+
+CVM publishes filings as yearly ZIPs of CSVs with mixed encodings,
+table-specific schemas, and no unified data dictionary. Common workflows
+— “give me DFP for company X across 2018-2024” — typically require
+manual ZIP downloads, ISO-8859-1 handling, scale-by-`ESCALA_MOEDA`
+conversion, and joins against a separate `submissao` header to translate
+CD_CVM to CNPJ. `cvmdata` consolidates these steps behind a single
+`cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)` call and
+ships the official dictionary as an embedded snapshot, so column types
+are picked up automatically.
+
+Two existing R packages by Marcelo Perlin address adjacent slices of
+this problem:
+
+- [`GetITRData`](https://github.com/msperlin/GetITRData) covered the
+  quarterly statements (ITR), but was archived by its author in March
+  2020 and is no longer maintained.
+- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2) is actively
+  maintained and is the right choice if you need DFP only. Its exported
+  API (`get_dfp_data()`) covers the *annual* statements; ITR, FRE and
+  the company registry (CAD) are out of scope.
+
+`cvmdata` unifies CAD, ITR, DFP and FRE behind a single
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+entry point, with consistent filtering semantics for companies (CNPJ or
+B3 ticker) and periods (whole years or a date window on the reference
+date), ETag/Last-Modified-aware HTTP caching with a configurable TTL
+window, and the CVM dictionary and code lists shipped as embedded
+snapshots (so column types and categorical values are canonical without
+a runtime fetch).
+
+## Installation
+
+`cvmdata` requires R ≥ 4.1 (native pipe) and is not yet on CRAN. The
+development version can be installed from GitHub:
+
+\
+`# install.packages("pak")`\
+`pak``::`[`pak`](https://pak.r-lib.org/reference/pak.html)`(``"SidneyBissoli/cvmdata"``)`
+
+## Quick start
+
+Browse what’s covered (offline — discovery reads from embedded
+snapshots):
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`\
+\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``)`\
+`#> [1] "cad"            "cgvn"           "dfp"            "fca"           `\
+`#> [5] "fre"            "ipe"            "itr"            "recompra_acoes"`\
+`#> [9] "vlmo"`
+
+The bundled dictionary surfaces the types and descriptions CVM publishes
+for every column:
+
+\
+`dict`` ``<-`` `[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``"dfp"``, ``"bpa"``)`\
+`tbl`` ``<-`` ``knitr``::`[`kable`](https://rdrr.io/pkg/knitr/man/kable.html)`(`\
+`  ``dict``[``1``:``8``, `[`c`](https://rdrr.io/r/base/c.html)`(``"campo"``, ``"descricao"``, ``"tipo_dados"``, ``"tamanho"``)``]``,`\
+`  format ``=`` ``"html"`\
+`)`\
+[`cat`](https://rdrr.io/r/base/cat.html)`(``'<div align="center">'``, ``tbl``, ``'</div>'``, sep ``=`` ``"\n"``)`
+
+| campo        | descricao                       | tipo_dados | tamanho |
+|:-------------|:--------------------------------|:-----------|--------:|
+| cd_conta     | Código da conta                 | varchar    |      18 |
+| cd_cvm       | Código CVM                      | char       |       6 |
+| cnpj_cia     | CNPJ da companhia               | varchar    |      18 |
+| denom_cia    | Nome empresarial da companhia   | varchar    |     100 |
+| ds_conta     | Descrição da conta              | varchar    |     100 |
+| dt_fim_exerc | Data fim do exercício social    | date       |      10 |
+| dt_refer     | Data de referência do documento | date       |      10 |
+| escala_moeda | Escala monetária                | varchar    |     100 |
+
+Fetch annual individual balance sheets (“BPA individual”) for two
+companies across recent years. Companies are identified by CNPJ (with or
+without punctuation) or by B3 ticker; `basis` picks the individual or
+consolidated statements, or both:
+
+\
+`bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  cnpj    ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"00.000.000/0001-91"``, ``"47.960.950/0001-21"``)``,`\
+`  year    ``=`` ``2022``:``2024``,`\
+`  basis   ``=`` ``"ind"`\
+`)`
+
+Each yearly file also carries the comparative the issuer presented for
+the previous exercise, which is often restated. `reading` puts the two
+readings of an exercise side by side, labelled: the figures originally
+filed and the comparative in the following year’s file:
+
+\
+`bpa_2022`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"bpa"``,`\
+`  ticker  ``=`` ``"PSSA3"``,`\
+`  year    ``=`` ``2022``,`\
+`  basis   ``=`` ``"con"``,`\
+`  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)`\
+`)`
+
+A filing may be re-filed, and
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+returns the current version.
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+returns every known version, the current one included, each superseded
+version dated and pointing at the version that replaced it (Braskem
+filed its 2023 income statement three times; version 1 was in R\$ units
+by mistake):
+
+\
+`brkm`` ``<-`` `[`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(`\
+`  dataset ``=`` ``"dfp"``,`\
+`  table   ``=`` ``"dre"``,`\
+`  cnpj    ``=`` ``"42.150.391/0001-70"``,`\
+`  year    ``=`` ``2023``,`\
+`  basis   ``=`` ``"con"`\
+`)`
+
+Parse and format Brazilian corporate taxpayer IDs (CNPJ):
+
+\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``"00.000.000/0001-91"``)`\
+`#> [1] "00000000000191"`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``"00000000000191"``)`\
+`#> [1] "00.000.000/0001-91"`
+
+## Documentation
+
+Reference and articles at <https://sidneybissoli.github.io/cvmdata/>.
+The exported API is grouped into five families:
+
+- **Fetcher** —
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  is the single function for every dataset and table; the groups still
+  on the roadmap (funds, agents, offerings, events) will extend it
+  through their schemas.
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+  returns every known version of a filing.
+- **Discovery** —
+  [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md),
+  [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+  [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md),
+  [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
+  [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
+  [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md).
+- **Cache** —
+  [`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md),
+  [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md),
+  [`cvm_cache_info()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md),
+  [`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md).
+  The TTL window for HTTP revalidation is configurable via
+  `options(cvmdata.cache_ttl_seconds)` (default 30 days).
+- **Source backend** —
+  [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md),
+  [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
+  The cache/mirror integration is documented in detail in the
+  [cache-and-mirror](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html)
+  article.
+- **Utilities** —
+  [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
+  [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
+
+## Data provenance and licence
+
+All data originates from the official CVM Open Data Portal
+(<https://dados.cvm.gov.br/>). The package reaches it through one of two
+backends, selectable via
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)
+or the `source` argument of
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md):
+
+- `"mirror"` (**the default** since v0.1.0) — Parquet snapshots of the
+  CVM files published in this repository’s GitHub Releases
+  (`mirror-<group>-<dataset>-latest`) and queried via DuckDB with
+  year-partition filter pushdown. The mirror is produced and refreshed
+  weekly by the ETL under `inst/etl/`, maintained by the package author,
+  not by the CVM. It is typically ~30× faster than the portal; its
+  staleness is bounded by the weekly refresh. The mirror omits a year
+  when the CVM publishes that year’s CSV with no data rows. Every weekly
+  run also keeps a dated snapshot
+  (`mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`), so
+  `cvm_release_set("2026-11-01")` pins a session to the mirror as it was
+  on that day; the default `"latest"` follows the weekly refresh.
+- `"cvm"` — HTTP directly to the CVM Open Data Portal. Opt in when
+  byte-level freshness against the regulator is required, or when you
+  prefer not to depend on a third-party mirror.
+
+Every returned tibble carries provenance attributes (`source`,
+`fetched_at`, `group`, `dataset`, `table`, `package_version`, `release`)
+so a downstream caller can audit which backend, and which mirror
+release, served the data.
+
+**Licence of the data.** The CVM publishes every dataset covered by
+`cvmdata` under the [Open Data Commons Open Database License (ODbL)
+v1.0](https://opendatacommons.org/licenses/odbl/1-0/). The mirror is a
+derivative database in the terms of that licence and is redistributed
+under the ODbL as well. Attribution for the data: *“Contains data from
+the Comissão de Valores Mobiliários (CVM) Open Data Portal,
+<https://dados.cvm.gov.br/>, under the ODbL v1.0.”* Details, including
+what the licence asks of you when you redistribute the data, are in
+[`DATA-LICENSE.md`](https://sidneybissoli.github.io/cvmdata/DATA-LICENSE.md).
+The package **code** is MIT licensed.
+
+The mirror holds data about companies, not about people; the tables that
+describe people are read straight from the CVM. What the mirror leaves
+out, who answers for it and how a person mentioned in a text can ask for
+the name to be removed are in the privacy notice,
+[`PRIVACY.md`](https://sidneybissoli.github.io/cvmdata/PRIVACY.md) ([em
+português](https://sidneybissoli.github.io/cvmdata/PRIVACY.pt-BR.md)).
+
+## Related work
+
+For exchange-side market data (prices, volumes, tickers, indices,
+trading calendars), the natural companion is
+[`rb3`](https://github.com/wilsonfreitas/rb3) by Wilson Freitas (with
+Marcelo Perlin as co-author), which downloads and parses public files
+released by B3. `rb3` and `cvmdata` are complements: `cvmdata` covers
+issuer-side filings released by the regulator (CVM); `rb3` covers
+exchange-side trading data released by the market operator (B3).
+Analyses that join market microstructure with financial statements use
+the two side by side.
+
+## Getting help
+
+Bug reports and feature requests:
+<https://github.com/SidneyBissoli/cvmdata/issues>.
+
+## Contributing
+
+Pull requests are welcome. See
+[CONTRIBUTING.md](https://github.com/SidneyBissoli/cvmdata/blob/main/CONTRIBUTING.md)
+for the development setup, the quality gate run on every commit, and the
+schema-YAML format used when adding a new dataset.
+
+Please note that the cvmdata project is released with a [Contributor
+Code of
+Conduct](https://github.com/SidneyBissoli/cvmdata/blob/main/CODE_OF_CONDUCT.md).
+By contributing to this project, you agree to abide by its terms.
+
+## License
+
+MIT © Sidney Bissoli.

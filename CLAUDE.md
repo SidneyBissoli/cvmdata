@@ -1,0 +1,985 @@
+# CLAUDE.md — Contexto persistente do pacote cvmdata
+
+Documento de referência para sessões do Claude Code no diretório
+`C:/Users/SIDNEY/OneDrive/programacao/R/packages/cvmdata`. Consolida o
+essencial dos canônicos de planejamento para que sessões futuras não
+precisem reler tudo. Quando este `CLAUDE.md` divergir de um canônico,
+**prevalece o canônico** — em particular
+`data-raw/decisions/cvmdata_rodada2-5_naming_unificado-v03.md` para
+naming de colunas e tabelas,
+`data-raw/decisions/cvmdata_rodada3-0-2_politica_reader_sem_meta.md`
+para a política do reader, e
+`data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md` para a
+arquitetura da API (função única
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+2026-10-16/19 — §2.1).
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md`
+(2026-05-25) é HISTÓRICO: os 5 fetchers por contrato que ele previa
+foram superados; valem ainda a §1.1 (mapping grupo → contrato), §3.2
+(singular), §4.3 (mirror) e §4.6 (atributo `group`). Estado de execução
+por fase no `ROADMAP.md`; histórico de breaking changes em `NEWS.md`.
+
+Comunicação com Sidney é em **português brasileiro**. Tom direto,
+técnico, sem fluff, sem puxa-saquismo. Quando ele perguntar problemas,
+dizer diretamente; se não houver, dizer isso. Críticas construtivas
+bem-vindas. Em decisões arquiteturais relevantes não fechadas nos
+canônicos: apresentar 2-3 alternativas com prós/contras e recomendar
+uma.
+
+------------------------------------------------------------------------
+
+## 1. Régua de idioma
+
+Princípio reitor:
+
+> **Se vem da CVM, fica como na CVM** (apenas normalização tipográfica
+> para snake_case minúsculo quando o original está em
+> SCREAMING_SNAKE_CASE). **Se não vem da CVM, é decisão do pacote.**
+
+Distribuição:
+
+| Categoria | Idioma |
+|----|----|
+| Nomes de função (públicas e internas) | **Inglês** |
+| Nomes de argumento de função | **Inglês** |
+| Atributos do tibble retornado | **Inglês** (`source`, `fetched_at`, `group`, `dataset`, `table`, `package_version`) |
+| Classes de condição | **Inglês** (`cvmdata_error_*`, `cvmdata_warn_*`) |
+| Options e env vars | **Inglês** (`cvmdata.verbosity`, `CVMDATA_VERBOSITY`) |
+| Nomes de arquivo e pasta no projeto | **Inglês** |
+| Comentários em código | **Inglês** |
+| README.md, NEWS.md, DESCRIPTION, roxygen | **Inglês** |
+| Mensagens de erro/warning emitidas por funções | **Inglês** (via `cli::cli_*`) |
+| Workflows GitHub Actions e comentários YAML | **Inglês** |
+| **Nomes de tabelas** do pacote | **Português** (snake_case, fiel à CVM) |
+| **Nomes de colunas** nos tibbles retornados | **Português** (snake_case, fiel à CVM) |
+| Colunas-meta de funções de descoberta | **Português** (`conjunto_dados`, `n_tabelas`, `tabela`, `campo`, `descricao`, `tipo_dados`, `dominio`, `tamanho`, `precisao`, `scale`) |
+| Valores em células categóricas | **Português** (como vem da CVM) |
+| Texto livre em colunas descritivas | **Português** (como vem da CVM) |
+| Documentos de planejamento | **Português** |
+
+Caveat: a palavra `dataset` permanece em inglês como argumento de função
+(palavra técnica internacionalizada); a coluna paralela em
+[`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
+chama-se `conjunto_dados` em PT. Mismatch deliberado.
+
+------------------------------------------------------------------------
+
+## 2. Naming canônico
+
+### 2.1 Funções públicas
+
+Padrão `object_verb` (Dev Guide rOpenSci). **Função única** (decisão de
+Sidney, 2026-10-16, que reabriu a arquitetura de 5 fetchers por contrato
+de 2026-05-25):
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+serve qualquer conjunto; os grupos planejados para v0.4–v0.8 (fundos,
+agentes, ofertas, eventos) estendem
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+pelo YAML de cada conjunto, sem funções novas. Os 4 skeletons
+(`fund_fetch()`, `agent_fetch()`, `offering_fetch()`, `event_fetch()`) e
+a classe `cvmdata_error_input_group` saíram na v0.3. `issuer_fetch()`
+foi REMOVIDA em 2026-11-01 (decisão do dono): adivinhava o tipo da
+entrada e abria [`utils::menu()`](https://rdrr.io/r/utils/menu.html).
+Com ela saíram a busca textual, o CD_CVM e o menu; o motor interno
+`issuer_fetch_internal()` ficou (é o que
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+e o ETL do espelho chamam) e filtra só por CNPJ.
+
+\
+`# Função única — qualquer conjunto coberto (hoje: grupo "companhias").`\
+`# Cobertura por dataset/sessão vive no ROADMAP.md — não duplicar status aqui.`\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``dataset``, ``table``,`\
+`          cnpj     ``=`` ``NULL``,      ``# SÓ CNPJ (com ou sem pontuação); código CVM`\
+`                                ``# e nome são recusados (cvmdata_error_input)`\
+`          ticker   ``=`` ``NULL``,      ``# código B3; resolvido via fca/valor_mobiliario`\
+`                                ``` # no mesmo `source`, contra a UNIÃO dos anos ``\
+`                                ``# com ticker (2018→último; deslistadas`\
+`                                ``` # resolvem); soma-se a `cnpj` ``\
+`          year     ``=`` ``NULL``,      ``# anos inteiros, NULL → último; OU`\
+`          from     ``=`` ``NULL``,      ``# janela de datas COMPLETAS ("YYYY-MM-DD"),`\
+`          to       ``=`` ``NULL``,      ``#   os dois juntos; filtra pela data de`\
+`                                ``#   REFERÊNCIA (dt_refer/data_referencia);`\
+`                                ``` #   com `year` = erro; em cad = erro ``\
+`          as_of    ``=`` ``NULL``,      ``# data COMPLETA; só em tabela-registro com`\
+`                                ``` #   `as_of:` no YAML (cad/companhias): ``\
+`                                ``#   registros vigentes na data, linhas de HOJE`\
+`          basis    ``=`` ``NULL``,      ``# "ind" / "con" / c("ind","con") — ver abaixo`\
+`          reading  ``=`` ``NULL``,      ``# "original" / "restated" / os dois — só nas`\
+`                                ``#   16 tabelas com ordem_exerc; ver abaixo`\
+`          source   ``=`` ``NULL``,      ``# via cvm_source_get()`\
+`          on_error ``=`` ``"abort"``,     ``# "abort" / "warn" — ver abaixo`\
+`          ``...``)``                  ``# reservado: qualquer extra aborta`\
+\
+`# Todas as versões de um documento (Parte 3 das versões, 2026-10-24,`\
+`# Forma B: função separada; cvm_fetch() segue devolvendo só a vigente).`\
+`# Assinatura = a parte de cvm_fetch() que IDENTIFICA o documento; recusa`\
+`# por nome reading / from / to / as_of (filtros da leitura vigente).`\
+`` # Só tabelas com `keep_latest_version` no YAML; outra = cvmdata_error_input. ``\
+`# Colunas da tabela (+ year, basis) + superseded_at (Date),`\
+`# superseded_by_versao, history_source ("current" na vigente; "rad" /`\
+`# "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao,`\
+`# scale_error ("apenas erro de escala" / "erro de escala e outras`\
+`# mudanças" / "sem erro de escala" — a vigente é sempre "sem"; NA =`\
+`# versão ainda não julgada pelo robô; gravada pelo estágio 05 do ETL,`\
+`# decisão do dono 2026-11-06; cli_inform único quando há versão marcada).`\
+`# source = "mirror": part-N ∪ __history por union_by_name (DuckDB);`\
+`# source = "cvm": CSV anual SEM keep_latest_version + cli_inform de que`\
+`# o CSV guarda só parte das versões (completo só no espelho/RAD).`\
+[`cvm_versions`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)`(``dataset``, ``table``, cnpj ``=`` ``NULL``, ticker ``=`` ``NULL``, year ``=`` ``NULL``,`\
+`             basis ``=`` ``NULL``, source ``=`` ``NULL``, on_error ``=`` ``"abort"``, ``...``)`\
+\
+`# Descoberta`\
+[`cvm_groups`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)`(``)``                                          ``# 18 grupos + contrato`\
+[`cvm_datasets`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)`(``group ``=`` ``NULL``)``                            ``# datasets disponíveis`\
+[`cvm_tables`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)`(``dataset``, group ``=`` ``NULL``)``                     ``# tabelas de um dataset`\
+[`cvm_dictionary`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)`(``dataset``, ``table``, group ``=`` ``NULL``)``          ``# dicionário do snapshot`\
+[`cvm_codelist`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)`(``dataset``, ``table``, ``column``, group ``=`` ``NULL``)``    ``# valores categóricos`\
+[`cvm_dataset_years`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)`(``dataset``, group ``=`` ``NULL``)``              ``# range de anos publicados`\
+\
+`# Cache`\
+[`cvm_cache_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)`(``)`\
+[`cvm_cache_set_path`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)`(``path``)`\
+[`cvm_cache_clear`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)`(``what ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"all"``, ``"raw"``, ``"parquet"``)``,`\
+`                group ``=`` ``NULL``, dataset ``=`` ``NULL``, year ``=`` ``NULL``,`\
+`                confirm ``=`` `[`interactive`](https://rdrr.io/r/base/interactive.html)`(``)``)`\
+[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)`\
+\
+`# Source`\
+[`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
+[`cvm_source_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md)`(``source``)`\
+`` # Retrato do espelho (decisão 2026-10-25): option `cvmdata.mirror_release`, ``\
+`# "latest" (padrão) ou data completa "YYYY-MM-DD" → snapshot datado mais`\
+`# recente até a data. Propriedade da SESSÃO, não da chamada (sem argumento`\
+`` # novo em cvm_fetch()). Resultado leva o atributo `release`. ``\
+[`cvm_release_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_get.md)`(``)`\
+[`cvm_release_set`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)`(``release``)`\
+\
+`# Utilidades`\
+[`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``x``)`\
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``x``)``                ``# inverso de cnpj_clean`
+
+Argumento `group` nas funções de descoberta resolve por unicidade quando
+omitido (`NULL`); a partir de v0.4, quando um slug de dataset puder
+ocorrer em mais de um grupo, omitir `group` aborta com
+`cvmdata_error_input_ambiguous`.
+
+Domínio dos argumentos enumerados (validados via
+[`rlang::arg_match0()`](https://rlang.r-lib.org/reference/arg_match.html)):
+
+- `source ∈ c("mirror", "cvm")`. **Default `"mirror"`**: lê parquets do
+  release `mirror-<group>-<dataset>-latest` via API GitHub + DuckDB
+  local; ~30× mais rápido que `"cvm"`. Backend `"cvm"` (portal aberto
+  `dados.cvm.gov.br`) permanece suportado por chamada explícita
+  (`source = "cvm"`) ou via `cvm_source_set("cvm")` para frescor byte a
+  byte. Precedência: arg explícito \> `getOption("cvmdata.source")` \>
+  default. A assinatura declara `source = NULL` para consulta dinâmica
+  do option (mesmo padrão de
+  [`cvm_cache_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_path.md)
+  ↔︎
+  [`cvm_cache_set_path()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_set_path.md)).
+
+- `on_error ∈ c("abort", "warn")`, default `"abort"` (decisão do dono,
+  2026-11-01: absorveu o antigo `validate`; os modos calados `"skip"` e
+  `"silent"` saíram da API). Cobre as duas falhas: arquivo que diverge
+  do esquema e ano que não baixou num lote. `"abort"` = erro com classe
+  (`cvmdata_error_parse` / `cvmdata_error_http`); `"warn"` = lê/pula e
+  avisa (`cvmdata_warn_validation` / `cvmdata_warn_partial_failure`).
+  `error_modes()` (`R/api-cvm-fetch.R`) traduz para os dois modos do
+  motor, que segue com `validate`/`on_error` internos (o `"skip"` e o
+  `"silent"` ficam só para leituras internas, como a `submissao` da
+  checagem de entregas). Passar `validate =` aborta com a migração.
+
+- `basis` (Sidney, 2026-10-19; nome escolhido contra `report_type`,
+  `type_format`, `scope`, `report`, `type`, `view`): `"ind"`, `"con"` ou
+  `c("ind", "con")` (empilha as duas). **Obrigatório, sem padrão**, para
+  tabelas com variantes individual/consolidada (`bpa`, `bpp`, `dre`,
+  `dra`, `dfc_md`, `dfc_mi`, `dmpl`, `dva`) — recusado `"con"` como
+  padrão: 35% das cias DFP 2023 só têm `"ind"`. Essas tabelas trazem
+  **sempre** a coluna `basis` no resultado, nos dois backends
+  (`set_basis_column()` em `R/api-cvm-fetch.R` substitui o `report_type`
+  vazado pelo mirror). **Erro** se passado a tabelas sem a divisão
+  (`composicao_capital`, `submissao`, `parecer`, `companhias`) — não
+  ignorar calado. `report_type ∈ c("ind", "con")` ou `NULL` é o
+  argumento do motor interno
+  ([`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  traduz `basis`).
+
+- `year`: integer vector ou `NULL`. `NULL` → **último ano disponível**,
+  descoberto por `HEAD` probing decrescente. Para histórico, integer
+  vector explícito (`year = 2012:2024`). Helper
+  [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
+  devolve o range. **Sem sentinela `"all"`** — tipo único. Ano anterior
+  ao `first_year` da TABELA (medido no espelho em 2026-10-21; uma tabela
+  pode começar depois do dataset: `composicao_capital` 2020, 14 do FRE
+
+  2023\) = `cvmdata_error_input` antes de baixar
+  (`check_published_years()`); em janela `from`/`to`, os anos
+  inexistentes caem com `cli_inform`. Simétrico (decisão A do dono,
+  2026-10-24): `empty_from`/`empty_reason` no YAML marcam a tabela que a
+  CVM publica só com cabeçalho desde um ano (hoje só
+  `fca/departamento_acionistas`: 2024, item 6 do Formulário Cadastral
+  revogado pela Res. CVM 59/2021); anos ≥ `empty_from` são recusados do
+  mesmo jeito, janela corta com aviso, e `year = NULL` emite
+  `cvmdata_warn_empty_upstream` — espelho devolve o último ano com dado,
+  portal devolve o arquivo mais recente com zero linhas.
+
+- `from`/`to` (só em
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)):
+  datas completas, os dois juntos (`"YYYY-MM-DD"` ou `Date`); `year`
+  junto = erro; data incompleta = erro (recusado por complexidade); em
+  tabela sem partição anual = erro. Os anos lidos são os abrangidos pela
+  janela; o corte é pós-leitura pela data de REFERÊNCIA do documento
+  (`dt_refer` ou `data_referencia`), nunca pela data de entrega
+  (`filter_by_reference_date()`).
+
+- `as_of` (Sidney, 2026-10-21; frente Deslistadas): data completa, só em
+  tabela-registro cujo YAML declara `as_of: {registered, cancelled}`
+  (hoje as três do `cad`: `dt_reg`/`dt_cancel`); outra tabela = erro.
+  `cad/estrangeiras` e `cad/incentivadas` (2026-11-01) têm a coluna
+  `cnpj` (não `cnpj_cia`), que `cnpj_col()` reconhece por último
+  (`fre/participacao_sociedade` tem `cnpj` da investida E
+  `cnpj_companhia`), e não têm `tp_merc`. Mantém os REGISTROS vigentes
+  na data (`dt_reg <= X` e `dt_cancel` vazia ou `> X`), olhando cada
+  `(cnpj_cia, cd_cvm)` — 34 CNPJ têm dois registros. As linhas são as de
+  HOJE (a CVM não publica o cadastro do passado); o retrato do ano é
+  `fca/geral`. Chave do CAD = `(cnpj_cia, cd_cvm, tp_merc)`: 107
+  registros repetem-se só por `tp_merc` e ficam como a CVM publica
+  (receita de uma linha por registro no help); `tp_merc` vazio nas
+  canceladas. Sem argumentos extras de código CVM ou mercado (recusados
+  2026-10-21). Mesmo nome previsto na v0.7 para os cadastros de agentes.
+
+Sobre exercícios contidos em cada CSV anual: o portal publica em cada
+ano apenas `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — o ano declarado e seu
+N-1. Sem `reading`,
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+retorna o conteúdo literal do CSV do `year` pedido (não reconstrói o
+antepenúltimo; para histórico mais longo, pedir `year = (N-2):N` e
+empilhar).
+
+- `reading` (Sidney, 2026-10-20; Parte 2 das versões): as duas leituras
+  de um exercício. `"original"` = linhas `ÚLTIMO` do arquivo de `year`;
+  `"restated"` = linhas `PENÚLTIMO` do arquivo de `year + 1` (lido pelo
+  pacote; só se publicado — senão `cli_inform` e devolve o que existe);
+  `c("original", "restated")` empilha na ordem pedida. Coluna `reading`
+  no resultado só quando o argumento é dado; linhas como a CVM publica
+  (`dt_refer`/`versao` do documento de origem;
+  `dt_fim_exerc`/`dt_ini_exerc` identificam o exercício). Só nas 16
+  tabelas com `ordem_exerc` (DFP/ITR `bpa`…`dva`, conferido no
+  dicionário); em outra tabela = erro. `year = NULL` resolve o último
+  ano como sem `reading`, depois busca o seguinte. Com `from`/`to`, a
+  janela corta por `dt_fim_exerc`. Medido 2026-10-20: ano do arquivo =
+  ano de `dt_refer` (0 divergências em dfp/itr bpa/dre); no ITR o
+  `PENÚLTIMO` de `bpa`/`bpp` é o fechamento do ano anterior (leitura
+  reexpressa do trimestre não existe para balanço); 21 bancos trazem o
+  comparativo individual de 2024 **zerado** na DFP 2025 (Res. CMN 4.966
+  sem reapresentar) — fica zero, como na CVM. Fixture real
+  `dfp_cia_aberta_2025.zip` + `mirror-dfp-bpa-ind-2025.parquet` (BB con
+  reexpressa 12 contas; BB ind zeros; MGLU igual).
+
+### 2.2 Colunas-chave universais (CAD + ITR + DFP + FRE-header)
+
+| Coluna | Tipo | Origem CVM | Notas |
+|----|----|----|----|
+| `cnpj_cia` | character | CNPJ_CIA | **Com pontuação** como vem da CVM |
+| `cd_cvm` | character | CD_CVM | Sempre character; ITR é zero-padded, CAD não — character preserva ambos |
+| `denom_cia` | character | DENOM_CIA | — |
+| `dt_refer` | Date | DT_REFER | Conversão automática via dicionário |
+| `versao` | character | VERSAO | Identificador → character |
+
+FRE-detail usa convenção diferente: `cnpj_companhia`, `data_referencia`,
+`nome_companhia`, `versao`, `id_documento`. **Sem `cd_cvm`**.
+Preservação estrita; joins exigem mapeamento explícito do usuário.
+
+CGVN/VLMO/IPE seguem uma terceira convenção (FRE-detail-like): mesma
+`cnpj_companhia` / `data_referencia`, mas a coluna CVM-code se chama
+`codigo_cvm` (não `cd_cvm`). O resolver `match_by_cd_cvm()` aceita
+qualquer das duas via helper interno `cdcvm_col(df)`; semântica
+idêntica.
+
+### 2.3 Submissão (header de ITR/DFP/FRE)
+
+Tabela de cabeçalho dos três datasets chama-se `submissao`. 9 campos:
+`cnpj_cia`, `dt_refer`, `versao`, `denom_cia`, `cd_cvm`, `categ_doc`,
+`id_doc`, `dt_receb`, `link_doc`. É o **índice de entregas** do dataset:
+uma linha por documento entregue, reapresentações incluídas (sem
+`keep_latest_version` desde 0.2.0.9000 — Parte 1 das versões, ROADMAP).
+A entrega vigente de um `(cnpj_cia, dt_refer)` é a última por
+`(dt_receb, id_doc, versao)`; o pacote a calcula onde precisa
+(`check_filings()`), não a marca com coluna.
+
+### 2.4 Regra dos identificadores → character
+
+Campos identificadores (CNPJ, CD_CVM, CEP, telefones, CPF, ID\_\*,
+DDI/DDD, protocolos, ticker B3) são forçados a **character** mesmo
+quando o META declara `numeric`. O META da CVM declara mal — CEPs perdem
+zero à esquerda, CD_CVM tem padding heterogêneo entre datasets, ID_Item
+da CGVN é `N.N.N`, etc. Implementação em
+`R/util-csv-cvm.R::identifier_columns()`: classificação por **prefixos
+regex** (`^cnpj`, `^cpf`, `^codigo_`, `^cd_cvm`, `^cep`, `^ddi_`,
+`^ddd_`, `^id_`, `^protocolo`) **+ exact-match** para os esquisitos
+(`caixa_postal`, `fax`, `fax_resp`, `tel`, `tel_resp`, `versao`; os três
+do fax/tel_resp entraram em 2026-11-01, únicos telefones do dicionário
+que o META declara numeric). Refator de v0.2 — Sessão 10 — substituiu a
+lista monolítica de regex `.identifier_patterns` por duas listas
+planas + um helper testável.
+
+### 2.5 Datas
+
+Conversão para `Date` é **automática** sempre que o snapshot de
+dicionário declarar `tipo_dados = "date"`.
+
+### 2.6 vl_conta × escala_moeda
+
+Em tabelas ITR/DFP contábeis: `VL_CONTA` é multiplicada por
+`ESCALA_MOEDA` (`UNIDADE`=1, `MIL`=1e3, `MILHÃO`=1e6, `BILHÃO`=1e9) e
+retornada em reais absolutos. `escala_moeda` é removida do tibble;
+`moeda` mantida (constante `"REAL"` na v0.1).
+
+### 2.7 Seleção de companhias via `issuer` (e `cnpj`/`ticker`)
+
+Em
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+(v0.3) a seleção é por **`cnpj`** (só CNPJ, com ou sem pontuação —
+`check_cnpj()` recusa código CVM e nome, inclusive como cortesia a quem
+migra do GetDFPData2) e/ou **`ticker`** (código B3 → CNPJ via
+`fca/valor_mobiliario`, lido do mesmo `source`; `check_ticker()` recusa
+o que não tem forma de ticker). O ticker é procurado na UNIÃO de todos
+os anos do FCA com a coluna (`ticker_first_year: 2018` no YAML; vazia em
+2010–2017), não só no ano pedido — assim o código de uma deslistada
+(GOLL4, BPAN4) resolve para qualquer `year` (decisão 2026-10-21;
+`resolve_ticker_all_years()`). Os dois se somam; CNPJ ausente da tabela
+= zero linhas, calado; ticker ausente de TODOS os anos =
+`cvmdata_error_input`; ticker que aponta para mais de um CNPJ =
+`cvmdata_error_input` pedindo `cnpj` (guarda; medido 2026-10-21: nenhum
+reusado). Busca textual e CD_CVM saíram com `issuer_fetch()` (removida
+em 2026-11-01); o cadastro `cvm_fetch("cad", "companhias")` é o lugar de
+resolver nome/código → CNPJ. Sem argumento `cpf` (filtro de PF fica para
+a v0.7). **DESDE 2026-11-15 O ESPELHO E O ZENODO SÓ LEVAM DADO DE
+COMPANHIA** (decisão do dono, regra de privacidade “5”; a dúvida da
+transferência internacional, LGPD art. 33 e Res. CD/ANPD 19/2024, não se
+resolveu sem advogado): as tabelas que descrevem pessoas são
+`mirror: false` no YAML e o pacote as lê da CVM SOZINHO, com mensagem
+`cvmdata_message_unmirrored` (`route_unmirrored()`; erro só com
+`source = "mirror"` explícito ou retrato datado) — `fre`:
+`administrador_membro_conselho_fiscal`, `membro_comite`,
+`relacao_familiar`, `relacao_subordinacao`, `responsavel`,
+`auditor_responsavel`, `posicao_acionaria`,
+`posicao_acionaria_classe_acao`, `transacao_parte_relacionada` e as três
+de declaração dos administradores; `fca`: `dri`. Nas tabelas que ficam
+saem as colunas que nomeiam pessoa (`.person_cols` em `util-privacy.R`:
+`resp` e as que o descrevem no `cad`, `contato` em
+`fca/departamento_acionistas`, o responsável técnico em `fca/auditor`,
+`cpf_auditor`) e a linha de auditor pessoa física. O que segue neste
+parágrafo, escrito antes, vale hoje só para nome ou CPF citado em texto
+sobre a companhia. A CVM PUBLICA CPF completo (`999.999.999-99`, sem
+máscara) em colunas `cpf*` e `documento_*` e em texto livre do FCA e do
+FRE — administradores, conselho fiscal, comitês, DRI, auditor
+responsável, acionistas PF, parentes de administradores. O ESPELHO E O
+ZENODO NÃO REDISTRIBUEM: CPF vira `***.456.789-**`, documento
+estrangeiro vira `***`, `data_nascimento` vira `ano_nascimento` e as
+colunas de e-mail, telefone e fax (de pessoa e de empresa) e de endereço
+de rua de pessoa saem, a coluna de biografia `experiencia_profissional`
+sai (regra 4, 2026-11-14: dado sensível em texto livre, LGPD art. 11), e
+três tabelas do FRE ficam fora do espelho (`mirror: false` no YAML:
+`administrador_declaracao_genero`, `administrador_declaracao_raca`,
+`administrador_PCD`; só com `source = "cvm"`), e as cinco tabelas de
+contagem de empregados por raça, gênero e deficiência vêm sem a
+companhia que tem grupo com menos de 10 pessoas ou unânime (aviso
+`cvmdata_warn_privacy_omitted`, atributo `omitted`, `privacy_omitted` no
+sidecar) (complementos de 2026-11-14); quem pede para sair e comprova
+ser a pessoa sai (`mirror_suppress_people()`: a linha fica, o nome vira
+`[omitido a pedido do titular]`, os dados da pessoa ficam vazios; lista
+só no segredo `CVMDATA_MIRROR_SUPPRESSED`, uma pessoa por linha
+`nome;CPF`, nunca no repositório; `privacy_suppressed` no sidecar é só a
+contagem, e lista menor que a anterior para o publish, salvo
+`--allow-unsuppress`); aviso de privacidade público em `PRIVACY.md` /
+`PRIVACY.pt-BR.md` (vale o português) e procedimento de pedidos de
+titular em `data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md`
+(`inst/etl/util-privacy.R`; decisão do dono de 2026-11-08 em
+`data-raw/decisions/cvmdata_dados_pessoais_espelho_decisao.md`). É a
+única exceção à regra “se vem da CVM, fica como na CVM”, e só no que o
+pacote redistribui: `source = "cvm"` devolve tudo intacto. Os cadastros
+de PF da v0.7 é que só trazem nome.
+
+O filtro de emissor do motor (`filter_by_issuer()` em
+`R/api-issuer-fetch.R`) compara só CNPJ:
+[`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
+dos dois lados, contra `cnpj_cia` ou `cnpj_companhia` (o ticker chega já
+resolvido em CNPJ por
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)).
+
+Política de versão: as tabelas de **detalhe** mantêm apenas a **última
+entrega** por `(cnpj_cia, dt_refer)` via transformação canônica
+`keep_latest_version` no YAML, ordenando por data de recebimento
+(`dt_receb`/`data_entrega`), depois id do documento
+(`id_doc`/`id_documento`/`protocolo_entrega`), depois `versao`. Tabelas
+sem colunas de entrega caem na maior `VERSAO`. A **`submissao` não
+deduplica** (0.2.0.9000): é o índice de entregas e devolve todas, com a
+data de recebimento — quem faz join por `(cnpj, data)` casa todas as
+entregas; a vigente é a última pela mesma ordem (§2.3). `VERSAO` **não é
+chave** (medido 2026-10-18: TRV XLIII DFP 2023 tem duas v1; Travessia VI
+DFP 2024 tem 1, 2, 1 e a v1 de agosto é a vigente). Depois do backend,
+`check_filings()` (`R/util-filing-checks.R`) confere a tabela contra a
+`submissao` (calculando a entrega vigente de cada chave antes de
+comparar): em DFP/ITR tira linhas idênticas e avisa (varredura
+2010-2026: 884 casos com a demonstração inteira em dobro, a maioria com
+UMA entrega no índice; em `vlmo` linhas idênticas são legítimas e
+ficam); avisa quando a tabela traz entrega anterior à última. Desliga
+com `options(cvmdata.check_filings = FALSE)`.
+
+------------------------------------------------------------------------
+
+## 3. Convenções de código R
+
+- Pipe: `|>` (nunca `%>%`). `R (>= 4.1)` no `Depends`.
+- Strings: aspas duplas por padrão;
+  [`stringr::str_c()`](https://stringr.tidyverse.org/reference/str_c.html)
+  em vez de
+  [`paste()`](https://rdrr.io/r/base/paste.html)/[`paste0()`](https://rdrr.io/r/base/paste.html).
+- Indentação 2 espaços, sem tabs.
+- Largura máxima 80 chars (tolerância até 100).
+- Style guide: tidyverse, aplicado pelo
+  [Air](https://posit-dev.github.io/air/) (`air format .`; configuração
+  em `air.toml`). Rodar antes do lintr.
+- Lint clean
+  ([`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html)
+  retorna `character(0)`) antes de qualquer commit.
+- **Fully-qualified namespaces** em todo código
+  ([`dplyr::filter()`](https://dplyr.tidyverse.org/reference/filter.html),
+  [`readr::read_delim()`](https://readr.tidyverse.org/reference/read_delim.html)).
+  Exceção em pipelines longos com `@importFrom` no roxygen.
+- Toda função exportada tem bloco roxygen completo: `@title`,
+  `@description`, `@param`, `@return`, `@examples`, `@export`, `@family`
+  (quando apropriado), `@seealso`.
+- Mensagens via
+  [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html) /
+  [`cli::cli_warn()`](https://cli.r-lib.org/reference/cli_abort.html) /
+  [`cli::cli_inform()`](https://cli.r-lib.org/reference/cli_abort.html).
+  **Nunca** [`print()`](https://rdrr.io/r/base/print.html) ou
+  [`cat()`](https://rdrr.io/r/base/cat.html) fora de métodos
+  `print.*`/`str.*`.
+- Estilo cli: `{.fn nome_funcao}`, `{.val "valor"}`, `{.var nome_var}`;
+  símbolos `x` (erro), `i` (info), `!` (warn), `v` (sucesso).
+
+------------------------------------------------------------------------
+
+## 4. Estrutura do pacote
+
+**Régua R/ é flat.** `R CMD INSTALL` ignora subpastas de `R/` — a
+representação modular do canônico de arquitetura fica como referência
+conceitual; arquivos reais usam **prefixos de hífen**:
+
+| Prefixo | Conteúdo |
+|----|----|
+| `api-` | Fetcher público (`api-cvm-fetch.R`: casca de validação sobre `issuer_fetch_internal()`), `api-issuer-fetch.R` (motor `issuer_fetch_internal()` + `filter_by_issuer()` por CNPJ + resolver de ticker) + `cvm-groups` |
+| `schema-` | Loader de YAML (`schema-load.R`) |
+| `source-` | Backends de dados (`source-cvm-http.R`, `source-mirror-duckdb.R`) |
+| `transform-` | Transformações declarativas (`transform-schema.R`) |
+| `util-` | Helpers internos (`util-cnpj.R`, `util-errors.R`, `util-attrs.R`, etc.) |
+| (sem prefixo) | API estável transversal: `cache.R`, `discovery.R`, `source.R`, `cvmdata-package.R` |
+
+Layout dos schemas:
+`inst/extdata/schemas/<group>/<dataset>/<table>.yaml` (`<group>` é o
+slug CKAN; `"companhias"` na cobertura atual). Datasets cobertos vivem
+no `ROADMAP.md`. Três topologias de download: CSV avulso (`none` +
+`cvm_file_url_pattern`, CAD), ZIP único sem ano (`none` +
+`cvm_archive_url_pattern` sem `{year}`, recompra_acoes) e ZIP anual
+(`yearly` + `{year}`); o `schema-load` recusa `{year}` fora do anual.
+Tabela sem coluna de emissor declara `issuer_via: {table, key}` e é
+filtrada por `cnpj`/`ticker` através da tabela-mãe. Layout do ETL:
+`inst/etl/{00-config,01-fetch-cvm,02-csv-to-parquet,02b-validate,03-publish,04-rad-fetch,05-label-scale,06-zenodo-edition,util-hash,util-history,util-release,util-rad,util-scale,util-snapshot,util-gh,util-zenodo}.R` +
+`repair-snapshot-digests.R` (reparo único dos sidecars datados,
+2026-11-07).
+
+`data-raw/` mistura **build scripts** regeneráveis (`build-*.R` para
+snapshots, fixtures e vignette data) com **auditorias one-shot**
+(`run-capacity-audit.R`, `validate-mirror-end-to-end.R`) e
+**`data-raw/decisions/`**, onde vivem TODOS os canônicos rastreados
+(desde 2026-10-19): - `cvmdata_rodada2-5_naming_unificado-v03.md`
+(naming) e `cvmdata_rodada3-0-2_politica_reader_sem_meta.md` (reader) —
+citados por seção no código e no schema do CAD. -
+`cvmdata_v0-3_funcao_unica_decisao.md` (arquitetura vigente),
+`cvmdata_arquitetura_grupos_decisao_v2.md` (histórico; mapping de
+grupos) + docs de planejamento v0.2 (`cvmdata_v0-2_*.md`). Os demais
+`cvmdata_rodada*.md` (rodadas 1, 2, 2.6, 3.0, 3.1) e os
+`PROMPT_CLAUDE_*.md` de sessão ficam FORA do repo (histórico;
+`git show ad04382^:<nome>`). O `.gitignore` ancora `/cvmdata_rodada*.md`
+e `/cvmdata_arquitetura_*` na raiz de propósito: sem a barra o padrão
+engolia esta pasta.
+
+Apenas os build scripts são regenerados em ciclo normal; canônicos só
+mudam por decisão deliberada.
+
+Documentação narrativa em `vignettes/`: `cvmdata.Rmd` é o vignette
+canônico embarcado no tarball (overview do pacote);
+`vignettes/articles/` contém artigos longos publicados **apenas no site
+pkgdown** (`.Rbuildignored`), sem peso na tarball CRAN.
+
+------------------------------------------------------------------------
+
+## 5. Sistema de classes S3
+
+S3 minimalista. Classes internas:
+
+- `cvm_tbl` — subclasse de `tbl_df`. Todo tibble retornado por funções
+  públicas. Carrega 6 atributos em inglês: `source`, `fetched_at`,
+  `group`, `dataset`, `table`, `package_version`.
+- `cvm_table_schema` — objeto interno descrevendo o schema lido do YAML.
+  Carrega `$group` stampado por `load_schema()` para que os callers
+  downstream propaguem sem re-lookup.
+- `cvm_source` — handle interno para dispatch HTTP / mirror / cache.
+
+`print.cvm_tbl()` é o único método print custom: exibe `source`,
+`fetched_at`, `group`, `dataset` e `table` antes do tibble normal,
+depois delega a [`NextMethod()`](https://rdrr.io/r/base/UseMethod.html).
+
+------------------------------------------------------------------------
+
+## 6. Hierarquia de classes de condição
+
+    cvmdata_error                          (pai genérico de erros)
+    ├── cvmdata_error_input                (argumento inválido do usuário;
+    │   │                                   inclui cnpj/ticker/basis/from/to
+    │   │                                   malformados em cvm_fetch())
+    │   └── cvmdata_error_input_ambiguous  ((dataset, table) ocorre em mais
+    │                                       de um group; passar group explícito)
+    │       (cvmdata_error_input_group saiu na v0.3 com os skeletons)
+    ├── cvmdata_error_http                 (falha de rede / HTTP)
+    │   ├── cvmdata_error_http_transport   (o portal não respondeu: DNS,
+    │   │                                   connect TCP, TLS, timeout de
+    │   │                                   leitura — distinto de um status
+    │   │                                   HTTP como 404; o ETL usa a
+    │   │                                   distinção no disjuntor do stage 01)
+    │   └── cvmdata_error_http_integrity   (parquet baixado do espelho não
+    │                                       bate com sha256/tamanho do
+    │                                       sidecar; arquivo descartado)
+    ├── cvmdata_error_parse                (falha de parse ou validação)
+    │   └── cvmdata_error_zip_member_missing (CSV da tabela-detalhe ausente
+    │                                       no ZIP anual — tabela não existia
+    │                                       naquele ano; ETL trata como skip)
+    ├── cvmdata_error_meta_unavailable     (META oficial não publicado — strict)
+    └── cvmdata_error_internal             (qualquer outro)
+
+    cvmdata_warn                           (pai genérico de warnings)
+    ├── cvmdata_warn_validation            (divergência no warn mode)
+    ├── cvmdata_warn_meta_unavailable      (META ausente, warn mode)
+    ├── cvmdata_warn_year_fallback         (year = NULL caiu para ano anterior
+    │                                       porque max year não tinha dados da
+    │                                       companhia pedida)
+    ├── cvmdata_warn_partial_failure       (batch yearly: alguns anos falharam
+    │                                       HTTP sob on_error = "warn"; demais
+    │                                       sobreviventes empilhados e retornados)
+    ├── cvmdata_warn_year_listing_fallback (cvm_dataset_years: índice de
+    │                                       diretório da CVM inalcançável após
+    │                                       retries; caiu para first_year:ano_atual)
+    ├── cvmdata_warn_eviction              (LRU eviction removeu unidades do
+    │                                       cache local para honrar
+    │                                       options(cvmdata.cache_max_size_mb))
+    ├── cvmdata_warn_duplicate_filing      (DFP/ITR: a CVM repetiu linhas;
+    │                                       cópias idênticas removidas)
+    ├── cvmdata_warn_conflicting_filing    (DFP/ITR: cópias da mesma entrega
+    │                                       com vl_conta diferente; mantidas)
+    ├── cvmdata_warn_empty_upstream        (year = NULL em tabela com
+    │                                       `empty_from` no YAML: a CVM publica
+    │                                       o CSV só com cabeçalho desde esse
+    │                                       ano; espelho devolve o último ano
+    │                                       com dado, portal devolve zero linhas)
+    ├── cvmdata_warn_privacy_omitted       (tabela de contagem lida do espelho
+    │                                       sem as companhias com grupo < 10
+    │                                       pessoas ou unânime; números em
+    │                                       attr(x, "omitted"))
+    └── cvmdata_warn_stale_filing          (a tabela traz entrega anterior à
+                                            última do índice submissao)
+
+Implementação via wrapper interno `cvmdata_abort(message, class, ...)`
+que adiciona `"cvmdata_error"` ao final do vetor de classes
+automaticamente. Análogo `cvmdata_warn()` para warnings.
+
+------------------------------------------------------------------------
+
+## 7. Política do reader: validação do cabeçalho
+
+Modo interno `validate` do motor, escolhido pelo `on_error` público
+(`"abort"` → `"strict"`, `"warn"` → `"warn"`); `"skip"` só em leitura
+interna. Tabela com e sem META seguem a mesma regra (corrigido em
+2026-11-01: a tabela antiga dizia que sem META o `strict` abortava com
+`cvmdata_error_meta_unavailable`, classe que nunca existiu no código).
+
+| `validate`           | Divergência do cabeçalho                   |
+|----------------------|--------------------------------------------|
+| `"strict"` (default) | `cvmdata_error_parse`                      |
+| `"warn"`             | `cvmdata_warn_validation` e entrega tibble |
+| `"skip"`             | Pula validação (só interno)                |
+
+Mensagens em inglês, via
+[`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html) /
+[`cli::cli_warn()`](https://cli.r-lib.org/reference/cli_abort.html).
+Símbolo `x` para erro, `!` para warning, `i` para info. “Valida” =
+contagem E NOMES de coluna do cabeçalho do CSV (conjunto, sem ordem;
+desde 2026-10-25 — antes só a contagem, salvo nas 8 sem META). Os nomes
+vêm de `expected_field_names()` (`R/util-csv-cvm.R`): o
+`expected_field_names` do YAML nas tabelas sem META; nas outras 66, o
+`campo_original` do snapshot do dicionário (o META), NUNCA copiado para
+o YAML. Medido 2026-10-25: 1.244 cabeçalhos (todos os CSV de todos os
+ZIPs anuais, 2003–2026) com exatamente os nomes do snapshot nas 74
+tabelas. O robô do espelho lê por
+`issuer_fetch_internal(source = "cvm")` em `strict`: coluna renomeada
+pela CVM derruba a rodada (alarme), não entra calada.
+
+13 tabelas FRE têm `meta_status: missing` (sem META oficial CVM): 8
+vigentes — `administrador_PCD`, `empregado_PCD`,
+`empregado_local_declaracao_genero`, `empregado_local_declaracao_raca`,
+`empregado_posicao_declaracao_genero`,
+`empregado_posicao_declaracao_raca`, `empregado_posicao_faixa_etaria`,
+`empregado_posicao_local` — e 5 legadas (até 2023):
+`distribuicao_dividendos`, `distribuicao_dividendos_classe_acao`,
+`endividamento`, `informacao_financeira`, `obrigacao`.
+
+**Tabelas legadas do FRE** (25, desde 2026-10-31): `last_year` no YAML =
+último ZIP anual que traz o CSV (2016, 2022 ou 2023; medido em todos os
+ZIPs 2010–2024, um cabeçalho por tabela). Ano depois dele =
+`cvmdata_error_input`; janela corta com aviso; `year = NULL` = ERRO
+pedindo `year` explícito (decisão do dono 2026-10-31; NÃO devolve o
+último ano da tabela). O ETL não agenda os anos seguintes
+(`mirror_table_years()`).
+
+Schema do YAML por tabela: campos canônicos (`dataset`, `table`,
+`cvm_archive_url_pattern` xor `cvm_file_url_pattern`,
+`cvm_file_pattern`, `cvm_dictionary_url`, `meta_status`, `encoding`,
+`delimiter`, `temporal_partitioning ∈ {none, yearly}`, `first_year`,
+`empty_from` + `empty_reason` (opcionais; ano a partir do qual o CSV vem
+só com cabeçalho, e por quê), `last_year` (opcional; último ano cujo ZIP
+traz o CSV — tabelas legadas), `expected_field_count`,
+`expected_field_names`, `transformations`). Domínio de `action` em
+`transformations`: `multiply_by_scale` (requer `scale_column:`), `drop`,
+`keep_latest_version` (aceita `keys: [...]` opcional para compor chaves
+extras com a dupla implícita `(cnpj, data)` — usado em `cgvn/praticas`
+com `keys: [id_item]`). Detalhes no naming doc v03 e no loader
+(`R/schema-load.R`).
+
+------------------------------------------------------------------------
+
+## 8. Cache
+
+Cache em `tools::R_user_dir("cvmdata", which = "cache")`. Layout
+`<group>`-aware:
+
+- **L1** raw CVM: `<cache>/raw/<group>/<dataset>/[<year>/]`. Cobre CSV
+  direto (CAD) e ZIP yearly (DFP/ITR/FRE). Sidecar `*.etag.rds` com
+  ETag/Last-Modified/`fetched_at`. Invalidação por HEAD HTTP com TTL
+  default 30 dias (`options(cvmdata.cache_ttl_seconds)`; `0` = sempre
+  HEAD, `Inf` = nunca enquanto sidecar existir).
+- **L3** parquet mirror:
+  `<cache>/parquet/<group>/<dataset>/<table>/[report_type=R/]year=Y/part-0.parquet`.
+  Sidecar `<cache>/parquet/<group>/<dataset>/__source_hash.json`
+  invalida por hash content-addressed contra o asset homônimo do
+  release. Sem TTL.
+- **L4** memória da sessão: planejado
+  ([`cachem::cache_mem()`](https://cachem.r-lib.org/reference/cache_mem.html),
+  50 MB), ainda não em `Imports`. **L2** não é usado.
+
+Fallback por `source`:
+
+- `source = "mirror"` (default): L4 → L3 → GitHub Releases → erro.
+- `source = "cvm"`: L4 → L1 → portal CVM HTTP → erro.
+
+Eviction LRU: default 100 MiB (`options(cvmdata.cache_max_size_mb)`).
+Quando soma \> 90%, próximo download dispara eviction até cair a 80%.
+Unidade: diretório do ano para yearly, par `{artifact, sidecar}` para
+não-particionados. `0`/negativo/`Inf` desligam a engine. Aviso agregado
+por `cvmdata_warn_eviction` (opt-in
+`options(cvmdata.cache_warn_evictions)` — default
+[`interactive()`](https://rdrr.io/r/base/interactive.html)). CSVs
+extraídos via [`unzip()`](https://rdrr.io/r/utils/unzip.html) contam
+para o limite mas não disparam eviction.
+
+[`cvm_cache_clear()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_clear.md)
+manual: `what ∈ c("all", "raw", "parquet")` + `group/dataset/year`
+opcionais. `what = "all"` ignora filtros; senão compõe
+`<cache>/<what>/<group>/<dataset>/<year>/` com cada segmento opcional da
+direita pra esquerda. `what = "parquet"` rejeita `year` (L3 aninha year
+sob table); para granularidade year-level usar `what = "raw"`.
+
+Mirror parquet: workflow semanal `etl-mirror.yaml` (cron `0 7 * * 2`)
+roda matrix bidimensional `(group, dataset)` (`fail-fast: false`); cada
+job encadeia os scripts `01→02→02b→03` com flags `--group --dataset`. O
+publish detecta mudança via hash SHA-256 (`util-hash.R`) e skipa
+republish quando o hash bate o anterior. O hash cobre os META **e o
+conteúdo (linhas e colunas, sem atributos) de cada parquet**; até
+2026-10-19 cobria só os META e o mirror ficou congelado no retrato de
+junho/2026. Depois do upload, o release é forçado para fora de draft e
+conferido sem credencial (o vlmo foi draft = 404 para todos de junho a
+outubro). Rodada com `year` é smoke test e NÃO publica (o publish deixa
+o release igual aos parquets locais e apagaria os outros anos). O
+release é atualizado NO LUGAR (`gh release edit` + upload `--clobber` +
+`delete-asset` dos que sobraram, com `=` → `.` na comparação), nunca
+apagado e recriado: o delete+create deixava o mirror vazio durante o
+upload e, em 19/10, falhou calado no fre/itr. `__source_hash.json` sobe
+por último; um upload que falha (o GitHub responde 500 esporádico no
+`--clobber`) é tentado de novo até três vezes. **Histórico de entregas
+substituídas** (Parte 3 das versões, 2026-10): para cada partição cujo
+hash de conteúdo mudou, o publish baixa o parquet do release anterior e
+compara entrega por entrega (`inst/etl/util-history.R`: chave
+`(cnpj, data[, extras do YAML])`, assinatura = linhas ordenadas sobre as
+colunas comuns, SEM `versao`/ `id_doc`/`dt_receb` — documento novo com
+os mesmos números não é versão); as linhas das entregas trocadas ou
+sumidas vão, com `superseded_at` e `superseded_by_versao`, para o asset
+acumulativo `<table>__report_type=R__year=Y__history.parquet`, que nunca
+é apagado como stale. Só tabelas com `keep_latest_version` têm
+histórico; o `-latest` não muda; o cliente ignora o asset (o parser
+recusa o nome); o JSON ganha o mapa `history` (partição → sha256),
+`hash` mantém o significado. Desde 2026-10-25 o JSON leva também `skips`
+(manifesto de pulos do stage 02: table/year/report_type/reason ∈ {empty,
+absent}); `mirror_fetch_sidecar()` lê, `attr(inventory, "skips")`
+guarda, e `mirror_skip_bullets()` cita no erro “No parquet assets
+match”. NUNCA asset novo no release: `parse_mirror_asset_name()` aborta
+em qualquer nome que não seja parquet ou `__source_hash.json`.
+`03-publish.R --dry-run` = smoke local sem tocar o release. **Etiqueta
+de erro de escala** (decisão do dono 2026-11-06; estágio
+`inst/etl/05-label-scale.R` + `util-scale.R`): depois do 03 (espelho) e
+do 04 (RAD), o estágio 05 lê do release o histórico e as partições
+vigentes das 8 demonstrações de cada ano cujo histórico mudou desde o
+último julgamento (`scale_labeled` e `scale_rule` no
+`__source_hash.json`), julga cada versão substituída pelo DOCUMENTO
+INTEIRO (ind + con) e regrava a coluna `scale_error` nos `__history` do
+ano (coluna nova, nunca asset novo). Regra fechada: contas `ÚLTIMO` sem
+`3.99*`, não nulas nas duas versões; mais da metade segue um mesmo fator
+1000^n → erro de escala; “apenas” se TODAS seguem e nenhuma conta não
+nula só de um lado; senão “e outras mudanças”; o resto é “sem”. Sucessor
+= entrega seguinte por (`superseded_at`, `id_doc`, `versao`), vigente
+por último; versão gravada pelo caminho do espelho só tem as tabelas que
+mudaram — as ausentes vêm do sucessor (iguais). Só dfp e itr. `--all` =
+backfill (input `label_all` do `etl-rad.yaml`); `--dry-run` grava local.
+**Edição trimestral com DOI no Zenodo** (desenho do dono 2026-11-06;
+estágio `inst/etl/06-zenodo-edition.R` + `util-zenodo.R`; workflow
+`zenodo-edition.yaml`, dia 22 de jan/abr/jul/out): edição = espelho
+inteiro na primeira terça do mês (snapshot ≤ data por conjunto, como
+[`cvm_release_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_release_set.md)), +
+`__history` do dia do depósito, README, dicionário, codelists,
+DATA-LICENSE, `manifest.csv` e `SHA256SUMS`, um `.tar` por conjunto (tar
+interno do R, sem compressão), UM registro com uma versão por edição
+(`newversion`). O robô PREPARA o rascunho e NUNCA publica
+(`zenodo_actions_allowed` sem `publish`; teste varre o fonte); carência
+de 14 dias; conferências em ordem: sha256 de toda partição contra o
+sidecar datado → contagem de linhas por tabela contra o `manifest.csv`
+da edição anterior (menos linhas ou tabela sumida = falha, salvo
+`--allow-shrink`; crescimento só se reporta) → leitura de volta do
+rascunho; falha antes do depósito não toca o Zenodo, falha depois
+apaga/descarta o rascunho. Relatório em
+`<workspace>/zenodo/<edição>/edition-report.md` (job summary). Sandbox
+primeiro (`--target sandbox`, padrão); segredos `ZENODO_SANDBOX_TOKEN` /
+`ZENODO_TOKEN` (escopos write + actions) e variáveis
+`ZENODO_SANDBOX_CONCEPT` / `ZENODO_CONCEPT` pelo site do GitHub; sem
+token o workflow agendado não faz nada. Ensaio local: `--dry-run`.
+**Snapshots datados** (decisão A do dono, 2026-10-25; medido: 624 MB em
+8 releases, ~60 MB/semana mudam = 11% das partições; cópia integral
+seria 32 GB/ano, só-mudadas 3,5 GB/ano): toda rodada que publica cria
+também `mirror-<group>-<dataset>-snapshot-<YYYY-MM-DD>`
+(`inst/etl/util-snapshot.R`) só com as partições cujo hash de conteúdo
+mudou (a primeira leva todas = baseline) e o sidecar completo, que ganha
+`snapshot` (data), `snapshots` (todas as datas), `releases` (partição →
+tag do snapshot que guarda os bytes) e `files` (partição → sha256 +
+tamanho do arquivo). **Os dois sidecars diferem em `files` desde
+2026-11-07** (`snapshot_pointer_digests()`): o parquet reescrito pela
+rodada muda de bytes mesmo com as mesmas linhas (`fetched_at` nos
+metadados), então o `-latest` publica o digest do arquivo que subiu para
+ele e guarda em `snapshot_files` o digest dos bytes apontados por
+`releases`, carregado rodada a rodada; o sidecar do snapshot datado leva
+esse mapa em `files`. Antes disso, pin em data que não fosse a do último
+snapshot falhava com `cvmdata_error_http_integrity` em toda partição não
+mudada (medido: `composicao_capital` 2021 pinado em 2026-11-04). Sidecar
+de `-latest` sem `snapshot_files` PARA o publish e pede
+`inst/etl/repair-snapshot-digests.R` (reconstrói `files` de cada
+snapshot datado pelos bytes apontados). Snapshot NUNCA é apagado (os
+ponteiros dos seguintes dependem dele); `-latest` continua inteiro para
+o cliente antigo; os `__history` ficam só no `-latest`. Snapshot sobe
+ANTES do `-latest` (retry no mesmo dia cai na mesma tag com
+`--clobber`); criado com `--latest=false`. Sidecar sem `releases` força
+publish mesmo com hash igual (cria o primeiro snapshot). Cliente:
+`mirror_list_assets(release=)` monta o inventário pelo sidecar do
+snapshot ≤ data (`mirror_pick_snapshot()`, URL direta
+`releases/download/<tag>/<asset>`, sem API) + histórico do `-latest`;
+`mirror_fetch_to_l3()` confere tamanho e sha256 de todo parquet (cache
+de outro snapshot é trocado; download divergente =
+`cvmdata_error_http_integrity`); com `files` presente, mudança de hash
+do dataset NÃO despeja a árvore L3 inteira (só os `history.parquet`);
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+sob pin descarta história com `superseded_at` \> data. Fora do repo, o
+portfolio-monitor (`R/collect_vigia_mirror_cvm.R`) confere toda semana,
+sem credencial, a última entrega de cada dataset na CVM contra a do
+espelho, e abre o item `cvmdata:mirror-atrasado` no painel quando falta
+entrega há mais de 7 dias ou o release não abre anônimo — é o alarme que
+faltou de junho a outubro/2026. Encoding dos asset names:
+`<table>__report_type=R__year=Y__part-0.parquet` (Hive-style achatado);
+GitHub Releases sanitiza `=` → `.` no URL público;
+`parse_mirror_asset_name()` em `R/util-mirror-assets.R` tolera ambos.
+
+------------------------------------------------------------------------
+
+## 9. Política de testes
+
+- `testthat` 3.x edition 3, `Config/testthat/edition: 3`.
+- **Sem rede em `tests/testthat/`**. Testes de integração em
+  `test-integration-*.R` com `skip_on_cran()` + `skip_if_offline()` +
+  guarda `CVMDATA_RUN_INTEGRATION=true`.
+- **Mocks HTTP** via `httptest2` (e em alguns casos
+  [`httr2::with_mocked_responses()`](https://httr2.r-lib.org/reference/with_mocked_responses.html)).
+- **Fixtures pequenos e reais** em `tests/testthat/fixtures/`: cada
+  fixture com `*.meta.json` registrando origem. Inclui `cad_sample.csv`,
+  ZIPs `{dfp,itr,fre,cgvn}_cia_aberta_2024.zip` e parquets
+  `mirror-*.parquet` gerados por `data-raw/build-mirror-test-fixtures.R`
+  (raw ZIPs do CGVN+ via `build_cgvn_raw_fixture()` no mesmo script;
+  CAD/DFP/ITR/FRE foram commitados manualmente antes de o script
+  existir).
+- **Snapshot tests** para mensagens de erro, atributos serializados,
+  estrutura de output
+  ([`dplyr::glimpse()`](https://pillar.r-lib.org/reference/glimpse.html)
+  snapshotado).
+- **Cobertura alvo 90%**.
+
+Cache real fica em `tools::R_user_dir("cvmdata", "cache")`. Em testes, é
+redirecionado para tempdir via `options(cvmdata.cache_dir = ...)`.
+
+Gate por commit: `devtools::check() == 0E/0W/0N` com `--as-cran`, lint
+clean, testes verdes,
+[`pkgdown::build_site()`](https://pkgdown.r-lib.org/reference/build_site.html)
+funcionando.
+
+CI em `.github/workflows/`: `R-CMD-check.yaml` (matrix release/devel +
+SO), `lint.yaml`
+([`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html)),
+`test-coverage.yaml` (covr → Codecov), `pkgdown.yaml` (deploy do site),
+`etl-mirror.yaml` (cron `0 7 * * 2` + dispatch manual, ver §8). Os
+quatro primeiros travam por push/PR; o quinto é operacional.
+
+------------------------------------------------------------------------
+
+## 10. Workflow de desenvolvimento
+
+- Modo **tracer bullet**: implementar a função mais simples
+  ponta-a-ponta antes de generalizar.
+- **Estado de execução vive em `ROADMAP.md`** — sessão por sessão, fase
+  por fase. `CLAUDE.md` não duplica status; consultar o roadmap antes de
+  assumir que algo está entregue.
+- **Não reabrir decisões travadas** (canônicos das Rodadas 2.5/2.6/3.0,
+  decisão de grupos 2026-05-25, decisões pós-3.4 em `NEWS.md` + git
+  log). Se acha que precisa rever, perguntar antes de agir.
+- **Não inventar URLs, nomes de arquivos CVM, conteúdo de schemas**.
+  Usar YAMLs validados em `inst/extdata/schemas/` ou `schemas_proto/`
+  para protótipos, ou perguntar.
+
+### 10.1 Comandos não-óbvios
+
+Comandos triviais de pacote R
+([`devtools::check()`](https://devtools.r-lib.org/reference/check.html),
+[`devtools::test()`](https://devtools.r-lib.org/reference/test.html),
+[`devtools::document()`](https://devtools.r-lib.org/reference/document.html),
+[`devtools::build_readme()`](https://devtools.r-lib.org/reference/build_readme.html),
+[`devtools::install()`](https://devtools.r-lib.org/reference/install.html),
+[`devtools::build()`](https://devtools.r-lib.org/reference/build.html),
+[`lintr::lint_package()`](https://lintr.r-lib.org/reference/lint.html),
+[`covr::package_coverage()`](https://covr.r-lib.org/reference/package_coverage.html))
+não estão listados aqui — usar diretamente.
+
+``` powershell
+# Um único teste por nome — desc parcial casa por regex
+Rscript -e "testthat::test_file('tests/testthat/test-issuer-fetch-cad.R', desc = 'returns a cvm_tbl')"
+
+# Regenerar README.pt-BR.md (build_readme() só cobre o canônico README.Rmd)
+Rscript -e "knitr::knit('README.pt-BR.Rmd', output = 'README.pt-BR.md')"
+
+# Regenerar snapshots/fixtures embarcados — batem no portal CVM real,
+# exigem rede, ~30 s cada; rodar quando schemas ou geradores mudarem
+Rscript data-raw/build-dictionary-snapshot.R    # inst/extdata/cvm_dictionary_snapshot.csv
+Rscript data-raw/build-codelists-snapshot.R     # inst/extdata/cvm_codelists_snapshot.csv
+Rscript data-raw/build-mirror-test-fixtures.R   # tests/testthat/fixtures/mirror-*.parquet
+Rscript data-raw/build-vignette-data.R          # inst/extdata/vignette-data/*.rds
+
+# ETL do mirror — dispatch manual (cron `0 7 * * 2` em etl-mirror.yaml)
+gh workflow run etl-mirror.yaml
+
+# ETL local (smoke) — --group + --dataset são obrigatórios
+Rscript inst/etl/01-fetch-cvm.R       --group companhias --dataset cad
+Rscript inst/etl/02-csv-to-parquet.R  --group companhias --dataset cad
+Rscript inst/etl/02b-validate.R       --group companhias --dataset cad
+Rscript inst/etl/03-publish.R         --group companhias --dataset cad
+```
+
+### 10.2 Stage `schemas_proto/`
+
+Diretório `schemas_proto/` na raiz (excluído da tarball via
+`.Rbuildignore`) é a área de stage para YAMLs antes da promoção para
+`inst/extdata/schemas/<group>/<dataset>/<table>.yaml`. Workflow:
+escrever o YAML em stage, validar contra dados reais com
+`cvm_fetch(..., source = "cvm", on_error = "warn")`, ajustar
+`expected_field_count`/`expected_field_names`/ `transformations` até
+zero divergência, então mover para `inst/extdata/schemas/`. Conteúdo
+atual de `schemas_proto/` é rascunho parcial — não usar como fonte
+canônica.
+
+### 10.3 Critério de inclusão das codelists
+
+Lógica enterrada em `data-raw/build-codelists-snapshot.R`. Replicar se o
+gerador for revisitado:
+
+- **Pelo dicionário**: colunas onde `dominio` enumera valores com
+  separador `/` ou `|` (capta `S/N`, `PF/PJ`).
+- **Por cardinalidade observada**: colunas `tipo_dados = "varchar"` com
+  `tamanho < 200` e ≤ 50 valores distintos SOMANDO TODOS OS ANOS
+  publicados (decisão do dono, 2026-11-01; lidos do espelho, e da CVM
+  quando o espelho ainda não tem a tabela). Exceção escrita em
+  `.CARDINALITY_EXCEPTIONS`: `fca/geral/setor_atividade` (classificação
+  setorial da CVM, 66 valores). Exclusão escrita em `.FREE_TEXT_COLUMNS`
+  (chave completa, não prefixo; decisão do dono, 2026-11-01): texto
+  livre de tabela pequena demais para o teste de cardinalidade —
+  `cad/estrangeiras` (27 linhas) `resp`, `auditor`, `cidade`, `estado`
+  (`fca/escriturador/cidade` é lista curta legítima, por isso não é
+  prefixo). Cada valor leva `first_seen_year` e `last_seen_year` (NA:
+  valor do `dominio` nunca observado, ou tabela sem ano, o `cad`),
+  EXCLUINDO prefixos: identificadores (`cnpj`, `cd_cvm`, `codigo_cvm`,
+  `cep`, `tel`, `ddd`, `cpf`, `id_doc`, `id_documento`, `versao`),
+  `^cd_` (códigos contábeis), `^nome_`/`^denom_` (nomes próprios),
+  `^ds_` (descrições texto livre), `^email`/`^logradouro`/`^compl`/
+  `^bairro`/`^mun($|_)`/`^municipio_` (endereço).
+- **Tabelas `meta_status: missing`**: excluídas (declarar codelist sem
+  ancoragem CVM violaria “se vem da CVM, fica como na CVM”).
+- **Guarda do `--write`** (2026-10-31): recusa gravar se alguma coluna
+  do snapshot commitado perderia a codelist; `--allow-drop` só quando a
+  CVM aposentou a coluna. Medido no mesmo dia: 5 colunas promovidas por
+  cardinalidade num ano antigo passam de 50 em 2026 (53 a 120 valores:
+  `fca/geral/setor_atividade`, `fre/auditor/auditor`,
+  `fre/capital_social/prazo_integralizacao`,
+  `fre/posicao_acionaria/nacionalidade`,
+  `fre/titulo_exterior/identificacao_valor_mobiliario`) — a regra de um
+  ano só é instável. **Resolvido 2026-11-01:** o snapshot de 29/05
+  amostrou um 2026 de cinco meses; medido em todos os anos, 13 das 178
+  colunas eram texto livre e 49 estavam incompletas. Com todos os anos
+  saíram 27 colunas (12 de texto livre e 15 `escala_moeda`, que a
+  transformação apaga) e entraram 10. O gerador lê com `quote = ""`,
+  como o leitor (o valor “5,13% a.a.” vinha das aspas).
+
+------------------------------------------------------------------------
+
+## 11. Objetivos do projeto
+
+- **Gate de qualidade**: rOpenSci via review formal em
+  <https://github.com/ropensci/software-review>. Ancora todo o trabalho
+  enquanto princípio de design — decisões que não passem o filtro “isso
+  ajuda ou atrapalha a aceitação rOpenSci?” devem ser rejeitadas.
+- **Timing de submissão** (decisão de 2026-11-06, substitui a de
+  2026-05-28): a submissão ao rOpenSci ocorre **quando o módulo de
+  companhias abertas estiver perfeito e funcionando** (os 9 conjuntos do
+  grupo `companhias` e o espelho que os serve), não após a v1.0. Os
+  grupos futuros (fundos etc.) entram depois, pela mesma
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+  O gate é `pkgcheck::pkgcheck()` (robô da revisão; passa desde
+  2026-11-06) mais a lista “Pré-requisitos (gate)” do ROADMAP;
+  `codemeta.json` se regera com `codemetar::write_codemeta()` a cada
+  release.
+- **CRAN**: permanece **acoplado ao aceite rOpenSci**; rOpenSci submete
+  em nome do mantenedor quando aceito.
+- **The R Journal**: paper sobre o pacote, **somente após o aceite
+  rOpenSci**.
+
+Sequenciamento canônico em `ROADMAP.md`, seção “Fim do ciclo — submissão
+rOpenSci, CRAN e publicação”.

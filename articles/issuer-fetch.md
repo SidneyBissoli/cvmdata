@@ -1,0 +1,672 @@
+# cvm_fetch(): the generic API
+
+`cvm_fetch(dataset, table, ...)` is the single entry point for every CVM
+dataset and every table covered by the package.
+
+This article walks through each argument: how issuers are selected
+(`cnpj`, `ticker`), how the period is selected (`year` or `from`/`to`),
+the `basis` rule for financial statements, the `on_error` modes, and the
+cache/source plumbing.
+
+`issuer_fetch()`, the entry point of v0.1 and v0.2, was removed. Its
+`issuer` argument took a CNPJ, a CVM code, a ticker or a company name;
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+takes `cnpj` or `ticker`, and the CVM code or name of a company is
+looked up in `cvm_fetch("cad", "companhias")`. Its `report_type` is
+`basis`.
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`cvmdata`](https://github.com/SidneyBissoli/cvmdata)`)`
+
+## Anatomy
+
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``dataset``,`\
+`  ``table``,`\
+`  cnpj     ``=`` ``NULL``,`\
+`  ticker   ``=`` ``NULL``,`\
+`  year     ``=`` ``NULL``,`\
+`  from     ``=`` ``NULL``,`\
+`  to       ``=`` ``NULL``,`\
+`  basis    ``=`` ``NULL``,`\
+`  source   ``=`` ``NULL``,`\
+`  on_error ``=`` ``"abort"``,`\
+`  ``...`\
+`)`
+
+Returns a tibble of subclass `cvm_tbl` carrying seven provenance
+attributes (`source`, `fetched_at`, `group`, `dataset`, `table`,
+`package_version`, `release`). Column names, table names and categorical
+values are preserved in Portuguese as published by CVM; the API surface
+is in English.
+
+\
+`bb_bpa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(`\
+`  ``"dfp"``, ``"bpa"``,`\
+`  cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`  year ``=`` ``2024``,`\
+`  basis ``=`` ``"ind"`\
+`)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`bb_bpa`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-dfp-snapshot-2026-11-15"`` |`\
+`#>   ``fetched_at``: ``2026-11-15 16:53:50.301106`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"dfp"`` | ``table``: ``"bpa"`\
+`#> ``# A tibble: 96 × 15`\
+`#>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc`\
+`#>    ``<chr>``          ``<date>``     ``<chr>``  ``<chr>``     ``<chr>``  ``<chr>``     ``<chr>`` ``<chr>``      `\
+`#> `` 1`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  `\
+`#> `` 2`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     `\
+`#> `` 3`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  `\
+`#> `` 4`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     `\
+`#> `` 5`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  `\
+`#> `` 6`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     `\
+`#> `` 7`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  `\
+`#> `` 8`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     `\
+`#> `` 9`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  PENÚLTIMO  `\
+`#> ``10`` 00.000.000/00… 2024-12-31 1      BCO BRAS… 001023 DF Indiv… REAL  ÚLTIMO     `\
+`#> ``# ℹ 86 more rows`\
+`#> ``# ℹ 7 more variables: dt_fim_exerc <date>, cd_conta <chr>, ds_conta <chr>,`\
+`#> ``#   vl_conta <dbl>, st_conta_fixa <chr>, year <int>, basis <chr>`\
+\
+`# Provenance:`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``bb_bpa``, ``"source"``)`\
+`#> [1] "mirror"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``bb_bpa``, ``"dataset"``)`\
+`#> [1] "dfp"`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``bb_bpa``, ``"table"``)`\
+`#> [1] "bpa"`
+
+## Identifying issuers
+
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+identifies issuers by two keys only, and the two combine in a single
+call:
+
+| Argument | Accepts | Match against |
+|----|----|----|
+| `cnpj` | CNPJ, with or without punctuation, vector of any length | `cnpj_cia` / `cnpj_companhia`, punctuation stripped |
+| `ticker` | B3 trading code (`PETR4`, `BBAS3`, `BBDC11`) | `codigo_negociacao` in `fca/valor_mobiliario`, resolved to the issuer’s CNPJ |
+
+A CVM code (`"1023"`) or a company name (`"BCO BRASIL"`) passed as
+`cnpj` aborts with `cvmdata_error_input`: there is no free-text search
+and no CD_CVM lookup in
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md).
+To find the CNPJ of a company you know by name or by CVM code, read the
+registry, which carries `cd_cvm`, `denom_social` and `cnpj_cia` side by
+side:
+
+\
+`registry`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"cad"``, ``"companhias"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`registry``[`[`grepl`](https://rdrr.io/r/base/grep.html)`(``"MAGAZINE LUIZA"``, ``registry``$``denom_social``)``,`\
+`         `[`c`](https://rdrr.io/r/base/c.html)`(``"cd_cvm"``, ``"denom_social"``, ``"cnpj_cia"``)``]`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-cad-snapshot-2026-11-15"`` |`\
+`#>   ``fetched_at``: ``2026-11-15 16:53:50.716144`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"cad"`` | ``table``: ``"companhias"`\
+`#> ``# A tibble: 1 × 3`\
+`#>   cd_cvm denom_social      cnpj_cia          `\
+`#>   ``<chr>``  ``<chr>``             ``<chr>``             `\
+`#> ``1`` 22470  MAGAZINE LUIZA SA 47.960.950/0001-21`
+
+### CNPJ: punctuated or clean, same rows
+
+\
+`# Each call returns identical rows.`\
+`a`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`               year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`b`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00000000000191"``,`\
+`               year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+\
+[`identical`](https://rdrr.io/r/base/identical.html)`(`[`nrow`](https://rdrr.io/r/base/nrow.html)`(``a``)``, `[`nrow`](https://rdrr.io/r/base/nrow.html)`(``b``)``)`\
+`#> [1] TRUE`
+
+A CNPJ absent from the table yields zero rows for it, silently — a miss
+on a taxpayer id is not a typo the package can second-guess.
+
+### Ticker: resolved through the registration form
+
+A B3 trading code is looked up in `fca/valor_mobiliario` (read from the
+same `source` as the data), and the issuer’s CNPJ is then filtered
+exactly as `cnpj` would be. The lookup reads every yearly FCA file that
+carries trading codes (2018 onwards; the column is empty in earlier
+files), so the code of a company that has since left the exchange still
+resolves, for any `year`: `GOLL4` fetches Gol’s statements of 2019
+although the company cancelled its registration in 2026. Tickers cover
+only exchange-listed securities; a code absent from every file aborts
+with `cvmdata_error_input` rather than returning an empty tibble, and so
+does a code that maps to more than one issuer (none does today; pass
+`cnpj` in that case).
+
+\
+`petr`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, ticker ``=`` ``"PETR4"``,`\
+`                  year ``=`` ``2024``, basis ``=`` ``"con"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`unique`](https://rdrr.io/r/base/unique.html)`(``petr``$``denom_cia``)`\
+`#> [1] "PETROLEO BRASILEIRO S.A. PETROBRAS"`
+
+`cnpj` and `ticker` combine; the result is the union of both sets:
+
+\
+`two`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``,`\
+`                 cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`                 ticker ``=`` ``"MGLU3"``,`\
+`                 year ``=`` ``2024``, basis ``=`` ``"ind"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`unique`](https://rdrr.io/r/base/unique.html)`(``two``$``denom_cia``)`\
+`#> [1] "BCO BRASIL S.A."     "MAGAZINE LUIZA S.A."`
+
+## Selecting the period
+
+Two mutually exclusive forms; passing both aborts.
+
+### Whole years with `year`
+
+`year` is an integer vector of any length (singular naming follows
+tidyverse conventions), matching the yearly files the CVM publishes.
+`NULL` (default) fetches the **latest available year**, discovered by
+HEAD-probing CVM’s listing (or from the mirror’s inventory). Must be
+`NULL` for snapshot tables such as `cad/companhias`.
+
+\
+`# What's published upstream?`\
+[`cvm_dataset_years`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)`(``"dfp"``)`\
+`#>  [1] 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024`\
+`#> [16] 2025 2026`\
+\
+`# Pass an explicit vector to back-fill history:`\
+`history`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`                     year ``=`` ``2022``:``2024``, basis ``=`` ``"ind"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`sort`](https://rdrr.io/r/base/sort.html)`(`[`unique`](https://rdrr.io/r/base/unique.html)`(`[`format`](https://rdrr.io/r/base/format.html)`(``history``$``dt_refer``, ``"%Y"``)``)``)`\
+`#> [1] "2022" "2023" "2024"`
+
+Each CSV publishes `ORDEM_EXERC ∈ {ÚLTIMO, PENÚLTIMO}` — the declared
+year and N − 1. The antepenultimate of year N is the last of year N − 2.
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+does not synthesize the antepenultimate; ask for `year = (N - 2):N` if
+you need it. To read an exercise by its own year, with the figures
+originally filed and the comparative of the following year’s file
+labelled, see [`reading`](#reading) below.
+
+\
+[`table`](https://rdrr.io/r/base/table.html)`(``history``$``ordem_exerc``)`\
+`#> `\
+`#> PENÚLTIMO    ÚLTIMO `\
+`#>       144       144`
+
+### A date window with `from` and `to`
+
+For slices smaller than a year, pass `from` and `to` together as
+complete dates (`"YYYY-MM-DD"` strings or `Date` scalars). Rows are kept
+when the document’s **reference date** (`dt_refer` in CAD/ITR/DFP-style
+tables, `data_referencia` in FRE-style tables) falls inside the window;
+the yearly files actually read are the years the window spans. The
+reference date is the period the filing describes, not the day it was
+delivered.
+
+\
+`# ITR balance sheets referenced in the first half of 2024`\
+`h1`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"itr"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`                from ``=`` ``"2024-01-01"``, to ``=`` ``"2024-06-30"``,`\
+`                basis ``=`` ``"con"``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`unique`](https://rdrr.io/r/base/unique.html)`(``h1``$``dt_refer``)`\
+`#> [1] "2024-03-31" "2024-06-30"`
+
+Incomplete dates (`"2024"`, `"2024-06"`) are rejected, as is a window on
+a snapshot table. One bound without the other aborts; for whole years
+use `year`.
+
+## `basis`
+
+Eight tables in ITR/DFP publish both **individual** and **consolidated**
+variants of the same concept (`bpa`, `bpp`, `dre`, `dra`, `dfc_md`,
+`dfc_mi`, `dmpl`, `dva`). `basis` is **required** for those, with no
+default: many issuers file only individual statements, so defaulting to
+`"con"` would silently drop them.
+
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``)`\
+`#> ``Error```  in `check_basis()` at cvmdata/R/api-cvm-fetch.R:351:3: ``\
+`#> ``!`` Table ``"dfp"``/``"bpa"```  requires `basis`. ``\
+`#> ``ℹ```  Pass `basis = "ind"` for individual statements, `basis = "con"` for ``\
+`` #>   consolidated, or `basis = c("ind", "con")` for both. ``
+
+`basis` takes `"ind"`, `"con"` or `c("ind", "con")`. With both, the two
+variants are read and stacked. Whatever you ask for, those eight tables
+**always carry a `basis` column** in the result, so a single value and a
+stacked pair have the same shape:
+
+\
+`both`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, cnpj ``=`` ``"00.000.000/0001-91"``,`\
+`                  year ``=`` ``2024``, basis ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"ind"``, ``"con"``)``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`table`](https://rdrr.io/r/base/table.html)`(``both``$``basis``)`\
+`#> `\
+`#> con ind `\
+`#>  82  96`\
+`"basis"`` `[`%in%`](https://rdrr.io/r/base/match.html)` `[`names`](https://rdrr.io/r/base/names.html)`(``bb_bpa``)`\
+`#> [1] TRUE`
+
+On every other table (`companhias`, `submissao`, `parecer`,
+`composicao_capital`, every FRE/FCA detail table) `basis` must be left
+unset; passing it aborts rather than being ignored:
+
+\
+[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"composicao_capital"``,`\
+`          cnpj ``=`` ``"00.000.000/0001-91"``, year ``=`` ``2024``,`\
+`          basis ``=`` ``"ind"``)`\
+`#> ``Error```  in `check_basis()` at cvmdata/R/api-cvm-fetch.R:351:3: ``\
+`#> ``!`` Table ``"dfp"``/``"composicao_capital"`` has no individual/consolidated split;`\
+`` #>   leave `basis` unset. ``\
+`#> ``✖`` Got ``"ind"``.`
+
+## `reading`
+
+The same eight tables carry two columns of figures per account in every
+yearly file: `ordem_exerc = "ÚLTIMO"`, the exercise the file is about,
+and `ordem_exerc = "PENÚLTIMO"`, the comparative the issuer presented
+for the previous exercise. That comparative is often **restated** —
+after a change of accounting policy, an error, a reorganisation — and it
+is the figure later statements build on. Measured on the DFP, about a
+third of the issuers restate: Porto Seguro’s consolidated total assets
+of 2022 are R\$ 50.5 bn in the 2022 file and R\$ 39.9 bn in the 2023
+one.
+
+`reading` reads an exercise by its own year and labels the two readings.
+`"original"` is the `ÚLTIMO` rows of the file of `year`; `"restated"` is
+the `PENÚLTIMO` rows of the file of `year + 1`, which the call reads on
+its own; `c("original", "restated")` stacks both. Rows come as
+published, with a `reading` column appended:
+
+\
+`pssa`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, ticker ``=`` ``"PSSA3"``,`\
+`                  year ``=`` ``2022``, basis ``=`` ``"con"``,`\
+`                  reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`pssa``[``pssa``$``cd_conta`` ``==`` ``"1"``,`\
+`     `[`c`](https://rdrr.io/r/base/c.html)`(``"dt_refer"``, ``"ordem_exerc"``, ``"dt_fim_exerc"``, ``"vl_conta"``, ``"reading"``)``]`\
+`#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-dfp-snapshot-2026-11-15"`` |`\
+`#>   ``fetched_at``: ``2026-11-15 16:54:01.328427`\
+`#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"dfp"`` | ``table``: ``"bpa"`\
+`#> ``# A tibble: 2 × 5`\
+`#>   dt_refer   ordem_exerc dt_fim_exerc    vl_conta reading `\
+`#>   ``<date>``     ``<chr>``       ``<date>``             ``<dbl>`` ``<chr>``   `\
+`#> ``1`` 2022-12-31 ÚLTIMO      2022-12-31   ``50``490``921``000 original`\
+`#> ``2`` 2023-12-31 PENÚLTIMO   2022-12-31   ``39``914``390``000 restated`
+
+`dt_refer` and `versao` are those of the document each row came from
+(the restated row is dated 2023); `dt_fim_exerc` — and `dt_ini_exerc` in
+the flow statements — identify the exercise, so the two readings pair on
+the issuer, the exercise dates, `cd_conta` and, in `dmpl`, `coluna_df`.
+Either reading can be missing for an issuer that stopped or started
+filing between the two years, and the restated figure is whatever the
+issuer presented: the banks that adopted CMN Resolution 4,966 in 2025
+presented no comparative for 2024 on the individual basis, and their
+restated reading of 2024 is a column of zeros, as in the CVM file.
+
+An exercise whose following year’s file is not published yet has no
+restated reading; the call says so and returns what exists. When the
+file exists but the issuer has not filed in it yet (the current year’s
+file opens with the first non-December fiscal years), the restated rows
+are simply absent:
+
+\
+`latest`` ``<-`` `[`cvm_fetch`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)`(``"dfp"``, ``"bpa"``, ticker ``=`` ``"PSSA3"``, year ``=`` ``2025``,`\
+`                    basis ``=`` ``"con"``, reading ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"original"``, ``"restated"``)``)`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+`#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
+`#> ``ℹ`` /tmp/Rtmp0JpYrx/duckdb`\
+`#> This is removed when the R session ends.`\
+`#> ``•`` Extensions are re-downloaded each session.`\
+`#> ``•`` Secrets are lost.`\
+`#> ``ℹ`` Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).`\
+`#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
+`#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
+[`table`](https://rdrr.io/r/base/table.html)`(``latest``$``reading``)`\
+`#> `\
+`#> original `\
+`#>       76`
+
+With `from`/`to`, the window applies to the exercise end
+(`dt_fim_exerc`) rather than to the document date, so an exercise’s two
+readings stay together. Without `reading` (the default) each file comes
+as the CVM publishes it, `ÚLTIMO` and `PENÚLTIMO` rows together, and
+there is no `reading` column. In the ITR, the comparative of the balance
+sheet (`bpa`, `bpp`) is the previous year end, not the previous year’s
+quarter, so the restated reading of an ITR balance sheet is the year-end
+balance as the following year’s quarterly filings present it; the flow
+statements (`dre`, `dfc_*`, `dva`, `dmpl`) compare like with like.
+
+## `on_error`
+
+One argument decides what happens when something goes wrong while
+reading. Two things can:
+
+- **A file departs from the schema.** Every CVM file is checked against
+  the field count and the field names its schema declares (for the eight
+  FRE tables without published META, the names come from the schema’s
+  `expected_field_names`).
+- **One of several yearly files fails to download** (more than one
+  element in `year`, or a window spanning several years).
+
+| `on_error` | File departs from the schema | One of several years fails |
+|----|----|----|
+| `"abort"` (default) | Stops with `cvmdata_error_parse`. | Stops with `cvmdata_error_http` at the first failure. |
+| `"warn"` | Reads it; `cvmdata_warn_validation`. | Returns the other years; `cvmdata_warn_partial_failure`. |
+
+A call where nothing could be read always aborts, and so do a single
+year, a non-yearly table (CAD) and the implicit `year = NULL` fallback
+when their one file fails to download. The errors carry classes for
+[`tryCatch()`](https://rdrr.io/r/base/conditions.html); to silence the
+warnings of `"warn"`, wrap the call in
+[`suppressWarnings()`](https://rdrr.io/r/base/warning.html). Until
+2026-11-01 a separate `validate` argument governed the schema check,
+with silent modes in both; it was merged into `on_error`.
+
+## Cache, TTL and source backend
+
+Downloaded artefacts are cached under
+`tools::R_user_dir("cvmdata", "cache")`. Each ZIP / CSV stores an
+ETag/Last-Modified sidecar; HTTP revalidation is throttled by a 30-day
+TTL (configurable via `options(cvmdata.cache_ttl_seconds)`). Cached
+units are LRU-evicted once total size exceeds the limit set by
+`options(cvmdata.cache_max_size_mb)` (default 100 MiB).
+
+\
+`info`` ``<-`` `[`cvm_cache_info`](https://sidneybissoli.github.io/cvmdata/reference/cvm_cache_info.md)`(``)`\
+`info`\
+`#> ``# A tibble: 3 × 8`\
+`#>   group   dataset file  path  size_bytes mtime               etag  last_modified`\
+`#>   ``<chr>``   ``<chr>``   ``<chr>`` ``<chr>``      ``<int>`` ``<dttm>``              ``<chr>`` ``<chr>``        `\
+`#> ``1`` compan… fre     fre_… /git…    1``086``530 2026-11-15 ``16:53:40``  ``NA``   ``NA``           `\
+`#> ``2`` compan… fre     fre_… /git…    8``410``569 2026-11-15 ``16:53:40`` ``"``\"6… Sun, 15 Nov …`\
+`#> ``3`` compan… fre     fre_… /git…    7``259``454 2026-11-15 ``16:53:40``  ``NA``   ``NA`\
+[`attr`](https://rdrr.io/r/base/attr.html)`(``info``, ``"total_size_bytes"``)`\
+`#> [1] 16756739`
+
+`source` selects the backend: from v0.1.0 the default is `"mirror"`,
+which reads parquet snapshots from GitHub Releases via DuckDB with
+year-partition filter pushdown; `"cvm"` reads the open-data portal over
+HTTP and remains fully supported. The current backend is read by
+[`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)
+and changed at session scope by
+[`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md):
+
+\
+[`cvm_source_get`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md)`(``)`\
+`#> [1] "mirror"`
+
+## Where to read next
+
+- **itr-dfp** — quarterly and annual financial statements; two
+  end-to-end workflows.
+- **fre** — reference form, including the eight ESG/governance tables
+  without published META.
+- **cvm-defects** — known publication quirks and how `cvmdata` handles
+  each one.

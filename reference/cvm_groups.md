@@ -1,0 +1,95 @@
+# List the CVM CKAN groups
+
+Returns the 18 thematic groups published by the CVM Open Data Portal
+(`<https://dados.cvm.gov.br/group/>`), each with the number of datasets
+the portal exposes for it and the canonical `cvmdata` fetcher contract
+that covers it.
+
+## Usage
+
+``` r
+cvm_groups()
+```
+
+## Value
+
+A tibble with 18 rows, sorted alphabetically by `group`. Columns:
+
+- `group` (character) – the CKAN slug (e.g. `"companhias"`,
+  `"fundos-de-investimento"`).
+
+- `n_datasets` (integer) – count of datasets the CVM portal publishes
+  under this group.
+
+- `contract` (character) – one of `"issuer"`, `"fund"`, `"agent"`,
+  `"offering"`, `"event"`. Identifies the `cvmdata` fetcher that covers
+  (or will cover) the group.
+
+## Details
+
+Only the `companhias` group is covered so far (every dataset is served
+by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md));
+the remaining 17 rows document the planned v0.4-v0.8 coverage so users
+can navigate the universe of CVM data before the corresponding datasets
+ship. The `contract` column is a planning map of the identity key and
+temporal axis each group needs; new groups extend
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+through their schemas rather than through new fetcher functions.
+
+The `n_datasets` column reports the totals published by CVM, not the
+count currently implemented in the package. The mapping between groups
+and contracts changes only when CVM reorganises its portal; see
+`data-raw/decisions/cvmdata_arquitetura_grupos_decisao_v2.md` §1.1 for
+the rationale (historical: the fetchers it planned were superseded by
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+decided in `data-raw/decisions/cvmdata_v0-3_funcao_unica_decisao.md`).
+
+## See also
+
+[`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+
+Other discovery:
+[`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
+[`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md),
+[`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),
+[`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md),
+[`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+
+## Examples
+
+``` r
+cvm_groups()
+#> # A tibble: 18 × 3
+#>    group                               n_datasets contract
+#>    <chr>                                    <int> <chr>   
+#>  1 administradores                              2 agent   
+#>  2 agentes-autonomos                            1 agent   
+#>  3 agentes-fiduciarios                          1 agent   
+#>  4 atividade-sancionadora                       1 event   
+#>  5 atos-declaratorios                           1 event   
+#>  6 auditores                                    1 agent   
+#>  7 companhias                                  12 issuer  
+#>  8 consultores-de-valores-mobiliarios           1 agent   
+#>  9 coordenadores-de-ofertas                     1 agent   
+#> 10 emissores-de-cepac                           1 issuer  
+#> 11 fundos-de-investimento                      22 fund    
+#> 12 fundos-de-investimento-imobiliarios          4 fund    
+#> 13 fundos-estruturados                         10 fund    
+#> 14 investidores-nao-residentes                  1 agent   
+#> 15 ofertas-publicas                             2 offering
+#> 16 participantes-intermediarios                 1 agent   
+#> 17 plataformas-de-crowdfunding                  1 offering
+#> 18 securitizadoras                              4 issuer  
+
+# Groups under the issuer data contract
+g <- cvm_groups()
+g[g$contract == "issuer", ]
+#> # A tibble: 3 × 3
+#>   group              n_datasets contract
+#>   <chr>                   <int> <chr>   
+#> 1 companhias                 12 issuer  
+#> 2 emissores-de-cepac          1 issuer  
+#> 3 securitizadoras             4 issuer  
+```
