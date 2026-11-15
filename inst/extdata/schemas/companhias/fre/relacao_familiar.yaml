@@ -29,3 +29,8 @@ expected_field_count: 17
 transformations:
   - action: keep_latest_version
     note: Mantem apenas a ultima entrega (data de recebimento, id, VERSAO) por (cnpj_companhia, data_referencia).
+
+# Out of the mirror and of the Zenodo editions: the mirror carries
+# company data only (owner's decision of 2026-11-15). Read from the CVM.
+mirror: false
+mirror_reason: "family ties between named board members; the mirror carries company data only (owner's decision of 2026-11-15)"

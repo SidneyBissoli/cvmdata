@@ -150,6 +150,7 @@ cvm_versions <- function(
   ...
 ) {
   check_versions_dots(list(...))
+  asked_source <- !is.null(source)
   if (is.null(source)) {
     source <- cvm_source_get()
   }
@@ -157,7 +158,7 @@ cvm_versions <- function(
   modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
-  check_mirrored(schema, source)
+  source <- route_unmirrored(schema, source, asked_source)
   version_tx <- check_versioned_table(schema)
   basis <- check_basis(basis, schema)
   period <- check_published_years(

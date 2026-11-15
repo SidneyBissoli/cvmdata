@@ -41,6 +41,16 @@
 #     table whole, so no row can be rebuilt by subtraction. The references
 #     read for the minimum (IBGE, UK Government Analysis Function, ONS,
 #     CMS) are in the decision file.
+#   * company data only (owner's decision of 2026-11-15): the doubt about
+#     hosting personal data abroad (LGPD art. 33; Resolucao CD/ANPD
+#     19/2024) was not settled, so the mirror stopped carrying the tables
+#     that describe people. They are `mirror: false` in their schemas and
+#     the package reads them from the CVM. Here, the columns that name a
+#     person inside a table about the company are dropped
+#     (`.person_cols`), and a row of an auditor who is a natural person
+#     leaves (`mirror_person_rows()`). Names that a text about the company
+#     happens to mention stay; a person can ask to have them replaced
+#     (`mirror_suppress_people()`).
 # `source = "cvm"` still reads everything from the CVM, untouched: this
 # file runs in the ETL only.
 #
@@ -62,7 +72,7 @@
 # Version of the rule. 03-publish.R stores it in `__source_hash.json`; a
 # previous sidecar with another one (or none) makes that run rewrite the
 # history assets of the release.
-mirror_privacy_rule <- "4"
+mirror_privacy_rule <- "5"
 
 # A punctuated CPF is a CPF even when its check digits fail (a typing
 # error); any other spelling needs the check digits, or phone numbers and
@@ -105,10 +115,46 @@ mirror_privacy_rule <- "4"
 # against the dictionary snapshot.
 .biography_cols <- "^experiencia_profissional$"
 
+# Company data only (owner's decision of 2026-11-15). The tables whose
+# rows describe natural persons are out of the mirror by their schema
+# (`mirror: false`) and are read from the CVM. What is left here are the
+# columns that name a person inside a table about the company: the
+# officer in charge in the `cad`, the contact of the shareholders'
+# department and the technical lead of the audit in the `fca`, and the
+# CPF of an auditor who is a natural person. The test pins the match
+# against the dictionary snapshot.
+.person_cols <- paste0(
+  "^(resp|tp_resp|dt_ini_resp|mun_resp|uf_resp|pais_resp)$|",
+  "^(contato|data_inicio_contato|data_fim_contato)$|",
+  "responsavel_tecnico|^cpf_auditor$"
+)
+
+# Document columns of a table of companies where a row may still be a
+# natural person (an auditor who is not a firm): such a row leaves.
+.person_document_cols <- c("cpf_auditor", "cpf_cnpj_auditor")
+
 # Every column of a frame the mirror does not carry, in the order they
-# appear: contact data and biographies.
+# appear: contact data, biographies and the columns that name a person.
 mirror_dropped_columns <- function(cols) {
-  cols[cols %in% mirror_contact_columns(cols) | grepl(.biography_cols, cols)]
+  drop <- cols %in%
+    mirror_contact_columns(cols) |
+    grepl(.biography_cols, cols) |
+    grepl(.person_cols, cols)
+  cols[drop]
+}
+
+# Rows of a table of companies that are about a natural person: a CPF,
+# masked or not, in one of `.person_document_cols`. FALSE everywhere for
+# a frame without those columns.
+mirror_person_rows <- function(df) {
+  out <- logical(nrow(df))
+  for (cn in intersect(.person_document_cols, names(df))) {
+    x <- df[[cn]]
+    if (is.character(x)) {
+      out <- out | (!is.na(x) & startsWith(mirror_mask_document(x), "***."))
+    }
+  }
+  out
 }
 
 # Contact columns of a frame, in the order they appear.
@@ -528,8 +574,9 @@ mirror_suppress_mentions <- function(df, texts, name, skip) {
 # columns, then the filings a group table may not show taken out. Same
 # column order; the attributes of the frame survive both steps.
 mirror_apply_privacy <- function(df) {
+  person <- mirror_person_rows(df)
   df <- mirror_mask_columns(df)
-  unsafe <- mirror_group_unsafe(df)
+  unsafe <- mirror_group_unsafe(df) | person
   if (!any(unsafe)) {
     return(df)
   }
@@ -584,6 +631,10 @@ mirror_privacy_counts <- function(df) {
   unsafe <- sum(mirror_group_unsafe(df))
   if (unsafe) {
     out[["small_or_unanimous_groups"]] <- unsafe
+  }
+  person <- sum(mirror_person_rows(df))
+  if (person) {
+    out[["natural_person_rows"]] <- person
   }
   for (cn in mirror_dropped_columns(names(df))) {
     out[[cn]] <- sum(!is.na(df[[cn]]))

@@ -44,33 +44,30 @@ Attribution for the mirror and for anything you derive from it:
 
 ## Personal data
 
-The mirror departs from the CVM in one respect. Full CPFs, birth dates
-and contact data are not redistributed: every CPF is masked as
-`***.456.789-**`, a foreign document in a CPF column becomes `***`,
-`data_nascimento` becomes the year, in `ano_nascimento`, and the columns
-of e-mail, telephone and fax (of people and of companies) and of the
-street address of a person are left out. Three tables of the FRE are
-not redistributed either: the counts of gender, race and disability
-declarations of board members by body (`administrador_declaracao_genero`,
-`administrador_declaracao_raca`, `administrador_PCD`), which in a small or
-unanimous body tell the declaration of each named member. The five
-workforce tables that count employees by race, gender or disability come
-without the companies that, in a year, have a group of fewer than 10
-people or a group in which everybody declared the same category, so
-totals computed from them are lower than the CVM's. The biography
-column (`experiencia_profissional`) of the board and committee tables
-is not carried: the texts mention union and party membership,
-religion, health and convictions. Names stay as
-published. These are personal data under the Brazilian LGPD (Lei
-13.709/2018) wherever you read them from: their open publication does
-not free you from respecting the purpose of the disclosure.
+The mirror carries data about companies, not about people. The tables
+in which the CVM describes natural persons are not redistributed: in the
+FRE, `administrador_membro_conselho_fiscal`, `membro_comite`, `relacao_familiar`, `relacao_subordinacao`, `responsavel`, `auditor_responsavel`, `posicao_acionaria`, `posicao_acionaria_classe_acao`, `transacao_parte_relacionada`, `administrador_declaracao_genero`, `administrador_declaracao_raca` and `administrador_PCD`;
+in the FCA, `dri`. The package reads them from the CVM, on the user's
+machine. In the tables that stay, the columns that name a person are
+left out (the officer in charge in the `cad`, the contact of
+`fca/departamento_acionistas`, the technical lead in `fca/auditor`), a
+row of an auditor who is a natural person is left out, every CPF that a
+text mentions is masked as `***.456.789-**`, and the columns of e-mail,
+telephone and fax are not carried. The five workforce tables that count
+employees by race, gender or disability come without the companies
+that, in a year, have a group of fewer than 10 people or a group in
+which everybody declared the same category, so totals computed from
+them are lower than the CVM's.
 
-A person named in these tables can ask to leave the mirror. The row
-stays, so a board keeps its number of members and a shareholding still
-adds up, but the name reads `[omitido a pedido do titular]`, the columns
-that describe the person are empty, and a mention of the name in a text
-of the same dataset reads the same label. The file of the CVM is not
-changed by this.
+A text about a company (an auditor's report, the subject of a filing, a
+note) may still mention somebody by name. That is personal data under
+the Brazilian LGPD (Lei 13.709/2018) wherever you read it from: its open
+publication does not free you from respecting the purpose of the
+disclosure.
+
+A person so mentioned can ask to leave the mirror: the name then
+reads `[omitido a pedido do titular]` wherever a text of the mirror
+mentions it. The file of the CVM is not changed by this.
 
 **The ODbL does not license the personal data.** The licence governs
 the rights over the database and says so itself (section 2.4): "The

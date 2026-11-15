@@ -138,38 +138,44 @@ check off.
 }
 \section{Personal data}{
 
-The CVM publishes, by legal duty, data of the natural persons who run
-and control listed companies. The mirror keeps what research needs and
-no more: every CPF, in the columns that hold it and in free text, is
-masked the way the Federal Revenue masks its open CNPJ data
-(\verb{***.456.789-**}), a foreign document in those columns becomes \verb{***},
-and \code{data_nascimento} becomes the integer \code{ano_nascimento}. Contact data
-is not carried at all: the columns of e-mail, telephone and fax, of
-people and of companies alike, and the street address of a person
-(\verb{*_resp} in \code{cad}; \code{fca} \code{dri} and \code{departamento_acionistas}; \code{fre}
-\code{auditor_responsavel}) are absent from the mirror. The address of the
-company stays. Three tables of the \code{fre} are not in the mirror at all:
+The mirror carries data about companies, not about people. The tables
+in which the CVM describes natural persons are not in it: in the \code{fre},
+\code{administrador_membro_conselho_fiscal}, \code{membro_comite},
+\code{relacao_familiar}, \code{relacao_subordinacao}, \code{responsavel},
+\code{auditor_responsavel}, \code{posicao_acionaria},
+\code{posicao_acionaria_classe_acao}, \code{transacao_parte_relacionada},
 \code{administrador_declaracao_genero}, \code{administrador_declaracao_raca} and
-\code{administrador_PCD} count the gender, race and disability declarations
-of board members by body, and in a small or unanimous body the count
-tells the declaration of each named member; asking for them without
-\code{source = "cvm"} is an error that says so. The five workforce tables
-that count employees by race, gender or disability (\code{empregado_PCD} and
-the \verb{empregado_local_*} and \verb{empregado_posicao_*} \code{declaracao_genero} and
-\code{declaracao_raca}) come from the mirror without the companies that, in a
-year, have a group of fewer than 10 people or a group in which everybody
-declared the same category. Reading one of them raises a warning of
-class \code{cvmdata_warn_privacy_omitted} with the companies and the share of
+\code{administrador_PCD}; in the \code{fca}, \code{dri}. \code{cvm_fetch()} reads them from
+the CVM by itself, with a message, so the same call works; the first
+read downloads the file of the year and the next ones use the local
+cache. There is no dated snapshot of these tables: under
+\code{\link[=cvm_release_set]{cvm_release_set()}} with a date, and under an explicit
+\code{source = "mirror"}, asking for one of them is an error that says so.
+
+In the tables that stay, the columns that name a person are absent
+(the officer in charge in \code{cad}, the contact of
+\code{fca/departamento_acionistas}, the technical lead in \code{fca/auditor}), a
+row of an auditor who is a natural person is left out, every CPF that
+a text mentions is masked (\verb{***.456.789-**}), and contact data is not
+carried: the columns of e-mail, telephone and fax. The address of the
+company stays. The five workforce tables that count employees by race,
+gender or disability (\code{empregado_PCD} and the \verb{empregado_local_*} and
+\verb{empregado_posicao_*} \code{declaracao_genero} and \code{declaracao_raca}) come
+without the companies that, in a year, have a group of fewer than 10
+people or a group in which everybody declared the same category.
+Reading one of them raises a warning of class
+\code{cvmdata_warn_privacy_omitted} with the companies and the share of
 people left out in each year, the same numbers stay in
 \code{attr(x, "omitted")}, and a company asked for by \code{cnpj} or \code{ticker} that
 was left out is named. Totals computed from these tables are lower than
-the CVM's. The biography column \code{experiencia_profissional} of
-\code{administrador_membro_conselho_fiscal} and \code{membro_comite} is not in the
-mirror: the texts mention union and party membership, religion, health
-and convictions. Names and CNPJs stay as published; the masked CPF plus
-the name still follow a person across tables. \code{source = "cvm"} reads
-everything from the CVM untouched, under the same duty to respect the
-purpose of the disclosure (Lei 13.709/2018, art. 7, paragraph 3).
+the CVM's.
+
+A text about a company (an auditor's report, the subject of a filing)
+may still mention somebody by name; a person can ask to have the name
+replaced, see \code{DATA-LICENSE.md}. \code{source = "cvm"} reads everything from
+the CVM untouched; what you do with the personal data in it is your
+own processing, under the duty to respect the purpose of the
+disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 }
 
 \section{Filing versions}{

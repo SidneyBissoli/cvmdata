@@ -1,7 +1,7 @@
-# a table out of the mirror is refused there, with the way out
+# a table out of the mirror is refused when the mirror is asked
 
     Code
-      cvm_fetch("fre", "administrador_declaracao_genero", year = 2024)
+      cvm_fetch("fre", "administrador_declaracao_genero", year = 2024, source = "mirror")
     Condition
       Error in `check_mirrored()`:
       ! Table "fre"/"administrador_declaracao_genero" is not in the mirror.
