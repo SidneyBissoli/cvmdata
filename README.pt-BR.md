@@ -292,6 +292,16 @@ fora, quem responde por ele e como uma pessoa citada em um texto pode
 pedir que o nome saia estão no aviso de privacidade,
 [`PRIVACY.pt-BR.md`](PRIVACY.pt-BR.md) ([in English](PRIVACY.md)).
 
+### Como citar os dados
+
+O espelho é depositado no Zenodo em edições com DOI (o plano é quatro
+por ano), para que um estudo possa citar exatamente o dado que usou e
+para que o dado sobreviva às releases do GitHub. Cite a edição que você
+usou; o DOI [10.5281/zenodo.24260440](https://doi.org/10.5281/zenodo.24260440) aponta sempre para a
+mais recente. A primeira edição é de 15/11/2026
+([10.5281/zenodo.24260441](https://doi.org/10.5281/zenodo.24260441)). `citation("cvmdata")` traz o
+pacote e os dados.
+
 ## Trabalhos relacionados
 
 Para dados de mercado do lado da bolsa (preços, volumes, tickers,
