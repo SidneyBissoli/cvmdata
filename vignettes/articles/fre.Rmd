@@ -123,6 +123,12 @@ cols <- intersect(
 posicao[, c("nome_companhia", "data_referencia", cols)]
 ```
 
+`posicao_acionaria` names shareholders, natural persons among them, so
+it is not in the mirror: the call above reads the file of the year from
+the CVM, with a message saying so. The same holds for the tables of
+board and committee members, family and subordination ties and related
+parties.
+
 The same approach works for `posicao_acionaria_classe_acao` (one row
 per share class held), `capital_social` (issued and paid-in capital
 totals), and `distribuicao_capital` (treasury and free-float

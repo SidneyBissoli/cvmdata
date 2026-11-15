@@ -98,38 +98,44 @@
 #'   `cvmdata_error_input`.
 #'
 #' @section Personal data:
-#' The CVM publishes, by legal duty, data of the natural persons who run
-#' and control listed companies. The mirror keeps what research needs and
-#' no more: every CPF, in the columns that hold it and in free text, is
-#' masked the way the Federal Revenue masks its open CNPJ data
-#' (`***.456.789-**`), a foreign document in those columns becomes `***`,
-#' and `data_nascimento` becomes the integer `ano_nascimento`. Contact data
-#' is not carried at all: the columns of e-mail, telephone and fax, of
-#' people and of companies alike, and the street address of a person
-#' (`*_resp` in `cad`; `fca` `dri` and `departamento_acionistas`; `fre`
-#' `auditor_responsavel`) are absent from the mirror. The address of the
-#' company stays. Three tables of the `fre` are not in the mirror at all:
+#' The mirror carries data about companies, not about people. The tables
+#' in which the CVM describes natural persons are not in it: in the `fre`,
+#' `administrador_membro_conselho_fiscal`, `membro_comite`,
+#' `relacao_familiar`, `relacao_subordinacao`, `responsavel`,
+#' `auditor_responsavel`, `posicao_acionaria`,
+#' `posicao_acionaria_classe_acao`, `transacao_parte_relacionada`,
 #' `administrador_declaracao_genero`, `administrador_declaracao_raca` and
-#' `administrador_PCD` count the gender, race and disability declarations
-#' of board members by body, and in a small or unanimous body the count
-#' tells the declaration of each named member; asking for them without
-#' `source = "cvm"` is an error that says so. The five workforce tables
-#' that count employees by race, gender or disability (`empregado_PCD` and
-#' the `empregado_local_*` and `empregado_posicao_*` `declaracao_genero` and
-#' `declaracao_raca`) come from the mirror without the companies that, in a
-#' year, have a group of fewer than 10 people or a group in which everybody
-#' declared the same category. Reading one of them raises a warning of
-#' class `cvmdata_warn_privacy_omitted` with the companies and the share of
+#' `administrador_PCD`; in the `fca`, `dri`. `cvm_fetch()` reads them from
+#' the CVM by itself, with a message, so the same call works; the first
+#' read downloads the file of the year and the next ones use the local
+#' cache. There is no dated snapshot of these tables: under
+#' [cvm_release_set()] with a date, and under an explicit
+#' `source = "mirror"`, asking for one of them is an error that says so.
+#'
+#' In the tables that stay, the columns that name a person are absent
+#' (the officer in charge in `cad`, the contact of
+#' `fca/departamento_acionistas`, the technical lead in `fca/auditor`), a
+#' row of an auditor who is a natural person is left out, every CPF that
+#' a text mentions is masked (`***.456.789-**`), and contact data is not
+#' carried: the columns of e-mail, telephone and fax. The address of the
+#' company stays. The five workforce tables that count employees by race,
+#' gender or disability (`empregado_PCD` and the `empregado_local_*` and
+#' `empregado_posicao_*` `declaracao_genero` and `declaracao_raca`) come
+#' without the companies that, in a year, have a group of fewer than 10
+#' people or a group in which everybody declared the same category.
+#' Reading one of them raises a warning of class
+#' `cvmdata_warn_privacy_omitted` with the companies and the share of
 #' people left out in each year, the same numbers stay in
 #' `attr(x, "omitted")`, and a company asked for by `cnpj` or `ticker` that
 #' was left out is named. Totals computed from these tables are lower than
-#' the CVM's. The biography column `experiencia_profissional` of
-#' `administrador_membro_conselho_fiscal` and `membro_comite` is not in the
-#' mirror: the texts mention union and party membership, religion, health
-#' and convictions. Names and CNPJs stay as published; the masked CPF plus
-#' the name still follow a person across tables. `source = "cvm"` reads
-#' everything from the CVM untouched, under the same duty to respect the
-#' purpose of the disclosure (Lei 13.709/2018, art. 7, paragraph 3).
+#' the CVM's.
+#'
+#' A text about a company (an auditor's report, the subject of a filing)
+#' may still mention somebody by name; a person can ask to have the name
+#' replaced, see `DATA-LICENSE.md`. `source = "cvm"` reads everything from
+#' the CVM untouched; what you do with the personal data in it is your
+#' own processing, under the duty to respect the purpose of the
+#' disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 #'
 #' @section Filing versions:
 #' When a detail table carries several filings for the same issuer and
@@ -333,6 +339,7 @@ cvm_fetch <- function(
       class = "cvmdata_error_input"
     )
   }
+  asked_source <- !is.null(source)
   if (is.null(source)) {
     source <- cvm_source_get()
   }
@@ -340,7 +347,7 @@ cvm_fetch <- function(
   modes <- error_modes(on_error)
 
   schema <- load_schema(dataset, table)
-  check_mirrored(schema, source)
+  source <- route_unmirrored(schema, source, asked_source)
   basis <- check_basis(basis, schema)
   reading <- check_reading(reading, schema)
   period <- check_period(year, from, to, schema)
@@ -1030,9 +1037,36 @@ check_published_years <- function(period, schema) {
   check_empty_from(period, schema)
 }
 
-# A table the mirror does not redistribute (`mirror: false` in the
-# schema): refused under `source = "mirror"` before any download, with the
-# reason of the schema and the way to read it.
+# The source a table is read from. A table the mirror does not
+# redistribute (`mirror: false` in the schema) is read from the CVM by
+# itself when the mirror is only the default of the session, with a
+# message once per table. It is refused when the call names the mirror
+# (`asked`), and when the session is pinned to a dated snapshot: the CVM
+# only has today's file, and a silent switch would break the pin.
+route_unmirrored <- function(schema, source, asked = FALSE) {
+  if (!identical(source, "mirror") || !isFALSE(schema$mirror)) {
+    return(source)
+  }
+  if (asked || !identical(cvm_release_get(), "latest")) {
+    check_mirrored(schema, source)
+  }
+  cli::cli_inform(
+    c(
+      "i" = paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}} is not in the",
+        "mirror: reading it from the CVM."
+      ),
+      "i" = "Not redistributed: {schema$mirror_reason}."
+    ),
+    class = "cvmdata_message_unmirrored",
+    .frequency = "once",
+    .frequency_id = paste("cvmdata_unmirrored", schema$dataset, schema$table)
+  )
+  "cvm"
+}
+
+# A table the mirror does not redistribute, asked from the mirror: the
+# error, with the reason of the schema and the way to read it.
 check_mirrored <- function(schema, source) {
   if (!identical(source, "mirror") || !isFALSE(schema$mirror)) {
     return(invisible(NULL))

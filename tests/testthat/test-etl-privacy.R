@@ -237,29 +237,117 @@ test_that("contact data is dropped, the company address stays", {
   expect_identical(mirror_apply_privacy(out), out)
   expect_length(mirror_privacy_counts(out), 0L)
 
-  # fca/dri: the table names a person, so the street address goes too
-  person <- cbind(company, responsavel = "Fulana de Tal", uf = "SP")
+  # a table that names a contact person: the street address goes too,
+  # and so does the person (rule 5)
+  person <- cbind(company, contato = "Fulana de Tal", uf = "SP")
   expect_named(
     mirror_apply_privacy(person),
-    c("cnpj_companhia", "cidade", "responsavel", "uf")
+    c("cnpj_companhia", "cidade", "uf")
   )
 
-  # cad: the address of the person in charge goes, the company's stays
+  # cad: the person in charge goes whole, the company's address stays
   cad <- data.frame(
     cnpj_cia = "11.222.333/0001-81",
     logradouro = "Rua A, 1",
     tel = "30000000",
     resp = "Fulana de Tal",
+    tp_resp = "DIRETOR DE RELACOES COM INVESTIDORES",
+    dt_ini_resp = as.Date("2020-01-01"),
     logradouro_resp = "Rua B, 2",
     cep_resp = "02000-000",
     mun_resp = "Sao Paulo",
     ddd_tel_resp = "11",
     email_resp = "fulana@gmail.com"
   )
-  expect_named(
-    mirror_apply_privacy(cad),
-    c("cnpj_cia", "logradouro", "resp", "mun_resp")
+  expect_named(mirror_apply_privacy(cad), c("cnpj_cia", "logradouro"))
+})
+
+test_that("a table about the company loses the person it names", {
+  load_etl_privacy()
+  # fca/auditor: the firm stays, its technical lead goes
+  fca <- data.frame(
+    cnpj_companhia = "11.222.333/0001-81",
+    auditor = c("Auditores Exemplo S.S.", "Fulano de Tal"),
+    cpf_cnpj_auditor = c("11.222.333/0001-81", "111.444.777-35"),
+    responsavel_tecnico = c("Beltrana de Tal", NA),
+    cpf_responsavel_tecnico = c("529.982.247-25", NA),
+    data_inicio_atuacao_responsavel_tecnico = as.Date("2024-01-01")
   )
+  expect_identical(
+    mirror_privacy_counts(fca)[["natural_person_rows"]],
+    1L
+  )
+  out <- mirror_apply_privacy(fca)
+  expect_named(out, c("cnpj_companhia", "auditor", "cpf_cnpj_auditor"))
+  expect_identical(out$auditor, "Auditores Exemplo S.S.")
+  expect_identical(mirror_apply_privacy(out), out)
+  expect_length(mirror_privacy_counts(out), 0L)
+
+  # fre/auditor: an auditor with a CPF is a natural person
+  fre <- data.frame(
+    auditor = c("Auditores Exemplo S.S.", "Fulano de Tal"),
+    cnpj_auditor = c("11.222.333/0001-81", NA),
+    cpf_auditor = c(NA, "***.444.777-**")
+  )
+  out <- mirror_apply_privacy(fre)
+  expect_named(out, c("auditor", "cnpj_auditor"))
+  expect_identical(nrow(out), 1L)
+})
+
+test_that("the person columns match the dictionary and nothing else", {
+  load_etl_privacy()
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    encoding = "UTF-8"
+  )
+  hit <- dict[grepl(.person_cols, dict$campo), ]
+  expect_setequal(
+    unique(paste(hit$dataset, hit$table, sep = "/")),
+    c(
+      "cad/companhias",
+      "cad/estrangeiras",
+      "cad/incentivadas",
+      "fca/auditor",
+      "fca/departamento_acionistas",
+      "fre/auditor",
+      # out of the mirror by its schema; the columns match all the same
+      "fre/auditor_responsavel"
+    )
+  )
+  expect_true(all(.person_document_cols %in% dict$campo))
+})
+
+test_that("the tables about people are out of the mirror", {
+  people <- c(
+    "fre/administrador_membro_conselho_fiscal",
+    "fre/membro_comite",
+    "fre/relacao_familiar",
+    "fre/relacao_subordinacao",
+    "fre/responsavel",
+    "fre/auditor_responsavel",
+    "fre/posicao_acionaria",
+    "fre/posicao_acionaria_classe_acao",
+    "fre/transacao_parte_relacionada",
+    "fca/dri"
+  )
+  for (key in people) {
+    parts <- strsplit(key, "/", fixed = TRUE)[[1L]]
+    expect_false(load_schema(parts[1L], parts[2L])$mirror, label = key)
+  }
+  # no table left in the mirror has a column that identifies a person
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    encoding = "UTF-8"
+  )
+  load_etl_privacy()
+  named <- "^(cpf$|cpf_|nome$|nome_administrador|nome_pessoa|nome_responsavel)"
+  left <- dict[grepl(named, dict$campo) & !grepl(.person_cols, dict$campo), ]
+  left <- unique(paste(left$dataset, left$table, sep = "/"))
+  left <- setdiff(left, "fca/auditor")
+  for (key in left) {
+    parts <- strsplit(key, "/", fixed = TRUE)[[1L]]
+    expect_false(load_schema(parts[1L], parts[2L])$mirror, label = key)
+  }
 })
 
 test_that("the contact rule matches the dictionary and nothing else", {

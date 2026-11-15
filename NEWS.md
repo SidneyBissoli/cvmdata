@@ -2,6 +2,30 @@
 
 ## ⚠️ Breaking changes
 
+* **The mirror and the Zenodo editions carry data about companies, not
+  about people.** The tables in which the CVM describes natural persons
+  left the mirror: `fre` `administrador_membro_conselho_fiscal`,
+  `membro_comite`, `relacao_familiar`, `relacao_subordinacao`,
+  `responsavel`, `auditor_responsavel`, `posicao_acionaria`,
+  `posicao_acionaria_classe_acao` and `transacao_parte_relacionada`, and
+  `fca` `dri` (besides the three counts of declarations of board members,
+  already out). `cvm_fetch()` and `cvm_versions()` now read a table that
+  is not in the mirror from the CVM by themselves, with a message (class
+  `cvmdata_message_unmirrored`), instead of failing; they still fail
+  under an explicit `source = "mirror"` and under `cvm_release_set()`
+  with a date, because the CVM has no dated snapshot. In the tables that
+  stay, the columns that name a person are gone: `resp`, `tp_resp`,
+  `dt_ini_resp`, `mun_resp`, `uf_resp` and `pais_resp` in the `cad`;
+  `contato` and its dates in `fca/departamento_acionistas`; the technical
+  lead in `fca/auditor`; `cpf_auditor` in `fre/auditor`, where the row of
+  an auditor who is a natural person is left out. The reason: whether
+  hosting personal data on services abroad is an international transfer
+  under the LGPD (art. 33; Resolução CD/ANPD nº 19/2024) could not be
+  settled, and reading from the CVM on the user's machine redistributes
+  nothing. The entries below about masked CPFs, birth years, biographies
+  and people who ask to leave now matter only for what a text about a
+  company happens to mention.
+
 * The mirror and the Zenodo editions no longer redistribute full CPFs and
   birth dates. The CVM publishes them by legal duty; a public and permanent
   deposit keeps only what research needs. Every CPF, in the columns that

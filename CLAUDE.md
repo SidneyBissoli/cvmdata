@@ -332,7 +332,24 @@ para mais de um CNPJ = `cvmdata_error_input` pedindo `cnpj` (guarda;
 medido 2026-10-21: nenhum reusado). Busca textual e CD_CVM saíram
 com `issuer_fetch()` (removida em 2026-11-01); o cadastro `cvm_fetch("cad",
 "companhias")` é o lugar de resolver nome/código → CNPJ. Sem argumento
-`cpf` (filtro de PF fica para a v0.7). A CVM PUBLICA CPF completo
+`cpf` (filtro de PF fica para a v0.7). **DESDE 2026-11-15 O ESPELHO E O
+ZENODO SÓ LEVAM DADO DE COMPANHIA** (decisão do dono, regra de
+privacidade "5"; a dúvida da transferência internacional, LGPD art. 33 e
+Res. CD/ANPD 19/2024, não se resolveu sem advogado): as tabelas que
+descrevem pessoas são `mirror: false` no YAML e o pacote as lê da CVM
+SOZINHO, com mensagem `cvmdata_message_unmirrored` (`route_unmirrored()`;
+erro só com `source = "mirror"` explícito ou retrato datado) — `fre`:
+`administrador_membro_conselho_fiscal`, `membro_comite`,
+`relacao_familiar`, `relacao_subordinacao`, `responsavel`,
+`auditor_responsavel`, `posicao_acionaria`,
+`posicao_acionaria_classe_acao`, `transacao_parte_relacionada` e as três
+de declaração dos administradores; `fca`: `dri`. Nas tabelas que ficam
+saem as colunas que nomeiam pessoa (`.person_cols` em `util-privacy.R`:
+`resp` e as que o descrevem no `cad`, `contato` em
+`fca/departamento_acionistas`, o responsável técnico em `fca/auditor`,
+`cpf_auditor`) e a linha de auditor pessoa física. O que segue neste
+parágrafo, escrito antes, vale hoje só para nome ou CPF citado em texto
+sobre a companhia. A CVM PUBLICA CPF completo
 (`999.999.999-99`, sem máscara) em colunas `cpf*` e `documento_*` e em
 texto livre do FCA e do FRE — administradores, conselho fiscal, comitês,
 DRI, auditor responsável, acionistas PF, parentes de administradores. O
