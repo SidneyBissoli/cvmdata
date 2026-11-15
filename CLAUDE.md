@@ -339,7 +339,9 @@ DRI, auditor responsável, acionistas PF, parentes de administradores. O
 ESPELHO E O ZENODO NÃO REDISTRIBUEM: CPF vira `***.456.789-**`,
 documento estrangeiro vira `***`, `data_nascimento` vira `ano_nascimento`
 e as colunas de e-mail, telefone e fax (de pessoa e de empresa) e de
-endereço de rua de pessoa saem, e três tabelas do FRE ficam fora do
+endereço de rua de pessoa saem, a coluna de biografia
+`experiencia_profissional` sai (regra 4, 2026-11-14: dado sensível em
+texto livre, LGPD art. 11), e três tabelas do FRE ficam fora do
 espelho (`mirror: false` no YAML: `administrador_declaracao_genero`,
 `administrador_declaracao_raca`, `administrador_PCD`; só com
 `source = "cvm"`), e as cinco tabelas de contagem de empregados por

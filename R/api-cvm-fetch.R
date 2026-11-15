@@ -123,10 +123,12 @@
 #' people left out in each year, the same numbers stay in
 #' `attr(x, "omitted")`, and a company asked for by `cnpj` or `ticker` that
 #' was left out is named. Totals computed from these tables are lower than
-#' the CVM's. Names, CNPJs
-#' and biographies stay as published; the masked CPF plus the name still
-#' follow a person across tables. `source = "cvm"` reads everything from
-#' the CVM untouched, under the same duty to respect the purpose of the
+#' the CVM's. The biography column `experiencia_profissional` of
+#' `administrador_membro_conselho_fiscal` and `membro_comite` is not in the
+#' mirror: the texts mention union and party membership, religion, health
+#' and convictions. Names and CNPJs stay as published; the masked CPF plus
+#' the name still follow a person across tables. `source = "cvm"` reads
+#' everything from the CVM untouched, under the same duty to respect the purpose of the
 #' disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 #'
 #' @section Filing versions:

@@ -12,9 +12,17 @@
 #   * birth date: reduced to the year (`data_nascimento` becomes
 #     `ano_nascimento`, integer), because name + CPF + birth date is what
 #     banks and public services use to confirm an identity.
-#   * names, biographies and per-body counts stay as published: the name
-#     is the first field the form asks of each board member (Res. CVM 80,
-#     Annex C, item 7.3), and research follows the person across companies.
+#   * names stay as published: the name is the first field the form asks
+#     of each board member (Res. CVM 80, Annex C, item 7.3), and research
+#     follows the person across companies.
+#   * biographies (owner's decision of 2026-11-14): the column
+#     `experiencia_profissional` of the board and committee tables is
+#     dropped. LGPD art. 11 lists when sensitive data may be processed and
+#     legitimate interest is not there; the biographies mention unions,
+#     parties, elected office, religion, health and convictions (measured
+#     on FRE 2025: 2.8% of them hit a keyword of art. 5 II), and no list
+#     of words tells such a text from the others safely. Profession,
+#     position, body and dates of office stay.
 #   * contact data (owner's decision of 2026-11-14): no e-mail, telephone
 #     or fax of anybody, person or company, and no street address of a
 #     person. The columns are dropped, not blanked. The field of the
@@ -47,14 +55,14 @@
 # datasets with text):
 #   * columns named `cpf*` and `documento_*`: CPF, CNPJ, a padded CPF, or a
 #     foreign document (`AA999999` and the like, in `cpf`);
-#   * free text (`experiencia_profissional`, `explicacao`, `assunto`, ...):
-#     about 2,400 rows of biographies carry a punctuated CPF. Masking the
-#     number there changes no statement the text makes.
+#   * free text (`explicacao`, `assunto`, `observacao`, ...): masking the
+#     number there changes no statement the text makes. The biographies,
+#     where most of them were, left the mirror with rule 4.
 
 # Version of the rule. 03-publish.R stores it in `__source_hash.json`; a
 # previous sidecar with another one (or none) makes that run rewrite the
 # history assets of the release.
-mirror_privacy_rule <- "3"
+mirror_privacy_rule <- "4"
 
 # A punctuated CPF is a CPF even when its check digits fail (a typing
 # error); any other spelling needs the check digits, or phone numbers and
@@ -92,7 +100,18 @@ mirror_privacy_rule <- "3"
 .address_resp_cols <- sub("[$]$", "_resp$", .address_cols)
 .person_markers <- c("responsavel", "contato", "responsavel_tecnico")
 
-# Columns of a frame the mirror does not carry, in the order they appear.
+# Free text about a named person that the mirror does not carry: the
+# biography of board and committee members. The test pins the match
+# against the dictionary snapshot.
+.biography_cols <- "^experiencia_profissional$"
+
+# Every column of a frame the mirror does not carry, in the order they
+# appear: contact data and biographies.
+mirror_dropped_columns <- function(cols) {
+  cols[cols %in% mirror_contact_columns(cols) | grepl(.biography_cols, cols)]
+}
+
+# Contact columns of a frame, in the order they appear.
 mirror_contact_columns <- function(cols) {
   drop <- grepl(.contact_cols, cols) | grepl(.address_resp_cols, cols)
   if (any(cols %in% .person_markers)) {
@@ -304,7 +323,7 @@ mirror_suppressed_label <- "[omitido a pedido do titular]"
 .person_roles <- list(
   nome = list(
     document = "cpf",
-    blank = c("cpf", "ano_nascimento", "profissao", "experiencia_profissional")
+    blank = c("cpf", "ano_nascimento", "profissao")
   ),
   resp = list(
     document = character(),
@@ -525,7 +544,7 @@ mirror_apply_privacy <- function(df) {
 # The column rules: same rows, same column order. Only the columns that
 # change are assigned, so the attributes of the frame survive.
 mirror_mask_columns <- function(df) {
-  for (cn in mirror_contact_columns(names(df))) {
+  for (cn in mirror_dropped_columns(names(df))) {
     df[[cn]] <- NULL
   }
   for (cn in names(df)) {
@@ -554,9 +573,9 @@ mirror_mask_columns <- function(df) {
 # How many values of each column `mirror_apply_privacy()` would change, as
 # a named integer holding only the columns with something to change: empty
 # means the frame may be published. Counts and column names only, so a
-# failure can be logged without printing anybody's data. A contact column
-# is listed whenever it is present, with its filled values as the count:
-# zero there still means "this column must go". The rows of a group table
+# failure can be logged without printing anybody's data. A contact or
+# biography column is listed whenever it is present, with its filled
+# values as the count: zero there still means "this column must go". The rows of a group table
 # that must go are counted under `small_or_unanimous_groups`.
 mirror_privacy_counts <- function(df) {
   safe <- mirror_mask_columns(df)
@@ -565,7 +584,7 @@ mirror_privacy_counts <- function(df) {
   if (unsafe) {
     out[["small_or_unanimous_groups"]] <- unsafe
   }
-  for (cn in mirror_contact_columns(names(df))) {
+  for (cn in mirror_dropped_columns(names(df))) {
     out[[cn]] <- sum(!is.na(df[[cn]]))
   }
   for (cn in intersect(names(df), names(safe))) {

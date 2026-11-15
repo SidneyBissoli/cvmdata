@@ -609,8 +609,9 @@ edition_readme <- function(
       "same category; the whole filing of the company leaves the table,",
       "so no row can be rebuilt by subtraction. Totals computed from",
       "these tables are therefore lower than the CVM's:",
-      "`privacy_omitted.csv` says by how much. Names, CNPJs,",
-      "biographies and the declarations the CVM requires stay as",
+      "`privacy_omitted.csv` says by how much. The biography column",
+      "(`experiencia_profissional`) of the board and committee tables",
+      "is not here. Names and CNPJs stay as",
       "published, and the masked CPF plus the name still identify a",
       "person across tables. The complete values remain on the CVM",
       "portal, and `cvm_fetch(source = \"cvm\")` reads them from there."

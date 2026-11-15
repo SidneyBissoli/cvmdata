@@ -84,7 +84,7 @@ test_that("the frame keeps its rows, order and attributes", {
     nome = "Fulana de Tal",
     cpf = "111.444.777-35",
     data_nascimento = as.Date("1965-03-01"),
-    experiencia_profissional = "CPF 111.444.777-35",
+    observacao = "CPF 111.444.777-35",
     protocolo_entrega = "11144477735",
     qtd = 1L
   )
@@ -97,7 +97,7 @@ test_that("the frame keeps its rows, order and attributes", {
       "nome",
       "cpf",
       "ano_nascimento",
-      "experiencia_profissional",
+      "observacao",
       "protocolo_entrega",
       "qtd"
     )
@@ -105,7 +105,7 @@ test_that("the frame keeps its rows, order and attributes", {
   expect_identical(out$nome, "Fulana de Tal")
   expect_identical(out$cpf, "***.444.777-**")
   expect_identical(out$ano_nascimento, 1965L)
-  expect_identical(out$experiencia_profissional, "CPF ***.444.777-**")
+  expect_identical(out$observacao, "CPF ***.444.777-**")
   expect_identical(out$protocolo_entrega, "11144477735")
   expect_identical(attr(out, "fetched_at"), "2026-11-08")
 })
@@ -114,14 +114,14 @@ test_that("the rule is idempotent and the guard sees only what it would do", {
   load_etl_privacy()
   df <- data.frame(
     cpf_cnpj_acionista = c("111.444.777-35", "11.222.333/0001-81", NA),
-    experiencia_profissional = c("CPF 111.444.777-35", "nada", NA),
+    observacao = c("CPF 111.444.777-35", "nada", NA),
     data_nascimento = as.Date(c("1965-03-01", NA, "1970-01-01"))
   )
   expect_identical(
     mirror_privacy_counts(df),
     c(
       cpf_cnpj_acionista = 1L,
-      experiencia_profissional = 1L,
+      observacao = 1L,
       data_nascimento = 2L
     )
   )
@@ -466,7 +466,7 @@ test_that("a person who asked to leave keeps the row and loses the data", {
     cpf = c("111.444.777-35", "529.982.247-25", NA),
     data_nascimento = as.Date(c("1965-03-01", "1970-01-01", NA)),
     profissao = c("Engenheiro", "Advogada", "Contador"),
-    experiencia_profissional = c(
+    observacao = c(
       "O Sr. Jo\u00e3o  Ant\u00f4nio Exemplo foi diretor.",
       "Trabalhou com joao antonio exemplo e com Joao Antonio Exemplos.",
       "Nada a declarar."
@@ -479,16 +479,19 @@ test_that("a person who asked to leave keeps the row and loses the data", {
   expect_true(all(is.na(c(
     out$cpf[1L],
     out$ano_nascimento[1L],
-    out$profissao[1L],
-    out$experiencia_profissional[1L]
+    out$profissao[1L]
   ))))
+  expect_identical(
+    out$observacao[1L],
+    paste0("O Sr. ", mirror_suppressed_label, " foi diretor.")
+  )
   # what places the seat stays
   expect_identical(out$orgao_administracao, df$orgao_administracao)
   expect_identical(out$data_eleicao, df$data_eleicao)
   # a mention in somebody else's text becomes the label; a longer name
   # that merely starts the same is another person
   expect_identical(
-    out$experiencia_profissional[2L],
+    out$observacao[2L],
     paste0(
       "Trabalhou com ",
       mirror_suppressed_label,
@@ -516,7 +519,7 @@ test_that("with a CPF on the list a namesake is left alone", {
     ),
     cpf = c("***.444.777-**", "529.982.247-25", NA),
     profissao = c("Economista", "Medica", "Professora"),
-    experiencia_profissional = c("a", "Maria Exemplo de Tal, medica.", "c")
+    observacao = c("a", "Maria Exemplo de Tal, medica.", "c")
   )
   out <- mirror_apply_privacy(df)
   # same middle digits, and a row without a document: the person
@@ -525,7 +528,7 @@ test_that("with a CPF on the list a namesake is left alone", {
   expect_identical(out$nome[2L], "MARIA EXEMPLO DE TAL")
   expect_identical(out$profissao[2L], "Medica")
   expect_identical(
-    out$experiencia_profissional[2L],
+    out$observacao[2L],
     "Maria Exemplo de Tal, medica."
   )
 })
@@ -586,4 +589,31 @@ test_that("only util-privacy.R reads the suppression list", {
       label = basename(path)
     )
   }
+})
+
+test_that("the biography column leaves the mirror", {
+  load_etl_privacy()
+  df <- data.frame(
+    nome = c("Fulana de Tal", "Outro Nome"),
+    profissao = c("Economista", "Contador"),
+    experiencia_profissional = c("Foi dirigente sindical.", NA)
+  )
+  expect_identical(
+    mirror_privacy_counts(df),
+    c(experiencia_profissional = 1L)
+  )
+  out <- mirror_apply_privacy(df)
+  expect_identical(names(out), c("nome", "profissao"))
+  expect_identical(mirror_apply_privacy(out), out)
+  expect_length(mirror_privacy_counts(out), 0L)
+  # the only tables with the column are the two that describe a person
+  dict <- utils::read.csv(
+    system.file("extdata", "cvm_dictionary_snapshot.csv", package = "cvmdata"),
+    encoding = "UTF-8"
+  )
+  hit <- dict[grepl(.biography_cols, dict$campo), ]
+  expect_setequal(
+    paste(hit$dataset, hit$table, sep = "/"),
+    c("fre/administrador_membro_conselho_fiscal", "fre/membro_comite")
+  )
 })

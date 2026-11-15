@@ -395,7 +395,7 @@ sozinho, em 15 dias, se um motivo procede.
 | Campo | O que acontece |
 |---|---|
 | Nome | vira `[omitido a pedido do titular]` |
-| CPF mascarado, ano de nascimento, profissão, biografia, nacionalidade e UF do acionista, município do responsável | ficam vazios |
+| CPF mascarado, ano de nascimento, profissão, nacionalidade e UF do acionista, município do responsável | ficam vazios |
 | Companhia, órgão, cargo, datas de mandato | ficam |
 | Percentuais de participação acionária | ficam, e a soma continua fechando |
 | Menção ao nome em texto de outra linha do mesmo conjunto | vira o rótulo |
@@ -421,3 +421,39 @@ disso grava um nome em log.
 **O que não está feito.** Fotos datadas e edições do Zenodo já publicadas
 não mudam sozinhas: pedem os reparos (`repair-personal-data.R`,
 `repair-snapshot-digests.R`) e, no Zenodo, pedido ao suporte.
+
+## Complemento de 2026-11-14: biografias fora do espelho (regra 4)
+
+Decisão do dono: a coluna `experiencia_profissional` das tabelas
+`fre/administrador_membro_conselho_fiscal` e `fre/membro_comite` sai do
+espelho e das edições do Zenodo. Profissão, cargo, órgão e mandatos ficam.
+`source = "cvm"` continua lendo o texto na CVM.
+
+**O que a lei diz** (LGPD, lida em 2026-11-14). Art. 5º, II: é sensível o
+dado sobre "origem racial ou étnica, convicção religiosa, opinião
+política, filiação a sindicato ou a organização de caráter religioso,
+filosófico ou político, dado referente à saúde ou à vida sexual, dado
+genético ou biométrico, quando vinculado a uma pessoa natural". Art. 11:
+o tratamento de dado sensível "somente poderá ocorrer" com consentimento
+ou nas hipóteses do inciso II, entre as quais o legítimo interesse não
+está. Art. 11, § 1º: vale para "qualquer tratamento de dados pessoais que
+revele dados pessoais sensíveis e que possa causar dano ao titular".
+
+**O que a medição mostra** (FRE e FCA 2025; busca por palavras-chave, só
+contagens: indica onde está o risco, não o que cada texto afirma).
+
+| Coluna | Textos | Citam sindicato, partido, cargo eletivo, religião ou saúde | Citam condenação sem negação por perto |
+|---|---|---|---|
+| Biografia de administradores e conselheiros fiscais | 8.901 | 251 (2,8%) | 223 |
+| Biografia de membros de comitês | 4.478 | 125 (2,8%) | 99 |
+| As outras 25 colunas de texto longo | | 78 no total, 48 numa coluna de contratos (`transacao_parte_relacionada/natureza_razao_operacao`) | não medido |
+
+**Por que a coluna inteira.** Apagar só os textos que batem nas palavras
+é regra por adivinhação, que erra para os dois lados. Tirar a coluna
+também tira as condenações descritas nas biografias e o nome da pessoa
+dentro do texto (34,1% das biografias de administradores). Não foi medido
+quanto da pesquisa sobre governança usa esse texto.
+
+**Como funciona.** `.biography_cols` e `mirror_dropped_columns()` em
+`util-privacy.R`; `mirror_privacy_rule` passa a "4", o que faz a rodada
+seguinte reescrever o histórico. As fotos datadas pedem o reparo.
