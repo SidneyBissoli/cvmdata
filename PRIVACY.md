@@ -126,7 +126,7 @@ soon as possible; the full answer, within 15 days of the request (art.
 - Files already downloaded by third parties are beyond the reach of the
   person responsible.
 - Requests are handled by the procedure recorded in
-  [`data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md`](https://sidneybissoli.github.io/cvmdata/data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md)
+  [`data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md)
   (in Portuguese).
 
 You can also petition the Brazilian data protection authority, the

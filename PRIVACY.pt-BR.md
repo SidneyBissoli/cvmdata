@@ -120,7 +120,7 @@ antes; a resposta completa, em até 15 dias do pedido (art. 19).
 - Arquivos já baixados por terceiros estão fora do alcance do
   responsável.
 - O atendimento segue o procedimento registrado em
-  [`data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md`](https://sidneybissoli.github.io/cvmdata/data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md).
+  [`data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md`](https://github.com/SidneyBissoli/cvmdata/blob/main/data-raw/decisions/cvmdata_lgpd_pedidos_de_titular.md).
 
 Você também pode peticionar à Autoridade Nacional de Proteção de Dados
 (art. 18, § 1º): <https://www.gov.br/anpd/>.
