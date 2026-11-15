@@ -163,11 +163,13 @@ class \code{cvmdata_warn_privacy_omitted} with the companies and the share of
 people left out in each year, the same numbers stay in
 \code{attr(x, "omitted")}, and a company asked for by \code{cnpj} or \code{ticker} that
 was left out is named. Totals computed from these tables are lower than
-the CVM's. Names, CNPJs
-and biographies stay as published; the masked CPF plus the name still
-follow a person across tables. \code{source = "cvm"} reads everything from
-the CVM untouched, under the same duty to respect the purpose of the
-disclosure (Lei 13.709/2018, art. 7, paragraph 3).
+the CVM's. The biography column \code{experiencia_profissional} of
+\code{administrador_membro_conselho_fiscal} and \code{membro_comite} is not in the
+mirror: the texts mention union and party membership, religion, health
+and convictions. Names and CNPJs stay as published; the masked CPF plus
+the name still follow a person across tables. \code{source = "cvm"} reads
+everything from the CVM untouched, under the same duty to respect the
+purpose of the disclosure (Lei 13.709/2018, art. 7, paragraph 3).
 }
 
 \section{Filing versions}{
