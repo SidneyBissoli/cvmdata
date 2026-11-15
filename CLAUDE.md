@@ -52,15 +52,19 @@ Distribuição:
 | Workflows GitHub Actions e comentários YAML | **Inglês** |
 | **Nomes de tabelas** do pacote | **Português** (snake_case, fiel à CVM) |
 | **Nomes de colunas** nos tibbles retornados | **Português** (snake_case, fiel à CVM) |
-| Colunas-meta de funções de descoberta | **Português** (`conjunto_dados`, `n_tabelas`, `tabela`, `campo`, `descricao`, `tipo_dados`, `dominio`, `tamanho`, `precisao`, `scale`) |
+| Colunas-meta de funções de descoberta | **Português** (`campo`, `descricao`, `tipo_dados`, `dominio`, `tamanho`, `precisao`, `scale`, em [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md) e [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)) |
 | Valores em células categóricas | **Português** (como vem da CVM) |
 | Texto livre em colunas descritivas | **Português** (como vem da CVM) |
 | Documentos de planejamento | **Português** |
 
 Caveat: a palavra `dataset` permanece em inglês como argumento de função
-(palavra técnica internacionalizada); a coluna paralela em
+(palavra técnica internacionalizada).
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
-chama-se `conjunto_dados` em PT. Mismatch deliberado.
+e
+[`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
+devolvem VETORES de caracteres com os ids, não tabelas (conferido em
+2026-11-15; este arquivo dizia que havia uma coluna `conjunto_dados`,
+que não existe).
 
 ------------------------------------------------------------------------
 
