@@ -60,7 +60,7 @@ cvm_source_set <- function(source) {
       !nzchar(source)
   ) {
     cvmdata_abort(
-      c("{.arg source} must be a single non-empty string."),
+      "{.arg source} must be a single non-empty string.",
       class = "cvmdata_error_input"
     )
   }

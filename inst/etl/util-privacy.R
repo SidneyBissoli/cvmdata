@@ -464,7 +464,7 @@ mirror_suppressed <- function(raw = Sys.getenv("CVMDATA_MIRROR_SUPPRESSED")) {
     stop(
       sprintf(
         "suppression list: entry %s needs a full name (two words or more)",
-        paste(short, collapse = ", ")
+        toString(short)
       ),
       call. = FALSE
     )

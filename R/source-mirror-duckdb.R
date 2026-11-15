@@ -59,12 +59,10 @@ source_mirror_duckdb_get <- function(
     mirror_l3_validate_hash(
       dataset,
       attr(inventory, "source_hash"),
-      verified = all(
-        !is.na(inventory$sha256[
-          !mirror_is_history_name(inventory$name) &
-            inventory$name != "__source_hash.json"
-        ])
-      )
+      verified = !anyNA(inventory$sha256[
+        !mirror_is_history_name(inventory$name) &
+          inventory$name != "__source_hash.json"
+      ])
     )
   }
   resolved_years <- resolve_mirror_years(
@@ -263,10 +261,7 @@ read_mirror_assets <- function(matches, dataset, table) {
     )
     sql <- sprintf(
       "SELECT * FROM read_parquet([%s], union_by_name = true)",
-      paste(
-        vapply(local_paths, mirror_quote_sql, character(1L)),
-        collapse = ", "
-      )
+      toString(vapply(local_paths, mirror_quote_sql, character(1L)))
     )
     df <- tryCatch(
       tibble::as_tibble(DBI::dbGetQuery(con, sql)),
@@ -496,7 +491,7 @@ mirror_l3_path <- function(
 # inside the path. Windows paths with backslashes are normalised to
 # forward slashes so DuckDB's path parser handles them uniformly.
 mirror_quote_sql <- function(path) {
-  normalised <- gsub("\\\\", "/", path, fixed = FALSE)
+  normalised <- gsub("\\", "/", path, fixed = TRUE)
   sprintf("'%s'", gsub("'", "''", normalised, fixed = TRUE))
 }
 
@@ -578,5 +573,5 @@ format_years <- function(years) {
   if (is.null(years) || all(is.na(years))) {
     return("NULL")
   }
-  paste(years, collapse = ", ")
+  toString(years)
 }

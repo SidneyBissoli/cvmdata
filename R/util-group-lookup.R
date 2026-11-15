@@ -91,7 +91,7 @@ dataset_group <- function(dataset) {
       !nzchar(dataset)
   ) {
     cvmdata_abort(
-      c("{.arg dataset} must be a single non-empty string."),
+      "{.arg dataset} must be a single non-empty string.",
       class = "cvmdata_error_internal"
     )
   }

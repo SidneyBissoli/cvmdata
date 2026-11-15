@@ -34,8 +34,10 @@ for (sibling in c("00-config.R", "util-release.R", "util-snapshot.R")) {
   }
 }
 
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
-stopifnot(requireNamespace("digest", quietly = TRUE))
+stopifnot(
+  requireNamespace("jsonlite", quietly = TRUE),
+  requireNamespace("digest", quietly = TRUE)
+)
 
 # Reads the sidecar of a release, or stops.
 repair_read_sidecar <- function(tag, dir) {
@@ -213,7 +215,7 @@ repair_main <- function(group, dataset, dry_run) {
     "[repair] %s: %d sidecar(s) to upload (%s)",
     dataset,
     length(uploads),
-    paste(names(uploads), collapse = ", ")
+    toString(names(uploads))
   ))
   if (dry_run) {
     message(sprintf("  dry run: written under %s; nothing uploaded", out_dir))

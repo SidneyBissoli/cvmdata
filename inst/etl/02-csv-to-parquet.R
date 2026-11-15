@@ -17,8 +17,10 @@
 
 source("inst/etl/00-config.R")
 source("inst/etl/util-privacy.R")
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE)
+)
 
 args <- commandArgs(trailingOnly = TRUE)
 group <- NULL
@@ -186,8 +188,8 @@ message(sprintf(
   "[02-parquet] group=%s dataset=%s tables=[%s] year =[%s]",
   group,
   dataset,
-  paste(tables, collapse = ", "),
-  paste(years_to_process, collapse = ", ")
+  toString(tables),
+  toString(years_to_process)
 ))
 
 # Process every tuple, collecting its outcome; tally and build the skip

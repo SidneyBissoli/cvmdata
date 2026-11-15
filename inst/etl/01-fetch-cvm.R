@@ -242,8 +242,8 @@ if (!isTRUE(getOption("cvmdata.etl_testing"))) {
     "[01-fetch] group=%s dataset=%s tables=[%s] year =[%s] workspace=%s",
     group,
     dataset,
-    paste(tables, collapse = ", "),
-    paste(years_to_fetch, collapse = ", "),
+    toString(tables),
+    toString(years_to_fetch),
     workspace
   ))
 

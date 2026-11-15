@@ -501,8 +501,8 @@ build_history <- function(prev, source_hash) {
       message(sprintf(
         "  %s: columns added [%s], dropped [%s]; compared on the rest",
         rel,
-        paste(diff$columns_added, collapse = ", "),
-        paste(diff$columns_dropped, collapse = ", ")
+        toString(diff$columns_added),
+        toString(diff$columns_dropped)
       ))
     }
     if (!nrow(diff$rows)) {

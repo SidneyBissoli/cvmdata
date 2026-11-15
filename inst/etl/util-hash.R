@@ -20,11 +20,13 @@
 # Sourced (not loaded as a package). Depends on `00-config.R` having been
 # sourced first for `mirror_schema_dir()`.
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("digest", quietly = TRUE))
-stopifnot(requireNamespace("httr2", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
-stopifnot(requireNamespace("yaml", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("digest", quietly = TRUE),
+  requireNamespace("httr2", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE),
+  requireNamespace("yaml", quietly = TRUE)
+)
 
 # Splits a dictionary URL of the form "<zip-url>#<entry>" into a
 # (base_url, fragment) pair. Plain URLs return fragment = NA.
@@ -108,7 +110,7 @@ mirror_hash_parquets <- function(parquets, dataset_dir) {
     return(list())
   }
   rel <- substring(parquets, nchar(dataset_dir) + 2L)
-  rel <- gsub("\\\\", "/", rel)
+  rel <- gsub("\\", "/", rel, fixed = TRUE)
   hashes <- vapply(parquets, mirror_hash_parquet, character(1L))
   names(hashes) <- rel
   as.list(hashes)[order(rel)]

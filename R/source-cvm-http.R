@@ -130,13 +130,13 @@ get_static_archive_csv <- function(schema, report_type) {
 # Path for yearly-partitioned datasets (DFP/ITR/FRE-detail).
 get_yearly_csv <- function(schema, year, report_type) {
   archive_url <- sub(
-    "\\{year\\}",
+    "{year}",
     year,
     schema$cvm_archive_url_pattern,
-    fixed = FALSE
+    fixed = TRUE
   )
   csv_pattern <- resolve_file_pattern(schema, report_type)
-  csv_name <- sub("\\{year\\}", year, csv_pattern, fixed = FALSE)
+  csv_name <- sub("{year}", year, csv_pattern, fixed = TRUE)
 
   cache_dir <- file.path(
     cvm_cache_path(),

@@ -166,7 +166,7 @@ doc_arguments_by_table <- function() {
       doc_table_list(a[a$as_of, , drop = FALSE]),
       "."
     ),
-    if (any(!is.na(a$issuer_via))) {
+    if (!all(is.na(a$issuer_via))) {
       via <- a[!is.na(a$issuer_via), , drop = FALSE]
       paste0(
         "* `cnpj`/`ticker` in a table without an issuer column: ",
@@ -195,5 +195,5 @@ doc_join_and <- function(x) {
   if (length(x) < 2L) {
     return(x)
   }
-  paste(paste(x[-length(x)], collapse = ", "), "and", x[length(x)])
+  paste(toString(x[-length(x)]), "and", x[length(x)])
 }

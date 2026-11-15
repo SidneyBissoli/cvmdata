@@ -501,7 +501,7 @@ privacy_omitted_asked <- function(omitted, cnpj) {
         sprintf(
           "%s: asked for and left out: %s.",
           omitted$year[i],
-          paste(cnpj_format(hit), collapse = ", ")
+          toString(cnpj_format(hit))
         )
       )
     }

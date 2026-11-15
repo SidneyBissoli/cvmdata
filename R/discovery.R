@@ -171,7 +171,7 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
 validate_string_arg <- function(value, arg_name) {
   if (!is.character(value) || length(value) != 1L || !nzchar(value)) {
     cvmdata_abort(
-      c("{.arg {arg_name}} must be a single non-empty string."),
+      "{.arg {arg_name}} must be a single non-empty string.",
       class = "cvmdata_error_input"
     )
   }
@@ -185,7 +185,7 @@ validate_optional_group_arg <- function(group) {
   }
   if (!is.character(group) || length(group) != 1L || !nzchar(group)) {
     cvmdata_abort(
-      c("{.arg group} must be a single non-empty string or NULL."),
+      "{.arg group} must be a single non-empty string or NULL.",
       class = "cvmdata_error_input"
     )
   }
@@ -501,7 +501,7 @@ cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
     tables <- cvm_tables(dataset, group = group)
     if (!length(tables)) {
       cvmdata_abort(
-        c("No tables for dataset {.val {dataset}}."),
+        "No tables for dataset {.val {dataset}}.",
         class = "cvmdata_error_input"
       )
     }
@@ -526,7 +526,12 @@ cvm_dataset_years <- function(dataset, group = NULL, schema = NULL) {
 
   # URL base = diretório pai do pattern (tudo até a última '/')
   dir_url <- sub("/[^/]+$", "/", pattern_url)
-  zip_basename_glob <- sub("\\{year\\}", "[0-9]{4}", basename(pattern_url))
+  zip_basename_glob <- sub(
+    "{year}",
+    "[0-9]{4}",
+    basename(pattern_url),
+    fixed = TRUE
+  )
 
   years <- tryCatch(
     get_years_from_listing(dir_url, zip_basename_glob),
