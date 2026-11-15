@@ -535,3 +535,39 @@ pelo rótulo onde o texto o cita.
 sozinha, com mensagem, e dá erro só com `source = "mirror"` explícito ou
 sob retrato datado. A rodada seguinte apaga do `-latest` as partições e
 o histórico dessas tabelas; as fotos datadas pedem o reparo.
+
+## Execução de 2026-11-15
+
+O que foi feito no mesmo dia da decisão, e o que não foi possível.
+
+| O quê | Resultado |
+|---|---|
+| Publicação sob a regra "5" | os nove conjuntos; no `fre`, de 61 tabelas ficaram 49, sem partição, histórico nem arquivo de tabela de pessoas; `privacy_omitted` com 20 partições de contagem (primeira prova da regra dos grupos pelos estágios 02 e 03) |
+| Fotos datadas | reparadas nos nove conjuntos (`repair-personal-data.R` e `repair-snapshot-digests.R`): `cad`, colunas do responsável; `fca`, 35 arquivos de `dri` apagados e colunas de pessoa retiradas; `fre`, 334 arquivos de tabelas de pessoas apagados e 83 reescritos; `itr` e `dfp`, 21 arquivos cada um reescritos; `vlmo`, `ipe`, `cgvn` e `recompra_acoes`, nada a mudar |
+| Leitura de conferência | 13 tabelas da cópia corrente e 5 da foto de 2026-10-27 lidas pelo pacote, com sha256 conferido e nada que a regra ainda mudasse |
+| Aviso de privacidade | publicado (`PRIVACY.pt-BR.md`, `PRIVACY.md`) |
+| Arquivos de exemplo do repositório | nome e contato de pessoas reais trocados por valores inventados nas amostras do `cad` e do `fca` e na amostra das vinhetas |
+| Histórico do git | 14 versões antigas de 8 arquivos de exemplo retiradas de todos os ramos e etiquetas (`git filter-repo --strip-blobs-with-ids`); as 52 releases seguiram públicas, com os mesmos arquivos; o ramo do site passou a ter uma versão só |
+| Registro de teste no Zenodo sandbox | apagado pelo dono da conta (motivo: dado pessoal) |
+
+**Duas falhas da execução, e a defesa de cada uma.**
+
+- O reparo do `fca` rodou primeiro com o pacote instalado desatualizado,
+  que não sabia que `dri` tinha saído do espelho: reescreveu os arquivos
+  em vez de apagá-los. Refeito depois de reinstalar. Defesa:
+  `mirror_check_installed()` para qualquer script do ETL rodado de uma
+  árvore de fontes cujos esquemas não sejam os instalados.
+- No `fre`, os relatórios do que as tabelas de contagem perderam ficaram
+  na pasta temporária da sessão e se perderam antes do segundo reparo.
+  Foram reconstruídos a partir do `privacy_omitted` do `-latest`, medido
+  pelo robô no mesmo dia: das 64 partições das fotos, 60 batem exatamente
+  e 4 (as de 2026 na foto de 2026-11-10) diferem em uma companhia
+  mantida. Defesa: o reparo recusa rodar de verdade sem
+  `CVMDATA_ETL_WORKSPACE`.
+
+**O que não foi possível.** O GitHub guarda referências somente de
+leitura dos pull requests (`refs/pull/*`), e por elas as versões antigas
+dos arquivos de exemplo continuam alcançáveis por quem souber o
+identificador. Só o suporte do GitHub as remove, a pedido do dono da
+conta. Cópias do repositório feitas antes de 2026-11-15 também guardam o
+histórico antigo.
