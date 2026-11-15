@@ -213,6 +213,31 @@ O que as regras dizem (lidas em 2026-11-14):
   (Resolução nº 32/2026), e nenhuma cláusula equivalente, cláusula
   específica ou norma corporativa global foi aprovada.
 
+O que os dois serviços dizem (lido em 2026-11-15):
+
+- **GitHub.** O "GitHub Data Protection Agreement" (versão de outubro de
+  2025) "applies to the processing of data for GitHub Enterprise Cloud,
+  GitHub Enterprise (Unified), GitHub Teams, and GitHub Copilot" (página
+  de termos do cliente). Define "Standard Contractual Clauses" só para o
+  GDPR, o UK GDPR e a lei suíça; não cita o Brasil nem a LGPD. A
+  declaração de privacidade diz que o GitHub transfere dados da União
+  Europeia, do Reino Unido e da Suíça com base nas cláusulas da Comissão
+  Europeia e no Data Privacy Framework; também não cita o Brasil.
+- **Zenodo.** A política de privacidade diz que o Zenodo "is hosted at
+  CERN and subject to CERN's special legal status as an
+  Intergovernmental Organization (IGO) and thus enjoys certain
+  privileges and immunities under international law", e que o
+  tratamento de dados pessoais no CERN segue a Operational Circular 11.
+  Essa política trata dos dados de quem tem conta, não das pessoas
+  citadas dentro dos arquivos depositados. Os termos de uso dizem que
+  "the uploader is exclusively responsible for the content" e que dado
+  que era sensível deve estar "anonymised to an appropriate degree or
+  fully consent cleared". O Zenodo repassa os registros publicados à
+  DataCite (Alemanha), ao OpenAIRE (Grécia) e ao Software Heritage
+  (França). Não há contrato de tratamento de dados com quem deposita.
+
+Nenhum dos dois documentos oferece as cláusulas-padrão brasileiras.
+
 Leitura do responsável, ainda sem conclusão: Budapeste está na União
 Europeia; Genebra e os Estados Unidos não estão cobertos por decisão de
 adequação. Não se sabe se guardar os arquivos no GitHub e no Zenodo
@@ -336,6 +361,11 @@ a ANPD publicar regulamento sobre o RIPD.
   Internacional de Dados), texto do DOU, arts. 1º a 9º, 15 e 16 —
   2026-11-14. Retificação posterior não conferida.
 - ANPD, página "Transferência Internacional de Dados" — 2026-11-14.
+- GitHub, Data Protection Agreement (outubro de 2025), página de termos
+  do cliente, termos de serviço e declaração de privacidade —
+  2026-11-15.
+- Zenodo, política de privacidade (revisão de 31-07-2026), termos de
+  uso v1.3, políticas gerais e página de infraestrutura — 2026-11-15.
 - LGPD, art. 33 — 2026-11-14.
 - Zenodo, ajuda "Manage records", políticas gerais e termos de uso v1.3
   — 2026-11-14.
@@ -345,8 +375,8 @@ a ANPD publicar regulamento sobre o RIPD.
 
 - Resolução CD/ANPD nº 32/2026 (adequação da União Europeia), citada
   só como a página da ANPD a cita.
-- Contrato de tratamento de dados do GitHub.
-- Regras do Zenodo e do CERN sobre transferência de dados.
+- CERN, Operational Circular 11.
+- Plano da conta do GitHub que hospeda o espelho (não conferido).
 - Resolução CD/ANPD nº 18/2024.
 - LGPD, arts. 5º, VII, 38 e 55-J, no texto da lei (citados aqui só como
   a página da ANPD os cita).
