@@ -33,7 +33,8 @@
 # client pinned to an old date fails its integrity check on the rewritten
 # files from the moment the URL turns until the digest repair has run.
 #
-# Usage:
+# Usage (CVMDATA_ETL_WORKSPACE set to a directory that outlives the run,
+# the same for repair-snapshot-digests.R afterwards):
 #   Rscript inst/etl/repair-personal-data.R --group companhias \
 #     --dataset fre [--dry-run]
 #
@@ -128,6 +129,22 @@ release_parquet_assets <- function(tag) {
 }
 
 personal_repair_main <- function(group, dataset, dry_run) {
+  # What a count table loses is measured here, before the bytes are
+  # replaced, and read by repair-snapshot-digests.R in ANOTHER R session.
+  # The default workspace is under tempdir() and dies with this one: on
+  # 2026-11-15 the reports of the FRE were lost that way and had to be
+  # rebuilt from the sidecar of `-latest`. A real run needs a workspace
+  # that outlives it.
+  if (!dry_run && !nzchar(Sys.getenv("CVMDATA_ETL_WORKSPACE", ""))) {
+    stop(
+      paste(
+        "set CVMDATA_ETL_WORKSPACE to a directory that outlives this run,",
+        "and run repair-snapshot-digests.R with the same value: the",
+        "reports of what the count tables lose are saved there"
+      ),
+      call. = FALSE
+    )
+  }
   work <- file.path(mirror_workspace(), "repair-personal", group, dataset)
   dir.create(work, recursive = TRUE, showWarnings = FALSE)
   sidecar_path <- download_public_asset(
