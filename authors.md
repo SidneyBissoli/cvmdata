@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/SidneyBissoli/cvmdata/blob/v0.3.0/inst/CITATION)
+[`inst/CITATION`](https://github.com/SidneyBissoli/cvmdata/blob/main/inst/CITATION)
 
 Bissoli S (2026). *cvmdata: Tidy Access to Brazilian CVM Open Data*. R
 package version 0.3.0, <https://sidneybissoli.github.io/cvmdata/>.
