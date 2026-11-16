@@ -27,7 +27,8 @@
 stopifnot(
   requireNamespace("httr2", quietly = TRUE),
   requireNamespace("jsonlite", quietly = TRUE),
-  requireNamespace("digest", quietly = TRUE)
+  requireNamespace("digest", quietly = TRUE),
+  requireNamespace("withr", quietly = TRUE)
 )
 
 # --- the calendar -----------------------------------------------------
@@ -459,13 +460,14 @@ edition_pack_dataset <- function(plan, group, dir, out_dir, edition) {
   tarfile <- file.path(out_dir, sprintf("%s-%s.tar", group, dataset))
   stamp <- as.POSIXct(paste(format(as.Date(edition)), "00:00:00"), tz = "UTC")
   Sys.setFileTime(plan$path, stamp)
-  old <- setwd(dir)
-  on.exit(setwd(old), add = TRUE)
-  utils::tar(
-    tarfile,
-    files = dataset,
-    compression = "none",
-    tar = "internal"
+  withr::with_dir(
+    dir,
+    utils::tar(
+      tarfile,
+      files = dataset,
+      compression = "none",
+      tar = "internal"
+    )
   )
   tarfile
 }
@@ -929,12 +931,10 @@ zenodo_open_draft <- function(client, concept = NULL, metadata = NULL) {
     } else {
       list(metadata = metadata)
     }
-    draft <- zenodo_perform(
-      zenodo_request(client, "/api/deposit/depositions") |>
-        httr2::req_method("POST") |>
-        httr2::req_body_json(body),
-      what = "create"
-    )
+    req <- zenodo_request(client, "/api/deposit/depositions") |>
+      httr2::req_method("POST") |>
+      httr2::req_body_json(body)
+    draft <- zenodo_perform(req, what = "create")
     attr(draft, "created") <- TRUE
     return(draft)
   }
@@ -965,10 +965,8 @@ zenodo_open_draft <- function(client, concept = NULL, metadata = NULL) {
   after <- zenodo_split_versions(zenodo_list_versions(client, concept))
   if (is.null(after$draft)) {
     stop(
-      paste(
-        "newversion opened no draft: the versions of the record are",
-        "all submitted"
-      ),
+      "newversion opened no draft: the versions of the record are ",
+      "all submitted",
       call. = FALSE
     )
   }
@@ -1035,14 +1033,12 @@ zenodo_sync_files <- function(client, draft, local) {
   remote <- zenodo_files_table(draft$files)
   actions <- zenodo_file_actions(remote, local)
   for (id in actions$delete) {
-    zenodo_perform(
-      zenodo_request(
-        client,
-        sprintf("/api/deposit/depositions/%s/files/%s", draft$id, id)
-      ) |>
-        httr2::req_method("DELETE"),
-      what = "delete file"
-    )
+    req <- zenodo_request(
+      client,
+      sprintf("/api/deposit/depositions/%s/files/%s", draft$id, id)
+    ) |>
+      httr2::req_method("DELETE")
+    zenodo_perform(req, what = "delete file")
   }
   bucket <- draft$links$bucket
   if (length(actions$upload) && is.null(bucket)) {
@@ -1055,27 +1051,26 @@ zenodo_sync_files <- function(client, draft, local) {
       name,
       format(round(file.size(path) / 1e6, 1), nsmall = 1L)
     ))
-    zenodo_perform(
-      zenodo_request(
-        client,
-        paste0(bucket, "/", utils::URLencode(name, reserved = TRUE))
-      ) |>
-        httr2::req_method("PUT") |>
-        httr2::req_body_file(path, type = "application/octet-stream") |>
-        httr2::req_timeout(3600),
-      what = "upload"
-    )
+    req <- zenodo_request(
+      client,
+      paste0(bucket, "/", utils::URLencode(name, reserved = TRUE))
+    ) |>
+      httr2::req_method("PUT") |>
+      httr2::req_body_file(path, type = "application/octet-stream") |>
+      httr2::req_timeout(3600)
+    zenodo_perform(req, what = "upload")
   }
   actions
 }
 
 zenodo_set_metadata <- function(client, draft, metadata) {
-  zenodo_perform(
-    zenodo_request(client, sprintf("/api/deposit/depositions/%s", draft$id)) |>
-      httr2::req_method("PUT") |>
-      httr2::req_body_json(list(metadata = metadata)),
-    what = "metadata"
-  )
+  req <- zenodo_request(
+    client,
+    sprintf("/api/deposit/depositions/%s", draft$id)
+  ) |>
+    httr2::req_method("PUT") |>
+    httr2::req_body_json(list(metadata = metadata))
+  zenodo_perform(req, what = "metadata")
 }
 
 # Reads the draft back: every file of the edition is listed in the
@@ -1125,14 +1120,12 @@ zenodo_drop_draft <- function(client, draft) {
   result <- tryCatch(
     {
       if (isTRUE(attr(draft, "created"))) {
-        zenodo_perform(
-          zenodo_request(
-            client,
-            sprintf("/api/deposit/depositions/%s", draft$id)
-          ) |>
-            httr2::req_method("DELETE"),
-          what = "delete draft"
-        )
+        req <- zenodo_request(
+          client,
+          sprintf("/api/deposit/depositions/%s", draft$id)
+        ) |>
+          httr2::req_method("DELETE")
+        zenodo_perform(req, what = "delete draft")
         "deleted"
       } else {
         zenodo_action(client, draft$id, "discard")

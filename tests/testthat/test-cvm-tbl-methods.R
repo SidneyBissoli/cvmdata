@@ -281,7 +281,12 @@ test_that("printing a cvm_tbl with stripped attributes shows no header", {
     attr(x, a) <- NULL
   }
   expect_s3_class(x, "cvm_tbl")
-  msg <- capture.output(out <- capture.output(print(x)), type = "message")
+  msg <- capture.output(
+    {
+      out <- capture.output(print(x))
+    },
+    type = "message"
+  )
   expect_identical(msg, character(0))
   expect_match(out[1], "A tibble")
 })

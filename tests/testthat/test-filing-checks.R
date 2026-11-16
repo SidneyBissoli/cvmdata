@@ -96,7 +96,9 @@ test_that("keep_latest_version orders receipt times within a day", {
 
 test_that("identical rows of a doubled filing are dropped with a warning", {
   expect_snapshot(
-    out <- drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
+    {
+      out <- drop_duplicate_filings(trv_bpa(), "cnpj_cia", "dt_refer")
+    }
   )
   expect_identical(nrow(out), 2L)
   expect_identical(out$vl_conta, c(127621000, 106772000))
@@ -113,7 +115,9 @@ test_that("copies that differ in vl_conta are kept and flagged", {
   df <- trv_bpa()
   df$vl_conta[3:4] <- c(1, 2)
   expect_warning(
-    out <- drop_duplicate_filings(df, "cnpj_cia", "dt_refer"),
+    {
+      out <- drop_duplicate_filings(df, "cnpj_cia", "dt_refer")
+    },
     class = "cvmdata_warn_conflicting_filing"
   )
   expect_identical(nrow(out), 4L)
@@ -152,15 +156,17 @@ test_that("a table behind the latest delivery is flagged", {
     issuer_fetch_internal = function(...) travessia_submissao()
   )
   expect_snapshot(
-    out <- check_filings(
-      travessia_bpa_v2(),
-      schema = list(),
-      dataset = "dfp",
-      table = "bpa",
-      year = 2024L,
-      source = "cvm",
-      validate = "strict"
-    )
+    {
+      out <- check_filings(
+        travessia_bpa_v2(),
+        schema = list(),
+        dataset = "dfp",
+        table = "bpa",
+        year = 2024L,
+        source = "cvm",
+        validate = "strict"
+      )
+    }
   )
   expect_identical(out, travessia_bpa_v2())
 })

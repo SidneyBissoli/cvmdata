@@ -237,8 +237,8 @@ test_that("a table with fewer rows or gone fails unless shrinking is allowed", {
     stringsAsFactors = FALSE
   )
   cmp <- edition_compare_counts(now, prev)
-  expect_identical(
-    names(cmp),
+  expect_named(
+    cmp,
     c("dataset", "kind", "table", "rows_prev", "rows_now")
   )
   expect_identical(cmp$table, c("companhias", "bpa", "dre", "dva"))
@@ -272,8 +272,8 @@ test_that("the manifest round-trips the counts of an edition", {
   )
   attr(plan, "snapshot") <- "2026-11-03"
   manifest <- edition_manifest(list(dfp = plan))
-  expect_identical(
-    names(manifest),
+  expect_named(
+    manifest,
     c("dataset", "snapshot", "kind", "rel", "release", "sha256", "size", "rows")
   )
   expect_identical(manifest$snapshot, c("2026-11-03", "2026-11-03"))
@@ -858,7 +858,7 @@ test_that("the edition carries what the group rule left out, counts only", {
   got <- edition_omitted("fre", entries)
   expect_identical(nrow(got), 1L)
   expect_identical(got$companies_omitted, 173)
-  expect_false(any(grepl("cnpj", names(got))))
+  expect_false(any(grepl("cnpj", names(got), fixed = TRUE)))
   expect_null(edition_omitted("dfp", NULL))
   expect_null(edition_omitted("dfp", list()))
 })

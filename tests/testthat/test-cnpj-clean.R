@@ -47,7 +47,9 @@ test_that("cnpj_format is vectorised", {
 
 test_that("cnpj_format returns NA + warns on non-14-digit input", {
   expect_warning(
-    out <- cnpj_format("123"),
+    {
+      out <- cnpj_format("123")
+    },
     class = "cvmdata_warn"
   )
   expect_identical(out, NA_character_)
@@ -55,7 +57,9 @@ test_that("cnpj_format returns NA + warns on non-14-digit input", {
 
 test_that("cnpj_format mixed-validity vector returns NA only for invalids", {
   expect_warning(
-    out <- cnpj_format(c("12345678000190", "123", NA, "98765432000110")),
+    {
+      out <- cnpj_format(c("12345678000190", "123", NA, "98765432000110"))
+    },
     class = "cvmdata_warn"
   )
   expect_identical(

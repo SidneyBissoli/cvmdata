@@ -139,11 +139,9 @@ personal_repair_main <- function(group, dataset, dry_run) {
   # that outlives it.
   if (!dry_run && !nzchar(Sys.getenv("CVMDATA_ETL_WORKSPACE", ""))) {
     stop(
-      paste(
-        "set CVMDATA_ETL_WORKSPACE to a directory that outlives this run,",
-        "and run repair-snapshot-digests.R with the same value: the",
-        "reports of what the count tables lose are saved there"
-      ),
+      "set CVMDATA_ETL_WORKSPACE to a directory that outlives this run, ",
+      "and run repair-snapshot-digests.R with the same value: the ",
+      "reports of what the count tables lose are saved there",
       call. = FALSE
     )
   }

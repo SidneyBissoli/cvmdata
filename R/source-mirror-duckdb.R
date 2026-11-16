@@ -390,12 +390,11 @@ mirror_fetch_to_l3 <- function(
 
 # GET one asset into `dest`. HTTP failures are `cvmdata_error_http`.
 mirror_download_asset <- function(url, dest) {
+  req <- httr2::request(url) |>
+    httr2::req_user_agent("cvmdata") |>
+    req_retry_transient()
   resp <- tryCatch(
-    httr2::req_perform(
-      httr2::request(url) |>
-        httr2::req_user_agent("cvmdata") |>
-        req_retry_transient()
-    ),
+    httr2::req_perform(req),
     error = function(e) {
       cvmdata_abort(
         c(

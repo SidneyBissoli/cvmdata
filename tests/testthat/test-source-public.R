@@ -27,7 +27,9 @@ test_that("cvm_source_get() does not validate the option value", {
 test_that("cvm_source_set() updates the option to 'cvm'", {
   withr::local_options(cvmdata.source = NULL)
   expect_message(
-    out <- cvm_source_set("cvm"),
+    {
+      out <- cvm_source_set("cvm")
+    },
     "Source backend set"
   )
   expect_identical(out, "cvm")
@@ -37,7 +39,9 @@ test_that("cvm_source_set() updates the option to 'cvm'", {
 test_that("cvm_source_set() updates the option to 'mirror'", {
   withr::local_options(cvmdata.source = NULL)
   expect_message(
-    out <- cvm_source_set("mirror"),
+    {
+      out <- cvm_source_set("mirror")
+    },
     "Source backend set"
   )
   expect_identical(out, "mirror")

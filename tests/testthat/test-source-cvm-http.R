@@ -91,7 +91,10 @@ test_that("download_with_etag fires GET when HEAD ETag mismatches", {
     )
   )
   expect_s3_class(result, "cvm_tbl")
-  expect_equal(file.info(zip_path)$size, length(fixture_body))
+  expect_identical(
+    file.info(zip_path)$size,
+    as.double(length(fixture_body))
+  )
   updated <- readRDS(paste0(zip_path, ".etag.rds"))
   expect_identical(updated$etag, "\"NEW-ETAG\"")
 })
@@ -325,7 +328,10 @@ test_that("download_with_etag fetches via GET when cache is empty", {
     "dfp_cia_aberta_2024.zip"
   )
   expect_true(file.exists(zip_path))
-  expect_equal(file.info(zip_path)$size, length(fixture_body))
+  expect_identical(
+    file.info(zip_path)$size,
+    as.double(length(fixture_body))
+  )
 })
 
 # Dispatch errors ---------------------------------------------------------

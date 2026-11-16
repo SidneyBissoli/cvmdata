@@ -405,7 +405,9 @@ test_that("cvm_dataset_years falls back to declared range when listing down", {
   testthat::local_mocked_bindings(current_year = function() 2026L)
   mock <- function(req) stop("simulated DNS error")
   expect_warning(
-    yrs <- httr2::with_mocked_responses(mock, cvm_dataset_years("dfp")),
+    {
+      yrs <- httr2::with_mocked_responses(mock, cvm_dataset_years("dfp"))
+    },
     class = "cvmdata_warn_year_listing_fallback"
   )
   expect_identical(yrs, 2010:2026) # dfp first_year = 2010

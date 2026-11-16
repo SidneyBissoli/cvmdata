@@ -51,17 +51,19 @@ test_that("on_error = 'warn' emits warning and returns surviving years", {
   }
   result <- NULL
   expect_warning(
-    result <- httr2::with_mocked_responses(
-      mock,
-      issuer_fetch_internal(
-        "dfp",
-        "bpa",
-        report_type = "ind",
-        year = c(2023L, 2024L),
-        source = "cvm",
-        on_error = "warn"
+    {
+      result <- httr2::with_mocked_responses(
+        mock,
+        issuer_fetch_internal(
+          "dfp",
+          "bpa",
+          report_type = "ind",
+          year = c(2023L, 2024L),
+          source = "cvm",
+          on_error = "warn"
+        )
       )
-    ),
+    },
     class = "cvmdata_warn_partial_failure"
   )
   expect_s3_class(result, "cvm_tbl")

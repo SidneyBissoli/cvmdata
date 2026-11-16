@@ -765,7 +765,9 @@ test_that("a year the mirror does not serve is retried, then labelled", {
     row(y)
   }
   expect_message(
-    index <- rad_read_index("itr", 2023:2024, fetch = recovers, pause = 0),
+    {
+      index <- rad_read_index("itr", 2023:2024, fetch = recovers, pause = 0)
+    },
     "did not serve the index of 2024"
   )
   expect_identical(index$id_doc, c("2023", "2024"))
@@ -1087,7 +1089,9 @@ test_that("a run that finds the whole queue empty records itself", {
   )
   source_hash <- list(hash = "h", history = list())
   said <- capture_messages(
-    res <- rad_run_checkpoints(index[0L, ], state, source_hash, ctx)
+    {
+      res <- rad_run_checkpoints(index[0L, ], state, source_hash, ctx)
+    }
   )
   expect_match(said, "the queue is empty: recording the idle run", all = FALSE)
   expect_identical(res$tally$checkpoints, 0L)
@@ -1193,7 +1197,9 @@ test_that("one refusal by the WAF is retried and the document is read", {
   )
   work <- withr::local_tempdir()
   expect_message(
-    got <- rad_fetch_one(f, work, pause = 0),
+    {
+      got <- rad_fetch_one(f, work, pause = 0)
+    },
     "refused by the RAD .*pausing 0s before try 2 of 3"
   )
   expect_true(got$ok)
@@ -1300,7 +1306,9 @@ test_that("the download service failing for a request is asked again", {
     "151243"
   )
   suppressMessages(expect_message(
-    got <- rad_fetch_one(f, withr::local_tempdir(), service_pause = 0),
+    {
+      got <- rad_fetch_one(f, withr::local_tempdir(), service_pause = 0)
+    },
     "download service failed \\(connection unknown\\), try 2 of 5 next"
   ))
   expect_true(got$ok)

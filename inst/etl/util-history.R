@@ -192,9 +192,7 @@ mirror_superseded_rows <- function(
   replaced <- names(o$sig)[!is.na(new_sig) & new_sig != o$sig]
   if (identity_only && length(replaced)) {
     ident <- intersect(intersect(names(old), names(new)), mirror_delivery_cols)
-    if (!length(ident)) {
-      replaced <- character()
-    } else {
+    if (length(ident)) {
       # the set of DISTINCT deliveries of each filing: recovered rows of
       # the same delivery repeat it, they do not make another one
       oi <- mirror_filing_signatures(
@@ -208,6 +206,8 @@ mirror_superseded_rows <- function(
         ident
       )$sig
       replaced <- replaced[oi[replaced] != ni[replaced]]
+    } else {
+      replaced <- character()
     }
   }
   rows <- old[o$key %in% c(removed, replaced), , drop = FALSE]

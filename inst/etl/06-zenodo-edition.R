@@ -267,10 +267,8 @@ edition_main <- function(opts) {
   privacy_failed <- edition_check_privacy(all_plan)
   if (length(privacy_failed)) {
     stop(
-      paste(
-        "personal data in the edition, nothing was deposited:",
-        paste(privacy_failed, collapse = "; ")
-      ),
+      "personal data in the edition, nothing was deposited: ",
+      paste(privacy_failed, collapse = "; "),
       call. = FALSE
     )
   }
