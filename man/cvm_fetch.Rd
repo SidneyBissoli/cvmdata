@@ -89,7 +89,12 @@ figures for the same exercise in the following year's file, the
 \code{PENÚLTIMO} rows there) or \code{c("original", "restated")}, which
 stacks both. \code{NULL} (default) returns each year's file as the CVM
 publishes it, \code{ÚLTIMO} and \code{PENÚLTIMO} rows together, without a
-\code{reading} column. When set, \code{year} names the exercises and the
+\code{reading} column. With several years and no \code{reading}, an
+exercise can then appear twice: \code{year = 2023:2024} returns 2023
+as the \code{ÚLTIMO} rows of the 2023 file and again as the
+\code{PENÚLTIMO} rows of the 2024 file, possibly with different
+figures. Filter on \code{ordem_exerc}, or set \code{reading}, before
+summing or plotting a series. When set, \code{year} names the exercises and the
 following year's files are read as needed; the result carries a
 \code{reading} column. See the section \emph{Readings of an exercise}.
 Must be \code{NULL} for tables without \code{ordem_exerc}; passing it
