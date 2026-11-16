@@ -321,10 +321,10 @@ that improve the code (130 of 190) and left 60 where the suggestion does
 not fit the case: `paste()` calls that build keys and XPath expressions
 rather than file paths (16); `cvmdata:::` in the ETL scripts, which use
 the package's internals by design, and `<<-` in test doubles that count
-calls (16); repeated `"i"` names in `cli` bullets, which is how `cli`
+or record calls (16); repeated `"i"` names in `cli` bullets, which is how `cli`
 takes them (10); `library(cvmdata)` in vignettes and `library(testthat)`
 in the test runner (11); and `%in%` against a single value where the
-column holds `NA`, where `==` would make the test wrong (7).
+vector may hold `NA`, which `==` would propagate (7).
 R CMD check is clean on Ubuntu (devel, release, oldrel-1), macOS and
 Windows; test coverage is 95.5%
 <!-- Codecov 95,26 % em 2026-11-06; reconferir. Testes medidos em
