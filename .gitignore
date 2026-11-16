@@ -113,3 +113,7 @@ teste_*.html
 # roadmap: documento de planejamento privado, nao vai para repo publico
 # (o passado ja publicado nao e apagado por esta regra — ver commit)
 ROADMAP.md
+
+# leftovers testthat writes when a test fails
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds
