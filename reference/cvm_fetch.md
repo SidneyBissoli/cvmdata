@@ -320,6 +320,8 @@ generated from the package's table schemas, the same ones the argument
 checks read, for the 104 tables in 9 datasets. An argument passed to a
 table it does not apply to aborts with `cvmdata_error_input` before
 anything is downloaded; nothing is silently ignored.
+[`cvm_arguments()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_arguments.md)
+gives the same rules for one table, as a tibble.
 
 - `year` and `from`/`to`: every table published one file per year. Not
   for `cad`: `companhias`, `estrangeiras`, `incentivadas`;

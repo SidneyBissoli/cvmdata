@@ -29,6 +29,7 @@ A character vector of table names, sorted alphabetically.
 ## See also
 
 Other discovery:
+[`cvm_arguments()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_arguments.md),
 [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md),
 [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md),
 [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md),

@@ -1,5 +1,29 @@
 # Changelog
 
+## cvmdata (development version)
+
+### New features
+
+- [`cvm_arguments()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_arguments.md)
+  says, for one table, which arguments of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  are required, optional or not allowed, and the values each one takes:
+  `basis` is required for the statements published individual and
+  consolidated and refused elsewhere, `as_of` only applies to a
+  registry, `year` not to a single snapshot. It reads the same table
+  schemas that
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  checks its arguments against, so the two never disagree; a test holds
+  them together for every table.
+
+### Minor improvements
+
+- `year` passed to a table without yearly files (`cad`,
+  `recompra_acoes`) is now refused with the other argument checks,
+  before the ticker lookup, as the help of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  says. It was refused later, by the reader, with the same message.
+
 ## cvmdata 0.3.1 (2026-11-16)
 
 ### Bug fixes

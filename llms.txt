@@ -347,14 +347,26 @@ disambiguates when a dataset slug occurs in more than one group.
 
 - [`cvm_groups()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_groups.md)
   : List the CVM CKAN groups
+
 - [`cvm_datasets()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_datasets.md)
   : List datasets covered by the package
+
 - [`cvm_tables()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tables.md)
   : List the tables published in a dataset
+
 - [`cvm_dictionary()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dictionary.md)
   : Look up the CVM-published dictionary for a table
+
+- [`cvm_arguments()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_arguments.md)
+  :
+
+  Which arguments of
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  a table takes
+
 - [`cvm_codelist()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_codelist.md)
   : Look up the codelist for a categorical column
+
 - [`cvm_dataset_years()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_dataset_years.md)
   : Range of years available for a yearly-partitioned dataset
 

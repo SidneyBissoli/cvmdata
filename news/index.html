@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,9 +43,22 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/v0.3.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/SidneyBissoli/cvmdata/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="cvmdata-development-version">cvmdata (development version)<a class="anchor" aria-label="anchor" href="#cvmdata-development-version"></a></h2>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/cvm_arguments.html">cvm_arguments()</a></code> says, for one table, which arguments of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> are required, optional or not allowed, and the values each one takes: <code>basis</code> is required for the statements published individual and consolidated and refused elsewhere, <code>as_of</code> only applies to a registry, <code>year</code> not to a single snapshot. It reads the same table schemas that <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> checks its arguments against, so the two never disagree; a test holds them together for every table.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-development-version">Minor improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-development-version"></a></h3>
+<ul><li>
+<code>year</code> passed to a table without yearly files (<code>cad</code>, <code>recompra_acoes</code>) is now refused with the other argument checks, before the ticker lookup, as the help of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> says. It was refused later, by the reader, with the same message.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="cvmdata-031-2026-11-16">cvmdata 0.3.1 (2026-11-16)<a class="anchor" aria-label="anchor" href="#cvmdata-031-2026-11-16"></a></h2>
 <div class="section level3">
