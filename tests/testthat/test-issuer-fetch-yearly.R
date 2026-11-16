@@ -1358,3 +1358,43 @@ test_that("the partition columns of the mirror do not reach the user", {
   # a CVM result has neither column: nothing changes
   expect_identical(drop_partition_columns(df["cd_conta"]), df["cd_conta"])
 })
+
+test_that("mirror_inventory_years lists the years of one table and basis", {
+  schema <- load_schema("dfp", "bpa")
+  seen <- new.env()
+  testthat::local_mocked_bindings(
+    mirror_list_assets = function(group, dataset, release = "latest") {
+      seen$release <- release
+      tibble::tibble(
+        name = c(
+          "bpa__report_type=ind__year=2025__part-0.parquet",
+          "bpa__report_type=ind__year=2023__part-0.parquet",
+          "bpa__report_type=con__year=2026__part-0.parquet",
+          "dre__report_type=ind__year=2026__part-0.parquet",
+          "bpa__report_type=ind__year=2025__history.parquet"
+        )
+      )
+    }
+  )
+  withr::local_options(cvmdata.mirror_release = "2026-11-10")
+  expect_identical(mirror_inventory_years(schema, "ind"), c(2023L, 2025L))
+  expect_identical(mirror_inventory_years(schema, "con"), 2026L)
+  # the session's pin decides which inventory is read
+  expect_identical(seen$release, "2026-11-10")
+})
+
+test_that("a table the mirror does not hold yet is left to the backend", {
+  schema <- load_schema("dfp", "bpa")
+  tally <- new.env()
+  tally$years <- list()
+  testthat::local_mocked_bindings(
+    mirror_inventory_years = function(...) integer(),
+    source_mirror_duckdb_get = function(schema, year = NULL, ...) {
+      tally$years[[length(tally$years) + 1L]] <- year %||% NA_integer_
+      data.frame(cnpj_cia = character(), stringsAsFactors = FALSE)
+    }
+  )
+  fetch_via_mirror(schema, "dfp", NULL, "00000000000191", "ind")
+  # one read with year = NULL: the backend raises its own error there
+  expect_identical(unlist(tally$years), NA_integer_)
+})
