@@ -171,7 +171,12 @@ figures for the same exercise in the following year's file, the
 <code>PENÚLTIMO</code> rows there) or <code>c("original", "restated")</code>, which
 stacks both. <code>NULL</code> (default) returns each year's file as the CVM
 publishes it, <code>ÚLTIMO</code> and <code>PENÚLTIMO</code> rows together, without a
-<code>reading</code> column. When set, <code>year</code> names the exercises and the
+<code>reading</code> column. With several years and no <code>reading</code>, an
+exercise can then appear twice: <code>year = 2023:2024</code> returns 2023
+as the <code>ÚLTIMO</code> rows of the 2023 file and again as the
+<code>PENÚLTIMO</code> rows of the 2024 file, possibly with different
+figures. Filter on <code>ordem_exerc</code>, or set <code>reading</code>, before
+summing or plotting a series. When set, <code>year</code> names the exercises and the
 following year's files are read as needed; the result carries a
 <code>reading</code> column. See the section <em>Readings of an exercise</em>.
 Must be <code>NULL</code> for tables without <code>ordem_exerc</code>; passing it

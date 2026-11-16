@@ -62,7 +62,7 @@ reference year 2024.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpq7DHDk/duckdb`\
+`#> ``ℹ`` /tmp/RtmpsUQdfK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -70,7 +70,7 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpq7DHDk/duckdb`\
+`#> ``ℹ`` /tmp/RtmpsUQdfK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -79,7 +79,7 @@ reference year 2024.
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `auditor`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
-`#>   ``fetched_at``: ``2026-11-16 22:55:20.310464`\
+`#>   ``fetched_at``: ``2026-11-16 23:05:35.874728`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
 `#> ``# A tibble: 2 × 17`\
 `#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
@@ -113,7 +113,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/Rtmpq7DHDk/duckdb`\
+`#> ``ℹ`` /tmp/RtmpsUQdfK/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -122,7 +122,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `pcd`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
-`#>   ``fetched_at``: ``2026-11-16 22:55:20.593541`\
+`#>   ``fetched_at``: ``2026-11-16 23:05:36.207412`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``!`` ``omitted``: 11 of 21 companies of 2024 are not in the mirror (privacy rule;`\
 `` #>   `attr(x, "omitted")`) ``\
@@ -163,7 +163,7 @@ FRE filing.
 `  `[`names`](https://rdrr.io/r/base/names.html)`(``posicao``)`\
 `)`\
 `posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
-`#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-11-16 22:55:21.261708`\
+`#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-11-16 23:05:37.036903`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
 `#> ``# A tibble: 5 × 6`\
 `#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\

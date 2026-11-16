@@ -109,12 +109,16 @@ cvm_fetch(
   exercise in the following year's file, the `PENÚLTIMO` rows there) or
   `c("original", "restated")`, which stacks both. `NULL` (default)
   returns each year's file as the CVM publishes it, `ÚLTIMO` and
-  `PENÚLTIMO` rows together, without a `reading` column. When set,
-  `year` names the exercises and the following year's files are read as
-  needed; the result carries a `reading` column. See the section
-  *Readings of an exercise*. Must be `NULL` for tables without
-  `ordem_exerc`; passing it aborts. Not the same as `versao`: a new
-  version replaces a filing (see
+  `PENÚLTIMO` rows together, without a `reading` column. With several
+  years and no `reading`, an exercise can then appear twice:
+  `year = 2023:2024` returns 2023 as the `ÚLTIMO` rows of the 2023 file
+  and again as the `PENÚLTIMO` rows of the 2024 file, possibly with
+  different figures. Filter on `ordem_exerc`, or set `reading`, before
+  summing or plotting a series. When set, `year` names the exercises and
+  the following year's files are read as needed; the result carries a
+  `reading` column. See the section *Readings of an exercise*. Must be
+  `NULL` for tables without `ordem_exerc`; passing it aborts. Not the
+  same as `versao`: a new version replaces a filing (see
   [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md));
   a restated reading is the same year shown in a later filing.
 
