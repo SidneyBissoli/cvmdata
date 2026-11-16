@@ -37,6 +37,92 @@ table_version_tx <- function(schema) {
   NULL
 }
 
+# One row per argument of `cvm_fetch()` that depends on the table or
+# selects rows, with its status for this table ("required", "optional"
+# or "not allowed") and the values it takes. Built on the predicates
+# above, the ones the argument checks enforce. The engine of
+# `cvm_arguments()`.
+fetch_argument_rules <- function(schema) {
+  yearly <- table_is_yearly(schema)
+  first <- schema$first_year
+  last <- schema$last_year
+  empty <- schema$empty_from
+  years <- if (!is.null(last)) {
+    paste0(first, "-", last)
+  } else if (!is.null(empty)) {
+    paste0(first, "-", as.integer(empty) - 1L)
+  } else {
+    paste0(first, " onwards")
+  }
+  year_status <- if (!yearly) {
+    "not allowed"
+  } else if (!is.null(last)) {
+    "required"
+  } else {
+    "optional"
+  }
+  year_values <- if (!yearly) {
+    NA_character_
+  } else if (!is.null(last)) {
+    paste0(years, "; or `from`/`to` instead")
+  } else {
+    paste0(years, "; NULL = latest year")
+  }
+  window <- if (yearly) {
+    "full date (\"YYYY-MM-DD\"); `from` and `to` together, not with `year`"
+  } else {
+    NA_character_
+  }
+  allowed <- function(x) if (x) "optional" else "not allowed"
+  source_values <- if (isFALSE(schema$mirror)) {
+    "\"cvm\" (not in the mirror: read from the CVM)"
+  } else {
+    "\"mirror\", \"cvm\"; NULL = session default"
+  }
+  tibble::tibble(
+    argument = c(
+      "cnpj",
+      "ticker",
+      "year",
+      "from",
+      "to",
+      "as_of",
+      "basis",
+      "reading",
+      "source",
+      "on_error"
+    ),
+    status = c(
+      "optional",
+      "optional",
+      year_status,
+      allowed(yearly),
+      allowed(yearly),
+      allowed(table_is_registry(schema)),
+      if (table_has_basis(schema)) "required" else "not allowed",
+      allowed(table_has_readings(schema)),
+      "optional",
+      "optional"
+    ),
+    values = c(
+      "CNPJ, with or without punctuation",
+      "B3 ticker, e.g. \"PETR4\"",
+      year_values,
+      window,
+      window,
+      if (table_is_registry(schema)) "full date (\"YYYY-MM-DD\")" else NA,
+      if (table_has_basis(schema)) "\"ind\", \"con\" or both" else NA,
+      if (table_has_readings(schema)) {
+        "\"original\", \"restated\" or both"
+      } else {
+        NA
+      },
+      source_values,
+      "\"abort\", \"warn\""
+    )
+  )
+}
+
 # One row per table of the installed schema tree with the arguments
 # that apply to it.
 table_arguments <- function() {
@@ -120,7 +206,8 @@ doc_arguments_by_table <- function() {
       length(unique(a$dataset)),
       " datasets. An argument passed to a ",
       "table it does not apply to aborts with `cvmdata_error_input` ",
-      "before anything is downloaded; nothing is silently ignored."
+      "before anything is downloaded; nothing is silently ignored. ",
+      "[cvm_arguments()] gives the same rules for one table, as a tibble."
     ),
     "",
     paste0(

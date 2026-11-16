@@ -167,6 +167,54 @@ cvm_dictionary <- function(dataset, table, group = NULL) {
   out
 }
 
+#' Which arguments of `cvm_fetch()` a table takes
+#'
+#' `cvm_fetch()` serves every table with one signature, but not every
+#' argument applies to every table: `basis` is required for the
+#' statements published both individual and consolidated and refused
+#' everywhere else, `as_of` only applies to a registry, `year` not to a
+#' single snapshot. `cvm_arguments()` says, for one table, which of
+#' these arguments are required, which are optional and which are not
+#' allowed, with the values each one takes.
+#'
+#' The answer is read from the same table schemas that `cvm_fetch()`
+#' checks its arguments against, so the two never disagree: an argument
+#' marked `"not allowed"` aborts `cvm_fetch()` with
+#' `cvmdata_error_input`, and a `"required"` one left out does too. The
+#' function reads only the installed schemas and needs no internet.
+#'
+#' @inheritParams cvm_dictionary
+#'
+#' @return A tibble with one row per argument of [cvm_fetch()] that
+#'   selects rows (`dataset` and `table` are always required and not
+#'   listed):
+#'   * `argument`: the argument name.
+#'   * `status`: `"required"`, `"optional"` or `"not allowed"`.
+#'   * `values`: the values it takes for this table, or `NA` when it is
+#'     not allowed. For `year`, the years the table is published as the
+#'     package knows them; the latest year is found when reading.
+#'
+#' @examples
+#' # A statement: `basis` is required
+#' cvm_arguments("dfp", "bpa")
+#'
+#' # The registry: no `year`, but `as_of`
+#' cvm_arguments("cad", "companhias")
+#'
+#' # Only the required ones
+#' args <- cvm_arguments("dfp", "dre")
+#' args[args$status == "required", ]
+#' @family discovery
+#' @seealso [cvm_fetch()], section "Arguments by table", for the same
+#'   rules across every table.
+#' @export
+cvm_arguments <- function(dataset, table, group = NULL) {
+  validate_string_arg(dataset, "dataset")
+  validate_string_arg(table, "table")
+  validate_optional_group_arg(group)
+  fetch_argument_rules(load_schema(dataset, table, group))
+}
+
 # Single-string arg validator shared by the discovery functions.
 validate_string_arg <- function(value, arg_name) {
   if (!is.character(value) || length(value) != 1L || !nzchar(value)) {

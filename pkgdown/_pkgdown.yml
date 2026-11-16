@@ -63,6 +63,7 @@ reference:
       - cvm_datasets
       - cvm_tables
       - cvm_dictionary
+      - cvm_arguments
       - cvm_codelist
       - cvm_dataset_years
   - title: Utilities
