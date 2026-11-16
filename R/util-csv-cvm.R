@@ -51,8 +51,10 @@ identifier_columns <- function(csv_names) {
     function(nm) {
       any(vapply(
         .identifier_prefixes,
-        function(p) grepl(p, nm, perl = TRUE),
-        logical(1L)
+        grepl,
+        logical(1L),
+        x = nm,
+        perl = TRUE
       ))
     },
     logical(1L)
@@ -111,8 +113,9 @@ build_col_types <- function(csv_names, schema = NULL) {
   dict_info <- resolve_dict_columns(schema)
   is_date <- vapply(
     csv_lower,
-    function(nm) classify_date(nm, dict_info),
-    logical(1L)
+    classify_date,
+    logical(1L),
+    dict_info
   )
   is_date <- is_date & !is_identifier
   is_text <- csv_lower %in% (dict_info$text %||% character())

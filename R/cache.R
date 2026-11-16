@@ -72,7 +72,7 @@ cvm_cache_set_path <- function(path) {
     !is.character(path) || length(path) != 1L || !nzchar(path) || is.na(path)
   ) {
     cvmdata_abort(
-      c("{.arg path} must be a single non-empty string."),
+      "{.arg path} must be a single non-empty string.",
       class = "cvmdata_error_input"
     )
   }
@@ -335,7 +335,7 @@ cvm_cache_clear <- function(
   what <- rlang::arg_match0(what, c("all", "raw", "parquet"))
   if (!is.null(year) && is.null(dataset)) {
     cvmdata_abort(
-      c("{.arg year} requires {.arg dataset} to be supplied."),
+      "{.arg year} requires {.arg dataset} to be supplied.",
       class = "cvmdata_error_input"
     )
   }
@@ -409,7 +409,7 @@ cvm_cache_clear <- function(
   }
   if (!is.character(dataset) || length(dataset) != 1L || !nzchar(dataset)) {
     cvmdata_abort(
-      c("{.arg dataset} must be a single non-empty string."),
+      "{.arg dataset} must be a single non-empty string.",
       class = "cvmdata_error_input"
     )
   }
@@ -432,7 +432,7 @@ cvm_cache_clear <- function(
       !nzchar(group)
   ) {
     cvmdata_abort(
-      c("{.arg group} must be a single non-empty string."),
+      "{.arg group} must be a single non-empty string.",
       class = "cvmdata_error_input"
     )
   }
@@ -450,7 +450,7 @@ cvm_cache_clear <- function(
       year != as.integer(year)
   ) {
     cvmdata_abort(
-      c("{.arg year} must be a single integer."),
+      "{.arg year} must be a single integer.",
       class = "cvmdata_error_input"
     )
   }
@@ -460,7 +460,7 @@ cvm_cache_clear <- function(
 .check_confirm_arg <- function(confirm) {
   if (!is.logical(confirm) || length(confirm) != 1L || is.na(confirm)) {
     cvmdata_abort(
-      c("{.arg confirm} must be a single logical (TRUE or FALSE)."),
+      "{.arg confirm} must be a single logical (TRUE or FALSE).",
       class = "cvmdata_error_input"
     )
   }

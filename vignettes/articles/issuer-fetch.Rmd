@@ -84,7 +84,7 @@ carries `cd_cvm`, `denom_social` and `cnpj_cia` side by side:
 
 ```{r registry-lookup}
 registry <- cvm_fetch("cad", "companhias")
-registry[grepl("MAGAZINE LUIZA", registry$denom_social),
+registry[grepl("MAGAZINE LUIZA", registry$denom_social, fixed = TRUE),
          c("cd_cvm", "denom_social", "cnpj_cia")]
 ```
 

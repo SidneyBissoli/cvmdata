@@ -28,10 +28,12 @@
 # Sourced (not loaded as a package). Depends on `00-config.R` having been
 # sourced first for `mirror_schema_dir()`.
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("digest", quietly = TRUE))
-stopifnot(requireNamespace("dplyr", quietly = TRUE))
-stopifnot(requireNamespace("yaml", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("digest", quietly = TRUE),
+  requireNamespace("dplyr", quietly = TRUE),
+  requireNamespace("yaml", quietly = TRUE)
+)
 
 # Columns appended to every history row (`scale_error` by stage 05,
 # util-scale.R).
@@ -491,7 +493,7 @@ mirror_append_history <- function(previous, rows) {
   if (length(aligned$changed)) {
     message(sprintf(
       "  history: column(s) [%s] stored with another type; aligned",
-      paste(aligned$changed, collapse = ", ")
+      toString(aligned$changed)
     ))
   }
   dplyr::bind_rows(aligned$previous, aligned$rows)

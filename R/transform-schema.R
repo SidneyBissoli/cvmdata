@@ -153,7 +153,7 @@ tx_drop <- function(df, tx, schema) {
   col <- tx$column
   if (is.null(col)) {
     cvmdata_abort(
-      c("Transformation {.code drop} requires {.field column}."),
+      "Transformation {.code drop} requires {.field column}.",
       class = "cvmdata_error_internal"
     )
   }

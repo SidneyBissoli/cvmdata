@@ -65,10 +65,12 @@
 source(.validate_locate_config())
 source(file.path(dirname(.validate_locate_config()), "util-privacy.R"))
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("pointblank", quietly = TRUE))
-stopifnot(requireNamespace("yaml", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("pointblank", quietly = TRUE),
+  requireNamespace("yaml", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE)
+)
 
 # CNPJ as published by CVM: XX.XXX.XXX/XXXX-XX. Applies to cnpj_cia
 # and cnpj_companhia in every dataset. Reader leaves the value as-is.

@@ -48,8 +48,10 @@ for (sibling in c(
   }
 }
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE)
+)
 
 # --- the release ------------------------------------------------------
 
@@ -227,7 +229,7 @@ scale_main <- function(group, dataset, all, year, dry_run) {
     "[05-scale] %d history asset(s) of the statements; %d year(s) to label%s",
     nrow(scale_history_assets(source_hash$history)),
     length(years),
-    if (length(years)) paste0(": ", paste(years, collapse = ", ")) else ""
+    if (length(years)) paste0(": ", toString(years)) else ""
   ))
   if (!length(years)) {
     return(invisible(NULL))

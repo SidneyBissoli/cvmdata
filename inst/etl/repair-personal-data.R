@@ -53,8 +53,10 @@ for (sibling in c("00-config.R", "util-release.R", "util-privacy.R")) {
   }
 }
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE)
+)
 
 # Rewrites one local parquet through the rule when it has something to
 # mask or drop. Returns the number of values changed (0 = file untouched);

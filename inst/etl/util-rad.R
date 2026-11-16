@@ -71,9 +71,11 @@
 # downloads (see `rad_download()`), reads, and decides what to do with
 # `problems`: any problem means the WHOLE document is set aside.
 
-stopifnot(requireNamespace("xml2", quietly = TRUE))
-stopifnot(requireNamespace("digest", quietly = TRUE))
-stopifnot(requireNamespace("tibble", quietly = TRUE))
+stopifnot(
+  requireNamespace("xml2", quietly = TRUE),
+  requireNamespace("digest", quietly = TRUE),
+  requireNamespace("tibble", quietly = TRUE)
+)
 
 `%||%` <- function(x, y) if (is.null(x)) y else x # nolint: object_name_linter.
 
@@ -483,7 +485,7 @@ rad_finish <- function(res, filing) {
         sprintf(
           "%d values could not be parsed (e.g. %s)",
           sum(bad),
-          paste(utils::head(unique(rows$raw[bad]), 3L), collapse = ", ")
+          toString(utils::head(unique(rows$raw[bad]), 3L))
         )
       )
     }
@@ -770,7 +772,7 @@ rad_rows <- function(table, report_type, contas, cols, dt_refer) {
   out <- out[!is.na(out$ordem_exerc), , drop = FALSE]
   # a statement with every value empty is a statement the company did
   # not present (consolidated of a company without subsidiaries)
-  if (nrow(out) == 0L || all(!nzchar(trimws(out$raw)))) {
+  if (nrow(out) == 0L || !any(nzchar(trimws(out$raw)))) {
     return(NULL)
   }
   # duplicate periods (quarter == year-to-date): keep the accumulated
@@ -1199,7 +1201,7 @@ rad_read_old <- function(inner_zip) {
     return(rad_result(
       problems = paste0(
         "old layout without ",
-        paste(setdiff(rad_old_files, entries), collapse = ", ")
+        toString(setdiff(rad_old_files, entries))
       ),
       kind = "document"
     ))
@@ -1223,7 +1225,7 @@ rad_read_old <- function(inner_zip) {
   problems <- character()
   rows <- list()
   for (k in unique(paste(acc$code, acc$info_type))) {
-    parts <- strsplit(k, " ")[[1L]]
+    parts <- strsplit(k, " ", fixed = TRUE)[[1L]]
     sub <- acc[acc$code == parts[1L] & acc$info_type == parts[2L], ]
     r <- rad_old_statement(parts, sub, colsets[[k]], periods, meta$dt_refer)
     rows <- c(rows, r$rows)

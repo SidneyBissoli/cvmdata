@@ -61,7 +61,7 @@ resolve_schema_group <- function(dataset, table, group) {
   if (!is.null(group)) {
     if (!is.character(group) || length(group) != 1L || !nzchar(group)) {
       cvmdata_abort(
-        c("{.arg group} must be a single non-empty string or NULL."),
+        "{.arg group} must be a single non-empty string or NULL.",
         class = "cvmdata_error_input"
       )
     }

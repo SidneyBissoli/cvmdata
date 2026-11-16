@@ -113,9 +113,11 @@ for (sibling in c(
   }
 }
 
-stopifnot(requireNamespace("arrow", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
-stopifnot(requireNamespace("dplyr", quietly = TRUE))
+stopifnot(
+  requireNamespace("arrow", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE),
+  requireNamespace("dplyr", quietly = TRUE)
+)
 
 rad_crawl_delay <- 10 # seconds between two requests to the RAD
 rad_waf_pause <- 90 # seconds of pause after a refusal, before retrying
@@ -216,7 +218,7 @@ rad_read_index <- function(
     }
     message(sprintf(
       "[04-rad] the mirror did not serve the index of %s, asking again in %ds",
-      paste(years[again], collapse = ", "),
+      toString(years[again]),
       pause
     ))
     Sys.sleep(pause)

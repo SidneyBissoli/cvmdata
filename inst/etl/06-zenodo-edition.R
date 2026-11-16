@@ -222,7 +222,7 @@ edition_main <- function(opts) {
   ]
   if (length(unknown)) {
     stop(
-      sprintf("unknown dataset(s): %s", paste(unknown, collapse = ", ")),
+      sprintf("unknown dataset(s): %s", toString(unknown)),
       call. = FALSE
     )
   }

@@ -24,9 +24,11 @@
 #
 # Depends on 00-config.R and util-release.R having been sourced.
 
-stopifnot(requireNamespace("httr2", quietly = TRUE))
-stopifnot(requireNamespace("jsonlite", quietly = TRUE))
-stopifnot(requireNamespace("digest", quietly = TRUE))
+stopifnot(
+  requireNamespace("httr2", quietly = TRUE),
+  requireNamespace("jsonlite", quietly = TRUE),
+  requireNamespace("digest", quietly = TRUE)
+)
 
 # --- the calendar -----------------------------------------------------
 
