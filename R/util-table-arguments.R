@@ -111,9 +111,19 @@ fetch_argument_rules <- function(schema) {
       window,
       window,
       if (table_is_registry(schema)) "full date (\"YYYY-MM-DD\")" else NA,
-      if (table_has_basis(schema)) "\"ind\", \"con\" or both" else NA,
+      if (table_has_basis(schema)) {
+        paste0(
+          "\"ind\" = parent company only; \"con\" = consolidated group;",
+          " or both"
+        )
+      } else {
+        NA
+      },
       if (table_has_readings(schema)) {
-        "\"original\", \"restated\" or both"
+        paste0(
+          "\"original\" = as first published; \"restated\" = as shown",
+          " again in next year's report; or both"
+        )
       } else {
         NA
       },

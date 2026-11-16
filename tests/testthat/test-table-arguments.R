@@ -219,6 +219,15 @@ test_that("cvm_arguments() returns one row per argument with its status", {
   )
 })
 
+test_that("cvm_arguments() says what the coded values mean", {
+  out <- cvm_arguments("dfp", "dre")
+  values <- stats::setNames(out$values, out$argument)
+  expect_match(values[["basis"]], "\"ind\" = parent company only")
+  expect_match(values[["basis"]], "\"con\" = consolidated group")
+  expect_match(values[["reading"]], "\"original\" = as first published")
+  expect_match(values[["reading"]], "\"restated\" = as shown again")
+})
+
 test_that("cvm_arguments() describes years, registries and the mirror", {
   cad <- cvm_arguments("cad", "companhias")
   expect_identical(
