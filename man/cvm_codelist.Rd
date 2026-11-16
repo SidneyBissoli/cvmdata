@@ -48,6 +48,7 @@ cvm_codelist("cad", "companhias", "sit")
 \code{\link[=cvm_dictionary]{cvm_dictionary()}}
 
 Other discovery:
+\code{\link[=cvm_arguments]{cvm_arguments()}},
 \code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
 \code{\link[=cvm_datasets]{cvm_datasets()}},
 \code{\link[=cvm_dictionary]{cvm_dictionary()}},

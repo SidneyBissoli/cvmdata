@@ -38,6 +38,7 @@ cvm_dataset_years("dfp", group = "companhias")
 }
 \seealso{
 Other discovery:
+\code{\link[=cvm_arguments]{cvm_arguments()}},
 \code{\link[=cvm_codelist]{cvm_codelist()}},
 \code{\link[=cvm_datasets]{cvm_datasets()}},
 \code{\link[=cvm_dictionary]{cvm_dictionary()}},

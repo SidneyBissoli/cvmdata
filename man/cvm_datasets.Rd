@@ -27,6 +27,7 @@ cvm_datasets(group = "companhias")
 }
 \seealso{
 Other discovery:
+\code{\link[=cvm_arguments]{cvm_arguments()}},
 \code{\link[=cvm_codelist]{cvm_codelist()}},
 \code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
 \code{\link[=cvm_dictionary]{cvm_dictionary()}},

@@ -808,6 +808,17 @@ inform_restated_unpublished <- function(exercises, schema) {
 # mutually exclusive; the window requires both bounds as complete
 # dates and only applies to yearly-partitioned tables.
 check_period <- function(year, from, to, schema) {
+  # Refused here, with the other argument checks, rather than by the
+  # backend after the ticker lookup: the same message as the backend's.
+  if (!is.null(year) && !table_is_yearly(schema)) {
+    cvmdata_abort(
+      paste(
+        "Table {.val {schema$dataset}}/{.val {schema$table}} is not",
+        "yearly-partitioned; {.arg year} must be {.code NULL}."
+      ),
+      class = "cvmdata_error_input"
+    )
+  }
   has_window <- !is.null(from) || !is.null(to)
   if (!has_window) {
     return(list(year = year, from = NULL, to = NULL))

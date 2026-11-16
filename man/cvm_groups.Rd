@@ -53,6 +53,7 @@ g[g$contract == "issuer", ]
 \code{\link[=cvm_datasets]{cvm_datasets()}}, \code{\link[=cvm_fetch]{cvm_fetch()}}
 
 Other discovery:
+\code{\link[=cvm_arguments]{cvm_arguments()}},
 \code{\link[=cvm_codelist]{cvm_codelist()}},
 \code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
 \code{\link[=cvm_datasets]{cvm_datasets()}},

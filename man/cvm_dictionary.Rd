@@ -47,6 +47,7 @@ cvm_dictionary("fre", "empregado_PCD")
 \code{\link[=cvm_tables]{cvm_tables()}}
 
 Other discovery:
+\code{\link[=cvm_arguments]{cvm_arguments()}},
 \code{\link[=cvm_codelist]{cvm_codelist()}},
 \code{\link[=cvm_dataset_years]{cvm_dataset_years()}},
 \code{\link[=cvm_datasets]{cvm_datasets()}},
