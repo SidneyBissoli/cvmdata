@@ -110,7 +110,7 @@ cvm_fetch(dataset, table,
 # Assinatura = a parte de cvm_fetch() que IDENTIFICA o documento; recusa
 # por nome reading / from / to / as_of (filtros da leitura vigente).
 # Só tabelas com `keep_latest_version` no YAML; outra = cvmdata_error_input.
-# Colunas da tabela (+ year, basis) + superseded_at (Date),
+# Colunas da tabela (+ basis) + superseded_at (Date),
 # superseded_by_versao, history_source ("current" na vigente; "rad" /
 # "mirror" no espelho; "cvm" no CSV), id_doc, motivo_reapresentacao,
 # scale_error ("apenas erro de escala" / "erro de escala e outras
