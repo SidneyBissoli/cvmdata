@@ -228,15 +228,15 @@ if (!is.null(prev_hash_file)) {
     )
   }
   if (unchanged && suppressed_count != was_suppressed) {
-    message(paste(
-      "[03-publish] content unchanged but the suppression list changed;",
+    message(
+      "[03-publish] content unchanged but the suppression list changed; ",
       "publishing to pass the history assets through it"
-    ))
+    )
   } else if (unchanged && is.null(prev$releases)) {
-    message(paste(
-      "[03-publish] content unchanged but the sidecar predates the dated",
+    message(
+      "[03-publish] content unchanged but the sidecar predates the dated ",
       "snapshots; publishing to create the first one"
-    ))
+    )
   } else if (unchanged && history_rule_pending(prev)) {
     message(sprintf(
       paste(

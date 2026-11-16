@@ -90,8 +90,8 @@ test_that("the frame keeps its rows, order and attributes", {
   )
   attr(df, "fetched_at") <- "2026-11-08"
   out <- mirror_apply_privacy(df)
-  expect_identical(
-    names(out),
+  expect_named(
+    out,
     c(
       "cnpj_companhia",
       "nome",
@@ -441,7 +441,7 @@ test_that("a filing with a small or unanimous group leaves a count table", {
   out <- mirror_apply_privacy(df)
   expect_identical(unique(out$cnpj_companhia), "33.333.333/0001-33")
   expect_identical(nrow(out), 2L)
-  expect_identical(names(out), names(df))
+  expect_named(out, names(df))
   expect_identical(attr(out, "fetched_at"), "2026-11-14")
   expect_identical(mirror_apply_privacy(out), out)
   expect_length(mirror_privacy_counts(out), 0L)
@@ -691,7 +691,7 @@ test_that("the biography column leaves the mirror", {
     c(experiencia_profissional = 1L)
   )
   out <- mirror_apply_privacy(df)
-  expect_identical(names(out), c("nome", "profissao"))
+  expect_named(out, c("nome", "profissao"))
   expect_identical(mirror_apply_privacy(out), out)
   expect_length(mirror_privacy_counts(out), 0L)
   # the only tables with the column are the two that describe a person

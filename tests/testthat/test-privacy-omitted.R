@@ -38,7 +38,7 @@ test_that("the sidecar entry is read whatever shape jsonlite gives it", {
   expect_identical(got$companies_omitted, c(2, 0))
   expect_identical(lengths(got$cnpj), c(2L, 0L))
   # two entries of the same length arrive as a matrix
-  same <- sub('"cnpj":\\[\\]', '"cnpj":["a","b"]', json)
+  same <- sub('"cnpj":[]', '"cnpj":["a","b"]', json, fixed = TRUE)
   expect_identical(
     mirror_normalise_omitted(jsonlite::fromJSON(same))$cnpj[[2L]],
     c("a", "b")
@@ -63,7 +63,9 @@ test_that("the backend notes the years it read and the fetcher takes them", {
 
 test_that("a read of a count table warns with the numbers and keeps them", {
   expect_snapshot(
-    out <- note_privacy_omitted(omitted_result(), omitted_rows())
+    {
+      out <- note_privacy_omitted(omitted_result(), omitted_rows())
+    }
   )
   expect_warning(
     note_privacy_omitted(omitted_result(), omitted_rows()),
@@ -75,26 +77,32 @@ test_that("a read of a count table warns with the numbers and keeps them", {
   expect_false("cnpj" %in% names(kept))
   # nothing omitted, nothing said
   quiet <- omitted_rows()[1L, ]
-  expect_no_warning(got <- note_privacy_omitted(omitted_result(), quiet))
+  expect_no_warning({
+    got <- note_privacy_omitted(omitted_result(), quiet)
+  })
   expect_null(attr(got, "omitted"))
   expect_no_warning(note_privacy_omitted(omitted_result(), NULL))
 })
 
 test_that("asking for a company names it when it was left out", {
   expect_snapshot(
-    out <- note_privacy_omitted(
-      omitted_result(),
-      omitted_rows(),
-      cnpj = c("11222333000181", "33.444.555/0001-81")
-    )
+    {
+      out <- note_privacy_omitted(
+        omitted_result(),
+        omitted_rows(),
+        cnpj = c("11222333000181", "33.444.555/0001-81")
+      )
+    }
   )
   # the company asked for is in the table: the attribute stays, no warning
   expect_no_warning(
-    got <- note_privacy_omitted(
-      omitted_result(),
-      omitted_rows(),
-      cnpj = "33.444.555/0001-81"
-    )
+    {
+      got <- note_privacy_omitted(
+        omitted_result(),
+        omitted_rows(),
+        cnpj = "33.444.555/0001-81"
+      )
+    }
   )
   expect_identical(attr(got, "omitted")$companies_omitted, c(0, 173))
 })

@@ -441,7 +441,9 @@ test_that("check_published_years clips a window to the published years", {
   schema <- load_schema("dfp", "composicao_capital")
   window <- check_period(NULL, "2019-01-01", "2021-12-31", schema)
   expect_message(
-    clipped <- check_published_years(window, schema),
+    {
+      clipped <- check_published_years(window, schema)
+    },
     regexp = "not published before.*2020"
   )
   expect_identical(clipped$year, 2020:2021)
@@ -485,7 +487,9 @@ test_that("check_published_years clips a window at empty_from", {
   schema <- load_schema("fca", "departamento_acionistas")
   window <- check_period(NULL, "2022-01-01", "2025-12-31", schema)
   expect_message(
-    clipped <- check_published_years(window, schema),
+    {
+      clipped <- check_published_years(window, schema)
+    },
     regexp = "no content from.*2024.*reading"
   )
   expect_identical(clipped$year, 2022:2023)
@@ -543,7 +547,9 @@ test_that("check_published_years clips a window at last_year", {
   schema <- load_schema("fre", "grupo_economico_reestruturacao")
   window <- check_period(NULL, "2015-01-01", "2018-12-31", schema)
   expect_message(
-    clipped <- check_published_years(window, schema),
+    {
+      clipped <- check_published_years(window, schema)
+    },
     regexp = "not published after.*2016.*reading"
   )
   expect_identical(clipped$year, 2015:2016)
@@ -562,7 +568,9 @@ test_that("check_published_years clips a window at last_year", {
 test_that("clamp_years_to_last drops later years for issuer_fetch", {
   schema <- load_schema("fre", "endividamento")
   expect_message(
-    kept <- clamp_years_to_last(2022:2025, schema),
+    {
+      kept <- clamp_years_to_last(2022:2025, schema)
+    },
     regexp = "ends at.*2023"
   )
   expect_identical(kept, 2022:2023)
@@ -601,9 +609,11 @@ test_that("cvm_fetch year = NULL on an emptied table warns, portal path", {
   local_prepare_cvm_cache("fca")
   local_published_years(2024L)
   expect_warning(
-    result <- with_fixture_http(
-      cvm_fetch("fca", "departamento_acionistas", source = "cvm")
-    ),
+    {
+      result <- with_fixture_http(
+        cvm_fetch("fca", "departamento_acionistas", source = "cvm")
+      )
+    },
     regexp = "without content from.*2024",
     class = "cvmdata_warn_empty_upstream"
   )
@@ -1076,24 +1086,28 @@ test_that("no restated reading when the following file is unpublished", {
   local_published_years(c(2024L, 2025L))
 
   expect_message(
-    both <- fetch_bpa(
-      cnpj = bb_cnpj,
-      year = 2025,
-      basis = "ind",
-      reading = c("original", "restated")
-    ),
+    {
+      both <- fetch_bpa(
+        cnpj = bb_cnpj,
+        year = 2025,
+        basis = "ind",
+        reading = c("original", "restated")
+      )
+    },
     regexp = "not published yet"
   )
   expect_identical(unique(both$reading), "original")
   expect_gt(nrow(both), 0L)
 
   expect_message(
-    none <- fetch_bpa(
-      cnpj = bb_cnpj,
-      year = 2025,
-      basis = "ind",
-      reading = "restated"
-    ),
+    {
+      none <- fetch_bpa(
+        cnpj = bb_cnpj,
+        year = 2025,
+        basis = "ind",
+        reading = "restated"
+      )
+    },
     regexp = "not published yet"
   )
   expect_identical(nrow(none), 0L)
@@ -1102,12 +1116,14 @@ test_that("no restated reading when the following file is unpublished", {
   # Two exercises, one of them with a following file: the message
   # names only the one without it, and rows come only for the other.
   expect_message(
-    span <- fetch_bpa(
-      cnpj = bb_cnpj,
-      year = 2024:2025,
-      basis = "ind",
-      reading = "restated"
-    ),
+    {
+      span <- fetch_bpa(
+        cnpj = bb_cnpj,
+        year = 2024:2025,
+        basis = "ind",
+        reading = "restated"
+      )
+    },
     regexp = "2025"
   )
   expect_identical(unique(format(span$dt_fim_exerc)), "2024-12-31")
@@ -1119,11 +1135,13 @@ test_that("year = NULL with reading resolves the latest year as usual", {
   local_published_years(c(2024L, 2025L))
 
   expect_message(
-    out <- fetch_bpa(
-      cnpj = bb_cnpj,
-      basis = "ind",
-      reading = c("original", "restated")
-    ),
+    {
+      out <- fetch_bpa(
+        cnpj = bb_cnpj,
+        basis = "ind",
+        reading = c("original", "restated")
+      )
+    },
     regexp = "not published yet"
   )
   expect_identical(unique(format(out$dt_refer, "%Y")), "2025")
@@ -1188,18 +1206,20 @@ test_that("reading works on the mirror backend", {
   # The 2026 asset is not in the inventory: exercise 2025 has no
   # restated reading on the mirror either.
   expect_message(
-    latest <- httr2::with_mocked_responses(
-      build_mock(entries),
-      cvm_fetch(
-        "dfp",
-        "bpa",
-        cnpj = bb_cnpj,
-        year = 2025,
-        basis = "ind",
-        reading = c("original", "restated"),
-        source = "mirror"
+    {
+      latest <- httr2::with_mocked_responses(
+        build_mock(entries),
+        cvm_fetch(
+          "dfp",
+          "bpa",
+          cnpj = bb_cnpj,
+          year = 2025,
+          basis = "ind",
+          reading = c("original", "restated"),
+          source = "mirror"
+        )
       )
-    ),
+    },
     regexp = "not published yet"
   )
   expect_identical(unique(latest$reading), "original")
@@ -1268,10 +1288,12 @@ test_that("on_error = 'warn' reads a file that departs from its schema", {
     class = "cvmdata_error_parse"
   )
   expect_warning(
-    out <- httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      cvm_fetch("cad", "companhias", source = "cvm", on_error = "warn")
-    ),
+    {
+      out <- httr2::with_mocked_responses(
+        function(req) fresh_head_response(),
+        cvm_fetch("cad", "companhias", source = "cvm", on_error = "warn")
+      )
+    },
     class = "cvmdata_warn_validation"
   )
   expect_gt(nrow(out), 0L)

@@ -153,7 +153,9 @@ test_that("history written under another reader is appended, not refused", {
   )
 
   expect_message(
-    all <- mirror_append_history(previous, rows),
+    {
+      all <- mirror_append_history(previous, rows)
+    },
     "telefone, fax"
   )
   expect_identical(all$telefone, c("30462550", NA, "0800 123"))

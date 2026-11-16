@@ -301,12 +301,14 @@ test_that("a stale public copy is fetched again through the API", {
     download_public_asset("tag", name, dir, expect_sha256 = NA_character_)
     expect_identical(api_calls, 0L)
     expect_message(
-      path <- download_public_asset(
-        "tag",
-        name,
-        dir,
-        expect_sha256 = fresh_sha
-      ),
+      {
+        path <- download_public_asset(
+          "tag",
+          name,
+          dir,
+          expect_sha256 = fresh_sha
+        )
+      },
       "stale copy"
     )
     expect_identical(api_calls, 1L)
@@ -372,7 +374,9 @@ test_that("a dated sidecar takes the omissions of the bytes it points to", {
     people_omitted = 5,
     cnpj = list("11.222.333/0001-81")
   )
-  key <- function(rel) gsub("/", "__", gsub("=", ".", rel, fixed = TRUE))
+  key <- function(rel) {
+    gsub("/", "__", gsub("=", ".", rel, fixed = TRUE), fixed = TRUE)
+  }
   reports <- list("tag-1" = stats::setNames(list(report), key(rel)))
   res <- snapshot_add_omitted(sidecar, reports, key)
   expect_identical(res$added, 1L)

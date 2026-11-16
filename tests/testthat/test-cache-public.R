@@ -90,7 +90,9 @@ test_that("cvm_cache_set_path() creates the dir and updates option", {
   target <- file.path(parent, "newcache")
   expect_false(dir.exists(target))
   expect_message(
-    out <- cvm_cache_set_path(target),
+    {
+      out <- cvm_cache_set_path(target)
+    },
     "Cache directory set"
   )
   expect_true(dir.exists(target))

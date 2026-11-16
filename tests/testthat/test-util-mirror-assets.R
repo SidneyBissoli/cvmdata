@@ -439,7 +439,9 @@ test_that("a sidecar that cannot be read is a warning, never silence", {
     mirror_list_assets("companhias", "unread_504")
   }
   w <- expect_warning(
-    out <- httr2::with_mocked_responses(mock, list_it()),
+    {
+      out <- httr2::with_mocked_responses(mock, list_it())
+    },
     class = "cvmdata_warn_sidecar_unread"
   )
   msg <- conditionMessage(w)
@@ -466,7 +468,9 @@ test_that("a sidecar that cannot be read is a warning, never silence", {
     httr2::response_json(body = list(hash = "abc123"))
   })
   expect_no_warning(
-    out <- httr2::with_mocked_responses(healed, list_it())
+    {
+      out <- httr2::with_mocked_responses(healed, list_it())
+    }
   )
   expect_identical(attr(out, "source_hash"), "abc123")
   expect_null(attr(out, "sidecar_unread"))

@@ -188,14 +188,16 @@ test_that("fetch_yearly_partitioned falls back when max year empty", {
     }
   )
   expect_warning(
-    out <- fetch_yearly_partitioned(
-      schema,
-      "dfp",
-      year = NULL,
-      issuer = "00000000000191",
-      report_type = "ind",
-      validate = "skip"
-    ),
+    {
+      out <- fetch_yearly_partitioned(
+        schema,
+        "dfp",
+        year = NULL,
+        issuer = "00000000000191",
+        report_type = "ind",
+        validate = "skip"
+      )
+    },
     class = "cvmdata_warn_year_fallback"
   )
   expect_identical(tally$calls, c(2026L, 2025L))
@@ -273,7 +275,9 @@ test_that("fetch_yearly_partitioned with explicit years skips discovery", {
 test_that("clamp_years_to_first drops early years and keeps the rest", {
   schema <- load_schema("dfp", "bpa") # first_year = 2010
   expect_message(
-    res <- clamp_years_to_first(c(2008L, 2010L, 2011L), schema),
+    {
+      res <- clamp_years_to_first(c(2008L, 2010L, 2011L), schema)
+    },
     regexp = "starts at"
   )
   expect_identical(res, c(2010L, 2011L))
@@ -310,15 +314,17 @@ test_that("issuer_fetch_internal clamps explicit years below first_year", {
     }
   )
   expect_message(
-    out <- issuer_fetch_internal(
-      "dfp",
-      "bpa",
-      issuer = "33000167000101",
-      year = 2008:2012,
-      source = "cvm",
-      report_type = "con",
-      validate = "skip"
-    ),
+    {
+      out <- issuer_fetch_internal(
+        "dfp",
+        "bpa",
+        issuer = "33000167000101",
+        year = 2008:2012,
+        source = "cvm",
+        report_type = "con",
+        validate = "skip"
+      )
+    },
     regexp = "starts at"
   )
   # 2008 and 2009 dropped before HTTP; only 2010-2012 fetched.
@@ -1136,16 +1142,18 @@ test_that(
     # should keep only the VERSAO=99 row. The filing index lists
     # VERSAO=14 as the last delivery, so the stale-filing check flags it.
     expect_warning(
-      result <- httr2::with_mocked_responses(
-        function(req) fresh_head_response(),
-        issuer_fetch_internal(
-          "fre",
-          "auditor",
-          issuer = "00.000.000/0001-91",
-          year = 2024L,
-          source = "cvm"
+      {
+        result <- httr2::with_mocked_responses(
+          function(req) fresh_head_response(),
+          issuer_fetch_internal(
+            "fre",
+            "auditor",
+            issuer = "00.000.000/0001-91",
+            year = 2024L,
+            source = "cvm"
+          )
         )
-      ),
+      },
       class = "cvmdata_warn_stale_filing"
     )
     expect_identical(nrow(result), 1L)
@@ -1198,16 +1206,18 @@ test_that("FRE meta_status:missing warn emits validation warning", {
   local_fre_cache_bad_pcd(rename_pcd_header)
 
   expect_warning(
-    result <- httr2::with_mocked_responses(
-      function(req) fresh_head_response(),
-      issuer_fetch_internal(
-        "fre",
-        "empregado_PCD",
-        year = 2024L,
-        source = "cvm",
-        validate = "warn"
+    {
+      result <- httr2::with_mocked_responses(
+        function(req) fresh_head_response(),
+        issuer_fetch_internal(
+          "fre",
+          "empregado_PCD",
+          year = 2024L,
+          source = "cvm",
+          validate = "warn"
+        )
       )
-    ),
+    },
     class = "cvmdata_warn_validation"
   )
   expect_s3_class(result, "cvm_tbl")

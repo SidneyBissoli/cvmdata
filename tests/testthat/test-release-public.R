@@ -8,7 +8,12 @@ test_that("cvm_release_get defaults to latest", {
 
 test_that("cvm_release_set accepts latest and complete dates", {
   withr::local_options(cvmdata.mirror_release = NULL)
-  expect_message(out <- cvm_release_set("2026-11-01"), "2026-11-01")
+  expect_message(
+    {
+      out <- cvm_release_set("2026-11-01")
+    },
+    "2026-11-01"
+  )
   expect_identical(out, "2026-11-01")
   expect_identical(cvm_release_get(), "2026-11-01")
   expect_identical(getOption("cvmdata.mirror_release"), "2026-11-01")

@@ -135,10 +135,12 @@ test_that("the figures of every version are returned as filed", {
 test_that("a superseded version that was a scale error is labelled and said", {
   mock <- local_mirror_dre()
   expect_message(
-    out <- httr2::with_mocked_responses(
-      mock,
-      cvm_versions("dfp", "dre", year = 2023, basis = "con")
-    ),
+    {
+      out <- httr2::with_mocked_responses(
+        mock,
+        cvm_versions("dfp", "dre", year = 2023, basis = "con")
+      )
+    },
     "1 superseded version was a scale error"
   )
   labels <- unique(out[c("cnpj_cia", "versao", "scale_error")])
@@ -156,10 +158,12 @@ test_that("a superseded version that was a scale error is labelled and said", {
   )
   # the Petrobras rows alone carry no scale error: no message
   expect_no_message(
-    petr <- httr2::with_mocked_responses(
-      mock,
-      cvm_versions("dfp", "dre", cnpj = petr_cnpj, year = 2023, basis = "con")
-    ),
+    {
+      petr <- httr2::with_mocked_responses(
+        mock,
+        cvm_versions("dfp", "dre", cnpj = petr_cnpj, year = 2023, basis = "con")
+      )
+    },
     message = "scale error"
   )
   expect_true(all(petr$scale_error == "sem erro de escala"))
@@ -266,15 +270,17 @@ test_that("cvm_versions via cvm reads the yearly file and says it is partial", {
   local_prepare_cvm_cache("itr")
 
   expect_message(
-    out <- with_fixture_http(
-      cvm_versions(
-        "itr",
-        "bpa",
-        year = 2024,
-        basis = "ind",
-        source = "cvm"
+    {
+      out <- with_fixture_http(
+        cvm_versions(
+          "itr",
+          "bpa",
+          year = 2024,
+          basis = "ind",
+          source = "cvm"
+        )
       )
-    ),
+    },
     "complete history is on the mirror"
   )
   expect_s3_class(out, "cvm_tbl")
