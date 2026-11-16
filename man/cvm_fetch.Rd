@@ -93,7 +93,9 @@ publishes it, \code{ÚLTIMO} and \code{PENÚLTIMO} rows together, without a
 following year's files are read as needed; the result carries a
 \code{reading} column. See the section \emph{Readings of an exercise}.
 Must be \code{NULL} for tables without \code{ordem_exerc}; passing it
-aborts.}
+aborts. Not the same as \code{versao}: a new version replaces a
+filing (see \code{\link[=cvm_versions]{cvm_versions()}}); a restated reading is the same
+year shown in a later filing.}
 
 \item{source}{One of \code{"mirror"} (parquet via DuckDB) or \code{"cvm"}
 (CVM Open Data Portal). \code{NULL} (default) resolves to the active
@@ -213,7 +215,10 @@ often not the figure originally filed: issuers restate it after a
 change of accounting policy, an error or a reorganisation (about a
 third of the issuers in the DFP, measured on the 2023 file against
 the 2022 one), and the restated figure is the one later statements
-build on. With \code{reading}, \code{cvm_fetch()} reads the exercise by its
+build on. This is not the same as a new version (\code{versao}): a new
+version replaces a filing, and \code{\link[=cvm_versions]{cvm_versions()}} returns all of
+them; a restated reading is the same year shown again in a later
+filing. With \code{reading}, \code{cvm_fetch()} reads the exercise by its
 own year and labels each row:
 \itemize{
 \item \code{"original"}: the \code{ÚLTIMO} rows of the file of \code{year}.
