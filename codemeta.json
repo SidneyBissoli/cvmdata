@@ -2,19 +2,19 @@
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
   "identifier": "cvmdata",
-  "description": "Provides a tidy API to the open data published by the Brazilian Securities and Exchange Commission ('CVM' - Comissao de Valores Mobiliarios). The package's first release covers core publicly-traded-company datasets: 'cad' (company registry), 'itr' (quarterly financial statements), 'dfp' (annual financial statements) and 'fre' (reference form, including ESG/governance tables). Column names, table names, categorical values and free text are preserved in Portuguese as published by 'CVM'; function names, arguments and metadata attributes are in English following the rOpenSci and tidyverse conventions. By default data is read from a weekly refreshed 'Parquet' mirror of the portal maintained by the package author in 'GitHub' Releases; the official portal can be read directly instead. Future releases will expand coverage to investment funds and other regulated entity classes.",
+  "description": "Provides a tidy API to the open data published by the Brazilian Securities and Exchange Commission ('CVM' - Comissao de Valores Mobiliarios) on listed companies: the company register, annual and quarterly financial statements, the reference form, the registration form, the corporate governance code report, insider trading positions, share buyback programmes and the index of periodic filings. Resolves resubmitted filings, returns the original and the restated figures of a fiscal year, applies the currency scale and checks every file against the regulator's data dictionary. Column names, table names, categorical values and free text are preserved in Portuguese as published by 'CVM'; function names, arguments and metadata attributes are in English. By default data is read from a weekly refreshed 'Parquet' mirror maintained by the package author in 'GitHub' Releases, with dated snapshots; the official portal can be read directly instead. The mirror carries data about companies; the tables that describe natural persons are read from the portal.",
   "name": "cvmdata: Tidy Access to Brazilian CVM Open Data",
   "relatedLink": "https://sidneybissoli.github.io/cvmdata/",
   "codeRepository": "https://github.com/SidneyBissoli/cvmdata",
   "issueTracker": "https://github.com/SidneyBissoli/cvmdata/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.2.0.9000",
+  "version": "0.3.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
     "url": "https://r-project.org"
   },
-  "runtimePlatform": "R version 4.6.1 (2026-06-24 ucrt)",
+  "runtimePlatform": "R version 4.6.2 (2026-10-29 ucrt)",
   "author": [
     {
       "@type": "Person",
@@ -333,7 +333,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "2036.324KB",
+  "fileSize": "2327.322KB",
   "citation": [
     {
       "@type": "SoftwareSourceCode",
@@ -349,7 +349,24 @@
       ],
       "name": "{cvmdata}: Tidy Access to Brazilian CVM Open Data",
       "url": "https://sidneybissoli.github.io/cvmdata/",
-      "description": "R package version 0.2.0.9000"
+      "description": "R package version 0.3.0"
+    },
+    {
+      "@type": "CreativeWork",
+      "datePublished": "2026",
+      "author": [
+        {
+          "@type": "Person",
+          "givenName": "Sidney da Silva Pereira",
+          "familyName": "Bissoli",
+          "@id": "https://orcid.org/0009-0001-0442-3700"
+        }
+      ],
+      "name": "cvmdata mirror: open data of the Brazilian securities regulator (CVM) in parquet",
+      "identifier": "10.5281/zenodo.24260440",
+      "description": "Data set, in editions. This DOI resolves to the latest edition; cite the DOI of the edition you used.",
+      "@id": "https://doi.org/10.5281/zenodo.24260440",
+      "sameAs": "https://doi.org/10.5281/zenodo.24260440"
     }
   ],
   "releaseNotes": "https://github.com/SidneyBissoli/cvmdata/blob/main/NEWS.md",

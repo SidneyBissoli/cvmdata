@@ -24,11 +24,14 @@ knitr::opts_chunk$set(
 [![pkgdown](https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml)
 <!-- badges: end -->
 
-API tidy para os dados abertos da CVM. A primeira versão cobre os
-principais conjuntos de companhias abertas: cadastro (`cad`), ITR,
-DFP e o Formulário de Referência (`fre`), incluindo as tabelas
-ESG/governança sobre composição de conselho, remuneração e estrutura
-acionária.
+API tidy para os dados abertos da CVM sobre companhias abertas. Lê nove
+conjuntos e 104 tabelas por uma única função: o cadastro (`cad`), as
+demonstrações anuais e trimestrais (`dfp`, `itr`), o Formulário de
+Referência (`fre`), o Formulário Cadastral (`fca`, que liga os tickers
+da B3 às companhias), o informe do código de governança (`cgvn`), os
+valores mobiliários negociados e detidos (`vlmo`), os programas de
+recompra de ações (`recompra_acoes`) e o índice de documentos
+periódicos e eventuais (`ipe`).
 
 Nomes de tabelas, colunas, valores categóricos e texto livre são
 preservados em português, exatamente como a CVM publica. Nomes de
@@ -58,25 +61,28 @@ uma chamada `cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)` e
 embarca o dicionário oficial como snapshot, então os tipos de coluna
 vêm prontos.
 
-Dois pacotes já existentes do Marcelo Perlin endereçam fatias
-adjacentes do problema:
+Dois pacotes de R no CRAN, ambos de Marcelo Perlin e colegas, leem o
+mesmo portal (conferido no CRAN em 15/11/2026):
 
-- [`GetITRData`](https://github.com/msperlin/GetITRData) cobria o ITR,
-  mas foi arquivado pelo autor em março de 2020 e não recebe mais
-  manutenção.
-- [`GetDFPData2`](https://github.com/msperlin/GetDFPData2) é mantido
-  ativamente e é a escolha certa quando se precisa só do DFP. O
-  `get_dfp_data()` cobre os formulários *anuais*; ITR, FRE e o
-  cadastro (CAD) estão fora do escopo.
+- [`GetDFPData2`](https://cran.r-project.org/package=GetDFPData2)
+  (0.6.5) lê as demonstrações anuais (DFP), o cadastro das companhias e
+  os tickers da B3.
+- [`GetFREData`](https://cran.r-project.org/package=GetFREData) (1.1.0)
+  lê as tabelas do Formulário de Referência (FRE).
 
-O `cvmdata` unifica CAD, ITR, DFP e FRE atrás de uma única
-`cvm_fetch()`, com filtros consistentes para companhias (CNPJ ou
-ticker da B3) e períodos (anos inteiros ou janela de datas pela data
-de referência), cache HTTP com
-revalidação por ETag/Last-Modified e janela TTL configurável, e o
-dicionário e as codelists da CVM embarcados como snapshots (tipos de
-coluna e valores categóricos canônicos, sem consulta em tempo de
-execução).
+Os antecessores `GetDFPData` e `GetITRData` estão arquivados no CRAN.
+Para o DFP de uma lista de companhias, ou uma tabela do FRE em alguns
+anos, esses pacotes atendem bem.
+
+O `cvmdata` difere no que faz entre o arquivo e a análise. Mantém a
+entrega vigente quando a companhia reapresenta (e devolve todas as
+versões substituídas com `cvm_versions()`), traz lado a lado o valor
+original e o reexpresso de um exercício (`reading`), aplica a escala da
+moeda, guarda identificadores como texto, confere cada arquivo contra o
+dicionário da CVM e seleciona companhias por CNPJ ou ticker da B3 e
+períodos por ano ou por janela de datas de referência, nos nove
+conjuntos. O dicionário e as listas de códigos vêm no pacote, e a fonte
+padrão é um espelho datado, com soma de verificação.
 
 ## Instalação
 
