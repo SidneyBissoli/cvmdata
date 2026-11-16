@@ -20,10 +20,10 @@
 >    rascunho com fatos medidos. Ler e reescrever na primeira pessoa.
 >    **Atenção à frase sobre a revisão dos pull requests**, marcada no
 >    texto: ela precisa dizer o que de fato acontece.
-> 3. Rodar `pkgcheck()` de novo na 0.3.0 (passou em 2026-11-15, antes
->    das duas rodadas de estilo; devem restar cerca de 53 sugestões, as
->    que a seção *Technical state* justifica) e reconferir os números
->    marcados `<!-- medido em ... -->`.
+> 3. `pkgcheck()` rodado na 0.3.0 em 2026-11-16: passa, 60 sugestões
+>    opcionais restantes, todas justificadas na seção *Technical state*.
+>    Reconferir os números marcados `<!-- medido em ... -->` se o pacote
+>    mudar antes de postar.
 > 4. Reler a seção *Ethics*: é a que mais mudou.
 
 ---
@@ -313,19 +313,20 @@ the columns must match the regulator's dictionary, the accounting
 standards and the literature.
 
 **Technical state.** <!-- medido em 2026-11-15; reconferir na 0.3.0 -->
-`pkgcheck()` passes <!-- rodado em 2026-11-15 no commit 46fd2ba, antes
-das duas rodadas de estilo: "Nothing wrong here!", cobertura 95,4 %,
-R CMD check 0/0/0, 190 sugestões opcionais do goodpractice. Rodar de novo
-na 0.3.0 e trocar os números abaixo pelo que sair -->. Of the optional
-goodpractice suggestions it listed, we took those that improve the code
-and left 53 where the suggestion does not fit the case: `paste()` calls
-that build keys and XPath expressions rather than file paths; repeated
-`"i"` names in `cli` bullets, which is how `cli` takes them;
-`library(cvmdata)` in vignettes; `%in%` against a single value where the
-column holds `NA` (with `==` the test would be wrong); and `cvmdata:::`
-in the ETL scripts, which use the package's internals by design.
+`pkgcheck()` passes <!-- rodado em 2026-11-16 na 0.3.0 (commit 70a83a0):
+"A truly lovely set of check results!", cobertura 95,5 %, R CMD check
+0/0/0, 60 sugestões opcionais do goodpractice (eram 190 em 2026-11-15)
+-->. Of the optional goodpractice suggestions it lists, we took those
+that improve the code (130 of 190) and left 60 where the suggestion does
+not fit the case: `paste()` calls that build keys and XPath expressions
+rather than file paths (16); `cvmdata:::` in the ETL scripts, which use
+the package's internals by design, and `<<-` in test doubles that count
+or record calls (16); repeated `"i"` names in `cli` bullets, which is how `cli`
+takes them (10); `library(cvmdata)` in vignettes and `library(testthat)`
+in the test runner (11); and `%in%` against a single value where the
+vector may hold `NA`, which `==` would propagate (7).
 R CMD check is clean on Ubuntu (devel, release, oldrel-1), macOS and
-Windows; test coverage is 95%
+Windows; test coverage is 95.5%
 <!-- Codecov 95,26 % em 2026-11-06; reconferir. Testes medidos em
 2026-11-16: 3.865 expectativas, 46 arquivos, 0 falhas, 1 pulada -->
 and the suite has 3,865 expectations in 46 files, none of
