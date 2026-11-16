@@ -84,8 +84,8 @@ cvm_arguments("dfp", "bpa")
 #>  4 from     optional    "full date (\"YYYY-MM-DD\"); `from` and `to` together, …
 #>  5 to       optional    "full date (\"YYYY-MM-DD\"); `from` and `to` together, …
 #>  6 as_of    not allowed  NA                                                     
-#>  7 basis    required    "\"ind\", \"con\" or both"                              
-#>  8 reading  optional    "\"original\", \"restated\" or both"                    
+#>  7 basis    required    "\"ind\" = parent company only; \"con\" = consolidated …
+#>  8 reading  optional    "\"original\" = as first published; \"restated\" = as s…
 #>  9 source   optional    "\"mirror\", \"cvm\"; NULL = session default"           
 #> 10 on_error optional    "\"abort\", \"warn\""                                   
 
@@ -109,7 +109,7 @@ cvm_arguments("cad", "companhias")
 args <- cvm_arguments("dfp", "dre")
 args[args$status == "required", ]
 #> # A tibble: 1 × 3
-#>   argument status   values                    
-#>   <chr>    <chr>    <chr>                     
-#> 1 basis    required "\"ind\", \"con\" or both"
+#>   argument status   values                                                      
+#>   <chr>    <chr>    <chr>                                                       
+#> 1 basis    required "\"ind\" = parent company only; \"con\" = consolidated grou…
 ```

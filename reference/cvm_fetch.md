@@ -113,7 +113,10 @@ cvm_fetch(
   `year` names the exercises and the following year's files are read as
   needed; the result carries a `reading` column. See the section
   *Readings of an exercise*. Must be `NULL` for tables without
-  `ordem_exerc`; passing it aborts.
+  `ordem_exerc`; passing it aborts. Not the same as `versao`: a new
+  version replaces a filing (see
+  [`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md));
+  a restated reading is the same year shown in a later filing.
 
 - source:
 
@@ -229,8 +232,12 @@ for the previous exercise. The comparative is often not the figure
 originally filed: issuers restate it after a change of accounting
 policy, an error or a reorganisation (about a third of the issuers in
 the DFP, measured on the 2023 file against the 2022 one), and the
-restated figure is the one later statements build on. With `reading`,
-`cvm_fetch()` reads the exercise by its own year and labels each row:
+restated figure is the one later statements build on. This is not the
+same as a new version (`versao`): a new version replaces a filing, and
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+returns all of them; a restated reading is the same year shown again in
+a later filing. With `reading`, `cvm_fetch()` reads the exercise by its
+own year and labels each row:
 
 - `"original"`: the `ÚLTIMO` rows of the file of `year`.
 

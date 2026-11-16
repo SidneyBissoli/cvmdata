@@ -175,7 +175,9 @@ publishes it, <code>ÚLTIMO</code> and <code>PENÚLTIMO</code> rows together, wi
 following year's files are read as needed; the result carries a
 <code>reading</code> column. See the section <em>Readings of an exercise</em>.
 Must be <code>NULL</code> for tables without <code>ordem_exerc</code>; passing it
-aborts.</p></dd>
+aborts. Not the same as <code>versao</code>: a new version replaces a
+filing (see <code><a href="cvm_versions.html">cvm_versions()</a></code>); a restated reading is the same
+year shown in a later filing.</p></dd>
 
 
 <dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
@@ -297,7 +299,10 @@ often not the figure originally filed: issuers restate it after a
 change of accounting policy, an error or a reorganisation (about a
 third of the issuers in the DFP, measured on the 2023 file against
 the 2022 one), and the restated figure is the one later statements
-build on. With <code>reading</code>, <code>cvm_fetch()</code> reads the exercise by its
+build on. This is not the same as a new version (<code>versao</code>): a new
+version replaces a filing, and <code><a href="cvm_versions.html">cvm_versions()</a></code> returns all of
+them; a restated reading is the same year shown again in a later
+filing. With <code>reading</code>, <code>cvm_fetch()</code> reads the exercise by its
 own year and labels each row:</p><ul><li><p><code>"original"</code>: the <code>ÚLTIMO</code> rows of the file of <code>year</code>.</p></li>
 <li><p><code>"restated"</code>: the <code>PENÚLTIMO</code> rows of the file of <code>year + 1</code>,
 read in addition to (or instead of) the file of <code>year</code>. Rows are
