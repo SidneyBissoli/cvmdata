@@ -22,9 +22,11 @@
 
 # ---- 0. Preparação ----------------------------------------------------
 
-# Instala a versão que um usuário instalaria (a marcada no GitHub), e não a
-# pasta de desenvolvimento. Rode uma vez; depois pode pular.
-# pak::pak("SidneyBissoli/cvmdata@v0.3.1")
+# Instala do GitHub, como um usuário instalaria, e não da pasta de
+# desenvolvimento. Rode uma vez; depois pode pular.
+# A v0.3.1 não tem cvm_arguments() (bloco 3b); para testá-la, instale o
+# main (0.3.1.9000 = a v0.3.1 + cvm_arguments()):
+# pak::pak("SidneyBissoli/cvmdata")
 
 library(cvmdata)
 
@@ -85,7 +87,14 @@ bb <- "00.000.000/0001-91" # Banco do Brasil
 
 passo("0. Versão instalada")
 print(packageVersion("cvmdata"))
-confere("a versão instalada é a 0.3.1", packageVersion("cvmdata") == "0.3.1")
+confere(
+  "a versão instalada é a 0.3.1 ou posterior",
+  packageVersion("cvmdata") >= "0.3.1"
+)
+confere(
+  "a versão instalada tem cvm_arguments() (senão o bloco 3b falha)",
+  exists("cvm_arguments", envir = asNamespace("cvmdata"))
+)
 confere("a fonte padrão é o espelho", identical(cvm_source_get(), "mirror"))
 confere("nenhuma data fixada", identical(cvm_release_get(), "latest"))
 
@@ -162,6 +171,74 @@ e <- erro_de(cvm_fetch("cad", "companhias", basis = "con"))
 confere(
   "basis em tabela sem essa divisão dá erro",
   inherits(e, "cvmdata_error_input")
+)
+
+# ---- 3b. Que argumentos cada tabela aceita ----------------------------
+
+passo("3b. cvm_arguments(): obrigatórios, opcionais e proibidos")
+# Uma linha por argumento de cvm_fetch(): status ("required", "optional",
+# "not allowed") e os valores aceitos. Não usa a internet.
+regra <- function(t, arg) t$status[t$argument == arg]
+
+dre_args <- cvm_arguments("dfp", "dre")
+print(dre_args, n = Inf)
+confere("na DRE, basis é obrigatório", regra(dre_args, "basis") == "required")
+confere(
+  "na DRE, reading é opcional",
+  regra(dre_args, "reading") == "optional"
+)
+confere(
+  "na DRE, as_of não se aplica",
+  regra(dre_args, "as_of") == "not allowed"
+)
+confere("na DRE, year é opcional", regra(dre_args, "year") == "optional")
+
+cad_args <- cvm_arguments("cad", "companhias")
+print(cad_args, n = Inf)
+confere(
+  "no cadastro, basis e year não se aplicam",
+  all(c(regra(cad_args, "basis"), regra(cad_args, "year")) == "not allowed")
+)
+confere("no cadastro, as_of é opcional", regra(cad_args, "as_of") == "optional")
+
+# Tabela que a CVM parou de publicar em 2023: year passa a ser obrigatório.
+leg_args <- cvm_arguments("fre", "endividamento")
+print(leg_args[leg_args$argument == "year", ])
+confere(
+  "em tabela legada do FRE, year é obrigatório",
+  regra(leg_args, "year") == "required"
+)
+
+# Tabela de pessoas: não está no espelho, e a coluna values diz isso.
+pes_args <- cvm_arguments("fre", "responsavel")
+print(pes_args[pes_args$argument == "source", ])
+confere(
+  "em tabela de pessoas, source avisa que ela não está no espelho",
+  grepl("not in the mirror", pes_args$values[pes_args$argument == "source"])
+)
+
+# O que a função diz é o que cvm_fetch() faz: "not allowed" dá erro de
+# entrada antes de baixar qualquer coisa.
+e <- erro_de(cvm_fetch("cad", "companhias", year = 2024))
+confere(
+  "year em tabela sem ano dá erro de entrada (e cvm_arguments diz 'not allowed')",
+  inherits(e, "cvmdata_error_input") &&
+    regra(cad_args, "year") == "not allowed"
+)
+e <- erro_de(cvm_arguments("dfp", "nada"))
+confere(
+  "tabela inexistente dá erro de entrada",
+  inherits(e, "cvmdata_error_input")
+)
+if (!is.null(e)) {
+  cat(conditionMessage(e), "\n")
+}
+olhe("A tabela da DRE acima responde à pergunta 'o que eu preciso passar?'")
+olhe(
+  "A coluna values diz o bastante (anos, formatos), ou falta algo que você procuraria?"
+)
+olhe(
+  "Abra ?cvm_fetch, seção 'Arguments by table': ela aponta para cvm_arguments()?"
 )
 
 # ---- 4. Períodos --------------------------------------------------------
