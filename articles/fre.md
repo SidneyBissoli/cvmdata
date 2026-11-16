@@ -62,7 +62,7 @@ reference year 2024.
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpliU1g8/duckdb`\
+`#> ``ℹ`` /tmp/RtmpCAJ9xG/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -70,7 +70,7 @@ reference year 2024.
 `#> ``ℹ`` Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).`\
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpliU1g8/duckdb`\
+`#> ``ℹ`` /tmp/RtmpCAJ9xG/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -79,19 +79,19 @@ reference year 2024.
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `auditor`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
-`#>   ``fetched_at``: ``2026-11-16 01:21:01.833313`\
+`#>   ``fetched_at``: ``2026-11-16 02:51:02.592532`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"auditor"`\
-`#> ``# A tibble: 2 × 18`\
+`#> ``# A tibble: 2 × 17`\
 `#>   cnpj_companhia   data_referencia versao id_documento nome_companhia id_auditor`\
 `#>   ``<chr>``            ``<date>``          ``<chr>``  ``<chr>``        ``<chr>``          ``<chr>``     `\
 `#> ``1`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131376    `\
 `#> ``2`` 00.000.000/0001… 2024-12-31      14     147862       BCO BRASIL S.… 131377    `\
-`#> ``# ℹ 12 more variables: auditor <chr>, cnpj_auditor <chr>,`\
+`#> ``# ℹ 11 more variables: auditor <chr>, cnpj_auditor <chr>,`\
 `#> ``#   codigo_cvm_auditor <chr>, tipo_origem_auditor <chr>,`\
 `#> ``#   data_inicio_contratacao <date>, data_fim_contratacao <date>,`\
 `#> ``#   data_inicio_prestacao_servico <date>, servico_contratado <chr>,`\
 `#> ``#   remuneracao_auditor <chr>, justificativa_substituicao <chr>,`\
-`#> ``#   razao_apresentada <chr>, year <int>`
+`#> ``#   razao_apresentada <chr>`
 
 Notice the header columns: `cnpj_companhia`, `data_referencia`,
 `nome_companhia` (no `cd_cvm`). The `cnpj` filter matched
@@ -113,7 +113,7 @@ header the CVM publishes, and a file that departs from it stops the call
 `  year ``=`` ``2024`\
 `)`\
 `#> duckdb keeps downloaded extensions and secrets in a temporary directory:`\
-`#> ``ℹ`` /tmp/RtmpliU1g8/duckdb`\
+`#> ``ℹ`` /tmp/RtmpCAJ9xG/duckdb`\
 `#> This is removed when the R session ends.`\
 `#> ``•`` Extensions are re-downloaded each session.`\
 `#> ``•`` Secrets are lost.`\
@@ -122,15 +122,15 @@ header the CVM publishes, and a file that departs from it stops the call
 `#> ``ℹ`` See ?duckdb_storage for details and alternatives.`\
 `pcd`\
 `#> ``ℹ`` ``source``: ``"mirror"`` | ``release``: ``"mirror-companhias-fre-snapshot-2026-11-15"`` |`\
-`#>   ``fetched_at``: ``2026-11-16 01:21:02.067928`\
+`#>   ``fetched_at``: ``2026-11-16 02:51:03.012264`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"empregado_PCD"`\
 `#> ``!`` ``omitted``: 11 of 21 companies of 2024 are not in the mirror (privacy rule;`\
 `` #>   `attr(x, "omitted")`) ``\
-`#> ``# A tibble: 0 × 11`\
-`#> ``# ℹ 11 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
+`#> ``# A tibble: 0 × 10`\
+`#> ``# ℹ 10 variables: cnpj_companhia <chr>, data_referencia <date>, versao <chr>,`\
 `#> ``#   id_documento <chr>, nome_companhia <chr>, codigo_posicao <chr>,`\
 `#> ``#   posicao <chr>, quantidade_pcd <dbl>, quantidade_nao_pcd <dbl>,`\
-`#> ``#   quantidade_sem_resposta <dbl>, year <int>`
+`#> ``#   quantidade_sem_resposta <dbl>`
 
 `cvm_dictionary("fre", "empregado_PCD")` returns the column list (from
 the YAML’s `expected_field_names`) with `NA` in every metadata column —
@@ -163,7 +163,7 @@ FRE filing.
 `  `[`names`](https://rdrr.io/r/base/names.html)`(``posicao``)`\
 `)`\
 `posicao``[``, `[`c`](https://rdrr.io/r/base/c.html)`(``"nome_companhia"``, ``"data_referencia"``, ``cols``)``]`\
-`#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-11-16 01:21:02.545583`\
+`#> ``ℹ`` ``source``: ``"cvm"`` | ``fetched_at``: ``2026-11-16 02:51:03.814732`\
 `#> ``ℹ`` ``group``: ``"companhias"`` | ``dataset``: ``"fre"`` | ``table``: ``"posicao_acionaria"`\
 `#> ``# A tibble: 5 × 6`\
 `#>   nome_companhia  data_referencia acionista                   cpf_cnpj_acionista`\
