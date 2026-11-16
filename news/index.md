@@ -1,6 +1,17 @@
 # Changelog
 
-## cvmdata 0.2.0.9000 (in development)
+## cvmdata 0.3.0 (2026-11-15)
+
+The version submitted to rOpenSci. One function,
+[`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md),
+reads the nine datasets of the CVM group of listed companies (104
+tables);
+[`cvm_versions()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_versions.md)
+returns every version of a filing; the default source is a dated,
+checksummed mirror that carries data about companies, with a first
+edition deposited on Zenodo (DOI `10.5281/zenodo.24260441`). The
+sections below list every change since 0.2.0, the most recent first
+within each.
 
 ### New
 

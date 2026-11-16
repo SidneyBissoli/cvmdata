@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">cvmdata</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,18 +52,19 @@
 
 <!-- badges: start -->
 <p><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/SidneyBissoli/cvmdata" class="external-link"><img src="https://codecov.io/gh/SidneyBissoli/cvmdata/graph/badge.svg" alt="Codecov test coverage"></a> <a href="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/SidneyBissoli/cvmdata/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a> <!-- badges: end --></p>
-<p>API tidy para os dados abertos da CVM. A primeira versão cobre os principais conjuntos de companhias abertas: cadastro (<code>cad</code>), ITR, DFP e o Formulário de Referência (<code>fre</code>), incluindo as tabelas ESG/governança sobre composição de conselho, remuneração e estrutura acionária.</p>
+<p>API tidy para os dados abertos da CVM sobre companhias abertas. Lê nove conjuntos e 104 tabelas por uma única função: o cadastro (<code>cad</code>), as demonstrações anuais e trimestrais (<code>dfp</code>, <code>itr</code>), o Formulário de Referência (<code>fre</code>), o Formulário Cadastral (<code>fca</code>, que liga os tickers da B3 às companhias), o informe do código de governança (<code>cgvn</code>), os valores mobiliários negociados e detidos (<code>vlmo</code>), os programas de recompra de ações (<code>recompra_acoes</code>) e o índice de documentos periódicos e eventuais (<code>ipe</code>).</p>
 <p>Nomes de tabelas, colunas, valores categóricos e texto livre são preservados em português, exatamente como a CVM publica. Nomes de função, argumentos e atributos de metadado seguem o padrão inglês-tidyverse esperado pelo rOpenSci e CRAN.</p>
 <p><strong>De onde vêm os dados.</strong> Por padrão, o <code>cvmdata</code> <em>não</em> lê o portal da CVM a cada chamada: lê um <strong>espelho</strong> do portal — snapshots em Parquet dos arquivos da CVM, mantidos pelo autor do pacote nos <a href="https://github.com/SidneyBissoli/cvmdata/releases" class="external-link">GitHub Releases</a> deste repositório e atualizados toda semana por um pipeline automatizado. Passe <code>source = "cvm"</code> (ou chame <code>cvm_source_set("cvm")</code>) para ler o portal oficial diretamente. A CVM publica esses conjuntos sob a licença Open Database License (ODbL) e o espelho é redistribuído sob a mesma licença; veja <a href="#proveni%C3%AAncia-e-licen%C3%A7a-dos-dados">Proveniência e licença dos dados</a> abaixo.</p>
 <div class="section level2">
 <h2 id="por-que-cvmdata">Por que cvmdata<a class="anchor" aria-label="anchor" href="#por-que-cvmdata"></a></h2>
 <p>A CVM publica os formulários em ZIPs anuais de CSVs com codificação ISO-8859-1, schema específico por tabela e sem dicionário de dados unificado. Workflows comuns — “me dá o DFP da empresa X de 2018 a 2024” — exigem download manual, tratamento de encoding, conversão de <code>VL_CONTA</code> por <code>ESCALA_MOEDA</code> e join contra uma <code>submissao</code> separada para traduzir CD_CVM em CNPJ. O <code>cvmdata</code> consolida tudo isso atrás de uma chamada <code>cvm_fetch(dataset, table, cnpj, year, basis, reading, ...)</code> e embarca o dicionário oficial como snapshot, então os tipos de coluna vêm prontos.</p>
-<p>Dois pacotes já existentes do Marcelo Perlin endereçam fatias adjacentes do problema:</p>
+<p>Dois pacotes de R no CRAN, ambos de Marcelo Perlin e colegas, leem o mesmo portal (conferido no CRAN em 15/11/2026):</p>
 <ul><li>
-<a href="https://github.com/msperlin/GetITRData" class="external-link"><code>GetITRData</code></a> cobria o ITR, mas foi arquivado pelo autor em março de 2020 e não recebe mais manutenção.</li>
+<a href="https://cran.r-project.org/package=GetDFPData2" class="external-link"><code>GetDFPData2</code></a> (0.6.5) lê as demonstrações anuais (DFP), o cadastro das companhias e os tickers da B3.</li>
 <li>
-<a href="https://github.com/msperlin/GetDFPData2" class="external-link"><code>GetDFPData2</code></a> é mantido ativamente e é a escolha certa quando se precisa só do DFP. O <code>get_dfp_data()</code> cobre os formulários <em>anuais</em>; ITR, FRE e o cadastro (CAD) estão fora do escopo.</li>
-</ul><p>O <code>cvmdata</code> unifica CAD, ITR, DFP e FRE atrás de uma única <code><a href="reference/cvm_fetch.html">cvm_fetch()</a></code>, com filtros consistentes para companhias (CNPJ ou ticker da B3) e períodos (anos inteiros ou janela de datas pela data de referência), cache HTTP com revalidação por ETag/Last-Modified e janela TTL configurável, e o dicionário e as codelists da CVM embarcados como snapshots (tipos de coluna e valores categóricos canônicos, sem consulta em tempo de execução).</p>
+<a href="https://cran.r-project.org/package=GetFREData" class="external-link"><code>GetFREData</code></a> (1.1.0) lê as tabelas do Formulário de Referência (FRE).</li>
+</ul><p>Os antecessores <code>GetDFPData</code> e <code>GetITRData</code> estão arquivados no CRAN. Para o DFP de uma lista de companhias, ou uma tabela do FRE em alguns anos, esses pacotes atendem bem.</p>
+<p>O <code>cvmdata</code> difere no que faz entre o arquivo e a análise. Mantém a entrega vigente quando a companhia reapresenta (e devolve todas as versões substituídas com <code><a href="reference/cvm_versions.html">cvm_versions()</a></code>), traz lado a lado o valor original e o reexpresso de um exercício (<code>reading</code>), aplica a escala da moeda, guarda identificadores como texto, confere cada arquivo contra o dicionário da CVM e seleciona companhias por CNPJ ou ticker da B3 e períodos por ano ou por janela de datas de referência, nos nove conjuntos. O dicionário e as listas de códigos vêm no pacote, e a fonte padrão é um espelho datado, com soma de verificação.</p>
 </div>
 <div class="section level2">
 <h2 id="instalação">Instalação<a class="anchor" aria-label="anchor" href="#instala%C3%A7%C3%A3o"></a></h2>
