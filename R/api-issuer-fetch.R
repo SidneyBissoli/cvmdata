@@ -188,15 +188,31 @@ issuer_fetch_internal <- function(
 # the orchestrator only has to layer `filter_by_issuer()` and the
 # provenance metadata on top.
 fetch_via_mirror <- function(schema, dataset, year, issuer, report_type) {
-  transformed <- source_mirror_duckdb_get(
-    schema,
-    year = year,
-    report_type = report_type
-  )
-  if (!is.null(issuer)) {
-    transformed <- filter_by_issuer(transformed, issuer)
+  read_years <- function(yr) {
+    transformed <- source_mirror_duckdb_get(
+      schema,
+      year = yr,
+      report_type = report_type
+    )
+    if (!is.null(issuer)) {
+      transformed <- filter_by_issuer(transformed, issuer)
+    }
+    transformed
   }
-  transformed
+  yearly <- identical(schema$temporal_partitioning %||% "none", "yearly")
+  if (!yearly || !is.null(year) || is.null(issuer)) {
+    return(read_years(year))
+  }
+  # `year = NULL` with an issuer: the same steps back as the CVM path.
+  candidates <- utils::head(
+    sort(mirror_inventory_years(schema, report_type), decreasing = TRUE),
+    .latest_year_max_tries
+  )
+  if (!length(candidates)) {
+    # nothing published for the table: let the backend say so
+    return(read_years(NULL))
+  }
+  fetch_latest_with_fallback(candidates, read_years)
 }
 
 # Fetch + transform + filter for a single year (or a non-yearly
@@ -279,12 +295,8 @@ fetch_yearly_partitioned <- function(
     ))
   }
 
-  tried <- integer(0L)
-  out <- NULL
-  for (i in seq_along(candidates)) {
-    yr <- candidates[[i]]
-    tried <- c(tried, yr)
-    out <- fetch_one_year(
+  fetch_latest_with_fallback(candidates, function(yr) {
+    fetch_one_year(
       schema,
       yr,
       issuer,
@@ -292,6 +304,22 @@ fetch_yearly_partitioned <- function(
       validate,
       keep_versions = keep_versions
     )
+  })
+}
+
+# `year = NULL` with an issuer: read the latest year, and when the issuer
+# has no row there, the year before, up to `.latest_year_max_tries`
+# years (`candidates`, newest first), warning when it had to step back.
+# `fetch_year(yr)` returns the rows of one year, already filtered by the
+# issuer. Shared by both sources, so they cannot drift apart again: until
+# 2026-11-16 only the CVM path stepped back, and the mirror returned zero
+# rows without a word.
+fetch_latest_with_fallback <- function(candidates, fetch_year) {
+  tried <- integer(0L)
+  out <- NULL
+  for (yr in candidates) {
+    tried <- c(tried, yr)
+    out <- fetch_year(yr)
     if (nrow(out) > 0L) {
       if (length(tried) > 1L) {
         skipped <- tried[seq_len(length(tried) - 1L)]

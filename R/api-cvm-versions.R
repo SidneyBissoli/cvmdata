@@ -188,6 +188,7 @@ cvm_versions <- function(
       )
     }
     out <- mark_versions(out, version_tx, source)
+    out <- drop_partition_columns(out)
     if (!is.null(b)) {
       out <- set_basis_column(out, b)
     }

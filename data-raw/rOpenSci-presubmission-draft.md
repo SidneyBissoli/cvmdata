@@ -342,7 +342,7 @@ copies of one filing with different values in 54, and of a table that
 carries a filing older than the last one in 28. The pkgdown site has an
 introductory vignette and eight articles, including one on the defects
 we found in the CVM files and how the package handles each. Version
-0.3.0 is the one submitted; the lifecycle badge says *experimental*.
+0.3.1 is the one submitted; the lifecycle badge says *experimental*.
 
 ## Use of Generative AI
 

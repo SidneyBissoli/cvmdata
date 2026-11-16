@@ -384,6 +384,7 @@ cvm_fetch <- function(
     } else {
       fetch_readings(fetch_files, b, period$year, reading, schema, source)
     }
+    out <- drop_partition_columns(out)
     if (!is.null(b)) {
       out <- set_basis_column(out, b)
     }
@@ -602,10 +603,18 @@ check_basis <- function(basis, schema) {
   unique(basis)
 }
 
-# Stamp the requested basis on every row. The mirror reattaches the
-# partition value as a `report_type` column; `cvm_fetch()` exposes that
-# information under the public name `basis` only, so the leaked column
-# is removed before the new one is appended.
+# The mirror backend reattaches its partition values as the columns
+# `year` and `report_type` (they live in the asset path, not in the
+# parquet). The CVM files have neither, so the public functions drop
+# both and the two sources return the same columns; `basis` is the public
+# name of `report_type`. Until 2026-11-16 `year` leaked from the mirror.
+drop_partition_columns <- function(df) {
+  df$year <- NULL
+  df$report_type <- NULL
+  df
+}
+
+# Stamp the requested basis on every row.
 set_basis_column <- function(df, basis) {
   df$report_type <- NULL
   df$basis <- rep(basis, nrow(df))

@@ -1,3 +1,23 @@
+# cvmdata 0.3.1 (2026-11-16)
+
+## Bug fixes
+
+* The mirror now returns the same columns as the CVM. It added a `year`
+  column (the partition value of its files) that `source = "cvm"` does
+  not have, so the same code gave different columns depending on the
+  source. `cvm_fetch()` and `cvm_versions()` drop it.
+
+* `year = NULL` with a company that has no filing in the latest yearly
+  file now steps back to the year before, up to three years, with a
+  `cvmdata_warn_year_fallback` warning, from the mirror as from the CVM.
+  The mirror returned zero rows without a word (for example, the
+  consolidated income statement of any civil-year company while the DFP
+  file of the current year only holds the companies with another fiscal
+  year). Both sources now share one implementation of the step back.
+
+Both were found by reading the same tables from the two sources in the
+owner's review script (`data-raw/revisao-do-dono.R`).
+
 # cvmdata 0.3.0 (2026-11-15)
 
 The version submitted to rOpenSci. One function, `cvm_fetch()`, reads

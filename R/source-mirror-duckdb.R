@@ -182,6 +182,23 @@ validate_mirror_args <- function(
   invisible()
 }
 
+# The years the mirror holds for one table (and statement basis), in
+# the release the session reads (`cvm_release_get()`), sorted.
+mirror_inventory_years <- function(schema, report_type = NULL) {
+  inventory <- mirror_list_assets(
+    schema$group,
+    schema$dataset,
+    release = cvm_release_get()
+  )
+  assets <- filter_mirror_assets(
+    inventory,
+    table = schema$table,
+    year = NULL,
+    report_type = report_type
+  )
+  sort(unique(as.integer(assets$year[!is.na(assets$year)])))
+}
+
 # Pick the year set to ask the mirror for. NULL year on a yearly
 # table falls back to the latest year present in the inventory (only
 # considering the requested table + report_type subset). NA for

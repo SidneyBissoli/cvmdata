@@ -1249,3 +1249,112 @@ test_that("FRE meta_status:missing skip suppresses validation", {
   expect_s3_class(result, "cvm_tbl")
   expect_gt(nrow(result), 0L)
 })
+
+# The mirror steps back like the CVM path (fixed 2026-11-16) ----------
+
+test_that("the mirror steps back a year when the issuer is not in the latest", {
+  schema <- load_schema("dfp", "bpa")
+  tally <- new.env()
+  tally$calls <- list()
+  testthat::local_mocked_bindings(
+    mirror_inventory_years = function(schema, report_type = NULL) {
+      c(2023L, 2024L, 2025L, 2026L)
+    },
+    source_mirror_duckdb_get = function(schema, year = NULL, ...) {
+      tally$calls[[length(tally$calls) + 1L]] <- year
+      cnpj <- if (identical(year, 2026L)) {
+        "11.222.333/0001-81"
+      } else {
+        "00.000.000/0001-91"
+      }
+      data.frame(cnpj_cia = cnpj, stringsAsFactors = FALSE)
+    }
+  )
+  expect_warning(
+    {
+      out <- fetch_via_mirror(
+        schema,
+        "dfp",
+        year = NULL,
+        issuer = "00000000000191",
+        report_type = "ind"
+      )
+    },
+    class = "cvmdata_warn_year_fallback"
+  )
+  expect_identical(unlist(tally$calls), c(2026L, 2025L))
+  expect_identical(nrow(out), 1L)
+})
+
+test_that("the mirror reads one year when the issuer is in the latest", {
+  schema <- load_schema("dfp", "bpa")
+  tally <- new.env()
+  tally$calls <- list()
+  testthat::local_mocked_bindings(
+    mirror_inventory_years = function(schema, report_type = NULL) {
+      c(2025L, 2026L)
+    },
+    source_mirror_duckdb_get = function(schema, year = NULL, ...) {
+      tally$calls[[length(tally$calls) + 1L]] <- year
+      data.frame(cnpj_cia = "00.000.000/0001-91", stringsAsFactors = FALSE)
+    }
+  )
+  expect_no_warning(
+    out <- fetch_via_mirror(
+      schema,
+      "dfp",
+      year = NULL,
+      issuer = "00000000000191",
+      report_type = "ind"
+    )
+  )
+  expect_identical(unlist(tally$calls), 2026L)
+  expect_identical(nrow(out), 1L)
+})
+
+test_that("the mirror gives up after .latest_year_max_tries years", {
+  schema <- load_schema("dfp", "bpa")
+  tally <- new.env()
+  tally$calls <- list()
+  testthat::local_mocked_bindings(
+    mirror_inventory_years = function(schema, report_type = NULL) {
+      2020:2026
+    },
+    source_mirror_duckdb_get = function(schema, year = NULL, ...) {
+      tally$calls[[length(tally$calls) + 1L]] <- year
+      data.frame(cnpj_cia = "11.222.333/0001-81", stringsAsFactors = FALSE)
+    }
+  )
+  out <- fetch_via_mirror(
+    schema,
+    "dfp",
+    year = NULL,
+    issuer = "00000000000191",
+    report_type = "ind"
+  )
+  expect_identical(unlist(tally$calls), c(2026L, 2025L, 2024L))
+  expect_identical(nrow(out), 0L)
+})
+
+test_that("without an issuer, or with a year, the mirror does not step back", {
+  schema <- load_schema("dfp", "bpa")
+  tally <- new.env()
+  tally$calls <- list()
+  testthat::local_mocked_bindings(
+    mirror_inventory_years = function(...) stop("not expected"),
+    source_mirror_duckdb_get = function(schema, year = NULL, ...) {
+      tally$calls[[length(tally$calls) + 1L]] <- year %||% NA_integer_
+      data.frame(cnpj_cia = character(), stringsAsFactors = FALSE)
+    }
+  )
+  fetch_via_mirror(schema, "dfp", NULL, issuer = NULL, report_type = "ind")
+  fetch_via_mirror(schema, "dfp", 2024L, "00000000000191", "ind")
+  expect_identical(unlist(tally$calls), c(NA_integer_, 2024L))
+})
+
+test_that("the partition columns of the mirror do not reach the user", {
+  df <- data.frame(cd_conta = "1", year = 2024L, report_type = "con")
+  expect_named(drop_partition_columns(df), "cd_conta")
+  # a CVM result has neither column: nothing changes
+  expect_identical(drop_partition_columns(df["cd_conta"]), df["cd_conta"])
+})

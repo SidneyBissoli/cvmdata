@@ -1,7 +1,7 @@
 Package: cvmdata
 Type: Package
 Title: Tidy Access to Brazilian CVM Open Data
-Version: 0.3.0
+Version: 0.3.1
 Authors@R:
     person(
       given = "Sidney da Silva Pereira",

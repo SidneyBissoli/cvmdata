@@ -8,7 +8,7 @@
   "codeRepository": "https://github.com/SidneyBissoli/cvmdata",
   "issueTracker": "https://github.com/SidneyBissoli/cvmdata/issues",
   "license": "https://spdx.org/licenses/MIT",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -333,7 +333,7 @@
     },
     "SystemRequirements": null
   },
-  "fileSize": "2327.322KB",
+  "fileSize": "2383.181KB",
   "citation": [
     {
       "@type": "SoftwareSourceCode",
@@ -349,7 +349,7 @@
       ],
       "name": "{cvmdata}: Tidy Access to Brazilian CVM Open Data",
       "url": "https://sidneybissoli.github.io/cvmdata/",
-      "description": "R package version 0.3.0"
+      "description": "R package version 0.3.1"
     },
     {
       "@type": "CreativeWork",

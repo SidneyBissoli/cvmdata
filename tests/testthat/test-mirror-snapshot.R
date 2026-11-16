@@ -279,7 +279,9 @@ test_that("cvm_fetch under a pinned date reads the snapshot's bytes", {
   expect_identical(attr(pinned, "source"), "mirror")
   expect_identical(attr(pinned, "release"), s20)
   expect_identical(ref_years(pinned), "2025")
-  expect_identical(unique(pinned$year), 2024L)
+  # the partition column of the mirror does not reach the user: the CVM
+  # files have no `year` column either
+  expect_false("year" %in% names(pinned))
   # The pin does not write the dataset-level sidecar of the L3 cache.
   expect_false(file.exists(file.path(
     cache_root,
