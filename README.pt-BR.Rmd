@@ -189,7 +189,8 @@ agrupada em cinco famílias:
   revalidação HTTP é configurável via
   `options(cvmdata.cache_ttl_seconds)` (default 30 dias).
 - **Source backend** — `cvm_source_get()`, `cvm_source_set()`.
-- **Utilidades** — `cnpj_clean()`, `cnpj_format()`.
+- **Utilidades** — `cnpj_lookup()` (acha o CNPJ pelo nome da
+  companhia), `cnpj_clean()`, `cnpj_format()`.
 
 ## Proveniência e licença dos dados
 

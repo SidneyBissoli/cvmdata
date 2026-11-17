@@ -30,7 +30,8 @@ For tables published in individual and consolidated variants,
 \item{cnpj}{Optional character vector of issuer CNPJs, with or
 without punctuation (\code{"00.000.000/0001-91"} or
 \code{"00000000000191"}). Only CNPJs are accepted: a CVM code or a
-company name aborts with \code{cvmdata_error_input}. \code{NULL} (default)
+company name aborts with \code{cvmdata_error_input}; find a company's
+CNPJ by name with \code{\link[=cnpj_lookup]{cnpj_lookup()}}. \code{NULL} (default)
 keeps every issuer. A CNPJ absent from the table yields zero rows
 for it, silently.}
 

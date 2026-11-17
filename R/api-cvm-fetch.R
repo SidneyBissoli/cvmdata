@@ -23,7 +23,8 @@
 #' @param cnpj Optional character vector of issuer CNPJs, with or
 #'   without punctuation (`"00.000.000/0001-91"` or
 #'   `"00000000000191"`). Only CNPJs are accepted: a CVM code or a
-#'   company name aborts with `cvmdata_error_input`. `NULL` (default)
+#'   company name aborts with `cvmdata_error_input`; find a company's
+#'   CNPJ by name with [cnpj_lookup()]. `NULL` (default)
 #'   keeps every issuer. A CNPJ absent from the table yields zero rows
 #'   for it, silently.
 #' @param ticker Optional character vector of B3 trading codes
@@ -997,7 +998,8 @@ check_cnpj <- function(cnpj) {
         "i" = paste(
           "CVM codes and company names are not accepted here; use",
           "{.arg ticker} for a B3 trading code."
-        )
+        ),
+        "i" = "Look a company's CNPJ up by name with {.fn cnpj_lookup}."
       ),
       class = "cvmdata_error_input"
     )
