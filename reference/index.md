@@ -79,8 +79,11 @@ disambiguates when a dataset slug occurs in more than one group.
 
 ## Utilities
 
-CNPJ formatting helpers and the provenance-carrying tibble.
+Find a CNPJ by company name, CNPJ formatting helpers and the
+provenance-carrying tibble.
 
+- [`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)
+  : Look up a company's CNPJ by name
 - [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)
   : Strip punctuation from a CNPJ vector
 - [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)

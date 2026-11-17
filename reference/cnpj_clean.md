@@ -32,6 +32,7 @@ check-digit validation is performed in v0.1; that may be added later.
 
 Other utilities:
 [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md),
+[`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md),
 [`cvm_tbl`](https://sidneybissoli.github.io/cvmdata/reference/cvm_tbl.md)
 
 ## Examples

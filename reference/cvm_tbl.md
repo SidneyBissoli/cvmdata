@@ -83,7 +83,8 @@ for the fetcher that creates these tibbles.
 
 Other utilities:
 [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
-[`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)
+[`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md),
+[`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)
 
 ## Examples
 

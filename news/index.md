@@ -16,6 +16,17 @@
   checks its arguments against, so the two never disagree; a test holds
   them together for every table.
 
+- [`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)
+  finds a company’s CNPJ by name, or part of one, in the three CVM
+  company registers (`cad/companhias`, `cad/estrangeiras`,
+  `cad/incentivadas`). Every word must appear, in any order, ignoring
+  case and accents. It lists every match, cancelled registrations
+  included, and never picks one: the CNPJ you choose goes to
+  `cvm_fetch(cnpj = )`, which still takes only a CNPJ or a ticker. The
+  error
+  [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
+  gives for a name passed as `cnpj` now points to it.
+
 ### Minor improvements
 
 - `year` passed to a table without yearly files (`cad`,

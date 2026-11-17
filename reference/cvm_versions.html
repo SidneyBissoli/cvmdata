@@ -129,7 +129,8 @@ For tables published in individual and consolidated variants,
 <dd><p>Optional character vector of issuer CNPJs, with or
 without punctuation (<code>"00.000.000/0001-91"</code> or
 <code>"00000000000191"</code>). Only CNPJs are accepted: a CVM code or a
-company name aborts with <code>cvmdata_error_input</code>. <code>NULL</code> (default)
+company name aborts with <code>cvmdata_error_input</code>; find a company's
+CNPJ by name with <code><a href="cnpj_lookup.html">cnpj_lookup()</a></code>. <code>NULL</code> (default)
 keeps every issuer. A CNPJ absent from the table yields zero rows
 for it, silently.</p></dd>
 

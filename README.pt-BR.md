@@ -199,6 +199,8 @@ API exportada está agrupada em cinco famílias:
   [`cvm_source_get()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_get.md),
   [`cvm_source_set()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_source_set.md).
 - **Utilidades** —
+  [`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)
+  (acha o CNPJ pelo nome da companhia),
   [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
   [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
 

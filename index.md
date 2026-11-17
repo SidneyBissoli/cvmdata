@@ -197,6 +197,8 @@ The exported API is grouped into five families:
   [cache-and-mirror](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html)
   article.
 - **Utilities** —
+  [`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)
+  (find a CNPJ by company name),
   [`cnpj_clean()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md),
   [`cnpj_format()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md).
 

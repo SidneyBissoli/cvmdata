@@ -54,8 +54,10 @@ cvm_versions(
   Optional character vector of issuer CNPJs, with or without punctuation
   (`"00.000.000/0001-91"` or `"00000000000191"`). Only CNPJs are
   accepted: a CVM code or a company name aborts with
-  `cvmdata_error_input`. `NULL` (default) keeps every issuer. A CNPJ
-  absent from the table yields zero rows for it, silently.
+  `cvmdata_error_input`; find a company's CNPJ by name with
+  [`cnpj_lookup()`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md).
+  `NULL` (default) keeps every issuer. A CNPJ absent from the table
+  yields zero rows for it, silently.
 
 - ticker:
 

@@ -160,7 +160,9 @@ e o ETL do espelho chamam) e filtra só por CNPJ.
 \
 `# Utilidades`\
 [`cnpj_clean`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_clean.md)`(``x``)`\
-[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``x``)``                ``# inverso de cnpj_clean`
+[`cnpj_format`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_format.md)`(``x``)``                ``# inverso de cnpj_clean`\
+[`cnpj_lookup`](https://sidneybissoli.github.io/cvmdata/reference/cnpj_lookup.md)`(``name``, source ``=`` ``NULL``)``  ``# nome → CNPJ nos 3 cadastros do cad;`\
+`                              ``# lista candidatos, nunca escolhe (2026-11-16)`
 
 Argumento `group` nas funções de descoberta resolve por unicidade quando
 omitido (`NULL`); a partir de v0.4, quando um slug de dataset puder
