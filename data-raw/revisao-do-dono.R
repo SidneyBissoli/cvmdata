@@ -29,6 +29,7 @@
 # pak::pak("SidneyBissoli/cvmdata")
 
 library(cvmdata)
+library(tidyverse)
 
 .revisao <- new.env()
 .revisao$ok <- 0L
@@ -118,7 +119,7 @@ olhe(
   "Os nomes dos conjuntos e das tabelas fazem sentido para quem conhece a CVM?"
 )
 olhe("cvm_groups() lista os 18 grupos do portal; a tabela abaixo está legível?")
-print(cvm_groups())
+print(cvm_groups()) |> arrange(desc(n_datasets))
 
 # ---- 2. A leitura mais comum -------------------------------------------
 
@@ -253,9 +254,9 @@ confere(
 janela <- cvm_fetch(
   "itr",
   "dre",
-  cnpj = petr,
-  from = "2024-04-01",
-  to = "2024-09-30",
+  cnpj  = petr,
+  from  = "2024-04-01",
+  to    = "2024-09-30",
   basis = "con"
 )
 print(sort(unique(janela$dt_refer)))
@@ -306,9 +307,9 @@ passo("5. reading: o exercício como foi publicado e como foi reapresentado")
 bpa <- suppressMessages(cvm_fetch(
   "dfp",
   "bpa",
-  cnpj = bb,
-  year = 2024,
-  basis = "con",
+  cnpj    = bb,
+  year    = 2024,
+  basis   = "con",
   reading = c("original", "restated")
 ))
 print(table(bpa$reading))
@@ -337,8 +338,8 @@ passo("6. cvm_versions(): entregas substituídas")
 v <- suppressMessages(cvm_versions(
   "dfp",
   "dre",
-  cnpj = "42.150.391/0001-70",
-  year = 2023,
+  cnpj  = "42.150.391/0001-70",
+  year  = 2023,
   basis = "con"
 ))
 print(unique(v[, c(
@@ -382,8 +383,8 @@ gol <- suppressMessages(cvm_fetch(
   "dfp",
   "dre",
   ticker = "GOLL4",
-  year = 2019,
-  basis = "con"
+  year   = 2019,
+  basis  = "con"
 ))
 print(unique(gol$denom_cia))
 confere("o ticker de uma deslistada (GOLL4) resolve", nrow(gol) > 0L)
