@@ -421,7 +421,8 @@ The exported API is grouped into five families:
   cache/mirror integration is documented in detail in the
   [cache-and-mirror](https://sidneybissoli.github.io/cvmdata/articles/cache-and-mirror.html)
   article.
-- **Utilities** — `cnpj_clean()`, `cnpj_format()`.
+- **Utilities** — `cnpj_lookup()` (find a CNPJ by company name),
+  `cnpj_clean()`, `cnpj_format()`.
 
 ## Data provenance and licence
 

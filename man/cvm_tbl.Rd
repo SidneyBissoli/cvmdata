@@ -77,6 +77,7 @@ if (requireNamespace("dplyr", quietly = TRUE)) {
 
 Other utilities:
 \code{\link[=cnpj_clean]{cnpj_clean()}},
-\code{\link[=cnpj_format]{cnpj_format()}}
+\code{\link[=cnpj_format]{cnpj_format()}},
+\code{\link[=cnpj_lookup]{cnpj_lookup()}}
 }
 \concept{utilities}

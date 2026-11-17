@@ -152,6 +152,8 @@ cvm_release_set(release)
 # Utilidades
 cnpj_clean(x)
 cnpj_format(x)                # inverso de cnpj_clean
+cnpj_lookup(name, source = NULL)  # nome → CNPJ nos 3 cadastros do cad;
+                              # lista candidatos, nunca escolhe (2026-11-16)
 ```
 
 Argumento `group` nas funções de descoberta resolve por unicidade quando
