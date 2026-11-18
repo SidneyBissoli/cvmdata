@@ -1,0 +1,86 @@
+name: ETL infrastructure retry
+
+# Re-runs, once, the jobs of an "ETL RAD history" or "Zenodo edition" run
+# that failed for a reason of INFRASTRUCTURE: nothing of the robot ran, so
+# nothing was measured and a new attempt is the cure.
+#
+# Infrastructure = the failed job is the image job (etl-image.yaml: the
+# registry, or a build that hit a slow mirror), or every failed step of
+# the job is one of "Set up job", "Initialize containers" (pulling the
+# image) or the checkout, or the job failed with no failed step at all
+# (the runner was lost). A failure inside the robot (stage 04 stopped by
+# the RAD's WAF, stage 06 refusing an edition) is NEVER retried here: the
+# robot has its own rules for that, and repeating a 4-hour RAD run would
+# only hit the same source again.
+#
+# "ETL mirror" is not listed: etl-mirror-retry.yaml already re-runs every
+# failure of that workflow (the CVM portal drops some runner IPs), which
+# covers its infrastructure failures too.
+#
+# Why (2026-11-18): the itr job of the scheduled RAD run of that day died
+# in setup-r-dependencies (slow apt mirror) and waited for a person to
+# re-run it. Since the same day the robots run inside a prebuilt image,
+# which removes most of that exposure; this covers what is left.
+
+on:
+  workflow_run:
+    workflows: ["ETL RAD history", "Zenodo edition"]
+    types: [completed]
+
+permissions:
+  actions: write  # gh run rerun
+
+jobs:
+  rerun:
+    # One retry: the first attempt failed, the second is the last.
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Re-run the failed jobs if the failure is of infrastructure
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          # The attempt from the API, not from the payload (see
+          # etl-mirror-retry.yaml: an absent field compares as 0).
+          live=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.run_attempt')
+          if [ "$live" != "1" ]; then
+            echo "run $RUN_ID is on attempt '$live'; nothing to do"
+            exit 0
+          fi
+
+          # One line per failed job: "<verdict> <job name>".
+          gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/1/jobs?per_page=100" \
+            --jq '
+              def infra_step: . as $n
+                | ["Set up job", "Initialize containers"] | index($n) != null
+                  or ($n | startswith("Run actions/checkout@"));
+              .jobs[]
+              | select(.conclusion == "failure")
+              | [.steps[] | select(.conclusion == "failure") | .name] as $failed
+              | (if (.name | startswith("image"))
+                   or ($failed | length) == 0
+                   or ($failed | all(infra_step))
+                 then "infra" else "robot" end) + " " + .name
+            ' > /tmp/verdicts
+          cat /tmp/verdicts
+
+          if [ ! -s /tmp/verdicts ]; then
+            echo "no failed job found; nothing to do"
+            exit 0
+          fi
+          if grep -q '^robot ' /tmp/verdicts; then
+            echo "a job failed inside the robot: not an infrastructure failure, no retry"
+            exit 0
+          fi
+
+          # A slow mirror or a registry hiccup usually passes in minutes.
+          echo "infrastructure failure on run $RUN_ID; waiting 5 min"
+          sleep 300
+          gh run rerun "$RUN_ID" --failed -R "$REPO"
+          echo "re-run requested for the failed jobs of $RUN_ID"
