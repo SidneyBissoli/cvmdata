@@ -24,8 +24,8 @@
 
 # Instala do GitHub, como um usuário instalaria, e não da pasta de
 # desenvolvimento. Rode uma vez; depois pode pular.
-# A v0.3.1 não tem cvm_arguments() (bloco 3b); para testá-la, instale o
-# main (0.3.1.9000 = a v0.3.1 + cvm_arguments()):
+# A v0.3.1 não tem cvm_arguments() (bloco 3b) nem cnpj_lookup() (bloco
+# 7b); para testá-las, instale o main (0.3.1.9000):
 # pak::pak("SidneyBissoli/cvmdata")
 
 library(cvmdata)
@@ -96,6 +96,10 @@ confere(
   "a versão instalada tem cvm_arguments() (senão o bloco 3b falha)",
   exists("cvm_arguments", envir = asNamespace("cvmdata"))
 )
+confere(
+  "a versão instalada tem cnpj_lookup() (senão o bloco 7b falha)",
+  exists("cnpj_lookup", envir = asNamespace("cvmdata"))
+)
 confere("a fonte padrão é o espelho", identical(cvm_source_get(), "mirror"))
 confere("nenhuma data fixada", identical(cvm_release_get(), "latest"))
 
@@ -119,7 +123,7 @@ olhe(
   "Os nomes dos conjuntos e das tabelas fazem sentido para quem conhece a CVM?"
 )
 olhe("cvm_groups() lista os 18 grupos do portal; a tabela abaixo está legível?")
-print(cvm_groups()) |> arrange(desc(n_datasets))
+cvm_groups() |> arrange(desc(n_datasets)) |> print()
 
 # ---- 2. A leitura mais comum -------------------------------------------
 
@@ -400,6 +404,76 @@ if (!is.null(e)) {
   cat(conditionMessage(e), "\n")
 }
 olhe("A mensagem acima deixa claro que o pacote só aceita CNPJ ou ticker?")
+olhe("Ela aponta para cnpj_lookup() como o caminho para achar o CNPJ?")
+
+passo("7b. cnpj_lookup(): achar o CNPJ pelo nome")
+# Procura nos três cadastros do cad (companhias, estrangeiras,
+# incentivadas), na razão social e no nome comercial. Cada palavra precisa
+# aparecer, em qualquer ordem, sem ligar para caixa e acento. Lista os
+# candidatos e nunca escolhe.
+pb <- cnpj_lookup("petroleo brasileiro")
+print(pb)
+confere("'petroleo brasileiro' acha a Petrobras", petr %in% pb$cnpj_cia)
+confere(
+  "o acento não muda o resultado ('petróleo' = 'petroleo')",
+  setequal(cnpj_lookup("Petróleo Brasileiro")$cnpj_cia, pb$cnpj_cia)
+)
+confere(
+  "a ordem das palavras não muda o resultado",
+  setequal(cnpj_lookup("brasileiro petroleo")$cnpj_cia, pb$cnpj_cia)
+)
+confere(
+  "as colunas são as prometidas no help",
+  identical(
+    names(pb),
+    c(
+      "cnpj_cia",
+      "denom_social",
+      "denom_comerc",
+      "cd_cvm",
+      "sit",
+      "dt_reg",
+      "dt_cancel",
+      "table"
+    )
+  )
+)
+
+# Um nome curto devolve vários candidatos; as ativas vêm primeiro.
+bancos <- cnpj_lookup("banco brasil")
+print(bancos, n = 20)
+confere(
+  "nenhuma linha repetida (as repetições por mercado foram juntadas)",
+  !anyDuplicated(bancos[, c("cnpj_cia", "cd_cvm", "table")])
+)
+confere(
+  "as canceladas vêm depois das ativas",
+  !is.unsorted(!is.na(bancos$dt_cancel))
+)
+confere("o Banco do Brasil está entre os candidatos", bb %in% bancos$cnpj_cia)
+
+# O fluxo inteiro: achar o CNPJ, depois buscar com ele.
+dre_pb <- suppressMessages(cvm_fetch(
+  "dfp",
+  "dre",
+  cnpj = pb$cnpj_cia[1],
+  year = 2024,
+  basis = "con"
+))
+confere("o CNPJ achado serve em cvm_fetch()", nrow(dre_pb) > 0L)
+
+nada <- cnpj_lookup("zzz companhia que nao existe")
+confere("busca sem resultado devolve zero linhas, sem erro", nrow(nada) == 0L)
+e <- erro_de(cnpj_lookup(c("petrobras", "vale")))
+confere(
+  "mais de um nome por chamada dá erro de entrada",
+  inherits(e, "cvmdata_error_input")
+)
+olhe("Procure duas ou três companhias que você conhece: elas aparecem?")
+olhe("A mensagem de busca sem resultado (acima) ajuda a tentar de novo?")
+olhe(
+  "Abra ?cnpj_lookup: fica claro que nomes antigos (ex.: BR Distribuidora) não são achados?"
+)
 
 # ---- 8. Formulário de Referência e dados pessoais ----------------------
 
