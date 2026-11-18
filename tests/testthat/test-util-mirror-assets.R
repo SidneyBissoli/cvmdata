@@ -331,9 +331,10 @@ test_that("mirror_list_assets caches per session", {
       mirror_list_assets("companhias", "dfp_test2")
     }
   )
-  # Only the first call (refresh = TRUE) hits the API. The release
-  # has no __source_hash.json so no second GET happens.
-  expect_identical(tally$n_calls, 1L)
+  # Only the first call (refresh = TRUE) goes out: the sidecar at the
+  # release's download URL (404 here) and then the API listing, which
+  # names no __source_hash.json, so no third GET happens.
+  expect_identical(tally$n_calls, 2L)
 })
 
 test_that("mirror_list_assets aborts on HTTP 404", {
@@ -413,11 +414,21 @@ test_that("mirror_list_assets returns NA hash when sidecar absent", {
 
 # A release that publishes a sidecar, with the sidecar answered by
 # `sidecar(req)` and every request counted in the caller's `n_calls`.
-unread_mock <- function(sidecar, count = function() NULL) {
-  body <- fake_github_release(c(
-    "companhias__part-0.parquet",
-    "__source_hash.json"
-  ))
+# With `dataset`, the listing's URLs are the real download URLs of that
+# release, as GitHub serves them.
+unread_mock <- function(sidecar, count = function() NULL, dataset = NULL) {
+  base <- if (is.null(dataset)) {
+    "https://example.test"
+  } else {
+    dirname(mirror_download_url(
+      mirror_release_tag("companhias", dataset),
+      "x"
+    ))
+  }
+  body <- fake_github_release(
+    c("companhias__part-0.parquet", "__source_hash.json"),
+    base = base
+  )
   function(req) {
     count()
     if (grepl("api.github.com", req$url, fixed = TRUE)) {
@@ -433,7 +444,8 @@ test_that("a sidecar that cannot be read is a warning, never silence", {
   tally$n_calls <- 0L
   mock <- unread_mock(
     function(req) httr2::response(504L),
-    function() tally$n_calls <- tally$n_calls + 1L
+    function() tally$n_calls <- tally$n_calls + 1L,
+    dataset = "unread_504"
   )
   list_it <- function() {
     mirror_list_assets("companhias", "unread_504")
@@ -453,7 +465,9 @@ test_that("a sidecar that cannot be read is a warning, never silence", {
   expect_true(is.na(attr(out, "source_hash")))
   expect_identical(attr(out, "sidecar_unread"), "HTTP 504")
 
-  # cached meanwhile: no request, no second warning
+  # cached meanwhile: no request, no second warning; and the fallback to
+  # the API did not ask again for the sidecar it had just failed to read
+  # (the sidecar, then the listing: 2)
   expect_no_warning(httr2::with_mocked_responses(mock, list_it()))
   expect_identical(tally$n_calls, 2L)
 
@@ -541,4 +555,109 @@ test_that("mirror_release_tag returns the canonical tag", {
     mirror_release_tag("companhias", "dfp"),
     "mirror-companhias-dfp-latest"
   )
+})
+
+# The -latest inventory from its sidecar (2026-11-18) --------------------
+
+test_that("a sidecar with `files` lists -latest without the GitHub API", {
+  mirror_assets_cache_clear()
+  tag <- mirror_release_tag("companhias", "from_sidecar")
+  sidecar <- list(
+    hash = "abc123",
+    snapshot = "2026-11-17",
+    snapshots = list("2026-11-10", "2026-11-17"),
+    files = list(
+      "bpa/report_type=ind/year=2024/part-0.parquet" = list(
+        sha256 = "s1",
+        size = 10L
+      ),
+      "submissao/year=2024/part-0.parquet" = list(sha256 = "s2", size = 20L)
+    ),
+    history = list("bpa/report_type=ind/year=2024/history.parquet" = "h1")
+  )
+  tally <- new.env()
+  tally$urls <- character(0L)
+  mock <- function(req) {
+    tally$urls <- c(tally$urls, req$url)
+    if (identical(req$url, mirror_download_url(tag, "__source_hash.json"))) {
+      return(httr2::response_json(body = sidecar))
+    }
+    httr2::response(500L)
+  }
+  out <- httr2::with_mocked_responses(
+    mock,
+    mirror_list_assets("companhias", "from_sidecar", refresh = TRUE)
+  )
+  expect_identical(tally$urls, mirror_download_url(tag, "__source_hash.json"))
+  expect_identical(
+    out$name,
+    c(
+      "bpa__report_type.ind__year.2024__part-0.parquet",
+      "submissao__year.2024__part-0.parquet",
+      "bpa__report_type.ind__year.2024__history.parquet"
+    )
+  )
+  expect_identical(out$url, mirror_download_url(tag, out$name))
+  expect_identical(out$sha256, c("s1", "s2", NA))
+  expect_identical(out$size_bytes, c(10L, 20L, NA))
+  expect_identical(attr(out, "source_hash"), "abc123")
+  expect_identical(
+    attr(out, "release_tag"),
+    mirror_snapshot_tag("companhias", "from_sidecar", "2026-11-17")
+  )
+  expect_identical(attr(out, "snapshots"), c("2026-11-10", "2026-11-17"))
+  expect_null(attr(out, "sidecar_unread"))
+  # the history asset is read by cvm_versions(), never by cvm_fetch()
+  current <- filter_mirror_assets(out, "bpa", 2024L, "ind")
+  expect_identical(nrow(current), 1L)
+  both <- filter_mirror_assets(
+    out,
+    "bpa",
+    2024L,
+    "ind",
+    c("current", "history")
+  )
+  expect_identical(nrow(both), 2L)
+})
+
+test_that("an exhausted API rate limit says so, not that the tag is missing", {
+  mirror_assets_cache_clear()
+  withr::local_envvar(GITHUB_TOKEN = NA, GITHUB_PAT = NA)
+  mock <- function(req) {
+    if (grepl("api.github.com", req$url, fixed = TRUE)) {
+      return(httr2::response(
+        status_code = 403L,
+        headers = list(
+          "x-ratelimit-remaining" = "0",
+          "x-ratelimit-reset" = "1795000000"
+        )
+      ))
+    }
+    httr2::response(404L)
+  }
+  err <- expect_error(
+    httr2::with_mocked_responses(
+      mock,
+      mirror_list_assets("companhias", "rate_limited", refresh = TRUE)
+    ),
+    class = "cvmdata_error_http"
+  )
+  msg <- conditionMessage(err)
+  expect_match(msg, "rate limit", fixed = TRUE)
+  expect_match(msg, "GITHUB_PAT", fixed = TRUE)
+  expect_no_match(msg, "may not exist yet", fixed = TRUE)
+
+  # a 403 with the limit still standing keeps the old hint
+  mirror_assets_cache_clear()
+  plain <- function(req) {
+    httr2::response(if (grepl("api", req$url)) 403L else 404L)
+  }
+  err <- expect_error(
+    httr2::with_mocked_responses(
+      plain,
+      mirror_list_assets("companhias", "forbidden", refresh = TRUE)
+    ),
+    class = "cvmdata_error_http"
+  )
+  expect_match(conditionMessage(err), "may not exist yet", fixed = TRUE)
 })

@@ -13,8 +13,9 @@
 #   bpa__report_type.ind__year.2024__part-0.parquet
 #
 # Both encodings need to round-trip through the parser below. The
-# parser is pure (no I/O); the inventory helper hits the GitHub REST
-# API and caches the result for the duration of the R session.
+# parser is pure (no I/O); the inventory helper reads the release's
+# sidecar from its download URL (the GitHub REST API only as a fallback)
+# and caches the result for the duration of the R session.
 #
 # Since the filing history shipped (Parte 3 of the versions work,
 # 2026-10), a partition of a table that keeps the current filing may
@@ -117,18 +118,18 @@ mirror_resolved_release <- function(
 # `pinned` (TRUE under a date). The result is cached per session so a
 # single fetch lists at most once per (group, dataset, release).
 #
-# Under "latest" the rows come from the GitHub REST API listing of
-# `mirror-<group>-<dataset>-latest`. Under a date the rows of the current
+# Under "latest" the rows come from the sidecar of
+# `mirror-<group>-<dataset>-latest` (`mirror_list_latest()`; the GitHub
+# REST API listing only when the sidecar cannot stand for it). Under a
+# date the rows of the current
 # partitions come from the sidecar of the snapshot on or before it (one
 # URL per partition, into the snapshot that holds its bytes) and the
 # history rows from the `-latest` listing, which is where the ETL keeps
 # them.
 #
-# Anonymous API access is enough for public repos (rate limit
-# 60 req/h, and the per-(group, dataset) call hits it once per
-# session). When `GITHUB_TOKEN` or `GITHUB_PAT` is set, the call
-# attaches a Bearer header to bump the limit to 5000 req/h -- useful
-# for CI runners.
+# Neither path needs a token. On the API fallback (60 anonymous
+# requests an hour per IP address), `GITHUB_TOKEN` or `GITHUB_PAT`, when
+# set, goes in a Bearer header that raises the limit to 5000.
 mirror_list_assets <- function(
   group,
   dataset,
@@ -381,8 +382,21 @@ mirror_file_digests <- function(files, rels) {
   )
 }
 
-# The `-latest` inventory via the GitHub REST API (see
-# `mirror_list_assets()` for the columns and attributes).
+# The `-latest` inventory (see `mirror_list_assets()` for the columns and
+# attributes).
+#
+# Since 2026-11-18 it is built from the release's own sidecar, fetched
+# from its public download URL, which has no rate limit: the `files` map
+# names every current partition with its sha256 and size, and the
+# `history` map every history asset. Measured that day on the 9 datasets:
+# the sidecar names exactly the data assets the API lists. Until then the
+# listing came from the GitHub REST API, which allows 60 anonymous
+# requests an hour per IP address: a user behind a shared address (a CI
+# runner, a university network) got a 403 that read as "release may not
+# exist yet". The ETL robots hit the same limit on 2026-11-18 (PR #124).
+#
+# The API listing stays as the fallback for a release whose sidecar is
+# missing, unreadable or predates the `files` map.
 mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   key <- .mirror_cache_key(group, dataset, "latest")
   cached <- mirror_cached_inventory(key, refresh)
@@ -390,6 +404,62 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
     return(cached)
   }
   tag <- mirror_release_tag(group, dataset)
+  sidecar_url <- mirror_download_url(tag, "__source_hash.json", repo)
+  sidecar <- mirror_read_sidecar(sidecar_url)
+  if (mirror_sidecar_lists_assets(sidecar)) {
+    parsed <- mirror_inventory_from_sidecar(sidecar, repo, tag)
+  } else {
+    assets <- mirror_list_latest_api(repo, tag)
+    sidecar <- mirror_fetch_sidecar(assets, read = sidecar)
+    parsed <- mirror_assets_to_tibble(assets, sidecar$files)
+  }
+  attr(parsed, "source_hash") <- sidecar$hash
+  attr(parsed, "skips") <- sidecar$skips
+  attr(parsed, "omitted") <- sidecar$omitted
+  attr(parsed, "release_tag") <- if (is.na(sidecar$snapshot)) {
+    tag
+  } else {
+    mirror_snapshot_tag(group, dataset, sidecar$snapshot)
+  }
+  attr(parsed, "snapshot") <- sidecar$snapshot
+  attr(parsed, "snapshots") <- sidecar$snapshots
+  attr(parsed, "pinned") <- FALSE
+  # set only when the release publishes a sidecar that could not be read
+  # (`mirror_read_sidecar()`); absent on a read sidecar or none at all
+  attr(parsed, "sidecar_unread") <- sidecar$unread
+  attr(parsed, "sidecar_transient") <- sidecar$transient
+  attr(parsed, "sidecar_tried_at") <- if (!is.null(sidecar$unread)) Sys.time()
+  .mirror_assets_cache[[key]] <- parsed
+  parsed
+}
+
+# Whether a sidecar read from its URL can stand for the API listing: it
+# was read, and it carries the `files` map (every sidecar published since
+# 2026-11-07 does).
+mirror_sidecar_lists_assets <- function(sidecar) {
+  is.null(sidecar$unread) && length(sidecar$files) > 0L
+}
+
+# Rows of the `-latest` inventory from its sidecar: one per entry of
+# `files` (current partitions, with sha256 and size) and one per entry of
+# `history` (history assets; their sha256 and size stay NA, as in the API
+# listing, because stage 05 rewrites them in place), every URL into the
+# `-latest` release.
+mirror_inventory_from_sidecar <- function(sidecar, repo, tag) {
+  rels <- names(sidecar$files)
+  digests <- mirror_file_digests(sidecar$files, rels)
+  current <- mirror_public_asset_name(rels)
+  history <- mirror_public_asset_name(names(sidecar$history))
+  tibble::tibble(
+    name = c(current, history),
+    url = mirror_download_url(tag, c(current, history), repo),
+    size_bytes = c(digests$size, rep(NA_integer_, length(history))),
+    sha256 = c(digests$sha256, rep(NA_character_, length(history)))
+  )
+}
+
+# The `assets` of the `-latest` release from the GitHub REST API.
+mirror_list_latest_api <- function(repo, tag) {
   url <- sprintf("https://api.github.com/repos/%s/releases/tags/%s", repo, tag)
   req <- httr2::request(url) |>
     httr2::req_headers(
@@ -418,8 +488,10 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
   status <- httr2::resp_status(resp)
   if (status >= 400L) {
     # a 5xx or a 429 that outlasted the retries says nothing about the
-    # tag; only the other statuses point at a release that is not there
-    hint <- http_retry_hint(status) %||%
+    # tag, nor does an exhausted rate limit; only the other statuses
+    # point at a release that is not there
+    hint <- mirror_rate_limit_hint(resp) %||%
+      http_retry_hint(status) %||%
       c(
         "i" = paste(
           "Release tag {.val {tag}} may not exist yet; check",
@@ -443,27 +515,37 @@ mirror_list_latest <- function(group, dataset, repo, refresh = FALSE) {
       )
     }
   )
-  assets <- body$assets %||% list()
-  sidecar <- mirror_fetch_sidecar(assets)
-  parsed <- mirror_assets_to_tibble(assets, sidecar$files)
-  attr(parsed, "source_hash") <- sidecar$hash
-  attr(parsed, "skips") <- sidecar$skips
-  attr(parsed, "omitted") <- sidecar$omitted
-  attr(parsed, "release_tag") <- if (is.na(sidecar$snapshot)) {
-    tag
-  } else {
-    mirror_snapshot_tag(group, dataset, sidecar$snapshot)
+  body$assets %||% list()
+}
+
+# Bullets for a 403 or 429 of the GitHub API whose rate limit is
+# exhausted (`x-ratelimit-remaining: 0`): what happened and how to raise
+# the limit. NULL for any other response.
+mirror_rate_limit_hint <- function(resp) {
+  status <- httr2::resp_status(resp)
+  remaining <- httr2::resp_header(resp, "x-ratelimit-remaining")
+  if (!status %in% c(403L, 429L) || !identical(remaining, "0")) {
+    return(NULL)
   }
-  attr(parsed, "snapshot") <- sidecar$snapshot
-  attr(parsed, "snapshots") <- sidecar$snapshots
-  attr(parsed, "pinned") <- FALSE
-  # set only when the release publishes a sidecar that could not be read
-  # (`mirror_read_sidecar()`); absent on a read sidecar or none at all
-  attr(parsed, "sidecar_unread") <- sidecar$unread
-  attr(parsed, "sidecar_transient") <- sidecar$transient
-  attr(parsed, "sidecar_tried_at") <- if (!is.null(sidecar$unread)) Sys.time()
-  .mirror_assets_cache[[key]] <- parsed
-  parsed
+  reset <- suppressWarnings(
+    as.numeric(httr2::resp_header(resp, "x-ratelimit-reset"))
+  )
+  when <- if (is.na(reset)) {
+    "within the hour"
+  } else {
+    format(as.POSIXct(reset, origin = "1970-01-01"), "at %H:%M")
+  }
+  c(
+    "x" = sprintf(
+      "The GitHub API rate limit of this address is exhausted; it resets %s.",
+      when
+    ),
+    "i" = paste(
+      "Without a token the limit is 60 requests an hour, shared by",
+      "everyone behind the same address. Set {.envvar GITHUB_PAT} (or",
+      "{.envvar GITHUB_TOKEN}) to a GitHub token to raise it to 5000."
+    )
+  )
 }
 
 # Resolve a token from the standard env vars used by `gh` and `usethis`.
@@ -527,7 +609,11 @@ mirror_assets_to_tibble <- function(assets, files = NULL) {
 # fetched only when present (one extra GET on first call). `hash` is
 # NA_character_ and the other fields NULL / NA when the release has no
 # sidecar, when it cannot be read, or when it predates the field.
-mirror_fetch_sidecar <- function(assets) {
+#
+# `read` is a sidecar `mirror_list_latest()` already fetched from the
+# release's download URL: when the listing points at that same URL it is
+# returned as it is, so the fallback to the API does not fetch it twice.
+mirror_fetch_sidecar <- function(assets, read = NULL) {
   hit <- NULL
   for (a in assets) {
     if (identical(a$name, "__source_hash.json")) {
@@ -542,6 +628,9 @@ mirror_fetch_sidecar <- function(assets) {
   if (!nzchar(url)) {
     return(mirror_empty_sidecar())
   }
+  if (!is.null(read) && identical(url, attr(read, "url"))) {
+    return(read)
+  }
   mirror_read_sidecar(url)
 }
 
@@ -554,7 +643,8 @@ mirror_empty_sidecar <- function() {
     snapshots = character(0L),
     releases = NULL,
     files = NULL,
-    data = NULL
+    data = NULL,
+    history = NULL
   )
 }
 
@@ -572,6 +662,9 @@ mirror_empty_sidecar <- function() {
 # `mirror_list_snapshot()` aborts.
 mirror_read_sidecar <- function(url) {
   none <- mirror_empty_sidecar()
+  # the URL travels with the result, so `mirror_fetch_sidecar()` can tell
+  # a sidecar already read from the one a listing points at
+  attr(none, "url") <- url
   unread <- function(reason, transient = FALSE) {
     none$unread <- reason
     none$transient <- transient
@@ -606,7 +699,7 @@ mirror_read_sidecar <- function(url) {
     return(unread("the file is not valid JSON"))
   }
   snapshot <- body$snapshot %||% NA_character_
-  list(
+  out <- list(
     hash = body$hash %||% NA_character_,
     skips = mirror_normalise_skips(body$skips),
     omitted = mirror_normalise_omitted(body$privacy_omitted),
@@ -619,8 +712,11 @@ mirror_read_sidecar <- function(url) {
     snapshots = as.character(unlist(body$snapshots %||% list())),
     releases = if (is.list(body$releases)) body$releases else NULL,
     files = if (is.list(body$files)) body$files else NULL,
-    data = if (is.list(body$data)) body$data else NULL
+    data = if (is.list(body$data)) body$data else NULL,
+    history = if (is.list(body$history)) body$history else NULL
   )
+  attr(out, "url") <- url
+  out
 }
 
 # What the mirror omitted from its count tables to protect personal data

@@ -124,7 +124,11 @@ test_that("the mirror's listing, index and download carry the policy", {
     }
   )
   expect_policy(seen, "api.github.com")
-  expect_policy(seen, "__source_hash.json")
+  expect_policy(
+    seen,
+    "releases/download/mirror-companhias-http_policy-latest/__source_hash.json"
+  )
+  expect_policy(seen, "example.test/__source_hash.json")
   expect_policy(seen, "cia__part-0.parquet")
   expect_identical(readBin(dest, "raw", 3L), as.raw(1:3))
 })
