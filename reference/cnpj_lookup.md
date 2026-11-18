@@ -67,7 +67,7 @@ Other utilities:
 # \donttest{
 hits <- cnpj_lookup("magazine luiza")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -75,7 +75,7 @@ hits <- cnpj_lookup("magazine luiza")
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -83,7 +83,7 @@ hits <- cnpj_lookup("magazine luiza")
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -97,7 +97,7 @@ hits
 #> 1 47.960.950… MAGAZINE LU… MAGAZINE LU… 22470  ATIVO 2011-04-28 NA        compa…
 cvm_fetch("dfp", "dre", cnpj = hits$cnpj_cia[1], basis = "con")
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -105,7 +105,7 @@ cvm_fetch("dfp", "dre", cnpj = hits$cnpj_cia[1], basis = "con")
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -117,7 +117,7 @@ cvm_fetch("dfp", "dre", cnpj = hits$cnpj_cia[1], basis = "con")
 #> ℹ The CVM portal publishes the current civil year as soon as the first
 #>   non-civil-calendar filing arrives (e.g. agribusiness).
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8htSTF/duckdb
+#> ℹ /tmp/RtmpehS1m9/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -125,7 +125,7 @@ cvm_fetch("dfp", "dre", cnpj = hits$cnpj_cia[1], basis = "con")
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #> ℹ source: "mirror" | release: "mirror-companhias-dfp-snapshot-2026-11-15" |
-#>   fetched_at: 2026-11-18 13:52:13.726864
+#>   fetched_at: 2026-11-18 15:18:22.639206
 #> ℹ group: "companhias" | dataset: "dfp" | table: "dre"
 #> # A tibble: 64 × 15
 #>    cnpj_cia       dt_refer   versao denom_cia cd_cvm grupo_dfp moeda ordem_exerc
