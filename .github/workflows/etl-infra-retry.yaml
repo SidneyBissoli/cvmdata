@@ -1,15 +1,18 @@
-name: ETL infrastructure retry
+name: Infrastructure retry
 
-# Re-runs, once, the jobs of an "ETL RAD history" or "Zenodo edition" run
-# that failed for a reason of INFRASTRUCTURE: nothing of the robot ran, so
-# nothing was measured and a new attempt is the cure.
+# Re-runs the failed jobs of an "ETL RAD history", "Zenodo edition" or
+# "R-CMD-check.yaml" run that failed for a reason of INFRASTRUCTURE: nothing
+# of the robot (or of the check) ran, so nothing was measured and a new
+# attempt is the cure. The robots get ONE retry; R-CMD-check gets TWO.
 #
 # Infrastructure = the failed job is the image job (etl-image.yaml: the
 # registry, or a build that hit a slow mirror), or every failed step of
 # the job is one of "Set up job", "Initialize containers" (pulling the
-# image) or the checkout, or the job failed with no failed step at all
-# (the runner was lost). A failure inside the robot (stage 04 stopped by
-# the RAD's WAF, stage 06 refusing an edition) is NEVER retried here: the
+# image), the checkout, setup-r or setup-pandoc, or the job failed with no
+# failed step at all (the runner was lost). setup-r-dependencies is NOT
+# infrastructure: it also fails when a dependency is really missing. A
+# failure inside the robot (stage 04 stopped by the RAD's WAF, stage 06
+# refusing an edition) or inside the check is NEVER retried here: the
 # robot has its own rules for that, and repeating a 4-hour RAD run would
 # only hit the same source again.
 #
@@ -21,10 +24,16 @@ name: ETL infrastructure retry
 # in setup-r-dependencies (slow apt mirror) and waited for a person to
 # re-run it. Since the same day the robots run inside a prebuilt image,
 # which removes most of that exposure; this covers what is left.
+#
+# R-CMD-check (2026-11-18): the devel and oldrel-1 legs still run setup-r,
+# which apt-installs from the runner's Ubuntu mirror under a 10-min limit.
+# That day it timed out six times in five runs (every failed step was
+# "Run r-lib/actions/setup-r@v2"), each one an urgency on the panel until
+# a person re-ran it; one PR needed a third attempt, hence two retries.
 
 on:
   workflow_run:
-    workflows: ["ETL RAD history", "Zenodo edition"]
+    workflows: ["ETL RAD history", "Zenodo edition", "R-CMD-check.yaml"]
     types: [completed]
 
 permissions:
@@ -32,10 +41,10 @@ permissions:
 
 jobs:
   rerun:
-    # One retry: the first attempt failed, the second is the last.
+    # The exact cap per workflow is checked in the step (MAX_ATTEMPTS).
     if: >-
       github.event.workflow_run.conclusion == 'failure' &&
-      github.event.workflow_run.run_attempt == 1
+      github.event.workflow_run.run_attempt < 3
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -44,22 +53,30 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.event.workflow_run.id }}
+          # a robot run is long and hits a live source: one retry; the
+          # check is cheap and idempotent: two
+          MAX_ATTEMPTS: ${{ github.event.workflow_run.name == 'R-CMD-check.yaml' && '3' || '2' }}
         run: |
           set -euo pipefail
           # The attempt from the API, not from the payload (see
           # etl-mirror-retry.yaml: an absent field compares as 0).
           live=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '.run_attempt')
-          if [ "$live" != "1" ]; then
-            echo "run $RUN_ID is on attempt '$live'; nothing to do"
+          case "$live" in
+            ''|*[!0-9]*) echo "run $RUN_ID: unreadable attempt '$live'"; exit 1 ;;
+          esac
+          if [ "$live" -ge "$MAX_ATTEMPTS" ]; then
+            echo "run $RUN_ID is on attempt $live of $MAX_ATTEMPTS; nothing to do"
             exit 0
           fi
 
-          # One line per failed job: "<verdict> <job name>".
-          gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/1/jobs?per_page=100" \
+          # One line per failed job of the latest attempt: "<verdict> <job>".
+          gh api "repos/$REPO/actions/runs/$RUN_ID/attempts/$live/jobs?per_page=100" \
             --jq '
               def infra_step: . as $n
                 | ["Set up job", "Initialize containers"] | index($n) != null
-                  or ($n | startswith("Run actions/checkout@"));
+                  or ($n | startswith("Run actions/checkout@"))
+                  or ($n | startswith("Run r-lib/actions/setup-r@"))
+                  or ($n | startswith("Run r-lib/actions/setup-pandoc@"));
               .jobs[]
               | select(.conclusion == "failure")
               | [.steps[] | select(.conclusion == "failure") | .name] as $failed
@@ -75,12 +92,12 @@ jobs:
             exit 0
           fi
           if grep -q '^robot ' /tmp/verdicts; then
-            echo "a job failed inside the robot: not an infrastructure failure, no retry"
+            echo "a job failed inside the robot or the check: not an infrastructure failure, no retry"
             exit 0
           fi
 
           # A slow mirror or a registry hiccup usually passes in minutes.
-          echo "infrastructure failure on run $RUN_ID; waiting 5 min"
+          echo "infrastructure failure on run $RUN_ID (attempt $live); waiting 5 min"
           sleep 300
           gh run rerun "$RUN_ID" --failed -R "$REPO"
           echo "re-run requested for the failed jobs of $RUN_ID"
