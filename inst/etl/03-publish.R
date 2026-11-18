@@ -158,10 +158,19 @@ short_hash <- function(h) {
 }
 
 # HTTP status of the release as an anonymous user sees it (200 = public;
-# 404 = missing or draft).
+# 404 = missing or draft), read from the public download URL of its
+# sidecar, which every release of the mirror carries (the dated snapshots
+# too). Until 2026-11-18 this asked the REST API anonymously, whose quota
+# is 60 requests per hour per IP and is shared with every other user of
+# the runner's address: on that day ipe and recompra_acoes got 403 (quota,
+# not visibility) in the same minute, republished an unchanged dataset and
+# failed with "answers 403 without credentials" on releases that answered
+# 200 from outside. The download URL carries no API quota and answers 404
+# for a draft just like the API (measured on a throwaway draft the same
+# day), so it proves the same thing without the shared quota.
 release_public_status <- function(tag) {
   url <- sprintf(
-    "https://api.github.com/repos/%s/releases/tags/%s",
+    "https://github.com/%s/releases/download/%s/__source_hash.json",
     mirror_repo,
     tag
   )
