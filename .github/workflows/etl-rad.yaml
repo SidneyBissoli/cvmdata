@@ -70,6 +70,7 @@ on:
 
 permissions:
   contents: write  # gh release upload
+  packages: read   # pull the ETL image
 
 concurrency:
   # Shared with etl-mirror.yaml (same history assets); see the header.
@@ -77,13 +78,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The environment of the robot, by digest (etl-image.yaml): resolved in
+  # seconds when the image exists, built and tested here when it does not.
+  image:
+    uses: ./.github/workflows/etl-image.yaml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
   rad:
-    # Pinned, not ubuntu-latest: by 2026-10-27 ubuntu-latest became
-    # Ubuntu 26.04, where setup-r apt-installs 175 system packages from a
-    # slow Azure mirror and blew its 10-min step limit in 3 of 3 jobs that
-    # day (itr, dfp, fca); on 24.04, where every run was green until
-    # 2026-10-25, the step takes seconds. Move on deliberately.
+    needs: image
+    # The robot runs inside the ETL image (since 2026-11-18): no setup-r,
+    # no apt, no P3M at run time, so a slow mirror cannot fail the job
+    # before the robot starts. The host OS only runs the container.
     runs-on: ubuntu-24.04
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     # The script stops starting new downloads after --minutes (default
     # 260) and publishes what it has; the 40 min on top cover the R
     # setup, the last document (up to two 90 s WAF pauses) and the last
@@ -103,33 +118,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The setup steps take 20-80 s when the Ubuntu apt mirror of the
-      # runners answers; on 2026-10-23 it crawled and they hung for hours
-      # (azure.archive.ubuntu.com). Past the deadline the job fails fast
-      # and is re-run, instead of holding the PR.
-      - uses: r-lib/actions/setup-r@v2
-        timeout-minutes: 10
-        with:
-          r-version: release
-          use-public-rspm: true
-
-      # Only what stages 04 and 05 load: the hard dependencies plus the
-      # packages inst/etl calls (arrow, digest, dplyr, jsonlite, xml2).
-      # Until 2026-11-18 this step took `needs: check` and devtools, which
-      # pull every Suggests (pkgdown, lintr, styler, rmarkdown...) and 21
-      # system packages from apt (pandoc, nodejs, X11, harfbuzz): on
-      # 2026-11-18 the apt mirror crawled and the step hit its 15 min
-      # deadline downloading pandoc, which this job never runs. Fewer apt
-      # packages = less exposure to the mirror; the deadline stays.
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        timeout-minutes: 15
-        with:
-          dependencies: '"hard"'
-          extra-packages: any::arrow, any::digest, any::dplyr, any::jsonlite, any::xml2
-
-      # R CMD INSTALL instead of devtools::install(quick = TRUE): the same
-      # install (no vignettes, inst/ copied as is, so 00-config.R finds the
-      # installed schemas identical to the source tree) without devtools.
+      # From the checkout, no network: the dependencies are in the image.
+      # Same install as devtools::install(quick = TRUE) (no vignettes,
+      # inst/ copied as is, so 00-config.R finds the installed schemas
+      # identical to the source tree).
       - name: Install cvmdata from source
         run: R CMD INSTALL --no-docs --no-multiarch .
 

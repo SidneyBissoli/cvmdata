@@ -1,0 +1,65 @@
+name: Refresh ETL image
+
+# Once a month, proposes a newer CRAN snapshot for the ETL image: a pull
+# request that moves P3M_DATE in .github/etl-image/Dockerfile to the day
+# before the run. The base image is bumped by Dependabot (docker ecosystem,
+# .github/dependabot.yml); the gh CLI by hand, with its sha256.
+#
+# A pull request opened with GITHUB_TOKEN does not trigger `pull_request`
+# workflows, so this run dispatches etl-image.yaml on the new branch
+# itself: the image of the proposal is built and smoke-tested (and pushed
+# under its own tag, which no robot uses until the merge). Merging is a
+# person's call; nothing changes for the robots before it.
+
+on:
+  schedule:
+    - cron: "0 12 3 * *" # day 3, 12:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write       # push the branch
+  pull-requests: write  # open the pull request
+  actions: write        # dispatch etl-image.yaml on the branch
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      FILE: .github/etl-image/Dockerfile
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Propose the new snapshot date
+        run: |
+          set -euo pipefail
+          new=$(date -u -d 'yesterday' +%F)
+          old=$(sed -n 's/^ARG P3M_DATE=//p' "$FILE")
+          if [ "$new" = "$old" ]; then
+            echo "P3M_DATE already $new"
+            exit 0
+          fi
+          # The snapshot must exist for this Ubuntu release before it is
+          # proposed.
+          url="https://p3m.dev/cran/__linux__/resolute/$new/src/contrib/PACKAGES"
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+          if [ "$code" != "200" ]; then
+            echo "::warning::P3M snapshot $new answered $code; not proposed"
+            exit 0
+          fi
+          branch="etl-image/p3m-$new"
+          if gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
+            echo "pull request for $branch already open"
+            exit 0
+          fi
+          sed -i "s/^ARG P3M_DATE=.*/ARG P3M_DATE=$new/" "$FILE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "ci(etl-image): CRAN snapshot $new (was $old)"
+          git push origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "ci(etl-image): CRAN snapshot $new" \
+            --body "Moves the dated P3M snapshot of the ETL image from $old to $new. The image of this branch is built and smoke-tested by the ETL image run dispatched on it (see the Actions tab). After the merge, the next robot run resolves the new image by digest."
+          gh workflow run etl-image.yaml --ref "$branch"

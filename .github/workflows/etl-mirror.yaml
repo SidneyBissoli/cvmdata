@@ -70,6 +70,7 @@ on:
 
 permissions:
   contents: write  # gh release create/delete/upload
+  packages: read   # pull the ETL image
 
 concurrency:
   # Shared with etl-rad.yaml (same history assets); see the header.
@@ -77,13 +78,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # The environment of the robot, by digest (etl-image.yaml): resolved in
+  # seconds when the image exists, built and tested here when it does not.
+  image:
+    uses: ./.github/workflows/etl-image.yaml
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+
   publish:
-    # Pinned, not ubuntu-latest: by 2026-10-27 ubuntu-latest became
-    # Ubuntu 26.04, where setup-r apt-installs 175 system packages from a
-    # slow Azure mirror and blew its 10-min step limit in 3 of 3 jobs that
-    # day (itr, dfp, fca); on 24.04, where every run was green until
-    # 2026-10-25, the step takes seconds. Move on deliberately.
+    needs: image
+    # The robot runs inside the ETL image (since 2026-11-18): no setup-r,
+    # no apt, no P3M at run time. Until then setup-r apt-installed up to
+    # 175 system packages per job from the runner's mirror, and a slow
+    # mirror failed the job before the robot started (2026-10-27: 3 of 3
+    # jobs on Ubuntu 26.04). The host OS only runs the container.
     runs-on: ubuntu-24.04
+    container:
+      image: ${{ needs.image.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     # Wall-clock ceiling. On 2026-09-08 the `fre` job stayed alive for
     # 5 h 51 min attempting 612 downloads against a portal that was not
     # answering that runner — minutes short of GitHub's own 6 h limit.
@@ -112,26 +129,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The setup steps take 20-80 s when the Ubuntu apt mirror of the
-      # runners answers; on 2026-10-23 it crawled and they hung for hours
-      # (azure.archive.ubuntu.com). Past the deadline the job fails fast
-      # and is re-run, instead of holding the PR.
-      - uses: r-lib/actions/setup-r@v2
-        timeout-minutes: 10
-        with:
-          r-version: release
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        timeout-minutes: 15
-        with:
-          extra-packages: any::arrow, any::devtools, any::digest, any::jsonlite, any::pointblank
-          needs: check
-
+      # From the checkout, no network: the dependencies are in the image.
+      # Same install as devtools::install(quick = TRUE) (no vignettes,
+      # inst/ copied as is, so 00-config.R finds the installed schemas
+      # identical to the source tree).
       - name: Install cvmdata from source
-        # `upgrade = "never"` worked on older devtools; current devtools
-        # accepts only TRUE/FALSE/NA.
-        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = FALSE)'
+        run: R CMD INSTALL --no-docs --no-multiarch .
 
       - name: Stage 01 — fetch CVM
         run: |
