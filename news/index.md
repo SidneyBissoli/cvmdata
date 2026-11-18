@@ -35,6 +35,19 @@
   [`cvm_fetch()`](https://sidneybissoli.github.io/cvmdata/reference/cvm_fetch.md)
   says. It was refused later, by the reader, with the same message.
 
+### Bug fixes
+
+- Reading the mirror no longer goes through the GitHub API, which allows
+  60 requests an hour per IP address without a token. On a shared
+  address (a CI runner, a university network) the limit could run out,
+  and the 403 that followed was reported as “Release tag … may not exist
+  yet”. The list of files of a mirror release now comes from the index
+  the release publishes (`__source_hash.json`), read from its download
+  URL, which has no such limit, as pinned dates already were. The API is
+  only the fallback for a release without a readable index; there, an
+  exhausted limit is reported as such, with the advice to set
+  `GITHUB_PAT`.
+
 ## cvmdata 0.3.1 (2026-11-16)
 
 ### Bug fixes

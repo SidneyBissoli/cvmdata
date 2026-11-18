@@ -58,6 +58,10 @@
 <ul><li>
 <code>year</code> passed to a table without yearly files (<code>cad</code>, <code>recompra_acoes</code>) is now refused with the other argument checks, before the ticker lookup, as the help of <code><a href="../reference/cvm_fetch.html">cvm_fetch()</a></code> says. It was refused later, by the reader, with the same message.</li>
 </ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>Reading the mirror no longer goes through the GitHub API, which allows 60 requests an hour per IP address without a token. On a shared address (a CI runner, a university network) the limit could run out, and the 403 that followed was reported as “Release tag … may not exist yet”. The list of files of a mirror release now comes from the index the release publishes (<code>__source_hash.json</code>), read from its download URL, which has no such limit, as pinned dates already were. The API is only the fallback for a release without a readable index; there, an exhausted limit is reported as such, with the advice to set <code>GITHUB_PAT</code>.</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="cvmdata-031-2026-11-16">cvmdata 0.3.1 (2026-11-16)<a class="anchor" aria-label="anchor" href="#cvmdata-031-2026-11-16"></a></h2>
