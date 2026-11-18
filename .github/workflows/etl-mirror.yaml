@@ -101,6 +101,11 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    # Inside a container the default shell of `run:` is sh; bash, as on
+    # the runner before 2026-11-18.
+    defaults:
+      run:
+        shell: bash
     # Wall-clock ceiling. On 2026-09-08 the `fre` job stayed alive for
     # 5 h 51 min attempting 612 downloads against a portal that was not
     # answering that runner — minutes short of GitHub's own 6 h limit.

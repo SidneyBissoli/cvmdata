@@ -99,6 +99,11 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    # Inside a container the default shell of `run:` is sh; bash, as on
+    # the runner before 2026-11-18.
+    defaults:
+      run:
+        shell: bash
     # The script stops starting new downloads after --minutes (default
     # 260) and publishes what it has; the 40 min on top cover the R
     # setup, the last document (up to two 90 s WAF pauses) and the last

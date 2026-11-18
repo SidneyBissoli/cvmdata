@@ -102,6 +102,11 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    # Inside a container the default shell of `run:` is sh; bash, as on
+    # the runner before 2026-11-18.
+    defaults:
+      run:
+        shell: bash
     # ~600 MB downloaded from the mirror, packed, uploaded to Zenodo
     # and downloaded again for the read-back; the sandbox is slow.
     timeout-minutes: 300
