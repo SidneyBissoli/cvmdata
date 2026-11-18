@@ -27,14 +27,15 @@ check(
   sprintf("CRAN pinned to a dated P3M snapshot (%s)", repo)
 )
 
-# 3. Every package the ETL calls, read from the scripts.
+# 3. Every package the ETL calls, read from the scripts by the R parser:
+#    only a `pkg::` in code is a SYMBOL_PACKAGE token. A regex also caught
+#    the text of messages and comments ("reinstall the package
+#    (devtools::install())", an escaped "ável::" in a string).
 etl <- list.files("inst/etl", pattern = "\\.R$", full.names = TRUE)
-code <- unlist(lapply(etl, readLines, warn = FALSE), use.names = FALSE)
-code <- sub("#.*$", "", code) # comments name packages too (devtools)
-used <- unique(unlist(regmatches(
-  code,
-  gregexpr("\\b[A-Za-z][A-Za-z0-9.]*(?=::)", code, perl = TRUE)
-)))
+used <- unique(unlist(lapply(etl, function(f) {
+  pd <- utils::getParseData(parse(f, keep.source = TRUE))
+  pd$text[pd$token == "SYMBOL_PACKAGE"]
+})))
 base <- rownames(installed.packages(priority = "base"))
 needed <- setdiff(used, c(base, "cvmdata"))
 for (pkg in sort(needed)) {
