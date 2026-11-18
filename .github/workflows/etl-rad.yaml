@@ -113,14 +113,25 @@ jobs:
           r-version: release
           use-public-rspm: true
 
+      # Only what stages 04 and 05 load: the hard dependencies plus the
+      # packages inst/etl calls (arrow, digest, dplyr, jsonlite, xml2).
+      # Until 2026-11-18 this step took `needs: check` and devtools, which
+      # pull every Suggests (pkgdown, lintr, styler, rmarkdown...) and 21
+      # system packages from apt (pandoc, nodejs, X11, harfbuzz): on
+      # 2026-11-18 the apt mirror crawled and the step hit its 15 min
+      # deadline downloading pandoc, which this job never runs. Fewer apt
+      # packages = less exposure to the mirror; the deadline stays.
       - uses: r-lib/actions/setup-r-dependencies@v2
         timeout-minutes: 15
         with:
-          extra-packages: any::arrow, any::devtools, any::digest, any::dplyr, any::jsonlite, any::xml2
-          needs: check
+          dependencies: '"hard"'
+          extra-packages: any::arrow, any::digest, any::dplyr, any::jsonlite, any::xml2
 
+      # R CMD INSTALL instead of devtools::install(quick = TRUE): the same
+      # install (no vignettes, inst/ copied as is, so 00-config.R finds the
+      # installed schemas identical to the source tree) without devtools.
       - name: Install cvmdata from source
-        run: Rscript -e 'devtools::install(quick = TRUE, upgrade = FALSE)'
+        run: R CMD INSTALL --no-docs --no-multiarch .
 
       - name: Stage 04 — RAD history
         run: |
