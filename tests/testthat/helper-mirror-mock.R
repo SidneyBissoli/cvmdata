@@ -122,6 +122,17 @@ mock_latest_sidecar <- function(hash, skips, sidecar, files, entries) {
   }
   if (isTRUE(files)) {
     out$files <- fixture_files_map(entries)
+    # the ETL writes the `history` map next to `files` (partition path of
+    # every history asset -> its content hash)
+    history <- list()
+    for (e in entries) {
+      if (grepl("__history", e$name, fixed = TRUE)) {
+        history[[asset_rel(e$name)]] <- "h"
+      }
+    }
+    if (length(history)) {
+      out$history <- history
+    }
   }
   for (field in names(sidecar)) {
     out[[field]] <- sidecar[[field]]

@@ -518,6 +518,9 @@ test_that("mirror reuses the L3 cache on a second call", {
         body = fake_release(entries)
       ))
     }
+    if (grepl("__source_hash.json", req$url, fixed = TRUE)) {
+      return(httr2::response(404L))
+    }
     tally$asset_calls <- tally$asset_calls + 1L
     body_raw <- readBin(
       dfp_fx(),

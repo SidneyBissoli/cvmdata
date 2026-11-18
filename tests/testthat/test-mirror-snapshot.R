@@ -183,9 +183,10 @@ test_that("a pin equal to the latest snapshot reuses the latest rows", {
   expect_true(attr(inventory, "pinned"))
   expect_identical(attr(inventory, "release_tag"), s27)
   expect_identical(attr(inventory, "source_hash"), "h27")
+  # the `-latest` rows, built from its sidecar: URLs into `-latest`
   expect_identical(
     inventory$url[inventory$name == bpa_name],
-    sprintf("https://example.test/%s", bpa_name)
+    mirror_download_url("mirror-companhias-dfp-latest", bpa_name)
   )
 })
 
