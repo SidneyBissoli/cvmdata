@@ -664,12 +664,16 @@ rad_undo_streak <- function(state, streak) {
 # was closed: A connection that was expected to be kept alive was closed
 # by the server." (3 of the 8 failures of the run of 2026-11-12, 292 of
 # 300 read): the front end lost its connection to the service, not the
-# robot its own, so it is asked again too. Other texts of the RAD (ITR
+# robot its own, so it is asked again too. And "There is not enough space
+# on the disk." (measured 2026-11-20, same network): a document the RAD
+# serves (132214) got it on two requests 4 s apart and the ZIP on the next
+# two, so the server's disk, not the document. Other texts of the RAD (ITR
 # 67723, "Index was out of range") are about the document and are not
 # retried.
 rad_service_flicker_texts <- c(
   "DownloadDocumento.svc",
-  "The underlying connection was closed"
+  "The underlying connection was closed",
+  "There is not enough space on the disk"
 )
 
 rad_service_flicker <- function(error) {
