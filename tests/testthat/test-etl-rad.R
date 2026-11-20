@@ -1289,6 +1289,11 @@ test_that("the download service failing for a request is asked again", {
     "connection was closed: A connection that was expected to be kept",
     "alive was closed by the server."
   )))
+  # 2026-11-20: the server's disk, on a document it serves the next try
+  expect_true(rad_service_flicker(paste(
+    "the RAD answered an error instead of the ZIP: There is not enough",
+    "space on the disk."
+  )))
   expect_false(rad_service_flicker("HTTP 500"))
   expect_false(rad_service_flicker(NA_character_))
   expect_false(rad_service_flicker(
