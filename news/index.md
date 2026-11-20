@@ -1158,7 +1158,9 @@ within each.
   with both (2026-11-12) read 292 of 300 with no pause, every retry on a
   new connection. Three of its eight failures were the same backend
   answering “The underlying connection was closed”; that text is now
-  asked again too.
+  asked again too, and so is “There is not enough space on the disk.”
+  (2026-11-20: the RAD’s own disk, given twice to a document it served
+  as a ZIP on the next two requests).
 
 - The RAD robot no longer fails as a defect of its own when the mirror
   cannot serve the delivery index. On 2026-11-12 GitHub answered HTTP
