@@ -152,6 +152,7 @@ olhe(
 
 passo("3. O argumento basis: obrigatório, sem palpite")
 e <- erro_de(cvm_fetch("dfp", "dre", cnpj = petr, year = 2024))
+e
 confere(
   "sem basis, a DRE dá erro de entrada",
   inherits(e, "cvmdata_error_input")
@@ -173,6 +174,7 @@ confere(
   setequal(unique(duas$basis), c("ind", "con"))
 )
 e <- erro_de(cvm_fetch("cad", "companhias", basis = "con"))
+e
 confere(
   "basis em tabela sem essa divisão dá erro",
   inherits(e, "cvmdata_error_input")
@@ -231,6 +233,7 @@ confere(
     regra(cad_args, "year") == "not allowed"
 )
 e <- erro_de(cvm_arguments("dfp", "nada"))
+e
 confere(
   "tabela inexistente dá erro de entrada",
   inherits(e, "cvmdata_error_input")
@@ -480,6 +483,7 @@ olhe(
 passo("8. FRE: tabela de companhia, tabela de contagem e tabela de pessoas")
 cap <- cvm_fetch("fre", "capital_social", cnpj = petr, year = 2025)
 print(cap)
+glimpse(cap)
 confere(
   "capital social vem do espelho",
   identical(attr(cap, "source"), "mirror")
